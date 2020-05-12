@@ -120,7 +120,7 @@ def main():
     tssc_factory = TSSCFactory(tssc_config)
 
     try:
-        tssc_factory.call_step(args.step)
+        tssc_factory.run_step(args.step)
     except TSSCException as err:
         print_error('Error calling step (' + args.step + '): ' + str(err))
         sys.exit(200)

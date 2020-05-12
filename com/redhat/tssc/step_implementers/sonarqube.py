@@ -3,26 +3,29 @@ com.redhat.tssc.step_implementers.sonarqube
 """
 
 from .. import TSSCFactory
+from .. import StepImplementer
+from .. import DefaultSteps
 
-class SonarQube: # pylint: disable=too-few-public-methods 
+class SonarQube(StepImplementer): # pylint: disable=too-few-public-methods 
     """
     SonarQube implementation of the security-static-code-analysis TSSC step.
 
     Attributes
     ----------
-    step_name : str
-        TSSC step that this Step Implementer implements
+    STEP_NAME: str
+        TSSC step that this StepImplementer implements
     """
-    step_name = 'security-static-code-analysis'
 
-    def __init__(self, config):
-        self.config = config
+    STEP_NAME = DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS
 
-    def call(self):
+ #   def __init__(self, config):
+ #       super().__init__(config)
+
+    def run_step(self):
         """
         Invoke SonarQube
         """
         print('SonarQube.call - TODO: (' + str(self.config) + ')')
 
 # register step implementer
-TSSCFactory.register_step_implementer(SonarQube.step_name, SonarQube)
+TSSCFactory.register_step_implementer(SonarQube)
