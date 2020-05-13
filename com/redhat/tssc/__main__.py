@@ -16,8 +16,9 @@ import os.path
 import json
 import yaml
 
-from com.redhat.tssc import TSSCFactory, TSSCException
-from com.redhat.tssc.step_implementers import *
+from .factory import TSSCFactory
+from .exceptions import TSSCException
+from .step_implementers import *
 
 def print_error(msg):
     """

@@ -21,7 +21,6 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Lint Synatx with pylnit
       run: |
-        pylint tssc.py
         pylint com/
     - name: Lint Synatx with flake8
       run: |
