@@ -20,13 +20,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
     - name: Generate HTML 🛠
-      run: pdoc --html --output-dir pydoc-html com/
+      run: pdoc3 --html --output-dir pdoc3-html tssc/
     
     - name: Upload Site 🔺
       uses: actions/upload-artifact@v1
       with:
-        name: pydoc-html
-        path: pydoc-html/com
+        name: pdoc3-html
+        path: pdoc3-html/tssc
     
   gh-pages-deploy:
     needs: [gh-pages-build]
@@ -38,11 +38,11 @@ jobs:
     - name: Download Site 🔻
       uses: actions/download-artifact@v1
       with:
-        name: pydoc-html
+        name: pdoc3-html
     
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
         ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages 
-        FOLDER: "pydoc-html"
+        FOLDER: "pdoc3-html"
