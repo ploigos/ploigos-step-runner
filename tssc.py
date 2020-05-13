@@ -2,12 +2,12 @@
 
 """
 TSSC entry point.
-Hello World.
 
 Notes
 -----
-Required pip modules
-* pyyaml
+Required pip modules:
+
+    - pyyaml
 """
 
 import sys
