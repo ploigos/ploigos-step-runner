@@ -20,13 +20,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
     - name: Generate HTML 🛠
-      run: pdoc --html --output-dir pydoc-html .
+      run: pdoc --html --output-dir pydoc-html com/
     
     - name: Upload Site 🔺
       uses: actions/upload-artifact@v1
       with:
         name: pydoc-html
-        path: pydoc-html/tssc-lib
+        path: pydoc-html/com
     
   gh-pages-deploy:
     needs: [gh-pages-build]
