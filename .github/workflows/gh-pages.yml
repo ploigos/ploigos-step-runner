@@ -26,7 +26,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: pydoc-html
-        path: pydoc-html
+        path: pydoc-html/tssc-lib
     
   gh-pages-deploy:
     needs: [gh-pages-build]
