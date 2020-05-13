@@ -1,3 +1,4 @@
 *.swp
 __pycache__
-pydoc-html
+pdoc3-html
+.DS_Store

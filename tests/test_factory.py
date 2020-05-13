@@ -1,6 +1,6 @@
 import pytest
 
-from com.redhat.tssc import TSSCFactory, StepImplementer, TSSCException
+from tssc import TSSCFactory, StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
     STEP_NAME = 'foo'

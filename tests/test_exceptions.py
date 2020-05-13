@@ -1,6 +1,6 @@
 import pytest
 
-from com.redhat.tssc import TSSCException
+from tssc import TSSCException
 
 def raise_TSSCException():
     raise TSSCException('test')
