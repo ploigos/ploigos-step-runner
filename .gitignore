@@ -4,4 +4,6 @@ pdoc3-html/
 dist/
 build/
 tssc.egg-info/
+.eggs/
 .DS_Store
+tssc/version.py

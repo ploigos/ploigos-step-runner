@@ -5,7 +5,6 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tssc",
-    version="0.1",
     author="Red Hat Services",
     description="Trusted Software Supply Chain (TSSC) python library.",
     long_description=long_description,
@@ -18,4 +17,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm']
 )
