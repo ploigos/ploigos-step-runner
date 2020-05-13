@@ -22,7 +22,10 @@ class TSSCFactory:
     _step_implementers = dict()
 
     def __init__(self, config):
-        self.config = config
+        if _TSSC_CONFIG_KEY in config:
+            self.config = config[_TSSC_CONFIG_KEY]
+        else:
+            raise ValueError('config must contain key: ' + _TSSC_CONFIG_KEY)
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -77,8 +80,8 @@ class TSSCFactory:
 
         # get step configuration if there is any
         step_config = dict()
-        if step_name in self.config[_TSSC_CONFIG_KEY]:
-            step_config = self.config[_TSSC_CONFIG_KEY][step_name]
+        if step_name in self.config:
+            step_config = self.config[step_name]
 
             for sub_step_config in step_config:
                 step_implementer_name = sub_step_config[_IMPLEMENTER_KEY]
