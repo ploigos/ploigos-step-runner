@@ -2,6 +2,7 @@
 
 """
 TSSC entry point.
+Hello World.
 
 Notes
 -----
