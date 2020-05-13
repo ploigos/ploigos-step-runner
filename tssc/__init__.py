@@ -1,5 +1,5 @@
 """
-Trusted Software Supply Chain Library (tssc-lib) main entry point.
+Trusted Software Supply Chain Library (tssc) main entry point.
 
 Examples
 --------
