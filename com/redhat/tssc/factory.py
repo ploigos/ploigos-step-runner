@@ -96,6 +96,9 @@ class TSSCFactory:
         if step_name in self.config:
             step_config = self.config[step_name]
 
+            if isinstance(step_config, dict):
+                step_config = [step_config]
+
             for sub_step in step_config:
                 sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
 

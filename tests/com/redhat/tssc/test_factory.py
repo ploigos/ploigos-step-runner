@@ -100,3 +100,16 @@ def test_TSSCFactory_run_step_config_implementer_specfied_and_no_sub_step_config
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     factory.run_step('foo')
+
+def test_TSSCFactory_run_step_config_only_sub_step_and_is_dict_rather_then_array():
+    config = {
+        'tssc-config': {
+            'foo': {
+                    'implementer': 'FooStepImplementer'
+            }
+        }
+    }
+    factory = TSSCFactory(config)
+    TSSCFactory.register_step_implementer(FooStepImplementer)
+
+    factory.run_step('foo')
