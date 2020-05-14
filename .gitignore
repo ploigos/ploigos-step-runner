@@ -7,3 +7,4 @@ tssc.egg-info/
 .eggs/
 .DS_Store
 tssc/version.py
+tssc-results

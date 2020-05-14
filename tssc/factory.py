@@ -17,19 +17,24 @@ class TSSCFactory:
     ----------
     config : dict
         TSSC configuration represented as a dictionary with a key of 'tssc-config'
+    results_dir_path : str, optional
+        Path to the file for steps to write their results to
+        Default: tssc-results
 
     Raises
     ------
     ValueError
         If given config does not contain 'tssc-config' key
     """
-    _step_implementers = dict()
+    _step_implementers = {}
 
-    def __init__(self, config):
+    def __init__(self, config, results_dir_path='tssc-results'):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
             raise ValueError('config must contain key: ' + _TSSC_CONFIG_KEY)
+
+        self.results_dir_path = results_dir_path
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -49,7 +54,7 @@ class TSSCFactory:
         step_name = implementer_class.STEP_NAME
 
         if step_name not in TSSCFactory._step_implementers:
-            TSSCFactory._step_implementers[step_name] = dict()
+            TSSCFactory._step_implementers[step_name] = {}
 
         # if this is the default, unset any other implimenters of this step as default
         # NOTE: last one to register as default wins, deal with it
@@ -63,7 +68,7 @@ class TSSCFactory:
             _IS_DEFAULT_KEY: is_default
         }
 
-    def run_step(self, step_name): # pylint: disable=too-many-branches
+    def run_step(self, step_name, runtime_step_config=None): # pylint: disable=too-many-branches
         """
         Call the given step.
 
@@ -71,6 +76,8 @@ class TSSCFactory:
         ----------
         step_name : str
             TSSC step to run.
+        runtime_step_config
+            TODO
 
         Raises
         ------
@@ -80,6 +87,9 @@ class TSSCFactory:
                 and no default StepImplementer registered for given step_name.
             If no StepImplementer regsitered for given step with given implemeneter name.
         """
+
+        if not runtime_step_config:
+            runtime_step_config = {}
 
         # verify that there is registered implementers for the given step
         if not step_name in TSSCFactory._step_implementers:
@@ -92,7 +102,7 @@ class TSSCFactory:
             raise TSSCException('No implimenters registered for step: ' + step_name)
 
         # get step configuration if there is any
-        step_config = dict()
+        step_config = {}
         if step_name in self.config:
             step_config = self.config[step_name]
 
@@ -106,12 +116,14 @@ class TSSCFactory:
                     if _SUB_STEP_CONFIG_KEY in sub_step:
                         sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
                     else:
-                        sub_step_config = dict()
+                        sub_step_config = {}
 
+                    # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                        sub_step_config
+                        sub_step_config,
+                        self.results_dir_path
                     )
-                    sub_step.run_step()
+                    sub_step.run_step(**runtime_step_config)
                 else:
                     raise TSSCException(
                         'No StepImplementer for step'
@@ -127,8 +139,12 @@ class TSSCFactory:
                     default_step_implementer = step_implementer_config
 
             if default_step_implementer:
-                sub_step = default_step_implementer[_CLAZZ_KEY](dict())
-                sub_step.run_step()
+                # create the default StepImplementer instance
+                sub_step = default_step_implementer[_CLAZZ_KEY](
+                    {},
+                    self.results_dir_path
+                )
+                sub_step.run_step(**runtime_step_config)
             else:
                 raise TSSCException(
                     'No implimenter specified for step'

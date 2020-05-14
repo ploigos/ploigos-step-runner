@@ -19,3 +19,15 @@ Latest Development Release
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple tssc
 ```
+
+## Development
+
+### Set Up Development Environment
+```bash
+TODO
+```
+
+### Run Tests
+```bash
+python -m pytest .
+```
