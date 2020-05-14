@@ -59,27 +59,18 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
 
         # extract needed information from the pom file
         pom_version_element = pom_xml.getroot().find("./version")
-        pom_group_id_element = pom_xml.getroot().find("./groupId")
-        pom_artifact_id_element = pom_xml.getroot().find("./artifactId")
 
         # verify information from pom file
         if pom_version_element is None:
             raise ValueError('Given pom file (' + pom_file + ') does not have ./version element')
 
-        if pom_group_id_element is None:
-            raise ValueError('Given pom file (' + pom_file + ') does not have ./groupId element')
-
-        if pom_artifact_id_element is None:
-            raise ValueError('Given pom file (' + pom_file + ') does not have ./artifactId element')
-
-
         pom_version = pom_version_element.text
-        pom_group_id = pom_group_id_element.text
-        pom_artifact_id = pom_artifact_id_element.text
 
-        print(pom_version)
-        print(pom_group_id)
-        print(pom_artifact_id)
+        results = {
+            'version': pom_version
+        }
+
+        self.write_results(results)
 
 
 

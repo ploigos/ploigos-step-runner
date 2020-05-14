@@ -1,5 +1,5 @@
 """
-com.redhat.tssc.exceptions
+Custom TSSC Exceptions.
 """
 
 class TSSCException(Exception):

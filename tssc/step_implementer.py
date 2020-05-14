@@ -1,8 +1,13 @@
 """
-com.redhat.tssc.step_implementer
+Abstract class and helper constants for StepImplementer.
 """
 
 from abc import ABC, abstractmethod
+import os
+import yaml
+from .exceptions import TSSCException
+
+_TSSC_RESULTS_KEY = 'tssc-results'
 
 class DefaultSteps: # pylint: disable=too-few-public-methods
     """
@@ -36,19 +41,19 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     ----------
     config : dict
         Configuration specific to the StepImplementer
-    results_file : str
+    results_dir_path : str
         Path to the file to write the results of the step to
     config_defaults : dict
         Defaults for any items not given in the config
     """
 
-    def __init__(self, step_name, config, results_file, config_defaults=None):
+    def __init__(self, step_name, config, results_dir_path, config_defaults=None):
         self.step_name = step_name
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
-        self.results_file = results_file
+        self.results_dir_path = results_dir_path
         super().__init__()
 
     @property
@@ -74,7 +79,64 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         ----------
         step_config : dict
             Step configuraiton to validate.
+
+        Raises
+        ------
+        TSSCException
+            If existing step results file has invalid YAML.
         """
+
+    def write_results(self, results):
+        """
+        Write the given results to a results file specific to this step in the results directory.
+
+        Parameters
+        ----------
+        restuls : dict
+            Dictionary of results to write to the step specific results file.
+        """
+        if not os.path.exists(self.results_dir_path):
+            os.makedirs(self.results_dir_path)
+
+        step_results_file_name = self.step_name + '.yml'
+        step_results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
+
+        current_step_results = None
+        if os.path.exists(step_results_file_path):
+            with open(step_results_file_path, 'r') as step_results_file:
+                try:
+                    current_step_results = yaml.safe_load(step_results_file.read())
+                except (yaml.scanner.ScannerError, ValueError) as err:
+                    raise TSSCException(
+                        'Existing results file'
+                        + ' (' + step_results_file_path + ')'
+                        + ' for step (' + self.step_name + ')'
+                        + ' has invalid yaml: ' + str(err)
+                    )
+
+            if current_step_results:
+                if _TSSC_RESULTS_KEY not in current_step_results:
+                    raise TSSCException(
+                        'Existing results file'
+                        + ' (' + step_results_file_path + ')'
+                        + ' for step (' + self.step_name + ')'
+                        + ' does not have expected top level element'
+                        + ' (' + _TSSC_RESULTS_KEY + '): ' + str(current_step_results)
+                    )
+        else:
+            current_step_results = {
+                _TSSC_RESULTS_KEY: {}
+            }
+
+        new_step_results = {
+            _TSSC_RESULTS_KEY: {
+                self.step_name: results
+            }
+        }
+        updated_step_results = {**current_step_results, **new_step_results}
+
+        with open(step_results_file_path, 'w') as step_results_file:
+            yaml.dump(updated_step_results, step_results_file)
 
     @abstractmethod
     def run_step(self, **kwargs):

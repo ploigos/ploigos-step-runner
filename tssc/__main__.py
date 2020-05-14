@@ -109,8 +109,8 @@ def main():
     )
     parser.add_argument(
         '-r',
-        '--results-file',
-        required=True,
+        '--results-dir',
+        default='tssc-results',
         help='TSSC workflow results file in yml or json'
     )
     parser.add_argument(
@@ -139,7 +139,7 @@ def main():
         print_error("specified -c/--config-file must have a 'tssc-config' attribute")
         sys.exit(103)
 
-    tssc_factory = TSSCFactory(tssc_config, args.results_file)
+    tssc_factory = TSSCFactory(tssc_config, args.results_dir)
 
     try:
         tssc_factory.run_step(args.step, args.step_config)

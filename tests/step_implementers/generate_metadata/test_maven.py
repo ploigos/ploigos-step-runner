@@ -2,6 +2,7 @@ import os
 
 import pytest
 from testfixtures import TempDirectory
+import yaml
 
 from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Maven
@@ -15,6 +16,7 @@ def test_pom_file_valid():
     <version>42.1</version>
 </project>''')
         pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+        results_dir_path = os.path.join(temp_dir.path, 'tssc-resutls')
 
         config = {
             'tssc-config': {
@@ -26,9 +28,14 @@ def test_pom_file_valid():
                 }
             }
         }
-        factory = TSSCFactory(config)
-
+        factory = TSSCFactory(config, results_dir_path)
         factory.run_step('generate-metadata')
+
+        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        with open(os.path.join(results_dir_path, 'generate-metadata.yml'), 'r') as step_results_file:
+            step_results = yaml.safe_load(step_results_file.read())
+            assert step_results == expected_step_results
+            
 
 def test_pom_file_valid_runtime_config_pom_file():
     config = {

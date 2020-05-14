@@ -17,9 +17,9 @@ class TSSCFactory:
     ----------
     config : dict
         TSSC configuration represented as a dictionary with a key of 'tssc-config'
-    results_file : str, optional
+    results_dir_path : str, optional
         Path to the file for steps to write their results to
-        Default: tssc-results.json
+        Default: tssc-results
 
     Raises
     ------
@@ -28,13 +28,13 @@ class TSSCFactory:
     """
     _step_implementers = {}
 
-    def __init__(self, config, results_file='tssc-results.json'):
+    def __init__(self, config, results_dir_path='tssc-results'):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
             raise ValueError('config must contain key: ' + _TSSC_CONFIG_KEY)
 
-        self.results_file = results_file
+        self.results_dir_path = results_dir_path
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -121,7 +121,7 @@ class TSSCFactory:
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                         sub_step_config,
-                        self.results_file
+                        self.results_dir_path
                     )
                     sub_step.run_step(**runtime_step_config)
                 else:
@@ -142,7 +142,7 @@ class TSSCFactory:
                 # create the default StepImplementer instance
                 sub_step = default_step_implementer[_CLAZZ_KEY](
                     {},
-                    self.results_file
+                    self.results_dir_path
                 )
                 sub_step.run_step(**runtime_step_config)
             else:
