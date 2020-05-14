@@ -27,7 +27,9 @@ jobs:
 
     - name: Lint Synatx with pylnit
       run: |
-        pylint tssc/
+        pylint \
+            --ignore version.py \
+            tssc/
 
     - name: Lint Synatx with flake8
       run: |
