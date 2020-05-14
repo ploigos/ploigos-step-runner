@@ -1,10 +1,7 @@
-![Lint and Test](https://github.com/rhtconsulting/tssc-python-package/workflows/Lint%20and%20Test/badge.svg?branch=master)
-![GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/GitHub%20Pages/badge.svg?branch=master)
-![Build and Publish](https://github.com/itewk/tssc-python-package/workflows/Build%20and%20Publish/badge.svg?branch=master)
+![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=master)
+![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=master)
 
 # tssc-python-package
-
-TODO
 
 ## Documenation
 
