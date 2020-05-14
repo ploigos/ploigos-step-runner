@@ -25,7 +25,7 @@ class SonarQube(StepImplementer): # pylint: disable=too-few-public-methods
         """
         Invoke SonarQube
         """
-        print('SonarQube.call - TODO: (' + str(self.config) + ')')
+        print('SonarQube.run_step - TODO: (' + str(self.config) + ')')
 
 # register step implementer
 TSSCFactory.register_step_implementer(SonarQube)

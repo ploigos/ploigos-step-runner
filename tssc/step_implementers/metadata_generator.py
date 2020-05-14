@@ -22,7 +22,7 @@ class MetadataGenerator(StepImplementer): # pylint: disable=too-few-public-metho
         """
         Generate the metadata.
         """
-        print('MetadataGenerator.call - TODO: (' + str(self.config) + ')')
+        print('MetadataGenerator.run_step - TODO: (' + str(self.config) + ')')
 
 # register step implementer
 TSSCFactory.register_step_implementer(MetadataGenerator, True)
