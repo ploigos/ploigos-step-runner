@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>tssc API documentation</title>
-<meta name="description" content="Trusted Software Supply Chain Library (tssc) main entry point …" />
+<title>tssc.step_implementers.generate_metadata API documentation</title>
+<meta name="description" content="tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,72 +17,31 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>tssc</code></h1>
+<h1 class="title">Module <code>tssc.step_implementers.generate_metadata</code></h1>
 </header>
 <section id="section-intro">
-<p>Trusted Software Supply Chain Library (tssc) main entry point.</p>
-<h2 id="examples">Examples</h2>
-<p>Getting Help</p>
-<pre><code class="python">&gt;&gt;&gt; python -m tssc --help
-</code></pre>
-<p>Example Running the 'generate-metadata' step</p>
-<pre><code class="python">&gt;&gt;&gt; python -m tssc
-...     --config-file=my-app-tssc-config.yml
-...     --results-file=my-app-tssc-results.yml
-...     --step=generate-metadata
-</code></pre>
+<p>tssc.StepImplementers for the 'generate-metadata' TSSC step.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-Trusted Software Supply Chain Library (tssc) main entry point.
-
-Examples
---------
-
-Getting Help
-
-&gt;&gt;&gt; python -m tssc --help
-
-
-Example Running the &#39;generate-metadata&#39; step
-
-&gt;&gt;&gt; python -m tssc
-...     --config-file=my-app-tssc-config.yml
-...     --results-file=my-app-tssc-results.yml
-...     --step=generate-metadata
-
+tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step.
 &#34;&#34;&#34;
 
-import __main__
-from .factory import TSSCFactory
-from .exceptions import TSSCException
-from .step_implementer import DefaultSteps, StepImplementer</code></pre>
+from .maven import Maven
+
+__all__ = [
+    &#39;maven&#39;
+]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></dt>
+<dt><code class="name"><a title="tssc.step_implementers.generate_metadata.maven" href="maven.html">tssc.step_implementers.generate_metadata.maven</a></code></dt>
 <dd>
-<div class="desc"><p>Custom TSSC Exceptions.</p></div>
-</dd>
-<dt><code class="name"><a title="tssc.factory" href="factory.html">tssc.factory</a></code></dt>
-<dd>
-<div class="desc"><p>com.redhat.tssc.factory</p></div>
-</dd>
-<dt><code class="name"><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></dt>
-<dd>
-<div class="desc"><p>Abstract class and helper constants for StepImplementer.</p></div>
-</dd>
-<dt><code class="name"><a title="tssc.step_implementers" href="step_implementers/index.html">tssc.step_implementers</a></code></dt>
-<dd>
-<div class="desc"><p>com.redhat.tssc.step_implementers</p></div>
-</dd>
-<dt><code class="name"><a title="tssc.version" href="version.html">tssc.version</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>com.redhat.tssc.step_implementers.metadata_generator.maven</p></div>
 </dd>
 </dl>
 </section>
@@ -96,18 +55,17 @@ from .step_implementer import DefaultSteps, StepImplementer</code></pre>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#examples">Examples</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tssc.step_implementers" href="../index.html">tssc.step_implementers</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></li>
-<li><code><a title="tssc.factory" href="factory.html">tssc.factory</a></code></li>
-<li><code><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></li>
-<li><code><a title="tssc.step_implementers" href="step_implementers/index.html">tssc.step_implementers</a></code></li>
-<li><code><a title="tssc.version" href="version.html">tssc.version</a></code></li>
+<li><code><a title="tssc.step_implementers.generate_metadata.maven" href="maven.html">tssc.step_implementers.generate_metadata.maven</a></code></li>
 </ul>
 </li>
 </ul>
