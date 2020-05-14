@@ -5,15 +5,19 @@ from tssc import TSSCFactory, StepImplementer, TSSCException
 class FooStepImplementer(StepImplementer):
     STEP_NAME = 'foo'
 
-    def run_step(self):
-        print('FooStepImplementer.run_step - hello world: ' + str(self.config))
+    def __init__(self, config, results_file):
+        super().__init__(FooStepImplementer.STEP_NAME, config, results_file, {}) 
+
+    def run_step(self, **kwargs):
+        print('FooStepImplementer.run_step - hello world: config: ' + str(self.step_config))
+        print('FooStepImplementer.run_step - hello world: kwargs: ' + str(kwargs))
 
 def test_TSSCFactory_init_valid_config():
     config = {
         'tssc-config': {
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     
 def test_TSSCFactory_init_invalid_config():
     config = {
@@ -28,7 +32,7 @@ def test_TSSCFactory_run_step_no_StepImplementers_for_step():
         'tssc-config': {
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
 
     with pytest.raises(TSSCException):
         factory.run_step('does-not-exist')
@@ -38,7 +42,7 @@ def test_TSSCFactory_run_step_no_default_StepImplementer_for_step_without_config
         'tssc-config': {
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     with pytest.raises(TSSCException):
@@ -49,7 +53,7 @@ def test_TSSCFactory_run_step_default_StepImplementer_for_step_without_config():
         'tssc-config': {
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer, True)
 
     factory.run_step('foo')
@@ -64,7 +68,7 @@ def test_TSSCFactory_run_step_config_specfied_StepImplementer_does_not_exist():
             ]
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     with pytest.raises(TSSCException):
@@ -81,7 +85,7 @@ def test_TSSCFactory_run_step_config_implementer_specfied_and_sub_step_config_sp
             ]
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     factory.run_step('foo')
@@ -96,7 +100,7 @@ def test_TSSCFactory_run_step_config_implementer_specfied_and_no_sub_step_config
             ]
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     factory.run_step('foo')
@@ -109,7 +113,7 @@ def test_TSSCFactory_run_step_config_only_sub_step_and_is_dict_rather_then_array
             }
         }
     }
-    factory = TSSCFactory(config)
+    factory = TSSCFactory(config, 'results.yml')
     TSSCFactory.register_step_implementer(FooStepImplementer)
 
     factory.run_step('foo')

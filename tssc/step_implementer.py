@@ -36,14 +36,53 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     ----------
     config : dict
         Configuration specific to the StepImplementer
+    results_file : str
+        Path to the file to write the results of the step to
+    config_defaults : dict
+        Defaults for any items not given in the config
     """
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, step_name, config, results_file, config_defaults=None):
+        self.step_name = step_name
+        if not config_defaults:
+            config_defaults = {}
+        step_config = {**config_defaults, **config}
+        self.step_config = step_config
+        self.results_file = results_file
         super().__init__()
 
+    @property
+    def step_config(self):
+        """
+        Getter for step_config property.
+        """
+        return self.__step_config
+
+    @step_config.setter
+    def step_config(self, val):
+        """
+        Setter with validation for step_config property.
+        """
+        self.validate_step_config(val)
+        self.__step_config = val
+
+    def validate_step_config(self, step_config):
+        """
+        Function for implementers to override to do custom step config validation.
+
+        Parameters
+        ----------
+        step_config : dict
+            Step configuraiton to validate.
+        """
+
     @abstractmethod
-    def run_step(self):
+    def run_step(self, **kwargs):
         """
         Runs the TSSC step implmented by this StepImplementer.
+
+        Parameters
+        ----------
+        kwargs
+            TODO
         """

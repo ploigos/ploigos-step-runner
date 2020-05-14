@@ -70,6 +70,25 @@ def parse_yaml_or_json_file(yaml_or_json_file):
 
     return parsed_file
 
+class ParseKeyValueArge(argparse.Action): # pylint: disable=too-few-public-methods
+    """
+    https://gist.github.com/fralau/061a4f6c13251367ef1d9a9a99fb3e8d
+    """
+    def __call__(self, parser, namespace, values, option_string=None):
+        key_value_dict = {}
+
+        if values:
+            for item in values:
+                split_items = item.split("=", 1)
+                key = split_items[
+                    0
+                ].strip()  # we remove blanks around keys, as is logical
+                value = split_items[1]
+
+                key_value_dict[key] = value
+
+        setattr(namespace, self.dest, key_value_dict)
+
 def main():
     """
     Main entry point for TSSC.
@@ -94,6 +113,13 @@ def main():
         required=True,
         help='TSSC workflow results file in yml or json'
     )
+    parser.add_argument(
+        '--step-config',
+        metavar='STEP_CONFIG_KEY=STEP_CONFIG_VALUE',
+        nargs='+',
+        help='Override step config provided by the given TSSC config-file with these arguments.',
+        action=ParseKeyValueArge
+    )
 
     args = parser.parse_args()
 
@@ -113,13 +139,16 @@ def main():
         print_error("specified -c/--config-file must have a 'tssc-config' attribute")
         sys.exit(103)
 
-    tssc_factory = TSSCFactory(tssc_config)
+    tssc_factory = TSSCFactory(tssc_config, args.results_file)
 
     try:
-        tssc_factory.run_step(args.step)
-    except TSSCException as err:
+        tssc_factory.run_step(args.step, args.step_config)
+    except ValueError as err:
         print_error('Error calling step (' + args.step + '): ' + str(err))
         sys.exit(200)
+    except TSSCException as err:
+        print_error('Error calling step (' + args.step + '): ' + str(err))
+        sys.exit(201)
 
 if __name__ == '__main__':
     main()
