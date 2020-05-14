@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
+        pip install pdoc3
 
     - name: Generate HTML 🛠
       run: pdoc3 --html --output-dir pdoc3-html tssc/
