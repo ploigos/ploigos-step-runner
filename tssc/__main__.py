@@ -75,7 +75,7 @@ def main():
     Main entry point for TSSC.
     """
 
-    parser = argparse.ArgumentParser(description='TSSC test')
+    parser = argparse.ArgumentParser(description='Trusted Software Supply Chain (TSSC)')
     parser.add_argument(
         '-s',
         '--step',
