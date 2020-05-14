@@ -1,8 +1,8 @@
-name: Build and Publish
+name: Publish Release
 
 on:
   push:
-    branches: [ master ]
+    tags: '*'
 
 jobs:
   lint:
@@ -98,14 +98,6 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: dist
-    
-    - name: Publish Distribution to Test PyPI 📦
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      uses: pypa/gh-action-pypi-publish@v1.1.0
-      with:
-        user: __token__
-        password: ${{ secrets.test_pypi_password }}
-        repository_url: https://test.pypi.org/legacy/
 
     - name: Publish Distribution to PyPI 📦
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
