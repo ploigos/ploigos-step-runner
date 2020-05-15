@@ -29,6 +29,7 @@
 com.redhat.tssc.step_implementers.metadata_generator.maven
 &#34;&#34;&#34;
 
+import re
 import os.path
 from xml.etree import ElementTree
 
@@ -81,11 +82,16 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        # parse the pom file
+        # parse the pom file and figure out the namespace if there is one
         pom_xml = ElementTree.parse(pom_file)
+        pom_root = pom_xml.getroot()
+        pom_namespace_match = re.match(r&#39;\{.*}&#39;, str(pom_root.tag))
+        pom_namespace = &#39;&#39;
+        if pom_namespace_match:
+            pom_namespace = pom_namespace_match.group(0)
 
         # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find(&#34;./version&#34;)
+        pom_version_element = pom_xml.getroot().find(&#39;./&#39; + pom_namespace + &#39;version&#39;)
 
         # verify information from pom file
         if pom_version_element is None:
@@ -176,11 +182,16 @@ If given pom file does not contain required elements</dd>
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        # parse the pom file
+        # parse the pom file and figure out the namespace if there is one
         pom_xml = ElementTree.parse(pom_file)
+        pom_root = pom_xml.getroot()
+        pom_namespace_match = re.match(r&#39;\{.*}&#39;, str(pom_root.tag))
+        pom_namespace = &#39;&#39;
+        if pom_namespace_match:
+            pom_namespace = pom_namespace_match.group(0)
 
         # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find(&#34;./version&#34;)
+        pom_version_element = pom_xml.getroot().find(&#39;./&#39; + pom_namespace + &#39;version&#39;)
 
         # verify information from pom file
         if pom_version_element is None:
