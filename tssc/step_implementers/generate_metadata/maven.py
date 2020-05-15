@@ -2,6 +2,7 @@
 com.redhat.tssc.step_implementers.metadata_generator.maven
 """
 
+import re
 import os.path
 from xml.etree import ElementTree
 
@@ -54,11 +55,16 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
-        # parse the pom file
+        # parse the pom file and figure out the namespace if there is one
         pom_xml = ElementTree.parse(pom_file)
+        pom_root = pom_xml.getroot()
+        pom_namespace_match = re.match(r'\{.*}', str(pom_root.tag))
+        pom_namespace = ''
+        if pom_namespace_match:
+            pom_namespace = pom_namespace_match.group(0)
 
         # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find("./version")
+        pom_version_element = pom_xml.getroot().find('./' + pom_namespace + 'version')
 
         # verify information from pom file
         if pom_version_element is None:
