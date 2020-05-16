@@ -3,11 +3,13 @@ __pycache__
 pdoc3-html/
 dist/
 build/
-*.eggs*
+*.egg*
+.coverage
 
 # TSSC build & runtime
 tssc/version.py
 tssc-results
+.venvs
 
 # Eclipse
 .project
