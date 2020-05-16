@@ -11,7 +11,7 @@ _TSSC_RESULTS_KEY = 'tssc-results'
 
 class DefaultSteps: # pylint: disable=too-few-public-methods
     """
-    Convinence constants for the default steps used in the default TSSC wofkflow definition.
+    Convenience constants for the default steps used in the default TSSC workflow definition.
     """
     GENERATE_METADATA = 'generate-metadata'
     TAG_SOURCE = 'tag-source'
@@ -47,8 +47,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Defaults for any items not given in the config
     """
 
-    def __init__(self, step_name, config, results_dir_path, config_defaults=None):
-        self.step_name = step_name
+    def __init__(self, config, results_dir_path, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
@@ -86,6 +85,18 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             If existing step results file has invalid YAML.
         """
 
+    @classmethod
+    @abstractmethod
+    def step_name(cls):
+        """
+        Getter for the TSSC Step name implemented by this step.
+
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
+
     def write_results(self, results):
         """
         Write the given results to a results file specific to this step in the results directory.
@@ -98,7 +109,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         if not os.path.exists(self.results_dir_path):
             os.makedirs(self.results_dir_path)
 
-        step_results_file_name = self.step_name + '.yml'
+        step_results_file_name = self.step_name() + '.yml'
         step_results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
 
         current_step_results = None
@@ -110,7 +121,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         'Existing results file'
                         + ' (' + step_results_file_path + ')'
-                        + ' for step (' + self.step_name + ')'
+                        + ' for step (' + self.step_name() + ')'
                         + ' has invalid yaml: ' + str(err)
                     )
 
@@ -119,21 +130,21 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         'Existing results file'
                         + ' (' + step_results_file_path + ')'
-                        + ' for step (' + self.step_name + ')'
+                        + ' for step (' + self.step_name() + ')'
                         + ' does not have expected top level element'
                         + ' (' + _TSSC_RESULTS_KEY + '): ' + str(current_step_results)
                     )
         else:
             current_step_results = {
                 _TSSC_RESULTS_KEY: {
-                    self.step_name: {}
+                    self.step_name(): {}
                 }
             }
 
         updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: {
-                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                self.step_name(): {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name()],
                     **results
                 }
             }

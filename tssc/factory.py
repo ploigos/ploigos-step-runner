@@ -1,5 +1,5 @@
 """
-com.redhat.tssc.factory
+Factory for creating TSSC workflow and running steps.
 """
 from .exceptions import TSSCException
 
@@ -51,7 +51,7 @@ class TSSCFactory:
             same step then the last one to register will win and be the default.
         """
 
-        step_name = implementer_class.STEP_NAME
+        step_name = implementer_class.step_name()
 
         if step_name not in TSSCFactory._step_implementers:
             TSSCFactory._step_implementers[step_name] = {}

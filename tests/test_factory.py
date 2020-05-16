@@ -1,16 +1,17 @@
 import pytest
 
-from tssc import TSSCFactory, StepImplementer, TSSCException
+from tssc import TSSCFactory, TSSCException, StepImplementer
 
 class FooStepImplementer(StepImplementer):
-    STEP_NAME = 'foo'
-
     def __init__(self, config, results_file):
-        super().__init__(FooStepImplementer.STEP_NAME, config, results_file, {}) 
+        super().__init__(config, results_file, {})
+
+    @classmethod
+    def step_name(cls):
+        return 'foo'
 
     def run_step(self, **kwargs):
-        print('FooStepImplementer.run_step - hello world: config: ' + str(self.step_config))
-        print('FooStepImplementer.run_step - hello world: kwargs: ' + str(kwargs))
+        pass
 
 def test_TSSCFactory_init_valid_config():
     config = {

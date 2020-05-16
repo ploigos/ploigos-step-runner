@@ -13,10 +13,12 @@ class dummy_context_mgr():
         return False
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
-    STEP_NAME = 'write-config-as-results'
-
     def __init__(self, config, results_file):
-        super().__init__(WriteConfigAsResultsStepImplementer.STEP_NAME, config, results_file, {}) 
+        super().__init__(config, results_file, {})
+    
+    @classmethod
+    def step_name(cls):
+        return 'write-config-as-results'
 
     def run_step(self, **kwargs):
         runtime_step_config = {**self.step_config, **kwargs}
