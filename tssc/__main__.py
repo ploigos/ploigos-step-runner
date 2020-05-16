@@ -60,7 +60,7 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     if not parsed_file:
         try:
             parsed_file = yaml.safe_load(file_contents)
-        except (yaml.scanner.ScannerError, ValueError) as err:
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
             yaml_parse_error = err
 
     if json_parse_error and yaml_parse_error:
@@ -89,11 +89,10 @@ class ParseKeyValueArge(argparse.Action): # pylint: disable=too-few-public-metho
 
         setattr(namespace, self.dest, key_value_dict)
 
-def main():
+def main(argv=None):
     """
     Main entry point for TSSC.
     """
-
     parser = argparse.ArgumentParser(description='Trusted Software Supply Chain (TSSC)')
     parser.add_argument(
         '-s',
@@ -121,11 +120,12 @@ def main():
         action=ParseKeyValueArge
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    print(args)
 
     # validate args
     if not os.path.exists(args.config_file) or os.stat(args.config_file).st_size == 0:
-        print_error('specifed -c/--config-file must exist and not be empty')
+        print_error('specified -c/--config-file must exist and not be empty')
         sys.exit(101)
 
     # parse and validate config file
@@ -143,12 +143,17 @@ def main():
 
     try:
         tssc_factory.run_step(args.step, args.step_config)
-    except ValueError as err:
+    except (ValueError, TSSCException) as err:
         print_error('Error calling step (' + args.step + '): ' + str(err))
         sys.exit(200)
-    except TSSCException as err:
-        print_error('Error calling step (' + args.step + '): ' + str(err))
-        sys.exit(201)
 
-if __name__ == '__main__':
-    main()
+def init():
+    """
+    Notes
+    -----
+    See https://medium.com/opsops/how-to-test-if-name-main-1928367290cb
+    """
+    if __name__ == "__main__":
+        sys.exit(main())
+
+init()
