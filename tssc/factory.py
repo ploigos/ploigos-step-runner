@@ -83,23 +83,20 @@ class TSSCFactory:
         ------
         TSSCException
             If no StepImplementers have been registered for the given step_name
-            If no specfiic StepImplementer name specified in sub step config
+            If no specific StepImplementer name specified in sub step config
                 and no default StepImplementer registered for given step_name.
-            If no StepImplementer regsitered for given step with given implemeneter name.
+            If no StepImplementer registered for given step with given implementer name.
         """
 
         if not runtime_step_config:
             runtime_step_config = {}
 
         # verify that there is registered implementers for the given step
-        if not step_name in TSSCFactory._step_implementers:
-            raise TSSCException('No implimenters registered for step: ' + step_name)
+        if not step_name in TSSCFactory._step_implementers or \
+                not TSSCFactory._step_implementers[step_name]:
+            raise TSSCException('No implementers registered for step: ' + step_name)
 
         step_implementers = TSSCFactory._step_implementers[step_name]
-
-        # verify that there is registered implementers for the given step
-        if not step_implementers:
-            raise TSSCException('No implimenters registered for step: ' + step_name)
 
         # get step configuration if there is any
         step_config = {}
