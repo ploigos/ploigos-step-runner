@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>tssc.factory API documentation</title>
-<meta name="description" content="com.redhat.tssc.factory" />
+<meta name="description" content="Factory for creating TSSC workflow and running steps." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,13 +20,13 @@
 <h1 class="title">Module <code>tssc.factory</code></h1>
 </header>
 <section id="section-intro">
-<p>com.redhat.tssc.factory</p>
+<p>Factory for creating TSSC workflow and running steps.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-com.redhat.tssc.factory
+Factory for creating TSSC workflow and running steps.
 &#34;&#34;&#34;
 from .exceptions import TSSCException
 
@@ -78,7 +78,7 @@ class TSSCFactory:
             same step then the last one to register will win and be the default.
         &#34;&#34;&#34;
 
-        step_name = implementer_class.STEP_NAME
+        step_name = implementer_class.step_name()
 
         if step_name not in TSSCFactory._step_implementers:
             TSSCFactory._step_implementers[step_name] = {}
@@ -254,7 +254,7 @@ Default: tssc-results</dd>
             same step then the last one to register will win and be the default.
         &#34;&#34;&#34;
 
-        step_name = implementer_class.STEP_NAME
+        step_name = implementer_class.step_name()
 
         if step_name not in TSSCFactory._step_implementers:
             TSSCFactory._step_implementers[step_name] = {}
@@ -390,7 +390,7 @@ def register_step_implementer(implementer_class, is_default=False):
         same step then the last one to register will win and be the default.
     &#34;&#34;&#34;
 
-    step_name = implementer_class.STEP_NAME
+    step_name = implementer_class.step_name()
 
     if step_name not in TSSCFactory._step_implementers:
         TSSCFactory._step_implementers[step_name] = {}

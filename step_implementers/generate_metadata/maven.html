@@ -57,10 +57,12 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    STEP_NAME = DefaultSteps.GENERATE_METADATA
-
     def __init__(self, config, results_file):
-        super().__init__(Maven.STEP_NAME, config, results_file, DEFAULT_ARGS)
+        super().__init__(config, results_file, DEFAULT_ARGS)
+
+    @classmethod
+    def step_name(cls):
+        return DefaultSteps.GENERATE_METADATA
 
     def validate_step_config(self, step_config):
         &#34;&#34;&#34;
@@ -157,10 +159,12 @@ If given pom file does not contain required elements</dd>
         If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    STEP_NAME = DefaultSteps.GENERATE_METADATA
-
     def __init__(self, config, results_file):
-        super().__init__(Maven.STEP_NAME, config, results_file, DEFAULT_ARGS)
+        super().__init__(config, results_file, DEFAULT_ARGS)
+
+    @classmethod
+    def step_name(cls):
+        return DefaultSteps.GENERATE_METADATA
 
     def validate_step_config(self, step_config):
         &#34;&#34;&#34;
@@ -210,13 +214,6 @@ If given pom file does not contain required elements</dd>
 <li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="tssc.step_implementers.generate_metadata.maven.Maven.STEP_NAME"><code class="name">var <span class="ident">STEP_NAME</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="tssc.step_implementers.generate_metadata.maven.Maven.validate_step_config"><code class="name flex">
@@ -253,6 +250,7 @@ If given pom file does not contain required elements</dd>
 <ul class="hlist">
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 </ul>
 </li>
@@ -277,7 +275,6 @@ If given pom file does not contain required elements</dd>
 <li>
 <h4><code><a title="tssc.step_implementers.generate_metadata.maven.Maven" href="#tssc.step_implementers.generate_metadata.maven.Maven">Maven</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.step_implementers.generate_metadata.maven.Maven.STEP_NAME" href="#tssc.step_implementers.generate_metadata.maven.Maven.STEP_NAME">STEP_NAME</a></code></li>
 <li><code><a title="tssc.step_implementers.generate_metadata.maven.Maven.validate_step_config" href="#tssc.step_implementers.generate_metadata.maven.Maven.validate_step_config">validate_step_config</a></code></li>
 </ul>
 </li>

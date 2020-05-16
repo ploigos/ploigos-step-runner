@@ -38,7 +38,7 @@ _TSSC_RESULTS_KEY = &#39;tssc-results&#39;
 
 class DefaultSteps: # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
-    Convinence constants for the default steps used in the default TSSC wofkflow definition.
+    Convenience constants for the default steps used in the default TSSC workflow definition.
     &#34;&#34;&#34;
     GENERATE_METADATA = &#39;generate-metadata&#39;
     TAG_SOURCE = &#39;tag-source&#39;
@@ -74,8 +74,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Defaults for any items not given in the config
     &#34;&#34;&#34;
 
-    def __init__(self, step_name, config, results_dir_path, config_defaults=None):
-        self.step_name = step_name
+    def __init__(self, config, results_dir_path, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
@@ -113,6 +112,18 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             If existing step results file has invalid YAML.
         &#34;&#34;&#34;
 
+    @classmethod
+    @abstractmethod
+    def step_name(cls):
+        &#34;&#34;&#34;
+        Getter for the TSSC Step name implemented by this step.
+
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        &#34;&#34;&#34;
+
     def write_results(self, results):
         &#34;&#34;&#34;
         Write the given results to a results file specific to this step in the results directory.
@@ -125,7 +136,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         if not os.path.exists(self.results_dir_path):
             os.makedirs(self.results_dir_path)
 
-        step_results_file_name = self.step_name + &#39;.yml&#39;
+        step_results_file_name = self.step_name() + &#39;.yml&#39;
         step_results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
 
         current_step_results = None
@@ -137,7 +148,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                        + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         + &#39; has invalid yaml: &#39; + str(err)
                     )
 
@@ -146,21 +157,21 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                        + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         + &#39; does not have expected top level element&#39;
                         + &#39; (&#39; + _TSSC_RESULTS_KEY + &#39;): &#39; + str(current_step_results)
                     )
         else:
             current_step_results = {
                 _TSSC_RESULTS_KEY: {
-                    self.step_name: {}
+                    self.step_name(): {}
                 }
             }
 
         updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: {
-                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                self.step_name(): {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name()],
                     **results
                 }
             }
@@ -194,14 +205,14 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 <span>class <span class="ident">DefaultSteps</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Convinence constants for the default steps used in the default TSSC wofkflow definition.</p></div>
+<div class="desc"><p>Convenience constants for the default steps used in the default TSSC workflow definition.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DefaultSteps: # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
-    Convinence constants for the default steps used in the default TSSC wofkflow definition.
+    Convenience constants for the default steps used in the default TSSC workflow definition.
     &#34;&#34;&#34;
     GENERATE_METADATA = &#39;generate-metadata&#39;
     TAG_SOURCE = &#39;tag-source&#39;
@@ -305,7 +316,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 </dd>
 <dt id="tssc.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>step_name, config, results_dir_path, config_defaults=None)</span>
+<span>(</span><span>config, results_dir_path, config_defaults=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
@@ -336,8 +347,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Defaults for any items not given in the config
     &#34;&#34;&#34;
 
-    def __init__(self, step_name, config, results_dir_path, config_defaults=None):
-        self.step_name = step_name
+    def __init__(self, config, results_dir_path, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
@@ -375,6 +385,18 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             If existing step results file has invalid YAML.
         &#34;&#34;&#34;
 
+    @classmethod
+    @abstractmethod
+    def step_name(cls):
+        &#34;&#34;&#34;
+        Getter for the TSSC Step name implemented by this step.
+
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        &#34;&#34;&#34;
+
     def write_results(self, results):
         &#34;&#34;&#34;
         Write the given results to a results file specific to this step in the results directory.
@@ -387,7 +409,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         if not os.path.exists(self.results_dir_path):
             os.makedirs(self.results_dir_path)
 
-        step_results_file_name = self.step_name + &#39;.yml&#39;
+        step_results_file_name = self.step_name() + &#39;.yml&#39;
         step_results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
 
         current_step_results = None
@@ -399,7 +421,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                        + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         + &#39; has invalid yaml: &#39; + str(err)
                     )
 
@@ -408,21 +430,21 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                        + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         + &#39; does not have expected top level element&#39;
                         + &#39; (&#39; + _TSSC_RESULTS_KEY + &#39;): &#39; + str(current_step_results)
                     )
         else:
             current_step_results = {
                 _TSSC_RESULTS_KEY: {
-                    self.step_name: {}
+                    self.step_name(): {}
                 }
             }
 
         updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: {
-                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                self.step_name(): {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name()],
                     **results
                 }
             }
@@ -450,6 +472,36 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 <ul class="hlist">
 <li><a title="tssc.step_implementers.generate_metadata.maven.Maven" href="step_implementers/generate_metadata/maven.html#tssc.step_implementers.generate_metadata.maven.Maven">Maven</a></li>
 </ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="tssc.step_implementer.StepImplementer.step_name"><code class="name flex">
+<span>def <span class="ident">step_name</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Getter for the TSSC Step name implemented by this step.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>TSSC step name implemented by this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+@abstractmethod
+def step_name(cls):
+    &#34;&#34;&#34;
+    Getter for the TSSC Step name implemented by this step.
+
+    Returns
+    -------
+    str
+        TSSC step name implemented by this step.
+    &#34;&#34;&#34;</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="tssc.step_implementer.StepImplementer.step_config"><code class="name">var <span class="ident">step_config</span></code></dt>
@@ -557,7 +609,7 @@ def run_step(self, **kwargs):
     if not os.path.exists(self.results_dir_path):
         os.makedirs(self.results_dir_path)
 
-    step_results_file_name = self.step_name + &#39;.yml&#39;
+    step_results_file_name = self.step_name() + &#39;.yml&#39;
     step_results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
 
     current_step_results = None
@@ -569,7 +621,7 @@ def run_step(self, **kwargs):
                 raise TSSCException(
                     &#39;Existing results file&#39;
                     + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                    + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                    + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                     + &#39; has invalid yaml: &#39; + str(err)
                 )
 
@@ -578,21 +630,21 @@ def run_step(self, **kwargs):
                 raise TSSCException(
                     &#39;Existing results file&#39;
                     + &#39; (&#39; + step_results_file_path + &#39;)&#39;
-                    + &#39; for step (&#39; + self.step_name + &#39;)&#39;
+                    + &#39; for step (&#39; + self.step_name() + &#39;)&#39;
                     + &#39; does not have expected top level element&#39;
                     + &#39; (&#39; + _TSSC_RESULTS_KEY + &#39;): &#39; + str(current_step_results)
                 )
     else:
         current_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: {}
+                self.step_name(): {}
             }
         }
 
     updated_step_results = {
         _TSSC_RESULTS_KEY: {
-            self.step_name: {
-                **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+            self.step_name(): {
+                **current_step_results[_TSSC_RESULTS_KEY][self.step_name()],
                 **results
             }
         }
@@ -649,6 +701,7 @@ def run_step(self, **kwargs):
 <ul class="">
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.validate_step_config" href="#tssc.step_implementer.StepImplementer.validate_step_config">validate_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 </ul>
