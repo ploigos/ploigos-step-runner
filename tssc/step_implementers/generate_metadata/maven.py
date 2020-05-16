@@ -42,7 +42,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         Parameters
         ----------
         step_config : dict
-            Step configuraiton to validate.
+            Step configuration to validate.
         """
         if 'pom-file' not in step_config:
             raise ValueError('Key (pom-file) must be in the step configuration')
