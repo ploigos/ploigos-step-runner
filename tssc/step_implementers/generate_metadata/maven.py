@@ -30,10 +30,12 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         If given pom file does not contain required elements
     """
 
-    STEP_NAME = DefaultSteps.GENERATE_METADATA
-
     def __init__(self, config, results_file):
-        super().__init__(Maven.STEP_NAME, config, results_file, DEFAULT_ARGS)
+        super().__init__(config, results_file, DEFAULT_ARGS)
+
+    @classmethod
+    def step_name(cls):
+        return DefaultSteps.GENERATE_METADATA
 
     def validate_step_config(self, step_config):
         """

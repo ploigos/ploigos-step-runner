@@ -7,20 +7,24 @@ from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
-    STEP_NAME = 'foo'
-
     def __init__(self, config, results_file):
-        super().__init__(FooStepImplementer.STEP_NAME, config, results_file, {})
+        super().__init__(config, results_file, {})
+
+    @classmethod
+    def step_name(cls):
+        return 'foo'
 
     def run_step(self, **kwargs):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
-    STEP_NAME = 'required-step-config-test'
-
     def __init__(self, config, results_file):
-        super().__init__(RequiredStepConfigStepImplementer.STEP_NAME, config, results_file, {})
-    
+        super().__init__(config, results_file, {})
+
+    @classmethod
+    def step_name(cls):
+        return 'required-step-config-test'
+
     def validate_step_config(self, step_config):
         if 'required-config-key' not in step_config:
             raise ValueError('Key (required-config-key) must be in the step configuration')
@@ -29,10 +33,12 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         pass
 
 class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
-    STEP_NAME = 'required-runtime-step-config-test'
-
     def __init__(self, config, results_file):
-        super().__init__(RequiredRuntimeStepConfigStepImplementer.STEP_NAME, config, results_file, {})
+        super().__init__(config, results_file, {})
+
+    @classmethod
+    def step_name(cls):
+        return 'required-runtime-step-config-test'
 
     def run_step(self, **kwargs):
         runtime_step_config = {**self.step_config, **kwargs}
