@@ -68,7 +68,6 @@ jobs:
     - name: Upload Coverage Report 🔺📊
       uses: codecov/codecov-action@v1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
         flags: pytests
         name: Python ${{ matrix.python-version }}
         env_vars: PYTHON
