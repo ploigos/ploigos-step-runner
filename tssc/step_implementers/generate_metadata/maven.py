@@ -80,6 +80,11 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
 
         self.write_results(results)
 
+    def example_without_test(self):
+        """
+        example of bad PR with missing test
+        """
+        print(self.step_name)
 
 
 # register step implementer
