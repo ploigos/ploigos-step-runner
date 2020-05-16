@@ -29,5 +29,9 @@ TODO
 
 ### Run Tests
 ```bash
+pytest .
+```
+or
+```bash
 python -m pytest .
 ```
