@@ -5,6 +5,7 @@ dist/
 build/
 *.egg*
 .coverage
+coverage.xml
 
 # TSSC build & runtime
 tssc/version.py
