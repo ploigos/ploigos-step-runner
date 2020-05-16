@@ -62,7 +62,7 @@ class DefaultSteps: # pylint: disable=too-few-public-methods
 
 class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
-    Abstract represnetation of a TSSC step implementer.
+    Abstract representation of a TSSC step implementer.
 
     Parameters
     ----------
@@ -105,7 +105,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Parameters
         ----------
         step_config : dict
-            Step configuraiton to validate.
+            Step configuration to validate.
 
         Raises
         ------
@@ -119,7 +119,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        restuls : dict
+        results : dict
             Dictionary of results to write to the step specific results file.
         &#34;&#34;&#34;
         if not os.path.exists(self.results_dir_path):
@@ -133,7 +133,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             with open(step_results_file_path, &#39;r&#39;) as step_results_file:
                 try:
                     current_step_results = yaml.safe_load(step_results_file.read())
-                except (yaml.scanner.ScannerError, ValueError) as err:
+                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
@@ -152,15 +152,19 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     )
         else:
             current_step_results = {
-                _TSSC_RESULTS_KEY: {}
+                _TSSC_RESULTS_KEY: {
+                    self.step_name: {}
+                }
             }
 
-        new_step_results = {
+        updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: results
+                self.step_name: {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                    **results
+                }
             }
         }
-        updated_step_results = {**current_step_results, **new_step_results}
 
         with open(step_results_file_path, &#39;w&#39;) as step_results_file:
             yaml.dump(updated_step_results, step_results_file)
@@ -168,7 +172,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     @abstractmethod
     def run_step(self, **kwargs):
         &#34;&#34;&#34;
-        Runs the TSSC step implmented by this StepImplementer.
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
@@ -304,7 +308,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 <span>(</span><span>step_name, config, results_dir_path, config_defaults=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract represnetation of a TSSC step implementer.</p>
+<div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>config</code></strong> :&ensp;<code>dict</code></dt>
@@ -320,7 +324,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 </summary>
 <pre><code class="python">class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
-    Abstract represnetation of a TSSC step implementer.
+    Abstract representation of a TSSC step implementer.
 
     Parameters
     ----------
@@ -363,7 +367,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Parameters
         ----------
         step_config : dict
-            Step configuraiton to validate.
+            Step configuration to validate.
 
         Raises
         ------
@@ -377,7 +381,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        restuls : dict
+        results : dict
             Dictionary of results to write to the step specific results file.
         &#34;&#34;&#34;
         if not os.path.exists(self.results_dir_path):
@@ -391,7 +395,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             with open(step_results_file_path, &#39;r&#39;) as step_results_file:
                 try:
                     current_step_results = yaml.safe_load(step_results_file.read())
-                except (yaml.scanner.ScannerError, ValueError) as err:
+                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         + &#39; (&#39; + step_results_file_path + &#39;)&#39;
@@ -410,15 +414,19 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     )
         else:
             current_step_results = {
-                _TSSC_RESULTS_KEY: {}
+                _TSSC_RESULTS_KEY: {
+                    self.step_name: {}
+                }
             }
 
-        new_step_results = {
+        updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: results
+                self.step_name: {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                    **results
+                }
             }
         }
-        updated_step_results = {**current_step_results, **new_step_results}
 
         with open(step_results_file_path, &#39;w&#39;) as step_results_file:
             yaml.dump(updated_step_results, step_results_file)
@@ -426,7 +434,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     @abstractmethod
     def run_step(self, **kwargs):
         &#34;&#34;&#34;
-        Runs the TSSC step implmented by this StepImplementer.
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
@@ -466,7 +474,7 @@ def step_config(self):
 <span>def <span class="ident">run_step</span></span>(<span>self, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Runs the TSSC step implmented by this StepImplementer.</p>
+<div class="desc"><p>Runs the TSSC step implemented by this StepImplementer.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>kwargs</code></strong></dt>
@@ -479,7 +487,7 @@ def step_config(self):
 <pre><code class="python">@abstractmethod
 def run_step(self, **kwargs):
     &#34;&#34;&#34;
-    Runs the TSSC step implmented by this StepImplementer.
+    Runs the TSSC step implemented by this StepImplementer.
 
     Parameters
     ----------
@@ -496,7 +504,7 @@ def run_step(self, **kwargs):
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>step_config</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Step configuraiton to validate.</dd>
+<dd>Step configuration to validate.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -514,7 +522,7 @@ def run_step(self, **kwargs):
     Parameters
     ----------
     step_config : dict
-        Step configuraiton to validate.
+        Step configuration to validate.
 
     Raises
     ------
@@ -530,7 +538,7 @@ def run_step(self, **kwargs):
 <div class="desc"><p>Write the given results to a results file specific to this step in the results directory.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>restuls</code></strong> :&ensp;<code>dict</code></dt>
+<dt><strong><code>results</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Dictionary of results to write to the step specific results file.</dd>
 </dl></div>
 <details class="source">
@@ -543,7 +551,7 @@ def run_step(self, **kwargs):
 
     Parameters
     ----------
-    restuls : dict
+    results : dict
         Dictionary of results to write to the step specific results file.
     &#34;&#34;&#34;
     if not os.path.exists(self.results_dir_path):
@@ -557,7 +565,7 @@ def run_step(self, **kwargs):
         with open(step_results_file_path, &#39;r&#39;) as step_results_file:
             try:
                 current_step_results = yaml.safe_load(step_results_file.read())
-            except (yaml.scanner.ScannerError, ValueError) as err:
+            except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                 raise TSSCException(
                     &#39;Existing results file&#39;
                     + &#39; (&#39; + step_results_file_path + &#39;)&#39;
@@ -576,15 +584,19 @@ def run_step(self, **kwargs):
                 )
     else:
         current_step_results = {
-            _TSSC_RESULTS_KEY: {}
+            _TSSC_RESULTS_KEY: {
+                self.step_name: {}
+            }
         }
 
-    new_step_results = {
+    updated_step_results = {
         _TSSC_RESULTS_KEY: {
-            self.step_name: results
+            self.step_name: {
+                **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                **results
+            }
         }
     }
-    updated_step_results = {**current_step_results, **new_step_results}
 
     with open(step_results_file_path, &#39;w&#39;) as step_results_file:
         yaml.dump(updated_step_results, step_results_file)</code></pre>
