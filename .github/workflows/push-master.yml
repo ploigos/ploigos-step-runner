@@ -25,13 +25,13 @@ jobs:
         pip install pep517
         pip install -e .[tests]
 
-    - name: Lint Synatx with pylnit 🧪
+    - name: Lint Synatx with pylnit 🧪🖋
       run: |
         pylint \
             --ignore version.py \
             tssc/
 
-    - name: Lint Synatx with flake8 🧪
+    - name: Lint Synatx with flake8 🧪🖋
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 tssc/ --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -66,6 +66,15 @@ jobs:
     - name: Test & Coverage 🧪
       run: |
         pytest --cov=tssc tests/
+
+    - name: Upload Coverage Report 🔺📊
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: pytests
+        name: ${{ matrix.python-version }}
+        env_vars: PYTHON
+        fail_ci_if_error: true
 
   build:
     needs:
