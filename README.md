@@ -1,6 +1,6 @@
-![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=master)
-![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=master)
-[![Code Coverage](https://codecov.io/gh/rhtconsulting/tssc-python-package/branch/master/graph/badge.svg)](https://codecov.io/gh/rhtconsulting/tssc-python-package)
+[![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Dev%22+branch%3Amaster)
+[![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+GitHub+Pages%22+branch%3Amaster)
+[![codecov](https://codecov.io/gh/rhtconsulting/tssc-python-package/branch/master/graph/badge.svg)](https://codecov.io/gh/rhtconsulting/tssc-python-package)
 
 # tssc-python-package
 Trusted Software Supply Chain (TSSC) implemented as a Python library.
