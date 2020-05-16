@@ -65,7 +65,7 @@ jobs:
 
     - name: Test & Coverage 🧪
       run: |
-        pytest --cov=tssc tests/
+        pytest --cov=tssc --cov-report=xml tests/
 
     - name: Upload Coverage Report 🔺📊
       uses: codecov/codecov-action@v1
