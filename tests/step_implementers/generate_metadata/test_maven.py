@@ -16,7 +16,7 @@ def test_pom_file_valid():
     <version>42.1</version>
 </project>''')
         pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-        results_dir_path = os.path.join(temp_dir.path, 'tssc-resutls')
+        results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
 
         config = {
             'tssc-config': {
