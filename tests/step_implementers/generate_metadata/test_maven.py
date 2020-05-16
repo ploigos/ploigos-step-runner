@@ -152,3 +152,18 @@ def test_config_file_pom_file_missing():
     factory = TSSCFactory(config)
     with pytest.raises(ValueError):
         factory.run_step('generate-metadata')
+
+def test_config_file_pom_file_none_value():
+    config = {
+        'tssc-config': {
+            'generate-metadata': {
+                'implementer': 'Maven',
+                'config': {
+                    'pom-file': None
+                }
+            }
+        }
+    }
+    factory = TSSCFactory(config)
+    with pytest.raises(ValueError):
+        factory.run_step('generate-metadata')
