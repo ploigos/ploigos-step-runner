@@ -1,10 +1,40 @@
-*.swp
+# Python
 __pycache__
 pdoc3-html/
 dist/
 build/
-tssc.egg-info/
-.eggs/
-.DS_Store
+*.eggs*
+
+# TSSC build & runtime
 tssc/version.py
 tssc-results
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+.pydevproject
+
+# IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
+
+# NetBeans
+nb-configuration.xml
+
+# Visual Studio Code
+.vscode
+
+# OSX
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+
+# patch
+*.orig
+*.rej
