@@ -35,7 +35,7 @@ class DefaultSteps: # pylint: disable=too-few-public-methods
 
 class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     """
-    Abstract represnetation of a TSSC step implementer.
+    Abstract representation of a TSSC step implementer.
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
         Parameters
         ----------
         step_config : dict
-            Step configuraiton to validate.
+            Step configuration to validate.
 
         Raises
         ------
@@ -141,7 +141,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
     @abstractmethod
     def run_step(self, **kwargs):
         """
-        Runs the TSSC step implmented by this StepImplementer.
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
