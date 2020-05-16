@@ -24,14 +24,14 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 ### Set Up Development Environment
 ```bash
-TODO
+cd tssc-python-package
+python -m venv .venvs/set-dev
+source .venvs/set-dev/bin/activate
+pip install --upgrade pip
+pip install -e .[tests]
 ```
 
 ### Run Tests
 ```bash
-pytest .
-```
-or
-```bash
-python -m pytest .
+pytest --cov=tssc tests/
 ```
