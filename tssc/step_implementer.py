@@ -92,7 +92,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
-        restuls : dict
+        results : dict
             Dictionary of results to write to the step specific results file.
         """
         if not os.path.exists(self.results_dir_path):
@@ -106,7 +106,7 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
             with open(step_results_file_path, 'r') as step_results_file:
                 try:
                     current_step_results = yaml.safe_load(step_results_file.read())
-                except (yaml.scanner.ScannerError, ValueError) as err:
+                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                     raise TSSCException(
                         'Existing results file'
                         + ' (' + step_results_file_path + ')'
@@ -125,15 +125,19 @@ class StepImplementer(ABC): # pylint: disable=too-few-public-methods
                     )
         else:
             current_step_results = {
-                _TSSC_RESULTS_KEY: {}
+                _TSSC_RESULTS_KEY: {
+                    self.step_name: {}
+                }
             }
 
-        new_step_results = {
+        updated_step_results = {
             _TSSC_RESULTS_KEY: {
-                self.step_name: results
+                self.step_name: {
+                    **current_step_results[_TSSC_RESULTS_KEY][self.step_name],
+                    **results
+                }
             }
         }
-        updated_step_results = {**current_step_results, **new_step_results}
 
         with open(step_results_file_path, 'w') as step_results_file:
             yaml.dump(updated_step_results, step_results_file)
