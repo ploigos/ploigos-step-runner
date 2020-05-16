@@ -70,6 +70,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         flags: pytests
-        name: ${{ matrix.python-version }}
+        name: Python ${{ matrix.python-version }}
         env_vars: PYTHON
         fail_ci_if_error: true
