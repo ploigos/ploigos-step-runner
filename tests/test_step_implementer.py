@@ -20,10 +20,8 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
     def step_name(cls):
         return 'write-config-as-results'
 
-    def run_step(self, **kwargs):
-        runtime_step_config = {**self.step_config, **kwargs}
-        
-        self.write_results(runtime_step_config)
+    def _run_step(self, runtime_step_config):
+        return runtime_step_config
 
 def _run_step_implementer_test(config, step, expected_step_results, test_dir):
     results_dir_path = os.path.join(test_dir.path, 'tssc-results')
