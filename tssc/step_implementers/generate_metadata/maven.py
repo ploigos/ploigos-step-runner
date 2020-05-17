@@ -37,7 +37,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
     def step_name(cls):
         return DefaultSteps.GENERATE_METADATA
 
-    def validate_step_config(self, step_config):
+    def _validate_step_config(self, step_config):
         """
         Function for implementers to override to do custom step config validation.
 
@@ -49,8 +49,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         if 'pom-file' not in step_config:
             raise ValueError('Key (pom-file) must be in the step configuration')
 
-    def run_step(self, **kwargs):
-        runtime_step_config = {**self.step_config, **kwargs}
+    def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config['pom-file']
 
         # verify runtime config
@@ -78,9 +77,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
             'version': pom_version
         }
 
-        self.write_results(results)
-
-
+        return results
 
 # register step implementer
 TSSCFactory.register_step_implementer(Maven)

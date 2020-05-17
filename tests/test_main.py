@@ -14,7 +14,7 @@ class FooStepImplementer(StepImplementer):
     def step_name(cls):
         return 'foo'
 
-    def run_step(self, **kwargs):
+    def _run_step(self, runtime_step_config):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
@@ -25,11 +25,11 @@ class RequiredStepConfigStepImplementer(StepImplementer):
     def step_name(cls):
         return 'required-step-config-test'
 
-    def validate_step_config(self, step_config):
+    def _validate_step_config(self, step_config):
         if 'required-config-key' not in step_config:
             raise ValueError('Key (required-config-key) must be in the step configuration')
 
-    def run_step(self, **kwargs):
+    def _run_step(self, runtime_step_config):
         pass
 
 class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
@@ -40,9 +40,7 @@ class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
     def step_name(cls):
         return 'required-runtime-step-config-test'
 
-    def run_step(self, **kwargs):
-        runtime_step_config = {**self.step_config, **kwargs}
-        
+    def _run_step(self, runtime_step_config):
         if 'required-rutnime-config-key' not in runtime_step_config:
             raise TSSCException('Key (required-rutnime-config-key) must be in the step configuration')
 

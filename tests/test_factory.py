@@ -10,7 +10,7 @@ class FooStepImplementer(StepImplementer):
     def step_name(cls):
         return 'foo'
 
-    def run_step(self, **kwargs):
+    def _run_step(self, runtime_step_config):
         pass
 
 def test_TSSCFactory_init_valid_config():
