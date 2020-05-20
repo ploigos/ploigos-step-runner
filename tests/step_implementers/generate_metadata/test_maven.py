@@ -35,6 +35,38 @@ def test_pom_file_valid():
         with open(os.path.join(results_dir_path, 'generate-metadata.yml'), 'r') as step_results_file:
             step_results = yaml.safe_load(step_results_file.read())
             assert step_results == expected_step_results
+
+def test_pom_file_valid_with_namespace():
+    with TempDirectory() as temp_dir:
+        temp_dir.write('pom.xml',b'''<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.mycompany.app</groupId>
+    <artifactId>my-app</artifactId>
+    <version>42.1</version>
+</project>''')
+        pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+        results_dir_path = os.path.join(temp_dir.path, 'tssc-resutls')
+
+        config = {
+            'tssc-config': {
+                'generate-metadata': {
+                    'implementer': 'Maven',
+                    'config': {
+                        'pom-file': str(pom_file_path)
+                    }
+                }
+            }
+        }
+        factory = TSSCFactory(config, results_dir_path)
+        factory.run_step('generate-metadata')
+
+        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        with open(os.path.join(results_dir_path, 'generate-metadata.yml'), 'r') as step_results_file:
+            step_results = yaml.safe_load(step_results_file.read())
+            assert step_results == expected_step_results
             
 
 def test_pom_file_valid_runtime_config_pom_file():
@@ -113,6 +145,21 @@ def test_config_file_pom_file_missing():
                 'implementer': 'Maven',
                 'config': {
                     'pom-file': 'does-not-exist.pom'
+                }
+            }
+        }
+    }
+    factory = TSSCFactory(config)
+    with pytest.raises(ValueError):
+        factory.run_step('generate-metadata')
+
+def test_config_file_pom_file_none_value():
+    config = {
+        'tssc-config': {
+            'generate-metadata': {
+                'implementer': 'Maven',
+                'config': {
+                    'pom-file': None
                 }
             }
         }
