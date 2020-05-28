@@ -1,5 +1,5 @@
 """
-com.redhat.tssc.step_implementers.metadata_generator.maven
+Step Implementer for the generate-metadata step for Maven.
 """
 
 import re
@@ -16,12 +16,7 @@ DEFAULT_ARGS = {
 
 class Maven(StepImplementer): # pylint: disable=too-few-public-methods 
     """
-    Default step implementer for the generate-metadata step.
-
-    Attributes
-    ----------
-    STEP_NAME: str
-        TSSC step that this StepImplementer implements
+    StepImplementer for the generate-metadata step for Maven.
 
     Raises
     ------
