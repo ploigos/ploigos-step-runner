@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>tssc.step_implementers.generate_metadata API documentation</title>
-<meta name="description" content="tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step." />
+<title>tssc.step_implementers.tag_source.git API documentation</title>
+<meta name="description" content="Step Implementer for the tag-source step for Git." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,39 +17,122 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.step_implementers.generate_metadata</code></h1>
+<h1 class="title">Module <code>tssc.step_implementers.tag_source.git</code></h1>
 </header>
 <section id="section-intro">
-<p>tssc.StepImplementers for the 'generate-metadata' TSSC step.</p>
+<p>Step Implementer for the tag-source step for Git.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step.
+Step Implementer for the tag-source step for Git.
 &#34;&#34;&#34;
 
-from .maven import Maven
+from tssc import TSSCFactory
+from tssc import StepImplementer
+from tssc import DefaultSteps
 
-__all__ = [
-    &#39;maven&#39;
-]</code></pre>
+DEFAULT_ARGS = {}
+
+class Git(StepImplementer):
+    &#34;&#34;&#34;
+    StepImplementer for the tag-source step for Git.
+    &#34;&#34;&#34;
+
+    def __init__(self, config, results_file):
+        super().__init__(config, results_file, DEFAULT_ARGS)
+
+    @classmethod
+    def step_name(cls):
+        return DefaultSteps.TAG_SOURCE
+
+    def _validate_step_config(self, step_config):
+        &#34;&#34;&#34;
+        Function for implementers to override to do custom step config validation.
+
+        Parameters
+        ----------
+        step_config : dict
+            Step configuration to validate.
+        &#34;&#34;&#34;
+
+    def _run_step(self, runtime_step_config):
+        results = {
+        }
+
+        return results
+
+# register step implementer
+TSSCFactory.register_step_implementer(Git, True)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt><code class="name"><a title="tssc.step_implementers.generate_metadata.maven" href="maven.html">tssc.step_implementers.generate_metadata.maven</a></code></dt>
+<dt id="tssc.step_implementers.tag_source.git.Git"><code class="flex name class">
+<span>class <span class="ident">Git</span></span>
+<span>(</span><span>config, results_file)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Step Implementer for the generate-metadata step for Maven.</p></div>
+<div class="desc"><p>StepImplementer for the tag-source step for Git.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Git(StepImplementer):
+    &#34;&#34;&#34;
+    StepImplementer for the tag-source step for Git.
+    &#34;&#34;&#34;
+
+    def __init__(self, config, results_file):
+        super().__init__(config, results_file, DEFAULT_ARGS)
+
+    @classmethod
+    def step_name(cls):
+        return DefaultSteps.TAG_SOURCE
+
+    def _validate_step_config(self, step_config):
+        &#34;&#34;&#34;
+        Function for implementers to override to do custom step config validation.
+
+        Parameters
+        ----------
+        step_config : dict
+            Step configuration to validate.
+        &#34;&#34;&#34;
+
+    def _run_step(self, runtime_step_config):
+        results = {
+        }
+
+        return results</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -60,12 +143,14 @@ __all__ = [
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.step_implementers" href="../index.html">tssc.step_implementers</a></code></li>
+<li><code><a title="tssc.step_implementers.tag_source" href="index.html">tssc.step_implementers.tag_source</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="tssc.step_implementers.generate_metadata.maven" href="maven.html">tssc.step_implementers.generate_metadata.maven</a></code></li>
+<li>
+<h4><code><a title="tssc.step_implementers.tag_source.git.Git" href="#tssc.step_implementers.tag_source.git.Git">Git</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>
