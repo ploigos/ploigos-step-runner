@@ -3,15 +3,9 @@ com.redhat.tssc.step_implementers
 """
 
 from .generate_metadata import *
+from .tag_source import *
 
 __all__ = [
-    'generate_metadata'
+    'generate_metadata',
+    'tag_source'
 ]
-
-#from .metadata_generator import MetadataGenerator
-#from .sonarqube import SonarQube
-
-#__all__ = [
-#    'metadata_generator',
-#    'sonarqube'
-#]
