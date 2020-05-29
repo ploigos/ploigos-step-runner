@@ -1,5 +1,5 @@
 """
-Step Implementer for the security-static-code-analysis step for SonarQube.
+Step Implementer for the linting-static-code-analysis step for SonarQube.
 """
 
 from tssc import TSSCFactory
@@ -18,7 +18,7 @@ class SonarQube(StepImplementer):
 
     @classmethod
     def step_name(cls):
-        return DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS
+        return DefaultSteps.LINTING_STATIC_CODE_ANALYSIS
 
     def _validate_step_config(self, step_config):
         """
