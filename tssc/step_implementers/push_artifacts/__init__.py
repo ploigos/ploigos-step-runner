@@ -6,5 +6,6 @@ from .maven import Maven
 from .npm import NPM
 
 __all__ = [
-    'maven'
+    'maven',
+    'npm'
 ]
