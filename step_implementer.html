@@ -48,14 +48,14 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     PACKAGE = &#39;package&#39;
     UNIT_TEST = &#39;unit-test&#39;
     PUSH_ARTIFACTS = &#39;push-artifacts&#39;
-    CREATE_CONTAINER_IMAGE = &#39;create-container&#39;
+    CREATE_CONTAINER_IMAGE = &#39;create-container-image&#39;
     PUSH_CONTAINER_IMAGE = &#39;push-container-image&#39;
     CONTAINER_IMAGE_UNIT_TEST = &#39;container-image-unit-test&#39;
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = &#39;container-image-static-compliance-scan&#39;
-    CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
+    CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
     PUSH_TRUSTED_CONTAINER_IMAGE = &#39;push-trusted-container-image&#39;
-    CREATE_KUBE_PROJECT = &#39;create-kube-project&#39;
-    DEPLOY_TO_KUBE_PROJECT = &#39;deploy-to-kube-project&#39;
+    CREATE_DEPLOYMENT_ENVIRONMENT = &#39;create-deployment-environment&#39;
+    DEPLOY = &#39;deploy&#39;
     UAT = &#39;uat&#39;
     RUNTIME_VULNERABILITY_SCAN = &#39;runtime-vulnerability-scan&#39;
     CANARY_TEST = &#39;canary-test&#39;
@@ -317,14 +317,14 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     PACKAGE = &#39;package&#39;
     UNIT_TEST = &#39;unit-test&#39;
     PUSH_ARTIFACTS = &#39;push-artifacts&#39;
-    CREATE_CONTAINER_IMAGE = &#39;create-container&#39;
+    CREATE_CONTAINER_IMAGE = &#39;create-container-image&#39;
     PUSH_CONTAINER_IMAGE = &#39;push-container-image&#39;
     CONTAINER_IMAGE_UNIT_TEST = &#39;container-image-unit-test&#39;
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = &#39;container-image-static-compliance-scan&#39;
-    CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
+    CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
     PUSH_TRUSTED_CONTAINER_IMAGE = &#39;push-trusted-container-image&#39;
-    CREATE_KUBE_PROJECT = &#39;create-kube-project&#39;
-    DEPLOY_TO_KUBE_PROJECT = &#39;deploy-to-kube-project&#39;
+    CREATE_DEPLOYMENT_ENVIRONMENT = &#39;create-deployment-environment&#39;
+    DEPLOY = &#39;deploy&#39;
     UAT = &#39;uat&#39;
     RUNTIME_VULNERABILITY_SCAN = &#39;runtime-vulnerability-scan&#39;
     CANARY_TEST = &#39;canary-test&#39;
@@ -340,7 +340,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN"><code class="name">var <span class="ident">CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN</span></code></dt>
+<dt id="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN"><code class="name">var <span class="ident">CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -352,11 +352,11 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.step_implementer.DefaultSteps.CREATE_KUBE_PROJECT"><code class="name">var <span class="ident">CREATE_KUBE_PROJECT</span></code></dt>
+<dt id="tssc.step_implementer.DefaultSteps.CREATE_DEPLOYMENT_ENVIRONMENT"><code class="name">var <span class="ident">CREATE_DEPLOYMENT_ENVIRONMENT</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.step_implementer.DefaultSteps.DEPLOY_TO_KUBE_PROJECT"><code class="name">var <span class="ident">DEPLOY_TO_KUBE_PROJECT</span></code></dt>
+<dt id="tssc.step_implementer.DefaultSteps.DEPLOY"><code class="name">var <span class="ident">DEPLOY</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -660,8 +660,19 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="tssc.step_implementers.canary_test.selenium.Selenium" href="step_implementers/canary_test/selenium.html#tssc.step_implementers.canary_test.selenium.Selenium">Selenium</a></li>
+<li><a title="tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP" href="step_implementers/container_image_static_compliance_scan/openscap.html#tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP">OpenSCAP</a></li>
+<li><a title="tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP" href="step_implementers/container_image_static_vulnerability_scan/openscap.html#tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP">OpenSCAP</a></li>
 <li><a title="tssc.step_implementers.generate_metadata.maven.Maven" href="step_implementers/generate_metadata/maven.html#tssc.step_implementers.generate_metadata.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube" href="step_implementers/linting_static_code_analysis/sonarqube.html#tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
+<li><a title="tssc.step_implementers.package.maven.Maven" href="step_implementers/package/maven.html#tssc.step_implementers.package.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.package.npm.NPM" href="step_implementers/package/npm.html#tssc.step_implementers.package.npm.NPM">NPM</a></li>
+<li><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="step_implementers/push_artifacts/maven.html#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.push_artifacts.npm.NPM" href="step_implementers/push_artifacts/npm.html#tssc.step_implementers.push_artifacts.npm.NPM">NPM</a></li>
+<li><a title="tssc.step_implementers.security_static_code_analysis.sonarqube.SonarQube" href="step_implementers/security_static_code_analysis/sonarqube.html#tssc.step_implementers.security_static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
 <li><a title="tssc.step_implementers.tag_source.git.Git" href="step_implementers/tag_source/git.html#tssc.step_implementers.tag_source.git.Git">Git</a></li>
+<li><a title="tssc.step_implementers.uat.cucumber.Cucumber" href="step_implementers/uat/cucumber.html#tssc.step_implementers.uat.cucumber.Cucumber">Cucumber</a></li>
+<li><a title="tssc.step_implementers.unit_test.junit.JUnit" href="step_implementers/unit_test/junit.html#tssc.step_implementers.unit_test.junit.JUnit">JUnit</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -882,11 +893,11 @@ to use when running the step.</dd>
 <ul class="">
 <li><code><a title="tssc.step_implementer.DefaultSteps.CANARY_TEST" href="#tssc.step_implementer.DefaultSteps.CANARY_TEST">CANARY_TEST</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN" href="#tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN">CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN" href="#tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN">CONTAINER_IMAGE_STATIC_ULNERABILITY_SCAN</a></code></li>
+<li><code><a title="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN" href="#tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN">CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_UNIT_TEST" href="#tssc.step_implementer.DefaultSteps.CONTAINER_IMAGE_UNIT_TEST">CONTAINER_IMAGE_UNIT_TEST</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.CREATE_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.CREATE_CONTAINER_IMAGE">CREATE_CONTAINER_IMAGE</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.CREATE_KUBE_PROJECT" href="#tssc.step_implementer.DefaultSteps.CREATE_KUBE_PROJECT">CREATE_KUBE_PROJECT</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.DEPLOY_TO_KUBE_PROJECT" href="#tssc.step_implementer.DefaultSteps.DEPLOY_TO_KUBE_PROJECT">DEPLOY_TO_KUBE_PROJECT</a></code></li>
+<li><code><a title="tssc.step_implementer.DefaultSteps.CREATE_DEPLOYMENT_ENVIRONMENT" href="#tssc.step_implementer.DefaultSteps.CREATE_DEPLOYMENT_ENVIRONMENT">CREATE_DEPLOYMENT_ENVIRONMENT</a></code></li>
+<li><code><a title="tssc.step_implementer.DefaultSteps.DEPLOY" href="#tssc.step_implementer.DefaultSteps.DEPLOY">DEPLOY</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.GENERATE_METADATA" href="#tssc.step_implementer.DefaultSteps.GENERATE_METADATA">GENERATE_METADATA</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.LINTING_STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.LINTING_STATIC_CODE_ANALYSIS">LINTING_STATIC_CODE_ANALYSIS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PACKAGE" href="#tssc.step_implementer.DefaultSteps.PACKAGE">PACKAGE</a></code></li>
