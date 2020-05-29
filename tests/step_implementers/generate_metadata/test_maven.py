@@ -3,11 +3,14 @@ import os
 import pytest
 from testfixtures import TempDirectory
 import yaml
+import sys
 
 from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Maven
 
-def test_pom_file_valid():
+from test_utils import *
+
+def test_pom_file_valid_old ():
     with TempDirectory() as temp_dir:
         temp_dir.write('pom.xml',b'''<project>
     <modelVersion>4.0.0</modelVersion>
@@ -16,8 +19,6 @@ def test_pom_file_valid():
     <version>42.1</version>
 </project>''')
         pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-        results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-
         config = {
             'tssc-config': {
                 'generate-metadata': {
@@ -28,13 +29,9 @@ def test_pom_file_valid():
                 }
             }
         }
-        factory = TSSCFactory(config, results_dir_path)
-        factory.run_step('generate-metadata')
-
         expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
-        with open(os.path.join(results_dir_path, 'generate-metadata.yml'), 'r') as step_results_file:
-            step_results = yaml.safe_load(step_results_file.read())
-            assert step_results == expected_step_results
+
+        run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
 
 def test_pom_file_valid_with_namespace():
     with TempDirectory() as temp_dir:
@@ -60,15 +57,10 @@ def test_pom_file_valid_with_namespace():
                 }
             }
         }
-        factory = TSSCFactory(config, results_dir_path)
-        factory.run_step('generate-metadata')
-
         expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
-        with open(os.path.join(results_dir_path, 'generate-metadata.yml'), 'r') as step_results_file:
-            step_results = yaml.safe_load(step_results_file.read())
-            assert step_results == expected_step_results
-            
 
+        run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
+            
 def test_pom_file_valid_runtime_config_pom_file():
     config = {
         'tssc-config': {
