@@ -25,10 +25,7 @@ jobs:
         pip install -e .[tests]
 
     - name: Lint Synatx with pylnit 🧪🖋
-      run: |
-        pylint \
-            --ignore version.py \
-            tssc/
+      run: pylint --rcfile=setup.cfg tssc
 
     - name: Lint Synatx with flake8 🧪🖋
       run: |
