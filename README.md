@@ -40,3 +40,8 @@ pip install -e .[tests]
 ```bash
 pytest --cov=tssc tests/
 ```
+
+### Run linter
+```bash
+pylint --rcfile=setup.cfg tssc
+```
