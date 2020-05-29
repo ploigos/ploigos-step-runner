@@ -1,5 +1,5 @@
 """
-tssc.StepImplementers for the 'generate-metadata' TSSC step.
+tssc.StepImplementers for the 'linting-static-code-analysis' TSSC step.
 """
 
 from .sonarqube import SonarQube
