@@ -194,7 +194,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         results : dict
             Results to write to the step specific results file.
         """
-        if results:
+        if results is not None:
             if not os.path.exists(self.results_dir_path):
                 os.makedirs(self.results_dir_path)
 
