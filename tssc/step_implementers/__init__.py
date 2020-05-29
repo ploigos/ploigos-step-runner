@@ -10,6 +10,8 @@ from .package import *
 from .unit_test import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
+from .uat import *
+from .canary_test import *
 
 __all__ = [
     'generate_metadata',
@@ -19,5 +21,7 @@ __all__ = [
     'package',
     'unit_test',
     'container_image_static_compliance_scan',
-    'container_image_static_vulnerability_scan'
+    'container_image_static_vulnerability_scan',
+    'uat',
+    'canary_test'
 ]
