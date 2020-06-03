@@ -113,8 +113,6 @@ def test_pom_file_valid_with_namespace_empty_jar ():
 
 def test_mvn_quickstart_single_jar_java_error():
     with TempDirectory() as temp_dir:
-        #java_app_class_file = os.path.join(temp_dir.path,"src/main/java/com/mycompany/app/app.java")
-        #os.makedirs(java_app_class_file)
         temp_dir.write('src/main/java/com/mycompany/app/App.java',b'''package com.mycompany.app;
 public class Fail {
     public static void main( String[] args ) {
