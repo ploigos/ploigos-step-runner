@@ -66,6 +66,9 @@ class Maven(StepImplementer):
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config['pom-file']
 
+        if not os.path.exists(pom_file):
+            raise ValueError('Given pom file does not exist: ' + pom_file)
+
         process_args = ["mvn", "clean", "install"]
         java_artifact_extenstions = ["jar", "war", "ear"]
         return_code = 1
