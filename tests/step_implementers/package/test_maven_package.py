@@ -104,7 +104,7 @@ def test_pom_file_valid_with_namespace_empty_jar ():
             'tssc-results': {
                 'package': {
                     'artifacts': {
-                        'my-app-42.1.jar': os.path.join(temp_dir.path, "target", 'my-app-42.1.jar')
+                        'my-app-42.1.jar': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')
                     }
                 }
             }
