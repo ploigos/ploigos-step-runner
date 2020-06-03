@@ -38,7 +38,7 @@ public class App {
             'tssc-results': {
                 'package': {
                     'artifacts': {
-                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, "target", 'my-app-1.0-SNAPSHOT.jar')
+                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, 'target', 'my-app-1.0-SNAPSHOT.jar')
                     }
                 }
             }
@@ -68,7 +68,7 @@ def test_pom_file_valid_old_empty_jar ():
             'tssc-results': {
                 'package': {
                     'artifacts': {
-                        'my-app-42.1.jar': os.path.join(temp_dir.path, "target", 'my-app-42.1.jar')
+                        'my-app-42.1.jar': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')
                     }
                 }
             }
