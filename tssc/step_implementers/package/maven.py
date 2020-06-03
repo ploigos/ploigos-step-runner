@@ -87,6 +87,7 @@ class Maven(StepImplementer):
         }
         for artifact in java_packaged_artifacts:
             results['artifacts'][artifact] = os.path.join(os.path.dirname(pom_file),artifact)
+
         return results
 
 # register step implementer

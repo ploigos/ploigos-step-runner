@@ -9,7 +9,6 @@ from tssc.step_implementers.package import Maven
 
 from test_utils import *
 
-
 def test_package_java_mvn_quickstart_single_jar():
     with TempDirectory() as temp_dir:
         #java_app_class_file = os.path.join(temp_dir.path,"src/main/java/com/mycompany/app/app.java")
