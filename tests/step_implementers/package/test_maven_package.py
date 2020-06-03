@@ -40,7 +40,7 @@ public class App {
             'tssc-results': {
                 'package': {
                     'artifacts': {
-                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, 'my-app-1.0-SNAPSHOT.jar')
+                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, "target", 'my-app-1.0-SNAPSHOT.jar')
                     }
                 }
             }

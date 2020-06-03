@@ -76,17 +76,18 @@ class Maven(StepImplementer):
             raise ValueError('Issue invoking ' + str(process_args) + \
               ' with given pom file (' + pom_file + ')')
 
-        included_extensions = ['jpg','jpeg', 'bmp', 'png', 'gif']
-        java_packaged_artifacts = [filename for filename in \
-          os.listdir(os.path.join(os.path.dirname(pom_file), "target"))
-            if any(filename.endswith(ext) for ext in java_artifact_extenstions)]
+        java_packaged_artifacts = []
+        for filename in os.listdir(os.path.join(os.path.dirname(pom_file), "target")):
+            if any(filename.endswith(ext) for ext in java_artifact_extenstions):
+                java_packaged_artifacts.append(filename)
 
         results = {
             'artifacts' : {
             }
         }
         for artifact in java_packaged_artifacts:
-            results['artifacts'][artifact] = os.path.join(os.path.dirname(pom_file),artifact)
+            results['artifacts'][artifact] = \
+              os.path.join(os.path.dirname(pom_file), "target", artifact)
 
         return results
 
