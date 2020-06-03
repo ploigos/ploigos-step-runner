@@ -67,14 +67,26 @@ class Maven(StepImplementer):
         pom_file = runtime_step_config['pom-file']
 
         process_args = ["mvn", "clean", "install"]
+        java_artifact_extenstions = ["jar", "war", "ear"]
+        return_code = 1
 
         with ChangeDir(os.path.dirname(pom_file)):
             return_code = subprocess.call(process_args)
         if return_code:
             raise ValueError('Issue invoking ' + str(process_args) + \
               ' with given pom file (' + pom_file + ')')
+
+        included_extensions = ['jpg','jpeg', 'bmp', 'png', 'gif']
+        java_packaged_artifacts = [filename for filename in \
+          os.listdir(os.path.join(os.path.dirname(pom_file), "target"))
+            if any(filename.endswith(ext) for ext in java_artifact_extenstions)]
+
         results = {
+            'artifacts' : {
+            }
         }
+        for artifact in java_packaged_artifacts:
+            results['artifacts'][artifact] = os.path.join(os.path.dirname(pom_file),artifact)
         return results
 
 # register step implementer
