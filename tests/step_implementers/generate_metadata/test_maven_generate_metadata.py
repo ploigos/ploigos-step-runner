@@ -10,6 +10,26 @@ from tssc.step_implementers.generate_metadata import Maven
 
 from test_utils import *
 
+
+def test_pom_file_valid_runtime_config_pom_file():
+    with TempDirectory() as temp_dir:
+        temp_dir.write('pom.xml',b'''<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.mycompany.app</groupId>
+    <artifactId>my-app</artifactId>
+    <version>42.1</version>
+</project>''')
+        pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+        config = {
+            'tssc-config': {
+                'generate-metadata': {
+                    'implementer': 'Maven'
+                }
+            }
+        }
+        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'pom-file': str(pom_file_path)})
+
 def test_pom_file_valid_old ():
     with TempDirectory() as temp_dir:
         temp_dir.write('pom.xml',b'''<project>
@@ -60,26 +80,6 @@ def test_pom_file_valid_with_namespace():
         expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
-            
-def test_pom_file_valid_runtime_config_pom_file():
-    config = {
-        'tssc-config': {
-            'generate-metadata': {
-                'implementer': 'Maven'
-            }
-        }
-    }
-    factory = TSSCFactory(config)
-
-    with TempDirectory() as temp_dir:
-        temp_dir.write('pom.xml',b'''<project>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.mycompany.app</groupId>
-    <artifactId>my-app</artifactId>
-    <version>42.1</version>
-</project>''')
-        pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-        factory.run_step('generate-metadata', {'pom-file': str(pom_file_path)})
 
 def test_pom_file_missing_version():
     with TempDirectory() as temp_dir:
