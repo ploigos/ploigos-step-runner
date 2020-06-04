@@ -68,22 +68,24 @@ class Maven(StepImplementer):
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
-        if not os.path.exists(os.path.dirname(pom_file)):
-            raise ValueError('Pom file does not have a parent dir: ' + os.path.dirname(pom_file) + \
+        if not os.path.exists(os.path.dirname(os.path.abspath(pom_file))):
+            raise ValueError('Pom file does not have a parent dir: ' + \
+              os.path.dirname(os.path.abspath(pom_file)) + \
               ' for pom file: ' + pom_file)
 
         process_args = ["mvn", "clean", "install"]
         java_artifact_extenstions = ["jar", "war", "ear"]
         return_code = 1
 
-        with ChangeDir(os.path.dirname(pom_file)):
+        with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
             return_code = subprocess.call(process_args)
         if return_code:
             raise ValueError('Issue invoking ' + str(process_args) + \
               ' with given pom file (' + pom_file + ')')
 
         java_packaged_artifacts = []
-        for filename in os.listdir(os.path.join(os.path.dirname(pom_file), "target")):
+        for filename in os.listdir(os.path.join(os.path.dirname(os.path.abspath(pom_file)), \
+          'target')):
             if any(filename.endswith(ext) for ext in java_artifact_extenstions):
                 java_packaged_artifacts.append(filename)
 
@@ -93,7 +95,7 @@ class Maven(StepImplementer):
         }
         for artifact in java_packaged_artifacts:
             results['artifacts'][artifact] = \
-              os.path.join(os.path.dirname(pom_file), "target", artifact)
+              os.path.join(os.path.dirname(os.path.abspath(pom_file)), "target", artifact)
 
         return results
 
