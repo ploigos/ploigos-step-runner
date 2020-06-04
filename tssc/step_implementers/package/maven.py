@@ -68,7 +68,7 @@ class Maven(StepImplementer):
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
-            
+
         process_args = ["mvn", "clean", "install"]
         java_artifact_extenstions = ["jar", "war", "ear"]
         return_code = 1
