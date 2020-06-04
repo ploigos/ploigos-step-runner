@@ -68,6 +68,8 @@ class Maven(StepImplementer):
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
+        if not os.path.exists(os.path.dirname(pom_file)):
+            raise ValueError('Pom file does not have a parent dir: ' + os.path.dirname(pom_file) + ' for pom file: ' + pom_file)
 
         process_args = ["mvn", "clean", "install"]
         java_artifact_extenstions = ["jar", "war", "ear"]
