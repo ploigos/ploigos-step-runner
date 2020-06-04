@@ -9,6 +9,35 @@ from tssc.step_implementers.package import Maven
 
 from test_utils import *
 
+def test_mvn_quickstart_single_jar_no_pom():
+    with TempDirectory() as temp_dir:
+        temp_dir.write('src/main/java/com/mycompany/app/App.java',b'''package com.mycompany.app;
+public class App {
+    public static void main( String[] args ) {
+        System.out.println( "Hello World!" );
+    }
+}''')
+        pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+        config = {
+            'tssc-config': {
+                'package': {
+                    'implementer': 'Maven',
+                }
+            }
+        }
+        expected_step_results = {
+            'tssc-results': {
+                'package': {
+                    'artifacts': {
+                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, 'target', 'my-app-1.0-SNAPSHOT.jar')
+                    }
+                }
+            }
+        }
+        factory = TSSCFactory(config)
+        with pytest.raises(ValueError):
+            factory.run_step('package')
+
 def test_mvn_quickstart_single_jar():
     with TempDirectory() as temp_dir:
         temp_dir.write('src/main/java/com/mycompany/app/App.java',b'''package com.mycompany.app;
