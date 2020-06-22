@@ -74,7 +74,7 @@ class Maven(StepImplementer):
         return_code = 1
 
         with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
-            return_code = subprocess.call(process_args)
+            return_code = subprocess.call(process_args, shell=True)
         if return_code:
             raise ValueError('Issue invoking ' + str(process_args) + \
               ' with given pom file (' + pom_file + ')')
