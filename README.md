@@ -8,10 +8,10 @@
 # tssc-python-package
 Trusted Software Supply Chain (TSSC) implemented as a Python library.
 
-## Documenation
+## Documentation
 
 - [Python Package Documenation](https://rhtconsulting.github.io/tssc-python-package/)
-- [Trusted Software Supply Chain (TSSC) Overview](https://rhtconsulting.github.io/tssc-docs/)
+- [Trusted Software Supply Chain (TSSC) Overview](https://rhtconsulting.github.io/tsc-docs/)
 
 ## Install
 
