@@ -27,7 +27,7 @@ def test_pom_file_valid_runtime_config_pom_file():
                 }
             }
         }
-        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'pom-file': str(pom_file_path)})
 
 def test_pom_file_valid_old ():
@@ -49,7 +49,7 @@ def test_pom_file_valid_old ():
                 }
             }
         }
-        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
 
@@ -77,7 +77,7 @@ def test_pom_file_valid_with_namespace():
                 }
             }
         }
-        expected_step_results = {'tssc-results': {'generate-metadata': {'version': '42.1'}}}
+        expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
 

@@ -193,47 +193,20 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         ----------
         results : dict
             Results to write to the step specific results file.
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
         """
         if results is not None:
-            if not os.path.exists(self.results_dir_path):
-                os.makedirs(self.results_dir_path)
-
-            step_results_file_path = self.results_file_path
-
-            current_step_results = None
-            if os.path.exists(step_results_file_path):
-                with open(step_results_file_path, 'r') as step_results_file:
-                    try:
-                        current_step_results = yaml.safe_load(step_results_file.read())
-                    except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
-                        raise TSSCException(
-                            'Existing results file'
-                            +' (' + step_results_file_path + ')'
-                            +' for step (' + self.step_name() + ')'
-                            +' has invalid yaml: ' + str(err)
-                        )
-
-                if current_step_results:
-                    if StepImplementer.__TSSC_RESULTS_KEY not in current_step_results:
-                        raise TSSCException(
-                            'Existing results file'
-                            +' (' + step_results_file_path + ')'
-                            +' for step (' + self.step_name() + ')'
-                            +' does not have expected top level element'
-                            +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
-                            + str(current_step_results)
-                        )
-            else:
-                current_step_results = {
-                    StepImplementer.__TSSC_RESULTS_KEY: {
-                        self.step_name(): {}
-                    }
-                }
+            current_results = self.current_results()
 
             updated_step_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
                     self.step_name(): {
-                        **current_step_results \
+                        **current_results \
                             [StepImplementer.__TSSC_RESULTS_KEY] \
                             [self.step_name()],
                         **results
@@ -241,8 +214,80 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                 }
             }
 
+            step_results_file_path = self.results_file_path
             with open(step_results_file_path, 'w') as step_results_file:
                 yaml.dump(updated_step_results, step_results_file)
+
+    def current_results(self):
+        """
+        Get the results of the TSSC so far from other step implementers that have already been run
+        for this step and other previous steps.
+
+        Returns
+        -------
+        dict
+            The results of the TSSC so far from other step implementers that have already been run
+            for this step and other previous steps.
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
+        """
+        if not os.path.exists(self.results_dir_path):
+            os.makedirs(self.results_dir_path)
+
+        step_results_file_path = self.results_file_path
+
+        current_results = None
+        if os.path.exists(step_results_file_path):
+            with open(step_results_file_path, 'r') as step_results_file:
+                try:
+                    current_results = yaml.safe_load(step_results_file.read())
+                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
+                    raise TSSCException(
+                        'Existing results file'
+                        +' (' + step_results_file_path + ')'
+                        +' for step (' + self.step_name() + ')'
+                        +' has invalid yaml: ' + str(err)
+                    )
+
+            if current_results:
+                if StepImplementer.__TSSC_RESULTS_KEY not in current_results:
+                    raise TSSCException(
+                        'Existing results file'
+                        +' (' + step_results_file_path + ')'
+                        +' for step (' + self.step_name() + ')'
+                        +' does not have expected top level element'
+                        +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
+                        + str(current_results)
+                    )
+        else:
+            current_results = {
+                StepImplementer.__TSSC_RESULTS_KEY: {
+                    self.step_name(): {}
+                }
+            }
+
+        return current_results
+
+    def current_step_results(self):
+        """
+        Get the results of this step so far from other step implementers that have already been run.
+
+        Returns
+        -------
+        dict
+            The results of this step so far from other step implementers that have already been run
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
+        """
+        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     @property
     def results_file_path(self):
