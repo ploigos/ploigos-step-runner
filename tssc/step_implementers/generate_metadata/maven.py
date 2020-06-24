@@ -41,7 +41,6 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         step_config : dict
             Step configuration to validate.
         """
-        print(step_config)
         if 'pom-file' not in step_config or not step_config['pom-file']:
             raise ValueError('Key (pom-file) must have none empty value in the step configuration')
 
@@ -70,7 +69,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         pom_version = pom_version_element.text
 
         results = {
-            'version': pom_version
+            'app-version': pom_version
         }
 
         return results

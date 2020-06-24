@@ -16,3 +16,9 @@ def run_step_test_with_result_validation(temp_dir, step_name, config, expected_s
     with open(os.path.join(results_dir_path, results_file_name), 'r') as step_results_file:
         actual_step_results = yaml.safe_load(step_results_file.read())
         assert actual_step_results == expected_step_results
+
+def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name = 'sample-file', commit_message = 'test'):
+    sample_file = os.path.join(temp_dir.path, sample_file_name)
+    open(sample_file, 'wb').close()
+    git_repo.index.add([sample_file])
+    git_repo.index.commit(commit_message)
