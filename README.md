@@ -32,16 +32,16 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 cd tssc-python-package
 python -m venv .venvs/tssc-dev
 source .venvs/tssc-dev/bin/activate
-pip install --upgrade pip
-pip install -e .[tests]
+python -m pip install --upgrade pip
+python -m pip install -e .[tests]
 ```
 
 ### Run Tests
 ```bash
-pytest --cov=tssc tests/
+python -m pytest --cov=tssc tests/
 ```
 
 ### Run linter
 ```bash
-pylint --rcfile=setup.cfg tssc
+python -m pylint --rcfile=setup.cfg tssc
 ```
