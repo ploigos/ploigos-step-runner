@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.3" />
-<title>tssc.step_implementers.linting_static_code_analysis.sonarqube API documentation</title>
-<meta name="description" content="Step Implementer for the linting-static-code-analysis step for SonarQube." />
+<title>tssc.step_implementers.generate_metadata.semantic_version API documentation</title>
+<meta name="description" content="Step Implementer for the generate-metadata step for generating a
+semantic version from other metadata." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
@@ -19,27 +20,34 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.step_implementers.linting_static_code_analysis.sonarqube</code></h1>
+<h1 class="title">Module <code>tssc.step_implementers.generate_metadata.semantic_version</code></h1>
 </header>
 <section id="section-intro">
-<p>Step Implementer for the linting-static-code-analysis step for SonarQube.</p>
+<p>Step Implementer for the generate-metadata step for generating a
+semantic version from other metadata.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-Step Implementer for the linting-static-code-analysis step for SonarQube.
+Step Implementer for the generate-metadata step for generating a
+semantic version from other metadata.
 &#34;&#34;&#34;
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {}
+DEFAULT_ARGS = {
+    &#39;release-branch&#39;: &#39;master&#39;
+}
 
-class SonarQube(StepImplementer):
+class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods 
     &#34;&#34;&#34;
-    StepImplementer for the tag-source step for SonarQube.
+    StepImplementer for the generate-metadata step for SemanticVersion.
+
+    Raises
+    ------
     &#34;&#34;&#34;
 
     def __init__(self, config, results_file):
@@ -47,7 +55,7 @@ class SonarQube(StepImplementer):
 
     @classmethod
     def step_name(cls):
-        return DefaultSteps.LINTING_STATIC_CODE_ANALYSIS
+        return DefaultSteps.GENERATE_METADATA
 
     def _validate_step_config(self, step_config):
         &#34;&#34;&#34;
@@ -60,13 +68,59 @@ class SonarQube(StepImplementer):
         &#34;&#34;&#34;
 
     def _run_step(self, runtime_step_config):
+        app_version = None
+        pre_release = None
+        build = None
+        release_branch = runtime_step_config[&#39;release-branch&#39;]
+
+        current_step_results = self.current_step_results()
+        if &#39;app-version&#39; in runtime_step_config:
+            app_version = runtime_step_config[&#39;app-version&#39;]
+        elif &#39;app-version&#39; in current_step_results:
+            app_version = current_step_results[&#39;app-version&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (app-version) provided via runtime flag
+                (app-version) or from prior step implementer ({0}).
+                &#34;&#34;&#34;.format(self.step_name())
+            )
+
+        if &#39;pre-release&#39; in runtime_step_config:
+            pre_release = runtime_step_config[&#39;pre-release&#39;]
+        elif &#39;pre-release&#39; in current_step_results:
+            pre_release = current_step_results[&#39;pre-release&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (pre_release) provided via runtime flag
+                (pre-release) or from prior step implementer ({0})
+                &#34;&#34;&#34;.format(self.step_name()))
+
+        if &#39;build&#39; in runtime_step_config:
+            build = runtime_step_config[&#39;build&#39;]
+        elif &#39;build&#39; in current_step_results:
+            build = current_step_results[&#39;build&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (build) provided via runtime flag
+                (build) or from prior step implementer ({0})
+                &#34;&#34;&#34;.format(self.step_name()))
+
+        if pre_release == release_branch:
+            version = &#34;{0}+{1}&#34;.format(app_version, build)
+            image_tag = &#34;{0}-{1}&#34;.format(app_version, build)
+        else:
+            version = &#34;{0}-{1}+{2}&#34;.format(app_version, pre_release, build)
+            image_tag = &#34;{0}-{1}-{2}&#34;.format(app_version, pre_release, build)
+
         results = {
+            &#39;version&#39;: version,
+            &#39;image-tag&#39;: image_tag
         }
 
         return results
 
 # register step implementer
-TSSCFactory.register_step_implementer(SonarQube)</code></pre>
+TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
 </details>
 </section>
 <section>
@@ -78,19 +132,23 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube"><code class="flex name class">
-<span>class <span class="ident">SonarQube</span></span>
+<dt id="tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion"><code class="flex name class">
+<span>class <span class="ident">SemanticVersion</span></span>
 <span>(</span><span>config, results_file)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>StepImplementer for the tag-source step for SonarQube.</p></div>
+<div class="desc"><p>StepImplementer for the generate-metadata step for SemanticVersion.</p>
+<h2 id="raises">Raises</h2></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class SonarQube(StepImplementer):
+<pre><code class="python">class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods 
     &#34;&#34;&#34;
-    StepImplementer for the tag-source step for SonarQube.
+    StepImplementer for the generate-metadata step for SemanticVersion.
+
+    Raises
+    ------
     &#34;&#34;&#34;
 
     def __init__(self, config, results_file):
@@ -98,7 +156,7 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
 
     @classmethod
     def step_name(cls):
-        return DefaultSteps.LINTING_STATIC_CODE_ANALYSIS
+        return DefaultSteps.GENERATE_METADATA
 
     def _validate_step_config(self, step_config):
         &#34;&#34;&#34;
@@ -111,7 +169,53 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
         &#34;&#34;&#34;
 
     def _run_step(self, runtime_step_config):
+        app_version = None
+        pre_release = None
+        build = None
+        release_branch = runtime_step_config[&#39;release-branch&#39;]
+
+        current_step_results = self.current_step_results()
+        if &#39;app-version&#39; in runtime_step_config:
+            app_version = runtime_step_config[&#39;app-version&#39;]
+        elif &#39;app-version&#39; in current_step_results:
+            app_version = current_step_results[&#39;app-version&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (app-version) provided via runtime flag
+                (app-version) or from prior step implementer ({0}).
+                &#34;&#34;&#34;.format(self.step_name())
+            )
+
+        if &#39;pre-release&#39; in runtime_step_config:
+            pre_release = runtime_step_config[&#39;pre-release&#39;]
+        elif &#39;pre-release&#39; in current_step_results:
+            pre_release = current_step_results[&#39;pre-release&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (pre_release) provided via runtime flag
+                (pre-release) or from prior step implementer ({0})
+                &#34;&#34;&#34;.format(self.step_name()))
+
+        if &#39;build&#39; in runtime_step_config:
+            build = runtime_step_config[&#39;build&#39;]
+        elif &#39;build&#39; in current_step_results:
+            build = current_step_results[&#39;build&#39;]
+        else:
+            raise ValueError(
+                &#34;&#34;&#34;No value for (build) provided via runtime flag
+                (build) or from prior step implementer ({0})
+                &#34;&#34;&#34;.format(self.step_name()))
+
+        if pre_release == release_branch:
+            version = &#34;{0}+{1}&#34;.format(app_version, build)
+            image_tag = &#34;{0}-{1}&#34;.format(app_version, build)
+        else:
+            version = &#34;{0}-{1}+{2}&#34;.format(app_version, pre_release, build)
+            image_tag = &#34;{0}-{1}-{2}&#34;.format(app_version, pre_release, build)
+
         results = {
+            &#39;version&#39;: version,
+            &#39;image-tag&#39;: image_tag
         }
 
         return results</code></pre>
@@ -147,13 +251,13 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.step_implementers.linting_static_code_analysis" href="index.html">tssc.step_implementers.linting_static_code_analysis</a></code></li>
+<li><code><a title="tssc.step_implementers.generate_metadata" href="index.html">tssc.step_implementers.generate_metadata</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube" href="#tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube">SonarQube</a></code></h4>
+<h4><code><a title="tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion" href="#tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion">SemanticVersion</a></code></h4>
 </li>
 </ul>
 </li>
