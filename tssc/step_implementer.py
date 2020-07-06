@@ -272,6 +272,28 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         return current_results
 
+    def get_step_results(self, step_name):
+        """
+        Get the results of a specific step.
+
+        Parameters
+        ----------
+        step_name : str
+            TSSC step name to get the results for
+
+        Returns
+        -------
+        dict
+            The results of a specific step
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
+        """
+        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][step_name]
+
     def current_step_results(self):
         """
         Get the results of this step so far from other step implementers that have already been run.
@@ -287,7 +309,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         """
-        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
+        return self.get_step_results(self.step_name())
+        #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     @property
     def results_file_path(self):
