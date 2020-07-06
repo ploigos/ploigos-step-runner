@@ -27,6 +27,8 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 ## Development
 
+> :warning: **If you are running RHEL7 or older versions of Python**: This project will need Python 3.3 or better to run. If you are running on RHEL7, you can invoke `python3` in place of `python` in the following commands.
+
 ### Set Up Development Environment
 ```bash
 cd tssc-python-package
