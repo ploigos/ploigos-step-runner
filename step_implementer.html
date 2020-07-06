@@ -301,6 +301,28 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         return current_results
 
+    def get_step_results(self, step_name):
+        &#34;&#34;&#34;
+        Get the results of a specific step.
+
+        Parameters
+        ----------
+        step_name : str
+            TSSC step name to get the results for
+
+        Returns
+        -------
+        dict
+            The results of a specific step
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
+        &#34;&#34;&#34;
+        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][step_name]
+
     def current_step_results(self):
         &#34;&#34;&#34;
         Get the results of this step so far from other step implementers that have already been run.
@@ -316,7 +338,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
+        return self.get_step_results(self.step_name())
+        #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     @property
     def results_file_path(self):
@@ -713,6 +736,28 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         return current_results
 
+    def get_step_results(self, step_name):
+        &#34;&#34;&#34;
+        Get the results of a specific step.
+
+        Parameters
+        ----------
+        step_name : str
+            TSSC step name to get the results for
+
+        Returns
+        -------
+        dict
+            The results of a specific step
+
+        Raises
+        ------
+        TSSCException
+            Existing results file has invalid yaml or existing results file does not have expected
+            element.
+        &#34;&#34;&#34;
+        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][step_name]
+
     def current_step_results(self):
         &#34;&#34;&#34;
         Get the results of this step so far from other step implementers that have already been run.
@@ -728,7 +773,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
+        return self.get_step_results(self.step_name())
+        #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     @property
     def results_file_path(self):
@@ -959,7 +1005,55 @@ element.</dd>
         Existing results file has invalid yaml or existing results file does not have expected
         element.
     &#34;&#34;&#34;
-    return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]</code></pre>
+    return self.get_step_results(self.step_name())</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.get_step_results"><code class="name flex">
+<span>def <span class="ident">get_step_results</span></span>(<span>self, step_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the results of a specific step.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>step_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>TSSC step name to get the results for</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The results of a specific step</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>TSSCException</code></dt>
+<dd>Existing results file has invalid yaml or existing results file does not have expected
+element.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_step_results(self, step_name):
+    &#34;&#34;&#34;
+    Get the results of a specific step.
+
+    Parameters
+    ----------
+    step_name : str
+        TSSC step name to get the results for
+
+    Returns
+    -------
+    dict
+        The results of a specific step
+
+    Raises
+    ------
+    TSSCException
+        Existing results file has invalid yaml or existing results file does not have expected
+        element.
+    &#34;&#34;&#34;
+    return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][step_name]</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.run_step"><code class="name flex">
@@ -1106,6 +1200,7 @@ element.</dd>
 <ul class="">
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
