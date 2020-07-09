@@ -51,6 +51,10 @@ public class App {
     <groupId>com.mycompany.app</groupId>
     <artifactId>my-app</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 </project>''')
         pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
         config = {
