@@ -35,7 +35,7 @@ cd tssc-python-package
 python -m venv .venvs/tssc-dev
 source .venvs/tssc-dev/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e .[tests]
+python -m pip install -e '.[tests]'
 ```
 
 ### Run Tests

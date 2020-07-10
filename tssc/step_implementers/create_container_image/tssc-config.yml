@@ -1,0 +1,18 @@
+---
+tssc-config:
+  generate-metadata:
+  - implementer: Maven
+  - implementer: Git
+  - implementer: SemanticVersion
+  package:
+  - implementer: Maven
+    config: {
+    }
+  create-container-image:
+  - implementer: Buildah
+    config: {
+      - dockerfile
+      - context
+      - tlsverify
+      - format
+    }
