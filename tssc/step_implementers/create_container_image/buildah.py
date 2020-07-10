@@ -1,5 +1,5 @@
 """
-Step Implementer for the package step for Maven.
+Step Implementer for the create-container-image step for Buildah.
 """
 import os
 import subprocess
@@ -25,12 +25,15 @@ DEFAULT_ARGS = {
 
 class Buildah(StepImplementer):
     """
-    StepImplementer for the build container step for Buildah.
+    StepImplementer for the create-container-image step for Buildah.
 
     Raises
     ------
     ValueError
         If image specification file does not exist
+        If tag is not specified (not defaulted)
+    RuntimeError
+        buildah command fails for any reason
     """
 
     def __init__(self, config, results_file):
@@ -81,7 +84,7 @@ class Buildah(StepImplementer):
 
         return_code = subprocess.call(process_args, shell=True)
         if return_code:
-            raise ValueError('Issue invoking ' + str(process_args) + \
+            raise RuntimeError('Issue invoking ' + str(process_args) + \
               ' with given image specification file (' + image_spec_file + ')')
 
         results = {

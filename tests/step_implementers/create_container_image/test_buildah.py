@@ -118,7 +118,7 @@ def test_create_container_image_specify_buildah_implementer_with_tag_invalid_doc
             expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:test'}}}
 
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
-        except ValueError as err:
+        except RuntimeError as err:
             if (err.__str__().startswith('Issue invoking')):
                 passed = True
 
