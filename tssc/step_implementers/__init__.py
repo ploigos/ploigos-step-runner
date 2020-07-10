@@ -8,6 +8,7 @@ from .security_static_code_analysis import *
 from .linting_static_code_analysis import *
 from .package import *
 from .unit_test import *
+from .create_container_image import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
 from .uat import *
@@ -20,6 +21,7 @@ __all__ = [
     'linting_static_code_analysis',
     'package',
     'unit_test',
+    'create_container_image',
     'container_image_static_compliance_scan',
     'container_image_static_vulnerability_scan',
     'uat',
