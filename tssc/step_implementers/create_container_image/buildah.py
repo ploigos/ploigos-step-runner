@@ -54,7 +54,7 @@ class Buildah(StepImplementer):
         for config_name in step_config:
             if config_name not in step_config or not step_config[config_name]:
                 raise ValueError('Key (' + config_name + ') must have non-empty value in the step '
-                    'configuration')
+                                 'configuration')
 
         if 'tag' not in step_config or not step_config['tag']:
             raise ValueError('Key (tag) must have non-empty value in the step configuration')
