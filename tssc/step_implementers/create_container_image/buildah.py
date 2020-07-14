@@ -2,8 +2,8 @@
 Step Implementer for the create-container-image step for Buildah.
 """
 import os
-import subprocess
 
+import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
@@ -54,7 +54,7 @@ class Buildah(StepImplementer):
         """
         print(step_config)
 
-        for config_name in step_config:
+        for config_name in DEFAULT_ARGS:
             if config_name not in step_config or not step_config[config_name]:
                 raise ValueError('Key (' + config_name + ') must have non-empty value in the step '
                                  'configuration')
@@ -70,26 +70,39 @@ class Buildah(StepImplementer):
         tag = runtime_step_config['tag']
 
         if not os.path.exists(image_spec_file_location):
-            raise ValueError('Image specification file does not exist in location: ' \
-            + image_spec_file_location)
+            raise ValueError('Image specification file does not exist in location: '
+                             + image_spec_file_location)
 
-        process_args = 'buildah bud' + \
-            ' --format=' + runtime_step_config['format'] + \
-            ' --tls-verify=' + runtime_step_config['tlsverify'] + \
-            ' --layers -f ' + image_spec_file + \
-            ' -t' + tag + \
-            ' ' + context
+        buildah_bud = sh.buildah.bake("bud")  # pylint: disable=no-member
 
-        return_code = 1
-
-        return_code = subprocess.call(process_args, shell=True)
-        if return_code:
-            raise RuntimeError('Issue invoking ' + str(process_args) + \
-              ' with given image specification file (' + image_spec_file + ')')
+        try:
+            print(buildah_bud(
+                '--format', runtime_step_config['format'],
+                '--tls-verify=' + runtime_step_config['tlsverify'],
+                '--layers', '-f', image_spec_file,
+                '-t', tag,
+                context
+            ))
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError('Issue invoking buildah bud  with given image '
+                               'specification file (' + image_spec_file + ')')
 
         results = {
             'image_tag' : tag
         }
+
+        if 'image_tar_file' in runtime_step_config and runtime_step_config['image_tar_file']:
+            buildah_push = sh.buildah.bake("push") # pylint: disable=no-member
+            image_tar_file = runtime_step_config['image_tar_file']
+            try:
+                print(buildah_push(
+                    tag,
+                    "docker-archive:" + image_tar_file
+                ))
+            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+                raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
+
+            results.update({'image_tar_file' : image_tar_file})
 
         return results
 
