@@ -31,7 +31,8 @@ class TSSCFactory:
     """
     _step_implementers = {}
 
-    def __init__(self, config, results_dir_path='tssc-results', results_file_name='tssc-results.yml'):
+    def __init__(self, config, results_dir_path='tssc-results', \
+      results_file_name='tssc-results.yml'):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
