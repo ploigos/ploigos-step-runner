@@ -267,7 +267,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                         except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                             raise TSSCException(
                                 'Existing results file'
-                                +' (' + step_results_file_path + ')'
+                                +' (' + step_results_file + ')'
                                 +' for step (' + self.step_name() + ')'
                                 +' has invalid yaml: ' + str(err)
                             )
