@@ -1,6 +1,7 @@
 """
 Step Implementer for the create-container-image step for Buildah.
 """
+import sys
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -70,7 +71,7 @@ class Skopeo(StepImplementer):
                 '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
                 '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
                 runtime_step_config['source'],
-                destination + ':' + version))
+                destination + ':' + version, _out=sys.stdout))
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking skopeo')
 

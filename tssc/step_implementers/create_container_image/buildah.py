@@ -2,7 +2,7 @@
 Step Implementer for the create-container-image step for Buildah.
 """
 import os
-
+import sys
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -81,7 +81,8 @@ class Buildah(StepImplementer):
                 '--tls-verify=' + runtime_step_config['tlsverify'],
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
-                context
+                context,
+                _out=sys.stdout
             ))
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Issue invoking buildah bud  with given image '
@@ -101,7 +102,8 @@ class Buildah(StepImplementer):
             try:
                 print(buildah_push(
                     tag,
-                    "docker-archive:" + image_tar_file
+                    "docker-archive:" + image_tar_file,
+                    _out=sys.stdout
                 ))
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
                 raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
