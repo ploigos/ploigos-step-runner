@@ -201,7 +201,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             element.
         """
         if results is not None:
-            current_results = self.current_results()
+            current_results = self.current_step_results()
 
             updated_step_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
@@ -235,41 +235,46 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         """
+        init_result = {
+            StepImplementer.__TSSC_RESULTS_KEY: {
+                self.step_name(): {}
+            }
+        }
+        current_results = None
         if not os.path.exists(self.results_dir_path):
             os.makedirs(self.results_dir_path)
-
-        step_results_file_path = self.results_file_path
-
-        current_results = None
-        if os.path.exists(step_results_file_path):
-            with open(step_results_file_path, 'r') as step_results_file:
-                try:
-                    current_results = yaml.safe_load(step_results_file.read())
-                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
-                    raise TSSCException(
-                        'Existing results file'
-                        +' (' + step_results_file_path + ')'
-                        +' for step (' + self.step_name() + ')'
-                        +' has invalid yaml: ' + str(err)
-                    )
-
-            if current_results:
-                if StepImplementer.__TSSC_RESULTS_KEY not in current_results:
-                    raise TSSCException(
-                        'Existing results file'
-                        +' (' + step_results_file_path + ')'
-                        +' for step (' + self.step_name() + ')'
-                        +' does not have expected top level element'
-                        +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
-                        + str(current_results)
-                    )
+            current_results = init_result
         else:
-            current_results = {
-                StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {}
-                }
-            }
+            step_results_files = 0;
+            for step_results_file_name in os.listdir(self.results_dir_path):
+                if step_results_file_name.endswith(".yml"):
+                    with open(os.path.join(self.results_dir_path, step_results_file_name), 'r') as step_results_file:
+                        try:
+                            tmp_results = yaml.safe_load(step_results_file.read())
+                            if StepImplementer.__TSSC_RESULTS_KEY not in tmp_results:
+                                raise TSSCException(
+                                    'Existing results file'
+                                    +' (' + step_results_file + ')'
+                                    +' does not have expected top level element'
+                                    +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
+                                    + str(tmp_results)
+                                )
+                            if current_results:
+                                current_results[StepImplementer.__TSSC_RESULTS_KEY].update(yaml.safe_load(step_results_file.read())[StepImplementer.__TSSC_RESULTS_KEY])
+                            else:
+                                current_results = yaml.safe_load(step_results_file.read())
+                        except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
+                            raise TSSCException(
+                                'Existing results file'
+                                +' (' + step_results_file_path + ')'
+                                +' for step (' + self.step_name() + ')'
+                                +' has invalid yaml: ' + str(err)
+                            )
+            if step_results_files == 0:
+                current_results = init_result
 
+        print("TEST")
+        print(current_results)
         return current_results
 
     def get_step_results(self, step_name):
