@@ -205,8 +205,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
         if results is not None:
             current_results = self.current_results()
-            if (current_results):
-                if (current_results['tssc-results'].get(self.step_name())):
+            if current_results:
+                if current_results['tssc-results'].get(self.step_name()):
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
