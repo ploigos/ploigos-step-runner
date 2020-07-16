@@ -201,7 +201,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             element.
         """
         if results is not None:
-            current_results = self.current_step_results()
+            current_results = self.current_results()
 
             updated_step_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
@@ -245,9 +245,10 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             os.makedirs(self.results_dir_path)
             current_results = init_result
         else:
-            step_results_files = 0;
+            step_results_files_found = 0
             for step_results_file_name in os.listdir(self.results_dir_path):
                 if step_results_file_name.endswith(".yml"):
+                    step_results_files_found += 1
                     with open(os.path.join(self.results_dir_path, step_results_file_name), 'r') as step_results_file:
                         try:
                             tmp_results = yaml.safe_load(step_results_file.read())
@@ -260,9 +261,9 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                                     + str(tmp_results)
                                 )
                             if current_results:
-                                current_results[StepImplementer.__TSSC_RESULTS_KEY].update(yaml.safe_load(step_results_file.read())[StepImplementer.__TSSC_RESULTS_KEY])
+                                current_results[StepImplementer.__TSSC_RESULTS_KEY].update(tmp_results[StepImplementer.__TSSC_RESULTS_KEY])
                             else:
-                                current_results = yaml.safe_load(step_results_file.read())
+                                current_results = tmp_results
                         except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
                             raise TSSCException(
                                 'Existing results file'
@@ -270,11 +271,10 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                                 +' for step (' + self.step_name() + ')'
                                 +' has invalid yaml: ' + str(err)
                             )
-            if step_results_files == 0:
+            if step_results_files_found == 0:
                 current_results = init_result
-
-        print("TEST")
-        print(current_results)
+        if self.step_name() not in current_results[StepImplementer.__TSSC_RESULTS_KEY]:
+            current_results[StepImplementer.__TSSC_RESULTS_KEY].update(init_result[StepImplementer.__TSSC_RESULTS_KEY])
         return current_results
 
     def get_step_results(self, step_name):
