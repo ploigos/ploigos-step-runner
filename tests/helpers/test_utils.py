@@ -12,7 +12,7 @@ def run_step_test_with_result_validation(temp_dir, step_name, config, expected_s
     else:
         factory.run_step(step_name)
 
-    results_file_name = "%s.yml" % step_name
+    results_file_name = "tssc-results.yml"
     with open(os.path.join(results_dir_path, results_file_name), 'r') as step_results_file:
         actual_step_results = yaml.safe_load(step_results_file.read())
         assert actual_step_results == expected_step_results

@@ -52,12 +52,13 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = 'tssc-results'
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
+        self.results_file_name = results_file_name
         self.__results_file_path = None
         super().__init__()
 
@@ -323,7 +324,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             OS path to the results file for this step.
         """
         if not self.__results_file_path:
-            step_results_file_name = self.step_name() + '.yml'
-            self.__results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
+            self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
         return self.__results_file_path

@@ -13,8 +13,8 @@ class SonarQube(StepImplementer):
     StepImplementer for the tag-source step for SonarQube.
     """
 
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):

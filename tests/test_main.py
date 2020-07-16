@@ -7,8 +7,8 @@ from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, {})
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, {})
 
     @classmethod
     def step_name(cls):
@@ -18,8 +18,8 @@ class FooStepImplementer(StepImplementer):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, {})
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, {})
 
     @classmethod
     def step_name(cls):
@@ -33,8 +33,8 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         pass
 
 class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, {})
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, {})
 
     @classmethod
     def step_name(cls):
@@ -51,7 +51,7 @@ def _run_main_test(argv, expected_exit_code=None, config_file_contents=None, con
             config_file_path = os.path.join(temp_dir.path, config_file_name)
             argv.append('--config-file')
             argv.append(config_file_path)
-        
+
         if expected_exit_code is not None:
             with pytest.raises(SystemExit) as pytest_wrapped_e:
                 main(argv)
