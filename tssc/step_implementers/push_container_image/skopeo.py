@@ -47,9 +47,7 @@ class Skopeo(StepImplementer):
         """
         print(step_config)
 
-        all_required_args = {}
-        all_required_args.update(DEFAULT_ARGS)
-        all_required_args.update(REQUIRED_ARGS)
+        all_required_args = {**DEFAULT_ARGS, **REQUIRED_ARGS}
 
         for config_name in all_required_args:
             if config_name not in step_config or not step_config[config_name]:
