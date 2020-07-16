@@ -213,3 +213,37 @@ def test_one_step_existing_results_file_missing_key():
                 None,
                 test_dir
             )
+
+def test_one_step_existing_results_file_empty():
+    config = {
+        'tssc-config': {
+            'write-config-as-results': {
+                'implementer': 'WriteConfigAsResultsStepImplementer',
+                'config': {
+                    'config-1': "config-1",
+                    'config-overwrite-me': 'config-1'
+                }
+            }
+        }
+    }
+
+    config_expected_step_results = {
+        'tssc-results': {
+            'write-config-as-results': {
+                'config-1': "config-1",
+                'config-overwrite-me': 'config-1'
+            },
+        }
+    }
+
+    TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
+    with TempDirectory() as test_dir:
+        results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+        results_file_path = os.path.join(results_dir_path, 'tssc-results.yml')
+        test_dir.write(results_file_path,b'''''')
+        _run_step_implementer_test(
+            config,
+            'write-config-as-results',
+            config_expected_step_results,
+            test_dir
+        )
