@@ -249,7 +249,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             for step_results_file_name in os.listdir(self.results_dir_path):
                 if step_results_file_name.endswith(".yml"):
                     step_results_files_found += 1
-                    with open(os.path.join(self.results_dir_path, step_results_file_name), 'r') as step_results_file:
+                    with open(os.path.join(self.results_dir_path, step_results_file_name), 'r') \
+                      as step_results_file:
                         try:
                             tmp_results = yaml.safe_load(step_results_file.read())
                             if StepImplementer.__TSSC_RESULTS_KEY not in tmp_results:
@@ -261,10 +262,12 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                                     + str(tmp_results)
                                 )
                             if current_results:
-                                current_results[StepImplementer.__TSSC_RESULTS_KEY].update(tmp_results[StepImplementer.__TSSC_RESULTS_KEY])
+                                current_results[StepImplementer.__TSSC_RESULTS_KEY].update( \
+                                  tmp_results[StepImplementer.__TSSC_RESULTS_KEY])
                             else:
                                 current_results = tmp_results
-                        except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
+                        except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) \
+                          as err:
                             raise TSSCException(
                                 'Existing results file'
                                 +' (' + step_results_file + ')'
@@ -274,7 +277,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             if step_results_files_found == 0:
                 current_results = init_result
         if self.step_name() not in current_results[StepImplementer.__TSSC_RESULTS_KEY]:
-            current_results[StepImplementer.__TSSC_RESULTS_KEY].update(init_result[StepImplementer.__TSSC_RESULTS_KEY])
+            current_results[StepImplementer.__TSSC_RESULTS_KEY].update( \
+              init_result[StepImplementer.__TSSC_RESULTS_KEY])
         return current_results
 
     def get_step_results(self, step_name):
