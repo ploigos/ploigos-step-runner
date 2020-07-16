@@ -188,12 +188,12 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
     def write_results(self, results):
         """
-        Write the given results to a results file specific to this step in the results directory.
+        Write the given results to the run's results file.
 
         Parameters
         ----------
         results : dict
-            Results to write to the step specific results file.
+            Results to write to the run's specific results file that is set as part of the factory
 
         Raises
         ------
