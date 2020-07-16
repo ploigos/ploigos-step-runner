@@ -182,7 +182,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         StepImplementer.__print_section_title("TSSC Step Results - {}".format(self.step_name()))
         StepImplementer.__print_data('Results File Path', self.results_file_path)
-        StepImplementer.__print_data('Results', results)
+        StepImplementer.__print_data('Step Results', results)
 
         StepImplementer.__print_section_title("TSSC Step End - {}".format(self.step_name()))
 
@@ -201,20 +201,40 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         """
+        #If you are looking at this code you are going to need this:
+        # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
         if results is not None:
             current_results = self.current_results()
-
-            updated_step_results = {
-                StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {
-                        **current_results \
-                            [StepImplementer.__TSSC_RESULTS_KEY] \
-                            [self.step_name()],
-                        **results
+            if (current_results):
+                if (current_results['tssc-results'].get(self.step_name())):
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **current_results \
+                                  [StepImplementer.__TSSC_RESULTS_KEY] \
+                                  [self.step_name()], \
+                                  **results
+                            }
+                        }
+                    }
+                else:
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **results
+                            }
+                        }
+                    }
+            else:
+                updated_step_results = {
+                    StepImplementer.__TSSC_RESULTS_KEY: {
+                        self.step_name(): {
+                            **results
+                        }
                     }
                 }
-            }
-
             step_results_file_path = self.results_file_path
             with open(step_results_file_path, 'w') as step_results_file:
                 yaml.dump(updated_step_results, step_results_file)
@@ -250,7 +270,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         'Existing results file'
                         +' (' + step_results_file_path + ')'
-                        +' for step (' + self.step_name() + ')'
                         +' has invalid yaml: ' + str(err)
                     )
 
@@ -259,7 +278,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         'Existing results file'
                         +' (' + step_results_file_path + ')'
-                        +' for step (' + self.step_name() + ')'
                         +' does not have expected top level element'
                         +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
                         + str(current_results)
