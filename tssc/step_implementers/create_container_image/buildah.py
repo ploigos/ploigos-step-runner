@@ -92,8 +92,12 @@ class Buildah(StepImplementer):
         }
 
         if 'image_tar_file' in runtime_step_config and runtime_step_config['image_tar_file']:
-            buildah_push = sh.buildah.bake("push") # pylint: disable=no-member
+
             image_tar_file = runtime_step_config['image_tar_file']
+            rm_f = sh.rm.bake("-f") # pylint: disable=no-member
+            print(rm_f(image_tar_file))
+
+            buildah_push = sh.buildah.bake("push") # pylint: disable=no-member
             try:
                 print(buildah_push(
                     tag,

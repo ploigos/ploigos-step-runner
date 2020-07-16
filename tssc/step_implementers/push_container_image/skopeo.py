@@ -57,6 +57,12 @@ class Skopeo(StepImplementer):
 
     def _run_step(self, runtime_step_config):
 
+        version = "latest"
+        try:
+            version = self.current_results()['tssc-results']['generate-metadata']['image-tag']
+        except KeyError:
+            print('No version found in metadata. Using latest')
+
         destination = runtime_step_config['destination']
         skopeo_copy = sh.skopeo.bake("copy") # pylint: disable=no-member
         try:
@@ -64,12 +70,12 @@ class Skopeo(StepImplementer):
                 '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
                 '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
                 runtime_step_config['source'],
-                destination))
+                destination + ':' + version))
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking skopeo')
 
         results = {
-            'image_tag' : destination
+            'image_tag' : destination + ':' + version
         }
 
         return results
