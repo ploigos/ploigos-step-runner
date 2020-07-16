@@ -256,7 +256,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                             if StepImplementer.__TSSC_RESULTS_KEY not in tmp_results:
                                 raise TSSCException(
                                     'Existing results file'
-                                    +' (' + step_results_file + ')'
+                                    +' (' + step_results_file_name + ')'
                                     +' does not have expected top level element'
                                     +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
                                     + str(tmp_results)
@@ -270,7 +270,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                           as err:
                             raise TSSCException(
                                 'Existing results file'
-                                +' (' + step_results_file + ')'
+                                +' (' + step_results_file_name + ')'
                                 +' for step (' + self.step_name() + ')'
                                 +' has invalid yaml: ' + str(err)
                             )
