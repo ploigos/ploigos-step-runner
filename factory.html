@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.8.3" />
+<meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.factory API documentation</title>
 <meta name="description" content="Factory for creating TSSC workflow and running steps." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -47,8 +47,11 @@ class TSSCFactory:
     config : dict
         TSSC configuration represented as a dictionary with a key of &#39;tssc-config&#39;
     results_dir_path : str, optional
-        Path to the file for steps to write their results to
+        Path to the folder for steps to write their results to
         Default: tssc-results
+    results_file_name : str, optional
+        Path to the file for steps to write their results to
+        Default: tssc-results.yml
 
     Raises
     ------
@@ -57,13 +60,15 @@ class TSSCFactory:
     &#34;&#34;&#34;
     _step_implementers = {}
 
-    def __init__(self, config, results_dir_path=&#39;tssc-results&#39;):
+    def __init__(self, config, results_dir_path=&#39;tssc-results&#39;, \
+      results_file_name=&#39;tssc-results.yml&#39;):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
             raise ValueError(&#39;config must contain key: &#39; + _TSSC_CONFIG_KEY)
 
         self.results_dir_path = results_dir_path
+        self.results_file_name = results_file_name
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -147,7 +152,8 @@ class TSSCFactory:
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                         sub_step_config,
-                        self.results_dir_path
+                        self.results_dir_path,
+                        self.results_file_name
                     )
                     sub_step.run_step(**runtime_step_config)
                 else:
@@ -168,7 +174,8 @@ class TSSCFactory:
                 # create the default StepImplementer instance
                 sub_step = default_step_implementer[_CLAZZ_KEY](
                     {},
-                    self.results_dir_path
+                    self.results_dir_path,
+                    self.results_file_name
                 )
                 sub_step.run_step(**runtime_step_config)
             else:
@@ -193,7 +200,7 @@ class TSSCFactory:
 <dl>
 <dt id="tssc.factory.TSSCFactory"><code class="flex name class">
 <span>class <span class="ident">TSSCFactory</span></span>
-<span>(</span><span>config, results_dir_path='tssc-results')</span>
+<span>(</span><span>config, results_dir_path='tssc-results', results_file_name='tssc-results.yml')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Enables the running of arbitrary TSSC steps via TSSC step implementers.</p>
@@ -202,8 +209,11 @@ class TSSCFactory:
 <dt><strong><code>config</code></strong> :&ensp;<code>dict</code></dt>
 <dd>TSSC configuration represented as a dictionary with a key of 'tssc-config'</dd>
 <dt><strong><code>results_dir_path</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Path to the file for steps to write their results to
+<dd>Path to the folder for steps to write their results to
 Default: tssc-results</dd>
+<dt><strong><code>results_file_name</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Path to the file for steps to write their results to
+Default: tssc-results.yml</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -223,8 +233,11 @@ Default: tssc-results</dd>
     config : dict
         TSSC configuration represented as a dictionary with a key of &#39;tssc-config&#39;
     results_dir_path : str, optional
-        Path to the file for steps to write their results to
+        Path to the folder for steps to write their results to
         Default: tssc-results
+    results_file_name : str, optional
+        Path to the file for steps to write their results to
+        Default: tssc-results.yml
 
     Raises
     ------
@@ -233,13 +246,15 @@ Default: tssc-results</dd>
     &#34;&#34;&#34;
     _step_implementers = {}
 
-    def __init__(self, config, results_dir_path=&#39;tssc-results&#39;):
+    def __init__(self, config, results_dir_path=&#39;tssc-results&#39;, \
+      results_file_name=&#39;tssc-results.yml&#39;):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
             raise ValueError(&#39;config must contain key: &#39; + _TSSC_CONFIG_KEY)
 
         self.results_dir_path = results_dir_path
+        self.results_file_name = results_file_name
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -323,7 +338,8 @@ Default: tssc-results</dd>
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                         sub_step_config,
-                        self.results_dir_path
+                        self.results_dir_path,
+                        self.results_file_name
                     )
                     sub_step.run_step(**runtime_step_config)
                 else:
@@ -344,7 +360,8 @@ Default: tssc-results</dd>
                 # create the default StepImplementer instance
                 sub_step = default_step_implementer[_CLAZZ_KEY](
                     {},
-                    self.results_dir_path
+                    self.results_dir_path,
+                    self.results_file_name
                 )
                 sub_step.run_step(**runtime_step_config)
             else:
@@ -487,7 +504,8 @@ If no StepImplementer registered for given step with given implementer name.</dd
                 # create the StepImplementer instance
                 sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                     sub_step_config,
-                    self.results_dir_path
+                    self.results_dir_path,
+                    self.results_file_name
                 )
                 sub_step.run_step(**runtime_step_config)
             else:
@@ -508,7 +526,8 @@ If no StepImplementer registered for given step with given implementer name.</dd
             # create the default StepImplementer instance
             sub_step = default_step_implementer[_CLAZZ_KEY](
                 {},
-                self.results_dir_path
+                self.results_dir_path,
+                self.results_file_name
             )
             sub_step.run_step(**runtime_step_config)
         else:
@@ -553,7 +572,7 @@ If no StepImplementer registered for given step with given implementer name.</dd
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.4</a>.</p>
 </footer>
 </body>
 </html>

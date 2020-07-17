@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.8.3" />
+<meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.step_implementer API documentation</title>
 <meta name="description" content="Abstract class and helper constants for StepImplementer." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -81,12 +81,13 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
+        self.results_file_name = results_file_name
         self.__results_file_path = None
         super().__init__()
 
@@ -210,18 +211,18 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
-        StepImplementer.__print_data(&#39;Results&#39;, results)
+        StepImplementer.__print_data(&#39;Step Results&#39;, results)
 
         StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
 
     def write_results(self, results):
         &#34;&#34;&#34;
-        Write the given results to a results file specific to this step in the results directory.
+        Write the given results to the run&#39;s results file.
 
         Parameters
         ----------
         results : dict
-            Results to write to the step specific results file.
+            Results to write to the run&#39;s specific results file that is set as part of the factory
 
         Raises
         ------
@@ -229,20 +230,40 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
+        #If you are looking at this code you are going to need this:
+        # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
         if results is not None:
             current_results = self.current_results()
-
-            updated_step_results = {
-                StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {
-                        **current_results \
-                            [StepImplementer.__TSSC_RESULTS_KEY] \
-                            [self.step_name()],
-                        **results
+            if current_results:
+                if current_results[&#39;tssc-results&#39;].get(self.step_name()):
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **current_results \
+                                  [StepImplementer.__TSSC_RESULTS_KEY] \
+                                  [self.step_name()], \
+                                  **results
+                            }
+                        }
+                    }
+                else:
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **results
+                            }
+                        }
+                    }
+            else:
+                updated_step_results = {
+                    StepImplementer.__TSSC_RESULTS_KEY: {
+                        self.step_name(): {
+                            **results
+                        }
                     }
                 }
-            }
-
             step_results_file_path = self.results_file_path
             with open(step_results_file_path, &#39;w&#39;) as step_results_file:
                 yaml.dump(updated_step_results, step_results_file)
@@ -278,7 +299,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         +&#39; has invalid yaml: &#39; + str(err)
                     )
 
@@ -287,7 +307,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         +&#39; does not have expected top level element&#39;
                         +&#39; (&#39; + StepImplementer.__TSSC_RESULTS_KEY + &#39;): &#39;
                         + str(current_results)
@@ -352,8 +371,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             OS path to the results file for this step.
         &#34;&#34;&#34;
         if not self.__results_file_path:
-            step_results_file_name = self.step_name() + &#39;.yml&#39;
-            self.__results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
+            self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
         return self.__results_file_path</code></pre>
 </details>
@@ -482,7 +500,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 </dd>
 <dt id="tssc.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>config, results_dir_path, config_defaults=None)</span>
+<span>(</span><span>config, results_dir_path, results_file_name, config_defaults=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
@@ -516,12 +534,13 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
+        self.results_file_name = results_file_name
         self.__results_file_path = None
         super().__init__()
 
@@ -645,18 +664,18 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
-        StepImplementer.__print_data(&#39;Results&#39;, results)
+        StepImplementer.__print_data(&#39;Step Results&#39;, results)
 
         StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
 
     def write_results(self, results):
         &#34;&#34;&#34;
-        Write the given results to a results file specific to this step in the results directory.
+        Write the given results to the run&#39;s results file.
 
         Parameters
         ----------
         results : dict
-            Results to write to the step specific results file.
+            Results to write to the run&#39;s specific results file that is set as part of the factory
 
         Raises
         ------
@@ -664,20 +683,40 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
+        #If you are looking at this code you are going to need this:
+        # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
         if results is not None:
             current_results = self.current_results()
-
-            updated_step_results = {
-                StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {
-                        **current_results \
-                            [StepImplementer.__TSSC_RESULTS_KEY] \
-                            [self.step_name()],
-                        **results
+            if current_results:
+                if current_results[&#39;tssc-results&#39;].get(self.step_name()):
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **current_results \
+                                  [StepImplementer.__TSSC_RESULTS_KEY] \
+                                  [self.step_name()], \
+                                  **results
+                            }
+                        }
+                    }
+                else:
+                    updated_step_results = {
+                        StepImplementer.__TSSC_RESULTS_KEY: {
+                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                            self.step_name(): {
+                                **results
+                            }
+                        }
+                    }
+            else:
+                updated_step_results = {
+                    StepImplementer.__TSSC_RESULTS_KEY: {
+                        self.step_name(): {
+                            **results
+                        }
                     }
                 }
-            }
-
             step_results_file_path = self.results_file_path
             with open(step_results_file_path, &#39;w&#39;) as step_results_file:
                 yaml.dump(updated_step_results, step_results_file)
@@ -713,7 +752,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         +&#39; has invalid yaml: &#39; + str(err)
                     )
 
@@ -722,7 +760,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
                     raise TSSCException(
                         &#39;Existing results file&#39;
                         +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                        +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                         +&#39; does not have expected top level element&#39;
                         +&#39; (&#39; + StepImplementer.__TSSC_RESULTS_KEY + &#39;): &#39;
                         + str(current_results)
@@ -787,8 +824,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             OS path to the results file for this step.
         &#34;&#34;&#34;
         if not self.__results_file_path:
-            step_results_file_name = self.step_name() + &#39;.yml&#39;
-            self.__results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
+            self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
         return self.__results_file_path</code></pre>
 </details>
@@ -870,8 +906,7 @@ def results_file_path(self):
         OS path to the results file for this step.
     &#34;&#34;&#34;
     if not self.__results_file_path:
-        step_results_file_name = self.step_name() + &#39;.yml&#39;
-        self.__results_file_path = os.path.join(self.results_dir_path, step_results_file_name)
+        self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
     return self.__results_file_path</code></pre>
 </details>
@@ -947,7 +982,6 @@ element.</dd>
                 raise TSSCException(
                     &#39;Existing results file&#39;
                     +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                    +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                     +&#39; has invalid yaml: &#39; + str(err)
                 )
 
@@ -956,7 +990,6 @@ element.</dd>
                 raise TSSCException(
                     &#39;Existing results file&#39;
                     +&#39; (&#39; + step_results_file_path + &#39;)&#39;
-                    +&#39; for step (&#39; + self.step_name() + &#39;)&#39;
                     +&#39; does not have expected top level element&#39;
                     +&#39; (&#39; + StepImplementer.__TSSC_RESULTS_KEY + &#39;): &#39;
                     + str(current_results)
@@ -1095,7 +1128,7 @@ to use when running the step.</dd>
 
     StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
     StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
-    StepImplementer.__print_data(&#39;Results&#39;, results)
+    StepImplementer.__print_data(&#39;Step Results&#39;, results)
 
     StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))</code></pre>
 </details>
@@ -1104,11 +1137,11 @@ to use when running the step.</dd>
 <span>def <span class="ident">write_results</span></span>(<span>self, results)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Write the given results to a results file specific to this step in the results directory.</p>
+<div class="desc"><p>Write the given results to the run's results file.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>results</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Results to write to the step specific results file.</dd>
+<dd>Results to write to the run's specific results file that is set as part of the factory</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1122,12 +1155,12 @@ element.</dd>
 </summary>
 <pre><code class="python">def write_results(self, results):
     &#34;&#34;&#34;
-    Write the given results to a results file specific to this step in the results directory.
+    Write the given results to the run&#39;s results file.
 
     Parameters
     ----------
     results : dict
-        Results to write to the step specific results file.
+        Results to write to the run&#39;s specific results file that is set as part of the factory
 
     Raises
     ------
@@ -1135,20 +1168,40 @@ element.</dd>
         Existing results file has invalid yaml or existing results file does not have expected
         element.
     &#34;&#34;&#34;
+    #If you are looking at this code you are going to need this:
+    # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
     if results is not None:
         current_results = self.current_results()
-
-        updated_step_results = {
-            StepImplementer.__TSSC_RESULTS_KEY: {
-                self.step_name(): {
-                    **current_results \
-                        [StepImplementer.__TSSC_RESULTS_KEY] \
-                        [self.step_name()],
-                    **results
+        if current_results:
+            if current_results[&#39;tssc-results&#39;].get(self.step_name()):
+                updated_step_results = {
+                    StepImplementer.__TSSC_RESULTS_KEY: {
+                        **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                        self.step_name(): {
+                            **current_results \
+                              [StepImplementer.__TSSC_RESULTS_KEY] \
+                              [self.step_name()], \
+                              **results
+                        }
+                    }
+                }
+            else:
+                updated_step_results = {
+                    StepImplementer.__TSSC_RESULTS_KEY: {
+                        **current_results[StepImplementer.__TSSC_RESULTS_KEY],
+                        self.step_name(): {
+                            **results
+                        }
+                    }
+                }
+        else:
+            updated_step_results = {
+                StepImplementer.__TSSC_RESULTS_KEY: {
+                    self.step_name(): {
+                        **results
+                    }
                 }
             }
-        }
-
         step_results_file_path = self.results_file_path
         with open(step_results_file_path, &#39;w&#39;) as step_results_file:
             yaml.dump(updated_step_results, step_results_file)</code></pre>
@@ -1215,7 +1268,7 @@ element.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.3</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.4</a>.</p>
 </footer>
 </body>
 </html>
