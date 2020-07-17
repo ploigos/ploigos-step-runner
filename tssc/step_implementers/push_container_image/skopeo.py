@@ -29,8 +29,8 @@ class Skopeo(StepImplementer):
         If skopeo command fails for any reason
     """
 
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -58,11 +58,11 @@ class Skopeo(StepImplementer):
 
         version = "latest"
         try:
-            version = self.current_results()['tssc-results']['generate-metadata']['image-tag']
+            version = self.get_step_results('generate-metadata')['image-tag']
         except KeyError:
             print('No version found in metadata. Using latest')
 
-        destination_with_version = runtime_step_config['destination'] + ':' + version
+        destination_with_version = (runtime_step_config['destination'] + ':' + version).lower()
         skopeo_copy = sh.skopeo.bake("copy") # pylint: disable=no-member
         try:
             print(skopeo_copy(
