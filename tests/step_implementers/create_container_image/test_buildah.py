@@ -141,3 +141,50 @@ def test_create_container_image_specify_buildah_implementer_with_tag_valid_docke
         }
         expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:test'}}}
         run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
+
+def test_create_container_image_specify_buildah_implementer_with_tag_valid_dockerfile_as_tarfile_fail():
+
+    passed = False
+    with TempDirectory() as temp_dir:
+        temp_dir.write('Dockerfile',b'FROM registry.access.redhat.com/ubi8:latest')
+        config = {
+            'tssc-config': {    
+                'create-container-image': {
+                    'implementer': 'Buildah',
+                    'config': {
+                        'tag' : 'localhost:test',
+                        'context' : temp_dir.path,
+                        'image_tar_file' : '/nonexistentpath/image.tar'
+                    }
+                }
+            }
+        }
+
+        try:
+            expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:test'}}}
+            run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
+        except RuntimeError as err:
+            if (err.__str__().startswith('Issue invoking')):
+                passed = True
+
+    assert passed
+
+def test_create_container_image_specify_buildah_implementer_with_tag_valid_dockerfile_as_tarfile_success():
+
+    with TempDirectory() as temp_dir:
+        temp_dir.write('Dockerfile',b'FROM registry.access.redhat.com/ubi8:latest')
+        config = {
+            'tssc-config': {    
+                'create-container-image': {
+                    'implementer': 'Buildah',
+                    'config': {
+                        'tag' : 'localhost:test',
+                        'context' : temp_dir.path,
+                        'image_tar_file' : temp_dir.path + '/image.tar'
+                    }
+                }
+            }
+        }
+        expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:test', 'image_tar_file' : temp_dir.path + '/image.tar'}}}
+        run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
+        assert os.path.exists(temp_dir.path + '/image.tar')
