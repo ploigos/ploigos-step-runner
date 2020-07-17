@@ -57,9 +57,10 @@ class Skopeo(StepImplementer):
     def _run_step(self, runtime_step_config):
 
         version = "latest"
-        try:
+        if(self.get_step_results('generate-metadata') and \
+          self.get_step_results('generate-metadata').get('image-tag')):
             version = self.get_step_results('generate-metadata')['image-tag']
-        except KeyError:
+        else:
             print('No version found in metadata. Using latest')
 
         destination_with_version = (runtime_step_config['destination'] + ':' + version).lower()
