@@ -77,7 +77,7 @@ class Buildah(StepImplementer):
 
         try:
             print(buildah_bud(
-                '--format', runtime_step_config['format'],
+                '--format=' + runtime_step_config['format'],
                 '--tls-verify=' + runtime_step_config['tlsverify'],
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
