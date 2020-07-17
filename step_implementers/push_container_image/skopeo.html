@@ -86,9 +86,10 @@ class Skopeo(StepImplementer):
     def _run_step(self, runtime_step_config):
 
         version = &#34;latest&#34;
-        try:
+        if(self.get_step_results(&#39;generate-metadata&#39;) and \
+          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
             version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
-        except KeyError:
+        else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
         destination_with_version = (runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + version).lower()
@@ -178,9 +179,10 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
     def _run_step(self, runtime_step_config):
 
         version = &#34;latest&#34;
-        try:
+        if(self.get_step_results(&#39;generate-metadata&#39;) and \
+          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
             version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
-        except KeyError:
+        else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
         destination_with_version = (runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + version).lower()
