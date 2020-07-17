@@ -3,8 +3,8 @@ import pytest
 from tssc import TSSCFactory, TSSCException, StepImplementer
 
 class FooStepImplementer(StepImplementer):
-    def __init__(self, config, results_file):
-        super().__init__(config, results_file, {})
+    def __init__(self, config, results_dir, results_file_name):
+        super().__init__(config, results_dir, results_file_name, {})
 
     @classmethod
     def step_name(cls):
@@ -19,7 +19,7 @@ def test_TSSCFactory_init_valid_config():
         }
     }
     factory = TSSCFactory(config, 'results.yml')
-    
+
 def test_TSSCFactory_init_invalid_config():
     config = {
         'blarg-config': {
