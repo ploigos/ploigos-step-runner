@@ -206,7 +206,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         if results is not None:
             current_results = self.current_results()
             if current_results:
-                if current_results['tssc-results'].get(self.step_name()):
+                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name()):
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
@@ -303,15 +303,9 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         Returns
         -------
         dict
-            The results of a specific step
-
-        Raises
-        ------
-        TSSCException
-            Existing results file has invalid yaml or existing results file does not have expected
-            element.
+            The results of a specific step. None if results DNE
         """
-        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][step_name]
+        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY].get(step_name)
 
     def current_step_results(self):
         """
