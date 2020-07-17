@@ -94,25 +94,16 @@ def test_create_container_image_specify_skopeo_implementer_valid_arguments():
         run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
 
 
-@pytest.mark.skip(reason="step_implementer.current_results() does not work, resulting in this unit test failure. Enable UT when fixed")
 def test_create_container_image_specify_skopeo_implementer_valid_arguments_passed_in_with_metadata_version():
     with TempDirectory() as temp_dir:
 
         temp_dir.makedir('tssc-results')
         temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
           generate-metadata:
-            app-version: 1.0-SNAPSHOT
-            build: 69442c8
             image-tag: 1.0-SNAPSHOT-69442c8
-            pre-release: master
-            version: 1.0-SNAPSHOT+69442c8
             ''')
 
         config = {
-            'generate-metadata': {
-                    'implementer': 'Maven',
-                    'config' : {}
-                },
             'tssc-config': {    
                 'push-container-image': {
                     'implementer': 'Skopeo',
@@ -121,11 +112,17 @@ def test_create_container_image_specify_skopeo_implementer_valid_arguments_passe
                         'destination' : 'docker-archive:' + temp_dir.path + '/image.tar' 
                     }
                 }
-            }
+            },
+            'generate-metadata': {
+                    'implementer': 'Maven',
+                    'config' : {}
+                }
         }
 
         print(os.listdir(temp_dir.path+'/tssc-results'))
 
-        expected_step_results = {'tssc-results': {'push-container-image': {'image_tag': 'docker-archive:' + temp_dir.path + '/image.tar:1.0-SNAPSHOT-69442c8'}}}
+        expected_step_results = {'tssc-results': {'generate-metadata': {'image-tag': '1.0-SNAPSHOT-69442c8'},
+                                 'push-container-image': {'image_tag':'docker-archive:' + temp_dir.path + 
+                                 '/image.tar:1.0-snapshot-69442c8'}}}
         run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
 
