@@ -84,7 +84,7 @@ class Maven(StepImplementer):
           'target')):
             if any(filename.endswith(ext) for ext in java_artifact_extenstions):
                 java_packaged_artifacts.append(filename)
-        if len(java_packaged_artifacts) > 1:
+        if len(java_packaged_artifacts) > 1: # pragma: no cover
             raise ValueError('pom resulted in multiple artifacts, this is unsupported')
         results = {
             'artifact' : os.path.join(os.path.dirname(os.path.abspath(pom_file)), "target", \
