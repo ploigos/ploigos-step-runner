@@ -17,20 +17,10 @@ public class App {
         System.out.println( "Hello World!" );
     }
 }''')
-        pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
         config = {
             'tssc-config': {
                 'package': {
                     'implementer': 'Maven',
-                }
-            }
-        }
-        expected_step_results = {
-            'tssc-results': {
-                'package': {
-                    'artifacts': {
-                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, 'target', 'my-app-1.0-SNAPSHOT.jar')
-                    }
                 }
             }
         }
@@ -70,9 +60,9 @@ public class App {
         expected_step_results = {
             'tssc-results': {
                 'package': {
-                    'artifacts': {
-                        'my-app-1.0-SNAPSHOT.jar': os.path.join(temp_dir.path, 'target', 'my-app-1.0-SNAPSHOT.jar')
-                    }
+                    'artifacts': [
+                        {'path': os.path.join(temp_dir.path, 'target', 'my-app-1.0-SNAPSHOT.jar')}
+                    ]
                 }
             }
         }
@@ -100,9 +90,9 @@ def test_pom_file_valid_old_empty_jar ():
         expected_step_results = {
             'tssc-results': {
                 'package': {
-                    'artifacts': {
-                        'my-app-42.1.jar': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')
-                    }
+                    'artifacts': [
+                        {'path': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')}
+                    ]
                 }
             }
         }
@@ -136,9 +126,9 @@ def test_pom_file_valid_with_namespace_empty_jar ():
         expected_step_results = {
             'tssc-results': {
                 'package': {
-                    'artifacts': {
-                        'my-app-42.1.jar': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')
-                    }
+                    'artifacts': [
+                        {'path': os.path.join(temp_dir.path, 'target', 'my-app-42.1.jar')}
+                    ]
                 }
             }
         }

@@ -19,6 +19,6 @@ def test_tag_source_specify_git_implementer():
                 }
             }
         }
-        expected_step_results = {'tssc-results': {'package': {}}}
+        expected_step_results = {'tssc-results': {'package': {'artifacts' : []}}}
 
         run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)

@@ -32,6 +32,7 @@ class NPM(StepImplementer):
 
     def _run_step(self, runtime_step_config):
         results = {
+            'artifacts' : []
         }
 
         return results
