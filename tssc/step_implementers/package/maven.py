@@ -9,7 +9,7 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_ARGS = {
-    'pom-file': 'pom.xml'
+    'pom-file': 'pom.xml',
     'artifact-extensions': ["jar", "war", "ear"]
 }
 
