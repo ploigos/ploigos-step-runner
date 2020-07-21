@@ -38,7 +38,8 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_ARGS = {
-    &#39;pom-file&#39;: &#39;pom.xml&#39;
+    &#39;pom-file&#39;: &#39;pom.xml&#39;,
+    &#39;artifact-extensions&#39;: [&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;]
 }
 
 # https://stackoverflow.com/questions/21377520/do-a-maven-build-in-a-python-script
@@ -62,7 +63,9 @@ class ChangeDir:
 
 class Maven(StepImplementer):
     &#34;&#34;&#34;
-    StepImplementer for the package step for Maven.
+    StepImplementer for the package step for Maven. It is assumed thought that there will
+    only be a single jar, ear, or war output for running mvn clean install against the given
+    pom.xml file.
 
     Raises
     ------
@@ -94,12 +97,12 @@ class Maven(StepImplementer):
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config[&#39;pom-file&#39;]
+        artifact_extensions = runtime_step_config[&#39;artifact-extensions&#39;]
 
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
         process_args = &#39;mvn clean install&#39;
-        java_artifact_extenstions = [&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;]
         return_code = 1
 
         with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
@@ -111,17 +114,14 @@ class Maven(StepImplementer):
         java_packaged_artifacts = []
         for filename in os.listdir(os.path.join(os.path.dirname(os.path.abspath(pom_file)), \
           &#39;target&#39;)):
-            if any(filename.endswith(ext) for ext in java_artifact_extenstions):
+            if any(filename.endswith(ext) for ext in artifact_extensions):
                 java_packaged_artifacts.append(filename)
-
+        if len(java_packaged_artifacts) &gt; 1:
+            raise ValueError(&#39;pom resulted in multiple artifacts, this is unsupported&#39;)
         results = {
-            &#39;artifacts&#39; : {
-            }
+            &#39;artifact&#39; : os.path.join(os.path.dirname(os.path.abspath(pom_file)), &#34;target&#34;, \
+              java_packaged_artifacts[0])
         }
-        for artifact in java_packaged_artifacts:
-            results[&#39;artifacts&#39;][artifact] = \
-              os.path.join(os.path.dirname(os.path.abspath(pom_file)), &#34;target&#34;, artifact)
-
         return results
 
 # register step implementer
@@ -172,7 +172,9 @@ starting working directory.</p></div>
 <span>(</span><span>config, results_dir, results_file_name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>StepImplementer for the package step for Maven.</p>
+<div class="desc"><p>StepImplementer for the package step for Maven. It is assumed thought that there will
+only be a single jar, ear, or war output for running mvn clean install against the given
+pom.xml file.</p>
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>ValueError</code></dt>
@@ -185,7 +187,9 @@ If given pom file does not contain required elements</dd>
 </summary>
 <pre><code class="python">class Maven(StepImplementer):
     &#34;&#34;&#34;
-    StepImplementer for the package step for Maven.
+    StepImplementer for the package step for Maven. It is assumed thought that there will
+    only be a single jar, ear, or war output for running mvn clean install against the given
+    pom.xml file.
 
     Raises
     ------
@@ -217,12 +221,12 @@ If given pom file does not contain required elements</dd>
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config[&#39;pom-file&#39;]
+        artifact_extensions = runtime_step_config[&#39;artifact-extensions&#39;]
 
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
         process_args = &#39;mvn clean install&#39;
-        java_artifact_extenstions = [&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;]
         return_code = 1
 
         with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
@@ -234,17 +238,14 @@ If given pom file does not contain required elements</dd>
         java_packaged_artifacts = []
         for filename in os.listdir(os.path.join(os.path.dirname(os.path.abspath(pom_file)), \
           &#39;target&#39;)):
-            if any(filename.endswith(ext) for ext in java_artifact_extenstions):
+            if any(filename.endswith(ext) for ext in artifact_extensions):
                 java_packaged_artifacts.append(filename)
-
+        if len(java_packaged_artifacts) &gt; 1:
+            raise ValueError(&#39;pom resulted in multiple artifacts, this is unsupported&#39;)
         results = {
-            &#39;artifacts&#39; : {
-            }
+            &#39;artifact&#39; : os.path.join(os.path.dirname(os.path.abspath(pom_file)), &#34;target&#34;, \
+              java_packaged_artifacts[0])
         }
-        for artifact in java_packaged_artifacts:
-            results[&#39;artifacts&#39;][artifact] = \
-              os.path.join(os.path.dirname(os.path.abspath(pom_file)), &#34;target&#34;, artifact)
-
         return results</code></pre>
 </details>
 <h3>Ancestors</h3>
