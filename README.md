@@ -43,6 +43,12 @@ python -m pip install -e '.[tests]'
 python -m pytest --cov=tssc tests/
 ```
 
+Or to run for just a particular implementer, and include the sections of code that you didn't cover
+
+```bash
+python3 -m pytest --cov=tssc tests/step_implementers/package/test_maven_package.py --cov-report term-missing
+```
+
 ### Run linter
 ```bash
 python -m pylint --rcfile=setup.cfg tssc
