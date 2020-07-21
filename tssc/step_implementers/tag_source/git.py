@@ -3,12 +3,16 @@ Step Implementer for the tag-source step for Git.
 """
 import sys
 import sh
-import os
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_ARGS = {}
+
+OPTIONAL_ARGS = {
+    'username': None,
+    'password': None
+}
 
 class Git(StepImplementer):
     """
@@ -31,15 +35,24 @@ class Git(StepImplementer):
         step_config : dict
             Step configuration to validate.
         """
+        print(step_config)
 
     def _run_step(self, runtime_step_config):
         username = None
         password = None
+        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
+          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            raise ValueError('Either username or password is not set. Neither ' \
+              'or both must be set.')
         tag = 'latest'
-        if(runtime_step_config.get('username_env_var') \
-          and runtime_step_config.get('password_env_var')):
-            username = os.getenv(runtime_step_config.get('username_env_var'))
-            password = os.getenv(runtime_step_config.get('password_env_var'))
+        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            if(runtime_step_config.get('username') \
+              and runtime_step_config.get('password')):
+                username = runtime_step_config.get('username')
+                password = runtime_step_config.get('password')
+            else:
+                raise ValueError('Both username and password must have ' \
+                  'non-empty value in the runtime step configuration')
         else:
             print('No username/password found, assuming ssh')
         if(self.get_step_results('generate-metadata') \
@@ -49,40 +62,50 @@ class Git(StepImplementer):
             print('No version found in metadata. Using latest')
         self._git_tag(tag)
         git_url = self._git_url(runtime_step_config)
-        self._git_push(git_url, username, password)
+        protocol = None
+        if git_url.startswith('http://'):
+            protocol = 'http://'
+            git_url = git_url[7:]
+        elif git_url.startswith('https://'):
+            protocol = 'https://'
+            git_url = git_url[8:]
+        self._git_push(protocol, git_url, username, password)
         results = {
             'git_tag' : tag
         }
         return results
 
-    def _git_url(self, runtime_step_config):
-        returnVal = None
-        if(runtime_step_config.get('git_url')):
-            returnVal = runtime_step_config.get('git_url')
+    @staticmethod
+    def _git_url(runtime_step_config):
+        return_val = None
+        if runtime_step_config.get('git_url'):
+            return_val = runtime_step_config.get('git_url')
         else:
             git_config = sh.git.bake("config")
             try:
-                returnVal = git_config(
+                return_val = git_config(
                     '--get',
                     'remote.origin.url',
                     _out=sys.stdout)
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError('Error invoking git config --get remote.origin.url')
-        return returnVal
+        return return_val
 
-    def _git_tag(self, git_tag_value):
+    @staticmethod
+    def _git_tag(git_tag_value): # pragma: no cover
         git_tag = sh.git.bake("tag")
         try:
             git_tag(git_tag_value)
         except:
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
 
-    def _git_push(self, url, username=None, password=None):
+    @staticmethod
+    def _git_push(protocol, url, username=None, password=None): # pragma: no cover
         git_push = sh.git.bake("push")
         try:
             if(username and password):
                 git_push(
-                    'http://' + username + ':' + password + git_url,
+                    protocol + username + ':' + password + url,
                     '--tag')
             else:
                 git_push('--tag')
