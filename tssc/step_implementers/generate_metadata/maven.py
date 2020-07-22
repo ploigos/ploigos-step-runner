@@ -2,13 +2,13 @@
 Step Implementer for the generate-metadata step for Maven.
 """
 
-import re
 import os.path
-from xml.etree import ElementTree
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
+
+from tssc.step_implementers.utils.xml import get_xml_element
 
 DEFAULT_ARGS = {
     'pom-file': 'pom.xml'
@@ -51,21 +51,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
-        # parse the pom file and figure out the namespace if there is one
-        pom_xml = ElementTree.parse(pom_file)
-        pom_root = pom_xml.getroot()
-        pom_namespace_match = re.match(r'\{.*}', str(pom_root.tag))
-        pom_namespace = ''
-        if pom_namespace_match:
-            pom_namespace = pom_namespace_match.group(0)
-
-        # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find('./' + pom_namespace + 'version')
-
-        # verify information from pom file
-        if pom_version_element is None:
-            raise ValueError('Given pom file (' + pom_file + ') does not have ./version element')
-
+        pom_version_element = get_xml_element(pom_file, 'version')
         pom_version = pom_version_element.text
 
         results = {
