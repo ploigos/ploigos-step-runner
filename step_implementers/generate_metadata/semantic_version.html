@@ -25,51 +25,80 @@ semantic version from other metadata …" />
 <section id="section-intro">
 <p>Step Implementer for the generate-metadata step for generating a
 semantic version from other metadata.</p>
-<p>Supports the following semantic versions (<a href="https://semver.org/">https://semver.org/</a>) :
-* major.minor.patch+build
-* major.minor.patch-pre_rleease+build</p>
+<p>Supports the following semantic versions (<a href="https://semver.org/">https://semver.org/</a>) :</p>
+<ul>
+<li>major.minor.patch+build</li>
+<li>major.minor.patch-pre_rleease+build</li>
+</ul>
 <h2 id="notes">Notes</h2>
-<p>when tagging container images we will regex + to - due to <a href="https://github.com/docker/distribution/issues/1201.">https://github.com/docker/distribution/issues/1201.</a></p>
-<p>Source for version sections:
-* major.minor.patch
-* will come from previous sub step of generate_metadata step, with step results including 'app_version'
-* implmeneters
-* maven
-* pre-release
-* will come from previous sub step of generate_metadata step, with step results including 'pre_release'
-* implmeneters
-* git
-* build
-* will come from previous sub step of generate_metadata step, with step results including 'build'
-* implmeneters
-* git</p>
-<p>Example 1
-pom.xml: 1.0.0-SNAPSHOT
-git branch: feature/foo
-generated version: 1.0.0-feature_foo+GITHASH
-docker tag: 1.0.0-feature_foo-GITHASH
-step results:
-{'tssc-results': {</p>
-<p>'generate-metadata': {</p>
-<pre><code>'version': '42.1.0-feature_foo+GITHASH',
-
-'image-tag': '42.1.0-feature_foo-GITHASH'
-
+<p>When tagging container images we will regex + to - due
+to <a href="https://github.com/docker/distribution/issues/1201.">https://github.com/docker/distribution/issues/1201.</a></p>
+<p>Source for version sections:</p>
+<ul>
+<li>major.minor.patch<ul>
+<li>will come from previous sub step of generate_metadata step,
+with step results including 'app_version'</li>
+<li>known implmeneters:</li>
+<li>maven</li>
+</ul>
+</li>
+<li>pre-release<ul>
+<li>will come from previous sub step of generate_metadata step,
+with step results including 'pre_release'</li>
+<li>known implmeneters:</li>
+<li>git</li>
+</ul>
+</li>
+<li>build<ul>
+<li>will come from previous sub step of generate_metadata step,
+with step results including 'build'</li>
+<li>known implmeneters:</li>
+<li>git</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example 1</strong></p>
+<p><em>Previous Step Results</em></p>
+<pre><code>{'tssc-results': {
+  'generate-metadata': {
+    'app-version': '1.0.0',
+    'pre-release': 'feature_test0',
+    'build': 'abc123'
+  }
 }
 </code></pre>
-<p>}}</p>
-<p>Example 2
-pom.xml: 1.0.0-SNAPSHOT
-git branch: master
-generated version: 1.0.0+GITHASH
-docker tag: 1.0.0-GITHASH
-step results:
-{'tssc-results': {
-'generate-metadata': {
-'version': '42.1.0+GITHASH',
-'image-tag': '42.1.0-GITHASH',
+<p><em>Step Results after this Step Implementer</em></p>
+<pre><code>{'tssc-results': {
+  'generate-metadata': {
+    'app-version': '42.1.0',
+    'pre-release': 'feature_test0',
+    'build': 'abc123',
+    'version': '42.1.0-feature_foo+abc123',
+    'image-tag': '42.1.0-feature_foo-abc123'
+  }
+}}
+</code></pre>
+<p><strong>Example 2</strong></p>
+<p><em>Previous Step Results</em></p>
+<pre><code>{'tssc-results': {
+  'generate-metadata': {
+    'app-version': '42.1.0',
+    'pre-release': 'master',
+    'build': 'abc123'
+  }
 }
-}}</p>
+</code></pre>
+<p><em>Step Results after this Step Implementer</em></p>
+<pre><code>{'tssc-results': {
+  'generate-metadata': {
+    'app-version': '42.1.0',
+    'pre-release': 'master',
+    'build': 'abc123',
+    'version': '42.1.0+abc123',
+    'image-tag': '42.1.0-abc123'
+  }
+}}
+</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -79,58 +108,80 @@ Step Implementer for the generate-metadata step for generating a
 semantic version from other metadata.
 
 Supports the following semantic versions (https://semver.org/) :
-* major.minor.patch+build
-* major.minor.patch-pre_rleease+build
+
+  - major.minor.patch+build
+  - major.minor.patch-pre_rleease+build
 
 Notes
 -----
-when tagging container images we will regex + to - due to https://github.com/docker/distribution/issues/1201.
+When tagging container images we will regex + to - due
+to https://github.com/docker/distribution/issues/1201.
 
 Source for version sections:
-* major.minor.patch
-  * will come from previous sub step of generate_metadata step, with step results including &#39;app_version&#39;
-  * implmeneters
-    * maven
-* pre-release
-  * will come from previous sub step of generate_metadata step, with step results including &#39;pre_release&#39;
-  * implmeneters
-    * git
-* build
-  * will come from previous sub step of generate_metadata step, with step results including &#39;build&#39;
-  * implmeneters
-    * git
 
-Example 1
-pom.xml: 1.0.0-SNAPSHOT
-git branch: feature/foo
-generated version: 1.0.0-feature_foo+GITHASH
-docker tag: 1.0.0-feature_foo-GITHASH
-step results:
-{&#39;tssc-results&#39;: {
+  - major.minor.patch
+    * will come from previous sub step of generate_metadata step,
+      with step results including &#39;app_version&#39;
+    * known implmeneters:
+      -  maven
+  - pre-release
+    * will come from previous sub step of generate_metadata step,
+      with step results including &#39;pre_release&#39;
+    * known implmeneters:
+      - git
+  - build
+    * will come from previous sub step of generate_metadata step,
+      with step results including &#39;build&#39;
+    * known implmeneters:
+      - git
 
-  &#39;generate-metadata&#39;: {
+**Example 1**
 
-    &#39;version&#39;: &#39;42.1.0-feature_foo+GITHASH&#39;,
+*Previous Step Results*
 
-    &#39;image-tag&#39;: &#39;42.1.0-feature_foo-GITHASH&#39;
-
+    {&#39;tssc-results&#39;: {
+      &#39;generate-metadata&#39;: {
+        &#39;app-version&#39;: &#39;1.0.0&#39;,
+        &#39;pre-release&#39;: &#39;feature_test0&#39;,
+        &#39;build&#39;: &#39;abc123&#39;
+      }
     }
 
-}}
+*Step Results after this Step Implementer*
 
-Example 2
-pom.xml: 1.0.0-SNAPSHOT
-git branch: master
-generated version: 1.0.0+GITHASH
-docker tag: 1.0.0-GITHASH
-step results:
-{&#39;tssc-results&#39;: {
-  &#39;generate-metadata&#39;: {
-    &#39;version&#39;: &#39;42.1.0+GITHASH&#39;,
-    &#39;image-tag&#39;: &#39;42.1.0-GITHASH&#39;,
-   }
-}}
+    {&#39;tssc-results&#39;: {
+      &#39;generate-metadata&#39;: {
+        &#39;app-version&#39;: &#39;42.1.0&#39;,
+        &#39;pre-release&#39;: &#39;feature_test0&#39;,
+        &#39;build&#39;: &#39;abc123&#39;,
+        &#39;version&#39;: &#39;42.1.0-feature_foo+abc123&#39;,
+        &#39;image-tag&#39;: &#39;42.1.0-feature_foo-abc123&#39;
+      }
+    }}
 
+**Example 2**
+
+*Previous Step Results*
+
+    {&#39;tssc-results&#39;: {
+      &#39;generate-metadata&#39;: {
+        &#39;app-version&#39;: &#39;42.1.0&#39;,
+        &#39;pre-release&#39;: &#39;master&#39;,
+        &#39;build&#39;: &#39;abc123&#39;
+      }
+    }
+
+*Step Results after this Step Implementer*
+
+    {&#39;tssc-results&#39;: {
+      &#39;generate-metadata&#39;: {
+        &#39;app-version&#39;: &#39;42.1.0&#39;,
+        &#39;pre-release&#39;: &#39;master&#39;,
+        &#39;build&#39;: &#39;abc123&#39;,
+        &#39;version&#39;: &#39;42.1.0+abc123&#39;,
+        &#39;image-tag&#39;: &#39;42.1.0-abc123&#39;
+      }
+    }}
 &#34;&#34;&#34;
 
 from tssc import TSSCFactory
