@@ -30,16 +30,32 @@
 <pre><code class="python">&#34;&#34;&#34;
 Step Implementer for the tag-source step for Git.
 &#34;&#34;&#34;
-
+import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_ARGS = {}
 
+OPTIONAL_ARGS = {
+    &#39;username&#39;: None,
+    &#39;password&#39;: None
+}
+
 class Git(StepImplementer):
     &#34;&#34;&#34;
     StepImplementer for the tag-source step for Git.
+
+    This makes extensive use of the python sh library. This was a deliberate choice,
+    as the gitpython library doesn&#39;t appear to easily support username/password auth
+    for http and https git repos, and that is a desired use case.
+
+    Raises
+    ------
+    ValueError
+        If a required parameter is unspecified
+    RuntimeError
+        If git commands fail for any reason
     &#34;&#34;&#34;
 
     def __init__(self, config, results_dir, results_file_name):
@@ -58,12 +74,98 @@ class Git(StepImplementer):
         step_config : dict
             Step configuration to validate.
         &#34;&#34;&#34;
+        print(step_config)
+
+    @staticmethod
+    def _validate_runtime_step_config(runtime_step_config):
+        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
+          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            raise ValueError(&#39;Either username or password is not set. Neither &#39; \
+              &#39;or both must be set.&#39;)
+
+    def _get_tag(self):
+        tag = &#39;latest&#39;
+        if(self.get_step_results(&#39;generate-metadata&#39;) \
+          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
+            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)
+        else:
+            print(&#39;No version found in metadata. Using latest&#39;)
+        return tag
 
     def _run_step(self, runtime_step_config):
-        results = {
-        }
+        username = None
+        password = None
 
+
+        self._validate_runtime_step_config(runtime_step_config)
+
+        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            if(runtime_step_config.get(&#39;username&#39;) \
+              and runtime_step_config.get(&#39;password&#39;)):
+                username = runtime_step_config.get(&#39;username&#39;)
+                password = runtime_step_config.get(&#39;password&#39;)
+            else:
+                raise ValueError(&#39;Both username and password must have &#39; \
+                  &#39;non-empty value in the runtime step configuration&#39;)
+        else:
+            print(&#39;No username/password found, assuming ssh&#39;)
+        tag = self._get_tag()
+        self._git_tag(tag)
+        git_url = self._git_url(runtime_step_config)
+        if git_url.startswith(&#39;http://&#39;):
+            if username and password:
+                self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
+            else:
+                raise ValueError(&#39;For a http:// git url, you need to also provide &#39; \
+                  &#39;username/password pair&#39;)
+        elif git_url.startswith(&#39;https://&#39;):
+            if username and password:
+                self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
+            else:
+                raise ValueError(&#39;For a https:// git url, you need to also provide &#39; \
+                  &#39;username/password pair&#39;)
+        else:
+            self._git_push(None)
+        results = {
+            &#39;git_tag&#39; : tag
+        }
         return results
+
+    @staticmethod
+    def _git_url(runtime_step_config):
+        return_val = None
+        if runtime_step_config.get(&#39;git_url&#39;):
+            return_val = runtime_step_config.get(&#39;git_url&#39;)
+        else:
+            git_config = sh.git.bake(&#34;config&#34;)
+            try:
+                return_val = git_config(
+                    &#39;--get&#39;,
+                    &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
+            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
+                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
+        return return_val
+
+    @staticmethod
+    def _git_tag(git_tag_value): # pragma: no cover
+        git_tag = sh.git.bake(&#34;tag&#34;)
+        try:
+            git_tag(git_tag_value)
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
+
+    @staticmethod
+    def _git_push(url=None): # pragma: no cover
+        git_push = sh.git.bake(&#34;push&#34;)
+        try:
+            if url:
+                git_push(
+                    url,
+                    &#39;--tag&#39;)
+            else:
+                git_push(&#39;--tag&#39;)
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git push&#39;)
 
 # register step implementer
 TSSCFactory.register_step_implementer(Git, True)</code></pre>
@@ -83,7 +185,17 @@ TSSCFactory.register_step_implementer(Git, True)</code></pre>
 <span>(</span><span>config, results_dir, results_file_name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>StepImplementer for the tag-source step for Git.</p></div>
+<div class="desc"><p>StepImplementer for the tag-source step for Git.</p>
+<p>This makes extensive use of the python sh library. This was a deliberate choice,
+as the gitpython library doesn't appear to easily support username/password auth
+for http and https git repos, and that is a desired use case.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If a required parameter is unspecified</dd>
+<dt><code>RuntimeError</code></dt>
+<dd>If git commands fail for any reason</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -91,6 +203,17 @@ TSSCFactory.register_step_implementer(Git, True)</code></pre>
 <pre><code class="python">class Git(StepImplementer):
     &#34;&#34;&#34;
     StepImplementer for the tag-source step for Git.
+
+    This makes extensive use of the python sh library. This was a deliberate choice,
+    as the gitpython library doesn&#39;t appear to easily support username/password auth
+    for http and https git repos, and that is a desired use case.
+
+    Raises
+    ------
+    ValueError
+        If a required parameter is unspecified
+    RuntimeError
+        If git commands fail for any reason
     &#34;&#34;&#34;
 
     def __init__(self, config, results_dir, results_file_name):
@@ -109,12 +232,98 @@ TSSCFactory.register_step_implementer(Git, True)</code></pre>
         step_config : dict
             Step configuration to validate.
         &#34;&#34;&#34;
+        print(step_config)
+
+    @staticmethod
+    def _validate_runtime_step_config(runtime_step_config):
+        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
+          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            raise ValueError(&#39;Either username or password is not set. Neither &#39; \
+              &#39;or both must be set.&#39;)
+
+    def _get_tag(self):
+        tag = &#39;latest&#39;
+        if(self.get_step_results(&#39;generate-metadata&#39;) \
+          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
+            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)
+        else:
+            print(&#39;No version found in metadata. Using latest&#39;)
+        return tag
 
     def _run_step(self, runtime_step_config):
-        results = {
-        }
+        username = None
+        password = None
 
-        return results</code></pre>
+
+        self._validate_runtime_step_config(runtime_step_config)
+
+        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            if(runtime_step_config.get(&#39;username&#39;) \
+              and runtime_step_config.get(&#39;password&#39;)):
+                username = runtime_step_config.get(&#39;username&#39;)
+                password = runtime_step_config.get(&#39;password&#39;)
+            else:
+                raise ValueError(&#39;Both username and password must have &#39; \
+                  &#39;non-empty value in the runtime step configuration&#39;)
+        else:
+            print(&#39;No username/password found, assuming ssh&#39;)
+        tag = self._get_tag()
+        self._git_tag(tag)
+        git_url = self._git_url(runtime_step_config)
+        if git_url.startswith(&#39;http://&#39;):
+            if username and password:
+                self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
+            else:
+                raise ValueError(&#39;For a http:// git url, you need to also provide &#39; \
+                  &#39;username/password pair&#39;)
+        elif git_url.startswith(&#39;https://&#39;):
+            if username and password:
+                self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
+            else:
+                raise ValueError(&#39;For a https:// git url, you need to also provide &#39; \
+                  &#39;username/password pair&#39;)
+        else:
+            self._git_push(None)
+        results = {
+            &#39;git_tag&#39; : tag
+        }
+        return results
+
+    @staticmethod
+    def _git_url(runtime_step_config):
+        return_val = None
+        if runtime_step_config.get(&#39;git_url&#39;):
+            return_val = runtime_step_config.get(&#39;git_url&#39;)
+        else:
+            git_config = sh.git.bake(&#34;config&#34;)
+            try:
+                return_val = git_config(
+                    &#39;--get&#39;,
+                    &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
+            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
+                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
+        return return_val
+
+    @staticmethod
+    def _git_tag(git_tag_value): # pragma: no cover
+        git_tag = sh.git.bake(&#34;tag&#34;)
+        try:
+            git_tag(git_tag_value)
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
+
+    @staticmethod
+    def _git_push(url=None): # pragma: no cover
+        git_push = sh.git.bake(&#34;push&#34;)
+        try:
+            if url:
+                git_push(
+                    url,
+                    &#39;--tag&#39;)
+            else:
+                git_push(&#39;--tag&#39;)
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git push&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
