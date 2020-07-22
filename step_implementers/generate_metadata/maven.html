@@ -31,13 +31,13 @@
 Step Implementer for the generate-metadata step for Maven.
 &#34;&#34;&#34;
 
-import re
 import os.path
-from xml.etree import ElementTree
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
+
+from tssc.step_implementers.utils.xml import get_xml_element
 
 DEFAULT_ARGS = {
     &#39;pom-file&#39;: &#39;pom.xml&#39;
@@ -80,21 +80,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        # parse the pom file and figure out the namespace if there is one
-        pom_xml = ElementTree.parse(pom_file)
-        pom_root = pom_xml.getroot()
-        pom_namespace_match = re.match(r&#39;\{.*}&#39;, str(pom_root.tag))
-        pom_namespace = &#39;&#39;
-        if pom_namespace_match:
-            pom_namespace = pom_namespace_match.group(0)
-
-        # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find(&#39;./&#39; + pom_namespace + &#39;version&#39;)
-
-        # verify information from pom file
-        if pom_version_element is None:
-            raise ValueError(&#39;Given pom file (&#39; + pom_file + &#39;) does not have ./version element&#39;)
-
+        pom_version_element = get_xml_element(pom_file, &#39;version&#39;)
         pom_version = pom_version_element.text
 
         results = {
@@ -169,21 +155,7 @@ If given pom file does not contain required elements</dd>
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        # parse the pom file and figure out the namespace if there is one
-        pom_xml = ElementTree.parse(pom_file)
-        pom_root = pom_xml.getroot()
-        pom_namespace_match = re.match(r&#39;\{.*}&#39;, str(pom_root.tag))
-        pom_namespace = &#39;&#39;
-        if pom_namespace_match:
-            pom_namespace = pom_namespace_match.group(0)
-
-        # extract needed information from the pom file
-        pom_version_element = pom_xml.getroot().find(&#39;./&#39; + pom_namespace + &#39;version&#39;)
-
-        # verify information from pom file
-        if pom_version_element is None:
-            raise ValueError(&#39;Given pom file (&#39; + pom_file + &#39;) does not have ./version element&#39;)
-
+        pom_version_element = get_xml_element(pom_file, &#39;version&#39;)
         pom_version = pom_version_element.text
 
         results = {
