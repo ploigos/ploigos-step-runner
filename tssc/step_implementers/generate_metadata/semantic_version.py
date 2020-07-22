@@ -1,6 +1,60 @@
 """
 Step Implementer for the generate-metadata step for generating a
 semantic version from other metadata.
+
+Supports the following semantic versions (https://semver.org/) :
+* major.minor.patch+build
+* major.minor.patch-pre_rleease+build
+
+Notes
+-----
+when tagging container images we will regex + to - due to https://github.com/docker/distribution/issues/1201.
+
+Source for version sections:
+* major.minor.patch
+  * will come from previous sub step of generate_metadata step, with step results including 'app_version'
+  * implmeneters
+    * maven
+* pre-release
+  * will come from previous sub step of generate_metadata step, with step results including 'pre_release'
+  * implmeneters
+    * git
+* build
+  * will come from previous sub step of generate_metadata step, with step results including 'build'
+  * implmeneters
+    * git
+
+Example 1
+pom.xml: 1.0.0-SNAPSHOT
+git branch: feature/foo
+generated version: 1.0.0-feature_foo+GITHASH
+docker tag: 1.0.0-feature_foo-GITHASH
+step results:
+{'tssc-results': {
+
+  'generate-metadata': {
+
+    'version': '42.1.0-feature_foo+GITHASH',
+
+    'image-tag': '42.1.0-feature_foo-GITHASH'
+
+    }
+
+}}
+
+Example 2
+pom.xml: 1.0.0-SNAPSHOT
+git branch: master
+generated version: 1.0.0+GITHASH
+docker tag: 1.0.0-GITHASH
+step results:
+{'tssc-results': {
+  'generate-metadata': {
+    'version': '42.1.0+GITHASH',
+    'image-tag': '42.1.0-GITHASH',
+   }
+}}
+
 """
 
 from tssc import TSSCFactory
