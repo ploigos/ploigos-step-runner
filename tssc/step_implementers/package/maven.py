@@ -9,7 +9,8 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_ARGS = {
-    'pom-file': 'pom.xml'
+    'pom-file': 'pom.xml',
+    'artifact-extensions': ["jar", "war", "ear"]
 }
 
 # https://stackoverflow.com/questions/21377520/do-a-maven-build-in-a-python-script
@@ -33,7 +34,9 @@ class ChangeDir:
 
 class Maven(StepImplementer):
     """
-    StepImplementer for the package step for Maven.
+    StepImplementer for the package step for Maven. It is assumed thought that there will
+    only be a single jar, ear, or war output for running mvn clean install against the given
+    pom.xml file.
 
     Raises
     ------
@@ -65,12 +68,12 @@ class Maven(StepImplementer):
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config['pom-file']
+        artifact_extensions = runtime_step_config['artifact-extensions']
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
         process_args = 'mvn clean install'
-        java_artifact_extenstions = ["jar", "war", "ear"]
         return_code = 1
 
         with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
@@ -82,17 +85,14 @@ class Maven(StepImplementer):
         java_packaged_artifacts = []
         for filename in os.listdir(os.path.join(os.path.dirname(os.path.abspath(pom_file)), \
           'target')):
-            if any(filename.endswith(ext) for ext in java_artifact_extenstions):
+            if any(filename.endswith(ext) for ext in artifact_extensions):
                 java_packaged_artifacts.append(filename)
-
+        if len(java_packaged_artifacts) > 1:
+            raise ValueError('pom resulted in multiple artifacts, this is unsupported')
         results = {
-            'artifacts' : {
-            }
+            'artifact' : os.path.join(os.path.dirname(os.path.abspath(pom_file)), "target", \
+              java_packaged_artifacts[0])
         }
-        for artifact in java_packaged_artifacts:
-            results['artifacts'][artifact] = \
-              os.path.join(os.path.dirname(os.path.abspath(pom_file)), "target", artifact)
-
         return results
 
 # register step implementer
