@@ -69,7 +69,7 @@ Notes
       }
 """
 import os
-import subprocess
+import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -82,25 +82,6 @@ DEFAULT_ARGS = {
     'artifact-extensions': ["jar", "war", "ear"],
     'artifact-parent-dir': 'target'
 }
-
-# https://stackoverflow.com/questions/21377520/do-a-maven-build-in-a-python-script
-class ChangeDir:
-    """
-    Internal helper class to manage changing directories, and returning to the
-    starting working directory.
-    """
-    def __init__(self, new_path):
-        self.saved_path = None
-        self.new_path = os.path.expanduser(new_path)
-
-    # Change directory with the new path
-    def __enter__(self):
-        self.saved_path = os.getcwd()
-        os.chdir(self.new_path)
-
-    # Return back to previous directory
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.saved_path)
 
 class Maven(StepImplementer):
     """
@@ -131,10 +112,9 @@ class Maven(StepImplementer):
         step_config : dict
             Step configuration to validate.
         """
-        print(step_config)
-
         if 'pom-file' not in step_config or not step_config['pom-file']:
             raise ValueError('Key (pom-file) must have none empty value in the step configuration')
+            #raise ValueError('Key (pom-file) must have none empty value in the step configuration')
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config['pom-file']
@@ -144,14 +124,13 @@ class Maven(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
-        process_args = 'mvn clean install'
-        return_code = 1
+        artifact_id = get_xml_element(pom_file, 'artifactId').text
+        group_id = get_xml_element(pom_file, 'groupId').text
 
-        with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
-            return_code = subprocess.call(process_args, shell=True)
-        if return_code:
-            raise ValueError('Issue invoking ' + str(process_args) + \
-              ' with given pom file (' + pom_file + ')')
+        try:
+            sh.mvn('clean', 'install', '-f', pom_file) # pylint: disable=no-member
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError("Error invoking mvn: {0}".format(str(error)))
 
         # find the artifacts
         artfiact_file_names = []
@@ -166,7 +145,16 @@ class Maven(StepImplementer):
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
         if len(artfiact_file_names) > 1:
-            raise ValueError('pom resulted in multiple artifacts, this is unsupported')
+            raise ValueError(
+                'pom resulted in multiple artifacts with expected artifact extensions ' +
+                '({artifact_extensions}), this is unsupported'.format(
+                    artifact_extensions=artifact_extensions))
+
+        if len(artfiact_file_names) < 1:
+            raise ValueError(
+                'pom resulted in 0 with expected artifact extensions ' +
+                '({artifact_extensions}), this is unsupported'.format(
+                    artifact_extensions=artifact_extensions))
 
         artifact_id = get_xml_element(pom_file, 'artifactId').text
         group_id = get_xml_element(pom_file, 'groupId').text
