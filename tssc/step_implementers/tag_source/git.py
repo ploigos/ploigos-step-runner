@@ -121,7 +121,7 @@ class Git(StepImplementer):
     def _git_tag(git_tag_value): # pragma: no cover
         git_tag = sh.git.bake("tag")
         try:
-            git_tag(git_tag_value)
+            git_tag(git_tag_value, '-f')
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
 
