@@ -157,7 +157,7 @@ Notes
       }
 &#34;&#34;&#34;
 import os
-import subprocess
+import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -170,25 +170,6 @@ DEFAULT_ARGS = {
     &#39;artifact-extensions&#39;: [&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;],
     &#39;artifact-parent-dir&#39;: &#39;target&#39;
 }
-
-# https://stackoverflow.com/questions/21377520/do-a-maven-build-in-a-python-script
-class ChangeDir:
-    &#34;&#34;&#34;
-    Internal helper class to manage changing directories, and returning to the
-    starting working directory.
-    &#34;&#34;&#34;
-    def __init__(self, new_path):
-        self.saved_path = None
-        self.new_path = os.path.expanduser(new_path)
-
-    # Change directory with the new path
-    def __enter__(self):
-        self.saved_path = os.getcwd()
-        os.chdir(self.new_path)
-
-    # Return back to previous directory
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.saved_path)
 
 class Maven(StepImplementer):
     &#34;&#34;&#34;
@@ -219,10 +200,9 @@ class Maven(StepImplementer):
         step_config : dict
             Step configuration to validate.
         &#34;&#34;&#34;
-        print(step_config)
-
         if &#39;pom-file&#39; not in step_config or not step_config[&#39;pom-file&#39;]:
             raise ValueError(&#39;Key (pom-file) must have none empty value in the step configuration&#39;)
+            #raise ValueError(&#39;Key (pom-file) must have none empty value in the step configuration&#39;)
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config[&#39;pom-file&#39;]
@@ -232,14 +212,13 @@ class Maven(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        process_args = &#39;mvn clean install&#39;
-        return_code = 1
+        artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
+        group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
 
-        with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
-            return_code = subprocess.call(process_args, shell=True)
-        if return_code:
-            raise ValueError(&#39;Issue invoking &#39; + str(process_args) + \
-              &#39; with given pom file (&#39; + pom_file + &#39;)&#39;)
+        try:
+            sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
 
         # find the artifacts
         artfiact_file_names = []
@@ -254,7 +233,16 @@ class Maven(StepImplementer):
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
         if len(artfiact_file_names) &gt; 1:
-            raise ValueError(&#39;pom resulted in multiple artifacts, this is unsupported&#39;)
+            raise ValueError(
+                &#39;pom resulted in multiple artifacts with expected artifact extensions &#39; +
+                &#39;({artifact_extensions}), this is unsupported&#39;.format(
+                    artifact_extensions=artifact_extensions))
+
+        if len(artfiact_file_names) &lt; 1:
+            raise ValueError(
+                &#39;pom resulted in 0 with expected artifact extensions &#39; +
+                &#39;({artifact_extensions}), this is unsupported&#39;.format(
+                    artifact_extensions=artifact_extensions))
 
         artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
         group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
@@ -290,36 +278,6 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.step_implementers.package.maven.ChangeDir"><code class="flex name class">
-<span>class <span class="ident">ChangeDir</span></span>
-<span>(</span><span>new_path)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Internal helper class to manage changing directories, and returning to the
-starting working directory.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ChangeDir:
-    &#34;&#34;&#34;
-    Internal helper class to manage changing directories, and returning to the
-    starting working directory.
-    &#34;&#34;&#34;
-    def __init__(self, new_path):
-        self.saved_path = None
-        self.new_path = os.path.expanduser(new_path)
-
-    # Change directory with the new path
-    def __enter__(self):
-        self.saved_path = os.getcwd()
-        os.chdir(self.new_path)
-
-    # Return back to previous directory
-    def __exit__(self, etype, value, traceback):
-        os.chdir(self.saved_path)</code></pre>
-</details>
-</dd>
 <dt id="tssc.step_implementers.package.maven.Maven"><code class="flex name class">
 <span>class <span class="ident">Maven</span></span>
 <span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
@@ -367,10 +325,9 @@ If given pom file does not contain required elements</dd>
         step_config : dict
             Step configuration to validate.
         &#34;&#34;&#34;
-        print(step_config)
-
         if &#39;pom-file&#39; not in step_config or not step_config[&#39;pom-file&#39;]:
             raise ValueError(&#39;Key (pom-file) must have none empty value in the step configuration&#39;)
+            #raise ValueError(&#39;Key (pom-file) must have none empty value in the step configuration&#39;)
 
     def _run_step(self, runtime_step_config):
         pom_file = runtime_step_config[&#39;pom-file&#39;]
@@ -380,14 +337,13 @@ If given pom file does not contain required elements</dd>
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        process_args = &#39;mvn clean install&#39;
-        return_code = 1
+        artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
+        group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
 
-        with ChangeDir(os.path.dirname(os.path.abspath(pom_file))):
-            return_code = subprocess.call(process_args, shell=True)
-        if return_code:
-            raise ValueError(&#39;Issue invoking &#39; + str(process_args) + \
-              &#39; with given pom file (&#39; + pom_file + &#39;)&#39;)
+        try:
+            sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
 
         # find the artifacts
         artfiact_file_names = []
@@ -402,7 +358,16 @@ If given pom file does not contain required elements</dd>
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
         if len(artfiact_file_names) &gt; 1:
-            raise ValueError(&#39;pom resulted in multiple artifacts, this is unsupported&#39;)
+            raise ValueError(
+                &#39;pom resulted in multiple artifacts with expected artifact extensions &#39; +
+                &#39;({artifact_extensions}), this is unsupported&#39;.format(
+                    artifact_extensions=artifact_extensions))
+
+        if len(artfiact_file_names) &lt; 1:
+            raise ValueError(
+                &#39;pom resulted in 0 with expected artifact extensions &#39; +
+                &#39;({artifact_extensions}), this is unsupported&#39;.format(
+                    artifact_extensions=artifact_extensions))
 
         artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
         group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
@@ -465,9 +430,6 @@ If given pom file does not contain required elements</dd>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li>
-<h4><code><a title="tssc.step_implementers.package.maven.ChangeDir" href="#tssc.step_implementers.package.maven.ChangeDir">ChangeDir</a></code></h4>
-</li>
 <li>
 <h4><code><a title="tssc.step_implementers.package.maven.Maven" href="#tssc.step_implementers.package.maven.Maven">Maven</a></code></h4>
 </li>
