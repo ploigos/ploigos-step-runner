@@ -1,14 +1,6 @@
-import os
-
-import pytest
 from testfixtures import TempDirectory
-import yaml
 import unittest
 from unittest.mock import patch
-from tssc.step_implementers.tag_source.git import Git
-
-from tssc import TSSCFactory
-from tssc.step_implementers.tag_source import Git
 
 from test_utils import *
 
