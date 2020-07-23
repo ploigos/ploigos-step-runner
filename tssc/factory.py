@@ -23,6 +23,9 @@ class TSSCFactory:
     results_file_name : str, optional
         Path to the file for steps to write their results to
         Default: tssc-results.yml
+    work_dir_path : str, optional
+        Path to the working folder for step_implementers for runtime files
+        Default: tssc-working
 
     Raises
     ------
@@ -32,7 +35,8 @@ class TSSCFactory:
     _step_implementers = {}
 
     def __init__(self, config, results_dir_path='tssc-results', \
-      results_file_name='tssc-results.yml'):
+            results_file_name='tssc-results.yml', \
+            work_dir_path='tssc-working'):
         if _TSSC_CONFIG_KEY in config:
             self.config = config[_TSSC_CONFIG_KEY]
         else:
@@ -40,6 +44,7 @@ class TSSCFactory:
 
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
+        self.work_dir_path = work_dir_path
 
     @staticmethod
     def register_step_implementer(implementer_class, is_default=False):
@@ -124,7 +129,8 @@ class TSSCFactory:
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                         sub_step_config,
                         self.results_dir_path,
-                        self.results_file_name
+                        self.results_file_name,
+                        self.work_dir_path
                     )
                     sub_step.run_step(**runtime_step_config)
                 else:
@@ -146,7 +152,8 @@ class TSSCFactory:
                 sub_step = default_step_implementer[_CLAZZ_KEY](
                     {},
                     self.results_dir_path,
-                    self.results_file_name
+                    self.results_file_name,
+                    self.work_dir_path
                 )
                 sub_step.run_step(**runtime_step_config)
             else:

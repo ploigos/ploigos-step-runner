@@ -13,8 +13,8 @@ class dummy_context_mgr():
         return False
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, {})
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
 
     @classmethod
     def step_name(cls):

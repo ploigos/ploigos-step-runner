@@ -10,6 +10,10 @@ Notes
     See https://projects.engineering.redhat.com/browse/NAPSSPO-546 for RFE
     to handle multiple artifacts.
 
+.. Important::
+
+    If package not specfied in pom will default to jar in result.
+
 **Example 1**
 
 *Given POM*
@@ -32,8 +36,37 @@ Notes
             'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
             'artifact-id': 'my-app',
             'group-id': 'com.mycompany.app'
+            'package-type': 'jar',
+            'pom-path': '{FULL_PATH_TO_POM}'
       }
     }}
+
+**Example 2**
+
+*Given POM*
+
+    <project>
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>com.mycompany.app</groupId>
+        <artifactId>my-app</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <package>war</package>
+        <properties>
+            <maven.compiler.source>1.8</maven.compiler.source>
+            <maven.compiler.target>1.8</maven.compiler.target>
+        </properties>
+    </project>
+
+*Step Results after this Step Implementer*
+
+    {'tssc-results': {
+        'package': {
+            'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+            'artifact-id': 'my-app',
+            'group-id': 'com.mycompany.app'
+            'package-type': 'war',
+            'pom-path': '{FULL_PATH_TO_POM}'
+      }
 """
 import os
 import subprocess
@@ -82,8 +115,8 @@ class Maven(StepImplementer):
         If given pom file does not contain required elements
     """
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -137,6 +170,10 @@ class Maven(StepImplementer):
 
         artifact_id = get_xml_element(pom_file, 'artifactId').text
         group_id = get_xml_element(pom_file, 'groupId').text
+        try:
+            package_type = get_xml_element(pom_file, 'package').text
+        except ValueError:
+            package_type = 'jar'
 
         results = {
             'artifacts' : [{
@@ -145,7 +182,9 @@ class Maven(StepImplementer):
                     artifact_parent_dir, artfiact_file_names[0]
                 ),
                 'artifact-id': artifact_id,
-                'group-id': group_id
+                'group-id': group_id,
+                'package-type': package_type,
+                'pom-path': pom_file
             }]
         }
         return results

@@ -52,13 +52,15 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = 'tssc-results'
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, \
+            work_dir_path, config_defaults=None): #pylint: disable=too-many-arguments
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
+        self.work_dir_path = work_dir_path
         self.__results_file_path = None
         super().__init__()
 
@@ -339,3 +341,24 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
         return self.__results_file_path
+
+    def write_temp_file(self, filename, contents):
+        """
+        Write content to filename in working directory
+
+        Returns
+        -------
+        str
+            return a string to the absolute file path
+        """
+        if not os.path.exists(self.work_dir_path):
+            os.makedirs(self.work_dir_path)
+        step_path = os.path.join(self.work_dir_path, self.step_name())
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+        file_path = os.path.join(step_path, filename)
+        with open(file_path, 'wb') as file:
+            file.write(contents)
+        return file_path

@@ -7,8 +7,8 @@ from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, {})
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
 
     @classmethod
     def step_name(cls):
@@ -18,8 +18,8 @@ class FooStepImplementer(StepImplementer):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, {})
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
 
     @classmethod
     def step_name(cls):
@@ -33,8 +33,8 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         pass
 
 class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, {})
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
 
     @classmethod
     def step_name(cls):
