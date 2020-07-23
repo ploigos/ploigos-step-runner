@@ -3,22 +3,18 @@ import os
 import pytest
 from testfixtures import TempDirectory
 import yaml
-import mock
 import unittest
+from unittest.mock import patch
+from tssc.step_implementers.tag_source.git import Git
 
 from tssc import TSSCFactory
 from tssc.step_implementers.tag_source import Git
 
 from test_utils import *
 
-def mock_git_tag(self, tag):
-    return True
-
-def mock_git_push(self, url):
-    return True
-
 class TestStepImplementerTagSourceGit(unittest.TestCase):
-    def test_tag_ssh_latest_version(self):
+    @patch('sh.git', create=True)
+    def test_tag_ssh_latest_version(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
@@ -28,8 +24,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -42,9 +36,13 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'username': 'unit_test_username',
                 'password': 'unit_test_password'
             }
+
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
+            git_mock.tag.assert_called_once_with('latest','-f')
+            git_mock.push.assert_called_once()
     
-    def test_tag_ssh_latest_version_git_url(self):
+    @patch('sh.git', create=True)
+    def test_tag_ssh_latest_version_git_url(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
@@ -56,8 +54,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
@@ -66,8 +62,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 }
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results)
+            git_mock.tag.assert_called_once_with('latest','-f')
+            git_mock.push.assert_called_once()
     
-    def test_tag_http_latest_version(self):
+    @patch('sh.git', create=True)
+    def test_tag_http_latest_version(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
@@ -77,8 +76,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
@@ -91,8 +88,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
+            git_mock.tag.assert_called_once_with('latest','-f')
+            git_mock.push.assert_called_once()
     
-    def test_tag_http_latest_version_git_url(self):
+    @patch('sh.git', create=True)
+    def test_tag_http_latest_version_git_url(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
@@ -104,8 +104,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
@@ -118,8 +116,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
+            git_mock.tag.assert_called_once_with('latest','-f')
+            git_mock.push.assert_called_once()
     
-    def test_tag_ssh_metadata_version(self):
+    @patch('sh.git', create=True)
+    def test_tag_ssh_metadata_version(self, git_mock):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
@@ -134,8 +135,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -152,8 +151,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
+            git_mock.tag.assert_called_once_with('1.0-69442c8','-f')
+            git_mock.push.assert_called_once()
     
-    def test_tag_http_metadata_version(self):
+    @patch('sh.git', create=True)
+    def test_tag_http_metadata_version(self, git_mock):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
@@ -170,8 +172,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -188,10 +188,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            _environ = dict(os.environ)  # or os.environ.copy()
+            git_mock.tag.assert_called_once_with('1.0-69442c8','-f')
+            git_mock.push.assert_called_once()
     
-    
-    def test_tag_http_metadata_version_missing_username(self):
+    @patch('sh.git', create=True)
+    def test_tag_http_metadata_version_missing_username(self, git_mock):
         passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -209,8 +210,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -236,7 +235,8 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     expected_step_results,
                     runtime_args)
 
-    def test_tag_http_metadata_version_blank_password(self):
+    @patch('sh.git', create=True)
+    def test_tag_http_metadata_version_blank_password(self, git_mock):
         passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -252,8 +252,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -276,7 +274,8 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 run_step_test_with_result_validation(temp_dir, 'tag-source', config, \
                   expected_step_results, runtime_args)
     
-    def test_tag_https_no_username_or_password(self):
+    @patch('sh.git', create=True)
+    def test_tag_https_no_username_or_password(self, git_mock):
         passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -294,8 +293,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
@@ -313,8 +310,9 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     'For a https:// git url, you need to also provide username/password pair'):
                 run_step_test_with_result_validation(temp_dir, 'tag-source', config, \
                   expected_step_results)
-    
-    def test_tag_http_no_username_or_password(self):
+     
+    @patch('sh.git', create=True)
+    def test_tag_http_no_username_or_password(self, git_mock):
         passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -332,8 +330,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     }
                 }
             }
-            Git._git_tag = mock_git_tag
-            Git._git_push = mock_git_push
     
             expected_step_results = {
                 'tssc-results': {
