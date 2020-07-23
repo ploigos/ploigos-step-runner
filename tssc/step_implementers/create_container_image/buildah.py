@@ -73,10 +73,8 @@ class Buildah(StepImplementer):
             raise ValueError('Image specification file does not exist in location: '
                              + image_spec_file_location)
 
-        buildah_bud = sh.buildah.bake("bud")  # pylint: disable=no-member
-
         try:
-            print(buildah_bud(
+            print(sh.buildah.bud( #pylint: disable=no-member
                 '--format=' + runtime_step_config['format'],
                 '--tls-verify=' + runtime_step_config['tlsverify'],
                 '--layers', '-f', image_spec_file,
@@ -85,7 +83,7 @@ class Buildah(StepImplementer):
                 _out=sys.stdout
             ))
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError('Issue invoking buildah bud  with given image '
+            raise RuntimeError('Issue invoking buildah bud with given image '
                                'specification file (' + image_spec_file + ')')
 
         results = {
@@ -93,18 +91,16 @@ class Buildah(StepImplementer):
         }
 
         if 'image_tar_file' in runtime_step_config and runtime_step_config['image_tar_file']:
-
             image_tar_file = runtime_step_config['image_tar_file']
-            rm_f = sh.rm.bake("-f") # pylint: disable=no-member
-            print(rm_f(image_tar_file))
-
-            buildah_push = sh.buildah.bake("push") # pylint: disable=no-member
+            print(sh.rm('-f', image_tar_file)) #pylint: disable=no-member
             try:
-                print(buildah_push(
-                    tag,
-                    "docker-archive:" + image_tar_file,
-                    _out=sys.stdout
-                ))
+                print(
+                    sh.buildah.push( #pylint: disable=no-member
+                        tag,
+                        "docker-archive:" + image_tar_file,
+                        _out=sys.stdout
+                    )
+                )
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
                 raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
 
