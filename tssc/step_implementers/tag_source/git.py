@@ -108,9 +108,8 @@ class Git(StepImplementer):
         if runtime_step_config.get('git_url'):
             return_val = runtime_step_config.get('git_url')
         else:
-            git_config = sh.git.bake("config")
             try:
-                return_val = git_config(
+                return_val = sh.git.config(
                     '--get',
                     'remote.origin.url').stdout.decode("utf-8").rstrip()
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
@@ -119,7 +118,6 @@ class Git(StepImplementer):
 
     @staticmethod
     def _git_tag(git_tag_value): # pragma: no cover
-        git_tag = sh.git.bake("tag")
         try:
             # NOTE:
             # this force is only needed locally in case of a re-reun of the same pipeline
@@ -127,20 +125,17 @@ class Git(StepImplementer):
             # making this an acceptable work around to the issue since on the off chance
             # actually orverwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
-            git_tag(git_tag_value, '-f')
+            sh.git.tag(git_tag_value, '-f')
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
 
     @staticmethod
     def _git_push(url=None): # pragma: no cover
-        git_push = sh.git.bake("push")
         try:
             if url:
-                git_push(
-                    url,
-                    '--tag')
+                sh.git.push(url, '--tag')
             else:
-                git_push('--tag')
+                sh.git.push('--tag')
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push')
 
