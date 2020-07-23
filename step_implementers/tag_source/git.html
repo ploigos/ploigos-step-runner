@@ -137,9 +137,8 @@ class Git(StepImplementer):
         if runtime_step_config.get(&#39;git_url&#39;):
             return_val = runtime_step_config.get(&#39;git_url&#39;)
         else:
-            git_config = sh.git.bake(&#34;config&#34;)
             try:
-                return_val = git_config(
+                return_val = sh.git.config(
                     &#39;--get&#39;,
                     &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
@@ -148,22 +147,24 @@ class Git(StepImplementer):
 
     @staticmethod
     def _git_tag(git_tag_value): # pragma: no cover
-        git_tag = sh.git.bake(&#34;tag&#34;)
         try:
-            git_tag(git_tag_value)
+            # NOTE:
+            # this force is only needed locally in case of a re-reun of the same pipeline
+            # without a fresh check out. You will notice there is no force on the push
+            # making this an acceptable work around to the issue since on the off chance
+            # actually orverwriting a tag with a different comment, the push will fail
+            # because the tag will be attached to a different git hash.
+            sh.git.tag(git_tag_value, &#39;-f&#39;)
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
 
     @staticmethod
     def _git_push(url=None): # pragma: no cover
-        git_push = sh.git.bake(&#34;push&#34;)
         try:
             if url:
-                git_push(
-                    url,
-                    &#39;--tag&#39;)
+                sh.git.push(url, &#39;--tag&#39;)
             else:
-                git_push(&#39;--tag&#39;)
+                sh.git.push(&#39;--tag&#39;)
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;)
 
@@ -295,9 +296,8 @@ for http and https git repos, and that is a desired use case.</p>
         if runtime_step_config.get(&#39;git_url&#39;):
             return_val = runtime_step_config.get(&#39;git_url&#39;)
         else:
-            git_config = sh.git.bake(&#34;config&#34;)
             try:
-                return_val = git_config(
+                return_val = sh.git.config(
                     &#39;--get&#39;,
                     &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
@@ -306,22 +306,24 @@ for http and https git repos, and that is a desired use case.</p>
 
     @staticmethod
     def _git_tag(git_tag_value): # pragma: no cover
-        git_tag = sh.git.bake(&#34;tag&#34;)
         try:
-            git_tag(git_tag_value)
+            # NOTE:
+            # this force is only needed locally in case of a re-reun of the same pipeline
+            # without a fresh check out. You will notice there is no force on the push
+            # making this an acceptable work around to the issue since on the off chance
+            # actually orverwriting a tag with a different comment, the push will fail
+            # because the tag will be attached to a different git hash.
+            sh.git.tag(git_tag_value, &#39;-f&#39;)
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
 
     @staticmethod
     def _git_push(url=None): # pragma: no cover
-        git_push = sh.git.bake(&#34;push&#34;)
         try:
             if url:
-                git_push(
-                    url,
-                    &#39;--tag&#39;)
+                sh.git.push(url, &#39;--tag&#39;)
             else:
-                git_push(&#39;--tag&#39;)
+                sh.git.push(&#39;--tag&#39;)
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;)</code></pre>
 </details>
