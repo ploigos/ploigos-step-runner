@@ -121,6 +121,12 @@ class Git(StepImplementer):
     def _git_tag(git_tag_value): # pragma: no cover
         git_tag = sh.git.bake("tag")
         try:
+            # NOTE:
+            # this force is only needed locally in case of a re-reun of the same pipeline
+            # without a fresh check out. You will notice there is no force on the push
+            # making this an acceptable work around to the issue since on the off chance
+            # actually orverwriting a tag with a different comment, the push will fail
+            # because the tag will be attached to a different git hash.
             git_tag(git_tag_value, '-f')
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
