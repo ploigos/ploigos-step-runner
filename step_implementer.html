@@ -81,13 +81,15 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, \
+            work_dir_path, config_defaults=None): #pylint: disable=too-many-arguments
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
+        self.work_dir_path = work_dir_path
         self.__results_file_path = None
         super().__init__()
 
@@ -367,7 +369,28 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         if not self.__results_file_path:
             self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
-        return self.__results_file_path</code></pre>
+        return self.__results_file_path
+
+    def write_temp_file(self, filename, contents):
+        &#34;&#34;&#34;
+        Write content to filename in working directory
+
+        Returns
+        -------
+        str
+            return a string to the absolute file path
+        &#34;&#34;&#34;
+        if not os.path.exists(self.work_dir_path):
+            os.makedirs(self.work_dir_path)
+        step_path = os.path.join(self.work_dir_path, self.step_name())
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+        file_path = os.path.join(step_path, filename)
+        with open(file_path, &#39;wb&#39;) as file:
+            file.write(contents)
+        return file_path</code></pre>
 </details>
 </section>
 <section>
@@ -494,7 +517,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 </dd>
 <dt id="tssc.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>config, results_dir_path, results_file_name, config_defaults=None)</span>
+<span>(</span><span>config, results_dir_path, results_file_name, work_dir_path, config_defaults=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
@@ -528,13 +551,15 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, results_file_name, config_defaults=None):
+    def __init__(self, config, results_dir_path, results_file_name, \
+            work_dir_path, config_defaults=None): #pylint: disable=too-many-arguments
         if not config_defaults:
             config_defaults = {}
         step_config = {**config_defaults, **config}
         self.step_config = step_config
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
+        self.work_dir_path = work_dir_path
         self.__results_file_path = None
         super().__init__()
 
@@ -814,7 +839,28 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         if not self.__results_file_path:
             self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
 
-        return self.__results_file_path</code></pre>
+        return self.__results_file_path
+
+    def write_temp_file(self, filename, contents):
+        &#34;&#34;&#34;
+        Write content to filename in working directory
+
+        Returns
+        -------
+        str
+            return a string to the absolute file path
+        &#34;&#34;&#34;
+        if not os.path.exists(self.work_dir_path):
+            os.makedirs(self.work_dir_path)
+        step_path = os.path.join(self.work_dir_path, self.step_name())
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+        file_path = os.path.join(step_path, filename)
+        with open(file_path, &#39;wb&#39;) as file:
+            file.write(contents)
+        return file_path</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1184,6 +1230,42 @@ element.</dd>
             yaml.dump(updated_step_results, step_results_file)</code></pre>
 </details>
 </dd>
+<dt id="tssc.step_implementer.StepImplementer.write_temp_file"><code class="name flex">
+<span>def <span class="ident">write_temp_file</span></span>(<span>self, filename, contents)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write content to filename in working directory</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>return a string to the absolute file path</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write_temp_file(self, filename, contents):
+    &#34;&#34;&#34;
+    Write content to filename in working directory
+
+    Returns
+    -------
+    str
+        return a string to the absolute file path
+    &#34;&#34;&#34;
+    if not os.path.exists(self.work_dir_path):
+        os.makedirs(self.work_dir_path)
+    step_path = os.path.join(self.work_dir_path, self.step_name())
+    if not os.path.exists(step_path):
+        os.makedirs(step_path)
+
+    #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+    file_path = os.path.join(step_path, filename)
+    with open(file_path, &#39;wb&#39;) as file:
+        file.write(contents)
+    return file_path</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1237,6 +1319,7 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
 </li>
 </ul>

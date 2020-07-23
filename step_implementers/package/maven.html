@@ -30,6 +30,10 @@
 See <a href="https://projects.engineering.redhat.com/browse/NAPSSPO-546">https://projects.engineering.redhat.com/browse/NAPSSPO-546</a> for RFE
 to handle multiple artifacts.</p>
 </div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If package not specfied in pom will default to jar in result.</p>
+</div>
 <p><strong>Example 1</strong></p>
 <p><em>Given POM</em></p>
 <pre><code>&lt;project&gt;
@@ -49,8 +53,34 @@ to handle multiple artifacts.</p>
         'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
         'artifact-id': 'my-app',
         'group-id': 'com.mycompany.app'
+        'package-type': 'jar',
+        'pom-path': '{FULL_PATH_TO_POM}'
   }
 }}
+</code></pre>
+<p><strong>Example 2</strong></p>
+<p><em>Given POM</em></p>
+<pre><code>&lt;project&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;
+    &lt;artifactId&gt;my-app&lt;/artifactId&gt;
+    &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+    &lt;package&gt;war&lt;/package&gt;
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+    &lt;/properties&gt;
+&lt;/project&gt;
+</code></pre>
+<p><em>Step Results after this Step Implementer</em></p>
+<pre><code>{'tssc-results': {
+    'package': {
+        'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+        'artifact-id': 'my-app',
+        'group-id': 'com.mycompany.app'
+        'package-type': 'war',
+        'pom-path': '{FULL_PATH_TO_POM}'
+  }
 </code></pre>
 <details class="source">
 <summary>
@@ -67,6 +97,10 @@ Notes
     This can currently only handle POMs that generate a single artifact.
     See https://projects.engineering.redhat.com/browse/NAPSSPO-546 for RFE
     to handle multiple artifacts.
+
+.. Important::
+
+    If package not specfied in pom will default to jar in result.
 
 **Example 1**
 
@@ -90,8 +124,37 @@ Notes
             &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
             &#39;artifact-id&#39;: &#39;my-app&#39;,
             &#39;group-id&#39;: &#39;com.mycompany.app&#39;
+            &#39;package-type&#39;: &#39;jar&#39;,
+            &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
       }
     }}
+
+**Example 2**
+
+*Given POM*
+
+    &lt;project&gt;
+        &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+        &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;
+        &lt;artifactId&gt;my-app&lt;/artifactId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+        &lt;package&gt;war&lt;/package&gt;
+        &lt;properties&gt;
+            &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+            &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+        &lt;/properties&gt;
+    &lt;/project&gt;
+
+*Step Results after this Step Implementer*
+
+    {&#39;tssc-results&#39;: {
+        &#39;package&#39;: {
+            &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
+            &#39;artifact-id&#39;: &#39;my-app&#39;,
+            &#39;group-id&#39;: &#39;com.mycompany.app&#39;
+            &#39;package-type&#39;: &#39;war&#39;,
+            &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
+      }
 &#34;&#34;&#34;
 import os
 import subprocess
@@ -140,8 +203,8 @@ class Maven(StepImplementer):
         If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -195,6 +258,10 @@ class Maven(StepImplementer):
 
         artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
         group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
+        try:
+            package_type = get_xml_element(pom_file, &#39;package&#39;).text
+        except ValueError:
+            package_type = &#39;jar&#39;
 
         results = {
             &#39;artifacts&#39; : [{
@@ -203,7 +270,9 @@ class Maven(StepImplementer):
                     artifact_parent_dir, artfiact_file_names[0]
                 ),
                 &#39;artifact-id&#39;: artifact_id,
-                &#39;group-id&#39;: group_id
+                &#39;group-id&#39;: group_id,
+                &#39;package-type&#39;: package_type,
+                &#39;pom-path&#39;: pom_file
             }]
         }
         return results
@@ -253,7 +322,7 @@ starting working directory.</p></div>
 </dd>
 <dt id="tssc.step_implementers.package.maven.Maven"><code class="flex name class">
 <span>class <span class="ident">Maven</span></span>
-<span>(</span><span>config, results_dir, results_file_name)</span>
+<span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>StepImplementer for the package step for Maven. It is assumed thought that there will
@@ -282,8 +351,8 @@ If given pom file does not contain required elements</dd>
         If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -337,6 +406,10 @@ If given pom file does not contain required elements</dd>
 
         artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
         group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
+        try:
+            package_type = get_xml_element(pom_file, &#39;package&#39;).text
+        except ValueError:
+            package_type = &#39;jar&#39;
 
         results = {
             &#39;artifacts&#39; : [{
@@ -345,7 +418,9 @@ If given pom file does not contain required elements</dd>
                     artifact_parent_dir, artfiact_file_names[0]
                 ),
                 &#39;artifact-id&#39;: artifact_id,
-                &#39;group-id&#39;: group_id
+                &#39;group-id&#39;: group_id,
+                &#39;package-type&#39;: package_type,
+                &#39;pom-path&#39;: pom_file
             }]
         }
         return results</code></pre>
@@ -367,6 +442,7 @@ If given pom file does not contain required elements</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
 </li>
 </ul>

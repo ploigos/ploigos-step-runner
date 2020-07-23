@@ -200,8 +200,8 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
     ------
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -284,7 +284,7 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
 <dl>
 <dt id="tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion"><code class="flex name class">
 <span>class <span class="ident">SemanticVersion</span></span>
-<span>(</span><span>config, results_dir, results_file_name)</span>
+<span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>StepImplementer for the generate-metadata step for SemanticVersion.</p>
@@ -301,8 +301,8 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
     ------
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -387,6 +387,7 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
 </li>
 </ul>

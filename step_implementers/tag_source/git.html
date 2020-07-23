@@ -58,8 +58,8 @@ class Git(StepImplementer):
         If git commands fail for any reason
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -183,7 +183,7 @@ TSSCFactory.register_step_implementer(Git, True)</code></pre>
 <dl>
 <dt id="tssc.step_implementers.tag_source.git.Git"><code class="flex name class">
 <span>class <span class="ident">Git</span></span>
-<span>(</span><span>config, results_dir, results_file_name)</span>
+<span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>StepImplementer for the tag-source step for Git.</p>
@@ -217,8 +217,8 @@ for http and https git repos, and that is a desired use case.</p>
         If git commands fail for any reason
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -344,6 +344,7 @@ for http and https git repos, and that is a desired use case.</p>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
 </li>
 </ul>

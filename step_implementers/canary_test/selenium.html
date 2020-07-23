@@ -42,8 +42,8 @@ class Selenium(StepImplementer):
     StepImplementer for the canary-test step for Selenium.
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -80,7 +80,7 @@ TSSCFactory.register_step_implementer(Selenium)</code></pre>
 <dl>
 <dt id="tssc.step_implementers.canary_test.selenium.Selenium"><code class="flex name class">
 <span>class <span class="ident">Selenium</span></span>
-<span>(</span><span>config, results_dir, results_file_name)</span>
+<span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>StepImplementer for the canary-test step for Selenium.</p></div>
@@ -93,8 +93,8 @@ TSSCFactory.register_step_implementer(Selenium)</code></pre>
     StepImplementer for the canary-test step for Selenium.
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -133,6 +133,7 @@ TSSCFactory.register_step_implementer(Selenium)</code></pre>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
 </li>
 </ul>
