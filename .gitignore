@@ -11,6 +11,7 @@ coverage.xml
 # TSSC build & runtime
 tssc/version.py
 tssc-results
+tssc-working
 .venvs
 
 # Eclipse

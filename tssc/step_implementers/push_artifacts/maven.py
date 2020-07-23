@@ -1,20 +1,24 @@
 """
 Step Implementer for the push-artifacts step for Maven.
 """
+import re
+import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {}
+DEFAULT_ARGS = {
+    'pom-file': 'pom.xml'
+}
 
 class Maven(StepImplementer):
     """
     StepImplementer for the push-artifacts step for Maven.
     """
 
-    def __init__(self, config, results_dir, results_file_name):
-        super().__init__(config, results_dir, results_file_name, DEFAULT_ARGS)
+    def __init__(self, config, results_dir, results_file_name, work_dir_path):
+        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
 
     @classmethod
     def step_name(cls):
@@ -29,10 +33,88 @@ class Maven(StepImplementer):
         step_config : dict
             Step configuration to validate.
         """
+        if 'url' not in step_config or not step_config['url']:
+            raise ValueError('Key (url) must have none empty value in the step configuration')
+        if 'user' not in step_config or not step_config['user']:
+            raise ValueError('Key (user) must have none empty value in the step configuration')
+        if 'password' not in step_config or not step_config['password']:
+            raise ValueError('Key (password) must have none empty value in the step configuration')
 
     def _run_step(self, runtime_step_config):
+
+        # ----- get config items
+        url = runtime_step_config['url']
+        user = runtime_step_config['user']
+        password = runtime_step_config['password']
+
+        # ----- get generate-metadata items
+        # Required: Get the generate-metadata.version
+        if(self.get_step_results('generate-metadata') and \
+          self.get_step_results('generate-metadata').get('version')):
+            version = self.get_step_results('generate-metadata')['version']
+        else:
+            raise ValueError('Severe error: Generate-metadata does not have a version')
+
+        # ----- get package items this will change
+        # Required: Get the package.artifacts
+        if(self.get_step_results('package') and \
+          self.get_step_results('package').get('artifacts')):
+            artifacts = self.get_step_results('package')['artifacts']
+        else:
+            raise ValueError('Severe error: Package does not have artifacts')
+
+        # Build a temporary settings.xml file for the mvn user/pass
+        settings_path = self.write_temp_file('ci-settings.xml', b'''
+        <settings>
+              <servers>
+                  <server>
+                          <id>${repositoryId}</id>
+                          <username>${repositoryUser}</username>
+                          <password>${repositoryPassword}</password>
+                  </server>
+              </servers>
+        </settings>''')
+
         results = {
+            'artifacts' : []
         }
+
+        for artifact in artifacts:
+            artifact_path = artifact['path']
+            group_id = artifact['group-id']
+            artifact_id = artifact['artifact-id']
+            package_type = artifact['package-type']
+
+            try:
+                # Build the mvn command
+                sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
+                       '-Dversion='+version,\
+                       '-Durl='+url,\
+                       '-Dfile='+artifact_path,\
+                       '-DgroupId='+group_id,\
+                       '-DartifactId='+artifact_id,\
+                       '-Dpackaging='+package_type,\
+                       '-DrepositoryId=tssc',\
+                       '-DrepositoryUser='+user,\
+                       '-DrepositoryPassword='+password,\
+                       '-s'+settings_path\
+                )
+            except:
+                raise ValueError('Error invoking mvn')
+
+            results['artifacts'].append({
+                'url': url + '/' + \
+                       re.sub(r'\.', '/', group_id) + '/' + \
+                       artifact_id + '/' + \
+                       version  + '/' + \
+                       artifact_id + '-' + \
+                       version  + '.' + \
+                       package_type,
+                'artifact-id' : artifact_id,
+                'group-id' : group_id,
+                'version' : version,
+                'path' : artifact_path,
+            })
 
         return results
 
