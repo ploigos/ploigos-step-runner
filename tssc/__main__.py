@@ -119,9 +119,7 @@ def main(argv=None):
         help='Override step config provided by the given TSSC config-file with these arguments.',
         action=ParseKeyValueArge
     )
-
     args = parser.parse_args(argv)
-    print(args)
 
     # validate args
     if not os.path.exists(args.config_file) or os.stat(args.config_file).st_size == 0:

@@ -17,18 +17,59 @@ Source for version sections:
   - major.minor.patch
     * will come from previous sub step of generate_metadata step,
       with step results including 'app_version'
-    * known implmeneters:
+    * known implementers:
       -  maven
   - pre-release
     * will come from previous sub step of generate_metadata step,
       with step results including 'pre_release'
-    * known implmeneters:
+    * known implementers:
       - git
   - build
     * will come from previous sub step of generate_metadata step,
       with step results including 'build'
-    * known implmeneters:
+    * known implementers:
       - git
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default | Description
+|-------------------|-----------|---------|-----------
+| `TODO`            | True      |         |
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name           | Result Key    | Description
+|---------------------|---------------|------------
+| `generate-metadata` | `app-version` | Value to use for `version` portion of semantic version \
+                                        (https://semver.org/).
+| `generate-metadata` | `pre-release` | Value to use for `pre-release` portion of semantic version \
+                                        (https://semver.org/). \
+                                        Uses the Git branch name.
+| `generate-metadata` | `build`       | Value to use for `build` portion of semantic version \
+                                        (https://semver.org/). \
+                                        Uses a portion of the latest Git commit hash.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key  | Description
+|-------------|------------
+| `version`   | Constructed semantic version (https://semver.org/).
+| `image-tag` | Constructed semantic version (https://semver.org/) modified \
+                to work as a container image tag.
+
+Examples
+--------
 
 **Example 1**
 

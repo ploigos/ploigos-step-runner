@@ -1,5 +1,38 @@
-"""
-Step Implementer for the generate-metadata step for git.
+"""Step Implementer for the generate-metadata step for git.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key     | Required? | Default | Description
+|-----------------------|-----------|---------|-----------
+| `repo-root`           | True      | `./`    | Directory path to the Git repo to generate \
+                                                metadata from.
+| `build-string-length` | True      | `7`     | Length of the Git hash to use for the \
+                                                `build` portion of the semantic version.
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+.. Note:: This step implementer does not expect results from any previous steps.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key    | Description
+|---------------|------------
+| `pre-release` | Value to use for `pre-release` portion of semantic version \
+                    (https://semver.org/). \
+                    Uses the Git branch name.
+| `build`       | Value to use for `build` portion of semantic version (https://semver.org/). \
+                    Uses a portion of the latest Git commit hash.
 """
 
 import re
