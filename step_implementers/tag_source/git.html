@@ -86,8 +86,8 @@ class Git(StepImplementer):
     def _get_tag(self):
         tag = &#39;latest&#39;
         if(self.get_step_results(&#39;generate-metadata&#39;) \
-          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
-            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)
+          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
+            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
         return tag
@@ -127,7 +127,7 @@ class Git(StepImplementer):
         else:
             self._git_push(None)
         results = {
-            &#39;git_tag&#39; : tag
+            &#39;git-tag&#39; : tag
         }
         return results
 
@@ -245,8 +245,8 @@ for http and https git repos, and that is a desired use case.</p>
     def _get_tag(self):
         tag = &#39;latest&#39;
         if(self.get_step_results(&#39;generate-metadata&#39;) \
-          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
-            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)
+          and self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
+            tag = self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
         return tag
@@ -286,7 +286,7 @@ for http and https git repos, and that is a desired use case.</p>
         else:
             self._git_push(None)
         results = {
-            &#39;git_tag&#39; : tag
+            &#39;git-tag&#39; : tag
         }
         return results
 
