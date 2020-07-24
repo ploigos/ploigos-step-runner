@@ -42,7 +42,6 @@ DEFAULT_ARGS = {
 }
 
 REQUIRED_ARGS = {
-    &#39;source&#39;: None,
     &#39;destination&#39;: None
 }
 
@@ -92,13 +91,21 @@ class Skopeo(StepImplementer):
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
+        image_tar_file = &#39;&#39;
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image_tar_file&#39;)):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image_tar_file&#39;]
+        else:
+            raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
+
         destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + (version).lower()
         try:
             print(
                 sh.skopeo.copy( #pylint: disable=no-member
                     &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
                     &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    runtime_step_config[&#39;source&#39;],
+                    &#39;docker-archive:/&#39; + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )
@@ -187,13 +194,21 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
+        image_tar_file = &#39;&#39;
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image_tar_file&#39;)):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image_tar_file&#39;]
+        else:
+            raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
+
         destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + (version).lower()
         try:
             print(
                 sh.skopeo.copy( #pylint: disable=no-member
                     &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
                     &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    runtime_step_config[&#39;source&#39;],
+                    &#39;docker-archive:/&#39; + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )

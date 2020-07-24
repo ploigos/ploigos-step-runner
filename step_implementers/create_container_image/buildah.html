@@ -32,6 +32,7 @@ Step Implementer for the create-container-image step for Buildah.
 &#34;&#34;&#34;
 import os
 import sys
+import uuid
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -52,6 +53,10 @@ DEFAULT_ARGS = {
 
 }
 
+REQUIRED_ARGS = {
+    # Image destination, without version
+    &#39;destination&#39; : None
+}
 class Buildah(StepImplementer):
     &#34;&#34;&#34;
     StepImplementer for the create-container-image step for Buildah.
@@ -60,7 +65,7 @@ class Buildah(StepImplementer):
     ------
     ValueError
         If image specification file does not exist
-        If tag is not specified (not defaulted)
+        If destination is not specified (not defaulted)
     RuntimeError
         buildah command fails for any reason
     &#34;&#34;&#34;
@@ -88,19 +93,29 @@ class Buildah(StepImplementer):
                 raise ValueError(&#39;Key (&#39; + config_name + &#39;) must have non-empty value in the step &#39;
                                  &#39;configuration&#39;)
 
-        if &#39;tag&#39; not in step_config or not step_config[&#39;tag&#39;]:
-            raise ValueError(&#39;Key (tag) must have non-empty value in the step configuration&#39;)
+        if &#39;destination&#39; not in step_config or not step_config[&#39;destination&#39;]:
+            raise ValueError(&#39;Key (destination) must have non-empty value in the step &#39;
+                             &#39;configuration&#39;)
 
     def _run_step(self, runtime_step_config):
 
         context = runtime_step_config[&#39;context&#39;]
         image_spec_file = runtime_step_config[&#39;imagespecfile&#39;]
         image_spec_file_location = context + &#39;/&#39; + image_spec_file
-        tag = runtime_step_config[&#39;tag&#39;]
+        destination = runtime_step_config[&#39;destination&#39;]
 
         if not os.path.exists(image_spec_file_location):
             raise ValueError(&#39;Image specification file does not exist in location: &#39;
                              + image_spec_file_location)
+
+        version = &#34;latest&#34;
+        if(self.get_step_results(&#39;generate-metadata&#39;) and \
+          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
+            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
+        else:
+            print(&#39;No version found in metadata. Using latest&#39;)
+
+        tag = destination + &#39;:&#39; + version
 
         try:
             print(sh.buildah.bud( #pylint: disable=no-member
@@ -115,25 +130,24 @@ class Buildah(StepImplementer):
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
                                &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
 
+        image_tar_file = &#39;image-{guid}.tar&#39;.format(guid=uuid.uuid4())
+
+        try:
+            print(
+                sh.buildah.push( #pylint: disable=no-member
+                    tag,
+                    &#34;docker-archive:&#34; + image_tar_file,
+                    _out=sys.stdout
+                )
+            )
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
+
         results = {
-            &#39;image_tag&#39; : tag
+            &#39;image_tag&#39; : tag,
+            &#39;image_tar_file&#39; : image_tar_file
         }
 
-        if &#39;image_tar_file&#39; in runtime_step_config and runtime_step_config[&#39;image_tar_file&#39;]:
-            image_tar_file = runtime_step_config[&#39;image_tar_file&#39;]
-            print(sh.rm(&#39;-f&#39;, image_tar_file)) #pylint: disable=no-member
-            try:
-                print(
-                    sh.buildah.push( #pylint: disable=no-member
-                        tag,
-                        &#34;docker-archive:&#34; + image_tar_file,
-                        _out=sys.stdout
-                    )
-                )
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-                raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
-
-            results.update({&#39;image_tar_file&#39; : image_tar_file})
 
         return results
 
@@ -160,7 +174,7 @@ TSSCFactory.register_step_implementer(Buildah, True)</code></pre>
 <dl>
 <dt><code>ValueError</code></dt>
 <dd>If image specification file does not exist
-If tag is not specified (not defaulted)</dd>
+If destination is not specified (not defaulted)</dd>
 <dt><code>RuntimeError</code></dt>
 <dd>buildah command fails for any reason</dd>
 </dl></div>
@@ -176,7 +190,7 @@ If tag is not specified (not defaulted)</dd>
     ------
     ValueError
         If image specification file does not exist
-        If tag is not specified (not defaulted)
+        If destination is not specified (not defaulted)
     RuntimeError
         buildah command fails for any reason
     &#34;&#34;&#34;
@@ -204,19 +218,29 @@ If tag is not specified (not defaulted)</dd>
                 raise ValueError(&#39;Key (&#39; + config_name + &#39;) must have non-empty value in the step &#39;
                                  &#39;configuration&#39;)
 
-        if &#39;tag&#39; not in step_config or not step_config[&#39;tag&#39;]:
-            raise ValueError(&#39;Key (tag) must have non-empty value in the step configuration&#39;)
+        if &#39;destination&#39; not in step_config or not step_config[&#39;destination&#39;]:
+            raise ValueError(&#39;Key (destination) must have non-empty value in the step &#39;
+                             &#39;configuration&#39;)
 
     def _run_step(self, runtime_step_config):
 
         context = runtime_step_config[&#39;context&#39;]
         image_spec_file = runtime_step_config[&#39;imagespecfile&#39;]
         image_spec_file_location = context + &#39;/&#39; + image_spec_file
-        tag = runtime_step_config[&#39;tag&#39;]
+        destination = runtime_step_config[&#39;destination&#39;]
 
         if not os.path.exists(image_spec_file_location):
             raise ValueError(&#39;Image specification file does not exist in location: &#39;
                              + image_spec_file_location)
+
+        version = &#34;latest&#34;
+        if(self.get_step_results(&#39;generate-metadata&#39;) and \
+          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
+            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
+        else:
+            print(&#39;No version found in metadata. Using latest&#39;)
+
+        tag = destination + &#39;:&#39; + version
 
         try:
             print(sh.buildah.bud( #pylint: disable=no-member
@@ -231,25 +255,24 @@ If tag is not specified (not defaulted)</dd>
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
                                &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
 
+        image_tar_file = &#39;image-{guid}.tar&#39;.format(guid=uuid.uuid4())
+
+        try:
+            print(
+                sh.buildah.push( #pylint: disable=no-member
+                    tag,
+                    &#34;docker-archive:&#34; + image_tar_file,
+                    _out=sys.stdout
+                )
+            )
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
+
         results = {
-            &#39;image_tag&#39; : tag
+            &#39;image_tag&#39; : tag,
+            &#39;image_tar_file&#39; : image_tar_file
         }
 
-        if &#39;image_tar_file&#39; in runtime_step_config and runtime_step_config[&#39;image_tar_file&#39;]:
-            image_tar_file = runtime_step_config[&#39;image_tar_file&#39;]
-            print(sh.rm(&#39;-f&#39;, image_tar_file)) #pylint: disable=no-member
-            try:
-                print(
-                    sh.buildah.push( #pylint: disable=no-member
-                        tag,
-                        &#34;docker-archive:&#34; + image_tar_file,
-                        _out=sys.stdout
-                    )
-                )
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-                raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
-
-            results.update({&#39;image_tar_file&#39; : image_tar_file})
 
         return results</code></pre>
 </details>
