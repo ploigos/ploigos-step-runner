@@ -37,8 +37,10 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {
-    &#39;pom-file&#39;: &#39;pom.xml&#39;
+DEFAULT_ARGS = {}
+OPTIONAL_ARGS = {
+    &#39;user&#39;: None,
+    &#39;password&#39;: None
 }
 
 class Maven(StepImplementer):
@@ -63,18 +65,28 @@ class Maven(StepImplementer):
             Step configuration to validate.
         &#34;&#34;&#34;
         if &#39;url&#39; not in step_config or not step_config[&#39;url&#39;]:
-            raise ValueError(&#39;Key (url) must have none empty value in the step configuration&#39;)
-        if &#39;user&#39; not in step_config or not step_config[&#39;user&#39;]:
-            raise ValueError(&#39;Key (user) must have none empty value in the step configuration&#39;)
-        if &#39;password&#39; not in step_config or not step_config[&#39;password&#39;]:
-            raise ValueError(&#39;Key (password) must have none empty value in the step configuration&#39;)
+            raise ValueError(&#39;url must have none empty value in the step configuration&#39;)
+
+    @staticmethod
+    def _validate_runtime_step_config(runtime_step_config):
+        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
+          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            raise ValueError(&#39;Either user or password is not set. Neither &#39; \
+              &#39;or both must be set.&#39;)
 
     def _run_step(self, runtime_step_config):
+        user = &#39;&#39;
+        password = &#39;&#39;
 
-        # ----- get config items
         url = runtime_step_config[&#39;url&#39;]
-        user = runtime_step_config[&#39;user&#39;]
-        password = runtime_step_config[&#39;password&#39;]
+
+        self._validate_runtime_step_config(runtime_step_config)
+
+        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            if(runtime_step_config.get(&#39;user&#39;) \
+              and runtime_step_config.get(&#39;password&#39;)):
+                user = runtime_step_config.get(&#39;user&#39;)
+                password = runtime_step_config.get(&#39;password&#39;)
 
         # ----- get generate-metadata items
         # Required: Get the generate-metadata.version
@@ -115,21 +127,36 @@ class Maven(StepImplementer):
             package_type = artifact[&#39;package-type&#39;]
 
             try:
-                # Build the mvn command
-                sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
-                       &#39;-Dversion=&#39;+version,\
-                       &#39;-Durl=&#39;+url,\
-                       &#39;-Dfile=&#39;+artifact_path,\
-                       &#39;-DgroupId=&#39;+group_id,\
-                       &#39;-DartifactId=&#39;+artifact_id,\
-                       &#39;-Dpackaging=&#39;+package_type,\
-                       &#39;-DrepositoryId=tssc&#39;,\
-                       &#39;-DrepositoryUser=&#39;+user,\
-                       &#39;-DrepositoryPassword=&#39;+password,\
-                       &#39;-s&#39;+settings_path\
-                )
-            except:
-                raise ValueError(&#39;Error invoking mvn&#39;)
+                # Build the mvn command, settings is required even if no user/password
+                # The settings file is required, need to deal with empty userid,password
+                # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
+                if user == &#39;&#39;:
+                    sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
+                           &#39;-Dversion=&#39;+version,\
+                           &#39;-Durl=&#39;+url,\
+                           &#39;-Dfile=&#39;+artifact_path,\
+                           &#39;-DgroupId=&#39;+group_id,\
+                           &#39;-DartifactId=&#39;+artifact_id,\
+                           &#39;-Dpackaging=&#39;+package_type,\
+                           &#39;-DrepositoryId=tssc&#39;,\
+                           &#39;-s&#39;+settings_path\
+                    )
+                else:
+                    sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
+                           &#39;-Dversion=&#39;+version,\
+                           &#39;-Durl=&#39;+url,\
+                           &#39;-Dfile=&#39;+artifact_path,\
+                           &#39;-DgroupId=&#39;+group_id,\
+                           &#39;-DartifactId=&#39;+artifact_id,\
+                           &#39;-Dpackaging=&#39;+package_type,\
+                           &#39;-DrepositoryId=tssc&#39;,\
+                           &#39;-DrepositoryUser=&#39;+user,\
+                           &#39;-DrepositoryPassword=&#39;+password,\
+                           &#39;-s&#39;+settings_path\
+                    )
+
+            except sh.ErrorReturnCode as error:
+                raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
 
             results[&#39;artifacts&#39;].append({
                 &#39;url&#39;: url + &#39;/&#39; + \
@@ -192,18 +219,28 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
             Step configuration to validate.
         &#34;&#34;&#34;
         if &#39;url&#39; not in step_config or not step_config[&#39;url&#39;]:
-            raise ValueError(&#39;Key (url) must have none empty value in the step configuration&#39;)
-        if &#39;user&#39; not in step_config or not step_config[&#39;user&#39;]:
-            raise ValueError(&#39;Key (user) must have none empty value in the step configuration&#39;)
-        if &#39;password&#39; not in step_config or not step_config[&#39;password&#39;]:
-            raise ValueError(&#39;Key (password) must have none empty value in the step configuration&#39;)
+            raise ValueError(&#39;url must have none empty value in the step configuration&#39;)
+
+    @staticmethod
+    def _validate_runtime_step_config(runtime_step_config):
+        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
+          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            raise ValueError(&#39;Either user or password is not set. Neither &#39; \
+              &#39;or both must be set.&#39;)
 
     def _run_step(self, runtime_step_config):
+        user = &#39;&#39;
+        password = &#39;&#39;
 
-        # ----- get config items
         url = runtime_step_config[&#39;url&#39;]
-        user = runtime_step_config[&#39;user&#39;]
-        password = runtime_step_config[&#39;password&#39;]
+
+        self._validate_runtime_step_config(runtime_step_config)
+
+        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+            if(runtime_step_config.get(&#39;user&#39;) \
+              and runtime_step_config.get(&#39;password&#39;)):
+                user = runtime_step_config.get(&#39;user&#39;)
+                password = runtime_step_config.get(&#39;password&#39;)
 
         # ----- get generate-metadata items
         # Required: Get the generate-metadata.version
@@ -244,21 +281,36 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
             package_type = artifact[&#39;package-type&#39;]
 
             try:
-                # Build the mvn command
-                sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
-                       &#39;-Dversion=&#39;+version,\
-                       &#39;-Durl=&#39;+url,\
-                       &#39;-Dfile=&#39;+artifact_path,\
-                       &#39;-DgroupId=&#39;+group_id,\
-                       &#39;-DartifactId=&#39;+artifact_id,\
-                       &#39;-Dpackaging=&#39;+package_type,\
-                       &#39;-DrepositoryId=tssc&#39;,\
-                       &#39;-DrepositoryUser=&#39;+user,\
-                       &#39;-DrepositoryPassword=&#39;+password,\
-                       &#39;-s&#39;+settings_path\
-                )
-            except:
-                raise ValueError(&#39;Error invoking mvn&#39;)
+                # Build the mvn command, settings is required even if no user/password
+                # The settings file is required, need to deal with empty userid,password
+                # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
+                if user == &#39;&#39;:
+                    sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
+                           &#39;-Dversion=&#39;+version,\
+                           &#39;-Durl=&#39;+url,\
+                           &#39;-Dfile=&#39;+artifact_path,\
+                           &#39;-DgroupId=&#39;+group_id,\
+                           &#39;-DartifactId=&#39;+artifact_id,\
+                           &#39;-Dpackaging=&#39;+package_type,\
+                           &#39;-DrepositoryId=tssc&#39;,\
+                           &#39;-s&#39;+settings_path\
+                    )
+                else:
+                    sh.mvn(&#39;deploy:deploy-file&#39;, # pylint: disable=no-member \
+                           &#39;-Dversion=&#39;+version,\
+                           &#39;-Durl=&#39;+url,\
+                           &#39;-Dfile=&#39;+artifact_path,\
+                           &#39;-DgroupId=&#39;+group_id,\
+                           &#39;-DartifactId=&#39;+artifact_id,\
+                           &#39;-Dpackaging=&#39;+package_type,\
+                           &#39;-DrepositoryId=tssc&#39;,\
+                           &#39;-DrepositoryUser=&#39;+user,\
+                           &#39;-DrepositoryPassword=&#39;+password,\
+                           &#39;-s&#39;+settings_path\
+                    )
+
+            except sh.ErrorReturnCode as error:
+                raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
 
             results[&#39;artifacts&#39;].append({
                 &#39;url&#39;: url + &#39;/&#39; + \
