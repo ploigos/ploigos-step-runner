@@ -4,6 +4,7 @@ Step Implementer for the create-container-image step for Buildah.
 import os
 import sys
 import sh
+import uuid
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
@@ -100,25 +101,24 @@ class Buildah(StepImplementer):
             raise RuntimeError('Issue invoking buildah bud with given image '
                                'specification file (' + image_spec_file + ')')
 
+        image_tar_file = 'image-{guid}.tar'.format(guid=uuid.uuid4())
+
+        try:
+            print(
+                sh.buildah.push( #pylint: disable=no-member
+                    tag,
+                    "docker-archive:" + image_tar_file,
+                    _out=sys.stdout
+                )
+            )
+        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+            raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
+
         results = {
-            'image_tag' : tag
+            'image_tag' : tag,
+            'image_tar_file' : image_tar_file
         }
 
-        if 'image_tar_file' in runtime_step_config and runtime_step_config['image_tar_file']:
-            image_tar_file = runtime_step_config['image_tar_file']
-            print(sh.rm('-f', image_tar_file)) #pylint: disable=no-member
-            try:
-                print(
-                    sh.buildah.push( #pylint: disable=no-member
-                        tag,
-                        "docker-archive:" + image_tar_file,
-                        _out=sys.stdout
-                    )
-                )
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-                raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
-
-            results.update({'image_tar_file' : image_tar_file})
 
         return results
 
