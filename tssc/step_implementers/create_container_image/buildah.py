@@ -23,6 +23,10 @@ DEFAULT_ARGS = {
 
 }
 
+REQUIRED_ARGS = {
+    # Image destination, without version
+    'destination' : None
+}
 class Buildah(StepImplementer):
     """
     StepImplementer for the create-container-image step for Buildah.
@@ -31,7 +35,7 @@ class Buildah(StepImplementer):
     ------
     ValueError
         If image specification file does not exist
-        If tag is not specified (not defaulted)
+        If destination is not specified (not defaulted)
     RuntimeError
         buildah command fails for any reason
     """
@@ -59,19 +63,28 @@ class Buildah(StepImplementer):
                 raise ValueError('Key (' + config_name + ') must have non-empty value in the step '
                                  'configuration')
 
-        if 'tag' not in step_config or not step_config['tag']:
-            raise ValueError('Key (tag) must have non-empty value in the step configuration')
+        if 'destination' not in step_config or not step_config['destination']:
+            raise ValueError('Key (destination) must have non-empty value in the step configuration')
 
     def _run_step(self, runtime_step_config):
 
         context = runtime_step_config['context']
         image_spec_file = runtime_step_config['imagespecfile']
         image_spec_file_location = context + '/' + image_spec_file
-        tag = runtime_step_config['tag']
+        destination = runtime_step_config['destination']
 
         if not os.path.exists(image_spec_file_location):
             raise ValueError('Image specification file does not exist in location: '
                              + image_spec_file_location)
+
+        version = "latest"
+        if(self.get_step_results('generate-metadata') and \
+          self.get_step_results('generate-metadata').get('image-tag')):
+            version = self.get_step_results('generate-metadata')['image-tag']
+        else:
+            print('No version found in metadata. Using latest')
+
+        tag = destination + ':' + version
 
         try:
             print(sh.buildah.bud( #pylint: disable=no-member
