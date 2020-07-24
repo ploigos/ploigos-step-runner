@@ -3,8 +3,8 @@ Step Implementer for the create-container-image step for Buildah.
 """
 import os
 import sys
-import sh
 import uuid
+import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
