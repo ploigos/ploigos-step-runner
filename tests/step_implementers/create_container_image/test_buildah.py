@@ -80,12 +80,13 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
     def test_create_container_image_specify_buildah_implementer_with_destination_invalid_dockerfile(self, buildah_mock):
         with TempDirectory() as temp_dir:
             temp_dir.write('Dockerfile',b'Invalid Dockerfile')
+            destination = localhost
             config = {
                 'tssc-config': {    
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : 'localhost',
+                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
