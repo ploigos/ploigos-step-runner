@@ -76,7 +76,7 @@ class Skopeo(StepImplementer):
                 sh.skopeo.copy( #pylint: disable=no-member
                     '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
                     '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
-                    'docker-archive:/' + image_tar_file,
+                    'docker-archive:' + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )
