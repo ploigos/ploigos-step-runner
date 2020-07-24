@@ -105,7 +105,7 @@ class Skopeo(StepImplementer):
                 sh.skopeo.copy( #pylint: disable=no-member
                     &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
                     &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    &#39;docker-archive:/&#39; + image_tar_file,
+                    &#39;docker-archive:&#39; + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )
@@ -208,7 +208,7 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
                 sh.skopeo.copy( #pylint: disable=no-member
                     &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
                     &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    &#39;docker-archive:/&#39; + image_tar_file,
+                    &#39;docker-archive:&#39; + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )
