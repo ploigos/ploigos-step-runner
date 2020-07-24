@@ -57,8 +57,8 @@ class Git(StepImplementer):
     def _get_tag(self):
         tag = 'latest'
         if(self.get_step_results('generate-metadata') \
-          and self.get_step_results('generate-metadata').get('image-tag')):
-            tag = self.get_step_results('generate-metadata').get('image-tag')
+          and self.get_step_results('generate-metadata').get('version')):
+            tag = self.get_step_results('generate-metadata').get('version')
         else:
             print('No version found in metadata. Using latest')
         return tag
@@ -98,7 +98,7 @@ class Git(StepImplementer):
         else:
             self._git_push(None)
         results = {
-            'git_tag' : tag
+            'git-tag' : tag
         }
         return results
 
