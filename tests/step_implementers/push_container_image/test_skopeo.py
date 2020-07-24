@@ -48,24 +48,35 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
-                            'source' : 'bogus-transport://quay.io/tssc/tssc-base',
                             'destination' : 'docker-archive:' + temp_dir.path + '/image.tar' 
                         }
                     }
                 }
             }
     
-            sh.skopeo.copy.side_effect = sh.ErrorReturnCode('skopeo copy', b'mock stdout', b'mock error about bogus transport')
             with self.assertRaisesRegex(
                     RuntimeError,
-                    r'Error invoking skopeo: .*'):
+                    r'Missing image tar .*'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, [])
     
     @patch('sh.skopeo', create=True)
     def test_create_container_image_specify_skopeo_implementer_valid_arguments(self, skopeo_mock):
         with TempDirectory() as temp_dir:
             source = 'docker://quay.io/tssc/tssc-base:latest'
-            destination = 'docker-archive:{path}/image.tar'.format(path=temp_dir.path)
+            destination = '{path}//image.tar'.format(path=temp_dir.path)
+            version = '1.0-69442c8'
+            temp_dir.makedir('tssc-results')
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                  generate-metadata:
+                    image-tag: {version}
+                  create-container-image:
+                    image_tar_file: {destination}
+                '''.format(version=version, destination=destination),
+                    'utf-8')
+                )
             config = {
                 'tssc-config': {    
                     'push-container-image': {
@@ -78,21 +89,21 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                 }
             }
             
-            expected_step_results = {'tssc-results': {'push-container-image': {'image_tag': "{destination}:{version}".format(destination=destination, version='latest')}}}
+            expected_step_results = {'tssc-results': { 'create-container-image': {'image_tar_file': destination}, 'generate-metadata': {'image-tag': version }, 'push-container-image': {'image_tag': "{destination}:{version}".format(destination=destination, version=version)}}}
             run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
             skopeo_mock.copy.assert_called_once_with(
                 '--src-tls-verify=true',
                 '--dest-tls-verify=true',
-                source,
-                "{destination}:{version}".format(destination=destination, version='latest'),
+                "docker-archive:/{destination}".format(destination=destination),
+                "{destination}:{version}".format(destination=destination, version=version),
                 _out=sys.stdout
             )
 
     @patch('sh.skopeo', create=True)
-    def test_create_container_image_specify_skopeo_implementer_valid_arguments_passed_in_with_metadata_version(self, skopeo_mock):
+    def test_push_container_image_specify_skopeo_implementer_skopeo_error(self, skopeo_mock):
         with TempDirectory() as temp_dir:
             source = 'docker://quay.io/tssc/tssc-base:latest'
-            destination = 'docker-archive:{path}/image.tar'.format(path=temp_dir.path)
+            destination = '{path}/image.tar'.format(path=temp_dir.path)
             version = '1.0-69442c8'
             temp_dir.makedir('tssc-results')
             temp_dir.write(
@@ -101,6 +112,8 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                     '''tssc-results:
                   generate-metadata:
                     image-tag: {version}
+                  create-container-image:
+                    image_tar_file: image.tar
                 '''.format(version=version),
                     'utf-8')
                 )
@@ -120,14 +133,12 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                         'config' : {}
                     }
             }
-    
-            expected_step_results = {'tssc-results': {'generate-metadata': {'image-tag': version},
+            expected_step_results = {'tssc-results': {'create-container-image': {'image_tar_file': 'image.tar'},'generate-metadata': {'image-tag': version},
                                      'push-container-image': {'image_tag':"{destination}:{version}".format(destination=destination, version=version)}}}
-            run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
-            skopeo_mock.copy.assert_called_once_with(
-                '--src-tls-verify=true',
-                '--dest-tls-verify=true',
-                source,
-                "{destination}:{version}".format(destination=destination, version=version),
-                _out=sys.stdout
-            )
+
+            sh.skopeo.copy.side_effect = sh.ErrorReturnCode('skopeo', b'mock stdout', b'mock error about skopeo runtime')
+            with self.assertRaisesRegex(
+                    RuntimeError,
+                    r'Error invoking .*'):
+                    run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
+    
