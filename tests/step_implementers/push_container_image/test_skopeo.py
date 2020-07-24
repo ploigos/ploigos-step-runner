@@ -94,7 +94,7 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
             skopeo_mock.copy.assert_called_once_with(
                 '--src-tls-verify=true',
                 '--dest-tls-verify=true',
-                "docker-archive:/{destination}".format(destination=destination),
+                "docker-archive:{destination}".format(destination=destination),
                 "{destination}:{version}".format(destination=destination, version=version),
                 _out=sys.stdout
             )
