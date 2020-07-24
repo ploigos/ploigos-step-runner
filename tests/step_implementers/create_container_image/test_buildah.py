@@ -40,12 +40,13 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
     
     def test_create_container_image_specify_buildah_implementer_missing_config(self):
         with TempDirectory() as temp_dir:
+            destination = 'localhost'
             config = {
                 'tssc-config': {    
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : 'localhost:test',
+                            'destination' : destination,
                             'tlsverify' : None,
                         }
                     }
@@ -59,12 +60,13 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
     
     def test_create_container_image_specify_buildah_implementer_with_destination_no_dockerfile(self):
         with TempDirectory() as temp_dir:
+            destination = 'localhost'
             config = {
                 'tssc-config': {    
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : 'localhost',
+                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
@@ -116,7 +118,7 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
                     }
                 }
             }
-            expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:latest'}}}
+            expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': destination + ':latest'}}}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
@@ -180,6 +182,7 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
     @patch('sh.buildah', create=True)
     def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_as_tarfile_fail(self, buildah_mock):
         with TempDirectory() as temp_dir:
+            destination = 'localhost'
             image_tar_file = '/nonexistentpath/image.tar'
             temp_dir.write('Dockerfile',b'FROM registry.access.redhat.com/ubi8:latest')
             config = {
@@ -187,7 +190,7 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : 'localhost',
+                            'destination' : destination,
                             'context' : temp_dir.path,
                             'image_tar_file' : image_tar_file
                         }
@@ -220,7 +223,7 @@ class TestStepImplementerCreateContaienrImageBuildah(unittest.TestCase):
                     }
                 }
             }
-            expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': 'localhost:latest', 'image_tar_file' : temp_dir.path + '/image.tar'}}}
+            expected_step_results = {'tssc-results': {'create-container-image': {'image_tag': destination + ':latest', 'image_tar_file' : temp_dir.path + '/image.tar'}}}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
