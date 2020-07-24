@@ -64,7 +64,8 @@ class Buildah(StepImplementer):
                                  'configuration')
 
         if 'destination' not in step_config or not step_config['destination']:
-            raise ValueError('Key (destination) must have non-empty value in the step configuration')
+            raise ValueError('Key (destination) must have non-empty value in the step '
+                             'configuration')
 
     def _run_step(self, runtime_step_config):
 
