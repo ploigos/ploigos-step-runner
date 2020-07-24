@@ -13,7 +13,6 @@ DEFAULT_ARGS = {
 }
 
 REQUIRED_ARGS = {
-    'source': None,
     'destination': None
 }
 
@@ -63,13 +62,21 @@ class Skopeo(StepImplementer):
         else:
             print('No version found in metadata. Using latest')
 
+        image_tar_file = ''
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image_tar_file')):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image_tar_file']
+        else:
+            raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
+
         destination_with_version = runtime_step_config['destination'] + ':' + (version).lower()
         try:
             print(
                 sh.skopeo.copy( #pylint: disable=no-member
                     '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
                     '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
-                    runtime_step_config['source'],
+                    'docker-archive:/' + image_tar_file,
                     destination_with_version, _out=sys.stdout
                 )
             )
