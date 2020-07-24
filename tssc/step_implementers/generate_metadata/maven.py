@@ -1,5 +1,32 @@
-"""
-Step Implementer for the generate-metadata step for Maven.
+"""Step Implementer for the generate-metadata step for Maven.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default     | Description
+|-------------------|-----------|-------------|-----------
+| `pom-file`        | True      | `'pom.xml'` | pom file to read the app version out of
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+.. Note:: This step implementer does not expect results from any previous steps.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key    | Description
+|---------------|------------
+| `app-version` | Value to use for `version` portion of semantic version (https://semver.org/). \
+                    Uses the version read out of the given pom file.
 """
 
 import os.path

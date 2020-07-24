@@ -1,5 +1,50 @@
-"""
-Step Implementer for the create-container-image step for Buildah.
+"""Step Implementer for the create-container-image step for Buildah.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default        | Description
+|-------------------|-----------|----------------|-----------
+| `imagespecfile`   | True      | `'Dockerfile'` | TODO
+| `context`         | True      | `'.'`          | TODO
+| `tlsverify`       | True      | `'true'`       | TODO
+| `format`          | True      | `'oci'`        | TODO
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name | Result Key | Description
+|-----------|------------|------------
+| `TODO`    | `TODO`     | TODO
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key       | Description
+|------------------|------------
+| `image_tag`      | TODO
+| `image_tar_file` | TODO
+
+
+** Example **
+
+`image_tar_file` step configuration specified.
+
+    'tssc-results': {
+        'create-container-image': {
+            'image_tag': '',
+            'image_tar_file' : ''
+        }
+    }
+
 """
 import os
 import sys
@@ -13,7 +58,7 @@ DEFAULT_ARGS = {
     # Image specification file name
     'imagespecfile': 'Dockerfile',
 
-    # Path to the image specification file
+    # Parent path to the image specification file
     'context': '.',
 
     # Verify TLS Certs?
@@ -21,7 +66,6 @@ DEFAULT_ARGS = {
 
     # Format of the produced image
     'format': 'oci'
-
 }
 
 REQUIRED_ARGS = {

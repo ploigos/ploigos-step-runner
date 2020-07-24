@@ -1,5 +1,43 @@
-"""
-Step Implementer for the push-artifacts step for NPM.
+"""Step Implementer for the push-artifacts step for NPM.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default | Description
+|-------------------|-----------|---------|-----------
+| `TODO`            | True      |         |
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name | Result Key | Description
+|-----------|------------|------------
+| `TODO`    | `TODO`     | TODO
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key | Description
+|------------|------------
+| `TODO`     | TODO
+
+
+**Example**
+
+    'tssc-results': {
+        'TODO': {
+            'TODO': ''
+        }
+    }
+TODO
 """
 
 from tssc import TSSCFactory
