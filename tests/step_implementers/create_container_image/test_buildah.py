@@ -1,12 +1,10 @@
 import os
 import sh
 import sys
-import glob
 import uuid
 
 import unittest
 from unittest.mock import patch
-
 from testfixtures import TempDirectory
 
 from tssc.step_implementers.create_container_image import Buildah
