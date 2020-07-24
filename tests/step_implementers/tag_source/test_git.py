@@ -20,7 +20,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git_tag': 'latest'
+                        'git-tag': 'latest'
                     }
                 }
             }
@@ -49,7 +49,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git_tag': 'latest'
+                        'git-tag': 'latest'
                     }
                 }
             }
@@ -71,7 +71,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git_tag': 'latest'
+                        'git-tag': 'latest'
                     }
                 }
             }
@@ -99,7 +99,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git_tag': 'latest'
+                        'git-tag': 'latest'
                     }
                 }
             }
@@ -117,6 +117,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
+                version: 1.0+69442c8
                 image-tag: 1.0-69442c8
                 ''')
             config = {
@@ -131,10 +132,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'image-tag': '1.0-69442c8',
+                        'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0+69442c8'
                     }
                 }
             }
@@ -143,7 +145,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('1.0-69442c8','-f')
+            git_mock.tag.assert_called_once_with('1.0+69442c8','-f')
             git_mock.push.assert_called_once()
     
     @patch('sh.git', create=True)
@@ -152,6 +154,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
+                version: 1.0+69442c8
                 image-tag: 1.0-69442c8
                 ''')
             config = {
@@ -168,10 +171,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'image-tag': '1.0-69442c8',
+                        'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0+69442c8'
                     }
                 }
             }
@@ -180,7 +184,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('1.0-69442c8','-f')
+            git_mock.tag.assert_called_once_with('1.0+69442c8','-f')
             git_mock.push.assert_called_once()
     
     @patch('sh.git', create=True)
@@ -206,10 +210,11 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'image-tag': '1.0-69442c8',
+                        'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0+69442c8'
                     }
                 }
             }
@@ -251,7 +256,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0-69442c8'
                     }
                 }
             }
@@ -292,7 +297,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0-69442c8'
                     }
                 }
             }
@@ -305,7 +310,6 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
      
     @patch('sh.git', create=True)
     def test_tag_http_no_username_or_password(self, git_mock):
-        passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
@@ -329,7 +333,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git_tag': '1.0-69442c8'
+                        'git-tag': '1.0-69442c8'
                     }
                 }
             }
