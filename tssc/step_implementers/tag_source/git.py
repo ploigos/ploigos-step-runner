@@ -7,18 +7,32 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `TODO`            | True      |         |
+| Configuration Key | Required?          | Default              | Description
+|-------------------|--------------------|----------------------|-----------
+| `git_url`         | False              | git url returned by  | This is the url for the git
+                                           `git config --get      server.
+                                           remote.origin.url`
+                                           in container
+| `username`        | True (if git_url   | n/a                  | This is the username to use.
+                      is http or https)                           Due to security concerns this
+                                                                  should only be only provided by
+                                                                  the runtime configuration
+| `password`        | True (if git_url   | n/a                  | This is the password to use.
+                      is http or https)                           Due to security concerns this
+                                                                  should only be only provided by
+                                                                  the runtime configuration
 
 Expected Previous Step Results
 ------------------------------
 
-Results expected from previous steps that this step requires.
+Results expected from previous steps that this step may require. If not found, it
+will attempt to tag the source with `latest`
 
-| Step Name | Result Key | Description
-|-----------|------------|------------
-| `TODO`    | `TODO`     | TODO
+| Step Name           | Result Key | Description
+|---------------------|------------|------------
+| `generate-metadata` | `version`  | Semantic version, if not found this step
+                                     will use `latest` as the version to perform
+                                     the git tag with
 
 Results
 -------
@@ -27,14 +41,14 @@ Results output by this step.
 
 | Result Key | Description
 |------------|------------
-| `TODO`     | TODO
+| `git-tag`  | This is the value that was used to tag in git.
 
 
 **Example**
 
     'tssc-results': {
-        'TODO': {
-            'TODO': ''
+        'tag-source': {
+            'git-tag': 'latest'
         }
     }
 """
