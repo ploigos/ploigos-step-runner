@@ -108,14 +108,15 @@ class TSSCFactory:
 
         step_implementers = TSSCFactory._step_implementers[step_name]
 
+        global_step_config_defaults = {}
+        if 'global-defaults' in self.config:
+            global_step_config_defaults = self.config['global-defaults']
         # get step configuration if there is any
         step_config = {}
         if step_name in self.config:
             step_config = self.config[step_name]
-
             if isinstance(step_config, dict):
                 step_config = [step_config]
-
             for sub_step in step_config:
                 sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
 
@@ -124,7 +125,6 @@ class TSSCFactory:
                         sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
                     else:
                         sub_step_config = {}
-
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
                         sub_step_config,
@@ -132,7 +132,7 @@ class TSSCFactory:
                         self.results_file_name,
                         self.work_dir_path
                     )
-                    sub_step.run_step(**runtime_step_config)
+                    sub_step.run_step(global_step_config_defaults, **runtime_step_config)
                 else:
                     raise TSSCException(
                         'No StepImplementer for step'
@@ -155,7 +155,7 @@ class TSSCFactory:
                     self.results_file_name,
                     self.work_dir_path
                 )
-                sub_step.run_step(**runtime_step_config)
+                sub_step.run_step(global_step_config_defaults, **runtime_step_config)
             else:
                 raise TSSCException(
                     'No implimenter specified for step'
