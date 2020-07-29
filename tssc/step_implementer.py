@@ -167,6 +167,11 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         Parameters
         ----------
+        global_step_config_defaults : dict
+            This is a dictionary that contains default global values for different
+            settings. If a setting in this dict is defined in either the step's config
+            or in the kwargs, it will be overwritten. These values are populated based
+            on the global-defaults section of the tssc-config.yml file
         kwargs : dict
             Arbitrary arguments passed in via runtime to merge with the step_config
             to use when running the step.
