@@ -59,6 +59,19 @@ def test_TSSCFactory_run_step_default_StepImplementer_for_step_without_config():
 
     factory.run_step('foo')
 
+def test_TSSCFactory_run_step_default_StepImplementer_for_step_without_config_with_global_defaults():
+    config = {
+        'tssc-config': {
+            'global-defaults': {
+                'foo': 'bar'
+            }
+        }
+    }
+    factory = TSSCFactory(config, 'results.yml')
+    TSSCFactory.register_step_implementer(FooStepImplementer, True)
+
+    factory.run_step('foo')
+
 def test_TSSCFactory_run_step_config_specfied_StepImplementer_does_not_exist():
     config = {
         'tssc-config': {

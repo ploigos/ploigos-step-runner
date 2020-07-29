@@ -161,7 +161,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             colalign=("left",)
         ))
 
-    def run_step(self, **kwargs):
+    def run_step(self, global_step_config_defaults, **kwargs):
         """
         Wrapper for running the implemented step.
 
@@ -173,8 +173,10 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         """
 
         StepImplementer.__print_section_title("TSSC Step Start - {}".format(self.step_name()))
-        runtime_step_config = {**self.step_config, **kwargs}
+        runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
 
+        StepImplementer.__print_data('Global Default Static Step Configuration', \
+          global_step_config_defaults)
         StepImplementer.__print_data('Static Step Configuration', self.step_config)
         StepImplementer.__print_data('Dynamic Step Configuration', kwargs)
         StepImplementer.__print_data('Runtime Step Configuration', runtime_step_config)
