@@ -108,9 +108,13 @@ class TSSCFactory:
 
         step_implementers = TSSCFactory._step_implementers[step_name]
 
+        # Check to see if there is a global-default section defined in the factory's
+        #   config. If so, set that. This will be passed in to run_step of the
+        #   step_implementer abstrct class
         global_step_config_defaults = {}
         if 'global-defaults' in self.config:
             global_step_config_defaults = self.config['global-defaults']
+
         # get step configuration if there is any
         step_config = {}
         if step_name in self.config:
