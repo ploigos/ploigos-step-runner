@@ -45,6 +45,7 @@ Keys in the dictionary elements in the `artifacts` array in the step results.
 | `version`       | Version pushed to the artifact repository
 """
 import re
+import sys
 import sh
 
 from tssc import TSSCFactory
@@ -200,32 +201,38 @@ class Maven(StepImplementer):
                 # The settings file is required, need to deal with empty userid,password
                 # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
                 if user == '':
-                    sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
-                           '-Dversion='+version,\
-                           '-Durl='+url,\
-                           '-Dfile='+artifact_path,\
-                           '-DgroupId='+group_id,\
-                           '-DartifactId='+artifact_id,\
-                           '-Dpackaging='+package_type,\
-                           '-DrepositoryId=tssc',\
-                           '-s'+settings_path\
+                    print(
+                        sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
+                               '-Dversion='+version,\
+                               '-Durl='+url,\
+                               '-Dfile='+artifact_path,\
+                               '-DgroupId='+group_id,\
+                               '-DartifactId='+artifact_id,\
+                               '-Dpackaging='+package_type,\
+                               '-DrepositoryId=tssc',\
+                               '-s'+settings_path,\
+                               _out=sys.stdout\
+                        )
                     )
                 else:
-                    sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
-                           '-Dversion='+version,\
-                           '-Durl='+url,\
-                           '-Dfile='+artifact_path,\
-                           '-DgroupId='+group_id,\
-                           '-DartifactId='+artifact_id,\
-                           '-Dpackaging='+package_type,\
-                           '-DrepositoryId=tssc',\
-                           '-DrepositoryUser='+user,\
-                           '-DrepositoryPassword='+password,\
-                           '-s'+settings_path\
+                    print(
+                        sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
+                               '-Dversion='+version,\
+                               '-Durl='+url,\
+                               '-Dfile='+artifact_path,\
+                               '-DgroupId='+group_id,\
+                               '-DartifactId='+artifact_id,\
+                               '-Dpackaging='+package_type,\
+                               '-DrepositoryId=tssc',\
+                               '-DrepositoryUser='+user,\
+                               '-DrepositoryPassword='+password,\
+                               '-s'+settings_path,\
+                               _out=sys.stdout\
+                        )
                     )
 
             except sh.ErrorReturnCode as error:
-                raise RuntimeError("Error invoking mvn: {0}".format(str(error)))
+                raise RuntimeError("Error invoking mvn: {all}".format(all=error))
 
             results['artifacts'].append({
                 'url': url + '/' + \
