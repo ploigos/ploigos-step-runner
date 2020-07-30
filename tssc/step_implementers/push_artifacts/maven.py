@@ -81,8 +81,7 @@ class Maven(StepImplementer):
         if 'url' not in step_config or not step_config['url']:
             raise ValueError('url must have none empty value in the step configuration')
 
-    @staticmethod
-    def _validate_runtime_step_config(runtime_step_config):
+    def _validate_runtime_step_config(self, runtime_step_config):
         if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
           and any(element in runtime_step_config for element in OPTIONAL_ARGS):
             raise ValueError('Either user or password is not set. Neither ' \
