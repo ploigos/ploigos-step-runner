@@ -120,6 +120,7 @@ Examples
         ]
     }}
 """
+import sys
 import os
 import sh
 
@@ -213,29 +214,36 @@ class Maven(StepImplementer):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
         try:
-            sh.mvn('clean', 'install', '-f', pom_file) # pylint: disable=no-member
+            print(
+                sh.mvn(  # pylint: disable=no-member,
+                    'clean',
+                    'install',
+                    '-f', pom_file,
+                    _out=sys.stdout
+                )
+            )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {0}".format(str(error)))
+            raise RuntimeError("Error invoking mvn: {error}".format(error=error))
 
         # find the artifacts
-        artfiact_file_names = []
+        artifact_file_names = []
         artifact_parent_dir_full_path = \
             os.listdir(os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
                 artifact_parent_dir))
         for filename in artifact_parent_dir_full_path:
             if any(filename.endswith(ext) for ext in artifact_extensions):
-                artfiact_file_names.append(filename)
+                artifact_file_names.append(filename)
 
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
-        if len(artfiact_file_names) > 1:
+        if len(artifact_file_names) > 1:
             raise ValueError(
                 'pom resulted in multiple artifacts with expected artifact extensions ' +
                 '({artifact_extensions}), this is unsupported'.format(
                     artifact_extensions=artifact_extensions))
 
-        if len(artfiact_file_names) < 1:
+        if len(artifact_file_names) < 1:
             raise ValueError(
                 'pom resulted in 0 with expected artifact extensions ' +
                 '({artifact_extensions}), this is unsupported'.format(
@@ -249,10 +257,10 @@ class Maven(StepImplementer):
             package_type = 'jar'
 
         results = {
-            'artifacts' : [{
+            'artifacts': [{
                 'path': os.path.join(
                     os.path.dirname(os.path.abspath(pom_file)),
-                    artifact_parent_dir, artfiact_file_names[0]
+                    artifact_parent_dir, artifact_file_names[0]
                 ),
                 'artifact-id': artifact_id,
                 'group-id': group_id,
@@ -261,6 +269,7 @@ class Maven(StepImplementer):
             }]
         }
         return results
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Maven)

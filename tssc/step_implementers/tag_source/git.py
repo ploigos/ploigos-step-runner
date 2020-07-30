@@ -52,6 +52,7 @@ Results output by this step.
         }
     }
 """
+import sys
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -63,6 +64,7 @@ AUTHENTICATION_CONFIG = {
     'username': None,
     'password': None
 }
+
 
 class Git(StepImplementer):
     """
@@ -164,7 +166,7 @@ class Git(StepImplementer):
                 password = runtime_step_config.get('password')
             else:
                 raise ValueError('Both username and password must have ' \
-                  'non-empty value in the runtime step configuration')
+                                 'non-empty value in the runtime step configuration')
         else:
             print('No username/password found, assuming ssh')
         tag = self._get_tag()
@@ -175,13 +177,13 @@ class Git(StepImplementer):
                 self._git_push('http://' + username + ':' + password + '@' + git_url[7:])
             else:
                 raise ValueError('For a http:// git url, you need to also provide ' \
-                  'username/password pair')
+                                 'username/password pair')
         elif git_url.startswith('https://'):
             if username and password:
                 self._git_push('https://' + username + ':' + password + '@' + git_url[8:])
             else:
                 raise ValueError('For a https:// git url, you need to also provide ' \
-                  'username/password pair')
+                                 'username/password pair')
         else:
             self._git_push(None)
         results = {
@@ -213,7 +215,7 @@ class Git(StepImplementer):
         return return_val
 
     @staticmethod
-    def _git_tag(git_tag_value): # pragma: no cover
+    def _git_tag(git_tag_value):  # pragma: no cover
         try:
             # NOTE:
             # this force is only needed locally in case of a re-reun of the same pipeline
@@ -221,19 +223,37 @@ class Git(StepImplementer):
             # making this an acceptable work around to the issue since on the off chance
             # actually orverwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
-            sh.git.tag(git_tag_value, '-f')
+            print(
+                sh.git.tag(  # pylint: disable=no-member
+                    git_tag_value,
+                    '-f',
+                    _out=sys.stdout
+                )
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
 
     @staticmethod
-    def _git_push(url=None): # pragma: no cover
+    def _git_push(url=None):  # pragma: no cover
         try:
             if url:
-                sh.git.push(url, '--tag')
+                print(  # pylint: disable=no-member
+                    sh.git.push(
+                        url,
+                        '--tag',
+                        _out=sys.stdout
+                    )
+                )
             else:
-                sh.git.push('--tag')
+                print(  # pylint: disable=no-member
+                    sh.git.push(
+                        '--tag',
+                        _out=sys.stdout
+                    )
+                )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push')
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Git, True)
