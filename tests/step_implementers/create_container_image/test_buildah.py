@@ -147,6 +147,7 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
+                    version: {version}
                     image-tag: {version}
                 '''.format(version=version),
                     'utf-8')
@@ -167,12 +168,11 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 }
             }
 
-            image_tar_file = 'image-latest.tar'
-
-            expected_step_results = {'tssc-results': {'generate-metadata': {'image-tag': version},\
+            expected_step_results = {'tssc-results': {'generate-metadata': \
+                {'image-tag': version, 'version': '{version}'.format(version=version)},\
                 'create-container-image': {'image-tag': '{destination}:{version}'\
                 .format(destination=destination,version=version),\
-                'image-tar-file' : image_tar_file
+                'image-tar-file' : 'image-{version}.tar'.format(version=version)
                 }}}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
@@ -266,7 +266,9 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
             }
 
             image_tar_file = 'image-latest.tar'
-            temp_dir.write(image_tar_file,b'If you wish to make an apple pie from scratch, you must first invent the universe.')
+            f = open(image_tar_file, 'w')
+            f.write('If you wish to make an apple pie from scratch, you must first invent the universe.')
+            f.close()
 
             expected_step_results = {'tssc-results': {'create-container-image': {'image-tag': destination + ':latest', 'image-tar-file' : image_tar_file}}}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
@@ -284,3 +286,59 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=sys.stdout
             )
+
+    @patch('sh.buildah', create=True)
+    def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_metadata_version_and_global_application_name_and_service_name(self, buildah_mock):
+        with TempDirectory() as temp_dir:
+            destination = 'localhost'
+            version = '1.0-69442c8'
+            file = 'Dockerfile'
+            temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
+            temp_dir.makedir('tssc-results')
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                          generate-metadata:
+                            version: {version}
+                            image-tag: {version}
+                        '''.format(version=version),
+                            'utf-8')
+                )
+            config = {
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': 'foo',
+                        'service-name': 'bar'
+                    },
+                    'create-container-image': {
+                        'implementer': 'Buildah',
+                        'config': {
+                            'destination' : destination,
+                            'context' : temp_dir.path
+                        }
+                    },
+                     'generate-metadata': {
+                        'implementer': 'Maven',
+                        'config' : {}
+                    }
+                }
+            }
+
+            expected_step_results = {'tssc-results': {'generate-metadata': \
+                {'image-tag': version, 'version': '{version}'.format(version=version)},\
+                'create-container-image': {'image-tag': '{destination}:{version}'\
+                .format(destination=destination,version=version),\
+                'image-tar-file' : 'image-foo-bar-{version}.tar'.format(version=version)
+                }}}
+            run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
+            buildah_mock.bud.assert_called_once_with(
+                '--format=oci',
+                '--tls-verify=true',
+                '--layers',
+                '-f', file,
+                '-t', '{destination}:{version}'.format(destination=destination, version=version),
+                temp_dir.path,
+                _out=sys.stdout
+            )
+            buildah_mock.push.assert_called()

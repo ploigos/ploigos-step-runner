@@ -103,7 +103,7 @@ class Buildah(StepImplementer):
         image_tar_file = "latest"
         if(self.get_step_results('generate-metadata') and \
           self.get_step_results('generate-metadata').get('version')):
-            version = self.get_step_results('generate-metadata')['version']
+            image_tar_file = self.get_step_results('generate-metadata')['version']
         else:
             print('No version found in metadata. Using latest')
 
@@ -112,9 +112,9 @@ class Buildah(StepImplementer):
         #   of the tssc-config.yml file. Is so, we're going to create a tar filename
         #   of the format image-<application-name>-<service-name>-<version>.tar
         if runtime_step_config.get('service-name'):
-            image_tar_file = runtime_step_config['service-name'] + '-' + version
+            image_tar_file = runtime_step_config['service-name'] + '-' + image_tar_file
         if runtime_step_config.get('application-name'):
-            image_tar_file = runtime_step_config['application-name'] + '-' + version
+            image_tar_file = runtime_step_config['application-name'] + '-' + image_tar_file
 
         image_tar_file = 'image-' + image_tar_file + '.tar'
 
