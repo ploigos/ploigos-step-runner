@@ -439,60 +439,6 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 factory.run_step('package')
     
     @patch('sh.mvn', create=True)
-    def test_pom_file_missing_groupId (self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <artifactId>my-app</artifactId>
-        <version>1.0</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-    
-            config = {
-                'tssc-config': {
-                    'package': {
-                        'implementer': 'Maven',
-                        'config': {
-                            'pom-file': str(pom_file_path)
-                        }
-                    }
-                }
-            }
-            factory = TSSCFactory(config)
-            with self.assertRaisesRegex(
-                ValueError,
-                r"Given xml file \(.*\) does not have ./groupId element"):
-                mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [])
-                factory.run_step('package')
-    
-    @patch('sh.mvn', create=True)
-    def test_pom_file_missing_artifactId (self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <version>1.0</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-    
-            config = {
-                'tssc-config': {
-                    'package': {
-                        'implementer': 'Maven',
-                        'config': {
-                            'pom-file': str(pom_file_path)
-                        }
-                    }
-                }
-            }
-            factory = TSSCFactory(config)
-            with self.assertRaisesRegex(
-                ValueError,
-                r"Given xml file \(.*\) does not have ./artifactId element"):
-                mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [])
-                factory.run_step('package')
-    
-    @patch('sh.mvn', create=True)
     def test_default_pom_file_missing(self, mvn_mock):
         config = {
             'tssc-config': {
