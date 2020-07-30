@@ -3,7 +3,6 @@ Step Implementer for the create-container-image step for Buildah.
 """
 import os
 import sys
-import uuid
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -79,14 +78,14 @@ class Buildah(StepImplementer):
             raise ValueError('Image specification file does not exist in location: '
                              + image_spec_file_location)
 
-        version = "latest"
+        image_tag_version = "latest"
         if(self.get_step_results('generate-metadata') and \
           self.get_step_results('generate-metadata').get('image-tag')):
-            version = self.get_step_results('generate-metadata')['image-tag']
+            image_tag_version = self.get_step_results('generate-metadata')['image-tag']
         else:
-            print('No version found in metadata. Using latest')
+            print('No image tag version found in metadata. Using latest')
 
-        tag = destination + ':' + version
+        tag = destination + ':' + image_tag_version
 
         try:
             print(sh.buildah.bud( #pylint: disable=no-member
@@ -101,9 +100,30 @@ class Buildah(StepImplementer):
             raise RuntimeError('Issue invoking buildah bud with given image '
                                'specification file (' + image_spec_file + ')')
 
-        image_tar_file = 'image-{guid}.tar'.format(guid=uuid.uuid4())
+        image_tar_file = "latest"
+        if(self.get_step_results('generate-metadata') and \
+          self.get_step_results('generate-metadata').get('version')):
+            version = self.get_step_results('generate-metadata')['version']
+        else:
+            print('No version found in metadata. Using latest')
+
+        # Check to see if the service-name and application-name were defined
+        #   This is most likely going to be defined in the global-defaults section
+        #   of the tssc-config.yml file. Is so, we're going to create a tar filename
+        #   of the format image-<application-name>-<service-name>-<version>.tar
+        if runtime_step_config.get('service-name'):
+            image_tar_file = runtime_step_config['service-name'] + '-' + version
+        if runtime_step_config.get('application-name'):
+            image_tar_file = runtime_step_config['application-name'] + '-' + version
+
+        image_tar_file = 'image-' + image_tar_file + '.tar'
 
         try:
+            # Check to see if the tar docker-archive file already exists
+            #   this needs to be run as buildah does not support overwritting
+            #   existing files.
+            if os.path.exists(image_tar_file):
+                os.remove(image_tar_file)
             print(
                 sh.buildah.push( #pylint: disable=no-member
                     tag,
@@ -115,8 +135,8 @@ class Buildah(StepImplementer):
             raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
 
         results = {
-            'image_tag' : tag,
-            'image_tar_file' : image_tar_file
+            'image-tag' : tag,
+            'image-tar-file' : image_tar_file
         }
 
 
