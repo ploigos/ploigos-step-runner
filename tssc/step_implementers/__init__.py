@@ -15,6 +15,7 @@ from .push_artifacts import *
 from .push_container_image import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
+from .deploy import *
 from .uat import *
 from .canary_test import *
 
@@ -32,5 +33,6 @@ __all__ = [
     'container_image_static_compliance_scan',
     'container_image_static_vulnerability_scan',
     'uat',
-    'canary_test'
+    'canary_test',
+    'deploy'
 ]

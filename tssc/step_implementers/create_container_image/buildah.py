@@ -183,9 +183,9 @@ class Buildah(StepImplementer):
                 context,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Issue invoking buildah bud with given image '
-                               'specification file (' + image_spec_file + ')')
+                               'specification file (' + image_spec_file + ')') from error
 
         image_tar_file = "image-{application_name}-{service_name}-{version}.tar".format(
             application_name=application_name,
@@ -204,8 +204,9 @@ class Buildah(StepImplementer):
                 "docker-archive:" + image_tar_file,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(
+                'Issue invoking buildah push to tar file ' + image_tar_file) from error
 
         results = {
             'image-tag' : tag,

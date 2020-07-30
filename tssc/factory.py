@@ -6,6 +6,7 @@ from .exceptions import TSSCException
 _TSSC_CONFIG_KEY = 'tssc-config'
 _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY = 'global-defaults'
 _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY = 'global-environment-defaults'
+_TSSC_ENVIRONMENT_NAME_KEY = 'environment-name'
 _IS_DEFAULT_KEY = 'is_default'
 _CLAZZ_KEY = 'clazz'
 _IMPLEMENTER_KEY = 'implementer'
@@ -127,6 +128,8 @@ class TSSCFactory:
 
             global_environment_config_defaults = \
                 self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
+
+            global_environment_config_defaults[_TSSC_ENVIRONMENT_NAME_KEY] = environment
 
         # get step configuration if there is any
         step_config = {}

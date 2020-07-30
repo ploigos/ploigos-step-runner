@@ -221,7 +221,7 @@ class Maven(StepImplementer):
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {error}".format(error=error))
+            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
 
         # find the artifacts
         artifact_file_names = []

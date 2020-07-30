@@ -9,7 +9,9 @@ from runtime configuration.
 
 | Configuration Key | Required? | Default  | Description
 |-------------------|-----------|----------|-----------
-| `destination`     | True      |          | Container image repository destination to push image to
+| `destination-url` | True      |          | Container image repository destination to push image
+                                             to. o not include the `docker://` prefix as it will
+                                             automatically be applied
 | `src-tls-verify`  | True      | `'true'` | Whether to very TLS for source of image
 | `dest-tls-verify` | True      | `'true'` | Whether to verify TLS for destination of image
 
@@ -143,14 +145,16 @@ class Skopeo(StepImplementer):
                 '--src-tls-verify=' + str(runtime_step_config['src-tls-verify']),
                 '--dest-tls-verify=' + str(runtime_step_config['dest-tls-verify']),
                 'docker-archive:' + image_tar_file,
-                destination_with_version,
+                'docker://' + destination_with_version,
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking skopeo: {error}'.format(error=error))
+            raise RuntimeError('Error invoking skopeo: {error}'.format(error=error)) from error
 
         results = {
-            'image-tag' : destination_with_version
+            'image-tag' : destination_with_version,
+            'image-version' : (version).lower(),
+            'image-url' : runtime_step_config['destination-url']
         }
 
         return results

@@ -222,8 +222,8 @@ class Git(StepImplementer):
                     _decode_errors='ignore'
                     ).rstrip()
 
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
-                raise RuntimeError('Error invoking git config --get remote.origin.url')
+            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
+                raise RuntimeError('Error invoking git config --get remote.origin.url') from error
         return return_val
 
     @staticmethod
@@ -240,8 +240,8 @@ class Git(StepImplementer):
                 '-f',
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking git tag ' + git_tag_value)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError('Error invoking git tag ' + git_tag_value) from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -257,8 +257,8 @@ class Git(StepImplementer):
                     '--tag',
                     _out=sys.stdout
                 )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking git push')
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError('Error invoking git push') from error
 
 
 # register step implementer

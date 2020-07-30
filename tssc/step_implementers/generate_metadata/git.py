@@ -52,7 +52,7 @@ REQUIRED_CONFIG_KEYS = [
     'repo-root'
 ]
 
-class Git(StepImplementer): # pylint: disable=too-few-public-methods 
+class Git(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Git.
     """
@@ -142,7 +142,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
                 "Given directory ({0}) is a Git branch ({1}) with no commit history".format(
                     repo_root, git_branch
                 )
-            )
+            ) from err
 
         # make the git branch safe
         pre_release_regex = re.compile(r"/", re.IGNORECASE)
