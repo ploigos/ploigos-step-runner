@@ -1,16 +1,11 @@
 import sh
 import os
 
-import pytest
-import yaml
-
 import unittest 
 from unittest.mock import patch
-from tssc.step_implementers.push_artifacts.maven import Maven
 
 from testfixtures import TempDirectory
 
-from tssc import TSSCFactory
 from tssc.step_implementers.push_artifacts import Maven
 
 
