@@ -93,9 +93,9 @@ class Skopeo(StepImplementer):
 
         image_tar_file = &#39;&#39;
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
-          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image_tar_file&#39;)):
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
             image_tar_file = self.\
-            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image_tar_file&#39;]
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image-tar-file&#39;]
         else:
             raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
@@ -113,7 +113,7 @@ class Skopeo(StepImplementer):
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))
 
         results = {
-            &#39;image_tag&#39; : destination_with_version
+            &#39;image-tag&#39; : destination_with_version
         }
 
         return results
@@ -196,9 +196,9 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
 
         image_tar_file = &#39;&#39;
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
-          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image_tar_file&#39;)):
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
             image_tar_file = self.\
-            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image_tar_file&#39;]
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image-tar-file&#39;]
         else:
             raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
@@ -216,7 +216,7 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))
 
         results = {
-            &#39;image_tag&#39; : destination_with_version
+            &#39;image-tag&#39; : destination_with_version
         }
 
         return results</code></pre>
