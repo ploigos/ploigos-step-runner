@@ -18,7 +18,8 @@ minimally produce the following step results.
 
 | Result Key       | Description
 |------------------|------------
-| `image_tag`      | TODO
+| `image-tag`      | The image ID to tag the built image with when pushing it to a local file
+| `image-tar-file` | Path to the built container image as a tar file
 
 """
 
