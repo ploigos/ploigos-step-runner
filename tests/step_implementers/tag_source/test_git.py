@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from test_utils import *
+from tssc.step_implementers.tag_source import Git
 
 class TestStepImplementerTagSourceGit(unittest.TestCase):
     @patch('sh.git', create=True)
@@ -20,7 +21,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git-tag': 'latest'
+                        'tag': 'latest'
                     }
                 }
             }
@@ -34,14 +35,14 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             git_mock.push.assert_called_once()
     
     @patch('sh.git', create=True)
-    def test_tag_ssh_latest_version_git_url(self, git_mock):
+    def test_tag_ssh_latest_version_url(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
                     'tag-source': {
                         'implementer': 'Git',
                         'config': {
-                            'git_url': 'git@github.com:rhtconsulting/tssc-python-package.git'
+                            'url': 'git@github.com:rhtconsulting/tssc-python-package.git'
                         }
                     }
                 }
@@ -49,7 +50,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git-tag': 'latest'
+                        'tag': 'latest'
                     }
                 }
             }
@@ -71,7 +72,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git-tag': 'latest'
+                        'tag': 'latest'
                     }
                 }
             }
@@ -84,14 +85,14 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             git_mock.push.assert_called_once()
     
     @patch('sh.git', create=True)
-    def test_tag_http_latest_version_git_url(self, git_mock):
+    def test_tag_http_latest_version_url(self, git_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
                     'tag-source': {
                         'implementer': 'Git',
                         'config': {
-                            'git_url': 'http://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
+                            'url': 'http://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
                         }
                     }
                 }
@@ -99,7 +100,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'tag-source': {
-                        'git-tag': 'latest'
+                        'tag': 'latest'
                     }
                 }
             }
@@ -136,7 +137,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0+69442c8'
+                        'tag': '1.0+69442c8'
                     }
                 }
             }
@@ -162,7 +163,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     'tag-source': {
                         'implementer': 'Git',
                         'config': {
-                            'git_url': 'https://github.com/rhtconsulting/tssc-python-package.git'
+                            'url': 'https://github.com/rhtconsulting/tssc-python-package.git'
                         }
                     }
                 }
@@ -175,7 +176,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0+69442c8'
+                        'tag': '1.0+69442c8'
                     }
                 }
             }
@@ -214,7 +215,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0+69442c8'
+                        'tag': '1.0+69442c8'
                     }
                 }
             }
@@ -256,7 +257,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0-69442c8'
+                        'tag': '1.0-69442c8'
                     }
                 }
             }
@@ -285,7 +286,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     'tag-source': {
                         'implementer': 'Git',
                         'config': {
-                            'git_url': 'https://github.com/rhtconsulting/tssc-python-package.git'
+                            'url': 'https://github.com/rhtconsulting/tssc-python-package.git'
                         }
                     }
                 }
@@ -297,7 +298,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0-69442c8'
+                        'tag': '1.0-69442c8'
                     }
                 }
             }
@@ -321,7 +322,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                     'tag-source': {
                         'implementer': 'Git',
                         'config': {
-                            'git_url': 'http://github.com/rhtconsulting/tssc-python-package.git'
+                            'url': 'http://github.com/rhtconsulting/tssc-python-package.git'
                         }
                     }
                 }
@@ -333,7 +334,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
                         'image-tag': '1.0-69442c8'
                     },
                     'tag-source': {
-                        'git-tag': '1.0-69442c8'
+                        'tag': '1.0-69442c8'
                     }
                 }
             }

@@ -9,15 +9,15 @@ from runtime configuration.
 
 | Configuration Key | Required?          | Default              | Description
 |-------------------|--------------------|----------------------|-----------
-| `git_url`         | False              | git url returned by  | This is the url for the git
+| `url`             | False              | git url returned by  | This is the url for the git
                                            `git config --get      server.
                                            remote.origin.url`
                                            in container
-| `username`        | True (if git_url   | n/a                  | This is the username to use.
+| `username`        | True (if url       | n/a                  | This is the username to use.
                       is http or https)                           Due to security concerns this
                                                                   should only be only provided by
                                                                   the runtime configuration
-| `password`        | True (if git_url   | n/a                  | This is the password to use.
+| `password`        | True (if url       | n/a                  | This is the password to use.
                       is http or https)                           Due to security concerns this
                                                                   should only be only provided by
                                                                   the runtime configuration
@@ -41,7 +41,7 @@ Results output by this step.
 
 | Result Key | Description
 |------------|------------
-| `git-tag`  | This is the value that was used to tag in git.
+| `tag`      | This is the value that was used to tag the source.
 
 
 **Example**
@@ -149,15 +149,15 @@ class Git(StepImplementer):
         else:
             self._git_push(None)
         results = {
-            'git-tag' : tag
+            'tag' : tag
         }
         return results
 
     @staticmethod
     def _git_url(runtime_step_config):
         return_val = None
-        if runtime_step_config.get('git_url'):
-            return_val = runtime_step_config.get('git_url')
+        if runtime_step_config.get('url'):
+            return_val = runtime_step_config.get('url')
         else:
             try:
                 return_val = sh.git.config(
