@@ -171,7 +171,7 @@ class Maven(StepImplementer):
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {error}".format(error=error))
+            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
 
         test_results_output_path = test_results_dir
 

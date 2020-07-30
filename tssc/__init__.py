@@ -140,26 +140,54 @@ From least precedence to highest precedence.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
       # given to the `--environment` flag of the main tssc entry point.
-      #global-environment-defaults:
-        # Optional Sample
+        global-environment-defaults:
+        # Sample
         # Sample configuration for an environment named 'DEV'.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-        #DEV:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.non-prod.myorg.xyz"
+          DEV:
+            # Required
+            kube-app-domain: ''
+
+            # Required
+            argocd-username: ''
+
+            # Required
+            argocd-password: ''
+
+            # Required
+            argocd-api: ''
+
+            # Optional
+            #argocd-sync-timeout-seconds: '60'
+
+            # Optional
+            #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-        #TEST:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.non-prod.myorg.xyz"
+          TEST:
+            # Required
+            kube-app-domain: ''
+
+            # Required
+            argocd-username: ''
+
+            # Required
+            argocd-password: ''
+
+            # Required
+            argocd-api: ''
+
+            # Optional
+            #argocd-sync-timeout-seconds: '60'
+
+            # Optional
+            #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -287,11 +315,37 @@ From least precedence to highest precedence.
       - implementer: OpenSCAP
         config: {}
 
-      # WARNING: not yet implemented
-      create-deployment-environment: []
+      deploy:
+      - implementer: ArgoCD
+        config:
+          # argocd specific variables are set per environment above
 
-      # WARNING: not yet implemented
-      deploy: []
+          # Required
+          helm-config-repo: ''
+
+          # Optional
+          #values-yaml-directory: './cicd/Deployment/'
+
+          # Optional
+          #value-yaml-template: 'values.yaml.j2'
+
+          # Required
+          git-email: ''
+
+          # Optional
+          #git-friendly-name: 'TSSC'
+
+          # Optional
+          #git-username: None
+
+          # Optional
+          #git-password: None
+
+          # Any template parameters required by values.yaml.j2 can be listed below. Note dashes will
+          # be converted to underscores to be compliant with the jinja template variable
+          # specification
+          readiness-probe-path: ''
+
 
       uat:
       # WARNING: not yet implemented
@@ -334,26 +388,54 @@ From least precedence to highest precedence.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
       # given to the `--environment` flag of the main tssc entry point.
-      #global-environment-defaults:
+        global-environment-defaults:
         # Optional Sample
         # Sample configuration for an environment named 'DEV'.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-        #DEV:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.non-prod.myorg.xyz"
+          DEV:
+            # Required
+            kube-app-domain: ''
+
+            # Required
+            argocd-username: ''
+
+            # Required
+            argocd-password: ''
+
+            # Required
+            argocd-api: ''
+
+            # Optional
+            #argocd-sync-timeout-seconds: '60'
+
+            # Optional
+            #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-        #TEST:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.non-prod.myorg.xyz"
+          TEST:
+            # Required
+            kube-app-domain: ''
+
+            # Required
+            argocd-username: ''
+
+            # Required
+            argocd-password: ''
+
+            # Required
+            argocd-api: ''
+
+            # Optional
+            #argocd-sync-timeout-seconds: '60'
+
+            # Optional
+            #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -467,11 +549,39 @@ From least precedence to highest precedence.
       - implementer: OpenSCAP
         config: {}
 
-      # WARNING: not yet implemented
-      create-deployment-environment: []
+      deploy:
+      - implementer: ArgoCD
+        config:
+          # argocd specific variables are set per environment above
 
-      # WARNING: not yet implemented
-      deploy: []
+          # Required
+          helm-config-repo: ''
+
+          # Optional
+          #values-yaml-directory: './cicd/Deployment/'
+
+          # Optional
+          #value-yaml-template: 'values.yaml.j2'
+
+          # Optional
+          #argocd-helm-chart-path: './'
+
+          # Required
+          git-email: ''
+
+          # Optional
+          #git-friendly-name: 'TSSC'
+
+          # Optional
+          #git-username: None
+
+          # Optional
+          #git-password: None
+
+          # Any template parameters required by values.yaml.j2 can be listed below.
+          # Note dashes will be converted to underscores to be compliant with the jinja
+          # template variable specification
+          readiness-probe-path: ''
 
       uat:
       # WARNING: not yet implemented

@@ -123,7 +123,7 @@ def parse_config_files(files):
                     "Duplicate keys when merging file ({file}) into ".format(file=file) +
                     "other configuration files ({merged_files}): {error}".format(
                         merged_files=merged_files, error=error)
-                    )
+                    ) from error
 
     return tssc_config
 

@@ -409,7 +409,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                         'Existing results file'
                         +' (' + step_results_file_path + ')'
                         +' has invalid yaml: ' + str(err)
-                    )
+                    ) from err
 
             if current_results:
                 if StepImplementer.__TSSC_RESULTS_KEY not in current_results:

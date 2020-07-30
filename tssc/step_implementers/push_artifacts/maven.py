@@ -232,7 +232,7 @@ class Maven(StepImplementer):
                     )
 
             except sh.ErrorReturnCode as error:
-                raise RuntimeError("Error invoking mvn: {all}".format(all=error))
+                raise RuntimeError("Error invoking mvn: {all}".format(all=error)) from error
 
             results['artifacts'].append({
                 'url': url + '/' +
