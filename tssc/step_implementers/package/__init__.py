@@ -16,7 +16,15 @@ minimally produce the following step results.
 
 | Result Key       | Description
 |------------------|------------
-| `TODO`           | TODO
+| `artifacts`      | An array of dictionaries with information on the built artifacts.
+                     Minimally each dictionary entry should have a `path` key with the absolute path
+                     to the built artifact.
+
+**artifacts**
+
+| `artifacts`Key | Description
+|----------------|------------
+| `path`         | Absolute path to the built artifact
 """
 
 from .maven import Maven

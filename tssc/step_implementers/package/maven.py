@@ -20,36 +20,43 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `TODO`            | True      |         |
+| Configuration Key     | Required? | Default                 | Description
+|-----------------------|-----------|-------------------------|-----------
+| `pom-file`            | True      | `'pom.xml'`             | Maven pom file to build
+| `artifact-extensions` | True      | `["jar", "war", "ear"]` | Extensions to look for in the
+                                                                `artifact-parent-dir` for built
+                                                                artifacts.
+| `artifact-parent-dir` | True      | `'target'`              | Parent directory to look for built
+                                                                artifacts in ending in
+                                                                `artifact-extensions`.
 
 Expected Previous Step Results
 ------------------------------
 
 Results expected from previous steps that this step requires.
 
-| Step Name | Result Key | Description
-|-----------|------------|------------
-| `TODO`    | `TODO`     | TODO
+None.
 
 Results
 -------
 
 Results output by this step.
 
-| Result Key | Description
-|------------|------------
-| `TODO`     | TODO
+| Result Key  | Description
+|-------------|------------
+| `artifacts` | An array of dictionaries with information on the built artifacts.
 
 
-**Example**
+**artifacts**
+Keys in the dictionary elements in the `artifacts` array in the step results.
 
-    'tssc-results': {
-        'TODO': {
-            'TODO': ''
-        }
-    }
+| `artifacts`Key | Description
+|----------------|------------
+| `path`         | Absolute path to the built artifact.
+| `artifact-id`  | Maven artifact ID.
+| `group-id`     | Maven group ID.
+| `package-type` | Package type.
+| `pom-path`     | Absolute path to the pom that built the artifact.
 
 Examples
 --------
@@ -72,13 +79,15 @@ Examples
 *Step Results after this Step Implementer*
 
     {'tssc-results': {
-        'package': {
-            'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
-            'artifact-id': 'my-app',
-            'group-id': 'com.mycompany.app'
-            'package-type': 'jar',
-            'pom-path': '{FULL_PATH_TO_POM}'
-      }
+        'package': [
+            {
+                'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+                'artifact-id': 'my-app',
+                'group-id': 'com.mycompany.app'
+                'package-type': 'jar',
+                'pom-path': '{FULL_PATH_TO_POM}'
+            }
+        ]
     }}
 
 **Example 2**
@@ -100,13 +109,16 @@ Examples
 *Step Results after this Step Implementer*
 
     {'tssc-results': {
-        'package': {
-            'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
-            'artifact-id': 'my-app',
-            'group-id': 'com.mycompany.app'
-            'package-type': 'war',
-            'pom-path': '{FULL_PATH_TO_POM}'
-      }
+        'package': [
+            {
+                'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+                'artifact-id': 'my-app',
+                'group-id': 'com.mycompany.app'
+                'package-type': 'war',
+                'pom-path': '{FULL_PATH_TO_POM}'
+            }
+        ]
+    }}
 """
 import os
 import sh
@@ -163,9 +175,6 @@ class Maven(StepImplementer):
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
-
-        artifact_id = get_xml_element(pom_file, 'artifactId').text
-        group_id = get_xml_element(pom_file, 'groupId').text
 
         try:
             sh.mvn('clean', 'install', '-f', pom_file) # pylint: disable=no-member
