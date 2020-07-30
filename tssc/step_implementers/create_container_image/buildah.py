@@ -9,19 +9,19 @@ from runtime configuration.
 
 | Configuration Key | Required? | Default        | Description
 |-------------------|-----------|----------------|-----------
-| `imagespecfile`   | True      | `'Dockerfile'` | TODO
-| `context`         | True      | `'.'`          | TODO
-| `tlsverify`       | True      | `'true'`       | TODO
-| `format`          | True      | `'oci'`        | TODO
+| `imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
+| `context`         | True      | `'.'`          | Context to build the container image in
+| `tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
+| `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
 
 Expected Previous Step Results
 ------------------------------
 
 Results expected from previous steps that this step requires.
 
-| Step Name | Result Key | Description
-|-----------|------------|------------
-| `TODO`    | `TODO`     | TODO
+| Step Name           | Result Key      | Description
+|---------------------|-----------------|------------
+| `generate-metadata` | `image-tag`     | Version to use when building the image
 
 Results
 -------
@@ -30,8 +30,8 @@ Results output by this step.
 
 | Result Key       | Description
 |------------------|------------
-| `image_tag`      | TODO
-| `image_tar_file` | TODO
+| `image-tag`      | The image ID to tag the built image with when pushing it to a local file
+| `image-tar-file` | Path to the built container image as a tar file
 
 
 ** Example **
