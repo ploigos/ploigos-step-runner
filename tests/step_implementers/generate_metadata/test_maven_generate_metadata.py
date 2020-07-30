@@ -2,8 +2,6 @@ import os
 
 import pytest
 from testfixtures import TempDirectory
-import yaml
-import sys
 
 from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Maven
