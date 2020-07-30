@@ -64,9 +64,9 @@ class Skopeo(StepImplementer):
 
         image_tar_file = ''
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
-          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image_tar_file')):
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image-tar-file')):
             image_tar_file = self.\
-            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image_tar_file']
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image-tar-file']
         else:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
@@ -84,7 +84,7 @@ class Skopeo(StepImplementer):
             raise RuntimeError('Error invoking skopeo: {error}'.format(error=error))
 
         results = {
-            'image_tag' : destination_with_version
+            'image-tag' : destination_with_version
         }
 
         return results
