@@ -9,7 +9,7 @@ from runtime configuration.
 
 | Configuration Key | Required? | Default  | Description
 |-------------------|-----------|----------|-----------
-| `destination`     | True      |          | Destination to push image to
+| `destination`     | True      |          | Container image repository destination to push image to
 | `src-tls-verify`  | True      | `'true'` | Whether to very TLS for source of image
 | `dest-tls-verify` | True      | `'true'` | Whether to verify TLS for destination of image
 
