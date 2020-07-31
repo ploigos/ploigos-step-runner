@@ -26,7 +26,6 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     CONTAINER_IMAGE_UNIT_TEST = 'container-image-unit-test'
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = 'container-image-static-compliance-scan'
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = 'container-image-static-vulnerability-scan'
-    PUSH_TRUSTED_CONTAINER_IMAGE = 'push-trusted-container-image'
     CREATE_DEPLOYMENT_ENVIRONMENT = 'create-deployment-environment'
     DEPLOY = 'deploy'
     UAT = 'uat'
