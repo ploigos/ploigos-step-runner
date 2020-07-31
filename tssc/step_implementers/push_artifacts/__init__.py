@@ -23,9 +23,9 @@ minimally produce the following step results.
 **artifacts**
 Keys in the dictionary elements in the `artifacts` array in the step results.
 
-| `artifacts`Key | Description
-|----------------|------------
-| `url`          | URL to the artifact pushed to the artifact repository
+| `artifacts` Key | Description
+|-----------------|------------
+| `url`           | URL to the artifact pushed to the artifact repository
 """
 
 from .maven import Maven

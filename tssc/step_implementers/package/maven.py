@@ -50,13 +50,13 @@ Results output by this step.
 **artifacts**
 Keys in the dictionary elements in the `artifacts` array in the step results.
 
-| `artifacts`Key | Description
-|----------------|------------
-| `path`         | Absolute path to the built artifact.
-| `artifact-id`  | Maven artifact ID.
-| `group-id`     | Maven group ID.
-| `package-type` | Package type.
-| `pom-path`     | Absolute path to the pom that built the artifact.
+| `artifacts` Key | Description
+|-----------------|------------
+| `path`          | Absolute path to the built artifact.
+| `artifact-id`   | Maven artifact ID.
+| `group-id`      | Maven group ID.
+| `package-type`  | Package type.
+| `pom-path`      | Absolute path to the pom that built the artifact.
 
 Examples
 --------

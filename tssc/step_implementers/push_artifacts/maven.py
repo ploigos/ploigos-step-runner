@@ -36,13 +36,13 @@ Results output by this step.
 **artifacts**
 Keys in the dictionary elements in the `artifacts` array in the step results.
 
-| `artifacts`Key | Description
-|----------------|------------
-| `url`          | URL to the artifact pushed to the artifact repository
-| `path`         | Absolute path to the artifact pushed to the artifact repository
-| `artifact-id`  | Maven artifact ID pushed to the artifact repository
-| `group-id`     | Maven group ID pushed to the artifact repository
-| `version`      | Version pushed to the artifact repository
+| `artifacts` Key | Description
+|-----------------|------------
+| `url`           | URL to the artifact pushed to the artifact repository
+| `path`          | Absolute path to the artifact pushed to the artifact repository
+| `artifact-id`   | Maven artifact ID pushed to the artifact repository
+| `group-id`      | Maven group ID pushed to the artifact repository
+| `version`       | Version pushed to the artifact repository
 """
 import re
 import sh
