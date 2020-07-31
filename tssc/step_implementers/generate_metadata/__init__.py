@@ -5,9 +5,9 @@ Step Configuration
 All tssc.StepImplementers for this step should
 accept minimally the following configuration options.
 
-| Parameter       | Description
-|-----------------|------------
-| `TODO`          | TODO
+.. Note::
+    No step configuration is specifically required for all step implementers of this step
+    to implement.
 
 Step Results
 ------------

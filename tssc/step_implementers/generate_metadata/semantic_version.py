@@ -37,9 +37,8 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `TODO`            | True      |         |
+.. Note::
+    This step implementer has not step configuration.
 
 Expected Previous Step Results
 ------------------------------
