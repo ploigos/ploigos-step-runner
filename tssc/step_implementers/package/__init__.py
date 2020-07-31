@@ -22,9 +22,9 @@ minimally produce the following step results.
 
 **artifacts**
 
-| `artifacts`Key | Description
-|----------------|------------
-| `path`         | Absolute path to the built artifact
+| `artifacts` Key | Description
+|-----------------|------------
+| `path`          | Absolute path to the built artifact
 """
 
 from .maven import Maven
