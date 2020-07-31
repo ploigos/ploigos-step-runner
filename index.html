@@ -23,6 +23,330 @@
 </header>
 <section id="section-intro">
 <p>Trusted Software Supply Chain Library (tssc) main entry point.</p>
+<h2 id="command-line-options">Command-Line Options</h2>
+<pre><code>-h, --help                                 show this help message and exit
+
+-s STEP, --step STEP                       TSSC workflow step to run
+
+-c CONFIG_FILE, --config-file CONFIG_FILE  TSSC workflow configuration file in yml or json
+
+-r RESULTS_DIR, --results-dir RESULTS_DIR  TSSC workflow results file in yml or json
+
+--step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
+
+                                           Override step config provided by the given TSSC
+                                           config-file with these arguments.
+</code></pre>
+<h2 id="step-config">Step Config</h2>
+<h3 id="steps">Steps</h3>
+<ul>
+<li>generate-metadata</li>
+<li>tag-source</li>
+<li>security-static-code-analysis</li>
+<li>linting-static-code-analysis</li>
+<li>package</li>
+<li>unit-test</li>
+<li>push-artifacts</li>
+<li>create-container-image</li>
+<li>push-container-image</li>
+<li>container-image-unit-test</li>
+<li>container-image-static-compliance-scan</li>
+<li>container-image-static-vulnerability-scan</li>
+<li>create-deployment-environment</li>
+<li>deploy</li>
+<li>uat</li>
+<li>runtime-vulnerability-scan</li>
+<li>canary-test</li>
+<li>publish-workflow-results</li>
+</ul>
+<h3 id="example-configuration-files">Example Configuration Files</h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional step configurations are listed commented out and with their default values.</p>
+</div>
+<p><strong> Example TSSC Config file for a Maven built Application </strong></p>
+<pre><code>---
+tssc-config:
+  global-defaults:
+    # Required.
+    # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+    application-name: ''
+
+    # Required.
+    # Name of the service this artifact built and deployed by this TSSC workflow implements as
+    # part of the application it is a part of.
+    service-name: ''
+
+  generate-metadata:
+  - implementer: Maven
+    config: {
+      # Optional.
+      #pom-file: 'pom.xml'
+    }
+
+  - implementer: Git
+    config: {
+      # Optional.
+      #repo-root: './'
+
+      # Optional.
+      #build-string-length: 7
+    }
+
+  - implementer: SemanticVersion
+
+  tag-source:
+  - implementer: Git
+    config: {
+      # Optional.
+      # Will use current directory to determine URL if not specified.
+      #url: None
+
+      # Optional.
+      #username: None
+
+      # Optional.
+      #password: None
+    }
+
+  security-static-code-analysis:
+  # WARNING: not yet implemented
+  - implementer: SonarQube
+    config: {}
+
+  linting-static-code-analysis:
+    # WARNING: not yet implemented
+  - implementer: SonarQube
+    config: {}
+
+  package:
+  - implementer: Maven
+    config: {
+      # Optional.
+      #pom-file: 'pom.xml'
+
+      # Optional
+      #artifact-extensions: ['jar', 'war', 'ear']
+
+      # Optional
+      #artifact-parent-dir: 'target'
+    }
+
+  unit-test:
+  # WARNING: not yet implemented
+  - implementer: Maven
+    config: {}
+
+  push-artifacts:
+  - implementer: Maven
+    config: {
+      # Required.
+      # URL to the artifact repository to push the artifact to.
+      url: ''
+
+      # Optional.
+      #user: None
+
+      # Optional.
+      #password: None
+    }
+
+  create-container-image:
+  - implementer: Buildah
+    config: {
+      # Optional.
+      #imagespecfile: 'Dockerfile'
+
+      # Optional.
+      #context: '.'
+
+      # Optional.
+      #tlsverify: true
+
+      # Optional.
+      #format: 'oci'
+    }
+
+  push-container-image:
+  - implementer: Skopeo
+    config: {
+      destination: '' # Required. Container image repository destination to push image to
+      #src-tls-verify: true # Optional
+      #dest-tls-verify: true # Optional
+    }
+
+  # WARNING: not yet implemented
+  container-image-unit-test: []
+
+  container-image-static-compliance-scan:
+  # WARNING: not yet implemented
+  - implementer: OpenSCAP
+    config: {}
+
+  container-image-static-vulnerability-scan:
+  # WARNING: not yet implemented
+  - implementer: OpenSCAP
+    config: {}
+
+  # WARNING: not yet implemented
+  create-deployment-environment: []
+
+  # WARNING: not yet implemented
+  deploy: []
+
+  uat:
+  # WARNING: not yet implemented
+  - implementer: Cucumber
+    config: {}
+
+  # WARNING: not yet implemented
+  runtime-vulnerability-scan: []
+
+  canary-test:
+    # WARNING: not yet implemented
+  - implementer: Selenium
+    config: {}
+
+  # WARNING: not yet implemented
+  publish-workflow-results: []
+</code></pre>
+<p><strong> Example TSSC Config file for a NPM built Application </strong></p>
+<pre><code>---
+tssc-config:
+  global-defaults:
+    # Required.
+    # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+    application-name: ''
+
+    # Required.
+    # Name of the service this artifact built and deployed by this TSSC workflow implements as
+    # part of the application it is a part of.
+    service-name: ''
+
+  generate-metadata:
+  # WARNING: not yet implemented
+  - implementer: NPM
+    config: {}
+
+  - implementer: Git
+    config: {
+      # Optional.
+      #repo-root: './'
+
+      # Optional.
+      #build-string-length: 7
+    }
+
+  - implementer: SemanticVersion
+
+  tag-source:
+  - implementer: Git
+    config: {
+      # Optional.
+      # Will use current directory to determine URL if not specified.
+      #url: None
+
+      # Optional.
+      #username: None
+
+      # Optional.
+      #password: None
+    }
+
+  security-static-code-analysis:
+  # WARNING: not yet implemented
+  - implementer: SonarQube
+    config: {}
+
+  linting-static-code-analysis:
+    # WARNING: not yet implemented
+  - implementer: SonarQube
+    config: {}
+
+  package:
+  # WARNING: not yet implemented
+  - implementer: NPM
+    config: {}
+
+  unit-test:
+  # WARNING: not yet implemented
+  - implementer: NPM
+    config: {}
+
+  push-artifacts:
+  # WARNING: not yet implemented
+  - implementer: NPM
+    config: {
+      # Required.
+      # URL to the artifact repository to push the artifact to.
+      url: ''
+
+      # Optional.
+      #user: None
+
+      # Optional.
+      #password: None
+    }
+
+  create-container-image:
+  - implementer: Buildah
+    config: {
+      # Optional.
+      #imagespecfile: 'Dockerfile'
+
+      # Optional.
+      #context: '.'
+
+      # Optional.
+      #tlsverify: true
+
+      # Optional.
+      #format: 'oci'
+    }
+
+  push-container-image:
+  - implementer: Skopeo
+    config: {
+      destination: '' # Required. Container image repository destination to push image to
+      #src-tls-verify: true # Optional
+      #dest-tls-verify: true # Optional
+    }
+
+  # WARNING: not yet implemented
+  container-image-unit-test: []
+
+  container-image-static-compliance-scan:
+  # WARNING: not yet implemented
+  - implementer: OpenSCAP
+    config: {}
+
+  container-image-static-vulnerability-scan:
+  # WARNING: not yet implemented
+  - implementer: OpenSCAP
+    config: {}
+
+  # WARNING: not yet implemented
+  create-deployment-environment: []
+
+  # WARNING: not yet implemented
+  deploy: []
+
+  uat:
+  # WARNING: not yet implemented
+  - implementer: Cucumber
+    config: {}
+
+  # WARNING: not yet implemented
+  runtime-vulnerability-scan: []
+
+  canary-test:
+    # WARNING: not yet implemented
+  - implementer: Selenium
+    config: {}
+
+  # WARNING: not yet implemented
+  publish-workflow-results: []
+</code></pre>
 <h2 id="examples">Examples</h2>
 <p>Getting Help</p>
 <pre><code class="python">&gt;&gt;&gt; python -m tssc --help
@@ -37,8 +361,337 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Trusted Software Supply Chain Library (tssc) main entry point.
+<pre><code class="python">&#34;&#34;&#34;Trusted Software Supply Chain Library (tssc) main entry point.
+
+Command-Line Options
+--------------------
+
+    -h, --help                                 show this help message and exit
+
+    -s STEP, --step STEP                       TSSC workflow step to run
+
+    -c CONFIG_FILE, --config-file CONFIG_FILE  TSSC workflow configuration file in yml or json
+
+    -r RESULTS_DIR, --results-dir RESULTS_DIR  TSSC workflow results file in yml or json
+
+    --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
+
+                                               Override step config provided by the given TSSC
+                                               config-file with these arguments.
+
+Step Config
+-----------
+
+### Steps
+
+* generate-metadata
+* tag-source
+* security-static-code-analysis
+* linting-static-code-analysis
+* package
+* unit-test
+* push-artifacts
+* create-container-image
+* push-container-image
+* container-image-unit-test
+* container-image-static-compliance-scan
+* container-image-static-vulnerability-scan
+* create-deployment-environment
+* deploy
+* uat
+* runtime-vulnerability-scan
+* canary-test
+* publish-workflow-results
+
+### Example Configuration Files
+
+.. Note::
+    Optional step configurations are listed commented out and with their default values.
+
+** Example TSSC Config file for a Maven built Application **
+
+    ---
+    tssc-config:
+      global-defaults:
+        # Required.
+        # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+        application-name: &#39;&#39;
+
+        # Required.
+        # Name of the service this artifact built and deployed by this TSSC workflow implements as
+        # part of the application it is a part of.
+        service-name: &#39;&#39;
+
+      generate-metadata:
+      - implementer: Maven
+        config: {
+          # Optional.
+          #pom-file: &#39;pom.xml&#39;
+        }
+
+      - implementer: Git
+        config: {
+          # Optional.
+          #repo-root: &#39;./&#39;
+
+          # Optional.
+          #build-string-length: 7
+        }
+
+      - implementer: SemanticVersion
+
+      tag-source:
+      - implementer: Git
+        config: {
+          # Optional.
+          # Will use current directory to determine URL if not specified.
+          #url: None
+
+          # Optional.
+          #username: None
+
+          # Optional.
+          #password: None
+        }
+
+      security-static-code-analysis:
+      # WARNING: not yet implemented
+      - implementer: SonarQube
+        config: {}
+
+      linting-static-code-analysis:
+        # WARNING: not yet implemented
+      - implementer: SonarQube
+        config: {}
+
+      package:
+      - implementer: Maven
+        config: {
+          # Optional.
+          #pom-file: &#39;pom.xml&#39;
+
+          # Optional
+          #artifact-extensions: [&#39;jar&#39;, &#39;war&#39;, &#39;ear&#39;]
+
+          # Optional
+          #artifact-parent-dir: &#39;target&#39;
+        }
+
+      unit-test:
+      # WARNING: not yet implemented
+      - implementer: Maven
+        config: {}
+
+      push-artifacts:
+      - implementer: Maven
+        config: {
+          # Required.
+          # URL to the artifact repository to push the artifact to.
+          url: &#39;&#39;
+
+          # Optional.
+          #user: None
+
+          # Optional.
+          #password: None
+        }
+
+      create-container-image:
+      - implementer: Buildah
+        config: {
+          # Optional.
+          #imagespecfile: &#39;Dockerfile&#39;
+
+          # Optional.
+          #context: &#39;.&#39;
+
+          # Optional.
+          #tlsverify: true
+
+          # Optional.
+          #format: &#39;oci&#39;
+        }
+
+      push-container-image:
+      - implementer: Skopeo
+        config: {
+          destination: &#39;&#39; # Required. Container image repository destination to push image to
+          #src-tls-verify: true # Optional
+          #dest-tls-verify: true # Optional
+        }
+
+      # WARNING: not yet implemented
+      container-image-unit-test: []
+
+      container-image-static-compliance-scan:
+      # WARNING: not yet implemented
+      - implementer: OpenSCAP
+        config: {}
+
+      container-image-static-vulnerability-scan:
+      # WARNING: not yet implemented
+      - implementer: OpenSCAP
+        config: {}
+
+      # WARNING: not yet implemented
+      create-deployment-environment: []
+
+      # WARNING: not yet implemented
+      deploy: []
+
+      uat:
+      # WARNING: not yet implemented
+      - implementer: Cucumber
+        config: {}
+
+      # WARNING: not yet implemented
+      runtime-vulnerability-scan: []
+
+      canary-test:
+        # WARNING: not yet implemented
+      - implementer: Selenium
+        config: {}
+
+      # WARNING: not yet implemented
+      publish-workflow-results: []
+
+** Example TSSC Config file for a NPM built Application **
+
+    ---
+    tssc-config:
+      global-defaults:
+        # Required.
+        # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+        application-name: &#39;&#39;
+
+        # Required.
+        # Name of the service this artifact built and deployed by this TSSC workflow implements as
+        # part of the application it is a part of.
+        service-name: &#39;&#39;
+
+      generate-metadata:
+      # WARNING: not yet implemented
+      - implementer: NPM
+        config: {}
+
+      - implementer: Git
+        config: {
+          # Optional.
+          #repo-root: &#39;./&#39;
+
+          # Optional.
+          #build-string-length: 7
+        }
+
+      - implementer: SemanticVersion
+
+      tag-source:
+      - implementer: Git
+        config: {
+          # Optional.
+          # Will use current directory to determine URL if not specified.
+          #url: None
+
+          # Optional.
+          #username: None
+
+          # Optional.
+          #password: None
+        }
+
+      security-static-code-analysis:
+      # WARNING: not yet implemented
+      - implementer: SonarQube
+        config: {}
+
+      linting-static-code-analysis:
+        # WARNING: not yet implemented
+      - implementer: SonarQube
+        config: {}
+
+      package:
+      # WARNING: not yet implemented
+      - implementer: NPM
+        config: {}
+
+      unit-test:
+      # WARNING: not yet implemented
+      - implementer: NPM
+        config: {}
+
+      push-artifacts:
+      # WARNING: not yet implemented
+      - implementer: NPM
+        config: {
+          # Required.
+          # URL to the artifact repository to push the artifact to.
+          url: &#39;&#39;
+
+          # Optional.
+          #user: None
+
+          # Optional.
+          #password: None
+        }
+
+      create-container-image:
+      - implementer: Buildah
+        config: {
+          # Optional.
+          #imagespecfile: &#39;Dockerfile&#39;
+
+          # Optional.
+          #context: &#39;.&#39;
+
+          # Optional.
+          #tlsverify: true
+
+          # Optional.
+          #format: &#39;oci&#39;
+        }
+
+      push-container-image:
+      - implementer: Skopeo
+        config: {
+          destination: &#39;&#39; # Required. Container image repository destination to push image to
+          #src-tls-verify: true # Optional
+          #dest-tls-verify: true # Optional
+        }
+
+      # WARNING: not yet implemented
+      container-image-unit-test: []
+
+      container-image-static-compliance-scan:
+      # WARNING: not yet implemented
+      - implementer: OpenSCAP
+        config: {}
+
+      container-image-static-vulnerability-scan:
+      # WARNING: not yet implemented
+      - implementer: OpenSCAP
+        config: {}
+
+      # WARNING: not yet implemented
+      create-deployment-environment: []
+
+      # WARNING: not yet implemented
+      deploy: []
+
+      uat:
+      # WARNING: not yet implemented
+      - implementer: Cucumber
+        config: {}
+
+      # WARNING: not yet implemented
+      runtime-vulnerability-scan: []
+
+      canary-test:
+        # WARNING: not yet implemented
+      - implementer: Selenium
+        config: {}
+
+      # WARNING: not yet implemented
+      publish-workflow-results: []
 
 Examples
 --------
@@ -99,6 +752,12 @@ from .step_implementer import DefaultSteps, StepImplementer</code></pre>
 <h1>Index</h1>
 <div class="toc">
 <ul>
+<li><a href="#command-line-options">Command-Line Options</a></li>
+<li><a href="#step-config">Step Config</a><ul>
+<li><a href="#steps">Steps</a></li>
+<li><a href="#example-configuration-files">Example Configuration Files</a></li>
+</ul>
+</li>
 <li><a href="#examples">Examples</a></li>
 </ul>
 </div>

@@ -38,25 +38,88 @@ to <a href="https://github.com/docker/distribution/issues/1201.">https://github.
 <li>major.minor.patch<ul>
 <li>will come from previous sub step of generate_metadata step,
 with step results including 'app_version'</li>
-<li>known implmeneters:</li>
+<li>known implementers:</li>
 <li>maven</li>
 </ul>
 </li>
 <li>pre-release<ul>
 <li>will come from previous sub step of generate_metadata step,
 with step results including 'pre_release'</li>
-<li>known implmeneters:</li>
+<li>known implementers:</li>
 <li>git</li>
 </ul>
 </li>
 <li>build<ul>
 <li>will come from previous sub step of generate_metadata step,
 with step results including 'build'</li>
-<li>known implmeneters:</li>
+<li>known implementers:</li>
 <li>git</li>
 </ul>
 </li>
 </ul>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This step implementer has not step configuration.</p>
+</div>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<table>
+<thead>
+<tr>
+<th>Step Name</th>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate-metadata</code></td>
+<td><code>app-version</code></td>
+<td>Value to use for <code>version</code> portion of semantic version
+(<a href="https://semver.org/">https://semver.org/</a>).</td>
+</tr>
+<tr>
+<td><code>generate-metadata</code></td>
+<td><code>pre-release</code></td>
+<td>Value to use for <code>pre-release</code> portion of semantic version
+(<a href="https://semver.org/">https://semver.org/</a>).
+Uses the Git branch name.</td>
+</tr>
+<tr>
+<td><code>generate-metadata</code></td>
+<td><code>build</code></td>
+<td>Value to use for <code>build</code> portion of semantic version
+(<a href="https://semver.org/">https://semver.org/</a>).
+Uses a portion of the latest Git commit hash.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>version</code></td>
+<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
+</tr>
+<tr>
+<td><code>image-tag</code></td>
+<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) modified
+to work as a container image tag.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples</h2>
 <p><strong>Example 1</strong></p>
 <p><em>Previous Step Results</em></p>
 <pre><code>{'tssc-results': {
@@ -122,18 +185,58 @@ Source for version sections:
   - major.minor.patch
     * will come from previous sub step of generate_metadata step,
       with step results including &#39;app_version&#39;
-    * known implmeneters:
+    * known implementers:
       -  maven
   - pre-release
     * will come from previous sub step of generate_metadata step,
       with step results including &#39;pre_release&#39;
-    * known implmeneters:
+    * known implementers:
       - git
   - build
     * will come from previous sub step of generate_metadata step,
       with step results including &#39;build&#39;
-    * known implmeneters:
+    * known implementers:
       - git
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+.. Note::
+    This step implementer has not step configuration.
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name           | Result Key    | Description
+|---------------------|---------------|------------
+| `generate-metadata` | `app-version` | Value to use for `version` portion of semantic version \
+                                        (https://semver.org/).
+| `generate-metadata` | `pre-release` | Value to use for `pre-release` portion of semantic version \
+                                        (https://semver.org/). \
+                                        Uses the Git branch name.
+| `generate-metadata` | `build`       | Value to use for `build` portion of semantic version \
+                                        (https://semver.org/). \
+                                        Uses a portion of the latest Git commit hash.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key  | Description
+|-------------|------------
+| `version`   | Constructed semantic version (https://semver.org/).
+| `image-tag` | Constructed semantic version (https://semver.org/) modified \
+                to work as a container image tag.
+
+Examples
+--------
 
 **Example 1**
 
@@ -400,6 +503,10 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
 <div class="toc">
 <ul>
 <li><a href="#notes">Notes</a></li>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+<li><a href="#examples">Examples</a></li>
 </ul>
 </div>
 <ul id="index">

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.step_implementers.generate_metadata API documentation</title>
-<meta name="description" content="tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step." />
+<meta name="description" content="tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
@@ -23,12 +23,61 @@
 </header>
 <section id="section-intro">
 <p>tssc.StepImplementers for the 'generate-metadata' TSSC step.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>All tssc.StepImplementers for this step should
+accept minimally the following configuration options.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No step configuration is specifically required for all step implementers of this step
+to implement.</p>
+</div>
+<h2 id="step-results">Step Results</h2>
+<p>The combination of tssc.StepImplementers for this step should
+minimally produce the following step results.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>version</code></td>
+<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
+</tr>
+<tr>
+<td><code>image-tag</code></td>
+<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) modified
+to work as a container image tag.</td>
+</tr>
+</tbody>
+</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step.
+<pre><code class="python">&#34;&#34;&#34;tssc.StepImplementers for the &#39;generate-metadata&#39; TSSC step.
+
+Step Configuration
+------------------
+All tssc.StepImplementers for this step should
+accept minimally the following configuration options.
+
+.. Note::
+    No step configuration is specifically required for all step implementers of this step
+    to implement.
+
+Step Results
+------------
+The combination of tssc.StepImplementers for this step should
+minimally produce the following step results.
+
+| Result Key  | Description
+|-------------|------------
+| `version`   | Constructed semantic version (https://semver.org/).
+| `image-tag` | Constructed semantic version (https://semver.org/) modified \
+                to work as a container image tag.
 &#34;&#34;&#34;
 
 from .maven import Maven
@@ -47,11 +96,11 @@ __all__ = [
 <dl>
 <dt><code class="name"><a title="tssc.step_implementers.generate_metadata.git" href="git.html">tssc.step_implementers.generate_metadata.git</a></code></dt>
 <dd>
-<div class="desc"><p>Step Implementer for the generate-metadata step for git.</p></div>
+<div class="desc"><p>Step Implementer for the generate-metadata step for git …</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.generate_metadata.maven" href="maven.html">tssc.step_implementers.generate_metadata.maven</a></code></dt>
 <dd>
-<div class="desc"><p>Step Implementer for the generate-metadata step for Maven.</p></div>
+<div class="desc"><p>Step Implementer for the generate-metadata step for Maven …</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.generate_metadata.semantic_version" href="semantic_version.html">tssc.step_implementers.generate_metadata.semantic_version</a></code></dt>
 <dd>
@@ -70,7 +119,10 @@ semantic version from other metadata …</p></div>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#step-results">Step Results</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

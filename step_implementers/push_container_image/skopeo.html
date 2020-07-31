@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.step_implementers.push_container_image.skopeo API documentation</title>
-<meta name="description" content="Step Implementer for the create-container-image step for Buildah." />
+<meta name="description" content="Step Implementer for the create-container-image step for Skopeo …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
@@ -22,13 +22,118 @@
 <h1 class="title">Module <code>tssc.step_implementers.push_container_image.skopeo</code></h1>
 </header>
 <section id="section-intro">
-<p>Step Implementer for the create-container-image step for Buildah.</p>
+<p>Step Implementer for the create-container-image step for Skopeo.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>destination</code></td>
+<td>True</td>
+<td></td>
+<td>Container image repository destination to push image to</td>
+</tr>
+<tr>
+<td><code>src-tls-verify</code></td>
+<td>True</td>
+<td><code>'true'</code></td>
+<td>Whether to very TLS for source of image</td>
+</tr>
+<tr>
+<td><code>dest-tls-verify</code></td>
+<td>True</td>
+<td><code>'true'</code></td>
+<td>Whether to verify TLS for destination of image</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<table>
+<thead>
+<tr>
+<th>Step Name</th>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate-metadata</code></td>
+<td><code>image-tag</code></td>
+<td>Tag to push image with</td>
+</tr>
+<tr>
+<td><code>create-container-image</code></td>
+<td><code>image-tar-file</code></td>
+<td>Local tar file of image to push</td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>image-tag</code></td>
+<td>Pushed destination image tag</td>
+</tr>
+</tbody>
+</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Step Implementer for the create-container-image step for Buildah.
+<pre><code class="python">&#34;&#34;&#34;Step Implementer for the create-container-image step for Skopeo.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default  | Description
+|-------------------|-----------|----------|-----------
+| `destination`     | True      |          | Container image repository destination to push image to
+| `src-tls-verify`  | True      | `&#39;true&#39;` | Whether to very TLS for source of image
+| `dest-tls-verify` | True      | `&#39;true&#39;` | Whether to verify TLS for destination of image
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name                | Result Key       | Description
+|--------------------------|------------------|------------
+| `generate-metadata`      | `image-tag`      | Tag to push image with
+| `create-container-image` | `image-tar-file` | Local tar file of image to push
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key  | Description
+|-------------|------------
+| `image-tag` | Pushed destination image tag
+
 &#34;&#34;&#34;
 import sys
 import sh
@@ -85,9 +190,9 @@ class Skopeo(StepImplementer):
     def _run_step(self, runtime_step_config):
 
         version = &#34;latest&#34;
-        if(self.get_step_results(&#39;generate-metadata&#39;) and \
-          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
-            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
+        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
+          self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;image-tag&#39;)):
+            version = self.get_step_results(DefaultSteps.GENERATE_METADATA)[&#39;image-tag&#39;]
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
@@ -188,9 +293,9 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
     def _run_step(self, runtime_step_config):
 
         version = &#34;latest&#34;
-        if(self.get_step_results(&#39;generate-metadata&#39;) and \
-          self.get_step_results(&#39;generate-metadata&#39;).get(&#39;image-tag&#39;)):
-            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;image-tag&#39;]
+        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
+          self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;image-tag&#39;)):
+            version = self.get_step_results(DefaultSteps.GENERATE_METADATA)[&#39;image-tag&#39;]
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
@@ -249,7 +354,11 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

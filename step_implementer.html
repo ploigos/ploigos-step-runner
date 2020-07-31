@@ -55,7 +55,6 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     CONTAINER_IMAGE_UNIT_TEST = &#39;container-image-unit-test&#39;
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = &#39;container-image-static-compliance-scan&#39;
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
-    PUSH_TRUSTED_CONTAINER_IMAGE = &#39;push-trusted-container-image&#39;
     CREATE_DEPLOYMENT_ENVIRONMENT = &#39;create-deployment-environment&#39;
     DEPLOY = &#39;deploy&#39;
     UAT = &#39;uat&#39;
@@ -148,8 +147,23 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         Raises
         ------
-        TSSCException
-            If existing step results file has invalid YAML.
+        ValueError
+            If step config is invalid.
+        &#34;&#34;&#34;
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        &#34;&#34;&#34;
+        Function for implementers to override to do custom runtime step configuration validation.
+
+        Parameters
+        ----------
+        runtime_step_config : dict
+            Runtime step configuration to validate.
+
+        Raises
+        ------
+        ValueError
+            If step config is invalid.
         &#34;&#34;&#34;
 
     @classmethod
@@ -208,6 +222,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
         runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+        self._validate_runtime_step_config(runtime_step_config)
 
         StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
           global_step_config_defaults)
@@ -434,7 +449,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
     CONTAINER_IMAGE_UNIT_TEST = &#39;container-image-unit-test&#39;
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = &#39;container-image-static-compliance-scan&#39;
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = &#39;container-image-static-vulnerability-scan&#39;
-    PUSH_TRUSTED_CONTAINER_IMAGE = &#39;push-trusted-container-image&#39;
     CREATE_DEPLOYMENT_ENVIRONMENT = &#39;create-deployment-environment&#39;
     DEPLOY = &#39;deploy&#39;
     UAT = &#39;uat&#39;
@@ -493,10 +507,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 <div class="desc"></div>
 </dd>
 <dt id="tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE"><code class="name">var <span class="ident">PUSH_CONTAINER_IMAGE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="tssc.step_implementer.DefaultSteps.PUSH_TRUSTED_CONTAINER_IMAGE"><code class="name">var <span class="ident">PUSH_TRUSTED_CONTAINER_IMAGE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -625,8 +635,23 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         Raises
         ------
-        TSSCException
-            If existing step results file has invalid YAML.
+        ValueError
+            If step config is invalid.
+        &#34;&#34;&#34;
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        &#34;&#34;&#34;
+        Function for implementers to override to do custom runtime step configuration validation.
+
+        Parameters
+        ----------
+        runtime_step_config : dict
+            Runtime step configuration to validate.
+
+        Raises
+        ------
+        ValueError
+            If step config is invalid.
         &#34;&#34;&#34;
 
     @classmethod
@@ -685,6 +710,7 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
         runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+        self._validate_runtime_step_config(runtime_step_config)
 
         StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
           global_step_config_defaults)
@@ -1165,6 +1191,7 @@ to use when running the step.</dd>
 
     StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
     runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+    self._validate_runtime_step_config(runtime_step_config)
 
     StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
       global_step_config_defaults)
@@ -1326,7 +1353,6 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUBLISH_WROKFLOW_RESULTS" href="#tssc.step_implementer.DefaultSteps.PUBLISH_WROKFLOW_RESULTS">PUBLISH_WROKFLOW_RESULTS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS" href="#tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS">PUSH_ARTIFACTS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE">PUSH_CONTAINER_IMAGE</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_TRUSTED_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.PUSH_TRUSTED_CONTAINER_IMAGE">PUSH_TRUSTED_CONTAINER_IMAGE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN" href="#tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN">RUNTIME_VULNERABILITY_SCAN</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS">SECURITY_STATIC_CODE_ANALYSIS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.TAG_SOURCE" href="#tssc.step_implementer.DefaultSteps.TAG_SOURCE">TAG_SOURCE</a></code></li>

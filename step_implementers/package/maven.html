@@ -32,8 +32,118 @@ to handle multiple artifacts.</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>If package not specfied in pom will default to jar in result.</p>
+<p>If package not specified in pom will default to jar in result.</p>
 </div>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pom-file</code></td>
+<td>True</td>
+<td><code>'pom.xml'</code></td>
+<td>Maven pom file to build</td>
+</tr>
+<tr>
+<td><code>artifact-extensions</code></td>
+<td>True</td>
+<td><code>["jar", "war", "ear"]</code></td>
+<td>Extensions to look for in the</td>
+</tr>
+<tr>
+<td><code>artifact-parent-dir</code> for built</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>artifacts.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>artifact-parent-dir</code></td>
+<td>True</td>
+<td><code>'target'</code></td>
+<td>Parent directory to look for built</td>
+</tr>
+<tr>
+<td>artifacts in ending in</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>artifact-extensions</code>.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<p>None.</p>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>artifacts</code></td>
+<td>An array of dictionaries with information on the built artifacts.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>artifacts</strong>
+Keys in the dictionary elements in the <code>artifacts</code> array in the step results.</p>
+<table>
+<thead>
+<tr>
+<th><code>artifacts</code> Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td>Absolute path to the built artifact.</td>
+</tr>
+<tr>
+<td><code>artifact-id</code></td>
+<td>Maven artifact ID.</td>
+</tr>
+<tr>
+<td><code>group-id</code></td>
+<td>Maven group ID.</td>
+</tr>
+<tr>
+<td><code>package-type</code></td>
+<td>Package type.</td>
+</tr>
+<tr>
+<td><code>pom-path</code></td>
+<td>Absolute path to the pom that built the artifact.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples</h2>
 <p><strong>Example 1</strong></p>
 <p><em>Given POM</em></p>
 <pre><code>&lt;project&gt;
@@ -49,13 +159,15 @@ to handle multiple artifacts.</p>
 </code></pre>
 <p><em>Step Results after this Step Implementer</em></p>
 <pre><code>{'tssc-results': {
-    'package': {
-        'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
-        'artifact-id': 'my-app',
-        'group-id': 'com.mycompany.app'
-        'package-type': 'jar',
-        'pom-path': '{FULL_PATH_TO_POM}'
-  }
+    'package': [
+        {
+            'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+            'artifact-id': 'my-app',
+            'group-id': 'com.mycompany.app'
+            'package-type': 'jar',
+            'pom-path': '{FULL_PATH_TO_POM}'
+        }
+    ]
 }}
 </code></pre>
 <p><strong>Example 2</strong></p>
@@ -74,20 +186,22 @@ to handle multiple artifacts.</p>
 </code></pre>
 <p><em>Step Results after this Step Implementer</em></p>
 <pre><code>{'tssc-results': {
-    'package': {
-        'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
-        'artifact-id': 'my-app',
-        'group-id': 'com.mycompany.app'
-        'package-type': 'war',
-        'pom-path': '{FULL_PATH_TO_POM}'
-  }
+    'package': [
+        {
+            'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
+            'artifact-id': 'my-app',
+            'group-id': 'com.mycompany.app'
+            'package-type': 'war',
+            'pom-path': '{FULL_PATH_TO_POM}'
+        }
+    ]
+}}
 </code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Step Implementer for the package step for Maven.
+<pre><code class="python">&#34;&#34;&#34;Step Implementer for the package step for Maven.
 
 Notes
 -----
@@ -100,7 +214,55 @@ Notes
 
 .. Important::
 
-    If package not specfied in pom will default to jar in result.
+    If package not specified in pom will default to jar in result.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key     | Required? | Default                 | Description
+|-----------------------|-----------|-------------------------|-----------
+| `pom-file`            | True      | `&#39;pom.xml&#39;`             | Maven pom file to build
+| `artifact-extensions` | True      | `[&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;]` | Extensions to look for in the
+                                                                `artifact-parent-dir` for built
+                                                                artifacts.
+| `artifact-parent-dir` | True      | `&#39;target&#39;`              | Parent directory to look for built
+                                                                artifacts in ending in
+                                                                `artifact-extensions`.
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+None.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key  | Description
+|-------------|------------
+| `artifacts` | An array of dictionaries with information on the built artifacts.
+
+
+**artifacts**
+Keys in the dictionary elements in the `artifacts` array in the step results.
+
+| `artifacts` Key | Description
+|-----------------|------------
+| `path`          | Absolute path to the built artifact.
+| `artifact-id`   | Maven artifact ID.
+| `group-id`      | Maven group ID.
+| `package-type`  | Package type.
+| `pom-path`      | Absolute path to the pom that built the artifact.
+
+Examples
+--------
 
 **Example 1**
 
@@ -120,13 +282,15 @@ Notes
 *Step Results after this Step Implementer*
 
     {&#39;tssc-results&#39;: {
-        &#39;package&#39;: {
-            &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
-            &#39;artifact-id&#39;: &#39;my-app&#39;,
-            &#39;group-id&#39;: &#39;com.mycompany.app&#39;
-            &#39;package-type&#39;: &#39;jar&#39;,
-            &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
-      }
+        &#39;package&#39;: [
+            {
+                &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
+                &#39;artifact-id&#39;: &#39;my-app&#39;,
+                &#39;group-id&#39;: &#39;com.mycompany.app&#39;
+                &#39;package-type&#39;: &#39;jar&#39;,
+                &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
+            }
+        ]
     }}
 
 **Example 2**
@@ -148,13 +312,16 @@ Notes
 *Step Results after this Step Implementer*
 
     {&#39;tssc-results&#39;: {
-        &#39;package&#39;: {
-            &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
-            &#39;artifact-id&#39;: &#39;my-app&#39;,
-            &#39;group-id&#39;: &#39;com.mycompany.app&#39;
-            &#39;package-type&#39;: &#39;war&#39;,
-            &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
-      }
+        &#39;package&#39;: [
+            {
+                &#39;path&#39;: &#39;{FULL_PATH_TO_GENERATED_ARTIFACT}&#39;,
+                &#39;artifact-id&#39;: &#39;my-app&#39;,
+                &#39;group-id&#39;: &#39;com.mycompany.app&#39;
+                &#39;package-type&#39;: &#39;war&#39;,
+                &#39;pom-path&#39;: &#39;{FULL_PATH_TO_POM}&#39;
+            }
+        ]
+    }}
 &#34;&#34;&#34;
 import os
 import sh
@@ -211,9 +378,6 @@ class Maven(StepImplementer):
 
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
-
-        artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
-        group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
 
         try:
             sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
@@ -337,9 +501,6 @@ If given pom file does not contain required elements</dd>
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
-        artifact_id = get_xml_element(pom_file, &#39;artifactId&#39;).text
-        group_id = get_xml_element(pom_file, &#39;groupId&#39;).text
-
         try:
             sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
         except sh.ErrorReturnCode as error:
@@ -420,6 +581,10 @@ If given pom file does not contain required elements</dd>
 <div class="toc">
 <ul>
 <li><a href="#notes">Notes</a></li>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+<li><a href="#examples">Examples</a></li>
 </ul>
 </div>
 <ul id="index">

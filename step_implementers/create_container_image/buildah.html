@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.step_implementers.create_container_image.buildah API documentation</title>
-<meta name="description" content="Step Implementer for the create-container-image step for Buildah." />
+<meta name="description" content="Step Implementer for the create-container-image step for Buildah …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
@@ -23,12 +23,144 @@
 </header>
 <section id="section-intro">
 <p>Step Implementer for the create-container-image step for Buildah.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imagespecfile</code></td>
+<td>True</td>
+<td><code>'Dockerfile'</code></td>
+<td>File defining the container image</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>True</td>
+<td><code>'.'</code></td>
+<td>Context to build the container image in</td>
+</tr>
+<tr>
+<td><code>tlsverify</code></td>
+<td>True</td>
+<td><code>'true'</code></td>
+<td>Whether to verify TLS when pulling parent images</td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td>True</td>
+<td><code>'oci'</code></td>
+<td>format of the built image's manifest and metadata</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<table>
+<thead>
+<tr>
+<th>Step Name</th>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate-metadata</code></td>
+<td><code>image-tag</code></td>
+<td>Version to use when building the image</td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>image-tag</code></td>
+<td>The image ID to tag the built image with when pushing it to a local file</td>
+</tr>
+<tr>
+<td><code>image-tar-file</code></td>
+<td>Path to the built container image as a tar file</td>
+</tr>
+</tbody>
+</table>
+<p><strong> Example </strong></p>
+<p><code>image_tar_file</code> step configuration specified.</p>
+<pre><code>'tssc-results': {
+    'create-container-image': {
+        'image_tag': '',
+        'image_tar_file' : ''
+    }
+}
+</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Step Implementer for the create-container-image step for Buildah.
+<pre><code class="python">&#34;&#34;&#34;Step Implementer for the create-container-image step for Buildah.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key | Required? | Default        | Description
+|-------------------|-----------|----------------|-----------
+| `imagespecfile`   | True      | `&#39;Dockerfile&#39;` | File defining the container image
+| `context`         | True      | `&#39;.&#39;`          | Context to build the container image in
+| `tlsverify`       | True      | `&#39;true&#39;`       | Whether to verify TLS when pulling parent images
+| `format`          | True      | `&#39;oci&#39;`        | format of the built image&#39;s manifest and metadata
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name           | Result Key      | Description
+|---------------------|-----------------|------------
+| `generate-metadata` | `image-tag`     | Version to use when building the image
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key       | Description
+|------------------|------------
+| `image-tag`      | The image ID to tag the built image with when pushing it to a local file
+| `image-tar-file` | Path to the built container image as a tar file
+
+
+** Example **
+
+`image_tar_file` step configuration specified.
+
+    &#39;tssc-results&#39;: {
+        &#39;create-container-image&#39;: {
+            &#39;image_tag&#39;: &#39;&#39;,
+            &#39;image_tar_file&#39; : &#39;&#39;
+        }
+    }
+
 &#34;&#34;&#34;
 import os
 import sys
@@ -41,7 +173,7 @@ DEFAULT_ARGS = {
     # Image specification file name
     &#39;imagespecfile&#39;: &#39;Dockerfile&#39;,
 
-    # Path to the image specification file
+    # Parent path to the image specification file
     &#39;context&#39;: &#39;.&#39;,
 
     # Verify TLS Certs?
@@ -49,7 +181,6 @@ DEFAULT_ARGS = {
 
     # Format of the produced image
     &#39;format&#39;: &#39;oci&#39;
-
 }
 
 REQUIRED_ARGS = {
@@ -345,7 +476,11 @@ If destination is not specified (not defaulted)</dd>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>

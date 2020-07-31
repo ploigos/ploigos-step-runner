@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.4" />
 <title>tssc.step_implementers.generate_metadata.git API documentation</title>
-<meta name="description" content="Step Implementer for the generate-metadata step for git." />
+<meta name="description" content="Step Implementer for the generate-metadata step for git …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
@@ -23,12 +23,103 @@
 </header>
 <section id="section-intro">
 <p>Step Implementer for the generate-metadata step for git.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>repo-root</code></td>
+<td>True</td>
+<td><code>./</code></td>
+<td>Directory path to the Git repo to generate
+metadata from.</td>
+</tr>
+<tr>
+<td><code>build-string-length</code></td>
+<td>True</td>
+<td><code>7</code></td>
+<td>Length of the Git hash to use for the
+<code>build</code> portion of the semantic version.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<div class="admonition note">
+<p class="admonition-title">Note:&ensp;This step implementer does not expect results from any previous steps.</p>
+</div>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pre-release</code></td>
+<td>Value to use for <code>pre-release</code> portion of semantic version
+(<a href="https://semver.org/">https://semver.org/</a>).
+Uses the Git branch name.</td>
+</tr>
+<tr>
+<td><code>build</code></td>
+<td>Value to use for <code>build</code> portion of semantic version (<a href="https://semver.org/">https://semver.org/</a>).
+Uses a portion of the latest Git commit hash.</td>
+</tr>
+</tbody>
+</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Step Implementer for the generate-metadata step for git.
+<pre><code class="python">&#34;&#34;&#34;Step Implementer for the generate-metadata step for git.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key     | Required? | Default | Description
+|-----------------------|-----------|---------|-----------
+| `repo-root`           | True      | `./`    | Directory path to the Git repo to generate \
+                                                metadata from.
+| `build-string-length` | True      | `7`     | Length of the Git hash to use for the \
+                                                `build` portion of the semantic version.
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+.. Note:: This step implementer does not expect results from any previous steps.
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key    | Description
+|---------------|------------
+| `pre-release` | Value to use for `pre-release` portion of semantic version \
+                    (https://semver.org/). \
+                    Uses the Git branch name.
+| `build`       | Value to use for `build` portion of semantic version (https://semver.org/). \
+                    Uses a portion of the latest Git commit hash.
 &#34;&#34;&#34;
 
 import re
@@ -241,7 +332,11 @@ If given pom file does not contain required elements</dd>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
