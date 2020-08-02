@@ -39,54 +39,81 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {
+DEFAULT_CONFIG = {
     'src-tls-verify': 'true',
     'dest-tls-verify': 'true',
 }
 
-REQUIRED_ARGS = {
-    'destination': None
-}
+REQUIRED_CONFIG_KEYS = [
+    'destination',
+    'src-tls-verify',
+    'dest-tls-verify'
+]
 
 class Skopeo(StepImplementer):
     """
     StepImplementer for the push-container-image step for Skopeo.
-
-    Raises
-    ------
-    ValueError
-        If a required parameter is unspecified
-    RuntimeError
-        If skopeo command fails for any reason
     """
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        """
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
         return DefaultSteps.PUSH_CONTAINER_IMAGE
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         """
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self, runtime_step_config):
+        """
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
+
+        Returns
+        -------
+        dict
+            Results of running this step.
         """
-        print(step_config)
-
-        all_required_args = {**DEFAULT_ARGS, **REQUIRED_ARGS}
-
-        for config_name in all_required_args:
-            if config_name not in step_config or not step_config[config_name]:
-                raise ValueError('Key (' + config_name + ') must have non-empty value in the step '
-                                 'configuration')
-
-    def _run_step(self, runtime_step_config):
-
         version = "latest"
         if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
           self.get_step_results(DefaultSteps.GENERATE_METADATA).get('image-tag')):

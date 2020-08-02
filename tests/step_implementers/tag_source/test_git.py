@@ -224,7 +224,7 @@ class TestStepImplementerTagSourceGit(unittest.TestCase):
             }
 
             with self.assertRaisesRegex(
-                    ValueError, 
+                    AssertionError, 
                     'Either username or password is not set. Neither or both must be set.'):
                 run_step_test_with_result_validation(
                     temp_dir,

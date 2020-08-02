@@ -500,8 +500,8 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
-                r'Key \(pom-file\) must have none empty value in the step configuration'):
+                AssertionError, 
+                r"The runtime step configuration \(\{'pom-file': None, 'artifact-extensions': \['jar', 'war', 'ear'\], 'artifact-parent-dir': 'target'\}\) is missing the required configuration keys \(\['pom-file'\]\)"):
             factory.run_step('package')
     
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'mock error'))

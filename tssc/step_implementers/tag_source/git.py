@@ -57,9 +57,9 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {}
+DEFAULT_CONFIG = {}
 
-OPTIONAL_ARGS = {
+AUTHENTICATION_CONFIG = {
     'username': None,
     'password': None
 }
@@ -71,57 +71,93 @@ class Git(StepImplementer):
     This makes extensive use of the python sh library. This was a deliberate choice,
     as the gitpython library doesn't appear to easily support username/password auth
     for http and https git repos, and that is a desired use case.
-
-    Raises
-    ------
-    ValueError
-        If a required parameter is unspecified
-    RuntimeError
-        If git commands fail for any reason
     """
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        """
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
         return DefaultSteps.TAG_SOURCE
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         """
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return []
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        """
+        Validates the given `runtime_step_config` against the required step configuration keys.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
+
+        Raises
+        ------
+        AssertionError
+            If the given `runtime_step_config` is not valid with a message as to why.
         """
-        print(step_config)
+        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
 
-    @staticmethod
-    def _validate_runtime_step_config(runtime_step_config):
-        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
-          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
-            raise ValueError('Either username or password is not set. Neither ' \
-              'or both must be set.')
-
-    def _get_tag(self):
-        tag = 'latest'
-        if(self.get_step_results('generate-metadata') \
-          and self.get_step_results('generate-metadata').get('version')):
-            tag = self.get_step_results('generate-metadata').get('version')
-        else:
-            print('No version found in metadata. Using latest')
-        return tag
+        assert ( \
+            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
+            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
+        ), 'Either username or password is not set. Neither or both must be set.'
 
     def _run_step(self, runtime_step_config):
+        """
+        Runs the TSSC step implemented by this StepImplementer.
+
+        Parameters
+        ----------
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
+
+        Returns
+        -------
+        dict
+            Results of running this step.
+        """
         username = None
         password = None
 
-
-        self._validate_runtime_step_config(runtime_step_config)
-
-        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
             if(runtime_step_config.get('username') \
               and runtime_step_config.get('password')):
                 username = runtime_step_config.get('username')
@@ -152,6 +188,15 @@ class Git(StepImplementer):
             'tag' : tag
         }
         return results
+
+    def _get_tag(self):
+        tag = 'latest'
+        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) \
+          and self.get_step_results(DefaultSteps.GENERATE_METADATA).get('version')):
+            tag = self.get_step_results(DefaultSteps.GENERATE_METADATA).get('version')
+        else:
+            print('No version found in metadata. Using latest')
+        return tag
 
     @staticmethod
     def _git_url(runtime_step_config):

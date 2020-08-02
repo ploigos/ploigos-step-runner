@@ -123,36 +123,74 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {
+DEFAULT_CONFIG = {
     'release-branch': 'master'
 }
 
 class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods 
     """
     StepImplementer for the generate-metadata step for SemanticVersion.
-
-    Raises
-    ------
     """
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        """
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
         return DefaultSteps.GENERATE_METADATA
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         """
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return []
+
+    def _run_step(self, runtime_step_config):
+        """
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
-        """
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
-    def _run_step(self, runtime_step_config):
+        Returns
+        -------
+        dict
+            Results of running this step.
+        """
         app_version = None
         pre_release = None
         build = None
@@ -167,8 +205,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
             raise ValueError(
                 """No value for (app-version) provided via runtime flag
                 (app-version) or from prior step implementer ({0}).
-                """.format(self.step_name())
-            )
+                """.format(self.step_name))
 
         if 'pre-release' in runtime_step_config:
             pre_release = runtime_step_config['pre-release']
@@ -178,7 +215,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
             raise ValueError(
                 """No value for (pre_release) provided via runtime flag
                 (pre-release) or from prior step implementer ({0})
-                """.format(self.step_name()))
+                """.format(self.step_name))
 
         if 'build' in runtime_step_config:
             build = runtime_step_config['build']
@@ -188,7 +225,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
             raise ValueError(
                 """No value for (build) provided via runtime flag
                 (build) or from prior step implementer ({0})
-                """.format(self.step_name()))
+                """.format(self.step_name))
 
         if pre_release == release_branch:
             version = "{0}+{1}".format(app_version, build)

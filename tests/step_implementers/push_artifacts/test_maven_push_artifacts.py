@@ -8,7 +8,6 @@ from testfixtures import TempDirectory
 
 from tssc.step_implementers.push_artifacts import Maven
 
-
 from test_utils import *
 
 class TestStepImplementerPushArtifact(unittest.TestCase):
@@ -32,8 +31,8 @@ class TestStepImplementerPushArtifact(unittest.TestCase):
             }
             expected_step_results = {}
             with self.assertRaisesRegex(
-                    ValueError,
-                    'url must have none empty value in the step configuration'):
+                    AssertionError,
+                    r'The runtime step configuration \(\{\'user\': \'unit.test.user\', \'password\': \'unit.test.password\'\}\) is missing the required configuration keys \(\[\'url\'\]\)'):
                 run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -54,8 +53,8 @@ class TestStepImplementerPushArtifact(unittest.TestCase):
             }
             expected_step_results = {}
             with self.assertRaisesRegex(
-                    ValueError,
-                    'Either user or password is not set. Neither or both must be set.'):
+                    AssertionError,
+                    'Either username or password is not set. Neither or both must be set.'):
                 run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -76,8 +75,8 @@ class TestStepImplementerPushArtifact(unittest.TestCase):
             }
             expected_step_results = {}
             with self.assertRaisesRegex(
-                    ValueError,
-                    'Either user or password is not set. Neither or both must be set.'):
+                    AssertionError,
+                    'Either username or password is not set. Neither or both must be set.'):
                 run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
 
     # ------------  Tests that require generate-metadata 
@@ -208,6 +207,7 @@ class TestStepImplementerPushArtifact(unittest.TestCase):
             }
 
             run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
+
     @patch('sh.mvn', create=True)
     def test_push_artifact_with_no_user_password_results(self, mvn_mock):
         with TempDirectory() as temp_dir:
