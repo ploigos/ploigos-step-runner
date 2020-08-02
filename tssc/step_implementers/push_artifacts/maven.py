@@ -51,49 +51,107 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {}
-OPTIONAL_ARGS = {
+DEFAULT_CONFIG = {}
+AUTHENTICATION_CONFIG = {
     'user': None,
     'password': None
 }
+REQUIRED_CONFIG_KEYS = [
+    'url'
+]
 
 class Maven(StepImplementer):
     """
     StepImplementer for the push-artifacts step for Maven.
     """
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        """
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
         return DefaultSteps.PUSH_ARTIFACTS
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         """
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return REQUIRED_CONFIG_KEYS
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        """
+        Validates the given `runtime_step_config` against the required step configuration keys.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
-        """
-        if 'url' not in step_config or not step_config['url']:
-            raise ValueError('url must have none empty value in the step configuration')
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        if not all(element in runtime_step_config for element in OPTIONAL_ARGS) \
-          and any(element in runtime_step_config for element in OPTIONAL_ARGS):
-            raise ValueError('Either user or password is not set. Neither ' \
-              'or both must be set.')
+        Raises
+        ------
+        AssertionError
+            If the given `runtime_step_config` is not valid with a message as to why.
+        """
+        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
+
+        assert ( \
+            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
+            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
+        ), 'Either username or password is not set. Neither or both must be set.'
 
     def _run_step(self, runtime_step_config):
+        """
+        Runs the TSSC step implemented by this StepImplementer.
+
+        Parameters
+        ----------
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
+
+        Returns
+        -------
+        dict
+            Results of running this step.
+        """
         user = ''
         password = ''
 
         url = runtime_step_config['url']
 
-        if any(element in runtime_step_config for element in OPTIONAL_ARGS):
+        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
             if(runtime_step_config.get('user') \
               and runtime_step_config.get('password')):
                 user = runtime_step_config.get('user')

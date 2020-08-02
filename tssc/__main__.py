@@ -44,7 +44,6 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     ValueError
         If the given file can not be parsed as YAML or JSON.
     """
-    file_contents = None
     parsed_file = None
     json_parse_error = None
     yaml_parse_error = None
@@ -101,6 +100,12 @@ def main(argv=None):
         help='TSSC workflow step to run'
     )
     parser.add_argument(
+        '-e',
+        '--environment',
+        required=False,
+        help='The environment to run this step against.'
+    )
+    parser.add_argument(
         '-c',
         '--config-file',
         required=True,
@@ -140,8 +145,8 @@ def main(argv=None):
     tssc_factory = TSSCFactory(tssc_config, args.results_dir)
 
     try:
-        tssc_factory.run_step(args.step, args.step_config)
-    except (ValueError, TSSCException) as err:
+        tssc_factory.run_step(args.step, args.step_config, args.environment)
+    except (ValueError, AssertionError, TSSCException) as err:
         print_error('Error calling step (' + args.step + '): ' + str(err))
         sys.exit(200)
 

@@ -53,7 +53,7 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {
+DEFAULT_CONFIG = {
     # Image specification file name
     'imagespecfile': 'Dockerfile',
 
@@ -67,10 +67,15 @@ DEFAULT_ARGS = {
     'format': 'oci'
 }
 
-REQUIRED_ARGS = {
-    # Image destination, without version
-    'destination' : None
-}
+REQUIRED_CONFIG_KEYS = [
+    'imagespecfile',
+    'context',
+    'tlsverify',
+    'format',
+    'service-name',
+    'application-name'
+]
+
 class Buildah(StepImplementer):
     """
     StepImplementer for the create-container-image step for Buildah.
@@ -84,52 +89,90 @@ class Buildah(StepImplementer):
         buildah command fails for any reason
     """
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        """
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        """
         return DefaultSteps.CREATE_CONTAINER_IMAGE
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         """
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self, runtime_step_config):
+        """
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
+
+        Returns
+        -------
+        dict
+            Results of running this step.
         """
-        print(step_config)
-
-        for config_name in DEFAULT_ARGS:
-            if config_name not in step_config or not step_config[config_name]:
-                raise ValueError('Key (' + config_name + ') must have non-empty value in the step '
-                                 'configuration')
-
-        if 'destination' not in step_config or not step_config['destination']:
-            raise ValueError('Key (destination) must have non-empty value in the step '
-                             'configuration')
-
-    def _run_step(self, runtime_step_config):
-
         context = runtime_step_config['context']
         image_spec_file = runtime_step_config['imagespecfile']
         image_spec_file_location = context + '/' + image_spec_file
-        destination = runtime_step_config['destination']
+        application_name = runtime_step_config['application-name']
+        service_name = runtime_step_config['service-name']
 
         if not os.path.exists(image_spec_file_location):
             raise ValueError('Image specification file does not exist in location: '
                              + image_spec_file_location)
 
-        image_tag_version = "latest"
-        if(self.get_step_results('generate-metadata') and \
-          self.get_step_results('generate-metadata').get('image-tag')):
-            image_tag_version = self.get_step_results('generate-metadata')['image-tag']
+        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
+          self.get_step_results(DefaultSteps.GENERATE_METADATA).get('image-tag')):
+            image_tag_version = self.get_step_results(DefaultSteps.GENERATE_METADATA)['image-tag']
         else:
+            image_tag_version = "latest"
             print('No image tag version found in metadata. Using latest')
 
-        tag = destination + ':' + image_tag_version
+        destination = "localhost/{application_name}/{service_name}".format(
+            application_name=application_name,
+            service_name=service_name
+        )
+        tag = "{destination}:{version}".format(
+            destination=destination,
+            version=image_tag_version
+        )
 
         try:
             print(sh.buildah.bud( #pylint: disable=no-member
@@ -144,23 +187,11 @@ class Buildah(StepImplementer):
             raise RuntimeError('Issue invoking buildah bud with given image '
                                'specification file (' + image_spec_file + ')')
 
-        image_tar_file = "latest"
-        if(self.get_step_results('generate-metadata') and \
-          self.get_step_results('generate-metadata').get('version')):
-            image_tar_file = self.get_step_results('generate-metadata')['version']
-        else:
-            print('No version found in metadata. Using latest')
-
-        # Check to see if the service-name and application-name were defined
-        #   This is most likely going to be defined in the global-defaults section
-        #   of the tssc-config.yml file. Is so, we're going to create a tar filename
-        #   of the format image-<application-name>-<service-name>-<version>.tar
-        if runtime_step_config.get('service-name'):
-            image_tar_file = runtime_step_config['service-name'] + '-' + image_tar_file
-        if runtime_step_config.get('application-name'):
-            image_tar_file = runtime_step_config['application-name'] + '-' + image_tar_file
-
-        image_tar_file = 'image-' + image_tar_file + '.tar'
+        image_tar_file = "image-{application_name}-{service_name}-{version}.tar".format(
+            application_name=application_name,
+            service_name=service_name,
+            version=image_tag_version
+        )
 
         try:
             # Check to see if the tar docker-archive file already exists
@@ -182,7 +213,6 @@ class Buildah(StepImplementer):
             'image-tag' : tag,
             'image-tar-file' : image_tar_file
         }
-
 
         return results
 

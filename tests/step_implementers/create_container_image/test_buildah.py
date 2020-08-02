@@ -1,7 +1,5 @@
-import os
 import sh
 import sys
-import uuid
 
 import unittest
 from unittest.mock import patch
@@ -12,42 +10,59 @@ from tssc.step_implementers.create_container_image import Buildah
 from test_utils import *
 
 class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
-    def test_create_container_image_default(self):
+    def test_create_container_image_default_missing_imagespecfile(self):
         with TempDirectory() as temp_dir:
-            config = {
-                'tssc-config': {}
-            }
-
-            with self.assertRaisesRegex(
-                    ValueError,
-                    r'Key \(destination\) must have non-empty value in the step configuration'):
-                run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
-
-    def test_create_container_image_specify_buildah_implementer(self):
-        with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
                 'tssc-config': {
-                    'create-container-image': {
-                        'implementer': 'Buildah',
-                        'config': {}
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
                     }
                 }
             }
 
             with self.assertRaisesRegex(
                     ValueError,
-                    r'Key \(destination\) must have non-empty value in the step configuration'):
+                    r"Image specification file does not exist in location: ./Dockerfile"):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
-    def test_create_container_image_specify_buildah_implementer_missing_config(self):
+    def test_create_container_image_specify_buildah_implementer_missing_imagespecfile(self):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
+                    'create-container-image': {
+                        'implementer': 'Buildah',
+                        'config': {}
+                    }
+                }
+            }
+            
+            with self.assertRaisesRegex(
+                    ValueError,
+                    r"Image specification file does not exist in location: ./Dockerfile"):
+                run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
+
+    def test_create_container_image_specify_buildah_implementer_missing_config_tlsverify(self):
+        with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
+            config = {
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'tlsverify' : None,
                         }
                     }
@@ -55,19 +70,23 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
             }
 
             with self.assertRaisesRegex(
-                    ValueError,
-                    r'Key \(tlsverify\) must have non-empty value in the step configuration'):
+                    AssertionError,
+                    r"The runtime step configuration \(.*\) is missing the required configuration keys \(\['tlsverify'\]\)"):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
-    def test_create_container_image_specify_buildah_implementer_with_destination_no_dockerfile(self):
+    def test_create_container_image_specify_buildah_implementer_no_dockerfile(self):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
@@ -80,16 +99,20 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
     @patch('sh.buildah', create=True)
-    def test_create_container_image_specify_buildah_implementer_with_destination_invalid_dockerfile(self, buildah_mock):
+    def test_create_container_image_specify_buildah_implementer_with_invalid_dockerfile(self, buildah_mock):
         with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
             temp_dir.write('Dockerfile',b'Invalid Dockerfile')
-            destination = 'localhost'
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
@@ -103,42 +126,72 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
     @patch('sh.buildah', create=True)
-    def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile(self, buildah_mock):
+    def test_create_container_image_specify_buildah_implementer_with_valid_dockerfile(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
+            version = 'latest'
+            tag = 'localhost/{application_name}/{service_name}:{version}'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
                 }
             }
 
-            image_tar_file = 'image-latest.tar'
-            expected_step_results = {'tssc-results': {'create-container-image': {'image-tag': destination + ':latest', 'image-tar-file': image_tar_file}}}
+            expected_step_results = {'tssc-results': {
+                'create-container-image': {
+                    'image-tag': tag,
+                    'image-tar-file': image_tar_file
+                }
+            }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
                 '-f', file,
-                '-t', destination + ':latest',
+                '-t', tag,
                 temp_dir.path,
                 _out=sys.stdout
             )
             buildah_mock.push.assert_called()
 
     @patch('sh.buildah', create=True)
-    def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_metadata_version(self, buildah_mock):
+    def test_create_container_image_specify_buildah_implementer_with_valid_dockerfile_metadata_version(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
             version = '1.0-69442c8'
+            tag = 'localhost/{application_name}/{service_name}:{version}'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             temp_dir.makedir('tssc-results')
@@ -154,10 +207,13 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 )
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     },
@@ -168,57 +224,84 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 }
             }
 
-            expected_step_results = {'tssc-results': {'generate-metadata': \
-                {'image-tag': version, 'version': '{version}'.format(version=version)},\
-                'create-container-image': {'image-tag': '{destination}:{version}'\
-                .format(destination=destination,version=version),\
-                'image-tar-file' : 'image-{version}.tar'.format(version=version)
-                }}}
-            run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
+            expected_step_results = {'tssc-results': {
+                'generate-metadata': {
+                    'image-tag': version,
+                    'version': version
+                },
+                'create-container-image': {
+                    'image-tag': tag,
+                    'image-tar-file': image_tar_file
+                }
+            }}
+            run_step_test_with_result_validation(
+                temp_dir,
+                'create-container-image',
+                config,
+                expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
                 '-f', file,
-                '-t', '{destination}:{version}'.format(destination=destination, version=version),
+                '-t', '{tag}'.format(tag=tag),
                 temp_dir.path,
                 _out=sys.stdout
             )
             buildah_mock.push.assert_called()
 
     @patch('sh.buildah', create=True)
-    def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_as_tarfile_success(self, buildah_mock):
+    def test_create_container_image_specify_buildah_implementer_with_valid_dockerfile_as_tarfile_success(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
+            version = 'latest'
+            tag = 'localhost/{application_name}/{service_name}:{version}'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
                 }
             }
 
-            image_tar_file = 'image-latest.tar'
-
-            expected_step_results = {'tssc-results': {'create-container-image': {'image-tag': destination + ':latest', 'image-tar-file' : image_tar_file}}}
+            expected_step_results = {'tssc-results': {
+                'create-container-image': {
+                    'image-tag': tag,
+                    'image-tar-file' : image_tar_file
+                }
+            }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
                 '-f', file,
-                '-t', destination + ':latest',
+                '-t', tag,
                 temp_dir.path,
                 _out=sys.stdout
             )
             buildah_mock.push.assert_called_once_with(
-                destination + ':latest',
+                tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=sys.stdout
             )
@@ -226,63 +309,93 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
     @patch('sh.buildah', create=True)
     def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_as_tarfile_fail(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
+            version = 'latest'
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
                 }
             }
-            image_tar_file = 'image-latest.tar'
+
             sh.buildah.push.side_effect = sh.ErrorReturnCode('buildah bud', b'mock stdout', b'mock error about invalid image tar file')
             with self.assertRaisesRegex(
-                  RuntimeError,
-                  r'Issue invoking buildah push to tar file {image_tar_file}'.format(image_tar_file=image_tar_file)):
+                    RuntimeError,
+                    r'Issue invoking buildah push to tar file {image_tar_file}'.format(image_tar_file=image_tar_file)):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
     @patch('sh.buildah', create=True)
     def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_as_tarfile_and_existing_tarfile_success(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
+            version = 'latest'
+            tag = 'localhost/{application_name}/{service_name}:{version}'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     }
                 }
             }
 
-            image_tar_file = 'image-latest.tar'
             f = open(image_tar_file, 'w')
             f.write('If you wish to make an apple pie from scratch, you must first invent the universe.')
             f.close()
 
-            expected_step_results = {'tssc-results': {'create-container-image': {'image-tag': destination + ':latest', 'image-tar-file' : image_tar_file}}}
+            expected_step_results = {'tssc-results': {
+                'create-container-image': {
+                    'image-tag': tag,
+                    'image-tar-file' : image_tar_file
+                }
+            }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
                 '-f', file,
-                '-t', destination + ':latest',
+                '-t', tag,
                 temp_dir.path,
                 _out=sys.stdout
             )
             buildah_mock.push.assert_called_once_with(
-                destination + ':latest',
+                tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=sys.stdout
             )
@@ -290,8 +403,19 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
     @patch('sh.buildah', create=True)
     def test_create_container_image_specify_buildah_implementer_with_destination_valid_dockerfile_metadata_version_and_global_application_name_and_service_name(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            destination = 'localhost'
+            application_name = 'foo'
+            service_name = 'bar'
             version = '1.0-69442c8'
+            tag = 'localhost/{application_name}/{service_name}:{version}'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
+            image_tar_file = 'image-{application_name}-{service_name}-{version}.tar'.format(
+                application_name=application_name,
+                service_name=service_name,
+                version=version
+            )
             file = 'Dockerfile'
             temp_dir.write(file,b'FROM registry.access.redhat.com/ubi8:latest')
             temp_dir.makedir('tssc-results')
@@ -308,13 +432,12 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'global-defaults': {
-                        'application-name': 'foo',
-                        'service-name': 'bar'
+                        'application-name': application_name,
+                        'service-name': service_name
                     },
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'destination' : destination,
                             'context' : temp_dir.path
                         }
                     },
@@ -325,19 +448,23 @@ class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
                 }
             }
 
-            expected_step_results = {'tssc-results': {'generate-metadata': \
-                {'image-tag': version, 'version': '{version}'.format(version=version)},\
-                'create-container-image': {'image-tag': '{destination}:{version}'\
-                .format(destination=destination,version=version),\
-                'image-tar-file' : 'image-foo-bar-{version}.tar'.format(version=version)
-                }}}
+            expected_step_results = {'tssc-results': {
+                'generate-metadata': {
+                    'image-tag': version,
+                    'version': version
+                },
+                'create-container-image': {
+                    'image-tag': tag,
+                    'image-tar-file' : image_tar_file
+                }
+            }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
                 '-f', file,
-                '-t', '{destination}:{version}'.format(destination=destination, version=version),
+                '-t', tag,
                 temp_dir.path,
                 _out=sys.stdout
             )

@@ -19,8 +19,8 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
             expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
     
             with self.assertRaisesRegex(
-                    ValueError,
-                    r'Key \(source\) must have non-empty value in the step configuration|Key \(destination\) must have non-empty value in the step configuration'):
+                    AssertionError,
+                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
     
     def test_push_container_image_specify_skopeo_implementer_missing_args(self):
@@ -36,8 +36,8 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
             expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
 
             with self.assertRaisesRegex(
-                    ValueError,
-                    r'Key \(source\) must have non-empty value in the step configuration|Key \(destination\) must have non-empty value in the step configuration'):
+                    AssertionError,
+                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
     
     @patch('sh.skopeo', create=True)

@@ -7,38 +7,124 @@ from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
-
-    @classmethod
-    def step_name(cls):
+    @staticmethod
+    def step_name():
+        print ('test------')
         return 'foo'
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        """
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return {}
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return []
 
     def _run_step(self, runtime_step_config):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
-
-    @classmethod
-    def step_name(cls):
+    @staticmethod
+    def step_name():
         return 'required-step-config-test'
 
-    def _validate_step_config(self, step_config):
-        if 'required-config-key' not in step_config:
-            raise ValueError('Key (required-config-key) must be in the step configuration')
+    @staticmethod
+    def step_implementer_config_defaults():
+        """
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return {}
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return [
+            'required-config-key'
+        ]
 
     def _run_step(self, runtime_step_config):
         pass
 
 class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, {})
-
-    @classmethod
-    def step_name(cls):
+    @staticmethod
+    def step_name():
         return 'required-runtime-step-config-test'
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        """
+        Getter for the StepImplementer's configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        """
+        return {}
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        """
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        """
+        return []
 
     def _run_step(self, runtime_step_config):
         if 'required-rutnime-config-key' not in runtime_step_config:
