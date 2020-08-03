@@ -38,7 +38,6 @@ import yaml
 from tabulate import tabulate
 from .exceptions import TSSCException
 
-
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
     Convenience constants for the default steps used in the default TSSC workflow definition.
@@ -63,53 +62,122 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     PUBLISH_WROKFLOW_RESULTS = &#39;publish-workflow-results&#39;
 
 
-class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
+class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     &#34;&#34;&#34;
     Abstract representation of a TSSC step implementer.
 
     Parameters
     ----------
-    config : dict
-        Configuration specific to the StepImplementer
     results_dir_path : str
-        Path to the file to write the results of the step to
-    config_defaults : dict
-        Defaults for any items not given in the config
+        Path to the directory to write the results of the step to
+    results_file_name : str
+        Name of file to write the results of the step to
+    work_dir_path : str
+        Path to the directory to write step working files to
+    step_environment_config : dict, optional
+        Step configuration specific to the current environment.
+    step_config : dict, optional
+        Step configuration.
+    global_config_defaults : dict, optional
+        Global defaults.
+    global_environment_config_defaults : dict, optional
+        Global defaults specific to the current environment.
     &#34;&#34;&#34;
 
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, results_file_name, \
-            work_dir_path, config_defaults=None): #pylint: disable=too-many-arguments
-        if not config_defaults:
-            config_defaults = {}
-        step_config = {**config_defaults, **config}
-        self.step_config = step_config
-        self.results_dir_path = results_dir_path
-        self.results_file_name = results_file_name
-        self.work_dir_path = work_dir_path
+    def __init__( # pylint: disable=too-many-arguments
+            self,
+            results_dir_path,
+            results_file_name,
+            work_dir_path,
+            step_environment_config=None,
+            step_config=None,
+            global_config_defaults=None,
+            global_environment_config_defaults=None):
+
+        if step_environment_config is None:
+            step_environment_config = {}
+        if step_config is None:
+            step_config = {}
+        if global_config_defaults is None:
+            global_config_defaults = {}
+        if global_environment_config_defaults is None:
+            global_environment_config_defaults = {}
+
+        self.__results_dir_path = results_dir_path
+        self.__results_file_name = results_file_name
+        self.__work_dir_path = work_dir_path
+
+        self.__step_environment_config = step_environment_config
+        self.__step_config = step_config
+        self.__global_config_defaults = global_config_defaults
+        self.__global_environment_config_defaults = global_environment_config_defaults
+
         self.__results_file_path = None
         super().__init__()
 
     @property
+    def step_environment_config(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration specific to the current environment.
+        &#34;&#34;&#34;
+        return self.__step_environment_config
+
+    @property
     def step_config(self):
         &#34;&#34;&#34;
-        Getter for step_config property.
+        Returns
+        -------
+        dict
+            Step configuration.
         &#34;&#34;&#34;
         return self.__step_config
 
-    @step_config.setter
-    def step_config(self, val):
+    @property
+    def global_config_defaults(self):
         &#34;&#34;&#34;
-        Setter with validation for step_config property.
+        Returns
+        -------
+        dict
+            Global configuration defaults affecting this step.
         &#34;&#34;&#34;
-        self._validate_step_config(val)
-        self.__step_config = val
+        return self.__global_config_defaults
 
-    @classmethod
+    @property
+    def global_environment_config_defaults(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Global configuration defaults affecting this step specific to the current environment.
+        &#34;&#34;&#34;
+        return self.__global_environment_config_defaults
+
+    @property
+    def results_file_path(self):
+        &#34;&#34;&#34;
+        Get the OS path to the results file for this step.
+
+        Returns
+        -------
+        str
+            OS path to the results file for this step.
+        &#34;&#34;&#34;
+        if not self.__results_file_path:
+            self.__results_file_path = os.path.join(
+                self.__results_dir_path,
+                self.__results_file_name)
+
+        return self.__results_file_path
+
+    @staticmethod
     @abstractmethod
-    def step_name(cls):
+    def step_name():
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
 
@@ -117,6 +185,38 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         -------
         str
             TSSC step name implemented by this step.
+        &#34;&#34;&#34;
+
+    @staticmethod
+    @abstractmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+
+    @staticmethod
+    @abstractmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
         &#34;&#34;&#34;
 
     @abstractmethod
@@ -127,8 +227,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         runtime_step_config : dict
-            Combination of the step configuration as well as overrides
-            and additional configuration passed in via runtime.
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
         Returns
         -------
@@ -136,107 +236,123 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Results of running this step.
         &#34;&#34;&#34;
 
-    def _validate_step_config(self, step_config):
-        &#34;&#34;&#34;
-        Function for implementers to override to do custom step configuration validation.
-
-        Parameters
-        ----------
-        step_config : dict
-            Step configuration to validate.
-
-        Raises
-        ------
-        ValueError
-            If step config is invalid.
-        &#34;&#34;&#34;
-
     def _validate_runtime_step_config(self, runtime_step_config):
         &#34;&#34;&#34;
-        Function for implementers to override to do custom runtime step configuration validation.
+        Validates the given `runtime_step_config` against the required step configuration keys.
 
         Parameters
         ----------
         runtime_step_config : dict
-            Runtime step configuration to validate.
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
         Raises
         ------
-        ValueError
-            If step config is invalid.
+        AssertionError
+            If the given `runtime_step_config` is not valid with a message as to why.
         &#34;&#34;&#34;
+        missing_required_config_keys = []
+        for required_config_key in self.required_runtime_step_config_keys():
+            if (required_config_key not in runtime_step_config) or \
+                    (not runtime_step_config[required_config_key]):
+                missing_required_config_keys.append(required_config_key)
 
-    @classmethod
-    def __print_section_title(cls, title):
+        assert (not missing_required_config_keys), \
+            &#34;The runtime step configuration ({runtime_step_config}) is missing the required&#34;.format(
+                runtime_step_config=runtime_step_config,) + \
+            &#34; configuration keys ({missing_required_config_keys})&#34;.format(
+                missing_required_config_keys=missing_required_config_keys
+            )
+
+    def __create_runtime_step_config(self, step_config_runtime_overrides):
         &#34;&#34;&#34;
-        Utility function for pretty printing section title.
+        Creates the step configuration to use when the StepImplementer runs the step.
+
+        From least precedence to highest precedence.
+
+            1. StepImplementer implementation provided configuration defaults
+               (self.step_implementer_config_defaults)
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
 
         Parameters
         ----------
-        title : str
-            Section title to print
-        &#34;&#34;&#34;
-        print()
-        print()
-        print(tabulate(
-            [[]],
-            [title.center(StepImplementer.__TITLE_LENGTH)],
-            tablefmt=&#34;pretty&#34;
-        ))
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
 
-    @classmethod
-    def __print_data(cls, title, data):
+        Returns
+        -------
+        dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
         &#34;&#34;&#34;
-        Utility function for pretty printing data.
+        return {
+            **self.step_implementer_config_defaults(),
+            **self.global_config_defaults,
+            **self.global_environment_config_defaults,
+            **self.step_config,
+            **self.step_environment_config,
+            **step_config_runtime_overrides
+        }
 
-        Parameters
-        ----------
-        title : str
-            Title of the data to print.
-        data
-            Data to print
-        &#34;&#34;&#34;
-        printer = pprint.PrettyPrinter()
-        print(tabulate(
-            [[printer.pformat(data)]],
-            [title.ljust(StepImplementer.__TITLE_LENGTH)],
-            tablefmt=&#34;pretty&#34;,
-            colalign=(&#34;left&#34;,)
-        ))
-
-    def run_step(self, global_step_config_defaults, **kwargs):
+    def run_step(self, step_config_runtime_overrides=None):
         &#34;&#34;&#34;
         Wrapper for running the implemented step.
 
         Parameters
         ----------
-        global_step_config_defaults : dict
-            This is a dictionary that contains default global values for different
-            settings. If a setting in this dict is defined in either the step&#39;s config
-            or in the kwargs, it will be overwritten. These values are populated based
-            on the global-defaults section of the tssc-config.yml file
-        kwargs : dict
-            Arbitrary arguments passed in via runtime to merge with the step_config
-            to use when running the step.
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
         &#34;&#34;&#34;
 
+        step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
+                                            else step_config_runtime_overrides
+
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
-        runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+
+        # print information about the static step configuration
+        StepImplementer.__print_data(
+            &#34;Step Implementer Configuration Defaults&#34;,
+            self.step_implementer_config_defaults())
+        StepImplementer.__print_data(
+            &#34;Global Configuration Defaults&#34;,
+            self.global_config_defaults)
+        StepImplementer.__print_data(
+            &#34;Global Environment Configuration Defaults&#34;,
+            self.global_environment_config_defaults)
+        StepImplementer.__print_data(
+            &#34;Step Configuration&#34;,
+            self.step_config)
+        StepImplementer.__print_data(
+            &#34;Step Environment Configuration&#34;,
+            self.step_environment_config)
+        StepImplementer.__print_data(
+            &#34;Step Environment Configuration&#34;,
+            self.step_environment_config)
+        StepImplementer.__print_data(
+            &#34;Step Configuration Runtime Overrides&#34;,
+            step_config_runtime_overrides)
+
+        # create the munged runtime step configuration and print
+        runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+        StepImplementer.__print_data(
+            &#34;Runtime Step Configuration&#34;,
+            runtime_step_config)
+
+        # validate the runtime step configuration, run the step, and save the results
         self._validate_runtime_step_config(runtime_step_config)
-
-        StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
-          global_step_config_defaults)
-        StepImplementer.__print_data(&#39;Static Step Configuration&#39;, self.step_config)
-        StepImplementer.__print_data(&#39;Dynamic Step Configuration&#39;, kwargs)
-        StepImplementer.__print_data(&#39;Runtime Step Configuration&#39;, runtime_step_config)
-
         results = self._run_step(runtime_step_config)
         self.write_results(results)
 
+        # print the step run results
         StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
         StepImplementer.__print_data(&#39;Step Results&#39;, results)
-
         StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
 
     def write_results(self, results):
@@ -309,8 +425,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        if not os.path.exists(self.results_dir_path):
-            os.makedirs(self.results_dir_path)
+        if not os.path.exists(self.__results_dir_path):
+            os.makedirs(self.__results_dir_path)
 
         step_results_file_path = self.results_file_path
 
@@ -378,21 +494,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         return self.get_step_results(self.step_name())
         #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
-    @property
-    def results_file_path(self):
-        &#34;&#34;&#34;
-        Get the OS path to the results file for this step.
-
-        Returns
-        -------
-        str
-            OS path to the results file for this step.
-        &#34;&#34;&#34;
-        if not self.__results_file_path:
-            self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
-
-        return self.__results_file_path
-
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
         Write content to filename in working directory
@@ -402,17 +503,55 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        if not os.path.exists(self.work_dir_path):
-            os.makedirs(self.work_dir_path)
-        step_path = os.path.join(self.work_dir_path, self.step_name())
+        if not os.path.exists(self.__work_dir_path):
+            os.makedirs(self.__work_dir_path)
+        step_path = os.path.join(self.__work_dir_path, self.step_name())
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+        #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
         file_path = os.path.join(step_path, filename)
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
-        return file_path</code></pre>
+        return file_path
+
+    @classmethod
+    def __print_section_title(cls, title):
+        &#34;&#34;&#34;
+        Utility function for pretty printing section title.
+
+        Parameters
+        ----------
+        title : str
+            Section title to print
+        &#34;&#34;&#34;
+        print()
+        print()
+        print(tabulate(
+            [[]],
+            [title.center(StepImplementer.__TITLE_LENGTH)],
+            tablefmt=&#34;pretty&#34;
+        ))
+
+    @classmethod
+    def __print_data(cls, title, data):
+        &#34;&#34;&#34;
+        Utility function for pretty printing data.
+
+        Parameters
+        ----------
+        title : str
+            Title of the data to print.
+        data
+            Data to print
+        &#34;&#34;&#34;
+        printer = pprint.PrettyPrinter()
+        print(tabulate(
+            [[printer.pformat(data)]],
+            [title.ljust(StepImplementer.__TITLE_LENGTH)],
+            tablefmt=&#34;pretty&#34;,
+            colalign=(&#34;left&#34;,)
+        ))</code></pre>
 </details>
 </section>
 <section>
@@ -534,70 +673,147 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 </dd>
 <dt id="tssc.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>config, results_dir_path, results_file_name, work_dir_path, config_defaults=None)</span>
+<span>(</span><span>results_dir_path, results_file_name, work_dir_path, step_environment_config=None, step_config=None, global_config_defaults=None, global_environment_config_defaults=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>config</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Configuration specific to the StepImplementer</dd>
 <dt><strong><code>results_dir_path</code></strong> :&ensp;<code>str</code></dt>
-<dd>Path to the file to write the results of the step to</dd>
-<dt><strong><code>config_defaults</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Defaults for any items not given in the config</dd>
+<dd>Path to the directory to write the results of the step to</dd>
+<dt><strong><code>results_file_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of file to write the results of the step to</dd>
+<dt><strong><code>work_dir_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to the directory to write step working files to</dd>
+<dt><strong><code>step_environment_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Step configuration specific to the current environment.</dd>
+<dt><strong><code>step_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Step configuration.</dd>
+<dt><strong><code>global_config_defaults</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Global defaults.</dd>
+<dt><strong><code>global_environment_config_defaults</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Global defaults specific to the current environment.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
+<pre><code class="python">class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     &#34;&#34;&#34;
     Abstract representation of a TSSC step implementer.
 
     Parameters
     ----------
-    config : dict
-        Configuration specific to the StepImplementer
     results_dir_path : str
-        Path to the file to write the results of the step to
-    config_defaults : dict
-        Defaults for any items not given in the config
+        Path to the directory to write the results of the step to
+    results_file_name : str
+        Name of file to write the results of the step to
+    work_dir_path : str
+        Path to the directory to write step working files to
+    step_environment_config : dict, optional
+        Step configuration specific to the current environment.
+    step_config : dict, optional
+        Step configuration.
+    global_config_defaults : dict, optional
+        Global defaults.
+    global_environment_config_defaults : dict, optional
+        Global defaults specific to the current environment.
     &#34;&#34;&#34;
 
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
     __TITLE_LENGTH = 80
 
-    def __init__(self, config, results_dir_path, results_file_name, \
-            work_dir_path, config_defaults=None): #pylint: disable=too-many-arguments
-        if not config_defaults:
-            config_defaults = {}
-        step_config = {**config_defaults, **config}
-        self.step_config = step_config
-        self.results_dir_path = results_dir_path
-        self.results_file_name = results_file_name
-        self.work_dir_path = work_dir_path
+    def __init__( # pylint: disable=too-many-arguments
+            self,
+            results_dir_path,
+            results_file_name,
+            work_dir_path,
+            step_environment_config=None,
+            step_config=None,
+            global_config_defaults=None,
+            global_environment_config_defaults=None):
+
+        if step_environment_config is None:
+            step_environment_config = {}
+        if step_config is None:
+            step_config = {}
+        if global_config_defaults is None:
+            global_config_defaults = {}
+        if global_environment_config_defaults is None:
+            global_environment_config_defaults = {}
+
+        self.__results_dir_path = results_dir_path
+        self.__results_file_name = results_file_name
+        self.__work_dir_path = work_dir_path
+
+        self.__step_environment_config = step_environment_config
+        self.__step_config = step_config
+        self.__global_config_defaults = global_config_defaults
+        self.__global_environment_config_defaults = global_environment_config_defaults
+
         self.__results_file_path = None
         super().__init__()
 
     @property
+    def step_environment_config(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration specific to the current environment.
+        &#34;&#34;&#34;
+        return self.__step_environment_config
+
+    @property
     def step_config(self):
         &#34;&#34;&#34;
-        Getter for step_config property.
+        Returns
+        -------
+        dict
+            Step configuration.
         &#34;&#34;&#34;
         return self.__step_config
 
-    @step_config.setter
-    def step_config(self, val):
+    @property
+    def global_config_defaults(self):
         &#34;&#34;&#34;
-        Setter with validation for step_config property.
+        Returns
+        -------
+        dict
+            Global configuration defaults affecting this step.
         &#34;&#34;&#34;
-        self._validate_step_config(val)
-        self.__step_config = val
+        return self.__global_config_defaults
 
-    @classmethod
+    @property
+    def global_environment_config_defaults(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Global configuration defaults affecting this step specific to the current environment.
+        &#34;&#34;&#34;
+        return self.__global_environment_config_defaults
+
+    @property
+    def results_file_path(self):
+        &#34;&#34;&#34;
+        Get the OS path to the results file for this step.
+
+        Returns
+        -------
+        str
+            OS path to the results file for this step.
+        &#34;&#34;&#34;
+        if not self.__results_file_path:
+            self.__results_file_path = os.path.join(
+                self.__results_dir_path,
+                self.__results_file_name)
+
+        return self.__results_file_path
+
+    @staticmethod
     @abstractmethod
-    def step_name(cls):
+    def step_name():
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
 
@@ -605,6 +821,38 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         -------
         str
             TSSC step name implemented by this step.
+        &#34;&#34;&#34;
+
+    @staticmethod
+    @abstractmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+
+    @staticmethod
+    @abstractmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
         &#34;&#34;&#34;
 
     @abstractmethod
@@ -615,8 +863,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         runtime_step_config : dict
-            Combination of the step configuration as well as overrides
-            and additional configuration passed in via runtime.
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
         Returns
         -------
@@ -624,107 +872,123 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Results of running this step.
         &#34;&#34;&#34;
 
-    def _validate_step_config(self, step_config):
-        &#34;&#34;&#34;
-        Function for implementers to override to do custom step configuration validation.
-
-        Parameters
-        ----------
-        step_config : dict
-            Step configuration to validate.
-
-        Raises
-        ------
-        ValueError
-            If step config is invalid.
-        &#34;&#34;&#34;
-
     def _validate_runtime_step_config(self, runtime_step_config):
         &#34;&#34;&#34;
-        Function for implementers to override to do custom runtime step configuration validation.
+        Validates the given `runtime_step_config` against the required step configuration keys.
 
         Parameters
         ----------
         runtime_step_config : dict
-            Runtime step configuration to validate.
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
         Raises
         ------
-        ValueError
-            If step config is invalid.
+        AssertionError
+            If the given `runtime_step_config` is not valid with a message as to why.
         &#34;&#34;&#34;
+        missing_required_config_keys = []
+        for required_config_key in self.required_runtime_step_config_keys():
+            if (required_config_key not in runtime_step_config) or \
+                    (not runtime_step_config[required_config_key]):
+                missing_required_config_keys.append(required_config_key)
 
-    @classmethod
-    def __print_section_title(cls, title):
+        assert (not missing_required_config_keys), \
+            &#34;The runtime step configuration ({runtime_step_config}) is missing the required&#34;.format(
+                runtime_step_config=runtime_step_config,) + \
+            &#34; configuration keys ({missing_required_config_keys})&#34;.format(
+                missing_required_config_keys=missing_required_config_keys
+            )
+
+    def __create_runtime_step_config(self, step_config_runtime_overrides):
         &#34;&#34;&#34;
-        Utility function for pretty printing section title.
+        Creates the step configuration to use when the StepImplementer runs the step.
+
+        From least precedence to highest precedence.
+
+            1. StepImplementer implementation provided configuration defaults
+               (self.step_implementer_config_defaults)
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
 
         Parameters
         ----------
-        title : str
-            Section title to print
-        &#34;&#34;&#34;
-        print()
-        print()
-        print(tabulate(
-            [[]],
-            [title.center(StepImplementer.__TITLE_LENGTH)],
-            tablefmt=&#34;pretty&#34;
-        ))
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
 
-    @classmethod
-    def __print_data(cls, title, data):
+        Returns
+        -------
+        dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
         &#34;&#34;&#34;
-        Utility function for pretty printing data.
+        return {
+            **self.step_implementer_config_defaults(),
+            **self.global_config_defaults,
+            **self.global_environment_config_defaults,
+            **self.step_config,
+            **self.step_environment_config,
+            **step_config_runtime_overrides
+        }
 
-        Parameters
-        ----------
-        title : str
-            Title of the data to print.
-        data
-            Data to print
-        &#34;&#34;&#34;
-        printer = pprint.PrettyPrinter()
-        print(tabulate(
-            [[printer.pformat(data)]],
-            [title.ljust(StepImplementer.__TITLE_LENGTH)],
-            tablefmt=&#34;pretty&#34;,
-            colalign=(&#34;left&#34;,)
-        ))
-
-    def run_step(self, global_step_config_defaults, **kwargs):
+    def run_step(self, step_config_runtime_overrides=None):
         &#34;&#34;&#34;
         Wrapper for running the implemented step.
 
         Parameters
         ----------
-        global_step_config_defaults : dict
-            This is a dictionary that contains default global values for different
-            settings. If a setting in this dict is defined in either the step&#39;s config
-            or in the kwargs, it will be overwritten. These values are populated based
-            on the global-defaults section of the tssc-config.yml file
-        kwargs : dict
-            Arbitrary arguments passed in via runtime to merge with the step_config
-            to use when running the step.
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
         &#34;&#34;&#34;
 
+        step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
+                                            else step_config_runtime_overrides
+
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
-        runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+
+        # print information about the static step configuration
+        StepImplementer.__print_data(
+            &#34;Step Implementer Configuration Defaults&#34;,
+            self.step_implementer_config_defaults())
+        StepImplementer.__print_data(
+            &#34;Global Configuration Defaults&#34;,
+            self.global_config_defaults)
+        StepImplementer.__print_data(
+            &#34;Global Environment Configuration Defaults&#34;,
+            self.global_environment_config_defaults)
+        StepImplementer.__print_data(
+            &#34;Step Configuration&#34;,
+            self.step_config)
+        StepImplementer.__print_data(
+            &#34;Step Environment Configuration&#34;,
+            self.step_environment_config)
+        StepImplementer.__print_data(
+            &#34;Step Environment Configuration&#34;,
+            self.step_environment_config)
+        StepImplementer.__print_data(
+            &#34;Step Configuration Runtime Overrides&#34;,
+            step_config_runtime_overrides)
+
+        # create the munged runtime step configuration and print
+        runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+        StepImplementer.__print_data(
+            &#34;Runtime Step Configuration&#34;,
+            runtime_step_config)
+
+        # validate the runtime step configuration, run the step, and save the results
         self._validate_runtime_step_config(runtime_step_config)
-
-        StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
-          global_step_config_defaults)
-        StepImplementer.__print_data(&#39;Static Step Configuration&#39;, self.step_config)
-        StepImplementer.__print_data(&#39;Dynamic Step Configuration&#39;, kwargs)
-        StepImplementer.__print_data(&#39;Runtime Step Configuration&#39;, runtime_step_config)
-
         results = self._run_step(runtime_step_config)
         self.write_results(results)
 
+        # print the step run results
         StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
         StepImplementer.__print_data(&#39;Step Results&#39;, results)
-
         StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
 
     def write_results(self, results):
@@ -797,8 +1061,8 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        if not os.path.exists(self.results_dir_path):
-            os.makedirs(self.results_dir_path)
+        if not os.path.exists(self.__results_dir_path):
+            os.makedirs(self.__results_dir_path)
 
         step_results_file_path = self.results_file_path
 
@@ -866,21 +1130,6 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         return self.get_step_results(self.step_name())
         #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
-    @property
-    def results_file_path(self):
-        &#34;&#34;&#34;
-        Get the OS path to the results file for this step.
-
-        Returns
-        -------
-        str
-            OS path to the results file for this step.
-        &#34;&#34;&#34;
-        if not self.__results_file_path:
-            self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
-
-        return self.__results_file_path
-
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
         Write content to filename in working directory
@@ -890,17 +1139,55 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        if not os.path.exists(self.work_dir_path):
-            os.makedirs(self.work_dir_path)
-        step_path = os.path.join(self.work_dir_path, self.step_name())
+        if not os.path.exists(self.__work_dir_path):
+            os.makedirs(self.__work_dir_path)
+        step_path = os.path.join(self.__work_dir_path, self.step_name())
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+        #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
         file_path = os.path.join(step_path, filename)
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
-        return file_path</code></pre>
+        return file_path
+
+    @classmethod
+    def __print_section_title(cls, title):
+        &#34;&#34;&#34;
+        Utility function for pretty printing section title.
+
+        Parameters
+        ----------
+        title : str
+            Section title to print
+        &#34;&#34;&#34;
+        print()
+        print()
+        print(tabulate(
+            [[]],
+            [title.center(StepImplementer.__TITLE_LENGTH)],
+            tablefmt=&#34;pretty&#34;
+        ))
+
+    @classmethod
+    def __print_data(cls, title, data):
+        &#34;&#34;&#34;
+        Utility function for pretty printing data.
+
+        Parameters
+        ----------
+        title : str
+            Title of the data to print.
+        data
+            Data to print
+        &#34;&#34;&#34;
+        printer = pprint.PrettyPrinter()
+        print(tabulate(
+            [[printer.pformat(data)]],
+            [title.ljust(StepImplementer.__TITLE_LENGTH)],
+            tablefmt=&#34;pretty&#34;,
+            colalign=(&#34;left&#34;,)
+        ))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -928,6 +1215,72 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 </ul>
 <h3>Static methods</h3>
 <dl>
+<dt id="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys"><code class="name flex">
+<span>def <span class="ident">required_runtime_step_config_keys</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Getter for step configuration keys that are required before running the step.</p>
+<h2 id="see-also">See Also</h2>
+<p><code>_validate_runtime_step_config</code></p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>array_list</code></dt>
+<dd>Array of configuration keys that are required before running the step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+@abstractmethod
+def required_runtime_step_config_keys():
+    &#34;&#34;&#34;
+    Getter for step configuration keys that are required before running the step.
+
+    See Also
+    --------
+    _validate_runtime_step_config
+
+    Returns
+    -------
+    array_list
+        Array of configuration keys that are required before running the step.
+    &#34;&#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.step_implementer_config_defaults"><code class="name flex">
+<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
+<h2 id="notes">Notes</h2>
+<p>These are the lowest precedence configuration values.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Default values to use for step configuration values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+@abstractmethod
+def step_implementer_config_defaults():
+    &#34;&#34;&#34;
+    Getter for the StepImplementer&#39;s configuration defaults.
+
+    Notes
+    -----
+    These are the lowest precedence configuration values.
+
+    Returns
+    -------
+    dict
+        Default values to use for step configuration values.
+    &#34;&#34;&#34;</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.step_name"><code class="name flex">
 <span>def <span class="ident">step_name</span></span>(<span>)</span>
 </code></dt>
@@ -942,9 +1295,9 @@ class StepImplementer(ABC):  # pylint: disable=too-few-public-methods
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@classmethod
+<pre><code class="python">@staticmethod
 @abstractmethod
-def step_name(cls):
+def step_name():
     &#34;&#34;&#34;
     Getter for the TSSC Step name implemented by this step.
 
@@ -958,6 +1311,50 @@ def step_name(cls):
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="tssc.step_implementer.StepImplementer.global_config_defaults"><code class="name">var <span class="ident">global_config_defaults</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Global configuration defaults affecting this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def global_config_defaults(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    dict
+        Global configuration defaults affecting this step.
+    &#34;&#34;&#34;
+    return self.__global_config_defaults</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.global_environment_config_defaults"><code class="name">var <span class="ident">global_environment_config_defaults</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Global configuration defaults affecting this step specific to the current environment.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def global_environment_config_defaults(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    dict
+        Global configuration defaults affecting this step specific to the current environment.
+    &#34;&#34;&#34;
+    return self.__global_environment_config_defaults</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.results_file_path"><code class="name">var <span class="ident">results_file_path</span></code></dt>
 <dd>
 <div class="desc"><p>Get the OS path to the results file for this step.</p>
@@ -981,14 +1378,20 @@ def results_file_path(self):
         OS path to the results file for this step.
     &#34;&#34;&#34;
     if not self.__results_file_path:
-        self.__results_file_path = os.path.join(self.results_dir_path, self.results_file_name)
+        self.__results_file_path = os.path.join(
+            self.__results_dir_path,
+            self.__results_file_name)
 
     return self.__results_file_path</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.step_config"><code class="name">var <span class="ident">step_config</span></code></dt>
 <dd>
-<div class="desc"><p>Getter for step_config property.</p></div>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Step configuration.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -996,9 +1399,34 @@ def results_file_path(self):
 <pre><code class="python">@property
 def step_config(self):
     &#34;&#34;&#34;
-    Getter for step_config property.
+    Returns
+    -------
+    dict
+        Step configuration.
     &#34;&#34;&#34;
     return self.__step_config</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.step_environment_config"><code class="name">var <span class="ident">step_environment_config</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Step configuration specific to the current environment.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def step_environment_config(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    dict
+        Step configuration specific to the current environment.
+    &#34;&#34;&#34;
+    return self.__step_environment_config</code></pre>
 </details>
 </dd>
 </dl>
@@ -1043,8 +1471,8 @@ element.</dd>
         Existing results file has invalid yaml or existing results file does not have expected
         element.
     &#34;&#34;&#34;
-    if not os.path.exists(self.results_dir_path):
-        os.makedirs(self.results_dir_path)
+    if not os.path.exists(self.__results_dir_path):
+        os.makedirs(self.__results_dir_path)
 
     step_results_file_path = self.results_file_path
 
@@ -1154,58 +1582,74 @@ element.</dd>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.run_step"><code class="name flex">
-<span>def <span class="ident">run_step</span></span>(<span>self, global_step_config_defaults, **kwargs)</span>
+<span>def <span class="ident">run_step</span></span>(<span>self, step_config_runtime_overrides=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Wrapper for running the implemented step.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>global_step_config_defaults</code></strong> :&ensp;<code>dict</code></dt>
-<dd>This is a dictionary that contains default global values for different
-settings. If a setting in this dict is defined in either the step's config
-or in the kwargs, it will be overwritten. These values are populated based
-on the global-defaults section of the tssc-config.yml file</dd>
-<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Arbitrary arguments passed in via runtime to merge with the step_config
-to use when running the step.</dd>
+<dt><strong><code>step_config_runtime_overrides</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Configuration for the step passed in at runtime when the step was invoked that will
+override step configuration coming from any other source.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_step(self, global_step_config_defaults, **kwargs):
+<pre><code class="python">def run_step(self, step_config_runtime_overrides=None):
     &#34;&#34;&#34;
     Wrapper for running the implemented step.
 
     Parameters
     ----------
-    global_step_config_defaults : dict
-        This is a dictionary that contains default global values for different
-        settings. If a setting in this dict is defined in either the step&#39;s config
-        or in the kwargs, it will be overwritten. These values are populated based
-        on the global-defaults section of the tssc-config.yml file
-    kwargs : dict
-        Arbitrary arguments passed in via runtime to merge with the step_config
-        to use when running the step.
+    step_config_runtime_overrides : dict, optional
+        Configuration for the step passed in at runtime when the step was invoked that will
+        override step configuration coming from any other source.
     &#34;&#34;&#34;
 
+    step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
+                                        else step_config_runtime_overrides
+
     StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
-    runtime_step_config = {**global_step_config_defaults, **self.step_config, **kwargs}
+
+    # print information about the static step configuration
+    StepImplementer.__print_data(
+        &#34;Step Implementer Configuration Defaults&#34;,
+        self.step_implementer_config_defaults())
+    StepImplementer.__print_data(
+        &#34;Global Configuration Defaults&#34;,
+        self.global_config_defaults)
+    StepImplementer.__print_data(
+        &#34;Global Environment Configuration Defaults&#34;,
+        self.global_environment_config_defaults)
+    StepImplementer.__print_data(
+        &#34;Step Configuration&#34;,
+        self.step_config)
+    StepImplementer.__print_data(
+        &#34;Step Environment Configuration&#34;,
+        self.step_environment_config)
+    StepImplementer.__print_data(
+        &#34;Step Environment Configuration&#34;,
+        self.step_environment_config)
+    StepImplementer.__print_data(
+        &#34;Step Configuration Runtime Overrides&#34;,
+        step_config_runtime_overrides)
+
+    # create the munged runtime step configuration and print
+    runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+    StepImplementer.__print_data(
+        &#34;Runtime Step Configuration&#34;,
+        runtime_step_config)
+
+    # validate the runtime step configuration, run the step, and save the results
     self._validate_runtime_step_config(runtime_step_config)
-
-    StepImplementer.__print_data(&#39;Global Default Static Step Configuration&#39;, \
-      global_step_config_defaults)
-    StepImplementer.__print_data(&#39;Static Step Configuration&#39;, self.step_config)
-    StepImplementer.__print_data(&#39;Dynamic Step Configuration&#39;, kwargs)
-    StepImplementer.__print_data(&#39;Runtime Step Configuration&#39;, runtime_step_config)
-
     results = self._run_step(runtime_step_config)
     self.write_results(results)
 
+    # print the step run results
     StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
     StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
     StepImplementer.__print_data(&#39;Step Results&#39;, results)
-
     StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))</code></pre>
 </details>
 </dd>
@@ -1306,13 +1750,13 @@ element.</dd>
     str
         return a string to the absolute file path
     &#34;&#34;&#34;
-    if not os.path.exists(self.work_dir_path):
-        os.makedirs(self.work_dir_path)
-    step_path = os.path.join(self.work_dir_path, self.step_name())
+    if not os.path.exists(self.__work_dir_path):
+        os.makedirs(self.__work_dir_path)
+    step_path = os.path.join(self.__work_dir_path, self.step_name())
     if not os.path.exists(step_path):
         os.makedirs(step_path)
 
-    #file_path = os.path.join(self.work_dir_path, self.step_name(), filename)
+    #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
     file_path = os.path.join(step_path, filename)
     with open(file_path, &#39;wb&#39;) as file:
         file.write(contents)
@@ -1366,9 +1810,14 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>

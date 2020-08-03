@@ -33,10 +33,13 @@ Factory for creating TSSC workflow and running steps.
 from .exceptions import TSSCException
 
 _TSSC_CONFIG_KEY = &#39;tssc-config&#39;
+_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY = &#39;global-defaults&#39;
+_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY = &#39;global-environment-defaults&#39;
 _IS_DEFAULT_KEY = &#39;is_default&#39;
 _CLAZZ_KEY = &#39;clazz&#39;
 _IMPLEMENTER_KEY = &#39;implementer&#39;
 _SUB_STEP_CONFIG_KEY = &#39;config&#39;
+_SUB_STEP_ENV_CONFIG_KEY = &#39;environment-config&#39;
 
 class TSSCFactory:
     &#34;&#34;&#34;
@@ -91,7 +94,6 @@ class TSSCFactory:
         &#34;&#34;&#34;
 
         step_name = implementer_class.step_name()
-
         if step_name not in TSSCFactory._step_implementers:
             TSSCFactory._step_implementers[step_name] = {}
 
@@ -107,7 +109,7 @@ class TSSCFactory:
             _IS_DEFAULT_KEY: is_default
         }
 
-    def run_step(self, step_name, runtime_step_config=None): # pylint: disable=too-many-branches
+    def run_step(self, step_name, step_config_runtime_overrides=None, environment=None): # pylint: disable=too-many-branches
         &#34;&#34;&#34;
         Call the given step.
 
@@ -115,8 +117,12 @@ class TSSCFactory:
         ----------
         step_name : str
             TSSC step to run.
-        runtime_step_config
-            TODO
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
+        environment : str, optional
+            Name of the environment the step is being run in. Used to determine environment
+            specific global defaults and step configuration.
 
         Raises
         ------
@@ -127,8 +133,8 @@ class TSSCFactory:
             If no StepImplementer registered for given step with given implementer name.
         &#34;&#34;&#34;
 
-        if not runtime_step_config:
-            runtime_step_config = {}
+        if step_config_runtime_overrides is None:
+            step_config_runtime_overrides = {}
 
         # verify that there is registered implementers for the given step
         if not step_name in TSSCFactory._step_implementers or \
@@ -137,12 +143,19 @@ class TSSCFactory:
 
         step_implementers = TSSCFactory._step_implementers[step_name]
 
-        # Check to see if there is a global-default section defined in the factory&#39;s
-        #   config. If so, set that. This will be passed in to run_step of the
-        #   step_implementer abstrct class
-        global_step_config_defaults = {}
-        if &#39;global-defaults&#39; in self.config:
-            global_step_config_defaults = self.config[&#39;global-defaults&#39;]
+        # determine the global configuration defaults
+        global_config_defaults = {}
+        if _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY in self.config:
+            global_config_defaults = self.config[_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY]
+
+        # determine the global environment configuration defaults
+        global_environment_config_defaults = {}
+        if environment and \
+                _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY in self.config and \
+                environment in self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY]:
+
+            global_environment_config_defaults = \
+                self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
 
         # get step configuration if there is any
         step_config = {}
@@ -154,18 +167,33 @@ class TSSCFactory:
                 sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
 
                 if sub_step_implementer_name in step_implementers:
+                    # determine the sub step configuration
                     if _SUB_STEP_CONFIG_KEY in sub_step:
                         sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
                     else:
                         sub_step_config = {}
+
+                    # determine the sub step environment specific configuration
+                    if _SUB_STEP_ENV_CONFIG_KEY in sub_step and \
+                            environment in sub_step[_SUB_STEP_ENV_CONFIG_KEY]:
+                        sub_step_environment_config = \
+                            sub_step[_SUB_STEP_ENV_CONFIG_KEY][environment]
+                    else:
+                        sub_step_environment_config = {}
+
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                        sub_step_config,
-                        self.results_dir_path,
-                        self.results_file_name,
-                        self.work_dir_path
+                        results_dir_path=self.results_dir_path,
+                        results_file_name=self.results_file_name,
+                        work_dir_path=self.work_dir_path,
+                        step_environment_config=sub_step_environment_config,
+                        step_config=sub_step_config,
+                        global_config_defaults=global_config_defaults,
+                        global_environment_config_defaults=global_environment_config_defaults
                     )
-                    sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+                    # run the step
+                    sub_step.run_step(step_config_runtime_overrides)
                 else:
                     raise TSSCException(
                         &#39;No StepImplementer for step&#39;
@@ -183,19 +211,24 @@ class TSSCFactory:
             if default_step_implementer:
                 # create the default StepImplementer instance
                 sub_step = default_step_implementer[_CLAZZ_KEY](
-                    {},
-                    self.results_dir_path,
-                    self.results_file_name,
-                    self.work_dir_path
+                    results_dir_path=self.results_dir_path,
+                    results_file_name=self.results_file_name,
+                    work_dir_path=self.work_dir_path,
+                    step_environment_config={},
+                    step_config={},
+                    global_config_defaults=global_config_defaults,
+                    global_environment_config_defaults=global_environment_config_defaults
                 )
-                sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+                # run the step
+                sub_step.run_step(step_config_runtime_overrides)
             else:
                 raise TSSCException(
-                    &#39;No implimenter specified for step&#39;
+                    &#39;No implementer specified for step&#39;
                     + &#39;(&#39; + step_name + &#39;)&#39;
                     + &#39; in config&#39;
                     + &#39;(&#39; + str(self.config) + &#39;)&#39;
-                    + &#39; and no default step implementer registered in step implimenters&#39;
+                    + &#39; and no default step implementer registered in step implementers&#39;
                     + &#39;(&#39; + str(step_implementers) + &#39;)&#39;
                 )</code></pre>
 </details>
@@ -291,7 +324,6 @@ Default: tssc-working</dd>
         &#34;&#34;&#34;
 
         step_name = implementer_class.step_name()
-
         if step_name not in TSSCFactory._step_implementers:
             TSSCFactory._step_implementers[step_name] = {}
 
@@ -307,7 +339,7 @@ Default: tssc-working</dd>
             _IS_DEFAULT_KEY: is_default
         }
 
-    def run_step(self, step_name, runtime_step_config=None): # pylint: disable=too-many-branches
+    def run_step(self, step_name, step_config_runtime_overrides=None, environment=None): # pylint: disable=too-many-branches
         &#34;&#34;&#34;
         Call the given step.
 
@@ -315,8 +347,12 @@ Default: tssc-working</dd>
         ----------
         step_name : str
             TSSC step to run.
-        runtime_step_config
-            TODO
+        step_config_runtime_overrides : dict, optional
+            Configuration for the step passed in at runtime when the step was invoked that will
+            override step configuration coming from any other source.
+        environment : str, optional
+            Name of the environment the step is being run in. Used to determine environment
+            specific global defaults and step configuration.
 
         Raises
         ------
@@ -327,8 +363,8 @@ Default: tssc-working</dd>
             If no StepImplementer registered for given step with given implementer name.
         &#34;&#34;&#34;
 
-        if not runtime_step_config:
-            runtime_step_config = {}
+        if step_config_runtime_overrides is None:
+            step_config_runtime_overrides = {}
 
         # verify that there is registered implementers for the given step
         if not step_name in TSSCFactory._step_implementers or \
@@ -337,12 +373,19 @@ Default: tssc-working</dd>
 
         step_implementers = TSSCFactory._step_implementers[step_name]
 
-        # Check to see if there is a global-default section defined in the factory&#39;s
-        #   config. If so, set that. This will be passed in to run_step of the
-        #   step_implementer abstrct class
-        global_step_config_defaults = {}
-        if &#39;global-defaults&#39; in self.config:
-            global_step_config_defaults = self.config[&#39;global-defaults&#39;]
+        # determine the global configuration defaults
+        global_config_defaults = {}
+        if _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY in self.config:
+            global_config_defaults = self.config[_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY]
+
+        # determine the global environment configuration defaults
+        global_environment_config_defaults = {}
+        if environment and \
+                _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY in self.config and \
+                environment in self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY]:
+
+            global_environment_config_defaults = \
+                self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
 
         # get step configuration if there is any
         step_config = {}
@@ -354,18 +397,33 @@ Default: tssc-working</dd>
                 sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
 
                 if sub_step_implementer_name in step_implementers:
+                    # determine the sub step configuration
                     if _SUB_STEP_CONFIG_KEY in sub_step:
                         sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
                     else:
                         sub_step_config = {}
+
+                    # determine the sub step environment specific configuration
+                    if _SUB_STEP_ENV_CONFIG_KEY in sub_step and \
+                            environment in sub_step[_SUB_STEP_ENV_CONFIG_KEY]:
+                        sub_step_environment_config = \
+                            sub_step[_SUB_STEP_ENV_CONFIG_KEY][environment]
+                    else:
+                        sub_step_environment_config = {}
+
                     # create the StepImplementer instance
                     sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                        sub_step_config,
-                        self.results_dir_path,
-                        self.results_file_name,
-                        self.work_dir_path
+                        results_dir_path=self.results_dir_path,
+                        results_file_name=self.results_file_name,
+                        work_dir_path=self.work_dir_path,
+                        step_environment_config=sub_step_environment_config,
+                        step_config=sub_step_config,
+                        global_config_defaults=global_config_defaults,
+                        global_environment_config_defaults=global_environment_config_defaults
                     )
-                    sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+                    # run the step
+                    sub_step.run_step(step_config_runtime_overrides)
                 else:
                     raise TSSCException(
                         &#39;No StepImplementer for step&#39;
@@ -383,19 +441,24 @@ Default: tssc-working</dd>
             if default_step_implementer:
                 # create the default StepImplementer instance
                 sub_step = default_step_implementer[_CLAZZ_KEY](
-                    {},
-                    self.results_dir_path,
-                    self.results_file_name,
-                    self.work_dir_path
+                    results_dir_path=self.results_dir_path,
+                    results_file_name=self.results_file_name,
+                    work_dir_path=self.work_dir_path,
+                    step_environment_config={},
+                    step_config={},
+                    global_config_defaults=global_config_defaults,
+                    global_environment_config_defaults=global_environment_config_defaults
                 )
-                sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+                # run the step
+                sub_step.run_step(step_config_runtime_overrides)
             else:
                 raise TSSCException(
-                    &#39;No implimenter specified for step&#39;
+                    &#39;No implementer specified for step&#39;
                     + &#39;(&#39; + step_name + &#39;)&#39;
                     + &#39; in config&#39;
                     + &#39;(&#39; + str(self.config) + &#39;)&#39;
-                    + &#39; and no default step implementer registered in step implimenters&#39;
+                    + &#39; and no default step implementer registered in step implementers&#39;
                     + &#39;(&#39; + str(step_implementers) + &#39;)&#39;
                 )</code></pre>
 </details>
@@ -435,7 +498,6 @@ def register_step_implementer(implementer_class, is_default=False):
     &#34;&#34;&#34;
 
     step_name = implementer_class.step_name()
-
     if step_name not in TSSCFactory._step_implementers:
         TSSCFactory._step_implementers[step_name] = {}
 
@@ -456,7 +518,7 @@ def register_step_implementer(implementer_class, is_default=False):
 <h3>Methods</h3>
 <dl>
 <dt id="tssc.factory.TSSCFactory.run_step"><code class="name flex">
-<span>def <span class="ident">run_step</span></span>(<span>self, step_name, runtime_step_config=None)</span>
+<span>def <span class="ident">run_step</span></span>(<span>self, step_name, step_config_runtime_overrides=None, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Call the given step.</p>
@@ -464,8 +526,12 @@ def register_step_implementer(implementer_class, is_default=False):
 <dl>
 <dt><strong><code>step_name</code></strong> :&ensp;<code>str</code></dt>
 <dd>TSSC step to run.</dd>
-<dt><strong><code>runtime_step_config</code></strong></dt>
-<dd>TODO</dd>
+<dt><strong><code>step_config_runtime_overrides</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Configuration for the step passed in at runtime when the step was invoked that will
+override step configuration coming from any other source.</dd>
+<dt><strong><code>environment</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Name of the environment the step is being run in. Used to determine environment
+specific global defaults and step configuration.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -479,7 +545,7 @@ If no StepImplementer registered for given step with given implementer name.</dd
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_step(self, step_name, runtime_step_config=None): # pylint: disable=too-many-branches
+<pre><code class="python">def run_step(self, step_name, step_config_runtime_overrides=None, environment=None): # pylint: disable=too-many-branches
     &#34;&#34;&#34;
     Call the given step.
 
@@ -487,8 +553,12 @@ If no StepImplementer registered for given step with given implementer name.</dd
     ----------
     step_name : str
         TSSC step to run.
-    runtime_step_config
-        TODO
+    step_config_runtime_overrides : dict, optional
+        Configuration for the step passed in at runtime when the step was invoked that will
+        override step configuration coming from any other source.
+    environment : str, optional
+        Name of the environment the step is being run in. Used to determine environment
+        specific global defaults and step configuration.
 
     Raises
     ------
@@ -499,8 +569,8 @@ If no StepImplementer registered for given step with given implementer name.</dd
         If no StepImplementer registered for given step with given implementer name.
     &#34;&#34;&#34;
 
-    if not runtime_step_config:
-        runtime_step_config = {}
+    if step_config_runtime_overrides is None:
+        step_config_runtime_overrides = {}
 
     # verify that there is registered implementers for the given step
     if not step_name in TSSCFactory._step_implementers or \
@@ -509,12 +579,19 @@ If no StepImplementer registered for given step with given implementer name.</dd
 
     step_implementers = TSSCFactory._step_implementers[step_name]
 
-    # Check to see if there is a global-default section defined in the factory&#39;s
-    #   config. If so, set that. This will be passed in to run_step of the
-    #   step_implementer abstrct class
-    global_step_config_defaults = {}
-    if &#39;global-defaults&#39; in self.config:
-        global_step_config_defaults = self.config[&#39;global-defaults&#39;]
+    # determine the global configuration defaults
+    global_config_defaults = {}
+    if _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY in self.config:
+        global_config_defaults = self.config[_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY]
+
+    # determine the global environment configuration defaults
+    global_environment_config_defaults = {}
+    if environment and \
+            _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY in self.config and \
+            environment in self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY]:
+
+        global_environment_config_defaults = \
+            self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
 
     # get step configuration if there is any
     step_config = {}
@@ -526,18 +603,33 @@ If no StepImplementer registered for given step with given implementer name.</dd
             sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
 
             if sub_step_implementer_name in step_implementers:
+                # determine the sub step configuration
                 if _SUB_STEP_CONFIG_KEY in sub_step:
                     sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
                 else:
                     sub_step_config = {}
+
+                # determine the sub step environment specific configuration
+                if _SUB_STEP_ENV_CONFIG_KEY in sub_step and \
+                        environment in sub_step[_SUB_STEP_ENV_CONFIG_KEY]:
+                    sub_step_environment_config = \
+                        sub_step[_SUB_STEP_ENV_CONFIG_KEY][environment]
+                else:
+                    sub_step_environment_config = {}
+
                 # create the StepImplementer instance
                 sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                    sub_step_config,
-                    self.results_dir_path,
-                    self.results_file_name,
-                    self.work_dir_path
+                    results_dir_path=self.results_dir_path,
+                    results_file_name=self.results_file_name,
+                    work_dir_path=self.work_dir_path,
+                    step_environment_config=sub_step_environment_config,
+                    step_config=sub_step_config,
+                    global_config_defaults=global_config_defaults,
+                    global_environment_config_defaults=global_environment_config_defaults
                 )
-                sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+                # run the step
+                sub_step.run_step(step_config_runtime_overrides)
             else:
                 raise TSSCException(
                     &#39;No StepImplementer for step&#39;
@@ -555,19 +647,24 @@ If no StepImplementer registered for given step with given implementer name.</dd
         if default_step_implementer:
             # create the default StepImplementer instance
             sub_step = default_step_implementer[_CLAZZ_KEY](
-                {},
-                self.results_dir_path,
-                self.results_file_name,
-                self.work_dir_path
+                results_dir_path=self.results_dir_path,
+                results_file_name=self.results_file_name,
+                work_dir_path=self.work_dir_path,
+                step_environment_config={},
+                step_config={},
+                global_config_defaults=global_config_defaults,
+                global_environment_config_defaults=global_environment_config_defaults
             )
-            sub_step.run_step(global_step_config_defaults, **runtime_step_config)
+
+            # run the step
+            sub_step.run_step(step_config_runtime_overrides)
         else:
             raise TSSCException(
-                &#39;No implimenter specified for step&#39;
+                &#39;No implementer specified for step&#39;
                 + &#39;(&#39; + step_name + &#39;)&#39;
                 + &#39; in config&#39;
                 + &#39;(&#39; + str(self.config) + &#39;)&#39;
-                + &#39; and no default step implementer registered in step implimenters&#39;
+                + &#39; and no default step implementer registered in step implementers&#39;
                 + &#39;(&#39; + str(step_implementers) + &#39;)&#39;
             )</code></pre>
 </details>

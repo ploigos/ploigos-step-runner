@@ -130,42 +130,79 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_ARGS = {
+DEFAULT_CONFIG = {
     &#39;repo-root&#39;: &#39;./&#39;,
     &#39;build-string-length&#39;: 7
 }
 
+REQUIRED_CONFIG_KEYS = [
+    &#39;repo-root&#39;
+]
+
 class Git(StepImplementer): # pylint: disable=too-few-public-methods 
     &#34;&#34;&#34;
     StepImplementer for the generate-metadata step for Git.
-
-    Raises
-    ------
-    ValueError
-        If given pom file does not exist
-        If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        &#34;&#34;&#34;
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        &#34;&#34;&#34;
         return DefaultSteps.GENERATE_METADATA
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         &#34;&#34;&#34;
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self, runtime_step_config):
+        &#34;&#34;&#34;
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
-        &#34;&#34;&#34;
-        if &#39;repo-root&#39; not in step_config or not step_config[&#39;repo-root&#39;]:
-            raise ValueError(&#39;Key (repo-root) must have non-empty value in the step configuration&#39;)
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
-    def _run_step(self, runtime_step_config):
+        Returns
+        -------
+        dict
+            Results of running this step.
+        &#34;&#34;&#34;
         repo_root = runtime_step_config[&#39;repo-root&#39;]
         build_string_length = runtime_step_config[&#39;build-string-length&#39;]
 
@@ -220,16 +257,10 @@ TSSCFactory.register_step_implementer(Git)</code></pre>
 <dl>
 <dt id="tssc.step_implementers.generate_metadata.git.Git"><code class="flex name class">
 <span>class <span class="ident">Git</span></span>
-<span>(</span><span>config, results_dir, results_file_name, work_dir_path)</span>
+<span>(</span><span>results_dir_path, results_file_name, work_dir_path, step_environment_config=None, step_config=None, global_config_defaults=None, global_environment_config_defaults=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>StepImplementer for the generate-metadata step for Git.</p>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>ValueError</code></dt>
-<dd>If given pom file does not exist
-If given pom file does not contain required elements</dd>
-</dl></div>
+<div class="desc"><p>StepImplementer for the generate-metadata step for Git.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -237,34 +268,67 @@ If given pom file does not contain required elements</dd>
 <pre><code class="python">class Git(StepImplementer): # pylint: disable=too-few-public-methods 
     &#34;&#34;&#34;
     StepImplementer for the generate-metadata step for Git.
-
-    Raises
-    ------
-    ValueError
-        If given pom file does not exist
-        If given pom file does not contain required elements
     &#34;&#34;&#34;
 
-    def __init__(self, config, results_dir, results_file_name, work_dir_path):
-        super().__init__(config, results_dir, results_file_name, work_dir_path, DEFAULT_ARGS)
+    @staticmethod
+    def step_name():
+        &#34;&#34;&#34;
+        Getter for the TSSC Step name implemented by this step.
 
-    @classmethod
-    def step_name(cls):
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
+        &#34;&#34;&#34;
         return DefaultSteps.GENERATE_METADATA
 
-    def _validate_step_config(self, step_config):
+    @staticmethod
+    def step_implementer_config_defaults():
         &#34;&#34;&#34;
-        Function for implementers to override to do custom step config validation.
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self, runtime_step_config):
+        &#34;&#34;&#34;
+        Runs the TSSC step implemented by this StepImplementer.
 
         Parameters
         ----------
-        step_config : dict
-            Step configuration to validate.
-        &#34;&#34;&#34;
-        if &#39;repo-root&#39; not in step_config or not step_config[&#39;repo-root&#39;]:
-            raise ValueError(&#39;Key (repo-root) must have non-empty value in the step configuration&#39;)
+        runtime_step_config : dict
+            Step configuration to use when the StepImplementer runs the step with all of the
+            various static, runtime, defaults, and environment configuration munged together.
 
-    def _run_step(self, runtime_step_config):
+        Returns
+        -------
+        dict
+            Results of running this step.
+        &#34;&#34;&#34;
         repo_root = runtime_step_config[&#39;repo-root&#39;]
         build_string_length = runtime_step_config[&#39;build-string-length&#39;]
 
@@ -316,9 +380,14 @@ If given pom file does not contain required elements</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
