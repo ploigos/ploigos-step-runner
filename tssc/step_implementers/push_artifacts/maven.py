@@ -201,37 +201,37 @@ class Maven(StepImplementer):
                 # Build the mvn command, settings is required even if no user/password
                 # The settings file is required, need to deal with empty userid,password
                 # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
+
+                # testing with and without print...
+                # this round is without.  Do the special charcters become ugly???
+                # next test is using _decode=utf-8
                 if user == '':
-                    print(
-                        sh.mvn(  # pylint: disable=no-member
-                            'deploy:deploy-file',
-                            '-Dversion=' + version,
-                            '-Durl=' + url,
-                            '-Dfile=' + artifact_path,
-                            '-DgroupId=' + group_id,
-                            '-DartifactId=' + artifact_id,
-                            '-Dpackaging=' + package_type,
-                            '-DrepositoryId=tssc',
-                            '-s' + settings_path,
-                            _out=sys.stdout
-                        )
+                    sh.mvn(  # pylint: disable=no-member
+                        'deploy:deploy-file',
+                        '-Dversion=' + version,
+                        '-Durl=' + url,
+                        '-Dfile=' + artifact_path,
+                        '-DgroupId=' + group_id,
+                        '-DartifactId=' + artifact_id,
+                        '-Dpackaging=' + package_type,
+                        '-DrepositoryId=tssc',
+                        '-s' + settings_path,
+                        _out=sys.stdout
                     )
                 else:
-                    print(
-                        sh.mvn(  # pylint: disable=no-member
-                            'deploy:deploy-file',
-                            '-Dversion=' + version,
-                            '-Durl=' + url,
-                            '-Dfile=' + artifact_path,
-                            '-DgroupId=' + group_id,
-                            '-DartifactId=' + artifact_id,
-                            '-Dpackaging=' + package_type,
-                            '-DrepositoryId=tssc',
-                            '-DrepositoryUser=' + user,
-                            '-DrepositoryPassword=' + password,
-                            '-s' + settings_path,
-                            _out=sys.stdout
-                        )
+                    sh.mvn(  # pylint: disable=no-member
+                        'deploy:deploy-file',
+                        '-Dversion=' + version,
+                        '-Durl=' + url,
+                        '-Dfile=' + artifact_path,
+                        '-DgroupId=' + group_id,
+                        '-DartifactId=' + artifact_id,
+                        '-Dpackaging=' + package_type,
+                        '-DrepositoryId=tssc',
+                        '-DrepositoryUser=' + user,
+                        '-DrepositoryPassword=' + password,
+                        '-s' + settings_path,
+                        _out=sys.stdout
                     )
 
             except sh.ErrorReturnCode as error:
