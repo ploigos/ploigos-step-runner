@@ -202,9 +202,6 @@ class Maven(StepImplementer):
                 # The settings file is required, need to deal with empty userid,password
                 # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
 
-                # testing with and without print...
-                # this round is without.  Do the special charcters become ugly???
-                # next test is using _decode=utf-8
                 if user == '':
                     sh.mvn(  # pylint: disable=no-member
                         'deploy:deploy-file',

@@ -214,13 +214,11 @@ class Maven(StepImplementer):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
         try:
-            print(
-                sh.mvn(  # pylint: disable=no-member,
-                    'clean',
-                    'install',
-                    '-f', pom_file,
-                    _out=sys.stdout
-                )
+            sh.mvn(  # pylint: disable=no-member,
+                'clean',
+                'install',
+                '-f', pom_file,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error invoking mvn: {error}".format(error=error))

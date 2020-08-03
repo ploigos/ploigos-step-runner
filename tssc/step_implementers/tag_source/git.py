@@ -165,8 +165,10 @@ class Git(StepImplementer):
                 username = runtime_step_config.get('username')
                 password = runtime_step_config.get('password')
             else:
-                raise ValueError('Both username and password must have ' \
-                                 'non-empty value in the runtime step configuration')
+                raise ValueError(
+                    'Both username and password must have ' \
+                    'non-empty value in the runtime step configuration'
+                )
         else:
             print('No username/password found, assuming ssh')
         tag = self._get_tag()
@@ -176,14 +178,18 @@ class Git(StepImplementer):
             if username and password:
                 self._git_push('http://' + username + ':' + password + '@' + git_url[7:])
             else:
-                raise ValueError('For a http:// git url, you need to also provide ' \
-                                 'username/password pair')
+                raise ValueError(
+                    'For a http:// git url, you need to also provide ' \
+                    'username/password pair'
+                )
         elif git_url.startswith('https://'):
             if username and password:
                 self._git_push('https://' + username + ':' + password + '@' + git_url[8:])
             else:
-                raise ValueError('For a https:// git url, you need to also provide ' \
-                                 'username/password pair')
+                raise ValueError(
+                    'For a https:// git url, you need to also provide ' \
+                    'username/password pair'
+                )
         else:
             self._git_push(None)
         results = {
@@ -209,7 +215,13 @@ class Git(StepImplementer):
             try:
                 return_val = sh.git.config(
                     '--get',
-                    'remote.origin.url').stdout.decode("utf-8").rstrip()
+                    'remote.origin.url',
+                    _out=sys.stdout,
+                    _tee=True,
+                    _encoding='UTF-8',
+                    _decode_errors='ignore'
+                    ).rstrip()
+
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError('Error invoking git config --get remote.origin.url')
         return return_val
@@ -223,12 +235,10 @@ class Git(StepImplementer):
             # making this an acceptable work around to the issue since on the off chance
             # actually orverwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
-            print(
-                sh.git.tag(  # pylint: disable=no-member
-                    git_tag_value,
-                    '-f',
-                    _out=sys.stdout
-                )
+            sh.git.tag(  # pylint: disable=no-member
+                git_tag_value,
+                '-f',
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value)
@@ -237,19 +247,15 @@ class Git(StepImplementer):
     def _git_push(url=None):  # pragma: no cover
         try:
             if url:
-                print(  # pylint: disable=no-member
-                    sh.git.push(
-                        url,
-                        '--tag',
-                        _out=sys.stdout
-                    )
+                sh.git.push(
+                    url,
+                    '--tag',
+                    _out=sys.stdout
                 )
             else:
-                print(  # pylint: disable=no-member
-                    sh.git.push(
-                        '--tag',
-                        _out=sys.stdout
-                    )
+                sh.git.push(
+                    '--tag',
+                    _out=sys.stdout
                 )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push')
