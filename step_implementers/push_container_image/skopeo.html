@@ -149,7 +149,9 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_KEYS = [
     &#39;destination&#39;,
     &#39;src-tls-verify&#39;,
-    &#39;dest-tls-verify&#39;
+    &#39;dest-tls-verify&#39;,
+    &#39;service-name&#39;,
+    &#39;application-name&#39;
 ]
 
 class Skopeo(StepImplementer):
@@ -223,6 +225,9 @@ class Skopeo(StepImplementer):
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
+        application_name = runtime_step_config[&#39;application-name&#39;]
+        service_name = runtime_step_config[&#39;service-name&#39;]
+
         image_tar_file = &#39;&#39;
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
           self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
@@ -231,7 +236,8 @@ class Skopeo(StepImplementer):
         else:
             raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + (version).lower()
+        destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;/&#39; + \
+          application_name + &#39;/&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
             print(
                 sh.skopeo.copy( #pylint: disable=no-member
@@ -344,6 +350,9 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
         else:
             print(&#39;No version found in metadata. Using latest&#39;)
 
+        application_name = runtime_step_config[&#39;application-name&#39;]
+        service_name = runtime_step_config[&#39;service-name&#39;]
+
         image_tar_file = &#39;&#39;
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
           self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
@@ -352,7 +361,8 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
         else:
             raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;:&#39; + (version).lower()
+        destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;/&#39; + \
+          application_name + &#39;/&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
             print(
                 sh.skopeo.copy( #pylint: disable=no-member
