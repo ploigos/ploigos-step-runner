@@ -291,14 +291,14 @@ class Buildah(StepImplementer):
         )
 
         try:
-            print(sh.buildah.bud( #pylint: disable=no-member
+            sh.buildah.bud(  # pylint: disable=no-member
                 &#39;--format=&#39; + runtime_step_config[&#39;format&#39;],
                 &#39;--tls-verify=&#39; + runtime_step_config[&#39;tlsverify&#39;],
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
                 &#39;-t&#39;, tag,
                 context,
                 _out=sys.stdout
-            ))
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
                                &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
@@ -315,12 +315,10 @@ class Buildah(StepImplementer):
             #   existing files.
             if os.path.exists(image_tar_file):
                 os.remove(image_tar_file)
-            print(
-                sh.buildah.push( #pylint: disable=no-member
-                    tag,
-                    &#34;docker-archive:&#34; + image_tar_file,
-                    _out=sys.stdout
-                )
+            sh.buildah.push( #pylint: disable=no-member
+                tag,
+                &#34;docker-archive:&#34; + image_tar_file,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
@@ -331,6 +329,7 @@ class Buildah(StepImplementer):
         }
 
         return results
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Buildah, True)</code></pre>
@@ -462,14 +461,14 @@ If destination is not specified (not defaulted)</dd>
         )
 
         try:
-            print(sh.buildah.bud( #pylint: disable=no-member
+            sh.buildah.bud(  # pylint: disable=no-member
                 &#39;--format=&#39; + runtime_step_config[&#39;format&#39;],
                 &#39;--tls-verify=&#39; + runtime_step_config[&#39;tlsverify&#39;],
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
                 &#39;-t&#39;, tag,
                 context,
                 _out=sys.stdout
-            ))
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
                                &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
@@ -486,12 +485,10 @@ If destination is not specified (not defaulted)</dd>
             #   existing files.
             if os.path.exists(image_tar_file):
                 os.remove(image_tar_file)
-            print(
-                sh.buildah.push( #pylint: disable=no-member
-                    tag,
-                    &#34;docker-archive:&#34; + image_tar_file,
-                    _out=sys.stdout
-                )
+            sh.buildah.push( #pylint: disable=no-member
+                tag,
+                &#34;docker-archive:&#34; + image_tar_file,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)

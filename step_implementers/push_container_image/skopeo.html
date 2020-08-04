@@ -239,13 +239,12 @@ class Skopeo(StepImplementer):
         destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;/&#39; + \
           application_name + &#39;/&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
-            print(
-                sh.skopeo.copy( #pylint: disable=no-member
-                    &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
-                    &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    &#39;docker-archive:&#39; + image_tar_file,
-                    destination_with_version, _out=sys.stdout
-                )
+            sh.skopeo.copy( # pylint: disable=no-member
+                &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
+                &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
+                &#39;docker-archive:&#39; + image_tar_file,
+                destination_with_version,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))
@@ -364,13 +363,12 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
         destination_with_version = runtime_step_config[&#39;destination&#39;] + &#39;/&#39; + \
           application_name + &#39;/&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
-            print(
-                sh.skopeo.copy( #pylint: disable=no-member
-                    &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
-                    &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
-                    &#39;docker-archive:&#39; + image_tar_file,
-                    destination_with_version, _out=sys.stdout
-                )
+            sh.skopeo.copy( # pylint: disable=no-member
+                &#39;--src-tls-verify=&#39; + runtime_step_config[&#39;src-tls-verify&#39;],
+                &#39;--dest-tls-verify=&#39; + runtime_step_config[&#39;dest-tls-verify&#39;],
+                &#39;docker-archive:&#39; + image_tar_file,
+                destination_with_version,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))

@@ -224,6 +224,7 @@ Results output by this step.
         }
     }
 &#34;&#34;&#34;
+import sys
 import sh
 from tssc import TSSCFactory
 from tssc import StepImplementer
@@ -235,6 +236,7 @@ AUTHENTICATION_CONFIG = {
     &#39;username&#39;: None,
     &#39;password&#39;: None
 }
+
 
 class Git(StepImplementer):
     &#34;&#34;&#34;
@@ -335,8 +337,10 @@ class Git(StepImplementer):
                 username = runtime_step_config.get(&#39;username&#39;)
                 password = runtime_step_config.get(&#39;password&#39;)
             else:
-                raise ValueError(&#39;Both username and password must have &#39; \
-                  &#39;non-empty value in the runtime step configuration&#39;)
+                raise ValueError(
+                    &#39;Both username and password must have &#39; \
+                    &#39;non-empty value in the runtime step configuration&#39;
+                )
         else:
             print(&#39;No username/password found, assuming ssh&#39;)
         tag = self._get_tag()
@@ -346,14 +350,18 @@ class Git(StepImplementer):
             if username and password:
                 self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
             else:
-                raise ValueError(&#39;For a http:// git url, you need to also provide &#39; \
-                  &#39;username/password pair&#39;)
+                raise ValueError(
+                    &#39;For a http:// git url, you need to also provide &#39; \
+                    &#39;username/password pair&#39;
+                )
         elif git_url.startswith(&#39;https://&#39;):
             if username and password:
                 self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
             else:
-                raise ValueError(&#39;For a https:// git url, you need to also provide &#39; \
-                  &#39;username/password pair&#39;)
+                raise ValueError(
+                    &#39;For a https:// git url, you need to also provide &#39; \
+                    &#39;username/password pair&#39;
+                )
         else:
             self._git_push(None)
         results = {
@@ -379,13 +387,19 @@ class Git(StepImplementer):
             try:
                 return_val = sh.git.config(
                     &#39;--get&#39;,
-                    &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
+                    &#39;remote.origin.url&#39;,
+                    _out=sys.stdout,
+                    _tee=True,
+                    _encoding=&#39;UTF-8&#39;,
+                    _decode_errors=&#39;ignore&#39;
+                    ).rstrip()
+
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
         return return_val
 
     @staticmethod
-    def _git_tag(git_tag_value): # pragma: no cover
+    def _git_tag(git_tag_value):  # pragma: no cover
         try:
             # NOTE:
             # this force is only needed locally in case of a re-reun of the same pipeline
@@ -393,19 +407,31 @@ class Git(StepImplementer):
             # making this an acceptable work around to the issue since on the off chance
             # actually orverwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
-            sh.git.tag(git_tag_value, &#39;-f&#39;)
+            sh.git.tag(  # pylint: disable=no-member
+                git_tag_value,
+                &#39;-f&#39;,
+                _out=sys.stdout
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
 
     @staticmethod
-    def _git_push(url=None): # pragma: no cover
+    def _git_push(url=None):  # pragma: no cover
         try:
             if url:
-                sh.git.push(url, &#39;--tag&#39;)
+                sh.git.push(
+                    url,
+                    &#39;--tag&#39;,
+                    _out=sys.stdout
+                )
             else:
-                sh.git.push(&#39;--tag&#39;)
+                sh.git.push(
+                    &#39;--tag&#39;,
+                    _out=sys.stdout
+                )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;)
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Git, True)</code></pre>
@@ -532,8 +558,10 @@ for http and https git repos, and that is a desired use case.</p></div>
                 username = runtime_step_config.get(&#39;username&#39;)
                 password = runtime_step_config.get(&#39;password&#39;)
             else:
-                raise ValueError(&#39;Both username and password must have &#39; \
-                  &#39;non-empty value in the runtime step configuration&#39;)
+                raise ValueError(
+                    &#39;Both username and password must have &#39; \
+                    &#39;non-empty value in the runtime step configuration&#39;
+                )
         else:
             print(&#39;No username/password found, assuming ssh&#39;)
         tag = self._get_tag()
@@ -543,14 +571,18 @@ for http and https git repos, and that is a desired use case.</p></div>
             if username and password:
                 self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
             else:
-                raise ValueError(&#39;For a http:// git url, you need to also provide &#39; \
-                  &#39;username/password pair&#39;)
+                raise ValueError(
+                    &#39;For a http:// git url, you need to also provide &#39; \
+                    &#39;username/password pair&#39;
+                )
         elif git_url.startswith(&#39;https://&#39;):
             if username and password:
                 self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
             else:
-                raise ValueError(&#39;For a https:// git url, you need to also provide &#39; \
-                  &#39;username/password pair&#39;)
+                raise ValueError(
+                    &#39;For a https:// git url, you need to also provide &#39; \
+                    &#39;username/password pair&#39;
+                )
         else:
             self._git_push(None)
         results = {
@@ -576,13 +608,19 @@ for http and https git repos, and that is a desired use case.</p></div>
             try:
                 return_val = sh.git.config(
                     &#39;--get&#39;,
-                    &#39;remote.origin.url&#39;).stdout.decode(&#34;utf-8&#34;).rstrip()
+                    &#39;remote.origin.url&#39;,
+                    _out=sys.stdout,
+                    _tee=True,
+                    _encoding=&#39;UTF-8&#39;,
+                    _decode_errors=&#39;ignore&#39;
+                    ).rstrip()
+
             except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
         return return_val
 
     @staticmethod
-    def _git_tag(git_tag_value): # pragma: no cover
+    def _git_tag(git_tag_value):  # pragma: no cover
         try:
             # NOTE:
             # this force is only needed locally in case of a re-reun of the same pipeline
@@ -590,17 +628,28 @@ for http and https git repos, and that is a desired use case.</p></div>
             # making this an acceptable work around to the issue since on the off chance
             # actually orverwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
-            sh.git.tag(git_tag_value, &#39;-f&#39;)
+            sh.git.tag(  # pylint: disable=no-member
+                git_tag_value,
+                &#39;-f&#39;,
+                _out=sys.stdout
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
 
     @staticmethod
-    def _git_push(url=None): # pragma: no cover
+    def _git_push(url=None):  # pragma: no cover
         try:
             if url:
-                sh.git.push(url, &#39;--tag&#39;)
+                sh.git.push(
+                    url,
+                    &#39;--tag&#39;,
+                    _out=sys.stdout
+                )
             else:
-                sh.git.push(&#39;--tag&#39;)
+                sh.git.push(
+                    &#39;--tag&#39;,
+                    _out=sys.stdout
+                )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;)</code></pre>
 </details>

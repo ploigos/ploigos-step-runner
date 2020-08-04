@@ -323,6 +323,7 @@ Examples
         ]
     }}
 &#34;&#34;&#34;
+import sys
 import os
 import sh
 
@@ -416,29 +417,34 @@ class Maven(StepImplementer):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
         try:
-            sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
+            sh.mvn(  # pylint: disable=no-member,
+                &#39;clean&#39;,
+                &#39;install&#39;,
+                &#39;-f&#39;, pom_file,
+                _out=sys.stdout
+            )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
+            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error))
 
         # find the artifacts
-        artfiact_file_names = []
+        artifact_file_names = []
         artifact_parent_dir_full_path = \
             os.listdir(os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
                 artifact_parent_dir))
         for filename in artifact_parent_dir_full_path:
             if any(filename.endswith(ext) for ext in artifact_extensions):
-                artfiact_file_names.append(filename)
+                artifact_file_names.append(filename)
 
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
-        if len(artfiact_file_names) &gt; 1:
+        if len(artifact_file_names) &gt; 1:
             raise ValueError(
                 &#39;pom resulted in multiple artifacts with expected artifact extensions &#39; +
                 &#39;({artifact_extensions}), this is unsupported&#39;.format(
                     artifact_extensions=artifact_extensions))
 
-        if len(artfiact_file_names) &lt; 1:
+        if len(artifact_file_names) &lt; 1:
             raise ValueError(
                 &#39;pom resulted in 0 with expected artifact extensions &#39; +
                 &#39;({artifact_extensions}), this is unsupported&#39;.format(
@@ -452,10 +458,10 @@ class Maven(StepImplementer):
             package_type = &#39;jar&#39;
 
         results = {
-            &#39;artifacts&#39; : [{
+            &#39;artifacts&#39;: [{
                 &#39;path&#39;: os.path.join(
                     os.path.dirname(os.path.abspath(pom_file)),
-                    artifact_parent_dir, artfiact_file_names[0]
+                    artifact_parent_dir, artifact_file_names[0]
                 ),
                 &#39;artifact-id&#39;: artifact_id,
                 &#39;group-id&#39;: group_id,
@@ -464,6 +470,7 @@ class Maven(StepImplementer):
             }]
         }
         return results
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Maven)</code></pre>
@@ -564,29 +571,34 @@ pom.xml file.</p></div>
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
         try:
-            sh.mvn(&#39;clean&#39;, &#39;install&#39;, &#39;-f&#39;, pom_file) # pylint: disable=no-member
+            sh.mvn(  # pylint: disable=no-member,
+                &#39;clean&#39;,
+                &#39;install&#39;,
+                &#39;-f&#39;, pom_file,
+                _out=sys.stdout
+            )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {0}&#34;.format(str(error)))
+            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error))
 
         # find the artifacts
-        artfiact_file_names = []
+        artifact_file_names = []
         artifact_parent_dir_full_path = \
             os.listdir(os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
                 artifact_parent_dir))
         for filename in artifact_parent_dir_full_path:
             if any(filename.endswith(ext) for ext in artifact_extensions):
-                artfiact_file_names.append(filename)
+                artifact_file_names.append(filename)
 
         # error if we find more then one artifact
         # see https://projects.engineering.redhat.com/browse/NAPSSPO-546
-        if len(artfiact_file_names) &gt; 1:
+        if len(artifact_file_names) &gt; 1:
             raise ValueError(
                 &#39;pom resulted in multiple artifacts with expected artifact extensions &#39; +
                 &#39;({artifact_extensions}), this is unsupported&#39;.format(
                     artifact_extensions=artifact_extensions))
 
-        if len(artfiact_file_names) &lt; 1:
+        if len(artifact_file_names) &lt; 1:
             raise ValueError(
                 &#39;pom resulted in 0 with expected artifact extensions &#39; +
                 &#39;({artifact_extensions}), this is unsupported&#39;.format(
@@ -600,10 +612,10 @@ pom.xml file.</p></div>
             package_type = &#39;jar&#39;
 
         results = {
-            &#39;artifacts&#39; : [{
+            &#39;artifacts&#39;: [{
                 &#39;path&#39;: os.path.join(
                     os.path.dirname(os.path.abspath(pom_file)),
-                    artifact_parent_dir, artfiact_file_names[0]
+                    artifact_parent_dir, artifact_file_names[0]
                 ),
                 &#39;artifact-id&#39;: artifact_id,
                 &#39;group-id&#39;: group_id,
