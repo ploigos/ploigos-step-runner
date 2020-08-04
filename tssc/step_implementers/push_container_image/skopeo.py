@@ -137,13 +137,12 @@ class Skopeo(StepImplementer):
         destination_with_version = runtime_step_config['destination'] + '/' + \
           application_name + '/' + service_name + ':' + (version).lower()
         try:
-            print(
-                sh.skopeo.copy( #pylint: disable=no-member
-                    '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
-                    '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
-                    'docker-archive:' + image_tar_file,
-                    destination_with_version, _out=sys.stdout
-                )
+            sh.skopeo.copy( # pylint: disable=no-member
+                '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
+                '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
+                'docker-archive:' + image_tar_file,
+                destination_with_version,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking skopeo: {error}'.format(error=error))

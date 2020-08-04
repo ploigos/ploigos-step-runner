@@ -1,4 +1,5 @@
 import os
+import sys
 import sh
 from pathlib import Path
 
@@ -6,10 +7,10 @@ import unittest
 from unittest.mock import patch
 from testfixtures import TempDirectory
 
+from tests.helpers.test_utils import run_step_test_with_result_validation
 from tssc import TSSCFactory
 from tssc.step_implementers.package import Maven
 
-from test_utils import *
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
     """simulates what mvn does by touching files.
@@ -28,7 +29,7 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
         artifact_parent_dir)
 
     
-    def mvn_side_effect(*args):
+    def mvn_side_effect(*args, **kwargs):
         if 'clean' in args:
             if os.path.exists(target_dir_path):
                 os.rmdir(target_dir_path)
@@ -105,7 +106,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -117,7 +118,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                             'path': os.path.join(
                                 temp_dir.path,
                                 'target',
-                                artfiact_file_name
+                                artifact_file_name
                             ),
                             'artifact-id': artifact_id,
                             'group-id': 'com.mycompany.app',
@@ -128,9 +129,9 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 }
             }
             
-            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artfiact_file_name])
+            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path)
+            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
     
     @patch('sh.mvn', create=True)
     def test_mvn_quickstart_no_jar(self, mvn_mock):
@@ -164,7 +165,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -176,7 +177,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                             'path': os.path.join(
                                 temp_dir.path,
                                 'target',
-                                artfiact_file_name
+                                artifact_file_name
                             ),
                             'artifact-id': 'my-app',
                             'group-id': 'com.mycompany.app'
@@ -284,7 +285,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 }
             }
             factory = TSSCFactory(config)
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -296,7 +297,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 [
                     'companya-{version}-jar-with-dependencies.jar'.format(version=version),
                     'companyb-{version}-jar-with-dependencies.jar'.format(version=version),
-                    artfiact_file_name
+                    artifact_file_name
                 ]
             )
             
@@ -331,7 +332,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -340,7 +341,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 'tssc-results': {
                     'package': {
                         'artifacts': [{
-                            'path': os.path.join(temp_dir.path, 'target', artfiact_file_name),
+                            'path': os.path.join(temp_dir.path, 'target', artifact_file_name),
                             'artifact-id': artifact_id,
                             'group-id': 'com.mycompany.app',
                             'package-type': package,
@@ -350,9 +351,9 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 }
             }
     
-            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artfiact_file_name])
+            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path)
+            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
     
     @patch('sh.mvn', create=True)
     def test_pom_file_valid_with_namespace_empty_jar(self, mvn_mock):
@@ -384,7 +385,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -393,7 +394,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                 'tssc-results': {
                     'package': {
                         'artifacts': [{
-                            'path': os.path.join(temp_dir.path, 'target', artfiact_file_name),
+                            'path': os.path.join(temp_dir.path, 'target', artifact_file_name),
                             'artifact-id': artifact_id,
                             'group-id': 'com.mycompany.app',
                             'package-type': package,
@@ -402,9 +403,9 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artfiact_file_name])
+            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path)
+            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
     
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile (default-compile) on project my-app: Compilation failure: Compilation failure'))
     def test_mvn_quickstart_single_jar_java_error(self, mvn_mock):
@@ -540,7 +541,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                     }
                 }
             }
-            artfiact_file_name = '{artifact_id}-{version}.{package}'.format(
+            artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
                 package=package
@@ -552,7 +553,7 @@ class TestStepImplementerPackageMaven(unittest.TestCase):
                             'path': os.path.join(
                                 temp_dir.path,
                                 'target',
-                                artfiact_file_name
+                                artifact_file_name
                             ),
                             'artifact-id': artifact_id,
                             'group-id': 'com.mycompany.app',

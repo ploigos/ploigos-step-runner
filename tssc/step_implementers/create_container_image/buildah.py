@@ -175,14 +175,14 @@ class Buildah(StepImplementer):
         )
 
         try:
-            print(sh.buildah.bud( #pylint: disable=no-member
+            sh.buildah.bud(  # pylint: disable=no-member
                 '--format=' + runtime_step_config['format'],
                 '--tls-verify=' + runtime_step_config['tlsverify'],
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 context,
                 _out=sys.stdout
-            ))
+            )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Issue invoking buildah bud with given image '
                                'specification file (' + image_spec_file + ')')
@@ -199,12 +199,10 @@ class Buildah(StepImplementer):
             #   existing files.
             if os.path.exists(image_tar_file):
                 os.remove(image_tar_file)
-            print(
-                sh.buildah.push( #pylint: disable=no-member
-                    tag,
-                    "docker-archive:" + image_tar_file,
-                    _out=sys.stdout
-                )
+            sh.buildah.push( #pylint: disable=no-member
+                tag,
+                "docker-archive:" + image_tar_file,
+                _out=sys.stdout
             )
         except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
             raise RuntimeError('Issue invoking buildah push to tar file ' + image_tar_file)
@@ -215,6 +213,7 @@ class Buildah(StepImplementer):
         }
 
         return results
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Buildah, True)
