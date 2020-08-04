@@ -13,20 +13,32 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
 
     def test_create_container_image_default_missing_args(self):
         with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
-                'tssc-config': {}
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    }
+                }
             }
             expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
-    
             with self.assertRaisesRegex(
                     AssertionError,
-                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
+                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\', \'application-name\': \'foo\', \'service-name\': \'bar\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
-    
+
     def test_push_container_image_specify_skopeo_implementer_missing_args(self):
         with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
-                'tssc-config': {    
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {}
@@ -37,28 +49,34 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
 
             with self.assertRaisesRegex(
                     AssertionError,
-                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
+                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\', \'application-name\': \'foo\', \'service-name\': \'bar\'\}\) is missing the required configuration keys \(\[\'destination\'\]\)'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
-    
+
     @patch('sh.skopeo', create=True)
     def test_create_container_image_specify_skopeo_implementer_invalid_arguments(self, skopeo_mock):
         with TempDirectory() as temp_dir:
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
-                'tssc-config': {    
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
-                            'destination' : 'docker-archive:' + temp_dir.path + '/image.tar' 
+                            'destination' : 'docker-archive:' + temp_dir.path + '/image.tar'
                         }
                     }
                 }
             }
-    
+
             with self.assertRaisesRegex(
                     RuntimeError,
                     r'Missing image tar .*'):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, [])
-    
+
     @patch('sh.skopeo', create=True)
     def test_create_container_image_specify_skopeo_implementer_valid_arguments(self, skopeo_mock):
         with TempDirectory() as temp_dir:
@@ -77,8 +95,14 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                 '''.format(version=version, destination=destination),
                     'utf-8')
                 )
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
-                'tssc-config': {    
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
@@ -88,14 +112,13 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                     }
                 }
             }
-            
-            expected_step_results = {'tssc-results': { 'create-container-image': {'image-tar-file': destination}, 'generate-metadata': {'image-tag': version }, 'push-container-image': {'image-tag': "{destination}:{version}".format(destination=destination, version=version)}}}
+            expected_step_results = {'tssc-results': { 'create-container-image': {'image-tar-file': destination}, 'generate-metadata': {'image-tag': version }, 'push-container-image': {'image-tag': "{destination}/{application_name}/{service_name}:{version}".format(destination=destination, application_name=application_name, service_name=service_name, version=version)}}}
             run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
             skopeo_mock.copy.assert_called_once_with(
                 '--src-tls-verify=true',
                 '--dest-tls-verify=true',
                 "docker-archive:{destination}".format(destination=destination),
-                "{destination}:{version}".format(destination=destination, version=version),
+                "{destination}/{application_name}/{service_name}:{version}".format(destination=destination, application_name=application_name, service_name=service_name, version=version),
                 _out=sys.stdout
             )
 
@@ -117,9 +140,15 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                 '''.format(version=version),
                     'utf-8')
                 )
-    
+
+            application_name = 'foo'
+            service_name = 'bar'
             config = {
-                'tssc-config': {    
+                'tssc-config': {
+                    'global-defaults': {
+                        'application-name': application_name,
+                        'service-name': service_name
+                    },
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
@@ -141,4 +170,3 @@ class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
                     RuntimeError,
                     r'Error invoking .*'):
                     run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
-    
