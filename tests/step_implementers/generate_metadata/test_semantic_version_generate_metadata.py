@@ -195,7 +195,7 @@ def test_maven_git_and_version_feature_branch():
         build = git_branch_last_commit_hash[:7]
         pre_release = 'feature_test0'
         version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-        image_tag = "{0}-{1}".format(app_version, pre_release, build)
+        image_tag = "{0}-{1}".format(app_version, pre_release)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'image-tag': image_tag}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
