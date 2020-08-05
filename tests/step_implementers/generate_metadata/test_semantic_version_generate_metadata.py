@@ -147,9 +147,9 @@ def test_maven_git_and_version_master_branch():
         app_version = "42.1"
         build = git_branch_last_commit_hash[:7]
         version = "{0}+{1}".format(app_version, build)
-        image_tag = "{0}-{1}".format(app_version, build)
+        image_tag = "{0}".format(app_version)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
-        
+
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
 
 def test_maven_git_and_version_feature_branch():
@@ -195,7 +195,7 @@ def test_maven_git_and_version_feature_branch():
         build = git_branch_last_commit_hash[:7]
         pre_release = 'feature_test0'
         version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-        image_tag = "{0}-{1}-{2}".format(app_version, pre_release, build)
+        image_tag = "{0}-{1}".format(app_version, pre_release, build)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'image-tag': image_tag}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
@@ -237,7 +237,7 @@ def test_override_app_version_at_runtime():
         app_version = "24.5"
         build = git_branch_last_commit_hash[:7]
         version = "{0}+{1}".format(app_version, build)
-        image_tag = "{0}-{1}".format(app_version, build)
+        image_tag = "{0}".format(app_version)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'app-version': app_version})
@@ -279,7 +279,7 @@ def test_override_build_at_runtime():
         app_version = "42.1"
         build = "1234"
         version = "{0}+{1}".format(app_version, build)
-        image_tag = "{0}-{1}".format(app_version, build)
+        image_tag = "{0}".format(app_version)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'image-tag': image_tag}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': build})
@@ -327,7 +327,7 @@ def test_override_pre_release_at_runtime():
         build = git_branch_last_commit_hash[:7]
         pre_release = 'beta1'
         version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-        image_tag = "{0}-{1}-{2}".format(app_version, pre_release, build)
+        image_tag = "{0}-{1}".format(app_version, pre_release)
         expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
         run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': pre_release})
