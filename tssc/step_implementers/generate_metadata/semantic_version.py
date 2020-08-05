@@ -64,8 +64,7 @@ Results output by this step.
 | Result Key  | Description
 |-------------|------------
 | `version`   | Constructed semantic version (https://semver.org/).
-| `image-tag` | Constructed semantic version (https://semver.org/) modified \
-                to work as a container image tag.
+| `image-tag` | Constructed semantic version (https://semver.org/) without build #
 
 Examples
 --------
@@ -90,7 +89,7 @@ Examples
         'pre-release': 'feature_test0',
         'build': 'abc123',
         'version': '42.1.0-feature_foo+abc123',
-        'image-tag': '42.1.0-feature_foo-abc123'
+        'image-tag': '42.1.0-feature_foo'
       }
     }}
 
@@ -114,7 +113,7 @@ Examples
         'pre-release': 'master',
         'build': 'abc123',
         'version': '42.1.0+abc123',
-        'image-tag': '42.1.0-abc123'
+        'image-tag': '42.1.0'
       }
     }}
 """
@@ -127,7 +126,7 @@ DEFAULT_CONFIG = {
     'release-branch': 'master'
 }
 
-class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods 
+class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for SemanticVersion.
     """
@@ -229,10 +228,10 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
 
         if pre_release == release_branch:
             version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}-{1}".format(app_version, build)
+            image_tag = "{0}".format(app_version)
         else:
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-            image_tag = "{0}-{1}-{2}".format(app_version, pre_release, build)
+            image_tag = "{0}-{1}".format(app_version, pre_release)
 
         results = {
             'version': version,
