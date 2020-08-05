@@ -136,8 +136,8 @@ class Skopeo(StepImplementer):
         else:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = runtime_step_config['destination-url'] + '/' + organization + '/' \
-          + application_name + '-' + service_name + ':' + (version).lower()
+        destination_with_version = runtime_step_config['destination-url'] + '/' + organization + \
+         '/' + application_name + '-' + service_name + ':' + (version).lower()
         try:
             sh.skopeo.copy( # pylint: disable=no-member
                 '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
