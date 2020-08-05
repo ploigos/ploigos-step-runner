@@ -303,9 +303,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             "Step Environment Configuration",
             self.step_environment_config)
         StepImplementer.__print_data(
-            "Step Environment Configuration",
-            self.step_environment_config)
-        StepImplementer.__print_data(
             "Step Configuration Runtime Overrides",
             step_config_runtime_overrides)
 

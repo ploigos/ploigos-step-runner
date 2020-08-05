@@ -45,6 +45,7 @@ Keys in the dictionary elements in the `artifacts` array in the step results.
 | `version`       | Version pushed to the artifact repository
 """
 import re
+import sys
 import sh
 
 from tssc import TSSCFactory
@@ -59,6 +60,7 @@ AUTHENTICATION_CONFIG = {
 REQUIRED_CONFIG_KEYS = [
     'url'
 ]
+
 
 class Maven(StepImplementer):
     """
@@ -159,16 +161,16 @@ class Maven(StepImplementer):
 
         # ----- get generate-metadata items
         # Required: Get the generate-metadata.version
-        if(self.get_step_results('generate-metadata') and \
-          self.get_step_results('generate-metadata').get('version')):
+        if (self.get_step_results('generate-metadata') and
+                self.get_step_results('generate-metadata').get('version')):
             version = self.get_step_results('generate-metadata')['version']
         else:
             raise ValueError('Severe error: Generate-metadata does not have a version')
 
         # ----- get package items this will change
         # Required: Get the package.artifacts
-        if(self.get_step_results('package') and \
-          self.get_step_results('package').get('artifacts')):
+        if (self.get_step_results('package') and
+                self.get_step_results('package').get('artifacts')):
             artifacts = self.get_step_results('package')['artifacts']
         else:
             raise ValueError('Severe error: Package does not have artifacts')
@@ -186,7 +188,7 @@ class Maven(StepImplementer):
         </settings>''')
 
         results = {
-            'artifacts' : []
+            'artifacts': []
         }
 
         for artifact in artifacts:
@@ -199,49 +201,55 @@ class Maven(StepImplementer):
                 # Build the mvn command, settings is required even if no user/password
                 # The settings file is required, need to deal with empty userid,password
                 # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
+
                 if user == '':
-                    sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
-                           '-Dversion='+version,\
-                           '-Durl='+url,\
-                           '-Dfile='+artifact_path,\
-                           '-DgroupId='+group_id,\
-                           '-DartifactId='+artifact_id,\
-                           '-Dpackaging='+package_type,\
-                           '-DrepositoryId=tssc',\
-                           '-s'+settings_path\
+                    sh.mvn(  # pylint: disable=no-member
+                        'deploy:deploy-file',
+                        '-Dversion=' + version,
+                        '-Durl=' + url,
+                        '-Dfile=' + artifact_path,
+                        '-DgroupId=' + group_id,
+                        '-DartifactId=' + artifact_id,
+                        '-Dpackaging=' + package_type,
+                        '-DrepositoryId=tssc',
+                        '-s' + settings_path,
+                        _out=sys.stdout
                     )
                 else:
-                    sh.mvn('deploy:deploy-file', # pylint: disable=no-member \
-                           '-Dversion='+version,\
-                           '-Durl='+url,\
-                           '-Dfile='+artifact_path,\
-                           '-DgroupId='+group_id,\
-                           '-DartifactId='+artifact_id,\
-                           '-Dpackaging='+package_type,\
-                           '-DrepositoryId=tssc',\
-                           '-DrepositoryUser='+user,\
-                           '-DrepositoryPassword='+password,\
-                           '-s'+settings_path\
+                    sh.mvn(  # pylint: disable=no-member
+                        'deploy:deploy-file',
+                        '-Dversion=' + version,
+                        '-Durl=' + url,
+                        '-Dfile=' + artifact_path,
+                        '-DgroupId=' + group_id,
+                        '-DartifactId=' + artifact_id,
+                        '-Dpackaging=' + package_type,
+                        '-DrepositoryId=tssc',
+                        '-DrepositoryUser=' + user,
+                        '-DrepositoryPassword=' + password,
+                        '-s' + settings_path,
+                        _out=sys.stdout
                     )
 
             except sh.ErrorReturnCode as error:
-                raise RuntimeError("Error invoking mvn: {0}".format(str(error)))
+                raise RuntimeError("Error invoking mvn: {all}".format(all=error))
 
             results['artifacts'].append({
-                'url': url + '/' + \
-                       re.sub(r'\.', '/', group_id) + '/' + \
-                       artifact_id + '/' + \
-                       version  + '/' + \
-                       artifact_id + '-' + \
-                       version  + '.' + \
+                'url': url + '/' +
+                       re.sub(r'\.', '/', group_id) + '/' +
+                       artifact_id + '/' +
+                       version + '/' +
+                       artifact_id + '-' +
+                       version + '.' +
                        package_type,
-                'artifact-id' : artifact_id,
-                'group-id' : group_id,
-                'version' : version,
-                'path' : artifact_path,
+                'artifact-id': artifact_id,
+                'group-id': group_id,
+                'version': version,
+                'path': artifact_path,
             })
 
         return results
+
 
 # register step implementer
 TSSCFactory.register_step_implementer(Maven)
