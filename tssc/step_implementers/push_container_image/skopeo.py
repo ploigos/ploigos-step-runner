@@ -45,11 +45,12 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_KEYS = [
-    'destination',
+    'destination-url',
     'src-tls-verify',
     'dest-tls-verify',
     'service-name',
-    'application-name'
+    'application-name',
+    'organization'
 ]
 
 class Skopeo(StepImplementer):
@@ -125,6 +126,7 @@ class Skopeo(StepImplementer):
 
         application_name = runtime_step_config['application-name']
         service_name = runtime_step_config['service-name']
+        organization = runtime_step_config['organization']
 
         image_tar_file = ''
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
@@ -134,8 +136,8 @@ class Skopeo(StepImplementer):
         else:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = runtime_step_config['destination'] + '/' + \
-          application_name + '/' + service_name + ':' + (version).lower()
+        destination_with_version = runtime_step_config['destination-url'] + '/' + organization + \
+         '/' + application_name + '-' + service_name + ':' + (version).lower()
         try:
             sh.skopeo.copy( # pylint: disable=no-member
                 '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
