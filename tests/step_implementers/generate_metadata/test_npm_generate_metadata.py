@@ -4,7 +4,7 @@ import unittest
 from testfixtures import TempDirectory
 
 from tssc import TSSCFactory
-from tssc.step_implementers.generate_metadata import npm
+from tssc.step_implementers.generate_metadata import Npm
 
 from test_utils import *
 
