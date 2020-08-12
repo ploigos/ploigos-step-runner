@@ -45,6 +45,7 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 from xml.etree import ElementTree
+import re
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml'
@@ -159,19 +160,21 @@ class JUnit(StepImplementer):
     @staticmethod
     def find_reports_dir(pom_file):
         """ Return the report directory specified in the pom """
-        # TODO: Figure out the pom namespace to make this work
-        ns = {'maven': 'http://maven.apache.org/POM/4.0.0'}
-        tree = ElementTree.parse(pom_file)
-        root = tree.getroot()
+        # extract and set namespace
+        root = ElementTree.parse(pom_file).getroot()
+        m = re.findall(r'{(.*?)}', root.tag)
+        namespace = m[0] if m else ''
+        ns = {'maven': namespace}
 
-        plugins = root.find('maven:build/maven:plugins', ns)
-        for plugin in plugins.findall('maven:plugin', ns):
-            config = plugin.find('maven:configuration', ns)
-            if config is not None:
-                reports_dir = config.find('maven:reportsDirectory', ns)
-                if reports_dir is not None:
-                    return reports_dir.text
-        return None
+        # extract reportsDirectory
+        xpath = 'maven:build/'\
+                'maven:plugins/'\
+                'maven:plugin/'\
+                '[maven:artifactId="maven-surefire-plugin"]/'\
+                'maven:configuration/'\
+                'maven:reportsDirectory'
+        plugin = root.find(xpath, ns)
+        return None if plugin is None else plugin.text
 
 # register step implementer
 TSSCFactory.register_step_implementer(JUnit)
