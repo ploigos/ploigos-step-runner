@@ -1,8 +1,8 @@
 import os
 import sys
-
+import sh
 from pathlib import Path
-import pytest
+
 from testfixtures import TempDirectory
 import unittest
 from unittest.mock import patch
@@ -110,6 +110,72 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                 ValueError, 
                 'Given pom file does not exist: does-not-exist.pom'):
             factory.run_step('unit-test')
+
+    @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean test', b'mock out', b'mock error'))
+    def test_mvn_error_return_code(self, mvn_mock):
+        group_id = 'com.mycompany.app'
+        artifact_id = 'my-app'
+        version = '1.0'
+        package = 'jar'
+        with TempDirectory() as temp_dir:
+            temp_dir.write('src/main/java/com/mycompany/app/App.java',b'''package com.mycompany.app;
+    public class App {
+        public static void main( String[] args ) {
+            System.out.println( "Hello World!" );
+        }
+    }''')
+            temp_dir.write(
+                'pom.xml',
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+  xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+                <configuration>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
+            )
+            test_results_dir = os.path.join(temp_dir.path,'tssc-results/unit-test/junit')
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            config = {
+                'tssc-config': {
+                    'unit-test': {
+                        'implementer': 'JUnit',
+                        'config': {
+                            'pom-file': str(pom_file_path)
+                        }
+                    }
+                }
+            }
+            expected_step_results = {
+                'tssc-results': {
+                    'unit-test': {
+                        'junit': {
+                            'pom-path': str(pom_file_path),
+                            'test-results': test_results_dir
+                        }
+                    }
+                }
+            }
+            
+            with self.assertRaisesRegex(
+                    RuntimeError, 
+                    'Error invoking mvn:.*'):
+                run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
 
     @patch('sh.mvn', create=True)
     def test_unit_test_no_reports_directory_reference_in_pom(self, mvn_mock):

@@ -183,8 +183,6 @@ class JUnit(StepImplementer):
                     '[maven:artifactId="maven-surefire-plugin"]/'\
                     'maven:configuration/'\
                     'maven:reportsDirectory'
-        else:
-            return None
 
         result = xml_file.find(xpath, maven_xml_namespace_dict)
         return None if result is None else result.text
