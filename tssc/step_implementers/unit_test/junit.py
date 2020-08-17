@@ -38,14 +38,13 @@ Keys in the `junit` dictionary element in the `unit-test` dictionary of the step
 """
 import sys
 import os
+from xml.etree import ElementTree
+import re
 import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
-
-from xml.etree import ElementTree
-import re
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml'
@@ -124,7 +123,11 @@ class JUnit(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
-        reports_dir = self.find_reports_dir(pom_file)
+        maven_surefire_plugin = self.find_reference_in_pom(pom_file, 'maven-surefire-plugin')
+        if maven_surefire_plugin is None:
+            raise ValueError('Unit test dependency "maven-surefire-plugin" missing from POM.')
+
+        reports_dir = self.find_reference_in_pom(pom_file, 'reportsDirectory')
         if reports_dir is not None:
             default_test_results_dir = reports_dir
         else:
@@ -132,11 +135,10 @@ class JUnit(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 'target/surefire-reports')
 
-        # TODO: Make method for identification/creation of this dir to be shared among steps
-        test_results_output_path = "tssc-results/unit-test/junit"
+        test_results_output_path = self._StepImplementer__results_dir_path + '/unit-test/junit' # pylint: disable=no-member
 
         try:
-            sh.mvn(  # pylint: disable=no-member,
+            sh.mvn(  # pylint: disable=no-member
                 'clean',
                 'test',
                 '-f', pom_file,
@@ -145,10 +147,13 @@ class JUnit(StepImplementer):
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error invoking mvn: {error}".format(error=error))
 
-        os.system("mkdir -p " + test_results_output_path)
-        os.system("cp -r " + default_test_results_dir + "/. " + test_results_output_path)
+        if not os.path.isdir(default_test_results_dir) or \
+            len(os.listdir(default_test_results_dir)) == 0:
+            test_results_output_path = "NO UNIT TEST RESULTS"
+        else:
+            os.makedirs(test_results_output_path, exist_ok=True)
+            os.system("cp -r " + default_test_results_dir + "/. " + test_results_output_path)
 
-        # Consider adding specific results: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
         results = {
             'junit': {
                 'pom-path': pom_file,
@@ -156,25 +161,33 @@ class JUnit(StepImplementer):
             }
         }
         return results
-    
+
     @staticmethod
-    def find_reports_dir(pom_file):
+    def find_reference_in_pom(pom_file, reference):
         """ Return the report directory specified in the pom """
         # extract and set namespace
-        root = ElementTree.parse(pom_file).getroot()
-        m = re.findall(r'{(.*?)}', root.tag)
-        namespace = m[0] if m else ''
-        ns = {'maven': namespace}
+        xml_file = ElementTree.parse(pom_file).getroot()
+        xml_namespace_match = re.findall(r'{(.*?)}', xml_file.tag)
+        xml_namespace = xml_namespace_match[0] if xml_namespace_match else ''
+        maven_xml_namespace_dict = {'maven': xml_namespace}
 
-        # extract reportsDirectory
-        xpath = 'maven:build/'\
-                'maven:plugins/'\
-                'maven:plugin/'\
-                '[maven:artifactId="maven-surefire-plugin"]/'\
-                'maven:configuration/'\
-                'maven:reportsDirectory'
-        plugin = root.find(xpath, ns)
-        return None if plugin is None else plugin.text
+        if reference == 'maven-surefire-plugin':
+            xpath = 'maven:build/'\
+                    'maven:plugins/'\
+                    'maven:plugin/'\
+                    '[maven:artifactId="maven-surefire-plugin"]/'
+        elif reference == 'reportsDirectory':
+            xpath = 'maven:build/'\
+                    'maven:plugins/'\
+                    'maven:plugin/'\
+                    '[maven:artifactId="maven-surefire-plugin"]/'\
+                    'maven:configuration/'\
+                    'maven:reportsDirectory'
+        else:
+            return None
+
+        result = xml_file.find(xpath, maven_xml_namespace_dict)
+        return None if result is None else result.text
 
 # register step implementer
 TSSCFactory.register_step_implementer(JUnit)
