@@ -177,7 +177,7 @@ class Buildah(StepImplementer):
         try:
             sh.buildah.bud(  # pylint: disable=no-member
                 '--format=' + runtime_step_config['format'],
-                '--tls-verify=' + runtime_step_config['tlsverify'],
+                '--tls-verify=' + str(runtime_step_config['tlsverify']),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 context,
