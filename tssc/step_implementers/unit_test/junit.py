@@ -7,9 +7,12 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key | Required? | Default     | Description
-|-------------------|-----------|-------------|-----------
-| `pom-file`        | True      | `'pom.xml'` | pom used to check for reportsDirectory definition
+| Configuration Key  | Required? | Default     | Description
+|--------------------|-----------|-------------|-----------
+| `fail-on-no-tests` | True      | False       | Value to specify whether unit-test
+                                                 step can succeed when no tests are defined
+| `pom-file`         | True      | `'pom.xml'` | pom used to run tests and check
+                                                 for existence of custom reportsDirectory
 
 Expected Previous Step Results
 ------------------------------
@@ -47,10 +50,12 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
+    'fail-on-no-tests': 'false',
     'pom-file': 'pom.xml'
 }
 
 REQUIRED_CONFIG_KEYS = [
+    'fail-on-no-tests',
     'pom-file'
 ]
 
@@ -119,6 +124,7 @@ class JUnit(StepImplementer):
             Results of running this step.
         """
         pom_file = runtime_step_config['pom-file']
+        fail_on_no_tests = runtime_step_config['fail-on-no-tests']
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
