@@ -6,8 +6,7 @@ from .utils import *
 
 from .generate_metadata import *
 from .tag_source import *
-from .security_static_code_analysis import *
-from .linting_static_code_analysis import *
+from .static_code_analysis import *
 from .package import *
 from .unit_test import *
 from .create_container_image import *
@@ -23,8 +22,7 @@ __all__ = [
     'utils',
     'generate_metadata',
     'tag_source',
-    'security_static_code_analysis',
-    'linting_static_code_analysis',
+    'static_code_analysis',
     'package',
     'unit_test',
     'create_container_image',
