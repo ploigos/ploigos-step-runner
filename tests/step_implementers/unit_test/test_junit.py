@@ -164,9 +164,12 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
-                        'junit': {
-                            'pom-path': str(pom_file_path),
-                            'test-results': test_results_dir
+                        'result': {
+                            'success': False,
+                            'message': "Failure message"
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
                         }
                     }
                 }
@@ -209,7 +212,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
     </build>
 </project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
             )
-            test_results_dir = os.path.join(temp_dir.path,'tssc-results/unit-test/junit')
+            test_results_dir = os.path.join(temp_dir.path, reports_dir)
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             config = {
                 'tssc-config': {
@@ -234,10 +237,19 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
-                        'junit': {
-                            'pom-path': str(pom_file_path),
-                            'test-results': test_results_dir
-                        }
+                        'result': {
+                            'success': True,
+                            'message': 'unit test step run successfully and junit reports were generated'
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        },
+                        'report-artifacts': [
+                            {
+                                'name': 'junit test results',
+                                'path': f'file://{str(test_results_dir)}'
+                            }
+                        ]
                     }
                 }
             }
@@ -299,15 +311,22 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                 ]
             )
 
-            test_results_dir = os.path.join(temp_dir.path,'tssc-results/unit-test/junit')
-
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
-                        'junit': {
-                            'pom-path': str(pom_file_path),
-                            'test-results': test_results_dir
-                        }
+                        'result': {
+                            'success': True,
+                            'message': 'unit test step run successfully and junit reports were generated'
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        },
+                        'report-artifacts': [
+                            {
+                                'name': 'junit test results',
+                                'path': f'file://{str(reports_dir)}'
+                            }
+                        ]
                     }
                 }
             }
@@ -404,9 +423,13 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
-                        'junit': {
+                        'result': {
+                            'success': True,
+                            'message': 'unit test step run successfully, but no tests were found'
+                        },
+                        'options': {
                             'pom-path': str(pom_file_path),
-                            'test-results': 'NO UNIT TEST RESULTS'
+                            'fail-on-no-tests': False
                         }
                     }
                 }
@@ -468,9 +491,13 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
-                        'junit': {
+                        'result': {
+                            'success': True,
+                            'message': 'unit test step run successfully, but no tests were found'
+                        },
+                        'options': {
                             'pom-path': str(pom_file_path),
-                            'test-results': 'NO UNIT TEST RESULTS'
+                            'fail-on-no-tests': False
                         }
                     }
                 }

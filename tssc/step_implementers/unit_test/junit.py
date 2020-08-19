@@ -135,13 +135,11 @@ class JUnit(StepImplementer):
 
         reports_dir = self.find_reference_in_pom(pom_file, 'reportsDirectory')
         if reports_dir is not None:
-            default_test_results_dir = reports_dir
+            test_results_dir = reports_dir
         else:
-            default_test_results_dir = os.path.join(
+            test_results_dir = os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
                 'target/surefire-reports')
-
-        test_results_output_path = self._StepImplementer__results_dir_path + '/unit-test/junit' # pylint: disable=no-member
 
         try:
             sh.mvn(  # pylint: disable=no-member
@@ -153,22 +151,39 @@ class JUnit(StepImplementer):
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error invoking mvn: {error}".format(error=error))
 
-        if not os.path.isdir(default_test_results_dir) or \
-            len(os.listdir(default_test_results_dir)) == 0:
+        test_results_output_path = test_results_dir
+
+        if not os.path.isdir(test_results_dir) or \
+            len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
-                test_results_output_path = "NO UNIT TEST RESULTS"
+                results = {
+                    'result': {
+                        'success': True,
+                        'message': 'unit test step run successfully, but no tests were found'
+                    },
+                    'options': {
+                        'pom-path': pom_file,
+                        'fail-on-no-tests': False
+                    }
+                }
             else:
                 raise RuntimeError("Error: No unit tests defined")
         else:
-            os.makedirs(test_results_output_path, exist_ok=True)
-            os.system("cp -r " + default_test_results_dir + "/. " + test_results_output_path)
-
-        results = {
-            'junit': {
-                'pom-path': pom_file,
-                'test-results': test_results_output_path
+            results = {
+                'result': {
+                    'success': True,
+                    'message': 'unit test step run successfully and junit reports were generated'
+                },
+                'options': {
+                    'pom-path': pom_file
+                },
+                'report-artifacts': [
+                    {
+                        'name': 'junit test results',
+                        'path': f'file://{test_results_output_path}'
+                    }
+                ]
             }
-        }
         return results
 
     @staticmethod
