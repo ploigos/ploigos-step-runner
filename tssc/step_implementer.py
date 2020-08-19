@@ -224,8 +224,9 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         missing_required_config_keys = []
         for required_config_key in self.required_runtime_step_config_keys():
-            if (required_config_key not in runtime_step_config) or \
-                    (not runtime_step_config[required_config_key]):
+            if ((required_config_key not in runtime_step_config) or \
+                    (not runtime_step_config[required_config_key]) and  \
+                    (not isinstance(runtime_step_config[required_config_key], bool))):
                 missing_required_config_keys.append(required_config_key)
 
         assert (not missing_required_config_keys), \

@@ -48,7 +48,7 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
         
         if 'test' in args:
             if throw_mvn_exception is True:
-                raise RuntimeError
+                raise RuntimeError('Error: No unit tests defined')
 
             os.makedirs(target_dir_path, exist_ok=True)
             
@@ -416,7 +416,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
 
     @patch('sh.mvn', create=True)
-    def test_unit_test_run_attempt_fails(self, mvn_mock):
+    def test_unit_test_run_attempt_fails_default_fail_on_no_tests_flag(self, mvn_mock):
         reports_dir = 'target/surefire-reports'
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
@@ -463,10 +463,76 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
+                []
+            )
+            expected_step_results = {
+                'tssc-results': {
+                    'unit-test': {
+                        'junit': {
+                            'pom-path': str(pom_file_path),
+                            'test-results': 'NO UNIT TEST RESULTS'
+                        }
+                    }
+                }
+            }
+
+            run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
+            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+
+    @patch('sh.mvn', create=True)
+    def test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true(self, mvn_mock):
+        reports_dir = 'target/surefire-reports'
+        group_id = 'com.mycompany.app'
+        artifact_id = 'my-app'
+        version = '1.0'
+        with TempDirectory() as temp_dir:
+            temp_dir.write(
+                'pom.xml',
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
+  xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>{group_id}</groupId>
+        <artifactId>{artifact_id}</artifactId>
+        <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+                <configuration>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
+            )
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            config = {
+                'tssc-config': {
+                    'unit-test': {
+                        'implementer': 'JUnit',
+                        'config': {
+                            'fail-on-no-tests': True,
+                            'pom-file': str(pom_file_path)
+                        }
+                    }
+                }
+            }
+            factory = TSSCFactory(config)
+
+            mvn_mock.side_effect = create_mvn_side_effect(
+                pom_file_path,
+                reports_dir,
                 [],
                 True
             )
 
             with self.assertRaisesRegex(
-                RuntimeError,''):
+                    RuntimeError, 
+                    'Error: No unit tests defined'):
                 factory.run_step('unit-test')

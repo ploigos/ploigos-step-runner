@@ -155,7 +155,10 @@ class JUnit(StepImplementer):
 
         if not os.path.isdir(default_test_results_dir) or \
             len(os.listdir(default_test_results_dir)) == 0:
-            test_results_output_path = "NO UNIT TEST RESULTS"
+            if fail_on_no_tests is not True:
+                test_results_output_path = "NO UNIT TEST RESULTS"
+            else:
+                raise RuntimeError("Error: No unit tests defined")
         else:
             os.makedirs(test_results_output_path, exist_ok=True)
             os.system("cp -r " + default_test_results_dir + "/. " + test_results_output_path)
