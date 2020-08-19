@@ -140,8 +140,8 @@ class Skopeo(StepImplementer):
          '/' + application_name + '-' + service_name + ':' + (version).lower()
         try:
             sh.skopeo.copy( # pylint: disable=no-member
-                '--src-tls-verify=' + runtime_step_config['src-tls-verify'],
-                '--dest-tls-verify=' + runtime_step_config['dest-tls-verify'],
+                '--src-tls-verify=' + str(runtime_step_config['src-tls-verify']),
+                '--dest-tls-verify=' + str(runtime_step_config['dest-tls-verify']),
                 'docker-archive:' + image_tar_file,
                 destination_with_version,
                 _out=sys.stdout

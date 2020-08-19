@@ -312,6 +312,35 @@ class TestStepImplementer(unittest.TestCase):
                     test_dir
                 )
     
+    def test_boolean_false_config_variable(self):
+        config = {
+            'tssc-config': {
+                'write-config-as-results': {
+                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'config': {
+                            'required-config-key': False
+                    }
+                }
+            }
+        }
+        config_expected_step_results = {
+            'tssc-results': {
+                'write-config-as-results': {
+                    'required-config-key': False
+                }
+            }
+        }
+    
+        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
+    
+        with TempDirectory() as test_dir:
+            self._run_step_implementer_test(
+                config,
+                'write-config-as-results',
+                config_expected_step_results,
+                test_dir
+            )
+    
     def test_one_step_existing_results_file_empty(self):
         config = {
             'tssc-config': {
