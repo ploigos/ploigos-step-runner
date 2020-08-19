@@ -1,4 +1,4 @@
-"""Step Implementer for the unit-test step for JUnit.
+"""Step Implementer for the unit-test step for Maven generating JUnit reports.
 
 Step Configuration
 ------------------
@@ -78,9 +78,9 @@ REQUIRED_CONFIG_KEYS = [
     'pom-file'
 ]
 
-class JUnit(StepImplementer):
+class Maven(StepImplementer):
     """
-    StepImplementer for the unit-test step for JUnit.
+    StepImplementer for the unit-test step for Maven generating JUnit reports.
     """
 
     @staticmethod
@@ -201,7 +201,7 @@ class JUnit(StepImplementer):
                 },
                 'report-artifacts': [
                     {
-                        'name': 'junit test results',
+                        'name': 'maven unit test results generated using junit',
                         'path': f'file://{test_results_output_path}'
                     }
                 ]
@@ -234,4 +234,4 @@ class JUnit(StepImplementer):
         return None if result is None else result.text
 
 # register step implementer
-TSSCFactory.register_step_implementer(JUnit)
+TSSCFactory.register_step_implementer(Maven)

@@ -9,7 +9,7 @@ from unittest.mock import patch
 import yaml
 
 from tssc import TSSCFactory
-from tssc.step_implementers.unit_test import JUnit
+from tssc.step_implementers.unit_test import Maven
 
 from test_utils import *
 
@@ -68,7 +68,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
         config = {
             'tssc-config': {
                 'unit-test': {
-                    'implementer': 'JUnit'
+                    'implementer': 'Maven'
                 }
             }
         }
@@ -83,7 +83,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
         config = {
             'tssc-config': {
                 'unit-test': {
-                    'implementer': 'JUnit'
+                    'implementer': 'Maven'
                 }
             }
         }
@@ -98,7 +98,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
         config = {
             'tssc-config': {
                 'unit-test': {
-                    'implementer': 'JUnit',
+                    'implementer': 'Maven',
                     'config': {
                         'pom-file': 'does-not-exist.pom'
                     }
@@ -149,12 +149,11 @@ class TestStepImplementerUnitTest(unittest.TestCase):
     </build>
 </project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
             )
-            test_results_dir = os.path.join(temp_dir.path,'tssc-results/unit-test/junit')
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -217,7 +216,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -246,7 +245,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                         },
                         'report-artifacts': [
                             {
-                                'name': 'junit test results',
+                                'name': 'maven unit test results generated using junit',
                                 'path': f'file://{str(test_results_dir)}'
                             }
                         ]
@@ -294,7 +293,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -323,7 +322,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                         },
                         'report-artifacts': [
                             {
-                                'name': 'junit test results',
+                                'name': 'maven unit test results generated using junit',
                                 'path': f'file://{str(reports_dir)}'
                             }
                         ]
@@ -355,7 +354,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -400,12 +399,11 @@ class TestStepImplementerUnitTest(unittest.TestCase):
     </build>
 </project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
             )
-            test_results_dir = os.path.join(temp_dir.path,'tssc-results/unit-test/junit')
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -474,7 +472,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'pom-file': str(pom_file_path)
                         }
@@ -544,7 +542,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             config = {
                 'tssc-config': {
                     'unit-test': {
-                        'implementer': 'JUnit',
+                        'implementer': 'Maven',
                         'config': {
                             'fail-on-no-tests': False,
                             'pom-file': str(pom_file_path)
