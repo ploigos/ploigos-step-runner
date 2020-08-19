@@ -573,6 +573,5 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             }
 
             with self.assertRaisesRegex(
-                    RuntimeError, 
-                    'Error: No unit tests defined'):
+                    RuntimeError, 'Error: No unit tests defined'):
                 run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
