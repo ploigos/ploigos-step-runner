@@ -424,19 +424,19 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                 'tssc-results': {
                     'unit-test': {
                         'result': {
-                            'success': True,
-                            'message': 'unit test step run successfully, but no tests were found'
+                            'success': False,
+                            'message': "Failure message"
                         },
                         'options': {
-                            'pom-path': str(pom_file_path),
-                            'fail-on-no-tests': False
+                            'pom-path': str(pom_file_path)
                         }
                     }
                 }
             }
 
-            run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+            with self.assertRaisesRegex(
+                    RuntimeError, 'Error: No unit tests defined'):
+                run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
 
     @patch('sh.mvn', create=True)
     def test_unit_test_run_attempt_fails_default_fail_on_no_tests_flag(self, mvn_mock):
@@ -486,28 +486,30 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
-                []
+                [],
+                True
             )
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
                         'result': {
-                            'success': True,
-                            'message': 'unit test step run successfully, but no tests were found'
+                            'success': False,
+                            'message': "Failure message"
                         },
                         'options': {
-                            'pom-path': str(pom_file_path),
-                            'fail-on-no-tests': False
+                            'pom-path': str(pom_file_path)
                         }
                     }
                 }
             }
 
-            run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+            with self.assertRaisesRegex(
+                    RuntimeError, 'Error: No unit tests defined'):
+                run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
+
 
     @patch('sh.mvn', create=True)
-    def test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true(self, mvn_mock):
+    def test_unit_test_run_attempt_fails_fail_on_no_tests_flag_false(self, mvn_mock):
         reports_dir = 'target/surefire-reports'
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
@@ -544,7 +546,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                     'unit-test': {
                         'implementer': 'JUnit',
                         'config': {
-                            'fail-on-no-tests': True,
+                            'fail-on-no-tests': False,
                             'pom-file': str(pom_file_path)
                         }
                     }
@@ -555,23 +557,22 @@ class TestStepImplementerUnitTest(unittest.TestCase):
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
-                [],
-                True
+                []
             )
             expected_step_results = {
                 'tssc-results': {
                     'unit-test': {
                         'result': {
-                            'success': False,
-                            'message': "Failure message"
+                            'success': True,
+                            'message': 'unit test step run successfully, but no tests were found'
                         },
                         'options': {
-                            'pom-path': str(pom_file_path)
+                            'pom-path': str(pom_file_path),
+                            'fail-on-no-tests': False
                         }
                     }
                 }
             }
 
-            with self.assertRaisesRegex(
-                    RuntimeError, 'Error: No unit tests defined'):
-                run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
+            run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
+            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)

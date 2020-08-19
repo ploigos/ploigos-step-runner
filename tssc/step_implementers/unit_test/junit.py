@@ -9,7 +9,7 @@ from runtime configuration.
 
 | Configuration Key  | Required? | Default     | Description
 |--------------------|-----------|-------------|-----------
-| `fail-on-no-tests` | True      | False       | Value to specify whether unit-test
+| `fail-on-no-tests` | True      | True        | Value to specify whether unit-test
                                                  step can succeed when no tests are defined
 | `pom-file`         | True      | `'pom.xml'` | pom used to run tests and check
                                                  for existence of custom reportsDirectory
@@ -50,7 +50,7 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
-    'fail-on-no-tests': 'false',
+    'fail-on-no-tests': True,
     'pom-file': 'pom.xml'
 }
 
