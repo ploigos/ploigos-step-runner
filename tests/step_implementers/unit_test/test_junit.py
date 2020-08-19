@@ -558,8 +558,21 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                 [],
                 True
             )
+            expected_step_results = {
+                'tssc-results': {
+                    'unit-test': {
+                        'result': {
+                            'success': False,
+                            'message': "Failure message"
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        }
+                    }
+                }
+            }
 
             with self.assertRaisesRegex(
                     RuntimeError, 
                     'Error: No unit tests defined'):
-                factory.run_step('unit-test')
+                run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
