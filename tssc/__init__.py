@@ -12,8 +12,9 @@ Command-Line Options
   -e ENVIRONMENT, --environment  ENVIRONMENT
         The environment to run this step against.
 
-  -c CONFIG_FILE, --config-file CONFIG_FILE
-        TSSC workflow configuration file in yml or json
+  -c CONFIG_FILE [CONFIG_FILE ...], --config-file CONFIG_FILE [CONFIG_FILE ...],
+  --config-files CONFIG_FILE [CONFIG_FILE ...], --config-dir CONFIG_FILE [CONFIG_FILE ...]
+        TSSC workflow configuration files, or directories containing files, in yml or json
 
   -r RESULTS_DIR, --results-dir RESULTS_DIR
         TSSC workflow results file in yml or json

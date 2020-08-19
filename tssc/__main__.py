@@ -5,10 +5,12 @@ TSSC entry point.
 """
 
 import sys
+import glob
 import argparse
 import os.path
 import json
 import yaml
+
 
 from .factory import TSSCFactory
 from .exceptions import TSSCException
@@ -27,12 +29,12 @@ def print_error(msg):
 
 def parse_yaml_or_json_file(yaml_or_json_file):
     """
-    Parse YAML or JSON config file.
+    Parse YAML or JSON config files.
 
     Parameters
     ----------
-    yaml_or_json_file : string
-        Path to YAML or JSON file to load as a dictionary.
+    yaml_or_json_files : string
+        List of paths to YAML or JSON files to load as a dictionary.
 
     Returns
     -------
@@ -68,6 +70,87 @@ def parse_yaml_or_json_file(yaml_or_json_file):
                          + "\n  YAML error: " + str(yaml_parse_error))
 
     return parsed_file
+
+def parse_config_files(files):
+    """Parses and merges a list of TSSC configuration files.
+
+    Given a list of files and directories parses all of the child files
+    as TSSC configuration files merges them together.
+
+    Notes
+    -----
+    If any files have duplicate (deep) keys then will throw an error.
+
+    Parameters
+    ----------
+    files : array
+       Array of files and/or directories that should be parsed as TSSC configuration files
+       and merged into one configuration object.
+
+    Returns
+    -------
+    dict
+        TSSC configuration created by merging all of the given files.
+
+    Raises
+    ------
+    ValueError
+        If any of the given file can not be parsed as YAML or JSON.
+        If any of the given files have duplicate (deep) keys.
+    """
+    tssc_config = {}
+    merged_files = []
+    for file in files:
+        # if file is a dir add all of the recursive files under that dir to the list of files
+        # to merge and parse
+        if os.path.isdir(file):
+            dir_files = glob.glob(file + '/**', recursive=True)
+            for dir_file in dir_files:
+                if os.path.isfile(dir_file):
+                    files.append(dir_file)
+        else:
+            parsed_file = parse_yaml_or_json_file(file)
+
+            if not 'tssc-config' in parsed_file:
+                print_error("specified -c/--config-file must have a 'tssc-config' attribute")
+                sys.exit(103)
+
+            try:
+                deep_merge(tssc_config, parsed_file)
+                merged_files.append(file)
+            except Exception as error:
+                raise ValueError(
+                    "Duplicate keys when merging file ({file}) into ".format(file=file) +
+                    "other configuration files ({merged_files}): {error}".format(
+                        merged_files=merged_files, error=error)
+                    )
+
+    return tssc_config
+
+def deep_merge(dest, source, path=None):
+    """"deep merges dest into source
+
+    Notes
+    ------
+    Modifies destination.
+
+    Source is https://stackoverflow.com/questions/7204805/how-to-merge-dictionaries-of-dictionaries/7205107#7205107 # pylint: disable=line-too-long
+    """
+    if path is None:
+        path = []
+
+    for key in source:
+        if key in dest:
+            if isinstance(dest[key], dict) and isinstance(source[key], dict):
+                deep_merge(dest[key], source[key], path + [str(key)])
+            elif dest[key] == source[key]:
+                pass # same leaf value
+            else:
+                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        else:
+            dest[key] = source[key]
+    return dest
+
 
 class ParseKeyValueArge(argparse.Action): # pylint: disable=too-few-public-methods
     """
@@ -108,8 +191,11 @@ def main(argv=None):
     parser.add_argument(
         '-c',
         '--config-file',
+        '--config-files',
+        '--config-dir',
         required=True,
-        help='TSSC workflow configuration file in yml or json'
+        nargs='+',
+        help='TSSC workflow configuration files, or directories containing files, in yml or json'
     )
     parser.add_argument(
         '-r',
@@ -127,20 +213,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     # validate args
-    if not os.path.exists(args.config_file) or os.stat(args.config_file).st_size == 0:
-        print_error('specified -c/--config-file must exist and not be empty')
-        sys.exit(101)
+    for config_file in args.config_file:
+        if not os.path.exists(config_file) or os.stat(config_file).st_size == 0:
+            print_error('specified -c/--config-file must exist and not be empty')
+            sys.exit(101)
 
     # parse and validate config file
     try:
-        tssc_config = parse_yaml_or_json_file(args.config_file)
+        tssc_config = parse_config_files(args.config_file)
     except ValueError as err:
         print_error(str(err))
         sys.exit(102)
-
-    if not 'tssc-config' in tssc_config:
-        print_error("specified -c/--config-file must have a 'tssc-config' attribute")
-        sys.exit(103)
 
     tssc_factory = TSSCFactory(tssc_config, args.results_dir)
 
