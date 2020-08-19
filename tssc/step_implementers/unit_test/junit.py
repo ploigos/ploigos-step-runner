@@ -167,7 +167,7 @@ class JUnit(StepImplementer):
                     }
                 }
             else:
-                raise RuntimeError("Error: No unit tests defined")
+                raise RuntimeError('Error: No unit tests defined')
         else:
             results = {
                 'result': {
