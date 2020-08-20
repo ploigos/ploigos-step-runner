@@ -112,7 +112,7 @@ def parse_config_files(files):
             parsed_file = parse_yaml_or_json_file(file)
 
             if not 'tssc-config' in parsed_file:
-                print_error("specified -c/--config-file must have a 'tssc-config' attribute")
+                print_error("specified -c/--config must have a 'tssc-config' attribute")
                 sys.exit(103)
 
             try:
@@ -190,9 +190,7 @@ def main(argv=None):
     )
     parser.add_argument(
         '-c',
-        '--config-file',
-        '--config-files',
-        '--config-dir',
+        '--config',
         required=True,
         nargs='+',
         help='TSSC workflow configuration files, or directories containing files, in yml or json'
@@ -213,14 +211,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     # validate args
-    for config_file in args.config_file:
+    for config_file in args.config:
         if not os.path.exists(config_file) or os.stat(config_file).st_size == 0:
-            print_error('specified -c/--config-file must exist and not be empty')
+            print_error('specified -c/--config must exist and not be empty')
             sys.exit(101)
 
     # parse and validate config file
     try:
-        tssc_config = parse_config_files(args.config_file)
+        tssc_config = parse_config_files(args.config)
     except ValueError as err:
         print_error(str(err))
         sys.exit(102)
