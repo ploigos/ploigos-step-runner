@@ -19,8 +19,8 @@ minimally produce the following step results.
 | `TODO`           | TODO
 """
 
-from .junit import JUnit
+from .maven import Maven
 
 __all__ = [
-    'junit'
+    'maven'
 ]
