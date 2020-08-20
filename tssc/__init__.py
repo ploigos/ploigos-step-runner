@@ -213,6 +213,16 @@ From least precedence to highest precedence.
       - implementer: SonarQube
         config: {}
 
+      unit-test:
+      - implementer: Maven
+        config: {
+          # Optional.
+          # fail-on-no-tests: true
+
+          # Optional.
+          # pom_file: 'pom.xml'
+        }
+
       package:
       - implementer: Maven
         config: {
@@ -225,11 +235,6 @@ From least precedence to highest precedence.
           # Optional
           #artifact-parent-dir: 'target'
         }
-
-      unit-test:
-      # WARNING: not yet implemented
-      - implementer: Maven
-        config: {}
 
       push-artifacts:
       - implementer: Maven

@@ -167,6 +167,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                             'success': False,
                             'message': "Failure message"
                         },
+                        'report-artifacts': [],
                         'options': {
                             'pom-path': str(pom_file_path)
                         }
@@ -425,6 +426,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                             'success': False,
                             'message': "Failure message"
                         },
+                        'report-artifacts': [],
                         'options': {
                             'pom-path': str(pom_file_path)
                         }
@@ -494,6 +496,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                             'success': False,
                             'message': "Failure message"
                         },
+                        'report-artifacts': [],
                         'options': {
                             'pom-path': str(pom_file_path)
                         }
@@ -564,6 +567,7 @@ class TestStepImplementerUnitTest(unittest.TestCase):
                             'success': True,
                             'message': 'unit test step run successfully, but no tests were found'
                         },
+                        'report-artifacts': [],
                         'options': {
                             'pom-path': str(pom_file_path),
                             'fail-on-no-tests': False
