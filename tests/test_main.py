@@ -180,7 +180,7 @@ class TestInit(unittest.TestCase):
 
         with TempDirectory() as temp_dir:
             if config_files:
-                argv.append('--config-file')
+                argv.append('--config')
                 for config_file in config_files:
                     config_file_name = config_file['name']
                     config_file_contents = config_file['contents']
@@ -231,7 +231,7 @@ class TestInit(unittest.TestCase):
         self._run_main_test(['--bad-arg'], 2)
 
     def test_config_file_does_not_exist(self):
-        self._run_main_test(['--step', 'generate-metadata', '--config-file', 'does-not-exist.yml'], 101)
+        self._run_main_test(['--step', 'generate-metadata', '--config', 'does-not-exist.yml'], 101)
 
     def test_config_file_not_json_or_yaml(self):
         self._run_main_test(['--step', 'generate-metadata'], 102,[
@@ -509,7 +509,7 @@ class TestInit(unittest.TestCase):
                 
                 temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
 
-            args.append('--config-file')
+            args.append('--config')
             args.append(os.path.join(temp_dir.path, 'foo'))
             args.append(os.path.join(temp_dir.path, 'tssc-config1.yaml'))
             self._run_main_test(

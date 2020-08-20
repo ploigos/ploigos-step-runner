@@ -3,23 +3,22 @@
 Command-Line Options
 --------------------
 
-  -h, --help
+    -h, --help
         show this help message and exit
 
-  -s STEP, --step STEP
+    -s STEP, --step STEP
         TSSC workflow step to run
 
-  -e ENVIRONMENT, --environment  ENVIRONMENT
+    -e ENVIRONMENT, --environment  ENVIRONMENT
         The environment to run this step against.
 
-  -c CONFIG_FILE [CONFIG_FILE ...], --config-file CONFIG_FILE [CONFIG_FILE ...],
-  --config-files CONFIG_FILE [CONFIG_FILE ...], --config-dir CONFIG_FILE [CONFIG_FILE ...]
+    -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
         TSSC workflow configuration files, or directories containing files, in yml or json
 
-  -r RESULTS_DIR, --results-dir RESULTS_DIR
+    -r RESULTS_DIR, --results-dir RESULTS_DIR
         TSSC workflow results file in yml or json
 
-  --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
+    --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
         Override step config provided by the given TSSC
         config-file with these arguments.
 
@@ -501,7 +500,7 @@ Getting Help
 Example Running the 'generate-metadata' step
 
 >>> python -m tssc
-...     --config-file=my-app-tssc-config.yml
+...     --config=my-app-tssc-config.yml
 ...     --results-file=my-app-tssc-results.yml
 ...     --step=generate-metadata
 
