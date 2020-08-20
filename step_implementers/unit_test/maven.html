@@ -112,7 +112,8 @@ Keys in the <code>result</code> dictionary element in the <code>unit-test</code>
 </tbody>
 </table>
 <p><strong>options</strong>
-Keys in the <code>options</code> dictionary element in the <code>unit-test</code> dictionary of the step results.</p>
+Keys in the <code>options</code> dictionary element in the <code>unit-test</code> dictionary of the step results.
+These keys are to be minimally displayed only when a non-default value is used.</p>
 <table>
 <thead>
 <tr>
@@ -133,7 +134,8 @@ when unit tests are missing</td>
 </tbody>
 </table>
 <p><strong>report-artifacts</strong>
-Keys in the <code>report-artifacts</code> dictionary element in the <code>unit-test</code> dictionary of the step results.</p>
+Keys in the <code>report-artifacts</code> array in the <code>unit-test</code> dictionary of the step results.
+Elements in this array are minimally shown when reports are generated. When no reports are generated, this array remains empty.</p>
 <table>
 <thead>
 <tr>
@@ -201,6 +203,7 @@ Keys in the `result` dictionary element in the `unit-test` dictionary of the ste
 
 **options**
 Keys in the `options` dictionary element in the `unit-test` dictionary of the step results.
+These keys are to be minimally displayed only when a non-default value is used.
 
 | `options` Key       | Description
 |---------------------|------------
@@ -209,7 +212,9 @@ Keys in the `options` dictionary element in the `unit-test` dictionary of the st
                         when unit tests are missing
 
 **report-artifacts**
-Keys in the `report-artifacts` dictionary element in the `unit-test` dictionary of the step results.
+Keys in the `report-artifacts` array in the `unit-test` dictionary of the step results.
+Elements in this array are minimally shown when reports are generated. When no reports are \
+generated, this array remains empty.
 
 | `report-artifacts` Key | Description
 |------------------------|------------
@@ -338,6 +343,7 @@ class Maven(StepImplementer):
                         &#39;success&#39;: True,
                         &#39;message&#39;: &#39;unit test step run successfully, but no tests were found&#39;
                     },
+                    &#39;report-artifacts&#39;: [],
                     &#39;options&#39;: {
                         &#39;pom-path&#39;: pom_file,
                         &#39;fail-on-no-tests&#39;: False
@@ -516,6 +522,7 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
                         &#39;success&#39;: True,
                         &#39;message&#39;: &#39;unit test step run successfully, but no tests were found&#39;
                     },
+                    &#39;report-artifacts&#39;: [],
                     &#39;options&#39;: {
                         &#39;pom-path&#39;: pom_file,
                         &#39;fail-on-no-tests&#39;: False

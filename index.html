@@ -223,6 +223,16 @@ tssc-config:
   - implementer: SonarQube
     config: {}
 
+  unit-test:
+  - implementer: Maven
+    config: {
+      # Optional.
+      # fail-on-no-tests: true
+
+      # Optional.
+      # pom_file: 'pom.xml'
+    }
+
   package:
   - implementer: Maven
     config: {
@@ -235,11 +245,6 @@ tssc-config:
       # Optional
       #artifact-parent-dir: 'target'
     }
-
-  unit-test:
-  # WARNING: not yet implemented
-  - implementer: Maven
-    config: {}
 
   push-artifacts:
   - implementer: Maven
@@ -722,6 +727,16 @@ From least precedence to highest precedence.
       - implementer: SonarQube
         config: {}
 
+      unit-test:
+      - implementer: Maven
+        config: {
+          # Optional.
+          # fail-on-no-tests: true
+
+          # Optional.
+          # pom_file: &#39;pom.xml&#39;
+        }
+
       package:
       - implementer: Maven
         config: {
@@ -734,11 +749,6 @@ From least precedence to highest precedence.
           # Optional
           #artifact-parent-dir: &#39;target&#39;
         }
-
-      unit-test:
-      # WARNING: not yet implemented
-      - implementer: Maven
-        config: {}
 
       push-artifacts:
       - implementer: Maven
