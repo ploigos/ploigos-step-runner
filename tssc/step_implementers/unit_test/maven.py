@@ -43,6 +43,7 @@ Keys in the `result` dictionary element in the `unit-test` dictionary of the ste
 
 **options**
 Keys in the `options` dictionary element in the `unit-test` dictionary of the step results.
+These keys are to be minimally displayed only when a non-default value is used.
 
 | `options` Key       | Description
 |---------------------|------------
@@ -51,7 +52,9 @@ Keys in the `options` dictionary element in the `unit-test` dictionary of the st
                         when unit tests are missing
 
 **report-artifacts**
-Keys in the `report-artifacts` dictionary element in the `unit-test` dictionary of the step results.
+Keys in the `report-artifacts` array in the `unit-test` dictionary of the step results.
+Elements in this array are minimally shown when reports are generated. When no reports are \
+generated, this array remains empty.
 
 | `report-artifacts` Key | Description
 |------------------------|------------
@@ -180,6 +183,7 @@ class Maven(StepImplementer):
                         'success': True,
                         'message': 'unit test step run successfully, but no tests were found'
                     },
+                    'report-artifacts': [],
                     'options': {
                         'pom-path': pom_file,
                         'fail-on-no-tests': False
