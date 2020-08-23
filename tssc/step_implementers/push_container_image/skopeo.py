@@ -37,9 +37,7 @@ Results output by this step.
 """
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'src-tls-verify': 'true',
@@ -59,18 +57,6 @@ class Skopeo(StepImplementer):
     """
     StepImplementer for the push-container-image step for Skopeo.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PUSH_CONTAINER_IMAGE
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -104,15 +90,8 @@ class Skopeo(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -126,9 +105,9 @@ class Skopeo(StepImplementer):
         else:
             print('No version found in metadata. Using latest')
 
-        application_name = runtime_step_config['application-name']
-        service_name = runtime_step_config['service-name']
-        organization = runtime_step_config['organization']
+        application_name = self.get_config_value('application-name')
+        service_name = self.get_config_value('service-name')
+        organization = self.get_config_value('organization')
 
         image_tar_file = ''
         if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
@@ -138,12 +117,12 @@ class Skopeo(StepImplementer):
         else:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = runtime_step_config['destination-url'] + '/' + organization + \
+        destination_with_version = self.get_config_value('destination-url') + '/' + organization + \
          '/' + application_name + '-' + service_name + ':' + (version).lower()
         try:
             sh.skopeo.copy( # pylint: disable=no-member
-                '--src-tls-verify=' + str(runtime_step_config['src-tls-verify']),
-                '--dest-tls-verify=' + str(runtime_step_config['dest-tls-verify']),
+                '--src-tls-verify=' + str(self.get_config_value('src-tls-verify')),
+                '--dest-tls-verify=' + str(self.get_config_value('dest-tls-verify')),
                 'docker-archive:' + image_tar_file,
                 'docker://' + destination_with_version,
                 _out=sys.stdout
@@ -154,10 +133,7 @@ class Skopeo(StepImplementer):
         results = {
             'image-tag' : destination_with_version,
             'image-version' : (version).lower(),
-            'image-url' : runtime_step_config['destination-url']
+            'image-url' : self.get_config_value('destination-url')
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Skopeo, True)

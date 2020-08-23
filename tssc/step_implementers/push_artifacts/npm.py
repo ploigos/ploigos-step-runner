@@ -39,9 +39,7 @@ Results output by this step.
     }
 """
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_ARGS = {}
 
@@ -49,18 +47,6 @@ class NPM(StepImplementer):
     """
     StepImplementer for the push-artifacts step for NPM.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PUSH_ARTIFACTS
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -94,15 +80,8 @@ class NPM(StepImplementer):
         """
         return []
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -111,6 +90,3 @@ class NPM(StepImplementer):
         """
         results = {}
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(NPM)

@@ -39,9 +39,7 @@ import re
 from git import Repo
 from git import InvalidGitRepositoryError
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
     'repo-root': './',
@@ -56,18 +54,6 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Git.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -101,23 +87,16 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        repo_root = runtime_step_config['repo-root']
-        build_string_length = runtime_step_config['build-string-length']
+        repo_root = self.get_config_value('repo-root')
+        build_string_length = self.get_config_value('build-string-length')
 
         try:
             repo = Repo(repo_root)
@@ -154,6 +133,3 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Git)

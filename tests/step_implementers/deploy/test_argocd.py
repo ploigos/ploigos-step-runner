@@ -28,6 +28,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -66,7 +67,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -77,7 +78,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -88,6 +88,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -100,8 +101,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -115,7 +127,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.login.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
     def test_deploy_git_username_missing(self):
 
@@ -154,6 +166,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -190,7 +203,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -201,7 +214,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -212,6 +224,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -221,8 +234,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -234,9 +258,9 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                r"No image url was specified"):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    r"No image url was specified"):
+                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -254,6 +278,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -290,7 +315,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -301,7 +326,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -312,6 +336,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -321,8 +346,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -335,7 +371,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -353,6 +395,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -391,7 +434,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -402,7 +445,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -413,6 +455,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -425,8 +468,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -440,7 +494,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             shutil_mock.side_effect = OSError
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(
+                    temp_dir=temp_dir,
+                    step_name='deploy',
+                    config=config,
+                    expected_step_results=expected_step_results,
+                    runtime_args=runtime_args,
+                    environment=environment_name)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -450,6 +510,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -491,7 +552,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -502,7 +563,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -513,6 +573,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -525,8 +586,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -539,7 +611,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.side_effect=self.git_rev_parse_side_effect
             argocd_mock.app.get.side_effect = sh.ErrorReturnCode_1('argocd', b'stdout', b'stderror')
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='deploy',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args,
+                environment=environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -575,6 +653,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -616,7 +695,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -627,7 +706,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -638,6 +716,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -649,9 +728,20 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     'tag-source' : {
                         'tag' : git_tag
                     },
-                    'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                    'deploy' :{
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
+                            'config-repo-git-tag':  f'{git_tag}.HASH'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -665,7 +755,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.checkout.side_effect = [sh.ErrorReturnCode('git', b'stdout', b'stderror'), None]
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -686,6 +782,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'latest'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -723,7 +820,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -734,7 +831,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -745,6 +841,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -755,8 +852,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'image-version' : image_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -770,7 +878,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -790,6 +904,123 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
+        git_tag = 'v1.2.3'
+        argocd_username = 'username'
+        argocd_password = 'password'
+        image_tag = 'not_latest'
+        image_url = 'quay.io/tssc/myimage'
+        helm_config_repo = 'http://gitrepo.com/helm-confg-repo.git'
+        argocd_api = 'http://argocd.example.com'
+
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('tssc-results')
+
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                  generate-metadata:
+                    image-tag: {image_tag}
+                  tag-source:
+                    tag: {git_tag}
+                  push-container-image:
+                    image-url: {image_url}
+                '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
+                    'utf-8')
+                )
+            temp_dir.write(
+                'values.yaml.j2',
+                bytes(
+                   '''
+                   {{ num_replicas }}
+                   ''', 'utf-8'
+                )
+            )
+            config = {
+                'tssc-config': {
+                    'global-defaults' : {
+                        'service-name' : service_name,
+                        'application-name' : application_name,
+                        'organization' : organization_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
+                        'git-email' : 'nappspo+tssc@redhat.com'
+                    },
+                    'deploy' : {
+                        'implementer': 'ArgoCD',
+                        'config': {
+                            'argocd-username' : argocd_username,
+                            'argocd-password' : argocd_password,
+                            'argocd-api' : argocd_api,
+                            'helm-config-repo' : helm_config_repo,
+                            'argocd-sync-timeout-seconds' : '60',
+                            'num-replicas' : '3',
+                            'ingress-enabled' : 'true',
+                            'readiness-probe-path' : '/ready',
+                            'liveness-probe-path' : '/live',
+                            'values-yaml-directory': temp_dir.path
+                        }
+                    }
+                }
+            }
+
+            repo_branch_name = 'testbranch'
+            expected_step_results = {
+                'tssc-results': {
+                    'generate-metadata' : {
+                        'image-tag' : image_tag
+                    },
+                    'push-container-image' : {
+                        'image-url' : image_url
+                    },
+                    'tag-source' : {
+                        'tag' : git_tag
+                    },
+                    'deploy': {
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+
+                        }
+                        ]
+                    }
+                }
+            }
+
+            runtime_args = {
+                'git-username': 'unit_test_username',
+                'git-password': 'unit_test_password'
+            }
+
+            git_mock.side_effect=self.git_rev_parse_side_effect
+            git_mock.commit.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
+
+            with self.assertRaises(RuntimeError):
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test_deploy_argo_git_push_no_git_password(self, argocd_mock, git_mock):
+
+        application_name = 'application-name'
+        service_name = 'service-name'
+        organization_name = 'organization-name'
+        environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -829,6 +1060,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -839,7 +1071,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -850,6 +1081,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -862,103 +1094,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
-                    }
-                }
-            }
-
-            runtime_args = {
-                'git-username': 'unit_test_username',
-                'git-password': 'unit_test_password'
-            }
-
-            git_mock.side_effect=self.git_rev_parse_side_effect
-            git_mock.commit.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
-
-            with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
-
-    @patch('sh.git', create=True)
-    @patch('sh.argocd', create=True)
-    def test_deploy_argo_git_push_no_git_password(self, argocd_mock, git_mock):
-
-        application_name = 'application-name'
-        service_name = 'service-name'
-        organization_name = 'organization-name'
-        git_tag = 'v1.2.3'
-        argocd_username = 'username'
-        argocd_password = 'password'
-        image_tag = 'not_latest'
-        image_url = 'quay.io/tssc/myimage'
-        helm_config_repo = 'http://gitrepo.com/helm-confg-repo.git'
-        argocd_api = 'http://argocd.example.com'
-
-        with TempDirectory() as temp_dir:
-            temp_dir.makedir('tssc-results')
-
-            temp_dir.write(
-                'tssc-results/tssc-results.yml',
-                bytes(
-                    '''tssc-results:
-                  generate-metadata:
-                    image-tag: {image_tag}
-                  tag-source:
-                    tag: {git_tag}
-                  push-container-image:
-                    image-url: {image_url}
-                '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
-                    'utf-8')
-                )
-            temp_dir.write(
-                'values.yaml.j2',
-                bytes(
-                   '''
-                   {{ num_replicas }}
-                   ''', 'utf-8'
-                )
-            )
-            config = {
-                'tssc-config': {
-                    'global-defaults' : {
-                        'service-name' : service_name,
-                        'application-name' : application_name,
-                        'organization' : organization_name,
-                        'git-email' : 'nappspo+tssc@redhat.com'
-                    },
-                    'deploy' : {
-                        'implementer': 'ArgoCD',
-                        'config': {
-                            'argocd-username' : argocd_username,
-                            'argocd-password' : argocd_password,
-                            'argocd-api' : argocd_api,
-                            'helm-config-repo' : helm_config_repo,
-                            'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
-                            'num-replicas' : '3',
-                            'ingress-enabled' : 'true',
-                            'readiness-probe-path' : '/ready',
-                            'liveness-probe-path' : '/live',
-                            'values-yaml-directory': temp_dir.path
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                         }
-                    }
-                }
-            }
-
-            expected_step_results = {
-                'tssc-results': {
-                    'generate-metadata' : {
-                        'image-tag' : image_tag
-                    },
-                    'push-container-image' : {
-                        'image-url' : image_url
-                    },
-                    'tag-source' : {
-                        'tag' : git_tag
-                    },
-                    'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch'),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        ]
                     }
                 }
             }
@@ -982,6 +1130,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1020,7 +1169,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1031,7 +1180,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1041,7 +1189,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     }
                 }
             }
-
+            
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1054,8 +1203,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1065,9 +1225,15 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                'For a http:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    'For a http:// git url, you need to also provide username/password pair'):
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -1077,6 +1243,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1115,7 +1282,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1126,7 +1293,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1137,6 +1303,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1149,8 +1316,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1160,9 +1338,15 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                'For a https:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    'For a https:// git url, you need to also provide username/password pair'):
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
 
     @patch('sh.git', create=True)
@@ -1173,6 +1357,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1212,7 +1397,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1223,7 +1408,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1234,6 +1418,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1246,8 +1431,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1259,7 +1455,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1287,6 +1489,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1326,7 +1529,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1337,7 +1540,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1348,6 +1550,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1360,8 +1563,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1372,7 +1586,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1395,6 +1615,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1402,7 +1623,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         image_url = 'quay.io/tssc/myimage'
         helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
         argocd_api = 'http://argocd.example.com'
-        argocd_sync_timeout_seconds = '60'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -1434,7 +1654,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1445,7 +1665,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1456,6 +1675,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1468,8 +1688,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1480,7 +1711,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1503,6 +1740,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1542,7 +1780,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1553,7 +1791,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1564,6 +1801,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1576,8 +1814,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1588,7 +1837,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1611,6 +1866,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1649,7 +1905,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1660,7 +1916,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1671,6 +1926,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1683,8 +1939,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1697,7 +1964,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
     @staticmethod
     def git_rev_parse_side_effect(*args, **kwargs):
@@ -1714,6 +1987,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1753,7 +2027,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1764,7 +2038,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1777,6 +2050,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1789,8 +2063,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1801,7 +2086,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1824,6 +2115,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1863,7 +2155,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1874,7 +2166,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1887,6 +2178,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1899,8 +2191,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1914,5 +2217,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.cluster.add.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
-
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)

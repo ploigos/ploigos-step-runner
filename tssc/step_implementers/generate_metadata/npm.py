@@ -33,9 +33,7 @@ Results output by this step.
 import os.path
 import json
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
@@ -49,18 +47,6 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for npm.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -94,22 +80,15 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        package_file = runtime_step_config['package-file']
+        package_file = self.get_config_value('package-file')
 
         # verify runtime config
         if not os.path.exists(package_file):
@@ -127,6 +106,3 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Npm)

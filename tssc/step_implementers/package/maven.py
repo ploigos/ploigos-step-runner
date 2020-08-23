@@ -124,11 +124,8 @@ import sys
 import os
 import sh
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
-
-from tssc.step_implementers.utils.xml import get_xml_element
+from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml',
@@ -146,18 +143,6 @@ class Maven(StepImplementer):
     only be a single jar, ear, or war output for running mvn clean install against the given
     pom.xml file.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PACKAGE
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -191,24 +176,17 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        pom_file = runtime_step_config['pom-file']
-        artifact_extensions = runtime_step_config['artifact-extensions']
-        artifact_parent_dir = runtime_step_config['artifact-parent-dir']
+        pom_file = self.get_config_value('pom-file')
+        artifact_extensions = self.get_config_value('artifact-extensions')
+        artifact_parent_dir = self.get_config_value('artifact-parent-dir')
 
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
@@ -267,7 +245,3 @@ class Maven(StepImplementer):
             }]
         }
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

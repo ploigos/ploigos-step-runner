@@ -31,11 +31,9 @@ Results output by this step.
 
 import os.path
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
-from tssc.step_implementers.utils.xml import get_xml_element
+from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml'
@@ -45,22 +43,10 @@ REQUIRED_CONFIG_KEYS = [
     'pom-file'
 ]
 
-class Maven(StepImplementer): # pylint: disable=too-few-public-methods 
+class Maven(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Maven.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -94,22 +80,15 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        pom_file = runtime_step_config['pom-file']
+        pom_file = self.get_config_value('pom-file')
 
         # verify runtime config
         if not os.path.exists(pom_file):
@@ -123,6 +102,3 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

@@ -1,17 +1,11 @@
 """
 Factory for creating TSSC workflow and running steps.
 """
-from .exceptions import TSSCException
 
-_TSSC_CONFIG_KEY = 'tssc-config'
-_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY = 'global-defaults'
-_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY = 'global-environment-defaults'
-_TSSC_ENVIRONMENT_NAME_KEY = 'environment-name'
-_IS_DEFAULT_KEY = 'is_default'
-_CLAZZ_KEY = 'clazz'
-_IMPLEMENTER_KEY = 'implementer'
-_SUB_STEP_CONFIG_KEY = 'config'
-_SUB_STEP_ENV_CONFIG_KEY = 'environment-config'
+from tssc.config import TSSCConfig
+from tssc.exceptions import TSSCException
+from tssc.step_implementer import StepImplementer
+from tssc.utils.reflection import import_and_get_class
 
 class TSSCFactory:
     """
@@ -19,8 +13,15 @@ class TSSCFactory:
 
     Parameters
     ----------
-    config : dict
-        TSSC configuration represented as a dictionary with a key of 'tssc-config'
+    config : TSSCConfig, dict, list, str (file or directory)
+        A TSSCConfig object,
+        a dictionary that is a valid TSSC configuration,
+        a string that is a path to a YAML or JSON file that is
+        a valid TSSC configuration,
+        a string that is a path to a directory containing one or more
+        files that are valid YAML or JSON files that are valid
+        configurations,
+        or a list of any of the former.
     results_dir_path : str, optional
         Path to the folder for steps to write their results to
         Default: tssc-results
@@ -34,54 +35,40 @@ class TSSCFactory:
     Raises
     ------
     ValueError
-        If given config does not contain 'tssc-config' key
+        If given config is not of expected type.
+    AssertionError
+        If given config contains any invalid TSSC configurations.
     """
-    _step_implementers = {}
 
-    def __init__(self, config, results_dir_path='tssc-results', \
+    __DEFAULT_MODULE = 'tssc.step_implementers'
+
+    def __init__(
+            self,
+            config,
+            results_dir_path='tssc-results', \
             results_file_name='tssc-results.yml', \
             work_dir_path='tssc-working'):
-        if _TSSC_CONFIG_KEY in config:
-            self.config = config[_TSSC_CONFIG_KEY]
+
+        if isinstance(config, TSSCConfig):
+            self.__config = config
         else:
-            raise ValueError('config must contain key: ' + _TSSC_CONFIG_KEY)
+            self.__config = TSSCConfig(config)
 
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
         self.work_dir_path = work_dir_path
 
-    @staticmethod
-    def register_step_implementer(implementer_class, is_default=False):
+    @property
+    def config(self):
         """
-        Register a Step Implementer.
-
-        Parameters
-        ----------
-        implementer_class : class
-            Class implimenting the step.
-        is_default : bool, optional
-            True if this should be the default implementer for this step, False other wise.
-            If more then one step implementer is registered as the default for for the
-            same step then the last one to register will win and be the default.
+        Returns
+        -------
+        TSSCConfig
+            Configuration used by this factory.
         """
+        return self.__config
 
-        step_name = implementer_class.step_name()
-        if step_name not in TSSCFactory._step_implementers:
-            TSSCFactory._step_implementers[step_name] = {}
-
-        # if this is the default, unset any other implimenters of this step as default
-        # NOTE: last one to register as default wins, deal with it
-        if is_default:
-            for step_implementer in \
-                    TSSCFactory._step_implementers[step_name].values():
-                step_implementer[_IS_DEFAULT_KEY] = False
-
-        TSSCFactory._step_implementers[step_name][implementer_class.__name__] = {
-            _CLAZZ_KEY: implementer_class,
-            _IS_DEFAULT_KEY: is_default
-        }
-
-    def run_step(self, step_name, step_config_runtime_overrides=None, environment=None): # pylint: disable=too-many-branches
+    def run_step(self, step_name, environment=None):
         """
         Call the given step.
 
@@ -89,9 +76,6 @@ class TSSCFactory:
         ----------
         step_name : str
             TSSC step to run.
-        step_config_runtime_overrides : dict, optional
-            Configuration for the step passed in at runtime when the step was invoked that will
-            override step configuration coming from any other source.
         environment : str, optional
             Name of the environment the step is being run in. Used to determine environment
             specific global defaults and step configuration.
@@ -105,103 +89,77 @@ class TSSCFactory:
             If no StepImplementer registered for given step with given implementer name.
         """
 
-        if step_config_runtime_overrides is None:
-            step_config_runtime_overrides = {}
+        sub_step_configs = self.config.get_sub_step_configs(step_name)
+        assert len(sub_step_configs) != 0, \
+            f"Can not run step ({step_name}) because no step configuration provided."
 
-        # verify that there is registered implementers for the given step
-        if not step_name in TSSCFactory._step_implementers or \
-                not TSSCFactory._step_implementers[step_name]:
-            raise TSSCException('No implementers registered for step: ' + step_name)
+        # for each sub step in the step config get the step implementer and run it
+        for sub_step_config in sub_step_configs:
+            sub_step_implementer_name = sub_step_config.sub_step_implementer_name
 
-        step_implementers = TSSCFactory._step_implementers[step_name]
+            step_implementer_class = TSSCFactory.__get_step_implementer_class(
+                step_name,
+                sub_step_implementer_name)
 
-        # determine the global configuration defaults
-        global_config_defaults = {}
-        if _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY in self.config:
-            global_config_defaults = self.config[_TSSC_CONFIG_GLOBAL_DEFAULTS_KEY]
+            # create the StepImplementer instance
+            sub_step = step_implementer_class(
+                results_dir_path=self.results_dir_path,
+                results_file_name=self.results_file_name,
+                work_dir_path=self.work_dir_path,
+                config=sub_step_config,
+                environment=environment
+            )
 
-        # determine the global environment configuration defaults
-        global_environment_config_defaults = {}
-        if environment and \
-                _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY in self.config and \
-                environment in self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY]:
+            # run the step
+            sub_step.run_step()
 
-            global_environment_config_defaults = \
-                self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
+    @staticmethod
+    def __get_step_implementer_class(step_name, step_implementer_name):
+        """Given a step name and a step implementer name dynamically loads the Class.
 
-            global_environment_config_defaults[_TSSC_ENVIRONMENT_NAME_KEY] = environment
+        Parameters
+        ----------
+        step_name : str
+            Name of the step to load the given step implementer for.
+            This is only used if the given step_implementer_name does not include
+            a module path.
+        step_implementer_name : str
+            Either the short name of a StepImplementer class which will be dynamically
+            loaded from the 'tssc.step_implementers.{step_name}' module or
+            A class name that includes a dot seperated module name to load the Class from.
 
-        # get step configuration if there is any
-        step_config = {}
-        if step_name in self.config:
-            step_config = self.config[step_name]
-            if isinstance(step_config, dict):
-                step_config = [step_config]
-            for sub_step in step_config:
-                sub_step_implementer_name = sub_step[_IMPLEMENTER_KEY]
+        Returns
+        -------
+        StepImplementer
+            Dynamically loaded subclass of StepImplementer for given step name with
+            given step implementer name.
 
-                if sub_step_implementer_name in step_implementers:
-                    # determine the sub step configuration
-                    if _SUB_STEP_CONFIG_KEY in sub_step:
-                        sub_step_config = sub_step[_SUB_STEP_CONFIG_KEY]
-                    else:
-                        sub_step_config = {}
+        Raises
+        ------
+        TSSCException
+            If could not find class to load
+            If loaded class is not a subclass of StepImplementer
+        """
+        parts = step_implementer_name.split('.')
+        class_name = parts.pop()
+        module_name = '.'.join(parts)
 
-                    # determine the sub step environment specific configuration
-                    if _SUB_STEP_ENV_CONFIG_KEY in sub_step and \
-                            environment in sub_step[_SUB_STEP_ENV_CONFIG_KEY]:
-                        sub_step_environment_config = \
-                            sub_step[_SUB_STEP_ENV_CONFIG_KEY][environment]
-                    else:
-                        sub_step_environment_config = {}
+        if not module_name:
+            step_module_part = step_name.replace('-', '_')
+            module_name = f"{TSSCFactory.__DEFAULT_MODULE}.{step_module_part}"
 
-                    # create the StepImplementer instance
-                    sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                        results_dir_path=self.results_dir_path,
-                        results_file_name=self.results_file_name,
-                        work_dir_path=self.work_dir_path,
-                        step_environment_config=sub_step_environment_config,
-                        step_config=sub_step_config,
-                        global_config_defaults=global_config_defaults,
-                        global_environment_config_defaults=global_environment_config_defaults
-                    )
+        clazz = import_and_get_class(module_name, class_name)
+        if not clazz:
+            raise TSSCException(
+                f"Could not dynamically load step ({step_name}) step implementer" +
+                f" ({step_implementer_name}) from module ({module_name})" +
+                f" with class name ({class_name})"
+            )
+        if not issubclass(clazz, StepImplementer):
+            raise TSSCException(
+                f"Step ({step_name}) is configured to use step implementer" +
+                f" ({step_implementer_name}) from module ({module_name}) with" +
+                f" class name ({class_name}), and dynamically loads as class ({clazz})" +
+                f" which is not a subclass of required parent class ({StepImplementer}).")
 
-                    # run the step
-                    sub_step.run_step(step_config_runtime_overrides)
-                else:
-                    raise TSSCException(
-                        'No StepImplementer for step'
-                        + ' (' + step_name + ')'
-                        + ' with TSSC config specified implementer name'
-                        + ' (' + sub_step_implementer_name + ')'
-                    )
-
-        else:
-            default_step_implementer = None
-            for sub_step_implementer_name, step_implementer_config in step_implementers.items():
-                if step_implementer_config[_IS_DEFAULT_KEY]:
-                    default_step_implementer = step_implementer_config
-
-            if default_step_implementer:
-                # create the default StepImplementer instance
-                sub_step = default_step_implementer[_CLAZZ_KEY](
-                    results_dir_path=self.results_dir_path,
-                    results_file_name=self.results_file_name,
-                    work_dir_path=self.work_dir_path,
-                    step_environment_config={},
-                    step_config={},
-                    global_config_defaults=global_config_defaults,
-                    global_environment_config_defaults=global_environment_config_defaults
-                )
-
-                # run the step
-                sub_step.run_step(step_config_runtime_overrides)
-            else:
-                raise TSSCException(
-                    'No implementer specified for step'
-                    + '(' + step_name + ')'
-                    + ' in config'
-                    + '(' + str(self.config) + ')'
-                    + ' and no default step implementer registered in step implementers'
-                    + '(' + str(step_implementers) + ')'
-                )
+        return clazz

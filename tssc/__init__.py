@@ -40,6 +40,7 @@ Step Configuration
 * container-image-static-vulnerability-scan
 * create-deployment-environment
 * deploy
+* validate-environment-configuration
 * uat
 * runtime-vulnerability-scan
 * canary-test
@@ -139,66 +140,66 @@ From least precedence to highest precedence.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
       # given to the `--environment` flag of the main tssc entry point.
-        global-environment-defaults:
+      global-environment-defaults:
         # Sample
         # Sample configuration for an environment named 'DEV'.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-          DEV:
-            # Required
-            kube-app-domain: ''
+        DEV:
+          # Required
+          kube-app-domain: ''
 
-            #Optional
-            #kube-api-token: ''
+          #Optional
+          #kube-api-token: ''
 
-            #Optional
-            #insecure-skip-tls-verify: 'true'
+          #Optional
+          #insecure-skip-tls-verify: 'true'
 
-            # Required
-            argocd-username: ''
+          # Required
+          argocd-username: ''
 
-            # Required
-            argocd-password: ''
+          # Required
+          argocd-password: ''
 
-            # Required
-            argocd-api: ''
+          # Required
+          argocd-api: ''
 
-            # Optional
-            #argocd-sync-timeout-seconds: '60'
+          # Optional
+          #argocd-sync-timeout-seconds: '60'
 
-            # Optional
-            #argocd-helm-chart-path: './'
+          # Optional
+          #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-          TEST:
-            # Required
-            kube-app-domain: ''
+        TEST:
+          # Required
+          kube-app-domain: ''
 
-            #Optional
-            #kube-api-token: ''
+          #Optional
+          #kube-api-token: ''
 
-            #Optional
-            #insecure-skip-tls-verify: 'true'
+          #Optional
+          #insecure-skip-tls-verify: 'true'
 
-            # Required
-            argocd-username: ''
+          # Required
+          argocd-username: ''
 
-            # Required
-            argocd-password: ''
+          # Required
+          argocd-password: ''
 
-            # Required
-            argocd-api: ''
+          # Required
+          argocd-api: ''
 
-            # Optional
-            #argocd-sync-timeout-seconds: '60'
+          # Optional
+          #argocd-sync-timeout-seconds: '60'
 
-            # Optional
-            #argocd-helm-chart-path: './'
+          # Optional
+          #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -206,9 +207,9 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         #PROD:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.prod.myorg.xyz"
+        # Sample
+        # Sample parameter that may differ from environment to environment.
+        #kube-api-uri: 'api.prod.myorg.xyz"
 
       generate-metadata:
       - implementer: Maven
@@ -247,11 +248,11 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the sonarqube server
-          url: 'http//sonarqube-sonarqube.company.com/'
+          url: ''
 
-          # Required.
+          # Optional.
           # Properties file in root folder (eg: sonar-project.properties)
-          properties: 'sonar-project.properties'
+          #properties: ''
 
           # Optional.
           #user: None
@@ -288,7 +289,7 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
-          #url: ''
+          url: ''
 
           # Optional.
           #user: None
@@ -365,10 +366,18 @@ From least precedence to highest precedence.
           # specification
           readiness-probe-path: ''
 
+      validate-environment-configuration:
+      - implementer: ConfiglintFromArgocd
+        config: {}
+      - implementer: Configlint
+        config: {
+          # Optional.
+          # Path to the rules file
+          #rules: ''
+        }
 
       uat:
-      # WARNING: not yet implemented
-      - implementer: Cucumber
+      - implementer: Maven
         config: {}
 
       # WARNING: not yet implemented
@@ -407,66 +416,66 @@ From least precedence to highest precedence.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
       # given to the `--environment` flag of the main tssc entry point.
-        global-environment-defaults:
+      global-environment-defaults:
         # Optional Sample
         # Sample configuration for an environment named 'DEV'.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-          DEV:
-            # Required
-            kube-app-domain: ''
+        DEV:
+          # Required
+          kube-app-domain: ''
 
-            #Optional
-            #kube-api-token: ''
+          #Optional
+          #kube-api-token: ''
 
-            #Optional
-            #insecure-skip-tls-verify: 'true'
+          #Optional
+          #insecure-skip-tls-verify: 'true'
 
-            # Required
-            argocd-username: ''
+          # Required
+          argocd-username: ''
 
-            # Required
-            argocd-password: ''
+          # Required
+          argocd-password: ''
 
-            # Required
-            argocd-api: ''
+          # Required
+          argocd-api: ''
 
-            # Optional
-            #argocd-sync-timeout-seconds: '60'
+          # Optional
+          #argocd-sync-timeout-seconds: '60'
 
-            # Optional
-            #argocd-helm-chart-path: './'
+          # Optional
+          #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
-          TEST:
-            # Required
-            kube-app-domain: ''
+        TEST:
+          # Required
+          kube-app-domain: ''
 
-            #Optional
-            #kube-api-token:
+          #Optional
+          #kube-api-token:
 
-            #Optional
-            #insecure-skip-tls-verify: 'true'
+          #Optional
+          #insecure-skip-tls-verify: 'true'
 
-            # Required
-            argocd-username: ''
+          # Required
+          argocd-username: ''
 
-            # Required
-            argocd-password: ''
+          # Required
+          argocd-password: ''
 
-            # Required
-            argocd-api: ''
+          # Required
+          argocd-api: ''
 
-            # Optional
-            #argocd-sync-timeout-seconds: '60'
+          # Optional
+          #argocd-sync-timeout-seconds: '60'
 
-            # Optional
-            #argocd-helm-chart-path: './'
+          # Optional
+          #argocd-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -474,9 +483,9 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         #PROD:
-          # Sample
-          # Sample parameter that may differ from environment to environment.
-          #kube-api-uri: 'api.prod.myorg.xyz"
+        # Sample
+        # Sample parameter that may differ from environment to environment.
+        #kube-api-uri: 'api.prod.myorg.xyz"
 
       generate-metadata:
       # WARNING: not yet implemented
@@ -513,11 +522,11 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the sonarqube server
-          url: 'http//sonarqube-sonarqube.company.com/'
+          url: ''
 
-          # Required.
+          # Optional.
           # Properties file in root folder (eg: sonar-project.properties)
-          properties: 'sonar-project.properties'
+          #properties: ''
 
           # Optional.
           #user: None
@@ -623,8 +632,7 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       uat:
-      # WARNING: not yet implemented
-      - implementer: Cucumber
+      - implementer: Maven
         config: {}
 
       # WARNING: not yet implemented
@@ -656,6 +664,16 @@ Example Running the 'generate-metadata' step
 """
 
 import __main__
-from .factory import TSSCFactory
-from .exceptions import TSSCException
+from .config import *
+from .factory import *
+from .exceptions import *
 from .step_implementer import DefaultSteps, StepImplementer
+from .utils import *
+
+__all__ = [
+    'config',
+    'factory',
+    'exceptions',
+    'step_implementer',
+    'utils'
+]

@@ -3,54 +3,92 @@
 Step Configuration
 ------------------
 
-Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Step configuration key(s) for this step:
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `url`             | True      |         | URL to the artifact repository to push the artifact to.
-| `user`            | False     |         | User to authenticate with the artifact repository.
-| `password`        | False     |         | Password to authenticate with the artifact repository.
+| Key                 | Required | Default | Description
+|---------------------|----------|---------|------------
+| `url`               | True     | N/A     | URL to the artifact repository
+| `user`              | False    | N/A     | Repository user for authenication
+| `password`          | False    | N/A     | Resository password for authentication
 
+`user` and `password` can be specifed as runtime arguments.
 
 Expected Previous Step Results
 ------------------------------
 
-Results expected from previous steps that this step requires.
+Results expected from previous steps:
 
-| Step Name           | Result Key  | Description
-|---------------------|-------------|------------
-| `generate-metadata` | `version`   | TODO
-| `package`           | `artifacts` |
+| Step Name           |  Key               | Description
+|---------------------|--------------------|------------
+| `generate-metadata` | `version`          | The version to be used to deploy to artifactory.
+| `package`           | `artifacts`        | Artifacts is an array of `artifact`.
+|                     |                    | Each element of an `artifact` will be used
+|                     |                    | as a parameter to deploy to artifactory:
+|                     |                    | * artifact.group-id
+|                     |                    | * artifact.artifact-id
+|                     |                    | * artifact.path
+|                     |                    | * artifact.package-type
 
 Results
 -------
 
-Results output by this step.
+Results output by this step:
 
-| Result Key  | Description
-|-------------|------------
-| `artifacts` | An array of dictionaries with information on the pushed artifacts.
+| Key             | Description
+|-----------------|------------
+| `artifacts`     | An array of dictionaries describing the push results
 
-**artifacts**
-Keys in the dictionary elements in the `artifacts` array in the step results.
+Elements in the `artifacts` dictionary:
 
-| `artifacts` Key | Description
+| Elements        | Description
 |-----------------|------------
 | `url`           | URL to the artifact pushed to the artifact repository
 | `path`          | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`   | Maven artifact ID pushed to the artifact repository
 | `group-id`      | Maven group ID pushed to the artifact repository
 | `version`       | Version pushed to the artifact repository
+
+Examples
+--------
+
+Example: Step Configuration (minimal)
+
+    push-artifacts:
+    - implementer: Maven
+      config:
+        url: http://artifactory.company.com/repo
+
+Example: Generated Maven Deploy (uses both step configuration and previous results)
+
+    mvn
+      deploy:deploy-file'
+      -Durl=url
+      -Dversion=generate-metadata.version
+      -DgroupId=package.artifact.group-id
+      -DartifactId=package.artifact.artifact-id
+      -Dfile=package.artifact.path
+      -Dpackaging=package.artifact.package-type
+
+Example: Results
+
+    'tssc-results': {
+        'artifacts': [
+             {
+             'path':''
+             'artifact-id': ''
+             'group-id': ''
+             'package-type': ''
+             'version': ''
+             }
+        ]
+    }
+
 """
 import re
 import sys
 import sh
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {}
 AUTHENTICATION_CONFIG = {
@@ -66,18 +104,6 @@ class Maven(StepImplementer):
     """
     StepImplementer for the push-artifacts step for Maven.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PUSH_ARTIFACTS
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -133,15 +159,8 @@ class Maven(StepImplementer):
             not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
         ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -151,13 +170,12 @@ class Maven(StepImplementer):
         user = ''
         password = ''
 
-        url = runtime_step_config['url']
+        url = self.get_config_value('url')
 
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if(runtime_step_config.get('user') \
-              and runtime_step_config.get('password')):
-                user = runtime_step_config.get('user')
-                password = runtime_step_config.get('password')
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if(self.get_config_value('user') and self.get_config_value('password')):
+                user = self.get_config_value('user')
+                password = self.get_config_value('password')
 
         # ----- get generate-metadata items
         # Required: Get the generate-metadata.version
@@ -176,7 +194,7 @@ class Maven(StepImplementer):
             raise ValueError('Severe error: Package does not have artifacts')
 
         # Build a temporary settings.xml file for the mvn user/pass
-        settings_path = self.write_temp_file('ci-settings.xml', b'''
+        settings_path = self.write_working_file('ci-settings.xml', b'''
         <settings>
               <servers>
                   <server>
@@ -249,7 +267,3 @@ class Maven(StepImplementer):
             })
 
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

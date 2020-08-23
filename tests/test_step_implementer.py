@@ -5,97 +5,16 @@ import os
 import yaml
 
 from tssc import TSSCFactory, StepImplementer, TSSCException
+from tssc.config import TSSCConfig
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.sample_step_implementers import *
 
 class dummy_context_mgr():
     def __enter__(self):
         return None
     def __exit__(self, exc_type, exc_value, traceback):
         return False
-
-class WriteConfigAsResultsStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'write-config-as-results'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return [
-            'required-config-key'
-        ]
-
-    def _run_step(self, runtime_step_config):
-        return runtime_step_config
-
-class WriteTempFileStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'write-temp-file'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return []
-
-    def _run_step(self, runtime_step_config):
-        self.write_temp_file('test', b'hello world')
-        return {}
 
 class TestStepImplementer(BaseTSSCTestCase):
     def _run_step_implementer_test(
@@ -121,7 +40,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config1 = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -140,7 +59,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -153,7 +71,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config1 = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -174,7 +92,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config2 = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-2': 'config-2',
                         'config-overwrite-me': 'config-2',
@@ -193,8 +111,6 @@ class TestStepImplementer(BaseTSSCTestCase):
                 }
             }
         }
-
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
@@ -215,7 +131,8 @@ class TestStepImplementer(BaseTSSCTestCase):
             'tssc-config': {
                 'write-config-as-results': [
                     {
-                        'implementer': 'WriteConfigAsResultsStepImplementer',
+                        'name': 'sub-step-1',
+                        'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                         'config': {
                             'config-1': "config-1",
                             'config-overwrite-me': 'config-1',
@@ -223,7 +140,8 @@ class TestStepImplementer(BaseTSSCTestCase):
                         }
                     },
                     {
-                        'implementer': 'WriteConfigAsResultsStepImplementer',
+                        'name': 'sub-step-2',
+                        'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                         'config': {
                             'config-2': 'config-2',
                             'config-overwrite-me': 'config-2',
@@ -244,8 +162,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
-
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config,
@@ -258,7 +174,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -268,7 +184,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'tssc-results')
             results_file_path = os.path.join(results_dir_path, 'tssc-results.yml')
@@ -288,7 +203,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -298,7 +213,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'tssc-results')
             results_file_path = os.path.join(results_dir_path, 'tssc-results.yml')
@@ -318,7 +232,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                             'required-config-key': False
                     }
@@ -333,8 +247,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
-
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config,
@@ -347,7 +259,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -367,7 +279,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'tssc-results')
             results_file_path = os.path.join(results_dir_path, 'tssc-results.yml')
@@ -391,7 +302,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                     }
                 },
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -423,7 +334,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -433,7 +343,6 @@ class TestStepImplementer(BaseTSSCTestCase):
                 'SAMPLE-ENV-1'
             )
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -447,7 +356,7 @@ class TestStepImplementer(BaseTSSCTestCase):
         config1 = {
             'tssc-config': {
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -485,7 +394,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -495,7 +403,6 @@ class TestStepImplementer(BaseTSSCTestCase):
                 'SAMPLE-ENV-1'
             )
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -519,7 +426,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                     }
                 },
                 'write-config-as-results': {
-                    'implementer': 'WriteConfigAsResultsStepImplementer',
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'config': {
                         'config-1': "config-1",
                         'config-overwrite-me': 'config-1',
@@ -561,7 +468,6 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -571,7 +477,6 @@ class TestStepImplementer(BaseTSSCTestCase):
                 'SAMPLE-ENV-1'
             )
 
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer)
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -582,13 +487,271 @@ class TestStepImplementer(BaseTSSCTestCase):
             )
 
     def test_empty_constructor_params(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'write-config-as-results': {
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
+                }
+            }
+        })
+        step_config = config.get_step_config('write-config-as-results')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer')
+
         step = WriteConfigAsResultsStepImplementer(
             results_dir_path='',
             results_file_name='',
-            work_dir_path=''
+            work_dir_path='',
+            config=sub_step
         )
 
         self.assertEqual(step.step_environment_config, {})
         self.assertEqual(step.step_config, {})
         self.assertEqual(step.global_config_defaults, {})
         self.assertEqual(step.global_environment_config_defaults, {})
+
+    def test_missing_required_config_key(self):
+        config = {
+            'tssc-config': {
+                'required-step-config-test': {
+                    'implementer': 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                    'config': {}
+                }
+            }
+        }
+
+        with self.assertRaisesRegex(
+                AssertionError,
+                r"The runtime step configuration \({}\) is missing the required configuration keys \(\['required-config-key'\]\)"):
+
+            with TempDirectory() as test_dir:
+                self._run_step_implementer_test(
+                    config,
+                    'required-step-config-test',
+                    {},
+                    test_dir
+                )
+
+    def test_get_step_results(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'write-config-as-results': {
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                    'config': {
+                        'config-1': "config-1",
+                        'foo': "bar",
+                    }
+                },
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        write_config_as_results_step_config = config.get_step_config('write-config-as-results')
+        write_config_as_results_step_config_sub_step = write_config_as_results_step_config.get_sub_step('tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer')
+
+        foo_step_config = config.get_step_config('foo')
+        foo_sub_step = foo_step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            write_config_step = WriteConfigAsResultsStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path='tssc-working',
+                config=write_config_as_results_step_config_sub_step
+            )
+
+            write_config_step.run_step()
+
+            # verify step can return it's own results
+            results_from_same_step = write_config_step.get_step_results('write-config-as-results')
+            self.assertEqual(results_from_same_step, {
+                'config-1': "config-1",
+                'foo': "bar",
+            })
+
+            # verify step can return results from a previous step
+            foo_step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path='tssc-working',
+                config=foo_sub_step
+            )
+
+            results_from_diff_step = foo_step.get_step_results('write-config-as-results')
+            self.assertEqual(results_from_diff_step, {
+                'config-1': "config-1",
+                'foo': "bar",
+            })
+
+    def test_current_step_results(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'write-config-as-results': {
+                    'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                    'config': {
+                        'config-1': "config-1",
+                        'foo': "bar",
+                    }
+                }
+            }
+        })
+        step_config = config.get_step_config('write-config-as-results')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            step = WriteConfigAsResultsStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path='tssc-working',
+                config=sub_step
+            )
+
+            step.run_step()
+            results = step.current_step_results()
+
+            self.assertEqual(results, {
+                'config-1': "config-1",
+                'foo': "bar",
+            })
+
+    def test_write_working_file(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
+            step.write_working_file('test-working-file', b'hello world')
+
+            with open(os.path.join(working_dir_path, 'foo', 'test-working-file'), 'r') as working_file:
+                self.assertEqual(working_file.read(), 'hello world')
+
+    def test_get_config_value(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {
+                        'test': 'hello world'
+                    }
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
+            self.assertEqual(step.get_config_value('test'), 'hello world')
+            self.assertIsNone(step.get_config_value('does-not-exist'))
+
+    def test_get_config_value_with_env(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {
+                        'test': 'hello world',
+                        'env-config-override-key': 'override-me'
+                    },
+                    'environment-config': {
+                        'SAMPLE-ENV-1': {
+                            'env-config-override-key': 'step env config - env 1 value - 1'
+                        },
+                        'SAMPLE-ENV-2': {
+                            'env-config-override-key': 'step env config - env 2 value - 1'
+                        }
+                    },
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step,
+                environment='SAMPLE-ENV-1'
+            )
+
+            self.assertEqual(step.get_config_value('test'), 'hello world')
+            self.assertIsNone(step.get_config_value('does-not-exist'))
+            self.assertEqual(
+                step.get_config_value('env-config-override-key'),
+                'step env config - env 1 value - 1')
+
+    def test_has_config_value(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {
+                        'test': 'hello world',
+                        'env-config-override-key': 'override-me',
+                        'username': 'foo',
+                        'password': 'bar'
+                    },
+                    'environment-config': {
+                        'SAMPLE-ENV-1': {
+                            'env-config-override-key': 'step env config - env 1 value - 1'
+                        },
+                        'SAMPLE-ENV-2': {
+                            'env-config-override-key': 'step env config - env 2 value - 1'
+                        }
+                    },
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step,
+                environment='SAMPLE-ENV-1'
+            )
+
+            self.assertFalse(step.has_config_value('bar'))
+            self.assertFalse(step.has_config_value(['bar']))
+
+            self.assertFalse(step.has_config_value(['username', 'foo'], False))
+            self.assertTrue(step.has_config_value(['username', 'foo'], True))
+
+            self.assertTrue(step.has_config_value(['username', 'password'], False))
+            self.assertTrue(step.has_config_value(['username', 'password'], True))

@@ -2,8 +2,6 @@
 com.redhat.tssc.step_implementers
 """
 
-from .utils import *
-
 from .generate_metadata import *
 from .tag_source import *
 from .static_code_analysis import *
@@ -15,11 +13,11 @@ from .push_container_image import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
 from .deploy import *
+from .validate_environment_configuration import *
 from .uat import *
 from .canary_test import *
 
 __all__ = [
-    'utils',
     'generate_metadata',
     'tag_source',
     'static_code_analysis',
@@ -30,7 +28,8 @@ __all__ = [
     'push_container_image',
     'container_image_static_compliance_scan',
     'container_image_static_vulnerability_scan',
+    'deploy',
+    'validate_environment_configuration',
     'uat',
-    'canary_test',
-    'deploy'
+    'canary_test'
 ]

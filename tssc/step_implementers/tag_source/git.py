@@ -54,9 +54,7 @@ Results output by this step.
 """
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {}
 
@@ -74,18 +72,6 @@ class Git(StepImplementer):
     as the gitpython library doesn't appear to easily support username/password auth
     for http and https git repos, and that is a desired use case.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.TAG_SOURCE
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -141,15 +127,8 @@ class Git(StepImplementer):
             not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
         ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -159,11 +138,11 @@ class Git(StepImplementer):
         username = None
         password = None
 
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if(runtime_step_config.get('username') \
-              and runtime_step_config.get('password')):
-                username = runtime_step_config.get('username')
-                password = runtime_step_config.get('password')
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if(self.get_config_value('username') \
+              and self.get_config_value('password')):
+                username = self.get_config_value('username')
+                password = self.get_config_value('password')
             else:
                 raise ValueError(
                     'Both username and password must have ' \
@@ -173,7 +152,7 @@ class Git(StepImplementer):
             print('No username/password found, assuming ssh')
         tag = self._get_tag()
         self._git_tag(tag)
-        git_url = self._git_url(runtime_step_config)
+        git_url = self._git_url()
         if git_url.startswith('http://'):
             if username and password:
                 self._git_push('http://' + username + ':' + password + '@' + git_url[7:])
@@ -206,11 +185,10 @@ class Git(StepImplementer):
             print('No version found in metadata. Using latest')
         return tag
 
-    @staticmethod
-    def _git_url(runtime_step_config):
+    def _git_url(self):
         return_val = None
-        if runtime_step_config.get('url'):
-            return_val = runtime_step_config.get('url')
+        if self.get_config_value('url'):
+            return_val = self.get_config_value('url')
         else:
             try:
                 return_val = sh.git.config(
@@ -259,7 +237,3 @@ class Git(StepImplementer):
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push') from error
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Git, True)

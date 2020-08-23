@@ -49,9 +49,8 @@ Results output by this step.
 import os
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     # Image specification file name
@@ -90,18 +89,6 @@ class Buildah(StepImplementer):
     """
 
     @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.CREATE_CONTAINER_IMAGE
-
-    @staticmethod
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.
@@ -133,26 +120,19 @@ class Buildah(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        context = runtime_step_config['context']
-        image_spec_file = runtime_step_config['imagespecfile']
+        context = self.get_config_value('context')
+        image_spec_file = self.get_config_value('imagespecfile')
         image_spec_file_location = context + '/' + image_spec_file
-        application_name = runtime_step_config['application-name']
-        service_name = runtime_step_config['service-name']
+        application_name = self.get_config_value('application-name')
+        service_name = self.get_config_value('service-name')
 
         if not os.path.exists(image_spec_file_location):
             raise ValueError('Image specification file does not exist in location: '
@@ -176,8 +156,8 @@ class Buildah(StepImplementer):
 
         try:
             sh.buildah.bud(  # pylint: disable=no-member
-                '--format=' + runtime_step_config['format'],
-                '--tls-verify=' + str(runtime_step_config['tlsverify']),
+                '--format=' + self.get_config_value('format'),
+                '--tls-verify=' + str(self.get_config_value('tlsverify')),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 context,
@@ -214,7 +194,3 @@ class Buildah(StepImplementer):
         }
 
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Buildah, True)

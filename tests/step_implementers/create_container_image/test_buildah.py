@@ -20,6 +20,10 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                     'global-defaults': {
                         'application-name': application_name,
                         'service-name': service_name
+                    },
+                    'create-container-image': {
+                        'implementer': 'Buildah',
+                        'config': {}
                     }
                 }
             }
@@ -45,7 +49,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                     }
                 }
             }
-            
+
             with self.assertRaisesRegex(
                     ValueError,
                     r"Image specification file does not exist in location: ./Dockerfile"):
