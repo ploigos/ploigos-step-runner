@@ -6,6 +6,8 @@ import yaml
 
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+
 class dummy_context_mgr():
     def __enter__(self):
         return None
@@ -95,7 +97,7 @@ class WriteTempFileStepImplementer(StepImplementer):
         self.write_temp_file('test', b'hello world')
         return {}
 
-class TestStepImplementer(unittest.TestCase):
+class TestStepImplementer(BaseTSSCTestCase):
     def _run_step_implementer_test(
             self,
             config,

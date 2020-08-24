@@ -1,6 +1,7 @@
 import unittest
 
 from tssc import TSSCFactory, TSSCException, StepImplementer
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 class FooStepImplementer(StepImplementer):
     @staticmethod
@@ -42,7 +43,7 @@ class FooStepImplementer(StepImplementer):
     def _run_step(self, runtime_step_config):
         pass
 
-class TestFactory(unittest.TestCase):
+class TestFactory(BaseTSSCTestCase):
     def test_TSSCFactory_init_valid_config(self):
         config = {
             'tssc-config': {

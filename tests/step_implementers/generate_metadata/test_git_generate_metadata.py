@@ -5,10 +5,12 @@ from git import Repo
 from git import InvalidGitRepositoryError
 
 from tssc.step_implementers.generate_metadata import Git
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import run_step_test_with_result_validation
 
 from test_utils import *
 
-class TestStepImplementerGenerateMetadataGit(unittest.TestCase):
+class TestStepImplementerGenerateMetadataGit(BaseTSSCTestCase):
     def test_root_dir_is_not_git_repo(self):
         with TempDirectory() as temp_dir:
             config = {

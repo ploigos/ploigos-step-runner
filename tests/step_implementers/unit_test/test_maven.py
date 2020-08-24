@@ -10,6 +10,7 @@ import yaml
 
 from tssc import TSSCFactory
 from tssc.step_implementers.unit_test import Maven
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from test_utils import *
 
@@ -61,7 +62,7 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
 
     return mvn_side_effect
 
-class TestStepImplementerUnitTest(unittest.TestCase):
+class TestStepImplementerUnitTest(BaseTSSCTestCase):
 
     @patch('sh.mvn', create=True)
     def test_unit_test_default_pom_file_missing(self, mvn_mock):

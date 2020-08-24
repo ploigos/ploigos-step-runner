@@ -7,6 +7,7 @@ from testfixtures import TempDirectory
 
 from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 class FooStepImplementer(StepImplementer):
     @staticmethod
@@ -173,7 +174,7 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
     def _run_step(self, runtime_step_config):
         return runtime_step_config
 
-class TestInit(unittest.TestCase):
+class TestInit(BaseTSSCTestCase):
     def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
         if argv is None:
             argv = []
