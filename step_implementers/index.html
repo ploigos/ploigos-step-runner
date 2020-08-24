@@ -44,6 +44,7 @@ from .push_artifacts import *
 from .push_container_image import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
+from .deploy import *
 from .uat import *
 from .canary_test import *
 
@@ -61,7 +62,8 @@ __all__ = [
     &#39;container_image_static_compliance_scan&#39;,
     &#39;container_image_static_vulnerability_scan&#39;,
     &#39;uat&#39;,
-    &#39;canary_test&#39;
+    &#39;canary_test&#39;,
+    &#39;deploy&#39;
 ]</code></pre>
 </details>
 </section>
@@ -83,6 +85,10 @@ __all__ = [
 <dt><code class="name"><a title="tssc.step_implementers.create_container_image" href="create_container_image/index.html">tssc.step_implementers.create_container_image</a></code></dt>
 <dd>
 <div class="desc"><p>tssc.StepImplementers for the 'create-container-image' TSSC step …</p></div>
+</dd>
+<dt><code class="name"><a title="tssc.step_implementers.deploy" href="deploy/index.html">tssc.step_implementers.deploy</a></code></dt>
+<dd>
+<div class="desc"><p>tssc.StepImplementers for the 'deploy' TSSC step …</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.generate_metadata" href="generate_metadata/index.html">tssc.step_implementers.generate_metadata</a></code></dt>
 <dd>
@@ -150,6 +156,7 @@ __all__ = [
 <li><code><a title="tssc.step_implementers.container_image_static_compliance_scan" href="container_image_static_compliance_scan/index.html">tssc.step_implementers.container_image_static_compliance_scan</a></code></li>
 <li><code><a title="tssc.step_implementers.container_image_static_vulnerability_scan" href="container_image_static_vulnerability_scan/index.html">tssc.step_implementers.container_image_static_vulnerability_scan</a></code></li>
 <li><code><a title="tssc.step_implementers.create_container_image" href="create_container_image/index.html">tssc.step_implementers.create_container_image</a></code></li>
+<li><code><a title="tssc.step_implementers.deploy" href="deploy/index.html">tssc.step_implementers.deploy</a></code></li>
 <li><code><a title="tssc.step_implementers.generate_metadata" href="generate_metadata/index.html">tssc.step_implementers.generate_metadata</a></code></li>
 <li><code><a title="tssc.step_implementers.linting_static_code_analysis" href="linting_static_code_analysis/index.html">tssc.step_implementers.linting_static_code_analysis</a></code></li>
 <li><code><a title="tssc.step_implementers.package" href="package/index.html">tssc.step_implementers.package</a></code></li>

@@ -366,7 +366,7 @@ class Maven(StepImplementer):
                     )
 
             except sh.ErrorReturnCode as error:
-                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error))
+                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error)) from error
 
             results[&#39;artifacts&#39;].append({
                 &#39;url&#39;: url + &#39;/&#39; +
@@ -578,7 +578,7 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
                     )
 
             except sh.ErrorReturnCode as error:
-                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error))
+                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error)) from error
 
             results[&#39;artifacts&#39;].append({
                 &#39;url&#39;: url + &#39;/&#39; +

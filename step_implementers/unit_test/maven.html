@@ -331,7 +331,7 @@ class Maven(StepImplementer):
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error))
+            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error
 
         test_results_output_path = test_results_dir
 
@@ -510,7 +510,7 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error))
+            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error
 
         test_results_output_path = test_results_dir
 

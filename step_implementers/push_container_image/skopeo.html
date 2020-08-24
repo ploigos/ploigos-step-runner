@@ -38,10 +38,22 @@ from runtime configuration.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>destination</code></td>
+<td><code>destination-url</code></td>
 <td>True</td>
 <td></td>
-<td>Container image repository destination to push image to</td>
+<td>Container image repository destination to push image</td>
+</tr>
+<tr>
+<td>to. o not include the <code>docker://</code> prefix as it will</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>automatically be applied</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td><code>src-tls-verify</code></td>
@@ -111,7 +123,9 @@ from runtime configuration.
 
 | Configuration Key | Required? | Default  | Description
 |-------------------|-----------|----------|-----------
-| `destination`     | True      |          | Container image repository destination to push image to
+| `destination-url` | True      |          | Container image repository destination to push image
+                                             to. o not include the `docker://` prefix as it will
+                                             automatically be applied
 | `src-tls-verify`  | True      | `&#39;true&#39;` | Whether to very TLS for source of image
 | `dest-tls-verify` | True      | `&#39;true&#39;` | Whether to verify TLS for destination of image
 
@@ -245,14 +259,16 @@ class Skopeo(StepImplementer):
                 &#39;--src-tls-verify=&#39; + str(runtime_step_config[&#39;src-tls-verify&#39;]),
                 &#39;--dest-tls-verify=&#39; + str(runtime_step_config[&#39;dest-tls-verify&#39;]),
                 &#39;docker-archive:&#39; + image_tar_file,
-                destination_with_version,
+                &#39;docker://&#39; + destination_with_version,
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))
+            raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error
 
         results = {
-            &#39;image-tag&#39; : destination_with_version
+            &#39;image-tag&#39; : destination_with_version,
+            &#39;image-version&#39; : (version).lower(),
+            &#39;image-url&#39; : runtime_step_config[&#39;destination-url&#39;]
         }
 
         return results
@@ -370,14 +386,16 @@ TSSCFactory.register_step_implementer(Skopeo, True)</code></pre>
                 &#39;--src-tls-verify=&#39; + str(runtime_step_config[&#39;src-tls-verify&#39;]),
                 &#39;--dest-tls-verify=&#39; + str(runtime_step_config[&#39;dest-tls-verify&#39;]),
                 &#39;docker-archive:&#39; + image_tar_file,
-                destination_with_version,
+                &#39;docker://&#39; + destination_with_version,
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error))
+            raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error
 
         results = {
-            &#39;image-tag&#39; : destination_with_version
+            &#39;image-tag&#39; : destination_with_version,
+            &#39;image-version&#39; : (version).lower(),
+            &#39;image-url&#39; : runtime_step_config[&#39;destination-url&#39;]
         }
 
         return results</code></pre>

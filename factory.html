@@ -35,6 +35,7 @@ from .exceptions import TSSCException
 _TSSC_CONFIG_KEY = &#39;tssc-config&#39;
 _TSSC_CONFIG_GLOBAL_DEFAULTS_KEY = &#39;global-defaults&#39;
 _TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY = &#39;global-environment-defaults&#39;
+_TSSC_ENVIRONMENT_NAME_KEY = &#39;environment-name&#39;
 _IS_DEFAULT_KEY = &#39;is_default&#39;
 _CLAZZ_KEY = &#39;clazz&#39;
 _IMPLEMENTER_KEY = &#39;implementer&#39;
@@ -156,6 +157,8 @@ class TSSCFactory:
 
             global_environment_config_defaults = \
                 self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
+
+            global_environment_config_defaults[_TSSC_ENVIRONMENT_NAME_KEY] = environment
 
         # get step configuration if there is any
         step_config = {}
@@ -387,6 +390,8 @@ Default: tssc-working</dd>
             global_environment_config_defaults = \
                 self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
 
+            global_environment_config_defaults[_TSSC_ENVIRONMENT_NAME_KEY] = environment
+
         # get step configuration if there is any
         step_config = {}
         if step_name in self.config:
@@ -592,6 +597,8 @@ If no StepImplementer registered for given step with given implementer name.</dd
 
         global_environment_config_defaults = \
             self.config[_TSSC_CONFIG_GLOBAL_ENVIRONMENT_DEFAULTS_KEY][environment]
+
+        global_environment_config_defaults[_TSSC_ENVIRONMENT_NAME_KEY] = environment
 
     # get step configuration if there is any
     step_config = {}

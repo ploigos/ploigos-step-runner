@@ -394,8 +394,8 @@ class Git(StepImplementer):
                     _decode_errors=&#39;ignore&#39;
                     ).rstrip()
 
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
-                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
+            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
+                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
         return return_val
 
     @staticmethod
@@ -412,8 +412,8 @@ class Git(StepImplementer):
                 &#39;-f&#39;,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value) from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -429,8 +429,8 @@ class Git(StepImplementer):
                     &#39;--tag&#39;,
                     _out=sys.stdout
                 )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git push&#39;)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git push&#39;) from error
 
 
 # register step implementer
@@ -615,8 +615,8 @@ for http and https git repos, and that is a desired use case.</p></div>
                     _decode_errors=&#39;ignore&#39;
                     ).rstrip()
 
-            except sh.ErrorReturnCode:  # pylint: disable=undefined-variable # pragma: no cover
-                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;)
+            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
+                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
         return return_val
 
     @staticmethod
@@ -633,8 +633,8 @@ for http and https git repos, and that is a desired use case.</p></div>
                 &#39;-f&#39;,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value) from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -650,8 +650,8 @@ for http and https git repos, and that is a desired use case.</p></div>
                     &#39;--tag&#39;,
                     _out=sys.stdout
                 )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git push&#39;)</code></pre>
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(&#39;Error invoking git push&#39;) from error</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

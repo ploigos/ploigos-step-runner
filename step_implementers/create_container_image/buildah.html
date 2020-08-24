@@ -299,9 +299,9 @@ class Buildah(StepImplementer):
                 context,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
-                               &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
+                               &#39;specification file (&#39; + image_spec_file + &#39;)&#39;) from error
 
         image_tar_file = &#34;image-{application_name}-{service_name}-{version}.tar&#34;.format(
             application_name=application_name,
@@ -320,8 +320,9 @@ class Buildah(StepImplementer):
                 &#34;docker-archive:&#34; + image_tar_file,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(
+                &#39;Issue invoking buildah push to tar file &#39; + image_tar_file) from error
 
         results = {
             &#39;image-tag&#39; : tag,
@@ -469,9 +470,9 @@ If destination is not specified (not defaulted)</dd>
                 context,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
-                               &#39;specification file (&#39; + image_spec_file + &#39;)&#39;)
+                               &#39;specification file (&#39; + image_spec_file + &#39;)&#39;) from error
 
         image_tar_file = &#34;image-{application_name}-{service_name}-{version}.tar&#34;.format(
             application_name=application_name,
@@ -490,8 +491,9 @@ If destination is not specified (not defaulted)</dd>
                 &#34;docker-archive:&#34; + image_tar_file,
                 _out=sys.stdout
             )
-        except sh.ErrorReturnCode:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Issue invoking buildah push to tar file &#39; + image_tar_file)
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            raise RuntimeError(
+                &#39;Issue invoking buildah push to tar file &#39; + image_tar_file) from error
 
         results = {
             &#39;image-tag&#39; : tag,
