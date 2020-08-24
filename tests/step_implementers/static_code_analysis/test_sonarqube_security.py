@@ -315,36 +315,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                                                      config, expected_step_results)
 
     @patch('sh.sonar_scanner', create=True)
-    def test_sonarqube_missing_properties(self, sonar_mock):
-        with TempDirectory() as temp_dir:
-            tssc_results = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
-            '''
-            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            config = {
-                'tssc-config': {
-                    'global-defaults': {
-                        'application-name': 'tssc',
-                        'service-name': 'tssc-reference-testcase'
-                    },
-                    'static-code-analysis': {
-                        'implementer': 'SonarQube',
-                        'config': {
-                            'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
-                        }
-                    }
-                }
-            }
-            expected_step_results = {
-            }
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    r'is missing.*properties*'):
-                run_step_test_with_result_validation(temp_dir, 'static-code-analysis',
-                                                     config, expected_step_results)
-
-    @patch('sh.sonar_scanner', create=True)
     def test_sonarqube_missing_properties_file(self, sonar_mock):
         with TempDirectory() as temp_dir:
             tssc_results = '''tssc-results:

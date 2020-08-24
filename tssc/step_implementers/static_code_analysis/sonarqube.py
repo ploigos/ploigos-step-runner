@@ -8,12 +8,15 @@ Could come from either configuration file or
 from runtime configuration.
 (Reference:  https://docs.sonarqube.org/latest/analysis/analysis-parameters)
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `properties'      | True      | None    | Properties file (./sonar-project.properties)
-| `url'             | True      | None    | SonarQube host url (sonar.host.url).
-| `user`            | False     | None    | SonarQube user id (sonar.login).
-| `password`        | False     | None    | SonarQube password (sonar.password).
+| Configuration Key | Required? | Default                    | Description
+|-------------------|-----------|----------------------------|-----------
+| `properties'      | True      | './sonar-project.proerties'| Properties file
+| `url'             | True      | None                       | SonarQube host url
+                                                               (sonar.host.url)
+| `user`            | False     | None                       | SonarQube user id
+                                                               (sonar.login)
+| `password`        | False     | None                       | SonarQube password
+                                                               (sonar.password)
 
 Expected Previous Step Results
 ------------------------------
@@ -75,7 +78,9 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-DEFAULT_CONFIG = {}
+DEFAULT_CONFIG = {
+    'properties': './sonar-project.properties'
+}
 
 AUTHENTICATION_CONFIG = {
     'user': None,
@@ -83,7 +88,6 @@ AUTHENTICATION_CONFIG = {
 }
 
 REQUIRED_CONFIG_KEYS = [
-    'properties',
     'url',
     'application-name',
     'service-name'
