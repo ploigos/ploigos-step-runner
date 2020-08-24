@@ -44,8 +44,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
     GENERATE_METADATA = &#39;generate-metadata&#39;
     TAG_SOURCE = &#39;tag-source&#39;
-    SECURITY_STATIC_CODE_ANALYSIS = &#39;security-static-code-analysis&#39;
-    LINTING_STATIC_CODE_ANALYSIS = &#39;linting-static-code-analysis&#39;
+    STATIC_CODE_ANALYSIS = &#39;static-code-analysis&#39;
     PACKAGE = &#39;package&#39;
     UNIT_TEST = &#39;unit-test&#39;
     PUSH_ARTIFACTS = &#39;push-artifacts&#39;
@@ -576,8 +575,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     &#34;&#34;&#34;
     GENERATE_METADATA = &#39;generate-metadata&#39;
     TAG_SOURCE = &#39;tag-source&#39;
-    SECURITY_STATIC_CODE_ANALYSIS = &#39;security-static-code-analysis&#39;
-    LINTING_STATIC_CODE_ANALYSIS = &#39;linting-static-code-analysis&#39;
+    STATIC_CODE_ANALYSIS = &#39;static-code-analysis&#39;
     PACKAGE = &#39;package&#39;
     UNIT_TEST = &#39;unit-test&#39;
     PUSH_ARTIFACTS = &#39;push-artifacts&#39;
@@ -627,10 +625,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.step_implementer.DefaultSteps.LINTING_STATIC_CODE_ANALYSIS"><code class="name">var <span class="ident">LINTING_STATIC_CODE_ANALYSIS</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="tssc.step_implementer.DefaultSteps.PACKAGE"><code class="name">var <span class="ident">PACKAGE</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -651,7 +645,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.step_implementer.DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS"><code class="name">var <span class="ident">SECURITY_STATIC_CODE_ANALYSIS</span></code></dt>
+<dt id="tssc.step_implementer.DefaultSteps.STATIC_CODE_ANALYSIS"><code class="name">var <span class="ident">STATIC_CODE_ANALYSIS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1200,13 +1194,12 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <li><a title="tssc.step_implementers.generate_metadata.maven.Maven" href="step_implementers/generate_metadata/maven.html#tssc.step_implementers.generate_metadata.maven.Maven">Maven</a></li>
 <li><a title="tssc.step_implementers.generate_metadata.npm.Npm" href="step_implementers/generate_metadata/npm.html#tssc.step_implementers.generate_metadata.npm.Npm">Npm</a></li>
 <li><a title="tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion" href="step_implementers/generate_metadata/semantic_version.html#tssc.step_implementers.generate_metadata.semantic_version.SemanticVersion">SemanticVersion</a></li>
-<li><a title="tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube" href="step_implementers/linting_static_code_analysis/sonarqube.html#tssc.step_implementers.linting_static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
 <li><a title="tssc.step_implementers.package.maven.Maven" href="step_implementers/package/maven.html#tssc.step_implementers.package.maven.Maven">Maven</a></li>
 <li><a title="tssc.step_implementers.package.npm.NPM" href="step_implementers/package/npm.html#tssc.step_implementers.package.npm.NPM">NPM</a></li>
 <li><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="step_implementers/push_artifacts/maven.html#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></li>
 <li><a title="tssc.step_implementers.push_artifacts.npm.NPM" href="step_implementers/push_artifacts/npm.html#tssc.step_implementers.push_artifacts.npm.NPM">NPM</a></li>
 <li><a title="tssc.step_implementers.push_container_image.skopeo.Skopeo" href="step_implementers/push_container_image/skopeo.html#tssc.step_implementers.push_container_image.skopeo.Skopeo">Skopeo</a></li>
-<li><a title="tssc.step_implementers.security_static_code_analysis.sonarqube.SonarQube" href="step_implementers/security_static_code_analysis/sonarqube.html#tssc.step_implementers.security_static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
+<li><a title="tssc.step_implementers.static_code_analysis.sonarqube.SonarQube" href="step_implementers/static_code_analysis/sonarqube.html#tssc.step_implementers.static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
 <li><a title="tssc.step_implementers.tag_source.git.Git" href="step_implementers/tag_source/git.html#tssc.step_implementers.tag_source.git.Git">Git</a></li>
 <li><a title="tssc.step_implementers.uat.cucumber.Cucumber" href="step_implementers/uat/cucumber.html#tssc.step_implementers.uat.cucumber.Cucumber">Cucumber</a></li>
 <li><a title="tssc.step_implementers.unit_test.maven.Maven" href="step_implementers/unit_test/maven.html#tssc.step_implementers.unit_test.maven.Maven">Maven</a></li>
@@ -1787,13 +1780,12 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.DefaultSteps.CREATE_DEPLOYMENT_ENVIRONMENT" href="#tssc.step_implementer.DefaultSteps.CREATE_DEPLOYMENT_ENVIRONMENT">CREATE_DEPLOYMENT_ENVIRONMENT</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.DEPLOY" href="#tssc.step_implementer.DefaultSteps.DEPLOY">DEPLOY</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.GENERATE_METADATA" href="#tssc.step_implementer.DefaultSteps.GENERATE_METADATA">GENERATE_METADATA</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.LINTING_STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.LINTING_STATIC_CODE_ANALYSIS">LINTING_STATIC_CODE_ANALYSIS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PACKAGE" href="#tssc.step_implementer.DefaultSteps.PACKAGE">PACKAGE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUBLISH_WROKFLOW_RESULTS" href="#tssc.step_implementer.DefaultSteps.PUBLISH_WROKFLOW_RESULTS">PUBLISH_WROKFLOW_RESULTS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS" href="#tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS">PUSH_ARTIFACTS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE">PUSH_CONTAINER_IMAGE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN" href="#tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN">RUNTIME_VULNERABILITY_SCAN</a></code></li>
-<li><code><a title="tssc.step_implementer.DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.SECURITY_STATIC_CODE_ANALYSIS">SECURITY_STATIC_CODE_ANALYSIS</a></code></li>
+<li><code><a title="tssc.step_implementer.DefaultSteps.STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.STATIC_CODE_ANALYSIS">STATIC_CODE_ANALYSIS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.TAG_SOURCE" href="#tssc.step_implementer.DefaultSteps.TAG_SOURCE">TAG_SOURCE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.UAT" href="#tssc.step_implementer.DefaultSteps.UAT">UAT</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.UNIT_TEST" href="#tssc.step_implementer.DefaultSteps.UNIT_TEST">UNIT_TEST</a></code></li>
