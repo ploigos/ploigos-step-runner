@@ -329,11 +329,13 @@ class ArgoCD(StepImplementer):
 
         template = env.get_template(runtime_step_config['values-yaml-template'])
 
-        with open("values.yaml", "w") as out_file:
-            out_file.writelines(template.render(jinja_runtime_step_config))
+        rendered_values_file = self.write_temp_file(
+            'values.yml',
+            bytes(template.render(jinja_runtime_step_config), 'utf-8')
+        )
 
         try:
-            shutil.copyfile('values.yaml', repo_directory + '/values.yaml')
+            shutil.copyfile(rendered_values_file, repo_directory + '/values.yaml')
         except (shutil.SameFileError, OSError, IOError) as error:
             raise RuntimeError("Error copying values.yml file: {all}".format(all=error)) from error
 
