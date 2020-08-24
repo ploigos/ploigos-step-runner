@@ -7,9 +7,10 @@ from testfixtures import TempDirectory
 
 from tssc.step_implementers.create_container_image import Buildah
 
-from test_utils import *
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import *
 
-class TestStepImplementerCreateContainerImageBuildah(unittest.TestCase):
+class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
     def test_create_container_image_default_missing_imagespecfile(self):
         with TempDirectory() as temp_dir:
             application_name = 'foo'

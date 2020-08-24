@@ -5,10 +5,11 @@ from testfixtures import TempDirectory
 
 from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Maven
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from test_utils import *
 
-class TestStepImplementerGenerateMetadataMaven(unittest.TestCase):
+class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
     def test_pom_file_valid_runtime_config_pom_file(self):
         with TempDirectory() as temp_dir:
             temp_dir.write('pom.xml',b'''<project>

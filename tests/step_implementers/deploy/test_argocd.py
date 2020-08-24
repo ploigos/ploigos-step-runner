@@ -7,8 +7,10 @@ import unittest
 import types
 from unittest.mock import patch, MagicMock
 
-from test_utils import *
 from tssc.step_implementers.tag_source import Git
+
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import *
 
 def Any(cls):
     class Any(cls):
@@ -16,7 +18,7 @@ def Any(cls):
             return True
     return Any()
 
-class TestStepImplementerDeployArgoCD(unittest.TestCase):
+class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)

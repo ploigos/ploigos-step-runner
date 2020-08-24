@@ -7,10 +7,11 @@ import unittest
 from unittest.mock import patch
 from testfixtures import TempDirectory
 
-from tests.helpers.test_utils import run_step_test_with_result_validation
 from tssc import TSSCFactory
 from tssc.step_implementers.package import Maven
 
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import run_step_test_with_result_validation
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
     """simulates what mvn does by touching files.
@@ -47,7 +48,7 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
     return mvn_side_effect
         
 
-class TestStepImplementerPackageMaven(unittest.TestCase):
+class TestStepImplementerPackageMaven(BaseTSSCTestCase):
     @patch('sh.mvn', create=True)
     def test_mvn_quickstart_single_jar_no_pom(self, mvn_mock):
         with TempDirectory() as temp_dir:
