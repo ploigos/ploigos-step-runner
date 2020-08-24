@@ -6,10 +6,11 @@ from unittest.mock import patch
 from testfixtures import TempDirectory
 
 from tssc.step_implementers.push_container_image import Skopeo
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from test_utils import *
 
-class TestStepImplementerPushContainerImageSkopeo(unittest.TestCase):
+class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
 
     def test_create_container_image_default_missing_args(self):
         with TempDirectory() as temp_dir:

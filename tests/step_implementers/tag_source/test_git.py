@@ -5,8 +5,9 @@ from unittest.mock import patch
 
 from test_utils import *
 from tssc.step_implementers.tag_source import Git
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-class TestStepImplementerTagSourceGit(unittest.TestCase):
+class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
     @patch('sh.git', create=True)
     def test_tag_ssh_latest_version(self, git_mock):
         with TempDirectory() as temp_dir:

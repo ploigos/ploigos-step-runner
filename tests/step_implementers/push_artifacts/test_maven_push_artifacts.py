@@ -7,10 +7,11 @@ from unittest.mock import patch
 from testfixtures import TempDirectory
 
 from tssc.step_implementers.push_artifacts import Maven
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from test_utils import *
 
-class TestStepImplementerPushArtifact(unittest.TestCase):
+class TestStepImplementerPushArtifact(BaseTSSCTestCase):
 
     # ------------ SIMPLE tests that test the config required items
     @patch('sh.mvn', create=True)

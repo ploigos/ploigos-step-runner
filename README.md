@@ -40,13 +40,13 @@ python -m pip install -e '.[tests]'
 
 ### Run Tests
 ```bash
-python -m pytest --cov=tssc tests/
+python -m pytest --cov=tssc --cov-report term-missing tests
 ```
 
 Or to run for just a particular implementer, and include the sections of code that you didn't cover
 
 ```bash
-python3 -m pytest --cov=tssc tests/step_implementers/package/test_maven_package.py --cov-report term-missing
+python3 -m pytest --cov=tssc --cov-report term-missing tests/step_implementers/package/test_maven_package.py
 ```
 
 ### Run linter

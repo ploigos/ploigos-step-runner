@@ -6,9 +6,12 @@ from testfixtures import TempDirectory
 from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Npm
 
+from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import run_step_test_with_result_validation
+
 from test_utils import *
 
-class TestStepImplementerGenerateMetadataNpm(unittest.TestCase):
+class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
     def test_package_file(self):
         with TempDirectory() as temp_dir:
             temp_dir.write('package.json',b'''{
