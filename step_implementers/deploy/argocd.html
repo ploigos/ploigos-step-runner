@@ -623,11 +623,13 @@ class ArgoCD(StepImplementer):
 
         template = env.get_template(runtime_step_config[&#39;values-yaml-template&#39;])
 
-        with open(&#34;values.yaml&#34;, &#34;w&#34;) as out_file:
-            out_file.writelines(template.render(jinja_runtime_step_config))
+        rendered_values_file = self.write_temp_file(
+            &#39;values.yml&#39;,
+            bytes(template.render(jinja_runtime_step_config), &#39;utf-8&#39;)
+        )
 
         try:
-            shutil.copyfile(&#39;values.yaml&#39;, repo_directory + &#39;/values.yaml&#39;)
+            shutil.copyfile(rendered_values_file, repo_directory + &#39;/values.yaml&#39;)
         except (shutil.SameFileError, OSError, IOError) as error:
             raise RuntimeError(&#34;Error copying values.yml file: {all}&#34;.format(all=error)) from error
 
@@ -993,11 +995,13 @@ TSSCFactory.register_step_implementer(ArgoCD, True)</code></pre>
 
         template = env.get_template(runtime_step_config[&#39;values-yaml-template&#39;])
 
-        with open(&#34;values.yaml&#34;, &#34;w&#34;) as out_file:
-            out_file.writelines(template.render(jinja_runtime_step_config))
+        rendered_values_file = self.write_temp_file(
+            &#39;values.yml&#39;,
+            bytes(template.render(jinja_runtime_step_config), &#39;utf-8&#39;)
+        )
 
         try:
-            shutil.copyfile(&#39;values.yaml&#39;, repo_directory + &#39;/values.yaml&#39;)
+            shutil.copyfile(rendered_values_file, repo_directory + &#39;/values.yaml&#39;)
         except (shutil.SameFileError, OSError, IOError) as error:
             raise RuntimeError(&#34;Error copying values.yml file: {all}&#34;.format(all=error)) from error
 
