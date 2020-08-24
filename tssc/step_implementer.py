@@ -15,8 +15,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     """
     GENERATE_METADATA = 'generate-metadata'
     TAG_SOURCE = 'tag-source'
-    SECURITY_STATIC_CODE_ANALYSIS = 'security-static-code-analysis'
-    LINTING_STATIC_CODE_ANALYSIS = 'linting-static-code-analysis'
+    STATIC_CODE_ANALYSIS = 'static-code-analysis'
     PACKAGE = 'package'
     UNIT_TEST = 'unit-test'
     PUSH_ARTIFACTS = 'push-artifacts'

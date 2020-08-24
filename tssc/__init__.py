@@ -29,8 +29,7 @@ Step Configuration
 
 * generate-metadata
 * tag-source
-* security-static-code-analysis
-* linting-static-code-analysis
+* static-code-analysis
 * package
 * unit-test
 * push-artifacts
@@ -231,15 +230,23 @@ From least precedence to highest precedence.
           #password: None
         }
 
-      security-static-code-analysis:
-      # WARNING: not yet implemented
+      static-code-analysis:
       - implementer: SonarQube
-        config: {}
+        config: {
+          # Required.
+          # URL to the sonarqube server
+          url: 'http//sonarqube-sonarqube.company.com/'
 
-      linting-static-code-analysis:
-        # WARNING: not yet implemented
-      - implementer: SonarQube
-        config: {}
+          # Required.
+          # Properties file in root folder (eg: sonar-project.properties)
+          properties: 'sonar-project.properties'
+
+          # Optional.
+          #user: None
+
+          # Optional.
+          #password: None
+        }
 
       unit-test:
       - implementer: Maven
@@ -269,7 +276,7 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
-          url: ''
+          #url: ''
 
           # Optional.
           #user: None
@@ -477,15 +484,23 @@ From least precedence to highest precedence.
           #password: None
         }
 
-      security-static-code-analysis:
-      # WARNING: not yet implemented
+      static-code-analysis:
       - implementer: SonarQube
-        config: {}
+        config: {
+          # Required.
+          # URL to the sonarqube server
+          url: 'http//sonarqube-sonarqube.company.com/'
 
-      linting-static-code-analysis:
-        # WARNING: not yet implemented
-      - implementer: SonarQube
-        config: {}
+          # Required.
+          # Properties file in root folder (eg: sonar-project.properties)
+          properties: 'sonar-project.properties'
+
+          # Optional.
+          #user: None
+
+          # Optional.
+          #password: None
+        }
 
       package:
       # WARNING: not yet implemented
