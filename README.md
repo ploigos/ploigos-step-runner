@@ -53,3 +53,11 @@ python3 -m pytest --cov=tssc --cov-report term-missing tests/step_implementers/p
 ```bash
 python -m pylint --rcfile=setup.cfg tssc
 ```
+
+### Generate the Documenation Locally
+If you are updating the python documenation and want to generate locally this is how you do it.
+
+```bash
+pip install pdoc3
+pdoc3 --html --output-dir pdoc3-html tssc/
+```
