@@ -247,11 +247,11 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the sonarqube server
-          url: 'http//sonarqube-sonarqube.company.com/'
+          url: ''
 
-          # Required.
+          # Optional.
           # Properties file in root folder (eg: sonar-project.properties)
-          properties: 'sonar-project.properties'
+          #properties: ''
 
           # Optional.
           #user: None
@@ -288,7 +288,7 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
-          #url: ''
+          url: ''
 
           # Optional.
           #user: None
@@ -513,11 +513,11 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the sonarqube server
-          url: 'http//sonarqube-sonarqube.company.com/'
+          url: ''
 
-          # Required.
+          # Optional.
           # Properties file in root folder (eg: sonar-project.properties)
-          properties: 'sonar-project.properties'
+          #properties: ''
 
           # Optional.
           #user: None

@@ -3,46 +3,86 @@
 Step Configuration
 ------------------
 
-Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Step configuration key(s) for this step:
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `url`             | True      |         | URL to the artifact repository to push the artifact to.
-| `user`            | False     |         | User to authenticate with the artifact repository.
-| `password`        | False     |         | Password to authenticate with the artifact repository.
+| Key                 | Required | Default | Description
+|---------------------|----------|---------|------------
+| `url`               | True     | N/A     | URL to the artifact repository
+| `user`              | False    | N/A     | Repository user for authenication
+| `password`          | False    | N/A     | Resository password for authentication
 
+`user` and `password` can be specifed as runtime arguments.
 
 Expected Previous Step Results
 ------------------------------
 
-Results expected from previous steps that this step requires.
+Results expected from previous steps:
 
-| Step Name           | Result Key  | Description
-|---------------------|-------------|------------
-| `generate-metadata` | `version`   | TODO
-| `package`           | `artifacts` |
+| Step Name           |  Key               | Description
+|---------------------|--------------------|------------
+| `generate-metadata` | `version`          | The version to be used to deploy to artifactory.
+| `package`           | `artifacts`        | Artifacts is an array of `artifact`.
+|                     |                    | Each element of an `artifact` will be used
+|                     |                    | as a parameter to deploy to artifactory:
+|                     |                    | * artifact.group-id
+|                     |                    | * artifact.artifact-id
+|                     |                    | * artifact.path
+|                     |                    | * artifact.package-type
 
 Results
 -------
 
-Results output by this step.
+Results output by this step:
 
-| Result Key  | Description
-|-------------|------------
-| `artifacts` | An array of dictionaries with information on the pushed artifacts.
+| Key             | Description
+|-----------------|------------
+| `artifacts`     | An array of dictionaries describing the push results
 
-**artifacts**
-Keys in the dictionary elements in the `artifacts` array in the step results.
+Elements in the `artifacts` dictionary:
 
-| `artifacts` Key | Description
+| Elements        | Description
 |-----------------|------------
 | `url`           | URL to the artifact pushed to the artifact repository
 | `path`          | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`   | Maven artifact ID pushed to the artifact repository
 | `group-id`      | Maven group ID pushed to the artifact repository
 | `version`       | Version pushed to the artifact repository
+
+Examples
+--------
+
+Example: Step Configuration (minimal)
+
+    push-artifacts:
+    - implementer: Maven
+      config:
+        url: http://artifactory.company.com/repo
+
+Example: Generated Maven Deploy (uses both step configuration and previous results)
+
+    mvn
+      deploy:deploy-file'
+      -Durl=url
+      -Dversion=generate-metadata.version
+      -DgroupId=package.artifact.group-id
+      -DartifactId=package.artifact.artifact-id
+      -Dfile=package.artifact.path
+      -Dpackaging=package.artifact.package-type
+
+Example: Results
+
+    'tssc-results': {
+        'artifacts': [
+             {
+             'path':''
+             'artifact-id': ''
+             'group-id': ''
+             'package-type': ''
+             'version': ''
+             }
+        ]
+    }
+
 """
 import re
 import sys
