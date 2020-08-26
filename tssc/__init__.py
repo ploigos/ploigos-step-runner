@@ -150,7 +150,10 @@ From least precedence to highest precedence.
             kube-app-domain: ''
 
             #Optional
-            #kube-api-token
+            #kube-api-token: ''
+
+            #Optional
+            #insecure-skip-tls-verify: 'true'
 
             # Required
             argocd-username: ''
@@ -177,7 +180,10 @@ From least precedence to highest precedence.
             kube-app-domain: ''
 
             #Optional
-            #kube-api-token
+            #kube-api-token: ''
+
+            #Optional
+            #insecure-skip-tls-verify: 'true'
 
             # Required
             argocd-username: ''
@@ -412,7 +418,10 @@ From least precedence to highest precedence.
             kube-app-domain: ''
 
             #Optional
-            #kube-api-token
+            #kube-api-token: ''
+
+            #Optional
+            #insecure-skip-tls-verify: 'true'
 
             # Required
             argocd-username: ''
@@ -439,7 +448,10 @@ From least precedence to highest precedence.
             kube-app-domain: ''
 
             #Optional
-            #kube-api-token
+            #kube-api-token:
+
+            #Optional
+            #insecure-skip-tls-verify: 'true'
 
             # Required
             argocd-username: ''

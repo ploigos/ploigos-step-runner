@@ -42,6 +42,12 @@ from runtime configuration.
                                                                           (.e.g, a service account
                                                                           token) and have cluster
                                                                           admin access.
+| `insecure-skip-tls-verify`| True               | 'true'               | Whether or not to skip
+                                                                          tls verification when
+                                                                          authenticating to an
+                                                                          external k8s cluster.
+                                                                          Used when a new cluster
+                                                                          is registered with argocd
 | `argocd-helm-chart-path`  | True               | ./                   | Directory containing the
                                                                           helm chart definition
 | `git-email`               | True               |                      | Git email for commit
@@ -99,6 +105,7 @@ DEFAULT_CONFIG = {
     'values-yaml-template': 'values.yaml.j2',
     'argocd-sync-timeout-seconds': 60,
     'argocd-auto-sync': 'false',
+    'insecure-skip-tls-verify': 'true',
     'kube-api-uri': 'https://kubernetes.default.svc',
     'argocd-helm-chart-path': './',
     'git-friendly-name': 'TSSC'
@@ -225,7 +232,7 @@ current-context: {context}
 apiVersion: v1
 clusters:
 - cluster:
-    insecure-skip-tls-verify: true
+    insecure-skip-tls-verify: {skip_tls}
     server: {kube_api}
   name: default-cluster
 
@@ -243,7 +250,8 @@ users:
     token: {kube_token}
             """.format(context=context_name,
                        kube_api=kube_api,
-                       kube_token=runtime_step_config['kube-api-token'])
+                       kube_token=runtime_step_config['kube-api-token'],
+                       skip_tls=str(runtime_step_config['insecure-skip-tls-verify']).lower())
 
             with tempfile.NamedTemporaryFile(buffering=0) as temp_file:
                 temp_file.write(bytes(kubeconfig, 'utf-8'))
