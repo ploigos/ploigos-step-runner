@@ -344,7 +344,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--insecure',
                 _out=sys.stdout
             )
-    
     @patch('shutil.copyfile', create=True)
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -562,6 +561,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--dest-server=' + kube_api_uri,
                 '--dest-namespace=' + organization_name + '-' + application_name + '-' + service_name + '-testbranch-' + environment_name,
                 '--sync-policy=none',
+                '--values=values-{env}.yaml'.format(env=environment_name),
                 _out=sys.stdout
                 )
 
@@ -1705,3 +1705,214 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             return 'testbranch'
         else:
             return 'HASH'
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test_argo_create_cluster_nominal(self, argocd_mock, git_mock):
+
+        application_name = 'application-name'
+        service_name = 'service-name'
+        organization_name = 'organization-name'
+        environment_name = 'environment-name'
+        git_tag = 'v1.2.3'
+        argocd_username = 'username'
+        argocd_password = 'password'
+        image_tag = 'not_latest'
+        image_url = 'quay.io/tssc/myimage'
+        helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
+        argocd_api = 'http://argocd.example.com'
+        argocd_sync_timeout_seconds = '60'
+
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('tssc-results')
+
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                  generate-metadata:
+                    image-tag: {image_tag}
+                  tag-source:
+                    tag: {git_tag}
+                  push-container-image:
+                    image-url: {image_url}
+                '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
+                    'utf-8')
+                )
+            temp_dir.write(
+                'values.yaml.j2',
+                bytes(
+                   '''
+                   {{ num_replicas }}
+                   ''', 'utf-8'
+                )
+            )
+            config = {
+                'tssc-config': {
+                    'global-defaults' : {
+                        'service-name' : service_name,
+                        'application-name' : application_name,
+                        'organization' : organization_name,
+                        'environment-name' : environment_name,
+                        'git-email' : 'nappspo+tssc@redhat.com'
+                    },
+                    'deploy' : {
+                        'implementer': 'ArgoCD',
+                        'config': {
+                            'argocd-username' : argocd_username,
+                            'argocd-password' : argocd_password,
+                            'argocd-api' : argocd_api,
+                            'helm-config-repo' : helm_config_repo,
+                            'argocd-sync-timeout-seconds' : '60',
+                            'kube-app-domain' : 'apps.tssc.rht-set.com',
+                            'num-replicas' : '3',
+                            'ingress-enabled' : 'true',
+                            'readiness-probe-path' : '/ready',
+                            'liveness-probe-path' : '/live',
+                            'values-yaml-directory': temp_dir.path,
+                            'kube-api-uri': "customcluster.ocp.com",
+                            'kube-api-token': "token"
+                        }
+                    }
+                }
+            }
+
+            expected_step_results = {
+                'tssc-results': {
+                    'generate-metadata' : {
+                        'image-tag' : image_tag
+                    },
+                    'push-container-image' : {
+                        'image-url' : image_url
+                    },
+                    'tag-source' : {
+                        'tag' : git_tag
+                    },
+                    'deploy': {
+                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                    }
+                }
+            }
+
+            runtime_args = {
+                'git-username': 'unit_test_username',
+                'git-password': 'unit_test_password'
+            }
+
+            git_mock.side_effect=self.git_rev_parse_side_effect
+            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+
+            argocd_mock.login.assert_called_once_with(
+                argocd_api,
+                '--username=' + argocd_username,
+                '--password=' + argocd_password,
+                '--insecure',
+                _out=sys.stdout
+            )
+
+
+            git_mock.clone.assert_called_once()
+            git_mock.checkout.assert_called_once()
+            git_mock.push.bake.assert_called()
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test_argo_create_cluster_add_failure(self, argocd_mock, git_mock):
+
+        application_name = 'application-name'
+        service_name = 'service-name'
+        organization_name = 'organization-name'
+        environment_name = 'environment-name'
+        git_tag = 'v1.2.3'
+        argocd_username = 'username'
+        argocd_password = 'password'
+        image_tag = 'not_latest'
+        image_url = 'quay.io/tssc/myimage'
+        helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
+        argocd_api = 'http://argocd.example.com'
+        argocd_sync_timeout_seconds = '60'
+
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('tssc-results')
+
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                  generate-metadata:
+                    image-tag: {image_tag}
+                  tag-source:
+                    tag: {git_tag}
+                  push-container-image:
+                    image-url: {image_url}
+                '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
+                    'utf-8')
+                )
+            temp_dir.write(
+                'values.yaml.j2',
+                bytes(
+                   '''
+                   {{ num_replicas }}
+                   ''', 'utf-8'
+                )
+            )
+            config = {
+                'tssc-config': {
+                    'global-defaults' : {
+                        'service-name' : service_name,
+                        'application-name' : application_name,
+                        'organization' : organization_name,
+                        'environment-name' : environment_name,
+                        'git-email' : 'nappspo+tssc@redhat.com'
+                    },
+                    'deploy' : {
+                        'implementer': 'ArgoCD',
+                        'config': {
+                            'argocd-username' : argocd_username,
+                            'argocd-password' : argocd_password,
+                            'argocd-api' : argocd_api,
+                            'helm-config-repo' : helm_config_repo,
+                            'argocd-sync-timeout-seconds' : '60',
+                            'kube-app-domain' : 'apps.tssc.rht-set.com',
+                            'num-replicas' : '3',
+                            'ingress-enabled' : 'true',
+                            'readiness-probe-path' : '/ready',
+                            'liveness-probe-path' : '/live',
+                            'values-yaml-directory': temp_dir.path,
+                            'kube-api-uri': "customcluster.ocp.com",
+                            'kube-api-token': "token"
+                        }
+                    }
+                }
+            }
+
+            expected_step_results = {
+                'tssc-results': {
+                    'generate-metadata' : {
+                        'image-tag' : image_tag
+                    },
+                    'push-container-image' : {
+                        'image-url' : image_url
+                    },
+                    'tag-source' : {
+                        'tag' : git_tag
+                    },
+                    'deploy': {
+                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                    }
+                }
+            }
+
+            runtime_args = {
+                'git-username': 'unit_test_username',
+                'git-password': 'unit_test_password'
+            }
+
+            git_mock.side_effect=self.git_rev_parse_side_effect
+            argocd_mock.cluster.add.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
+
+            with self.assertRaises(RuntimeError):
+                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+

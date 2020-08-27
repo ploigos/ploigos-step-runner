@@ -32,6 +32,22 @@ from runtime configuration.
   `seconds`                                                               for argocd to sync updates
 | `kube-api-uri`            | True               | https://kubernetes.  | k8s API endpoint
                                                    default.svc
+| `kube-api-token`          | False              |                      | k8s API token. This is
+                                                                          used to add an external
+                                                                          k8s cluster into argocd.
+                                                                          It is required if the
+                                                                          cluster has not already
+                                                                          been added to ArgoCD. The
+                                                                          token should be persistent
+                                                                          (.e.g, a service account
+                                                                          token) and have cluster
+                                                                          admin access.
+| `insecure-skip-tls-verify`| True               | 'true'               | Whether or not to skip
+                                                                          tls verification when
+                                                                          authenticating to an
+                                                                          external k8s cluster.
+                                                                          Used when a new cluster
+                                                                          is registered with argocd
 | `argocd-helm-chart-path`  | True               | ./                   | Directory containing the
                                                                           helm chart definition
 | `git-email`               | True               |                      | Git email for commit
@@ -89,6 +105,7 @@ DEFAULT_CONFIG = {
     'values-yaml-template': 'values.yaml.j2',
     'argocd-sync-timeout-seconds': 60,
     'argocd-auto-sync': 'false',
+    'insecure-skip-tls-verify': 'true',
     'kube-api-uri': 'https://kubernetes.default.svc',
     'argocd-helm-chart-path': './',
     'git-friendly-name': 'TSSC'
@@ -202,7 +219,55 @@ class ArgoCD(StepImplementer):
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error logging in to ArgoCD: {all}".format(all=error)) from error
 
-        argocd_app_name = self._get_app_name(runtime_step_config)
+        kube_api = runtime_step_config['kube-api-uri']
+        # If the cluster is an external cluster and an api token was provided,
+        # add the cluster to ArgoCD
+        if  kube_api != DEFAULT_CONFIG['kube-api-uri'] and \
+            runtime_step_config.get('kube-api-token'):
+
+            context_name = '{server}-context'.format(server=kube_api)
+
+            kubeconfig = """
+current-context: {context}
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: {skip_tls}
+    server: {kube_api}
+  name: default-cluster
+
+contexts:
+- context:
+    cluster: default-cluster
+    user: default-user
+  name: {context}
+
+kind: Config
+preferences:
+users:
+- name: default-user
+  user:
+    token: {kube_token}
+            """.format(context=context_name,
+                       kube_api=kube_api,
+                       kube_token=runtime_step_config['kube-api-token'],
+                       skip_tls=str(runtime_step_config['insecure-skip-tls-verify']).lower())
+
+            with tempfile.NamedTemporaryFile(buffering=0) as temp_file:
+                temp_file.write(bytes(kubeconfig, 'utf-8'))
+                try:
+                    sh.argocd.cluster.add( # pylint: disable=no-member
+                        '--kubeconfig',
+                        temp_file.name,
+                        context_name,
+                        _out=sys.stdout
+                    )
+                except sh.ErrorReturnCode as error:
+                    raise RuntimeError("Error adding cluster to ArgoCD: {cluster}".format(
+                        cluster=kube_api)) from error
+
+        values_file_name = 'values-{env}.yaml'.format(env=runtime_step_config['environment-name']) \
+            if runtime_step_config.get('environment-name') else 'values.yaml'
 
         # NOTE: In this block the reference app config repo is cloned and checked out to a temp
         #       directory so that it can update the values.yml based on values.yaml.j2 template.
@@ -224,7 +289,7 @@ class ArgoCD(StepImplementer):
                 except sh.ErrorReturnCode:
                     sh.git.checkout('-b', repo_branch, _cwd=repo_directory, _out=sys.stdout)
 
-                self._update_values_yaml(repo_directory, runtime_step_config)
+                self._update_values_yaml(repo_directory, runtime_step_config, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
                                  '{repo}'.format(repo=git_url)
@@ -236,6 +301,9 @@ class ArgoCD(StepImplementer):
                               runtime_step_config['git-friendly-name'],
                               _out=sys.stdout)
 
+                sh.git.add(values_file_name, _cwd=repo_directory,
+                           _out=sys.stdout)
+
                 sh.git.commit('-am', git_commit_msg, _cwd=repo_directory,
                               _out=sys.stdout)
 
@@ -246,6 +314,8 @@ class ArgoCD(StepImplementer):
                 raise RuntimeError("Error invoking git: {all}".format(all=error)) from error
 
             self._git_tag_and_push(repo_directory, runtime_step_config)
+
+            argocd_app_name = self._get_app_name(runtime_step_config)
 
             try:
                 sh.argocd.app.get(argocd_app_name, _out=sys.stdout) # pylint: disable=no-member
@@ -265,6 +335,7 @@ class ArgoCD(StepImplementer):
                 '--dest-server=' + runtime_step_config['kube-api-uri'],
                 '--dest-namespace=' + argocd_app_name,
                 '--sync-policy=' + sync_policy,
+                '--values=' + values_file_name,
                 _out=sys.stdout
             )
 
@@ -308,7 +379,7 @@ class ArgoCD(StepImplementer):
                 print('No image version found in metadata, using \"latest\"')
         return image_version
 
-    def _update_values_yaml(self, repo_directory, runtime_step_config):
+    def _update_values_yaml(self, repo_directory, runtime_step_config, values_file_name):
         env = Environment(loader=FileSystemLoader(runtime_step_config['values-yaml-directory']),
                           trim_blocks=True, lstrip_blocks=True)
 
@@ -335,9 +406,10 @@ class ArgoCD(StepImplementer):
         )
 
         try:
-            shutil.copyfile(rendered_values_file, repo_directory + '/values.yaml')
+            shutil.copyfile(rendered_values_file, repo_directory + '/' + values_file_name)
         except (shutil.SameFileError, OSError, IOError) as error:
-            raise RuntimeError("Error copying values.yml file: {all}".format(all=error)) from error
+            raise RuntimeError("Error copying {values_file} file: {all}".format(
+                values_file=values_file_name, all=error)) from error
 
     def _get_tag(self, repo_directory):
 
