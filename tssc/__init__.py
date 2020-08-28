@@ -40,6 +40,7 @@ Step Configuration
 * container-image-static-vulnerability-scan
 * create-deployment-environment
 * deploy
+* validate-environment-configuration
 * uat
 * runtime-vulnerability-scan
 * canary-test
@@ -365,6 +366,13 @@ From least precedence to highest precedence.
           # specification
           readiness-probe-path: ''
 
+      validate-environment-configuration:
+      - implementer: Config_lint
+        config: {
+          # Optional.
+          # Path to the rules file
+          #rules: ''
+        }
 
       uat:
       # WARNING: not yet implemented

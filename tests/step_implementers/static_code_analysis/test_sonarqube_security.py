@@ -19,9 +19,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -75,9 +74,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -116,9 +114,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -156,9 +153,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -209,9 +205,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -247,9 +242,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -285,9 +279,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')

@@ -26,6 +26,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = 'container-image-static-vulnerability-scan'
     CREATE_DEPLOYMENT_ENVIRONMENT = 'create-deployment-environment'
     DEPLOY = 'deploy'
+    VALIDATE_ENVIRONMENT_CONFIGURATION  = 'validate-environment-configuration'
     UAT = 'uat'
     RUNTIME_VULNERABILITY_SCAN = 'runtime-vulnerability-scan'
     CANARY_TEST = 'canary-test'
