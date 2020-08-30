@@ -1,116 +1,57 @@
 import unittest
 
-from tssc import TSSCFactory, TSSCException, StepImplementer
+from tssc import TSSCFactory, TSSCException, StepImplementer, TSSCConfig
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-
-class FooStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'foo'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return []
-
-    def _run_step(self, runtime_step_config):
-        pass
+from tests.helpers.sample_step_implementers import *
 
 class TestFactory(BaseTSSCTestCase):
-    def test_TSSCFactory_init_valid_config(self):
+    def test_init_valid_config(self):
         config = {
             'tssc-config': {
             }
         }
         factory = TSSCFactory(config, 'results.yml')
-    
-    def test_TSSCFactory_init_invalid_config(self):
+
+    def test_init_invalid_config(self):
         config = {
             'blarg-config': {
             }
         }
 
         with self.assertRaisesRegex(
-                ValueError,
-                r"config must contain key: tssc-config"):
+                AssertionError,
+                r"Failed to add invalid TSSC config. Missing expected top level key \(tssc-config\): {'blarg-config': {}}"):
             TSSCFactory(config)
-    
-    def test_TSSCFactory_run_step_no_StepImplementers_for_step(self):
+
+    def test_run_step_no_StepImplementers_for_step(self):
         config = {
             'tssc-config': {
-            }
-        }
-        factory = TSSCFactory(config, 'results.yml')
-    
-        with self.assertRaisesRegex(
-                TSSCException,
-                r"No implementers registered for step: does-not-exist"):
-            factory.run_step('does-not-exist')
-    
-    def test_TSSCFactory_run_step_no_default_StepImplementer_for_step_without_config(self):
-        config = {
-            'tssc-config': {
-            }
-        }
-        factory = TSSCFactory(config, 'results.yml')
-        TSSCFactory.register_step_implementer(FooStepImplementer)
-    
-        with self.assertRaisesRegex(
-                TSSCException,
-                r"No implementer specified for step\(foo\) in config\(\{\}\) and no default step implementer registered in step implementers(.*)"):
-            factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_default_StepImplementer_for_step_without_config(self):
-        config = {
-            'tssc-config': {
-            }
-        }
-        factory = TSSCFactory(config, 'results.yml')
-        TSSCFactory.register_step_implementer(FooStepImplementer, True)
-    
-        factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_default_StepImplementer_for_step_without_config_with_global_defaults(self):
-        config = {
-            'tssc-config': {
-                'global-defaults': {
-                    'foo': 'bar'
+                'step-with-none-existent-implementer': {
+                    'implementer': 'does-not-exist'
                 }
             }
         }
         factory = TSSCFactory(config, 'results.yml')
+
+        with self.assertRaisesRegex(
+                AssertionError,
+                r"No implementers registered for step \(step-with-none-existent-implementer\)."):
+            factory.run_step('step-with-none-existent-implementer')
+
+    def test_run_step_with_no_config(self):
+        config = {
+            'tssc-config': {
+            }
+        }
+        factory = TSSCFactory(config, 'results.yml')
         TSSCFactory.register_step_implementer(FooStepImplementer, True)
-    
-        factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_config_specfied_StepImplementer_does_not_exist(self):
+
+        with self.assertRaisesRegex(
+                AssertionError,
+                r"Can not run step \(foo\) because no step configuration provided."):
+            factory.run_step('foo')
+
+    def test_run_step_config_specfied_StepImplementer_does_not_exist(self):
         config = {
             'tssc-config': {
                 'foo': [
@@ -122,13 +63,13 @@ class TestFactory(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config, 'results.yml')
         TSSCFactory.register_step_implementer(FooStepImplementer)
-    
+
         with self.assertRaisesRegex(
                 TSSCException,
                 r"No StepImplementer for step \(foo\) with TSSC config specified implementer name \(DoesNotExist\)"):
             factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_config_implementer_specfied_and_sub_step_config_specified_StepImplementer(self):
+
+    def test_run_step_config_implementer_specfied_and_sub_step_config_specified_StepImplementer(self):
         config = {
             'tssc-config': {
                 'foo': [
@@ -141,10 +82,10 @@ class TestFactory(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config, 'results.yml')
         TSSCFactory.register_step_implementer(FooStepImplementer)
-    
+
         factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_config_implementer_specfied_and_no_sub_step_config_specified_StepImplementer(self):
+
+    def test_run_step_config_implementer_specfied_and_no_sub_step_config_specified_StepImplementer(self):
         config = {
             'tssc-config': {
                 'foo': [
@@ -156,10 +97,10 @@ class TestFactory(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config, 'results.yml')
         TSSCFactory.register_step_implementer(FooStepImplementer)
-    
+
         factory.run_step('foo')
-    
-    def test_TSSCFactory_run_step_config_only_sub_step_and_is_dict_rather_then_array(self):
+
+    def test_run_step_config_only_sub_step_and_is_dict_rather_then_array(self):
         config = {
             'tssc-config': {
                 'foo': {
@@ -169,5 +110,32 @@ class TestFactory(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config, 'results.yml')
         TSSCFactory.register_step_implementer(FooStepImplementer)
-    
+
         factory.run_step('foo')
+
+    def test_init_with_tsscconfig(self):
+        config = {
+            TSSCConfig.TSSC_CONFIG_KEY: {
+                'step-foo': {
+                    'implementer': 'foo'
+                }
+            }
+        }
+        tssc_config = TSSCConfig(config)
+        factory = TSSCFactory(tssc_config, 'results.yml')
+
+        self.assertEqual(factory.config, tssc_config)
+
+    def test_init_with_dict(self):
+        config = {
+            TSSCConfig.TSSC_CONFIG_KEY: {
+                'step-foo': {
+                    'implementer': 'foo'
+                }
+            }
+        }
+        factory = TSSCFactory(config, 'results.yml')
+
+        sub_step_configs = factory.config.get_sub_step_configs('step-foo')
+
+        self.assertEqual(len(sub_step_configs), 1)

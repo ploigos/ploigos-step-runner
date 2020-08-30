@@ -8,29 +8,9 @@ from testfixtures import TempDirectory
 from tssc.step_implementers.push_container_image import Skopeo
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from test_utils import *
+from tests.helpers.test_utils import *
 
 class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
-
-    def test_create_container_image_default_missing_args(self):
-        with TempDirectory() as temp_dir:
-            application_name = 'foo'
-            service_name = 'bar'
-            organization = 'xyzzy'
-            config = {
-                'tssc-config': {
-                    'global-defaults': {
-                        'application-name': application_name,
-                        'service-name': service_name,
-                        'organization': organization
-                    }
-                }
-            }
-            expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\', \'application-name\': \'foo\', \'service-name\': \'bar\', \'organization\': \'xyzzy\'\}\) is missing the required configuration keys \(\[\'destination-url\'\]\)'):
-                run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
 
     def test_push_container_image_specify_skopeo_implementer_missing_args(self):
         with TempDirectory() as temp_dir:

@@ -16,43 +16,43 @@ from test_utils import *
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_mvn_exception=False):
     """simulates what mvn does by touching files.
-    
+
     Notes
     -----
-    
+
     Supports
-    
+
     - mvn clean
     - mvn install
     - mvn test
-    
+
     """
     target_dir_path = os.path.join(
         os.path.dirname(os.path.abspath(pom_file)),
         artifact_parent_dir)
 
-    
+
     def mvn_side_effect(*args, **kwargs):
         if 'clean' in args:
             if os.path.exists(target_dir_path):
                 os.rmdir(target_dir_path)
-        
+
         if 'install' in args:
             os.mkdir(target_dir_path)
-            
+
             for artifact_name in artifact_names:
                 artifact_path = os.path.join(
                     target_dir_path,
                     artifact_name
                 )
                 Path(artifact_path).touch()
-        
+
         if 'test' in args:
             if throw_mvn_exception is True:
                 raise RuntimeError('Error: No unit tests defined')
 
             os.makedirs(target_dir_path, exist_ok=True)
-            
+
             for artifact_name in artifact_names:
                 artifact_path = os.path.join(
                     target_dir_path,
@@ -75,7 +75,7 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 "Given pom file does not exist: pom.xml"):
             factory.run_step('unit-test')
 
@@ -90,10 +90,14 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 "Given pom file does not exist: does-not-exist-pom.xml"):
-            factory.run_step('unit-test', {'pom-file': 'does-not-exist-pom.xml'})
-    
+
+            factory.config.set_step_config_overrides(
+                'unit-test',
+                {'pom-file': 'does-not-exist-pom.xml'})
+            factory.run_step('unit-test')
+
     @patch('sh.mvn', create=True)
     def test_unit_test_config_file_pom_file_missing(self, mvn_mock):
         config = {
@@ -108,7 +112,7 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 'Given pom file does not exist: does-not-exist.pom'):
             factory.run_step('unit-test')
 
@@ -127,8 +131,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
     }''')
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>{group_id}</groupId>
@@ -175,9 +179,9 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            
+
             with self.assertRaisesRegex(
-                    RuntimeError, 
+                    RuntimeError,
                     'Error invoking mvn:.*'):
                 run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
 
@@ -190,8 +194,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>{group_id}</groupId>
@@ -226,7 +230,7 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 }
             }
             factory = TSSCFactory(config)
-            
+
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
@@ -267,8 +271,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             reports_dir = os.path.join(temp_dir.path, 'target/custom-reports-dir')
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>{group_id}</groupId>
@@ -343,8 +347,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <modelVersion>4.0.0</modelVersion>
         <groupId>{group_id}</groupId>
@@ -365,10 +369,10 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             }
             factory = TSSCFactory(config)
             with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 'Unit test dependency "maven-surefire-plugin" missing from POM.'):
                 factory.run_step('unit-test')
-        
+
     @patch('sh.mvn', create=True)
     def test_unit_test_empty_reports_dir(self, mvn_mock):
         reports_dir = 'target/surefire-reports'
@@ -378,8 +382,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>{group_id}</groupId>
@@ -413,7 +417,7 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 }
             }
             factory = TSSCFactory(config)
-            
+
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
@@ -448,8 +452,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <modelVersion>4.0.0</modelVersion>
         <groupId>{group_id}</groupId>
@@ -519,8 +523,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.write(
                 'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <modelVersion>4.0.0</modelVersion>
         <groupId>{group_id}</groupId>

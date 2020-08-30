@@ -8,171 +8,7 @@ from testfixtures import TempDirectory
 from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-
-class FooStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'foo'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return []
-
-    def _run_step(self, runtime_step_config):
-        pass
-
-class RequiredStepConfigStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'required-step-config-test'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return [
-            'required-config-key'
-        ]
-
-    def _run_step(self, runtime_step_config):
-        pass
-
-class RequiredRuntimeStepConfigStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'required-runtime-step-config-test'
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return []
-
-    def _run_step(self, runtime_step_config):
-        if 'required-rutnime-config-key' not in runtime_step_config:
-            raise TSSCException('Key (required-rutnime-config-key) must be in the step configuration')
-
-class WriteConfigAsResultsStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'write-config-as-results'
-    
-    @staticmethod
-    def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {}
-
-    @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
-        return [
-            'required-config-key'
-        ]
-
-    def _run_step(self, runtime_step_config):
-        return runtime_step_config
+from tests.helpers.sample_step_implementers import *
 
 class TestInit(BaseTSSCTestCase):
     def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
@@ -185,7 +21,7 @@ class TestInit(BaseTSSCTestCase):
                 for config_file in config_files:
                     config_file_name = config_file['name']
                     config_file_contents = config_file['contents']
-                    
+
                     temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
                     config_file_path = os.path.join(temp_dir.path, config_file_name)
                     argv.append(config_file_path)
@@ -193,22 +29,18 @@ class TestInit(BaseTSSCTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             argv.append('--results-dir')
             argv.append(results_dir_path)
-    
+
             if expected_exit_code is not None:
-                with self.assertRaises(SystemExit) as cm:
+                with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
                     main(argv)
-                
-                exception = cm.exception
-                self.assertEqual(exception.code, expected_exit_code,
-                    "Expected system exit with code: {code}".format(code=expected_exit_code))
             else:
                 main(argv)
-                
+
                 if expected_results:
                     with open(os.path.join(results_dir_path, "tssc-results.yml"), 'r') as step_results_file:
                         results = yaml.safe_load(step_results_file.read())
                         self.assertEqual(results, expected_results)
-    
+
     def test_init(self):
         """
         Notes
@@ -243,7 +75,7 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_config_file_no_root_tssc_config_key(self):
-        self._run_main_test(['--step', 'generate-metadata'], 103, [
+        self._run_main_test(['--step', 'generate-metadata'], 102, [
             {
                 'name': 'tssc-config.yaml',
                 'contents': '{}'
@@ -256,7 +88,9 @@ class TestInit(BaseTSSCTestCase):
             {
                 'name': 'tssc-config.yaml',
                 'contents': '''---
-                tssc-config: {}
+                tssc-config:
+                    foo:
+                        implementer: FooStepImplementer
                 '''
             }]
         )
@@ -266,8 +100,14 @@ class TestInit(BaseTSSCTestCase):
         self._run_main_test(['--step', 'foo'], None,[
             {
                 'name': 'tssc-config.json',
-                'contents': '''---
-                tssc-config: {}
+                'contents': '''
+                {
+                    "tssc-config": {
+                        "foo": {
+                        "implementer": "FooStepImplementer"
+                        }
+                    }
+                }
                 '''
             }]
         )
@@ -299,7 +139,7 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_required_step_config_pass_via_runtime_arg_missing(self):
-        TSSCFactory.register_step_implementer(RequiredRuntimeStepConfigStepImplementer, True)
+        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             [
                 '--step', 'required-runtime-step-config-test',
@@ -310,25 +150,31 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'tssc-config.yaml',
                     'contents': '''---
-                    tssc-config: {}
+                    tssc-config:
+                        'required-runtime-step-config-test':
+                             implementer: RequiredStepConfigStepImplementer
+                             config: {}
                     '''
                 }
             ]
         )
 
     def test_required_step_config_pass_via_runtime_arg_valid(self):
-        TSSCFactory.register_step_implementer(RequiredRuntimeStepConfigStepImplementer, True)
+        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             [
-                '--step', 'required-runtime-step-config-test',
-                '--step-config', 'required-rutnime-config-key="hello world"'
+                '--step', 'required-step-config-test',
+                '--step-config', 'required-config-key="hello world"'
             ],
             None,
             [
                 {
                     'name': 'tssc-config.yaml',
                     'contents': '''---
-                    tssc-config: {}
+                    tssc-config:
+                        'required-step-config-test':
+                             implementer: RequiredStepConfigStepImplementer
+                             config: {}
                     '''
                 }
             ]
@@ -437,9 +283,9 @@ class TestInit(BaseTSSCTestCase):
 
     def test_multiple_config_files_from_dir(self):
         TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer, True)
-        
+
         args = ['--step', 'write-config-as-results']
-        
+
         with TempDirectory() as temp_dir:
             config_files = [
                 {
@@ -507,7 +353,7 @@ class TestInit(BaseTSSCTestCase):
             for config_file in config_files:
                 config_file_name = config_file['name']
                 config_file_contents = config_file['contents']
-                
+
                 temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
 
             args.append('--config')

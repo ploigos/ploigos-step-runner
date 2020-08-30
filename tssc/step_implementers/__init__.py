@@ -2,8 +2,6 @@
 com.redhat.tssc.step_implementers
 """
 
-from .utils import *
-
 from .generate_metadata import *
 from .tag_source import *
 from .static_code_analysis import *
@@ -19,7 +17,6 @@ from .uat import *
 from .canary_test import *
 
 __all__ = [
-    'utils',
     'generate_metadata',
     'tag_source',
     'static_code_analysis',

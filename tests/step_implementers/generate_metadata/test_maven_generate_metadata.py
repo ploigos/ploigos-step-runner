@@ -7,7 +7,7 @@ from tssc import TSSCFactory
 from tssc.step_implementers.generate_metadata import Maven
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from test_utils import *
+from tests.helpers.test_utils import *
 
 class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
     def test_pom_file_valid_runtime_config_pom_file(self):
@@ -28,7 +28,7 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
             }
             expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'pom-file': str(pom_file_path)})
-    
+
     def test_pom_file_valid_old(self):
         with TempDirectory() as temp_dir:
             temp_dir.write('pom.xml',b'''<project>
@@ -49,9 +49,9 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
                 }
             }
             expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
-    
+
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
-    
+
     def test_pom_file_valid_with_namespace(self):
         with TempDirectory() as temp_dir:
             temp_dir.write('pom.xml',b'''<?xml version="1.0"?>
@@ -64,8 +64,7 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         <version>42.1</version>
     </project>''')
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-resutls')
-    
+
             config = {
                 'tssc-config': {
                     'generate-metadata': {
@@ -77,9 +76,9 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
                 }
             }
             expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': '42.1'}}}
-    
+
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results)
-    
+
     def test_pom_file_missing_version(self):
         with TempDirectory() as temp_dir:
             temp_dir.write('pom.xml',b'''<project>
@@ -88,7 +87,7 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         <artifactId>my-app</artifactId>
     </project>''')
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-    
+
             config = {
                 'tssc-config': {
                     'generate-metadata': {
@@ -102,10 +101,10 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
             factory = TSSCFactory(config)
 
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 r"Given pom file does not exist:"):
             factory.run_step('generate-metadata')
-    
+
     def test_default_pom_file_missing(self):
         config = {
             'tssc-config': {
@@ -116,11 +115,14 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 r"Given pom file does not exist: does-not-exist-pom.xml"):
 
-            factory.run_step('generate-metadata', {'pom-file': 'does-not-exist-pom.xml'})
-    
+            factory.config.set_step_config_overrides(
+                'generate-metadata',
+                {'pom-file': 'does-not-exist-pom.xml'})
+            factory.run_step('generate-metadata')
+
     def test_runtime_pom_file_missing(self):
         config = {
             'tssc-config': {
@@ -131,10 +133,14 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 r"Given pom file does not exist: does-not-exist-pom.xml"):
-            factory.run_step('generate-metadata', {'pom-file': 'does-not-exist-pom.xml'})
-    
+
+            factory.config.set_step_config_overrides(
+                'generate-metadata',
+                {'pom-file': 'does-not-exist-pom.xml'})
+            factory.run_step('generate-metadata')
+
     def test_config_file_pom_file_missing(self):
         config = {
             'tssc-config': {
@@ -148,10 +154,10 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 r"Given pom file does not exist: does-not-exist.pom"):
             factory.run_step('generate-metadata')
-    
+
     def test_config_file_pom_file_none_value(self):
         config = {
             'tssc-config': {
@@ -165,6 +171,6 @@ class TestStepImplementerGenerateMetadataMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                AssertionError, 
+                AssertionError,
                 r"The runtime step configuration \(\{'pom-file': None\}\) is missing the required configuration keys \(\['pom-file'\]\)"):
             factory.run_step('generate-metadata')
