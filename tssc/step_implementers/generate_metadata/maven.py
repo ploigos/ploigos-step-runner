@@ -35,7 +35,7 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-from tssc.step_implementers.utils.xml import get_xml_element
+from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml'
@@ -45,7 +45,7 @@ REQUIRED_CONFIG_KEYS = [
     'pom-file'
 ]
 
-class Maven(StepImplementer): # pylint: disable=too-few-public-methods 
+class Maven(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Maven.
     """

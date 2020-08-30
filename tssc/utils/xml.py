@@ -1,5 +1,5 @@
 """
-Shared utils for steps that deal with XML.
+Shared utils for dealing with XML.
 """
 
 import re
