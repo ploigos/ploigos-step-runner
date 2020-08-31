@@ -217,7 +217,8 @@ class Configlint(StepImplementer):
             sh.config_lint(  # pylint: disable=no-member
                 "-verbose",
                 "-debug",
-                "-rules " + rules_file,
+                "-rules",
+                rules_file,
                 yml_to_lint,
                 _out=sys.stdout
             )
