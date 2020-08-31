@@ -54,7 +54,7 @@ Examples
 Example: Step Configuration (minimal)
 
     validate-environment-configuration:
-    - implementer: Config_lint
+    - implementer: Configlint
       config:
         rules: 'config_lint.rules'
 

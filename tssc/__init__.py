@@ -367,7 +367,7 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       validate-environment-configuration:
-      - implementer: Config_lint
+      - implementer: Configlint
         config: {
           # Optional.
           # Path to the rules file
