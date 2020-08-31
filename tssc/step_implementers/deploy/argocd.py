@@ -94,6 +94,7 @@ import sys
 import tempfile
 from datetime import datetime
 import shutil
+import os
 import sh
 from jinja2 import Environment, FileSystemLoader
 
@@ -321,11 +322,31 @@ users:
                 argocd_app_name,
                 _out=sys.stdout)
 
+            # NOTE: Creating a file to pass to the next step
+            working_directory = os.path.join(os.getcwd(), 'argocd')
+
+            if (not os.path.exists(working_directory)):
+                sh.mkdir(working_directory) # pylint: disable=no-member
+
+            manifest_file = open(working_directory + '/argocd_manifests.yml', 'w')
+            sh.argocd.app.manifests(argocd_app_name, _out=manifest_file) # pylint: disable=no-member
+
             results = {
-                'argocd-app-name': argocd_app_name,
-                'config-repo-git-tag' : self._get_tag(repo_directory),
-                'argocd-endpoint-url': 'http://{endpoint}'.format(
-                    endpoint=self._get_endpoint_url())
+                'result': {
+                    'success': True,
+                    'message': 'deploy step completed - see report-artifacts',
+                    'argocd-app-name': argocd_app_name,
+                    'config-repo-git-tag' : self._get_tag(repo_directory)
+                    'argocd-endpoint-url': 'http://{endpoint}'.format(
+                         endpoint=self._get_endpoint_url())
+                },
+                'report-artifacts': [
+                    {
+                        #'name': 'deploy result set: includes manifests for next step',
+                        'name' : 'argocd',
+                        'path': working_directory + '/argocd_manifests.yml'
+                    }
+                ]
             }
 
         return results
