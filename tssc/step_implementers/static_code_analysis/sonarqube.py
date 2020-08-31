@@ -118,7 +118,7 @@ Example: Results
             'report-artifacts': [
                 {
                   'name': 'sonarqube result set',
-                  'path': 'file://folder/report-task.txt'
+                  'path': 'tssc-working/static_code_analysis/report-task.txt'
                 }
              ]
          }
@@ -239,7 +239,8 @@ class SonarQube(StepImplementer):
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
+            #working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
+            working_directory = self.create_working_folder()
             if user == '':
                 sh.sonar_scanner(  # pylint: disable=no-member
                     '-Dproject.settings=' + self.get_config_value('properties'),
@@ -278,7 +279,7 @@ class SonarQube(StepImplementer):
             'report-artifacts': [
                 {
                     'name': 'sonarqube result set',
-                    'path': 'file://' + working_directory + '/report-task.txt'
+                    'path': working_directory + '/report-task.txt'
                 }
             ]
         }

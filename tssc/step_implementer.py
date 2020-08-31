@@ -525,6 +525,25 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         return self.get_step_results(self.step_name)
 
+    def create_working_folder(self):
+        """
+        If it does not exist, create working folder
+
+        Returns
+        -------
+        str
+            return a string to the absolute path
+        """
+        if not os.path.exists(self.__work_dir_path):
+            os.makedirs(self.__work_dir_path)
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        file_path = os.path.join(step_path, filename)
+
+        return folder_path
+
     def write_working_file(self, filename, contents):
         """
         Write content to filename in working directory
@@ -534,13 +553,15 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         """
-        if not os.path.exists(self.__work_dir_path):
-            os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name)
-        if not os.path.exists(step_path):
-            os.makedirs(step_path)
+        working_folder = self.create_working_folder()
 
-        file_path = os.path.join(step_path, filename)
+        #if not os.path.exists(self.__work_dir_path):
+        #    os.makedirs(self.__work_dir_path)
+        #step_path = os.path.join(self.__work_dir_path, self.step_name())
+        #if not os.path.exists(step_path):
+        #    os.makedirs(step_path)
+
+        file_path = os.path.join(working_folder, filename)
 
         with open(file_path, 'wb') as file:
             file.write(contents)
