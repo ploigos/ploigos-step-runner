@@ -94,7 +94,6 @@ import sys
 import tempfile
 from datetime import datetime
 import shutil
-import os
 import sh
 from jinja2 import Environment, FileSystemLoader
 
@@ -323,12 +322,11 @@ users:
                 _out=sys.stdout)
 
             # NOTE: Creating a file to pass to the next step
-            working_directory = os.path.join(os.getcwd(), 'argocd')
+            manifest_file = self.write_working_file(
+                'deploy_argocd_manifests.yml',
+                b''
+            )
 
-            if (not os.path.exists(working_directory)):
-                sh.mkdir(working_directory) # pylint: disable=no-member
-
-            manifest_file = open(working_directory + '/argocd_manifests.yml', 'w')
             sh.argocd.app.manifests(argocd_app_name, _out=manifest_file) # pylint: disable=no-member
 
             results = {
@@ -344,7 +342,7 @@ users:
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd',
-                        'path': working_directory + '/argocd_manifests.yml'
+                        'path': manifest_file
                     }
                 ]
             }
@@ -406,7 +404,7 @@ users:
 
         template = env.get_template(self.get_config_value('values-yaml-template'))
 
-        rendered_values_file = self.write_temp_file(
+        rendered_values_file = self.write_working_file(
             'values.yml',
             bytes(template.render(jinja_runtime_step_config), 'utf-8')
         )

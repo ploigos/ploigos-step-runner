@@ -525,7 +525,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         return self.get_step_results(self.step_name)
 
-    def write_temp_file(self, filename, contents):
+    def write_working_file(self, filename, contents):
         """
         Write content to filename in working directory
 
@@ -541,6 +541,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             os.makedirs(step_path)
 
         file_path = os.path.join(step_path, filename)
+
         with open(file_path, 'wb') as file:
             file.write(contents)
         return file_path
