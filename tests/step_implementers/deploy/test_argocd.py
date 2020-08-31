@@ -2202,7 +2202,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd',
-                        'path': '/home/ashleykim/SPO/tssc-python-package/argocd/argocd_manifests.yml'
+                        'path': '/home/ashleykim/SPO/tssc-python-package/argocd/argocd_manifests.yml' 
                     }
                     ]
                     }

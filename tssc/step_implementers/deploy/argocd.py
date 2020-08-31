@@ -336,9 +336,9 @@ users:
                     'success': True,
                     'message': 'deploy step completed - see report-artifacts',
                     'argocd-app-name': argocd_app_name,
-                    'config-repo-git-tag' : self._get_tag(repo_directory)
                     'argocd-endpoint-url': 'http://{endpoint}'.format(
-                         endpoint=self._get_endpoint_url())
+                         endpoint=self._get_endpoint_url()),
+                    'config-repo-git-tag' : self._get_tag(repo_directory) 
                 },
                 'report-artifacts': [
                     {
