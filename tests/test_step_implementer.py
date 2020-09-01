@@ -660,3 +660,114 @@ class TestStepImplementer(BaseTSSCTestCase):
             with open(os.path.join(working_dir_path, 'foo', 'test-working-file'), 'r') as working_file:
                 self.assertEqual(working_file.read(), 'hello world')
 
+    def test_get_config_value(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'FooStepImplementer',
+                    'config': {
+                        'test': 'hello world'
+                    }
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
+            self.assertEqual(step.get_config_value('test'), 'hello world')
+            self.assertIsNone(step.get_config_value('does-not-exist'))
+
+    def test_get_config_value_with_env(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'FooStepImplementer',
+                    'config': {
+                        'test': 'hello world',
+                        'env-config-override-key': 'override-me'
+                    },
+                    'environment-config': {
+                        'SAMPLE-ENV-1': {
+                            'env-config-override-key': 'step env config - env 1 value - 1'
+                        },
+                        'SAMPLE-ENV-2': {
+                            'env-config-override-key': 'step env config - env 2 value - 1'
+                        }
+                    },
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step,
+                environment='SAMPLE-ENV-1'
+            )
+
+            self.assertEqual(step.get_config_value('test'), 'hello world')
+            self.assertIsNone(step.get_config_value('does-not-exist'))
+            self.assertEqual(
+                step.get_config_value('env-config-override-key'),
+                'step env config - env 1 value - 1')
+
+    def test_has_config_value(self):
+        config = TSSCConfig({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'FooStepImplementer',
+                    'config': {
+                        'test': 'hello world',
+                        'env-config-override-key': 'override-me',
+                        'username': 'foo',
+                        'password': 'bar'
+                    },
+                    'environment-config': {
+                        'SAMPLE-ENV-1': {
+                            'env-config-override-key': 'step env config - env 1 value - 1'
+                        },
+                        'SAMPLE-ENV-2': {
+                            'env-config-override-key': 'step env config - env 2 value - 1'
+                        }
+                    },
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step,
+                environment='SAMPLE-ENV-1'
+            )
+
+            self.assertFalse(step.has_config_value('bar'))
+            self.assertFalse(step.has_config_value(['bar']))
+
+            self.assertFalse(step.has_config_value(['username', 'foo'], False))
+            self.assertTrue(step.has_config_value(['username', 'foo'], True))
+
+            self.assertTrue(step.has_config_value(['username', 'password'], False))
+            self.assertTrue(step.has_config_value(['username', 'password'], True))

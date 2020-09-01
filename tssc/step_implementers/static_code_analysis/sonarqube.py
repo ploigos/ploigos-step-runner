@@ -220,15 +220,8 @@ class SonarQube(StepImplementer):
                 element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
             ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -239,11 +232,11 @@ class SonarQube(StepImplementer):
         # Optional: user and password
         user = ''
         password = ''
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if (runtime_step_config.get('user')
-                    and runtime_step_config.get('password')):
-                user = runtime_step_config.get('user')
-                password = runtime_step_config.get('password')
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if (self.get_config_value('user')
+                    and self.get_config_value('password')):
+                user = self.get_config_value('user')
+                password = self.get_config_value('password')
 
         # Required: Get the generate-metadata.version
         if (self.get_step_results('generate-metadata') and
@@ -253,8 +246,8 @@ class SonarQube(StepImplementer):
             raise ValueError('Severe error: Generate-metadata results is missing a version tag')
 
         # Required: properties and exists
-        properties_file = runtime_step_config['properties']
-        if not os.path.exists(properties_file):
+        properties_file = self.get_config_value('properties')
+        if not properties_file or not os.path.exists(properties_file):
             raise ValueError('Properties file in tssc config not found: ' + properties_file)
 
         try:
@@ -263,25 +256,25 @@ class SonarQube(StepImplementer):
             working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             if user == '':
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    '-Dproject.settings=' + runtime_step_config['properties'],
-                    '-Dsonar.host.url=' + runtime_step_config['url'],
+                    '-Dproject.settings=' + self.get_config_value('properties'),
+                    '-Dsonar.host.url=' + self.get_config_value('url'),
                     '-Dsonar.projectVersion=' + version,
                     '-Dsonar.projectKey=' + \
-                        runtime_step_config['application-name'] + \
+                        self.get_config_value('application-name') + \
                         ':' + \
-                        runtime_step_config['service-name'],
+                        self.get_config_value('service-name'),
                     '-Dsonar.working.directory=' + working_directory,
                     _out=sys.stdout
                 )
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    '-Dproject.settings=' + runtime_step_config['properties'],
-                    '-Dsonar.host.url=' + runtime_step_config['url'],
+                    '-Dproject.settings=' + self.get_config_value('properties'),
+                    '-Dsonar.host.url=' + self.get_config_value('url'),
                     '-Dsonar.projectVersion=' + version,
                     '-Dsonar.projectKey=' + \
-                        runtime_step_config['application-name'] + \
+                        self.get_config_value('application-name') + \
                         ':' + \
-                        runtime_step_config['service-name'],
+                        self.get_config_value('service-name'),
                     '-Dsonar.login=' + user,
                     '-Dsonar.password=' + password,
                     '-Dsonar.working.directory=' + working_directory,

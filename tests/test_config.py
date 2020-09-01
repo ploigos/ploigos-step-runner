@@ -1030,7 +1030,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
                 }
             ])
 
-    def test_get_runtime_step_config_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
+    def test_get_copy_of_runtime_step_config_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
         tssc_config = TSSCConfig({
             TSSCConfig.TSSC_CONFIG_KEY: {
                 'global-defaults': {
@@ -1091,7 +1091,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         step_config = tssc_config.get_step_config('step-foo')
         sub_step = step_config.get_sub_step('foo1')
 
-        runtime_step_config_no_given_env = sub_step.get_runtime_step_config()
+        runtime_step_config_no_given_env = sub_step.get_copy_of_runtime_step_config()
         self.assertEqual(runtime_step_config_no_given_env, {
             'global-default-unique-0': 'global-default',
             'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -1105,7 +1105,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'global-env-default-override-by-step-config': 'step-foo-foo1'
         })
 
-        runtime_step_config_env1 = sub_step.get_runtime_step_config('env1')
+        runtime_step_config_env1 = sub_step.get_copy_of_runtime_step_config('env1')
         self.assertEqual(runtime_step_config_env1, {
             'environment-name': 'env1',
             'global-default-unique-0': 'global-default',
@@ -1123,7 +1123,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'step-foo-foo1-env-specific': 'step-foo-foo-env1'
         })
 
-        runtime_step_config_env2 = sub_step.get_runtime_step_config('env2')
+        runtime_step_config_env2 = sub_step.get_copy_of_runtime_step_config('env2')
         self.assertEqual(runtime_step_config_env2, {
             'environment-name': 'env2',
             'global-default-unique-0': 'global-default',
@@ -1141,7 +1141,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'step-foo-foo1-env-specific': 'step-foo-foo-env2'
         })
 
-    def test_get_runtime_step_config_default_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
+
+    def test_get_copy_of_runtime_step_config_default_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
         tssc_config = TSSCConfig({
             TSSCConfig.TSSC_CONFIG_KEY: {
                 'global-defaults': {
@@ -1218,7 +1219,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'default-overriden-by-step-config-overrides': 'override-me'
         }
 
-        runtime_step_config_no_given_env = sub_step.get_runtime_step_config(None, defaults)
+        runtime_step_config_no_given_env = sub_step.get_copy_of_runtime_step_config(None, defaults)
         self.assertEqual(runtime_step_config_no_given_env, {
             'global-default-unique-0': 'global-default',
             'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -1238,7 +1239,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'default-overriden-by-step-config-overrides': 'step-foo-step-config-override'
         })
 
-        runtime_step_config_env1 = sub_step.get_runtime_step_config('env1', defaults)
+        runtime_step_config_env1 = sub_step.get_copy_of_runtime_step_config('env1', defaults)
         self.assertEqual(runtime_step_config_env1, {
             'environment-name': 'env1',
             'global-default-unique-0': 'global-default',
@@ -1262,7 +1263,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'default-overriden-by-step-config-overrides': 'step-foo-step-config-override'
         })
 
-        runtime_step_config_env2 = sub_step.get_runtime_step_config('env2', defaults)
+        runtime_step_config_env2 = sub_step.get_copy_of_runtime_step_config('env2', defaults)
         self.assertEqual(runtime_step_config_env2, {
             'environment-name': 'env2',
             'global-default-unique-0': 'global-default',
@@ -1285,3 +1286,105 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             'default-overriden-by-step-env-config': 'step-foo-foo-env2',
             'default-overriden-by-step-config-overrides': 'step-foo-step-config-override'
         })
+
+    def test_get_config_value(self):
+        tssc_config = TSSCConfig({
+            TSSCConfig.TSSC_CONFIG_KEY: {
+                'global-defaults': {
+                    'global-default-unique-0': 'global-default',
+                    'global-default-override-by-global-env-default-0': 'global-default-override-me',
+                    'global-default-override-by-step-config-0': 'global-default-override-me',
+                    'global-default-override-by-step-env-config-0': 'global-default-override-me',
+                    'global-default-override-by-step-config-override-0': 'global-default-override-me'
+                },
+                'global-environment-defaults' : {
+                    'env1': {
+                        'global-default-override-by-global-env-default-0': 'global-environment-defaults-1',
+                        'global-env-default-env1-unique-0': 'global-environment-defaults-1',
+                        'global-env-default-override-by-step-config': 'global-environment-defaults-1'
+                    },
+                    'env2': {
+                        'global-default-override-by-global-env-default-0': 'global-environment-defaults-2',
+                        'global-env-default-env2-unique-0': 'global-environment-defaults-2',
+                        'global-env-default-override-by-step-config': 'global-environment-defaults-1'
+                    }
+                },
+                'step-foo': [
+                    {
+                        'implementer': 'foo1',
+                        'config': {
+                            'step-foo-foo1-unique-0': 'step-foo-foo1',
+                            'step-foo-foo1-override-by-step-env-config': 'step-foo-foo-override-me',
+                            'step-foo-foo1-override-by-step-override': 'step-foo-foo-override-me',
+                            'global-default-override-by-step-config-0': 'step-foo-foo1',
+                            'global-env-default-override-by-step-config': 'step-foo-foo1'
+                        },
+                        'environment-config': {
+                            'env1': {
+                                'step-foo-foo1-override-by-step-env-config': 'step-foo-foo-env1',
+                                'global-default-override-by-step-env-config-0': 'step-foo-foo-env1',
+                                'step-foo-foo1-env1-unique-0': 'step-foo-foo-env1',
+                                'step-foo-foo1-env-specific': 'step-foo-foo-env1'
+                            },
+                            'env2': {
+                                'step-foo-foo1-override-by-step-env-config': 'step-foo-foo-env2',
+                                'global-default-override-by-step-env-config-0': 'step-foo-foo-env2',
+                                'step-foo-foo1-env2-unique-0': 'step-foo-foo-env2',
+                                'step-foo-foo1-env-specific': 'step-foo-foo-env2'
+                            }
+                        }
+                    }
+                ]
+
+            }
+        })
+
+        tssc_config.set_step_config_overrides('step-foo', {
+            'global-default-override-by-step-config-override-0': 'step-foo-step-config-override',
+            'step-foo-foo1-override-by-step-override' : 'step-foo-step-config-override',
+            'step-config-override-unique-0': 'step-config-override-unique'
+        })
+
+        step_config = tssc_config.get_step_config('step-foo')
+        sub_step = step_config.get_sub_step('foo1')
+
+        self.assertEqual(
+            sub_step.get_config_value('global-default-unique-0'),
+            "global-default")
+
+        self.assertEqual(
+            sub_step.get_config_value('global-default-override-by-global-env-default-0'),
+            "global-default-override-me")
+
+        self.assertEqual(
+            sub_step.get_config_value('global-default-override-by-global-env-default-0', 'env1'),
+            "global-environment-defaults-1")
+        self.assertEqual(
+            sub_step.get_config_value('global-default-override-by-global-env-default-0', 'env2'),
+            "global-environment-defaults-2")
+
+        self.assertEqual(
+            sub_step.get_config_value('global-default-override-by-step-config-0'),
+            "step-foo-foo1")
+        self.assertEqual(
+            sub_step.get_config_value('global-default-override-by-step-config-0', 'env1'),
+            "step-foo-foo1")
+
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-unique-0',),
+            "step-foo-foo1")
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-unique-0', 'env1'),
+            "step-foo-foo1")
+
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-override-by-step-env-config',),
+            "step-foo-foo-override-me")
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-override-by-step-env-config', 'env1'),
+            "step-foo-foo-env1")
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-override-by-step-env-config', 'env2'),
+            "step-foo-foo-env2")
+
+        self.assertIsNone(sub_step.get_config_value('does-not-exist'))
