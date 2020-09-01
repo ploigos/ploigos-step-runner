@@ -208,7 +208,7 @@ class Configlint(StepImplementer):
                 ) from err
 
         if yml_path == '':
-            raise ValueError(f'yml_path not found')
+            raise ValueError(f'yml_path not found: {yml_path}')
 
         if not os.path.exists(yml_path):
             raise ValueError(f'File not found {yml_path}')
