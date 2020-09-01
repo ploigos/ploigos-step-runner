@@ -118,7 +118,7 @@ Example: Results
             'report-artifacts': [
                 {
                   'name': 'sonarqube result set',
-                  'path': 'tssc-working/static_code_analysis/report-task.txt'
+                  'path': 'file:///folder/tssc-working/static_code_analysis/report-task.txt'
                 }
              ]
          }
@@ -279,7 +279,7 @@ class SonarQube(StepImplementer):
             'report-artifacts': [
                 {
                     'name': 'sonarqube result set',
-                    'path': working_directory + '/report-task.txt'
+                    'path': f'file:///{working_directory}/report-task.txt'
                 }
             ]
         }

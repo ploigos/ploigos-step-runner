@@ -18,9 +18,10 @@ minimally produce the following step results.
 |------------------|------------
 | `TODO`           | TODO
 """
-
 from .configlint import Configlint
+from .configlint_from_argocd import ConfiglintFromArgocd
 
 __all__ = [
-    'configlint'
+    'configlint',
+    'configlint_from_argocd'
 ]

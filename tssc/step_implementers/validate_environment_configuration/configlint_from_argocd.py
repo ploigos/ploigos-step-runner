@@ -9,7 +9,7 @@ Step configuration key(s) for this step:
 
 | Key               | Required | Default                   | Description
 |-------------------|----------|---------------------------|-----------
-| `rules`           | False    | ./config_lint.rules       | Basic Rules file for config_lint
+|                   |          |                           |
 
 
 Expected Previous Step Results
@@ -19,9 +19,8 @@ Results expected from previous steps:
 
 | Step Name           |  Key                | Description
 |---------------------|---------------------|------------
-| `validate`          | ``                  | yml_path
-| environment-        |                     |
-| configuration       |                     |
+| `deploy`            | `report-artifacts`  | name='argocd'
+|                     |                       path='file.yml'
 
 Results
 -------
@@ -56,9 +55,7 @@ Examples
 Example: Step Configuration (minimal)
 
     validate-environment-configuration:
-    - implementer: Configlint
-      config:
-        rules: 'config_lint.rules'
+    - implementer: prep-yada
 
 Example: Generated Config Lint Call (uses both step configuration and previous results)
 
@@ -94,14 +91,13 @@ Example: Results
 """
 
 import os
-import sys
-import sh
+from urllib.parse import urlparse
+
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
-    'rules': './config-lint.rules'
 }
 
 REQUIRED_CONFIG_KEYS = {
@@ -110,8 +106,7 @@ REQUIRED_CONFIG_KEYS = {
 AUTHENTICATION_CONFIG = {
 }
 
-
-class Configlint(StepImplementer):
+class ConfiglintFromArgocd(StepImplementer):
     """
     StepImplementer for the tag-source step for Config_lint.
     """
@@ -158,7 +153,7 @@ class Configlint(StepImplementer):
         array_list
             Array of configuration keys that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return
 
     def _validate_runtime_step_config(self, runtime_step_config):
         """
@@ -192,56 +187,35 @@ class Configlint(StepImplementer):
             Results of running this step.
         """
 
-        # First priority is runtime_step
-        yml_path = ''
-        if 'yml_path' in runtime_step_config:
-            yml_path = runtime_step_config['yml_path']
+        yml_path=''
+        if (self.get_step_results('deploy') and
+                self.get_step_results('deploy').get('report-artifacts')):
+            artifacts = self.get_step_results('deploy').get('report-artifacts')
+            for artifact in artifacts:
+                name = artifact['name']
+                if name == 'argocd-result-set':
+                    yml_path = artifact['path']
         else:
-            try:
-                current_step_results = self.current_step_results()
-                if 'options' in current_step_results:
-                    if 'yml_path' in current_step_results['options']:
-                        yml_path = current_step_results['options']['yml_path']
-            except Exception as err:  # pylint: disable=undefined-variable
-                raise ValueError(
-                    'yml_path not collected from previous step nor runtime'
-                ) from err
-
+            raise ValueError('Deploy results is missing report-artifacts')
         if yml_path == '':
-            raise ValueError(f'yml_path not found')
+            raise ValueError('Deploy results missing yml element name=argocd-result-set')
 
+        # The expected format:  file:///folder/file.yml
+        yml_path = urlparse(yml_path).path
         if not os.path.exists(yml_path):
             raise ValueError(f'File not found {yml_path}')
-
-        # Required: rules and exists
-        rules_file: object = runtime_step_config['rules']
-        if not os.path.exists(rules_file):
-            raise ValueError('Rules file in tssc config not found: ' + rules_file)
-
-        try:
-            # Hint:  Call config-lint with sh.config_lint
-            sh.config_lint(  # pylint: disable=no-member
-                "-verbose",
-                "-debug",
-                "-rules",
-                rules_file,
-                yml_path,
-                _out=sys.stdout
-            )
-
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking config-lint: {all}'.format(all=error)) from error
 
         results = {
             'result': {
                 'success': True,
-                'message': 'configlint step completed',
+                'message': 'configlint prep step completed',
             },
-            'report-artifacts': [
-            ]
+            'options': {
+                'yml_path': yml_path
+            }
         }
         return results
 
 
 # register step implementer
-TSSCFactory.register_step_implementer(Configlint)
+TSSCFactory.register_step_implementer(ConfiglintFromArgocd)

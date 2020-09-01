@@ -57,8 +57,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'tssc-working/static-code-analysis/report-task.txt'
-            }
+                                'path': 'file:///tssc-working/static-code-analysis/report-task.txt'
+                            }
                         ]
                     }
                 }
@@ -187,8 +187,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'tssc-working/static-code-analysis/report-task.txt'
-            }
+                                'path': 'file:///tssc-working/static-code-analysis/report-task.txt'
+                            }
                         ]
                     }
                 }
