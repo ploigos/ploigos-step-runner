@@ -25,7 +25,7 @@ jobs:
         pip install -e .[tests]
 
     - name: Lint Synatx with pylnit 🧪🖋
-      run: pylint --rcfile=setup.cfg tssc
+      run: python -m pylint --rcfile=setup.cfg tssc
 
     - name: Lint Synatx with flake8 🧪🖋
       run: |
@@ -60,7 +60,7 @@ jobs:
 
     - name: Test & Coverage 🧪
       run: |
-        pytest --cov=tssc --cov-report=xml tests/
+        python -m pytest --cov=tssc --cov-report=xml tests/
 
     - name: Upload Coverage Report 🔺📊
       uses: codecov/codecov-action@v1
