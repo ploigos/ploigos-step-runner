@@ -340,9 +340,8 @@ users:
                 },
                 'report-artifacts': [
                     {
-                        #'name': 'deploy result set: includes manifests for next step',
-                        'name' : 'argocd',
-                        'path': manifest_file
+                        'name' : 'argocd-result-set',
+                        'path': f'file://{manifest_file}'
                     }
                 ]
             }
