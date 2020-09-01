@@ -239,7 +239,6 @@ class SonarQube(StepImplementer):
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
-            #working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             working_directory = self.create_working_folder()
             if user == '':
                 sh.sonar_scanner(  # pylint: disable=no-member
@@ -279,7 +278,7 @@ class SonarQube(StepImplementer):
             'report-artifacts': [
                 {
                     'name': 'sonarqube result set',
-                    'path': f'file:///{working_directory}/report-task.txt'
+                     'path': f'file://{working_directory}/report-task.txt'
                 }
             ]
         }

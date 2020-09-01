@@ -43,7 +43,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                 'user': 'unit.test.user',
                 'password': 'unit.test.password'
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
@@ -57,7 +56,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'file:///tssc-working/static-code-analysis/report-task.txt'
+                                'path': f'file://{temp_dir.path}' +
+                                        '/tssc-working/static-code-analysis/report-task.txt'
                             }
                         ]
                     }
@@ -173,7 +173,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     }
                 }
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
@@ -187,7 +186,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'file:///tssc-working/static-code-analysis/report-task.txt'
+                                'path': f'file://{temp_dir.path}' +
+                                        '/tssc-working/static-code-analysis/report-task.txt'
                             }
                         ]
                     }
@@ -298,7 +298,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     }
                 }
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
             }
             with self.assertRaisesRegex(

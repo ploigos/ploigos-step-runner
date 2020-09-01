@@ -542,7 +542,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         file_path = os.path.join(step_path, filename)
 
-        return folder_path
+        return os.path.abspath(folder_path)
 
     def write_working_file(self, filename, contents):
         """
@@ -554,12 +554,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             return a string to the absolute file path
         """
         working_folder = self.create_working_folder()
-
-        #if not os.path.exists(self.__work_dir_path):
-        #    os.makedirs(self.__work_dir_path)
-        #step_path = os.path.join(self.__work_dir_path, self.step_name())
-        #if not os.path.exists(step_path):
-        #    os.makedirs(step_path)
 
         file_path = os.path.join(working_folder, filename)
 
