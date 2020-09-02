@@ -2,11 +2,15 @@
 
 The Configlint step executes the config-lint against yml files for user-defined
 rules.   The inputs to this step include:
+
   - Rules defined by the user in a specified file
+
     * Reference:  https://stelligent.github.io/config-lint/#/
+
   - File path of yml files to lint
-    * Specify as a runtime argument
-    * Or specified as an option
+
+    * Specify as a runtime argument, or
+    * Use results from previous step such as ConfilintFromArgocd
 
 Step Configuration
 ------------------
@@ -66,7 +70,7 @@ Examples
       config:
         rules: 'config_lint.rules'
 
-.. Note:: The configuration example above uses the ConfiglintFromArgocd step to
+.. Note:: The configuration example above uses the ConfiglintFromArgocd step to \
 provide the yml_path option.
 
 **Example: Generated Config Lint Call (runtime)**
@@ -105,7 +109,7 @@ Example: Results
 
     }
 
-.. Note:: The configuration example above used the ConfiglintFromArgocd step to
+.. Note:: The configuration example above used the ConfiglintFromArgocd step to \
 provide the yml_path option.
 
 """

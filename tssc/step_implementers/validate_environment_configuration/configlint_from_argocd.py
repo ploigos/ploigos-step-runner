@@ -23,7 +23,7 @@ Results expected from previous steps:
 | Step Name           |  Key                | Description
 |---------------------|---------------------|------------
 | `deploy`            | `report-artifacts`  | name='argocd'
-|                     |                       path='file:///folder/file.yml'
+|                     |                     | path='file:///folder/file.yml'
 
 Results
 -------
@@ -59,6 +59,15 @@ Examples
 
     validate-environment-configuration:
     - implementer: ConfiglintFromArgocd
+
+**Example: Previous Results**
+
+    'tssc-results': {
+        'deploy': {
+            'report-artifacts': {
+                'argocd-result-set': 'file:///home/user/tssc-work/deploy/file.yml'
+            }
+    }
 
 **Example: Results**
 
