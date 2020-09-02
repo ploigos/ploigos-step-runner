@@ -28,6 +28,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -67,6 +68,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -77,7 +79,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -101,6 +102,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -154,6 +156,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -191,6 +194,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -201,7 +205,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -222,6 +225,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -254,6 +258,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -291,6 +296,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -301,7 +307,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -322,6 +327,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -353,6 +359,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -392,6 +399,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -402,7 +410,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -426,6 +433,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -450,6 +458,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -492,6 +501,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -502,7 +512,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -526,6 +535,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -575,6 +585,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -617,6 +628,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -627,7 +639,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -651,6 +662,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -686,6 +698,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'latest'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -724,6 +737,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -734,7 +748,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -756,6 +769,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -790,6 +804,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -829,6 +844,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -839,7 +855,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -863,6 +878,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -886,6 +902,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         application_name = 'application-name'
         service_name = 'service-name'
         organization_name = 'organization-name'
+        environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -924,6 +942,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
+                        'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -934,7 +954,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -958,6 +977,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch'),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -982,6 +1002,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1021,6 +1042,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1031,7 +1053,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1055,6 +1076,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1077,6 +1099,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1116,6 +1139,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1126,7 +1150,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1150,6 +1173,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1173,6 +1197,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1213,6 +1238,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1223,7 +1249,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1247,6 +1272,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1287,6 +1313,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1327,6 +1354,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1337,7 +1365,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1361,6 +1388,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1395,6 +1423,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1435,6 +1464,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1445,7 +1475,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1469,6 +1498,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1503,6 +1533,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1543,6 +1574,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1553,7 +1585,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1577,6 +1608,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1611,6 +1643,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1650,6 +1683,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1660,7 +1694,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1684,6 +1717,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1714,6 +1748,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1754,6 +1789,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1764,7 +1800,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1790,6 +1825,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}.{app}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1824,6 +1860,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         service_name = 'service-name'
         organization_name = 'organization-name'
         environment_name = 'environment-name'
+        kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
         argocd_password = 'password'
@@ -1864,6 +1901,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'application-name' : application_name,
                         'organization' : organization_name,
                         'environment-name' : environment_name,
+                        'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
                     'deploy' : {
@@ -1874,7 +1912,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                             'argocd-api' : argocd_api,
                             'helm-config-repo' : helm_config_repo,
                             'argocd-sync-timeout-seconds' : '60',
-                            'kube-app-domain' : 'apps.tssc.rht-set.com',
                             'num-replicas' : '3',
                             'ingress-enabled' : 'true',
                             'readiness-probe-path' : '/ready',
@@ -1900,6 +1937,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
+                        'argocd-endpoint-url': '{service}-{app}-{org}-{app}-{service}-{repo_branch_name}-{environment}-{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
