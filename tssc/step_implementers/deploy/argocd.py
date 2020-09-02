@@ -346,7 +346,8 @@ users:
             results = {
                 'argocd-app-name': argocd_app_name,
                 'config-repo-git-tag' : self._get_tag(repo_directory),
-                'argocd-endpoint-url': self._get_endpoint_url(runtime_step_config)
+                'argocd-endpoint-url': 'http://{endpoint}'.format(
+                    endpoint=self._get_endpoint_url(runtime_step_config))
             }
 
         return results
@@ -528,9 +529,8 @@ users:
 
     def _get_endpoint_url(self, runtime_step_config):
         argocd_app_name = self._get_app_name(runtime_step_config)
-        endpoint_url = "{service}.{application}.{namespace}.{domain}".\
+        endpoint_url = "{service}.{namespace}.{domain}".\
                       format(service=runtime_step_config['service-name'],
-                      application=runtime_step_config['application-name'],
                       namespace=argocd_app_name,
                       domain=runtime_step_config['kube-app-domain'])
         return endpoint_url
