@@ -39,9 +39,7 @@ Results output by this step.
     }
 """
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 class Selenium(StepImplementer):
     """
@@ -102,6 +100,3 @@ class Selenium(StepImplementer):
         """
         results = {}
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Selenium)

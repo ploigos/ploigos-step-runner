@@ -67,9 +67,7 @@ from xml.etree import ElementTree
 import re
 import sh
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -229,6 +227,3 @@ class Maven(StepImplementer):
 
         result = xml_file.find(xpath, maven_xml_namespace_dict)
         return None if result is None else result.text
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

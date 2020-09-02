@@ -39,9 +39,7 @@ import re
 from git import Repo
 from git import InvalidGitRepositoryError
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'repo-root': './',
@@ -147,6 +145,3 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Git)

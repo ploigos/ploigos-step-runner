@@ -54,9 +54,7 @@ Results output by this step.
 """
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {}
 
@@ -251,7 +249,3 @@ class Git(StepImplementer):
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push') from error
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Git, True)

@@ -49,9 +49,8 @@ Results output by this step.
 import os
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     # Image specification file name
@@ -207,7 +206,3 @@ class Buildah(StepImplementer):
         }
 
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Buildah, True)

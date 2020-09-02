@@ -88,9 +88,7 @@ import re
 import sys
 import sh
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {}
 AUTHENTICATION_CONFIG = {
@@ -281,7 +279,3 @@ class Maven(StepImplementer):
             })
 
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

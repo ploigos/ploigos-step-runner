@@ -31,9 +31,7 @@ Results output by this step.
 
 import os.path
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 from tssc.utils.xml import get_xml_element
 
@@ -116,6 +114,3 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

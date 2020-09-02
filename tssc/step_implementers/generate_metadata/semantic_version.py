@@ -118,9 +118,7 @@ Examples
     }}
 """
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'release-branch': 'master'
@@ -230,6 +228,3 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(SemanticVersion)

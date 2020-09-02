@@ -124,10 +124,7 @@ import sys
 import os
 import sh
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
-
+from tssc import StepImplementer, DefaultSteps
 from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
@@ -260,7 +257,3 @@ class Maven(StepImplementer):
             }]
         }
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)
