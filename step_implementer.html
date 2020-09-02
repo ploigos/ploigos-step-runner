@@ -243,14 +243,9 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
 
     @abstractmethod
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+
         Returns
         -------
         dict
@@ -314,16 +309,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             self.step_config_overrides)
 
         # create the munged runtime step configuration and print
-        runtime_step_config = self.config.get_runtime_step_config(
-            self.environment,
-            self.step_implementer_config_defaults())
+        copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
-            runtime_step_config)
+            copy_of_runtime_step_config)
 
         # validate the runtime step configuration, run the step, and save the results
-        self._validate_runtime_step_config(runtime_step_config)
-        results = self._run_step(runtime_step_config)
+        self._validate_runtime_step_config(copy_of_runtime_step_config)
+        results = self._run_step()
         self.write_results(results)
 
         # print the step run results
@@ -437,9 +430,99 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return current_results
 
-    def get_step_results(self, step_name):
+    def get_config_value(self, key):
+        &#34;&#34;&#34;Convenience function for self.config.get_config_value.
+
+        Get the configuration value for a given configuration key from the
+        merged set of configuration sources.
+
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
+        Also See
+        --------
+        TSSCSubStepConfig.get_config_value
+        get_copy_of_runtime_step_config
+
+        Parameters
+        ----------
+        key : str
+            Key to get the configuration value for.
+        environment : str, optional
+            Environment to include the configuration for if running in the context of
+            a specific environment.
+        defaults : dict, optional
+            If no value for the given configuration key found in any of the configuration
+            sources then use these defaults as last resort.
+
+        Returns
+        -------
+        str, int, dict, list, or bool or None
+            Value of the given configuration key or None if one does not exist
+            for this sub step in the given context with the given defaults.
         &#34;&#34;&#34;
-        Get the results of a specific step.
+        return self.config.get_config_value(
+            key,
+            self.environment,
+            self.step_implementer_config_defaults())
+
+    def get_copy_of_runtime_step_config(self):
+        &#34;&#34;&#34;Convenience function for self.config.get_copy_of_runtime_step_config
+
+        See Also
+        --------
+        TSSCSubStepConfig.get_copy_of_runtime_step_config
+        get_config_value
+
+        Returns
+        -------
+        dict
+            A deep copy of the merged runtime step configuration
+        &#34;&#34;&#34;
+        return self.config.get_copy_of_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
+
+    def has_config_value(self, keys, match_any=False):
+        &#34;&#34;&#34;Determins if step has values for any of the given keys.
+
+        Parmaeters
+        ----------
+        keys : str or list of str
+            Keys to check to see if there are values for any or all of these key(s).
+        match_any : bool
+            If True only one key has to have a value.
+            If False then all given keys have to have values.
+
+        Returns
+        -------
+        bool
+            True if any/all (depending on value of match_any) keys have a value.
+            False otherwise.
+        &#34;&#34;&#34;
+        if isinstance(keys, str):
+            keys = [keys]
+
+        result = not match_any
+        for key in keys:
+            if match_any and self.get_config_value(key) is not None:
+                result = True
+                break
+
+            if not match_any and self.get_config_value(key) is None:
+                result = False
+                break
+
+        return result
+
+    def get_step_results(self, step_name):
+        &#34;&#34;&#34;Get the results of a specific step.
 
         Parameters
         ----------
@@ -855,14 +938,9 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
 
     @abstractmethod
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+
         Returns
         -------
         dict
@@ -926,16 +1004,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             self.step_config_overrides)
 
         # create the munged runtime step configuration and print
-        runtime_step_config = self.config.get_runtime_step_config(
-            self.environment,
-            self.step_implementer_config_defaults())
+        copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
-            runtime_step_config)
+            copy_of_runtime_step_config)
 
         # validate the runtime step configuration, run the step, and save the results
-        self._validate_runtime_step_config(runtime_step_config)
-        results = self._run_step(runtime_step_config)
+        self._validate_runtime_step_config(copy_of_runtime_step_config)
+        results = self._run_step()
         self.write_results(results)
 
         # print the step run results
@@ -1049,9 +1125,99 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return current_results
 
-    def get_step_results(self, step_name):
+    def get_config_value(self, key):
+        &#34;&#34;&#34;Convenience function for self.config.get_config_value.
+
+        Get the configuration value for a given configuration key from the
+        merged set of configuration sources.
+
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
+        Also See
+        --------
+        TSSCSubStepConfig.get_config_value
+        get_copy_of_runtime_step_config
+
+        Parameters
+        ----------
+        key : str
+            Key to get the configuration value for.
+        environment : str, optional
+            Environment to include the configuration for if running in the context of
+            a specific environment.
+        defaults : dict, optional
+            If no value for the given configuration key found in any of the configuration
+            sources then use these defaults as last resort.
+
+        Returns
+        -------
+        str, int, dict, list, or bool or None
+            Value of the given configuration key or None if one does not exist
+            for this sub step in the given context with the given defaults.
         &#34;&#34;&#34;
-        Get the results of a specific step.
+        return self.config.get_config_value(
+            key,
+            self.environment,
+            self.step_implementer_config_defaults())
+
+    def get_copy_of_runtime_step_config(self):
+        &#34;&#34;&#34;Convenience function for self.config.get_copy_of_runtime_step_config
+
+        See Also
+        --------
+        TSSCSubStepConfig.get_copy_of_runtime_step_config
+        get_config_value
+
+        Returns
+        -------
+        dict
+            A deep copy of the merged runtime step configuration
+        &#34;&#34;&#34;
+        return self.config.get_copy_of_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
+
+    def has_config_value(self, keys, match_any=False):
+        &#34;&#34;&#34;Determins if step has values for any of the given keys.
+
+        Parmaeters
+        ----------
+        keys : str or list of str
+            Keys to check to see if there are values for any or all of these key(s).
+        match_any : bool
+            If True only one key has to have a value.
+            If False then all given keys have to have values.
+
+        Returns
+        -------
+        bool
+            True if any/all (depending on value of match_any) keys have a value.
+            False otherwise.
+        &#34;&#34;&#34;
+        if isinstance(keys, str):
+            keys = [keys]
+
+        result = not match_any
+        for key in keys:
+            if match_any and self.get_config_value(key) is not None:
+                result = True
+                break
+
+            if not match_any and self.get_config_value(key) is None:
+                result = False
+                break
+
+        return result
+
+    def get_step_results(self, step_name):
+        &#34;&#34;&#34;Get the results of a specific step.
 
         Parameters
         ----------
@@ -1570,6 +1736,123 @@ element.</dd>
     return self.get_step_results(self.step_name())</code></pre>
 </details>
 </dd>
+<dt id="tssc.step_implementer.StepImplementer.get_config_value"><code class="name flex">
+<span>def <span class="ident">get_config_value</span></span>(<span>self, key)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convenience function for self.config.get_config_value.</p>
+<p>Get the configuration value for a given configuration key from the
+merged set of configuration sources.</p>
+<p>From least precedence to highest precedence.</p>
+<pre><code>1. defaults
+2. Global Configuration Defaults (self.global_config_defaults)
+3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+4. Step Configuration ( self.step_config)
+5. Step Environment Configuration (self.step_environment_config)
+6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+</code></pre>
+<h2 id="also-see">Also See</h2>
+<p>TSSCSubStepConfig.get_config_value
+get_copy_of_runtime_step_config</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>Key to get the configuration value for.</dd>
+<dt><strong><code>environment</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Environment to include the configuration for if running in the context of
+a specific environment.</dd>
+<dt><strong><code>defaults</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>If no value for the given configuration key found in any of the configuration
+sources then use these defaults as last resort.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str, int, dict, list,</code> or <code>bool</code> or <code>None</code></dt>
+<dd>Value of the given configuration key or None if one does not exist
+for this sub step in the given context with the given defaults.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_config_value(self, key):
+    &#34;&#34;&#34;Convenience function for self.config.get_config_value.
+
+    Get the configuration value for a given configuration key from the
+    merged set of configuration sources.
+
+    From least precedence to highest precedence.
+
+        1. defaults
+        2. Global Configuration Defaults (self.global_config_defaults)
+        3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+        4. Step Configuration ( self.step_config)
+        5. Step Environment Configuration (self.step_environment_config)
+        6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
+    Also See
+    --------
+    TSSCSubStepConfig.get_config_value
+    get_copy_of_runtime_step_config
+
+    Parameters
+    ----------
+    key : str
+        Key to get the configuration value for.
+    environment : str, optional
+        Environment to include the configuration for if running in the context of
+        a specific environment.
+    defaults : dict, optional
+        If no value for the given configuration key found in any of the configuration
+        sources then use these defaults as last resort.
+
+    Returns
+    -------
+    str, int, dict, list, or bool or None
+        Value of the given configuration key or None if one does not exist
+        for this sub step in the given context with the given defaults.
+    &#34;&#34;&#34;
+    return self.config.get_config_value(
+        key,
+        self.environment,
+        self.step_implementer_config_defaults())</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config"><code class="name flex">
+<span>def <span class="ident">get_copy_of_runtime_step_config</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convenience function for self.config.get_copy_of_runtime_step_config</p>
+<h2 id="see-also">See Also</h2>
+<p><code>TSSCSubStepConfig.get_copy_of_runtime_step_config</code>
+<code>get_config_value</code></p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A deep copy of the merged runtime step configuration</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_copy_of_runtime_step_config(self):
+    &#34;&#34;&#34;Convenience function for self.config.get_copy_of_runtime_step_config
+
+    See Also
+    --------
+    TSSCSubStepConfig.get_copy_of_runtime_step_config
+    get_config_value
+
+    Returns
+    -------
+    dict
+        A deep copy of the merged runtime step configuration
+    &#34;&#34;&#34;
+    return self.config.get_copy_of_runtime_step_config(
+        self.environment,
+        self.step_implementer_config_defaults())</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.get_step_results"><code class="name flex">
 <span>def <span class="ident">get_step_results</span></span>(<span>self, step_name)</span>
 </code></dt>
@@ -1590,8 +1873,7 @@ element.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_step_results(self, step_name):
-    &#34;&#34;&#34;
-    Get the results of a specific step.
+    &#34;&#34;&#34;Get the results of a specific step.
 
     Parameters
     ----------
@@ -1604,6 +1886,60 @@ element.</dd>
         The results of a specific step. None if results DNE
     &#34;&#34;&#34;
     return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY].get(step_name)</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.has_config_value"><code class="name flex">
+<span>def <span class="ident">has_config_value</span></span>(<span>self, keys, match_any=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determins if step has values for any of the given keys.</p>
+<h2 id="parmaeters">Parmaeters</h2>
+<p>keys : str or list of str
+Keys to check to see if there are values for any or all of these key(s).
+match_any : bool
+If True only one key has to have a value.
+If False then all given keys have to have values.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if any/all (depending on value of match_any) keys have a value.
+False otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_config_value(self, keys, match_any=False):
+    &#34;&#34;&#34;Determins if step has values for any of the given keys.
+
+    Parmaeters
+    ----------
+    keys : str or list of str
+        Keys to check to see if there are values for any or all of these key(s).
+    match_any : bool
+        If True only one key has to have a value.
+        If False then all given keys have to have values.
+
+    Returns
+    -------
+    bool
+        True if any/all (depending on value of match_any) keys have a value.
+        False otherwise.
+    &#34;&#34;&#34;
+    if isinstance(keys, str):
+        keys = [keys]
+
+    result = not match_any
+    for key in keys:
+        if match_any and self.get_config_value(key) is not None:
+            result = True
+            break
+
+        if not match_any and self.get_config_value(key) is None:
+            result = False
+            break
+
+    return result</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.run_step"><code class="name flex">
@@ -1643,16 +1979,14 @@ element.</dd>
         self.step_config_overrides)
 
     # create the munged runtime step configuration and print
-    runtime_step_config = self.config.get_runtime_step_config(
-        self.environment,
-        self.step_implementer_config_defaults())
+    copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
     StepImplementer.__print_data(
         &#34;Runtime Step Configuration&#34;,
-        runtime_step_config)
+        copy_of_runtime_step_config)
 
     # validate the runtime step configuration, run the step, and save the results
-    self._validate_runtime_step_config(runtime_step_config)
-    results = self._run_step(runtime_step_config)
+    self._validate_runtime_step_config(copy_of_runtime_step_config)
+    results = self._run_step()
     self.write_results(results)
 
     # print the step run results
@@ -1819,9 +2153,12 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>

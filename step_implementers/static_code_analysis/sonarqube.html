@@ -453,15 +453,8 @@ class SonarQube(StepImplementer):
                 element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
             ), &#39;Either username or password is not set. Neither or both must be set.&#39;
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -472,11 +465,11 @@ class SonarQube(StepImplementer):
         # Optional: user and password
         user = &#39;&#39;
         password = &#39;&#39;
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if (runtime_step_config.get(&#39;user&#39;)
-                    and runtime_step_config.get(&#39;password&#39;)):
-                user = runtime_step_config.get(&#39;user&#39;)
-                password = runtime_step_config.get(&#39;password&#39;)
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if (self.get_config_value(&#39;user&#39;)
+                    and self.get_config_value(&#39;password&#39;)):
+                user = self.get_config_value(&#39;user&#39;)
+                password = self.get_config_value(&#39;password&#39;)
 
         # Required: Get the generate-metadata.version
         if (self.get_step_results(&#39;generate-metadata&#39;) and
@@ -486,8 +479,8 @@ class SonarQube(StepImplementer):
             raise ValueError(&#39;Severe error: Generate-metadata results is missing a version tag&#39;)
 
         # Required: properties and exists
-        properties_file = runtime_step_config[&#39;properties&#39;]
-        if not os.path.exists(properties_file):
+        properties_file = self.get_config_value(&#39;properties&#39;)
+        if not properties_file or not os.path.exists(properties_file):
             raise ValueError(&#39;Properties file in tssc config not found: &#39; + properties_file)
 
         try:
@@ -496,25 +489,25 @@ class SonarQube(StepImplementer):
             working_directory = os.path.join(os.getcwd(), &#39;sonar-scanner&#39;)
             if user == &#39;&#39;:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    &#39;-Dproject.settings=&#39; + runtime_step_config[&#39;properties&#39;],
-                    &#39;-Dsonar.host.url=&#39; + runtime_step_config[&#39;url&#39;],
+                    &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
+                    &#39;-Dsonar.host.url=&#39; + self.get_config_value(&#39;url&#39;),
                     &#39;-Dsonar.projectVersion=&#39; + version,
                     &#39;-Dsonar.projectKey=&#39; + \
-                        runtime_step_config[&#39;application-name&#39;] + \
+                        self.get_config_value(&#39;application-name&#39;) + \
                         &#39;:&#39; + \
-                        runtime_step_config[&#39;service-name&#39;],
+                        self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
                     _out=sys.stdout
                 )
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    &#39;-Dproject.settings=&#39; + runtime_step_config[&#39;properties&#39;],
-                    &#39;-Dsonar.host.url=&#39; + runtime_step_config[&#39;url&#39;],
+                    &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
+                    &#39;-Dsonar.host.url=&#39; + self.get_config_value(&#39;url&#39;),
                     &#39;-Dsonar.projectVersion=&#39; + version,
                     &#39;-Dsonar.projectKey=&#39; + \
-                        runtime_step_config[&#39;application-name&#39;] + \
+                        self.get_config_value(&#39;application-name&#39;) + \
                         &#39;:&#39; + \
-                        runtime_step_config[&#39;service-name&#39;],
+                        self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.login=&#39; + user,
                     &#39;-Dsonar.password=&#39; + password,
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
@@ -633,15 +626,8 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
                 element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
             ), &#39;Either username or password is not set. Neither or both must be set.&#39;
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -652,11 +638,11 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
         # Optional: user and password
         user = &#39;&#39;
         password = &#39;&#39;
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if (runtime_step_config.get(&#39;user&#39;)
-                    and runtime_step_config.get(&#39;password&#39;)):
-                user = runtime_step_config.get(&#39;user&#39;)
-                password = runtime_step_config.get(&#39;password&#39;)
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if (self.get_config_value(&#39;user&#39;)
+                    and self.get_config_value(&#39;password&#39;)):
+                user = self.get_config_value(&#39;user&#39;)
+                password = self.get_config_value(&#39;password&#39;)
 
         # Required: Get the generate-metadata.version
         if (self.get_step_results(&#39;generate-metadata&#39;) and
@@ -666,8 +652,8 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
             raise ValueError(&#39;Severe error: Generate-metadata results is missing a version tag&#39;)
 
         # Required: properties and exists
-        properties_file = runtime_step_config[&#39;properties&#39;]
-        if not os.path.exists(properties_file):
+        properties_file = self.get_config_value(&#39;properties&#39;)
+        if not properties_file or not os.path.exists(properties_file):
             raise ValueError(&#39;Properties file in tssc config not found: &#39; + properties_file)
 
         try:
@@ -676,25 +662,25 @@ TSSCFactory.register_step_implementer(SonarQube)</code></pre>
             working_directory = os.path.join(os.getcwd(), &#39;sonar-scanner&#39;)
             if user == &#39;&#39;:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    &#39;-Dproject.settings=&#39; + runtime_step_config[&#39;properties&#39;],
-                    &#39;-Dsonar.host.url=&#39; + runtime_step_config[&#39;url&#39;],
+                    &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
+                    &#39;-Dsonar.host.url=&#39; + self.get_config_value(&#39;url&#39;),
                     &#39;-Dsonar.projectVersion=&#39; + version,
                     &#39;-Dsonar.projectKey=&#39; + \
-                        runtime_step_config[&#39;application-name&#39;] + \
+                        self.get_config_value(&#39;application-name&#39;) + \
                         &#39;:&#39; + \
-                        runtime_step_config[&#39;service-name&#39;],
+                        self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
                     _out=sys.stdout
                 )
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    &#39;-Dproject.settings=&#39; + runtime_step_config[&#39;properties&#39;],
-                    &#39;-Dsonar.host.url=&#39; + runtime_step_config[&#39;url&#39;],
+                    &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
+                    &#39;-Dsonar.host.url=&#39; + self.get_config_value(&#39;url&#39;),
                     &#39;-Dsonar.projectVersion=&#39; + version,
                     &#39;-Dsonar.projectKey=&#39; + \
-                        runtime_step_config[&#39;application-name&#39;] + \
+                        self.get_config_value(&#39;application-name&#39;) + \
                         &#39;:&#39; + \
-                        runtime_step_config[&#39;service-name&#39;],
+                        self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.login=&#39; + user,
                     &#39;-Dsonar.password=&#39; + password,
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
@@ -761,9 +747,12 @@ def step_name():
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>

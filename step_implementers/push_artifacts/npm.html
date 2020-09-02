@@ -186,15 +186,8 @@ class NPM(StepImplementer):
         &#34;&#34;&#34;
         return []
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -276,15 +269,8 @@ TSSCFactory.register_step_implementer(NPM)</code></pre>
         &#34;&#34;&#34;
         return []
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -337,9 +323,12 @@ def step_name():
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>

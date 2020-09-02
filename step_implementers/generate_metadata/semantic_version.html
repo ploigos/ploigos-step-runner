@@ -342,15 +342,8 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         &#34;&#34;&#34;
         return []
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -360,34 +353,32 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         app_version = None
         pre_release = None
         build = None
-        release_branch = runtime_step_config[&#39;release-branch&#39;]
+        release_branch = self.get_config_value(&#39;release-branch&#39;)
 
         current_step_results = self.current_step_results()
-        if &#39;app-version&#39; in runtime_step_config:
-            app_version = runtime_step_config[&#39;app-version&#39;]
-        elif &#39;app-version&#39; in current_step_results:
+
+        app_version = self.get_config_value(&#39;app-version&#39;)
+        if app_version is None and &#39;app-version&#39; in current_step_results:
             app_version = current_step_results[&#39;app-version&#39;]
-        else:
+        if app_version is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (app-version) provided via runtime flag
                 (app-version) or from prior step implementer ({0}).
                 &#34;&#34;&#34;.format(self.step_name))
 
-        if &#39;pre-release&#39; in runtime_step_config:
-            pre_release = runtime_step_config[&#39;pre-release&#39;]
-        elif &#39;pre-release&#39; in current_step_results:
+        pre_release = self.get_config_value(&#39;pre-release&#39;)
+        if pre_release is None and &#39;pre-release&#39; in current_step_results:
             pre_release = current_step_results[&#39;pre-release&#39;]
-        else:
+        if pre_release is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (pre_release) provided via runtime flag
                 (pre-release) or from prior step implementer ({0})
                 &#34;&#34;&#34;.format(self.step_name))
 
-        if &#39;build&#39; in runtime_step_config:
-            build = runtime_step_config[&#39;build&#39;]
-        elif &#39;build&#39; in current_step_results:
+        build = self.get_config_value(&#39;build&#39;)
+        if build is None and &#39;build&#39; in current_step_results:
             build = current_step_results[&#39;build&#39;]
-        else:
+        if build is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (build) provided via runtime flag
                 (build) or from prior step implementer ({0})
@@ -479,15 +470,8 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
         &#34;&#34;&#34;
         return []
 
-    def _run_step(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -497,34 +481,32 @@ TSSCFactory.register_step_implementer(SemanticVersion)</code></pre>
         app_version = None
         pre_release = None
         build = None
-        release_branch = runtime_step_config[&#39;release-branch&#39;]
+        release_branch = self.get_config_value(&#39;release-branch&#39;)
 
         current_step_results = self.current_step_results()
-        if &#39;app-version&#39; in runtime_step_config:
-            app_version = runtime_step_config[&#39;app-version&#39;]
-        elif &#39;app-version&#39; in current_step_results:
+
+        app_version = self.get_config_value(&#39;app-version&#39;)
+        if app_version is None and &#39;app-version&#39; in current_step_results:
             app_version = current_step_results[&#39;app-version&#39;]
-        else:
+        if app_version is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (app-version) provided via runtime flag
                 (app-version) or from prior step implementer ({0}).
                 &#34;&#34;&#34;.format(self.step_name))
 
-        if &#39;pre-release&#39; in runtime_step_config:
-            pre_release = runtime_step_config[&#39;pre-release&#39;]
-        elif &#39;pre-release&#39; in current_step_results:
+        pre_release = self.get_config_value(&#39;pre-release&#39;)
+        if pre_release is None and &#39;pre-release&#39; in current_step_results:
             pre_release = current_step_results[&#39;pre-release&#39;]
-        else:
+        if pre_release is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (pre_release) provided via runtime flag
                 (pre-release) or from prior step implementer ({0})
                 &#34;&#34;&#34;.format(self.step_name))
 
-        if &#39;build&#39; in runtime_step_config:
-            build = runtime_step_config[&#39;build&#39;]
-        elif &#39;build&#39; in current_step_results:
+        build = self.get_config_value(&#39;build&#39;)
+        if build is None and &#39;build&#39; in current_step_results:
             build = current_step_results[&#39;build&#39;]
-        else:
+        if build is None:
             raise ValueError(
                 &#34;&#34;&#34;No value for (build) provided via runtime flag
                 (build) or from prior step implementer ({0})
@@ -587,9 +569,12 @@ def step_name():
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
