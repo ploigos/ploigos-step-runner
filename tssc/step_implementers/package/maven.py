@@ -128,7 +128,7 @@ from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
 
-from tssc.step_implementers.utils.xml import get_xml_element
+from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml',

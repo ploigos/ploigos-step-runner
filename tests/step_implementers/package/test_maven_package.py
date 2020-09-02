@@ -15,38 +15,38 @@ from tests.helpers.test_utils import run_step_test_with_result_validation
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
     """simulates what mvn does by touching files.
-    
+
     Notes
     -----
-    
+
     Supports
-    
+
     - mvn clean
     - mvn install
-    
+
     """
     target_dir_path = os.path.join(
         os.path.dirname(os.path.abspath(pom_file)),
         artifact_parent_dir)
 
-    
+
     def mvn_side_effect(*args, **kwargs):
         if 'clean' in args:
             if os.path.exists(target_dir_path):
                 os.rmdir(target_dir_path)
-        
+
         if 'install' in args:
             os.mkdir(target_dir_path)
-            
+
             for artifact_name in artifact_names:
                 artifact_path = os.path.join(
                     target_dir_path,
                     artifact_name
                 )
                 Path(artifact_path).touch()
-    
+
     return mvn_side_effect
-        
+
 
 class TestStepImplementerPackageMaven(BaseTSSCTestCase):
     @patch('sh.mvn', create=True)
@@ -67,10 +67,10 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             }
             factory = TSSCFactory(config)
             with self.assertRaisesRegex(
-                    ValueError, 
+                    ValueError,
                     'Given pom file does not exist: .*'):
                 factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True)
     def test_mvn_quickstart_single_jar(self, mvn_mock):
         artifact_id = 'my-app'
@@ -129,11 +129,11 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            
+
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
             mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
-    
+
     @patch('sh.mvn', create=True)
     def test_mvn_quickstart_no_jar(self, mvn_mock):
         artifact_id = 'my-app'
@@ -186,18 +186,18 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            
+
             # NOTE:
             # sort of hacking this test by passing in no artifacts to cause the no artifacts error message
             # because can't figure out how to create a pom that doesn't generate any artifacts
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [])
-            
+
             with self.assertRaisesRegex(
-                    ValueError, 
+                    ValueError,
                     'pom resulted in 0 with expected artifact extensions (.*), this is unsupported'):
-                
+
                     run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-    
+
     @patch('sh.mvn', create=True)
     def test_mvn_multiple_jars(self, mvn_mock):
         artifact_id = 'my-app'
@@ -291,7 +291,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 version=version,
                 package=package
             )
-            
+
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 'target',
@@ -301,12 +301,12 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     artifact_file_name
                 ]
             )
-            
+
             with self.assertRaisesRegex(
-                    ValueError, 
+                    ValueError,
                     'pom resulted in multiple artifacts with expected artifact extensions (.*), this is unsupported'):
                 factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True)
     def test_pom_file_valid_old_empty_jar(self, mvn_mock):
         artifact_id = 'my-app'
@@ -351,11 +351,11 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-    
+
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
             mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
-    
+
     @patch('sh.mvn', create=True)
     def test_pom_file_valid_with_namespace_empty_jar(self, mvn_mock):
         artifact_id = 'my-app'
@@ -375,7 +375,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
     </project>'''.format(artifact_id=artifact_id, version=version), 'utf-8')
             )
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-    
+
             config = {
                 'tssc-config': {
                     'package': {
@@ -407,7 +407,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
             mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
-    
+
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile (default-compile) on project my-app: Compilation failure: Compilation failure'))
     def test_mvn_quickstart_single_jar_java_error(self, mvn_mock):
         with TempDirectory() as temp_dir:
@@ -436,10 +436,10 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             }
             factory = TSSCFactory(config)
             with self.assertRaisesRegex(
-                    RuntimeError, 
+                    RuntimeError,
                     'Error invoking mvn:.*'):
                 factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True)
     def test_default_pom_file_missing(self, mvn_mock):
         config = {
@@ -451,10 +451,10 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 "Given pom file does not exist: pom.xml"):
             factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True)
     def test_runtime_pom_file_missing(self, mvn_mock):
         config = {
@@ -466,10 +466,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 "Given pom file does not exist: does-not-exist-pom.xml"):
-            factory.run_step('package', {'pom-file': 'does-not-exist-pom.xml'})
-    
+
+            factory.config.set_step_config_overrides(
+                'package',
+                {'pom-file': 'does-not-exist-pom.xml'})
+            factory.run_step('package')
+
     @patch('sh.mvn', create=True)
     def test_config_file_pom_file_missing(self, mvn_mock):
         config = {
@@ -484,10 +488,10 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                ValueError, 
+                ValueError,
                 'Given pom file does not exist: does-not-exist.pom'):
             factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True)
     def test_config_file_pom_file_none_value(self, mvn_mock):
         config = {
@@ -502,10 +506,10 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         with self.assertRaisesRegex(
-                AssertionError, 
+                AssertionError,
                 r"The runtime step configuration \(\{'pom-file': None, 'artifact-extensions': \['jar', 'war', 'ear'\], 'artifact-parent-dir': 'target'\}\) is missing the required configuration keys \(\['pom-file'\]\)"):
             factory.run_step('package')
-    
+
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'mock error'))
     def test_mvn_error_return_code(self, mvn_mock):
         artifact_id = 'my-app'
@@ -564,8 +568,8 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            
+
             with self.assertRaisesRegex(
-                    RuntimeError, 
+                    RuntimeError,
                     'Error invoking mvn:.*'):
                 run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
