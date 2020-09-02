@@ -1,6 +1,7 @@
-"""Step Implementer for the 'validate-environment-config' step for configlint.
+"""Step Implementer for the 'validate-environment-config' step for ConfiglintFromArgocd.
 
-Reference:  https://stelligent.github.io/config-lint/#/
+The ConfiglintFromArogcd step takes the output of the Deploy (argocd) step and prepares
+it as input for the Configlint step.
 
 Step Configuration
 ------------------
@@ -11,6 +12,8 @@ Step configuration key(s) for this step:
 |-------------------|----------|---------------------------|-----------
 |                   |          |                           |
 
+.. Note:: No required keys
+
 
 Expected Previous Step Results
 ------------------------------
@@ -20,7 +23,7 @@ Results expected from previous steps:
 | Step Name           |  Key                | Description
 |---------------------|---------------------|------------
 | `deploy`            | `report-artifacts`  | name='argocd'
-|                     |                       path='file.yml'
+|                     |                       path='file:///folder/file.yml'
 
 Results
 -------
@@ -52,39 +55,17 @@ Elements in `report-artifacts` dictionary:
 Examples
 --------
 
-Example: Step Configuration (minimal)
+**Example: Step Configuration (minimal)**
 
     validate-environment-configuration:
-    - implementer: prep-yada
+    - implementer: ConfiglintFromArgocd
 
-Example: Generated Config Lint Call (uses both step configuration and previous results)
-
-    config-lint -verbose
-        -rules rules.yml ./argcd/file.yml
-
-Example: Existing Rules File (minimal)
-    version: 1
-    description: Rules for Kubernetes spec files
-    type: Kubernetes
-    files:
-      - "*.yml"
-    rules:
-    - id: TSSC_LEARN
-      severity: FAILURE
-      message: Deployment must have testing
-      resource: Deployment
-      assertions:
-        - key: spec.template.metadata.annotations
-          op: contains
-          value: '"sidecar.istio.io/inject": false'
-
-Example: Results
+**Example: Results**
 
     'tssc-results': {
         'validate-environment-configuration': {
-            'result': {
-                'success': True,
-                'message': 'config-lint step completed'
+            'options': {
+                'yml_path': '/folder/file.yml'
             }
     }
 
@@ -153,23 +134,7 @@ class ConfiglintFromArgocd(StepImplementer):
         array_list
             Array of configuration keys that are required before running the step.
         """
-        return
-
-    def _validate_runtime_step_config(self, runtime_step_config):
-        """
-        Validates the given `runtime_step_config` against the required step configuration keys.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
-
-        Raises
-        ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
-        """
+        return REQUIRED_CONFIG_KEYS
 
     def _run_step(self, runtime_step_config):
         """
@@ -187,7 +152,7 @@ class ConfiglintFromArgocd(StepImplementer):
             Results of running this step.
         """
 
-        yml_path=''
+        yml_path = ''
         if (self.get_step_results('deploy') and
                 self.get_step_results('deploy').get('report-artifacts')):
             artifacts = self.get_step_results('deploy').get('report-artifacts')

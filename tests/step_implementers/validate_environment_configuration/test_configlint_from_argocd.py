@@ -10,7 +10,7 @@ from tssc.step_implementers.validate_environment_configuration import Configlint
 
 class TestStepImplementerConfiglintFromArgo(unittest.TestCase):
     @patch('sh.config_lint', create=True)
-    def test_configlint_from_missing_artifacts(self, configlint_mock):
+    def test_configlint_from_argocd_missing_artifacts(self, configlint_mock):
         with TempDirectory() as temp_dir:
             yml_file = '''
                empty file

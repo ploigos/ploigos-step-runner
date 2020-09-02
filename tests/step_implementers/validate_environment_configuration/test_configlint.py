@@ -14,22 +14,18 @@ class TestStepImplementerConfiglint(unittest.TestCase):
     @patch('sh.config_lint', create=True)
     def test_configlint_missing_options_and_runtime(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
                 validate-environment-configuration:
                         'badoptions':
                             {
-                                'yml_path':''' + str(yml_path)+'''
+                                'yml_path':''' + yml_path + '''
                             }
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'config-lint.rules')
             config = {
@@ -52,7 +48,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'message': 'configlint step completed'
                         },
                         'options': {
-                            'yml_path': str(yml_path)
+                            'yml_path': yml_path
                         },
                         'report-artifacts': [
                         ]
@@ -62,23 +58,19 @@ class TestStepImplementerConfiglint(unittest.TestCase):
 
             with self.assertRaisesRegex(
                     ValueError,
-                    r'yml_path not found'):
+                    r'yml_path not specified in runtime args or in options'):
                 run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
     def test_configlint_missing_options_and_runtime_and_steps(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'config-lint.rules')
             config = {
@@ -101,7 +93,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'message': 'configlint step completed'
                         },
                         'options': {
-                            'yml_path': str(yml_path)
+                            'yml_path': yml_path
                         },
                         'report-artifacts': [
                         ]
@@ -111,23 +103,19 @@ class TestStepImplementerConfiglint(unittest.TestCase):
 
             with self.assertRaisesRegex(
                     ValueError,
-                    r'yml_path not collected from previous step nor runtime'):
+                    r'yml_path not found in runtime args or in options'):
                 run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
     def test_configlint_using_runtime(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
             yml_path: str = os.path.join(temp_dir.path, 'file.yml')
             tssc_results = '''tssc-results:
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'config-lint.rules')
             config = {
@@ -141,7 +129,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                 }
             }
             runtime_args = {
-                'yml_path': str(yml_path)
+                'yml_path': yml_path
             }
             expected_step_results = {
                 'tssc-results': {
@@ -164,22 +152,18 @@ class TestStepImplementerConfiglint(unittest.TestCase):
     @patch('sh.config_lint', create=True)
     def test_configlint_ok(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
                 validate-environment-configuration:
                         'options':
                             {
-                                'yml_path':''' + str(yml_path)+'''
+                                'yml_path':''' + yml_path + '''
                             }
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'config-lint.rules')
             config = {
@@ -202,7 +186,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'message': 'configlint step completed'
                         },
                         'options': {
-                            'yml_path': str(yml_path)
+                            'yml_path': yml_path
                         },
                         'report-artifacts': [
                         ]
@@ -212,77 +196,20 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                  config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
-    def test_configlint_bad_yml(self, configlint_mock):
-        with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
-            temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
-            tssc_results = '''tssc-results:
-                validate-environment-configuration:
-                        'options':
-                            {
-                                'yml_path': 'bad.yml'
-                            }
-            '''
-            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
-            temp_dir.write('config-lint.rules', configlint_rules.encode())
-            rules = os.path.join(temp_dir.path, 'config-lint.rules')
-            config = {
-                'tssc-config': {
-                    'validate-environment-configuration': {
-                        'implementer': 'Configlint',
-                        'config': {
-                            'rules': rules
-                        }
-                    }
-                }
-            }
-            runtime_args = {
-            }
-            expected_step_results = {
-                'tssc-results': {
-                    'validate-environment-configuration': {
-                        'result': {
-                            'success': True,
-                            'message': 'configlint step completed'
-                        },
-                        'options': {
-                            'yml_path': str(yml_path)
-                        },
-                        'report-artifacts': [
-                        ]
-                    }
-                }
-            }
-            with self.assertRaisesRegex(
-                    ValueError,
-                    r'File not found bad.yml'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
-                                                     config, expected_step_results, runtime_args)
-    @patch('sh.config_lint', create=True)
     def test_configlint_missing_rule(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
                 validate-environment-configuration:
                         'options':
                             {
-                                'yml_path':''' + str(yml_path)+'''
+                                'yml_path':''' + yml_path + '''
                             }
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'badconfig-lint.rules')
             config = {
@@ -305,7 +232,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'message': 'configlint step completed'
                         },
                         'options': {
-                            'yml_path': str(yml_path)
+                            'yml_path': yml_path
                         },
                         'report-artifacts': [
                         ]
@@ -314,82 +241,25 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             }
             with self.assertRaisesRegex(
                     ValueError,
-                    r'Rules file in tssc config not found: ./config-lint.rules'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
-                                                     config, expected_step_results, runtime_args)
-    @patch('sh.config_lint', create=True)
-    def test_configlint_missing_rule_file(self, configlint_mock):
-        with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
-            temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
-            tssc_results = '''tssc-results:
-                validate-environment-configuration:
-                        'options':
-                            {
-                                'yml_path': 'bad.yml'
-                            }
-            '''
-            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
-            temp_dir.write('config-lint.rules', configlint_rules.encode())
-            rules = os.path.join(temp_dir.path, 'config-lint.rules')
-            config = {
-                'tssc-config': {
-                    'validate-environment-configuration': {
-                        'implementer': 'Configlint',
-                        'config': {
-                            'rules': 'missingrules'
-                        }
-                    }
-                }
-            }
-            runtime_args = {
-            }
-            expected_step_results = {
-                'tssc-results': {
-                    'validate-environment-configuration': {
-                        'result': {
-                            'success': True,
-                            'message': 'configlint step completed'
-                        },
-                        'options': {
-                            'yml_path': str(yml_path)
-                        },
-                        'report-artifacts': [
-                        ]
-                    }
-                }
-            }
-            with self.assertRaisesRegex(
-                    ValueError,
-                    r'File not found bad.yml'):
+                    r'Rules file specified in tssc config not found: ./config-lint.rules'):
                 run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
 
     @patch('sh.config_lint', create=True)
     def test_configlint_bad_sh_call(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            yml_file = '''
-               empty file
-            '''
+            yml_file = ''
             temp_dir.write('file.yml', yml_file.encode())
-            yml_path = os.path.join(temp_dir.path, 'file.yml')
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
                 validate-environment-configuration:
                         'options':
                             {
-                                'yml_path':''' + str(yml_path) + '''
+                                'yml_path':''' + yml_path + '''
                             }
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            configlint_rules = '''
-               used for testing existence of file
-            '''
+            configlint_rules = ''
             temp_dir.write('config-lint.rules', configlint_rules.encode())
             rules = os.path.join(temp_dir.path, 'config-lint.rules')
             config = {
@@ -412,7 +282,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'message': 'configlint step completed'
                         },
                         'options': {
-                            'yml_path': str(yml_path)
+                            'yml_path': yml_path
                         },
                         'report-artifacts': [
                         ]
@@ -420,9 +290,59 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                 }
             }
             sh.config_lint.side_effect = sh.ErrorReturnCode('config_lint',
-                                                              b'mock stdout', b'mock error')
+                                                            b'mock stdout', b'mock error')
             with self.assertRaisesRegex(
                     RuntimeError,
                     r'Error invoking config-lint: .*'):
                 run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
-                                                 config, expected_step_results, runtime_args)
+                                                     config, expected_step_results, runtime_args)
+
+    @patch('sh.config_lint', create=True)
+    def test_configlint_missing_yml_file(self, configlint_mock):
+        with TempDirectory() as temp_dir:
+            yml_file = ''
+            temp_dir.write('badfile.yml', yml_file.encode())
+            yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
+            tssc_results = '''tssc-results:
+                validate-environment-configuration:
+                        'options':
+                            {
+                                'yml_path':''' + yml_path + '''
+                            }
+            '''
+            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
+            configlint_rules = ''
+            temp_dir.write('config-lint.rules', configlint_rules.encode())
+            rules = os.path.join(temp_dir.path, 'config-lint.rules')
+            config = {
+                'tssc-config': {
+                    'validate-environment-configuration': {
+                        'implementer': 'Configlint',
+                        'config': {
+                            'rules': rules
+                        }
+                    }
+                }
+            }
+            runtime_args = {
+            }
+            expected_step_results = {
+                'tssc-results': {
+                    'validate-environment-configuration': {
+                        'result': {
+                            'success': True,
+                            'message': 'configlint step completed'
+                        },
+                        'options': {
+                            'yml_path': yml_path
+                        },
+                        'report-artifacts': [
+                        ]
+                    }
+                }
+            }
+            with self.assertRaisesRegex(
+                    ValueError,
+                    r'Specified file in yml_path not found: ' + yml_path):
+                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                                                     config, expected_step_results, runtime_args)

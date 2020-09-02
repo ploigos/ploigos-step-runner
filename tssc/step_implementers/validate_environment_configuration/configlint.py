@@ -1,6 +1,12 @@
 """Step Implementer for the 'validate-environment-config' step for configlint.
 
-Reference:  https://stelligent.github.io/config-lint/#/
+The Configlint step executes the config-lint against yml files for user-defined
+rules.   The inputs to this step include:
+  - Rules defined by the user in a specified file
+    * Reference:  https://stelligent.github.io/config-lint/#/
+  - File path of yml files to lint
+    * Specify as a runtime argument
+    * Or specified as an option
 
 Step Configuration
 ------------------
@@ -9,8 +15,7 @@ Step configuration key(s) for this step:
 
 | Key               | Required | Default                   | Description
 |-------------------|----------|---------------------------|-----------
-| `rules`           | False    | ./config_lint.rules       | Basic Rules file for config_lint
-
+| `rules`           | False    | ./config_lint.rules       | File containing user-defined rules
 
 Expected Previous Step Results
 ------------------------------
@@ -19,9 +24,9 @@ Results expected from previous steps:
 
 | Step Name           |  Key                | Description
 |---------------------|---------------------|------------
-| `validate`          | ``                  | yml_path
-| environment-        |                     |
-| configuration       |                     |
+| `validate`          | `options.yml_path`  | Provides the path to the yml files
+| `environment-`      |                     | to be evaluated
+| `configuration`     |                     |
 
 Results
 -------
@@ -53,28 +58,33 @@ Elements in `report-artifacts` dictionary:
 Examples
 --------
 
-Example: Step Configuration (minimal)
+**Example: Step Configuration (minimal)**
 
     validate-environment-configuration:
+    - implementer: ConfiglintFromArgocd
     - implementer: Configlint
       config:
         rules: 'config_lint.rules'
 
-Example: Generated Config Lint Call (uses both step configuration and previous results)
+.. Note:: The configuration example above uses the ConfiglintFromArgocd step to
+provide the yml_path option.
+
+**Example: Generated Config Lint Call (runtime)**
 
     config-lint -verbose
-        -rules rules.yml ./argcd/file.yml
+        -rules rules.yml /home/user/tssc-working/deploy/file.yml
 
-Example: Existing Rules File (minimal)
+**Example: Existing Rules File (minimal)**
+
     version: 1
     description: Rules for Kubernetes spec files
     type: Kubernetes
     files:
       - "*.yml"
     rules:
-    - id: TSSC_LEARN
+    - id: TSSC_EXAMPLE
       severity: FAILURE
-      message: Deployment must have testing
+      message: Deployment must have istio
       resource: Deployment
       assertions:
         - key: spec.template.metadata.annotations
@@ -89,7 +99,14 @@ Example: Results
                 'success': True,
                 'message': 'config-lint step completed'
             }
+            'options': {
+                'yml_path': '/home/user/tssc-working/file.yml'
+            }
+
     }
+
+.. Note:: The configuration example above used the ConfiglintFromArgocd step to
+provide the yml_path option.
 
 """
 
@@ -109,7 +126,6 @@ REQUIRED_CONFIG_KEYS = {
 
 AUTHENTICATION_CONFIG = {
 }
-
 
 class Configlint(StepImplementer):
     """
@@ -160,22 +176,6 @@ class Configlint(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        """
-        Validates the given `runtime_step_config` against the required step configuration keys.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
-
-        Raises
-        ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
-        """
-
     def _run_step(self, runtime_step_config):
         """
         Runs the TSSC step implemented by this StepImplementer.
@@ -192,7 +192,7 @@ class Configlint(StepImplementer):
             Results of running this step.
         """
 
-        # First priority is runtime_step
+        # Find yml_path
         yml_path = ''
         if 'yml_path' in runtime_step_config:
             yml_path = runtime_step_config['yml_path']
@@ -204,19 +204,19 @@ class Configlint(StepImplementer):
                         yml_path = current_step_results['options']['yml_path']
             except Exception as err:  # pylint: disable=undefined-variable
                 raise ValueError(
-                    'yml_path not collected from previous step nor runtime'
+                    'yml_path not found in runtime args or in options'
                 ) from err
 
         if yml_path == '':
-            raise ValueError(f'yml_path not found: {yml_path}')
+            raise ValueError('yml_path not specified in runtime args or in options')
 
         if not os.path.exists(yml_path):
-            raise ValueError(f'File not found {yml_path}')
+            raise ValueError(f'Specified file in yml_path not found: {yml_path}')
 
         # Required: rules and exists
         rules_file: object = runtime_step_config['rules']
         if not os.path.exists(rules_file):
-            raise ValueError('Rules file in tssc config not found: ' + rules_file)
+            raise ValueError(f'Rules file specified in tssc config not found: {rules_file}')
 
         try:
             # Hint:  Call config-lint with sh.config_lint
