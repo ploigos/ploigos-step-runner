@@ -268,7 +268,7 @@ users:
                 self._update_values_yaml(repo_directory, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
-                                 '{repo}'.format(repo=git_url)
+                                 '{repo}'.format(repo=runtime_step_config.get('helm-config-repo'))
 
                 sh.git.config('--global', 'user.email', self.get_config_value('git-email'),
                               _out=sys.stdout)
