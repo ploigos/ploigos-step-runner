@@ -83,20 +83,18 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_config_file_valid_yaml(self):
-        TSSCFactory.register_step_implementer(FooStepImplementer, True)
         self._run_main_test(['--step', 'foo'], None, [
             {
                 'name': 'tssc-config.yaml',
                 'contents': '''---
                 tssc-config:
                     foo:
-                        implementer: FooStepImplementer
+                        implementer: 'tests.helpers.sample_step_implementers.FooStepImplementer'
                 '''
             }]
         )
 
     def test_config_file_valid_json(self):
-        TSSCFactory.register_step_implementer(FooStepImplementer, True)
         self._run_main_test(['--step', 'foo'], None,[
             {
                 'name': 'tssc-config.json',
@@ -104,7 +102,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     "tssc-config": {
                         "foo": {
-                        "implementer": "FooStepImplementer"
+                        "implementer": 'tests.helpers.sample_step_implementers.FooStepImplementer'
                         }
                     }
                 }
@@ -113,7 +111,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_required_step_config_missing(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(['--step', 'required-step-config-test'], 200, [
             {
                 'name': 'tssc-config.yaml',
@@ -124,14 +121,13 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_required_step_config_pass_via_config_file(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(['--step', 'required-step-config-test'], None,[
             {
                 'name': 'tssc-config.yaml',
                 'contents': '''---
                     tssc-config:
                         required-step-config-test:
-                            implementer: RequiredStepConfigStepImplementer
+                            implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                             config:
                                 required-config-key: "hello world"
                 '''
@@ -139,7 +135,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_required_step_config_pass_via_runtime_arg_missing(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             [
                 '--step', 'required-runtime-step-config-test',
@@ -152,7 +147,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                     tssc-config:
                         'required-runtime-step-config-test':
-                             implementer: RequiredStepConfigStepImplementer
+                             implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                              config: {}
                     '''
                 }
@@ -160,7 +155,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_required_step_config_pass_via_runtime_arg_valid(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             [
                 '--step', 'required-step-config-test',
@@ -173,7 +167,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                     tssc-config:
                         'required-step-config-test':
-                             implementer: RequiredStepConfigStepImplementer
+                             implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                              config: {}
                     '''
                 }
@@ -181,7 +175,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_multiple_config_files_verify_required_key_not_overwritten(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             ['--step', 'required-step-config-test'],
             None,
@@ -191,7 +184,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             required-step-config-test:
-                                implementer: RequiredStepConfigStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
                                     required-config-key: "hello world"
                                     bar: 'test'
@@ -202,7 +195,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             required-step-config-test:
-                                implementer: RequiredStepConfigStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
                                     key2: "goodbye world"
                     '''
@@ -211,7 +204,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_multiple_config_files_verify_expected_merge(self):
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer, True)
         self._run_main_test(
             ['--step', 'write-config-as-results'],
             None,
@@ -221,7 +213,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     key1: "value1"
                                     key2: "value1"
@@ -232,7 +224,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     key3: "value2"
                                     required-config-key: 'value'
@@ -252,7 +244,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_multiple_config_files_dup_keys_error(self):
-        TSSCFactory.register_step_implementer(RequiredStepConfigStepImplementer, True)
         self._run_main_test(
             ['--step', 'required-step-config-test'],
             102,
@@ -262,7 +253,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             required-step-config-test:
-                                implementer: RequiredStepConfigStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
                                     required-config-key: "hello world"
                                     bar: 'test'
@@ -273,7 +264,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             required-step-config-test:
-                                implementer: RequiredStepConfigStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
                                     bar: "goodbye world"
                     '''
@@ -282,8 +273,6 @@ class TestInit(BaseTSSCTestCase):
         )
 
     def test_multiple_config_files_from_dir(self):
-        TSSCFactory.register_step_implementer(WriteConfigAsResultsStepImplementer, True)
-
         args = ['--step', 'write-config-as-results']
 
         with TempDirectory() as temp_dir:
@@ -293,7 +282,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     required-config-key: 'value'
                     '''
@@ -303,7 +292,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     keya: "a"
 
@@ -314,7 +303,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     keyb: "b"
                     '''
@@ -324,7 +313,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     keyc: "c"
                     '''
@@ -334,7 +323,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     keyc2: "c2"
                     '''
@@ -344,7 +333,7 @@ class TestInit(BaseTSSCTestCase):
                     'contents': '''---
                         tssc-config:
                             write-config-as-results:
-                                implementer: WriteConfigAsResultsStepImplementer
+                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
                                     keyd: "d"
                     '''

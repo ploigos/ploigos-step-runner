@@ -123,3 +123,7 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
         return self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())
+
+class NotSubClassOfStepImplementer():
+    pass
+

@@ -129,9 +129,7 @@ Example: Results
 import os
 import sys
 import sh
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'properties': './sonar-project.properties'
@@ -297,7 +295,3 @@ class SonarQube(StepImplementer):
             ]
         }
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(SonarQube)

@@ -33,9 +33,7 @@ Results output by this step.
 import os.path
 import json
 
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
@@ -120,6 +118,3 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
         }
 
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Npm)

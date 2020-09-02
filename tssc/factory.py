@@ -2,11 +2,10 @@
 Factory for creating TSSC workflow and running steps.
 """
 
-from .config import TSSCConfig
-from .exceptions import TSSCException
-
-_IS_DEFAULT_KEY = 'is_default'
-_CLAZZ_KEY = 'clazz'
+from tssc.config import TSSCConfig
+from tssc.exceptions import TSSCException
+from tssc.step_implementer import StepImplementer
+from tssc.utils.reflection import import_and_get_class
 
 class TSSCFactory:
     """
@@ -41,7 +40,7 @@ class TSSCFactory:
         If given config contains any invalid TSSC configurations.
     """
 
-    _step_implementers = {}
+    __DEFAULT_MODULE = 'tssc.step_implementers'
 
     def __init__(
             self,
@@ -58,37 +57,6 @@ class TSSCFactory:
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
         self.work_dir_path = work_dir_path
-
-    @staticmethod
-    def register_step_implementer(implementer_class, is_default=False):
-        """
-        Register a Step Implementer.
-
-        Parameters
-        ----------
-        implementer_class : class
-            Class implimenting the step.
-        is_default : bool, optional
-            True if this should be the default implementer for this step, False other wise.
-            If more then one step implementer is registered as the default for for the
-            same step then the last one to register will win and be the default.
-        """
-
-        step_name = implementer_class.step_name()
-        if step_name not in TSSCFactory._step_implementers:
-            TSSCFactory._step_implementers[step_name] = {}
-
-        # if this is the default, unset any other implimenters of this step as default
-        # NOTE: last one to register as default wins, deal with it
-        if is_default:
-            for step_implementer in \
-                    TSSCFactory._step_implementers[step_name].values():
-                step_implementer[_IS_DEFAULT_KEY] = False
-
-        TSSCFactory._step_implementers[step_name][implementer_class.__name__] = {
-            _CLAZZ_KEY: implementer_class,
-            _IS_DEFAULT_KEY: is_default
-        }
 
     @property
     def config(self):
@@ -125,28 +93,73 @@ class TSSCFactory:
         assert len(sub_step_configs) != 0, \
             f"Can not run step ({step_name}) because no step configuration provided."
 
-        assert step_name in TSSCFactory._step_implementers, \
-            f"No implementers registered for step ({step_name})."
-        step_implementers = TSSCFactory._step_implementers[step_name]
+        # for each sub step in the step config get the step implementer and run it
         for sub_step_config in sub_step_configs:
             sub_step_implementer_name = sub_step_config.sub_step_implementer_name
 
-            if sub_step_implementer_name in step_implementers:
-                # create the StepImplementer instance
-                sub_step = step_implementers[sub_step_implementer_name][_CLAZZ_KEY](
-                    results_dir_path=self.results_dir_path,
-                    results_file_name=self.results_file_name,
-                    work_dir_path=self.work_dir_path,
-                    config=sub_step_config,
-                    environment=environment
-                )
+            step_implementer_class = TSSCFactory.__get_step_implementer_class(
+                step_name,
+                sub_step_implementer_name)
 
-                # run the step
-                sub_step.run_step()
-            else:
-                raise TSSCException(
-                    'No StepImplementer for step'
-                    + ' (' + step_name + ')'
-                    + ' with TSSC config specified implementer name'
-                    + ' (' + sub_step_implementer_name + ')'
-                )
+            # create the StepImplementer instance
+            sub_step = step_implementer_class(
+                results_dir_path=self.results_dir_path,
+                results_file_name=self.results_file_name,
+                work_dir_path=self.work_dir_path,
+                config=sub_step_config,
+                environment=environment
+            )
+
+            # run the step
+            sub_step.run_step()
+
+    @staticmethod
+    def __get_step_implementer_class(step_name, step_implementer_name):
+        """Given a step name and a step implementer name dynamically loads the Class.
+
+        Parameters
+        ----------
+        step_name : str
+            Name of the step to load the given step implementer for.
+            This is only used if the given step_implementer_name does not include
+            a module path.
+        step_implementer_name : str
+            Either the short name of a StepImplementer class which will be dynamically
+            loaded from the 'tssc.step_implementers.{step_name}' module or
+            A class name that includes a dot seperated module name to load the Class from.
+
+        Returns
+        -------
+        StepImplementer
+            Dynamically loaded subclass of StepImplementer for given step name with
+            given step implementer name.
+
+        Raises
+        ------
+        TSSCException
+            If could not find class to load
+            If loaded class is not a subclass of StepImplementer
+        """
+        parts = step_implementer_name.split('.')
+        class_name = parts.pop()
+        module_name = '.'.join(parts)
+
+        if not module_name:
+            step_module_part = step_name.replace('-', '_')
+            module_name = f"{TSSCFactory.__DEFAULT_MODULE}.{step_module_part}"
+
+        clazz = import_and_get_class(module_name, class_name)
+        if not clazz:
+            raise TSSCException(
+                f"Could not dynamically load step ({step_name}) step implementer" +
+                f" ({step_implementer_name}) from module ({module_name})" +
+                f" with class name ({class_name})"
+            )
+        if not issubclass(clazz, StepImplementer):
+            raise TSSCException(
+                f"Step ({step_name}) is configured to use step implementer" +
+                f" ({step_implementer_name}) from module ({module_name}) with" +
+                f" class name ({class_name}), and dynamically loads as class ({clazz})" +
+                f" which is not a subclass of required parent class ({StepImplementer}).")
+
+        return clazz

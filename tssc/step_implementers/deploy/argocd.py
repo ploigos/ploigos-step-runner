@@ -96,9 +96,8 @@ from datetime import datetime
 import shutil
 import sh
 from jinja2 import Environment, FileSystemLoader
-from tssc import TSSCFactory
-from tssc import StepImplementer
-from tssc import DefaultSteps
+
+from tssc import StepImplementer, DefaultSteps
 
 DEFAULT_CONFIG = {
     'values-yaml-directory': './cicd/Deployment',
@@ -534,6 +533,3 @@ users:
     @staticmethod
     def _get_repo_branch():
         return sh.git('rev-parse', '--abbrev-ref', 'HEAD').rstrip() # pylint: disable=too-many-function-args
-
-# register step implementer
-TSSCFactory.register_step_implementer(ArgoCD, True)
