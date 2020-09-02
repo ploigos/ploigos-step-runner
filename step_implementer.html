@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.0" />
+<meta name="generator" content="pdoc 0.9.1" />
 <title>tssc.step_implementer API documentation</title>
 <meta name="description" content="Abstract class and helper constants for StepImplementer." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -75,12 +75,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
-    step_config : dict, optional
-        Step configuration.
-    global_config_defaults : dict, optional
-        Global defaults.
-    global_environment_config_defaults : dict, optional
-        Global defaults specific to the current environment.
+    config : TSSCSubStepConfig
+        Configuration for this step.
+    environment : str
+        Environment name to execute this step against
+
+    Attributes
+    __config : TSSCSubStepConfig
+    __environment : str
     &#34;&#34;&#34;
 
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
@@ -91,41 +93,38 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             results_dir_path,
             results_file_name,
             work_dir_path,
-            step_environment_config=None,
-            step_config=None,
-            global_config_defaults=None,
-            global_environment_config_defaults=None):
-
-        if step_environment_config is None:
-            step_environment_config = {}
-        if step_config is None:
-            step_config = {}
-        if global_config_defaults is None:
-            global_config_defaults = {}
-        if global_environment_config_defaults is None:
-            global_environment_config_defaults = {}
+            config,
+            environment=None):
 
         self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
-        self.__step_environment_config = step_environment_config
-        self.__step_config = step_config
-        self.__global_config_defaults = global_config_defaults
-        self.__global_environment_config_defaults = global_environment_config_defaults
+        self.__config = config
+        self.__environment = environment
 
         self.__results_file_path = None
         super().__init__()
 
     @property
-    def step_environment_config(self):
+    def config(self):
         &#34;&#34;&#34;
         Returns
         -------
-        dict
-            Step configuration specific to the current environment.
+        TSSCSubStepConfig
+            Configuration for this step.
         &#34;&#34;&#34;
-        return self.__step_environment_config
+        return self.__config
+
+    @property
+    def environment(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            Environment name to execute this step against
+        &#34;&#34;&#34;
+        return self.__environment
 
     @property
     def step_config(self):
@@ -135,7 +134,27 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Step configuration.
         &#34;&#34;&#34;
-        return self.__step_config
+        return self.config.sub_step_config
+
+    @property
+    def step_config_overrides(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration overrides.
+        &#34;&#34;&#34;
+        return self.config.step_config_overrides
+
+    @property
+    def step_environment_config(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration specific to the current environment.
+        &#34;&#34;&#34;
+        return self.config.get_sub_step_env_config(self.environment)
 
     @property
     def global_config_defaults(self):
@@ -145,7 +164,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Global configuration defaults affecting this step.
         &#34;&#34;&#34;
-        return self.__global_config_defaults
+        return self.config.global_defaults
 
     @property
     def global_environment_config_defaults(self):
@@ -155,7 +174,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Global configuration defaults affecting this step specific to the current environment.
         &#34;&#34;&#34;
-        return self.__global_environment_config_defaults
+
+        if self.environment is not None:
+            defaults_for_env = self.config.get_global_environment_defaults(self.environment)
+        else:
+            defaults_for_env = {}
+
+        return defaults_for_env
 
     @property
     def results_file_path(self):
@@ -179,7 +204,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     def step_name():
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
-
         Returns
         -------
         str
@@ -222,13 +246,11 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     def _run_step(self, runtime_step_config):
         &#34;&#34;&#34;
         Runs the TSSC step implemented by this StepImplementer.
-
         Parameters
         ----------
         runtime_step_config : dict
             Step configuration to use when the StepImplementer runs the step with all of the
             various static, runtime, defaults, and environment configuration munged together.
-
         Returns
         -------
         dict
@@ -264,54 +286,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                 missing_required_config_keys=missing_required_config_keys
             )
 
-    def __create_runtime_step_config(self, step_config_runtime_overrides):
-        &#34;&#34;&#34;
-        Creates the step configuration to use when the StepImplementer runs the step.
-
-        From least precedence to highest precedence.
-
-            1. StepImplementer implementation provided configuration defaults
-               (self.step_implementer_config_defaults)
-            2. Global Configuration Defaults (self.global_config_defaults)
-            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
-            4. Step Configuration ( self.step_config)
-            5. Step Environment Configuration (self.step_environment_config)
-            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
-
-        Parameters
-        ----------
-        step_config_runtime_overrides : dict, optional
-            Configuration for the step passed in at runtime when the step was invoked that will
-            override step configuration coming from any other source.
-
-        Returns
-        -------
-        dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
-        &#34;&#34;&#34;
-        return {
-            **self.step_implementer_config_defaults(),
-            **self.global_config_defaults,
-            **self.global_environment_config_defaults,
-            **self.step_config,
-            **self.step_environment_config,
-            **step_config_runtime_overrides
-        }
-
-    def run_step(self, step_config_runtime_overrides=None):
+    def run_step(self):
         &#34;&#34;&#34;
         Wrapper for running the implemented step.
-
-        Parameters
-        ----------
-        step_config_runtime_overrides : dict, optional
-            Configuration for the step passed in at runtime when the step was invoked that will
-            override step configuration coming from any other source.
         &#34;&#34;&#34;
-
-        step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
-                                            else step_config_runtime_overrides
 
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
 
@@ -333,10 +311,12 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             self.step_environment_config)
         StepImplementer.__print_data(
             &#34;Step Configuration Runtime Overrides&#34;,
-            step_config_runtime_overrides)
+            self.step_config_overrides)
 
         # create the munged runtime step configuration and print
-        runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+        runtime_step_config = self.config.get_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
             runtime_step_config)
@@ -489,7 +469,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             element.
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name())
-        #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
@@ -665,7 +644,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 </dd>
 <dt id="tssc.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>results_dir_path, results_file_name, work_dir_path, step_environment_config=None, step_config=None, global_config_defaults=None, global_environment_config_defaults=None)</span>
+<span>(</span><span>results_dir_path, results_file_name, work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a TSSC step implementer.</p>
@@ -679,12 +658,16 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <dd>Path to the directory to write step working files to</dd>
 <dt><strong><code>step_environment_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
 <dd>Step configuration specific to the current environment.</dd>
-<dt><strong><code>step_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
-<dd>Step configuration.</dd>
-<dt><strong><code>global_config_defaults</code></strong> :&ensp;<code>dict</code>, optional</dt>
-<dd>Global defaults.</dd>
-<dt><strong><code>global_environment_config_defaults</code></strong> :&ensp;<code>dict</code>, optional</dt>
-<dd>Global defaults specific to the current environment.</dd>
+<dt><strong><code>config</code></strong> :&ensp;<code>TSSCSubStepConfig</code></dt>
+<dd>Configuration for this step.</dd>
+<dt><strong><code>environment</code></strong> :&ensp;<code>str</code></dt>
+<dd>Environment name to execute this step against</dd>
+<dt><strong><code>Attributes</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>__config</code></strong> :&ensp;<code>TSSCSubStepConfig</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>__environment</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -704,12 +687,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
-    step_config : dict, optional
-        Step configuration.
-    global_config_defaults : dict, optional
-        Global defaults.
-    global_environment_config_defaults : dict, optional
-        Global defaults specific to the current environment.
+    config : TSSCSubStepConfig
+        Configuration for this step.
+    environment : str
+        Environment name to execute this step against
+
+    Attributes
+    __config : TSSCSubStepConfig
+    __environment : str
     &#34;&#34;&#34;
 
     __TSSC_RESULTS_KEY = &#39;tssc-results&#39;
@@ -720,41 +705,38 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             results_dir_path,
             results_file_name,
             work_dir_path,
-            step_environment_config=None,
-            step_config=None,
-            global_config_defaults=None,
-            global_environment_config_defaults=None):
-
-        if step_environment_config is None:
-            step_environment_config = {}
-        if step_config is None:
-            step_config = {}
-        if global_config_defaults is None:
-            global_config_defaults = {}
-        if global_environment_config_defaults is None:
-            global_environment_config_defaults = {}
+            config,
+            environment=None):
 
         self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
-        self.__step_environment_config = step_environment_config
-        self.__step_config = step_config
-        self.__global_config_defaults = global_config_defaults
-        self.__global_environment_config_defaults = global_environment_config_defaults
+        self.__config = config
+        self.__environment = environment
 
         self.__results_file_path = None
         super().__init__()
 
     @property
-    def step_environment_config(self):
+    def config(self):
         &#34;&#34;&#34;
         Returns
         -------
-        dict
-            Step configuration specific to the current environment.
+        TSSCSubStepConfig
+            Configuration for this step.
         &#34;&#34;&#34;
-        return self.__step_environment_config
+        return self.__config
+
+    @property
+    def environment(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            Environment name to execute this step against
+        &#34;&#34;&#34;
+        return self.__environment
 
     @property
     def step_config(self):
@@ -764,7 +746,27 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Step configuration.
         &#34;&#34;&#34;
-        return self.__step_config
+        return self.config.sub_step_config
+
+    @property
+    def step_config_overrides(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration overrides.
+        &#34;&#34;&#34;
+        return self.config.step_config_overrides
+
+    @property
+    def step_environment_config(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        dict
+            Step configuration specific to the current environment.
+        &#34;&#34;&#34;
+        return self.config.get_sub_step_env_config(self.environment)
 
     @property
     def global_config_defaults(self):
@@ -774,7 +776,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Global configuration defaults affecting this step.
         &#34;&#34;&#34;
-        return self.__global_config_defaults
+        return self.config.global_defaults
 
     @property
     def global_environment_config_defaults(self):
@@ -784,7 +786,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         dict
             Global configuration defaults affecting this step specific to the current environment.
         &#34;&#34;&#34;
-        return self.__global_environment_config_defaults
+
+        if self.environment is not None:
+            defaults_for_env = self.config.get_global_environment_defaults(self.environment)
+        else:
+            defaults_for_env = {}
+
+        return defaults_for_env
 
     @property
     def results_file_path(self):
@@ -808,7 +816,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     def step_name():
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
-
         Returns
         -------
         str
@@ -851,13 +858,11 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     def _run_step(self, runtime_step_config):
         &#34;&#34;&#34;
         Runs the TSSC step implemented by this StepImplementer.
-
         Parameters
         ----------
         runtime_step_config : dict
             Step configuration to use when the StepImplementer runs the step with all of the
             various static, runtime, defaults, and environment configuration munged together.
-
         Returns
         -------
         dict
@@ -893,54 +898,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                 missing_required_config_keys=missing_required_config_keys
             )
 
-    def __create_runtime_step_config(self, step_config_runtime_overrides):
-        &#34;&#34;&#34;
-        Creates the step configuration to use when the StepImplementer runs the step.
-
-        From least precedence to highest precedence.
-
-            1. StepImplementer implementation provided configuration defaults
-               (self.step_implementer_config_defaults)
-            2. Global Configuration Defaults (self.global_config_defaults)
-            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
-            4. Step Configuration ( self.step_config)
-            5. Step Environment Configuration (self.step_environment_config)
-            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
-
-        Parameters
-        ----------
-        step_config_runtime_overrides : dict, optional
-            Configuration for the step passed in at runtime when the step was invoked that will
-            override step configuration coming from any other source.
-
-        Returns
-        -------
-        dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
-        &#34;&#34;&#34;
-        return {
-            **self.step_implementer_config_defaults(),
-            **self.global_config_defaults,
-            **self.global_environment_config_defaults,
-            **self.step_config,
-            **self.step_environment_config,
-            **step_config_runtime_overrides
-        }
-
-    def run_step(self, step_config_runtime_overrides=None):
+    def run_step(self):
         &#34;&#34;&#34;
         Wrapper for running the implemented step.
-
-        Parameters
-        ----------
-        step_config_runtime_overrides : dict, optional
-            Configuration for the step passed in at runtime when the step was invoked that will
-            override step configuration coming from any other source.
         &#34;&#34;&#34;
-
-        step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
-                                            else step_config_runtime_overrides
 
         StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
 
@@ -962,10 +923,12 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             self.step_environment_config)
         StepImplementer.__print_data(
             &#34;Step Configuration Runtime Overrides&#34;,
-            step_config_runtime_overrides)
+            self.step_config_overrides)
 
         # create the munged runtime step configuration and print
-        runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+        runtime_step_config = self.config.get_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
             runtime_step_config)
@@ -1118,7 +1081,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             element.
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name())
-        #return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY][self.step_name()]
 
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
@@ -1276,8 +1238,9 @@ def step_implementer_config_defaults():
 <span>def <span class="ident">step_name</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Getter for the TSSC Step name implemented by this step.</p>
-<h2 id="returns">Returns</h2>
+<div class="desc"><p>Getter for the TSSC Step name implemented by this step.
+Returns</p>
+<hr>
 <dl>
 <dt><code>str</code></dt>
 <dd>TSSC step name implemented by this step.</dd>
@@ -1291,7 +1254,6 @@ def step_implementer_config_defaults():
 def step_name():
     &#34;&#34;&#34;
     Getter for the TSSC Step name implemented by this step.
-
     Returns
     -------
     str
@@ -1302,6 +1264,50 @@ def step_name():
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="tssc.step_implementer.StepImplementer.config"><code class="name">var <span class="ident">config</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>TSSCSubStepConfig</code></dt>
+<dd>Configuration for this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def config(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    TSSCSubStepConfig
+        Configuration for this step.
+    &#34;&#34;&#34;
+    return self.__config</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.environment"><code class="name">var <span class="ident">environment</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Environment name to execute this step against</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def environment(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str
+        Environment name to execute this step against
+    &#34;&#34;&#34;
+    return self.__environment</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.global_config_defaults"><code class="name">var <span class="ident">global_config_defaults</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
@@ -1321,7 +1327,7 @@ def global_config_defaults(self):
     dict
         Global configuration defaults affecting this step.
     &#34;&#34;&#34;
-    return self.__global_config_defaults</code></pre>
+    return self.config.global_defaults</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.global_environment_config_defaults"><code class="name">var <span class="ident">global_environment_config_defaults</span></code></dt>
@@ -1343,7 +1349,13 @@ def global_environment_config_defaults(self):
     dict
         Global configuration defaults affecting this step specific to the current environment.
     &#34;&#34;&#34;
-    return self.__global_environment_config_defaults</code></pre>
+
+    if self.environment is not None:
+        defaults_for_env = self.config.get_global_environment_defaults(self.environment)
+    else:
+        defaults_for_env = {}
+
+    return defaults_for_env</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.results_file_path"><code class="name">var <span class="ident">results_file_path</span></code></dt>
@@ -1395,7 +1407,29 @@ def step_config(self):
     dict
         Step configuration.
     &#34;&#34;&#34;
-    return self.__step_config</code></pre>
+    return self.config.sub_step_config</code></pre>
+</details>
+</dd>
+<dt id="tssc.step_implementer.StepImplementer.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Step configuration overrides.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def step_config_overrides(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    dict
+        Step configuration overrides.
+    &#34;&#34;&#34;
+    return self.config.step_config_overrides</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.step_environment_config"><code class="name">var <span class="ident">step_environment_config</span></code></dt>
@@ -1417,7 +1451,7 @@ def step_environment_config(self):
     dict
         Step configuration specific to the current environment.
     &#34;&#34;&#34;
-    return self.__step_environment_config</code></pre>
+    return self.config.get_sub_step_env_config(self.environment)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1573,33 +1607,18 @@ element.</dd>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.run_step"><code class="name flex">
-<span>def <span class="ident">run_step</span></span>(<span>self, step_config_runtime_overrides=None)</span>
+<span>def <span class="ident">run_step</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Wrapper for running the implemented step.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>step_config_runtime_overrides</code></strong> :&ensp;<code>dict</code>, optional</dt>
-<dd>Configuration for the step passed in at runtime when the step was invoked that will
-override step configuration coming from any other source.</dd>
-</dl></div>
+<div class="desc"><p>Wrapper for running the implemented step.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_step(self, step_config_runtime_overrides=None):
+<pre><code class="python">def run_step(self):
     &#34;&#34;&#34;
     Wrapper for running the implemented step.
-
-    Parameters
-    ----------
-    step_config_runtime_overrides : dict, optional
-        Configuration for the step passed in at runtime when the step was invoked that will
-        override step configuration coming from any other source.
     &#34;&#34;&#34;
-
-    step_config_runtime_overrides = {} if step_config_runtime_overrides is None \
-                                        else step_config_runtime_overrides
 
     StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
 
@@ -1621,10 +1640,12 @@ override step configuration coming from any other source.</dd>
         self.step_environment_config)
     StepImplementer.__print_data(
         &#34;Step Configuration Runtime Overrides&#34;,
-        step_config_runtime_overrides)
+        self.step_config_overrides)
 
     # create the munged runtime step configuration and print
-    runtime_step_config = self.__create_runtime_step_config(step_config_runtime_overrides)
+    runtime_step_config = self.config.get_runtime_step_config(
+        self.environment,
+        self.step_implementer_config_defaults())
     StepImplementer.__print_data(
         &#34;Runtime Step Configuration&#34;,
         runtime_step_config)
@@ -1794,8 +1815,10 @@ element.</dd>
 <li>
 <h4><code><a title="tssc.step_implementer.StepImplementer" href="#tssc.step_implementer.StepImplementer">StepImplementer</a></code></h4>
 <ul class="">
+<li><code><a title="tssc.step_implementer.StepImplementer.config" href="#tssc.step_implementer.StepImplementer.config">config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.environment" href="#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
@@ -1803,6 +1826,7 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
@@ -1816,7 +1840,7 @@ element.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
 </footer>
 </body>
 </html>

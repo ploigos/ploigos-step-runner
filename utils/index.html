@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
-<title>tssc.step_implementers.package API documentation</title>
-<meta name="description" content="tssc.StepImplementers for the &#39;tag-source&#39; TSSC step …" />
+<title>tssc.utils API documentation</title>
+<meta name="description" content="Useful utilities." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,118 +19,41 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.step_implementers.package</code></h1>
+<h1 class="title">Module <code>tssc.utils</code></h1>
 </header>
 <section id="section-intro">
-<p>tssc.StepImplementers for the 'tag-source' TSSC step.</p>
-<h2 id="step-configuration">Step Configuration</h2>
-<p>All tssc.StepImplementers for this step should
-accept minimally the following configuration options.</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>TODO</code></td>
-<td>TODO</td>
-</tr>
-</tbody>
-</table>
-<h2 id="results">Results</h2>
-<p>All tssc.StepImplementers for this step should
-minimally produce the following step results.</p>
-<table>
-<thead>
-<tr>
-<th>Result Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>artifacts</code></td>
-<td>An array of dictionaries with information on the built artifacts.</td>
-</tr>
-<tr>
-<td>Minimally each dictionary entry should have a <code>path</code> key with the absolute path</td>
-<td></td>
-</tr>
-<tr>
-<td>to the built artifact.</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p><strong>artifacts</strong></p>
-<table>
-<thead>
-<tr>
-<th><code>artifacts</code> Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>path</code></td>
-<td>Absolute path to the built artifact</td>
-</tr>
-</tbody>
-</table>
+<p>Useful utilities.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;tssc.StepImplementers for the &#39;tag-source&#39; TSSC step.
-
-Step Configuration
-------------------
-All tssc.StepImplementers for this step should
-accept minimally the following configuration options.
-
-| Parameter       | Description
-|-----------------|------------
-| `TODO`          | TODO
-
-Results
--------
-All tssc.StepImplementers for this step should
-minimally produce the following step results.
-
-| Result Key       | Description
-|------------------|------------
-| `artifacts`      | An array of dictionaries with information on the built artifacts.
-                     Minimally each dictionary entry should have a `path` key with the absolute path
-                     to the built artifact.
-
-**artifacts**
-
-| `artifacts` Key | Description
-|-----------------|------------
-| `path`          | Absolute path to the built artifact
+<pre><code class="python">&#34;&#34;&#34;
+Useful utilities.
 &#34;&#34;&#34;
 
-from .maven import Maven
-from .npm import NPM
+from. file import *
+from .xml import *
 
 __all__ = [
-    &#39;maven&#39;
+    &#39;file&#39;,
+    &#39;xml&#39;
 ]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="tssc.step_implementers.package.maven" href="maven.html">tssc.step_implementers.package.maven</a></code></dt>
+<dt><code class="name"><a title="tssc.utils.dict" href="dict.html">tssc.utils.dict</a></code></dt>
 <dd>
-<div class="desc"><p>Step Implementer for the package step for Maven …</p></div>
+<div class="desc"><p>Shared utils for dealing with dictionaries.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.step_implementers.package.npm" href="npm.html">tssc.step_implementers.package.npm</a></code></dt>
+<dt><code class="name"><a title="tssc.utils.file" href="file.html">tssc.utils.file</a></code></dt>
 <dd>
-<div class="desc"><p>Step Implementer for the package step for NPM …</p></div>
+<div class="desc"><p>Shared utils for dealing with files.</p></div>
+</dd>
+<dt><code class="name"><a title="tssc.utils.xml" href="xml.html">tssc.utils.xml</a></code></dt>
+<dd>
+<div class="desc"><p>Shared utils for dealing with XML.</p></div>
 </dd>
 </dl>
 </section>
@@ -144,21 +67,19 @@ __all__ = [
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#results">Results</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.step_implementers" href="../index.html">tssc.step_implementers</a></code></li>
+<li><code><a title="tssc" href="../index.html">tssc</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="tssc.step_implementers.package.maven" href="maven.html">tssc.step_implementers.package.maven</a></code></li>
-<li><code><a title="tssc.step_implementers.package.npm" href="npm.html">tssc.step_implementers.package.npm</a></code></li>
+<li><code><a title="tssc.utils.dict" href="dict.html">tssc.utils.dict</a></code></li>
+<li><code><a title="tssc.utils.file" href="file.html">tssc.utils.file</a></code></li>
+<li><code><a title="tssc.utils.xml" href="xml.html">tssc.utils.xml</a></code></li>
 </ul>
 </li>
 </ul>
