@@ -735,7 +735,9 @@ users:
 
             results = {
                 &#39;argocd-app-name&#39;: argocd_app_name,
-                &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory)
+                &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory),
+                &#39;argocd-endpoint-url&#39;: &#39;http://{endpoint}&#39;.format(
+                    endpoint=self._get_endpoint_url(runtime_step_config))
             }
 
         return results
@@ -776,14 +778,15 @@ users:
         argocd_app_name = self._get_app_name(runtime_step_config)
         version = self._get_image_version(runtime_step_config)
         url = self._get_image_url(runtime_step_config)
-        timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
+        endpoint_url = self._get_endpoint_url(runtime_step_config)
 
         jinja_runtime_step_config = {&#39;image_url&#39; : url,
                                      &#39;image_version&#39; : version,
-                                     &#39;timestamp&#39; : timestamp,
+                                     &#39;timestamp&#39; : str(datetime.now()),
                                      &#39;repo_branch&#39; : repo_branch,
-                                     &#39;deployment_namespace&#39; : argocd_app_name}
+                                     &#39;deployment_namespace&#39; : argocd_app_name,
+                                     &#39;endpoint_url&#39; : endpoint_url}
 
         for key in runtime_step_config:
             jinja_runtime_step_config[key.replace(&#39;-&#39;, &#39;_&#39;)] = runtime_step_config[key]
@@ -913,6 +916,14 @@ users:
             app_name = app_name + &#39;-&#39; + runtime_step_config.get(&#39;environment-name&#39;)
 
         return app_name.lower().replace(&#39;/&#39;, &#39;-&#39;).replace(&#39;_&#39;, &#39;-&#39;).replace(&#39;.&#39;, &#39;-&#39;)
+
+    def _get_endpoint_url(self, runtime_step_config):
+        argocd_app_name = self._get_app_name(runtime_step_config)
+        endpoint_url = &#34;{service}.{namespace}.{domain}&#34;.\
+                      format(service=runtime_step_config[&#39;service-name&#39;],
+                      namespace=argocd_app_name,
+                      domain=runtime_step_config[&#39;kube-app-domain&#39;])
+        return endpoint_url
 
     @staticmethod
     def _get_repo_branch():
@@ -1162,7 +1173,9 @@ users:
 
             results = {
                 &#39;argocd-app-name&#39;: argocd_app_name,
-                &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory)
+                &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory),
+                &#39;argocd-endpoint-url&#39;: &#39;http://{endpoint}&#39;.format(
+                    endpoint=self._get_endpoint_url(runtime_step_config))
             }
 
         return results
@@ -1203,14 +1216,15 @@ users:
         argocd_app_name = self._get_app_name(runtime_step_config)
         version = self._get_image_version(runtime_step_config)
         url = self._get_image_url(runtime_step_config)
-        timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
+        endpoint_url = self._get_endpoint_url(runtime_step_config)
 
         jinja_runtime_step_config = {&#39;image_url&#39; : url,
                                      &#39;image_version&#39; : version,
-                                     &#39;timestamp&#39; : timestamp,
+                                     &#39;timestamp&#39; : str(datetime.now()),
                                      &#39;repo_branch&#39; : repo_branch,
-                                     &#39;deployment_namespace&#39; : argocd_app_name}
+                                     &#39;deployment_namespace&#39; : argocd_app_name,
+                                     &#39;endpoint_url&#39; : endpoint_url}
 
         for key in runtime_step_config:
             jinja_runtime_step_config[key.replace(&#39;-&#39;, &#39;_&#39;)] = runtime_step_config[key]
@@ -1340,6 +1354,14 @@ users:
             app_name = app_name + &#39;-&#39; + runtime_step_config.get(&#39;environment-name&#39;)
 
         return app_name.lower().replace(&#39;/&#39;, &#39;-&#39;).replace(&#39;_&#39;, &#39;-&#39;).replace(&#39;.&#39;, &#39;-&#39;)
+
+    def _get_endpoint_url(self, runtime_step_config):
+        argocd_app_name = self._get_app_name(runtime_step_config)
+        endpoint_url = &#34;{service}.{namespace}.{domain}&#34;.\
+                      format(service=runtime_step_config[&#39;service-name&#39;],
+                      namespace=argocd_app_name,
+                      domain=runtime_step_config[&#39;kube-app-domain&#39;])
+        return endpoint_url
 
     @staticmethod
     def _get_repo_branch():
