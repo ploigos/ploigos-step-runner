@@ -24,14 +24,12 @@
 <section id="section-intro">
 <p>Step Implementer for the push-artifacts step for Maven.</p>
 <h2 id="step-configuration">Step Configuration</h2>
-<p>Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.</p>
+<p>Step configuration key(s) for this step:</p>
 <table>
 <thead>
 <tr>
-<th>Configuration Key</th>
-<th>Required?</th>
+<th>Key</th>
+<th>Required</th>
 <th>Default</th>
 <th>Description</th>
 </tr>
@@ -40,30 +38,31 @@ from runtime configuration.</p>
 <tr>
 <td><code>url</code></td>
 <td>True</td>
-<td></td>
-<td>URL to the artifact repository to push the artifact to.</td>
+<td>N/A</td>
+<td>URL to the artifact repository</td>
 </tr>
 <tr>
 <td><code>user</code></td>
 <td>False</td>
-<td></td>
-<td>User to authenticate with the artifact repository.</td>
+<td>N/A</td>
+<td>Repository user for authenication</td>
 </tr>
 <tr>
 <td><code>password</code></td>
 <td>False</td>
-<td></td>
-<td>Password to authenticate with the artifact repository.</td>
+<td>N/A</td>
+<td>Resository password for authentication</td>
 </tr>
 </tbody>
 </table>
+<p><code>user</code> and <code>password</code> can be specifed as runtime arguments.</p>
 <h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
-<p>Results expected from previous steps that this step requires.</p>
+<p>Results expected from previous steps:</p>
 <table>
 <thead>
 <tr>
 <th>Step Name</th>
-<th>Result Key</th>
+<th>Key</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -71,37 +70,66 @@ from runtime configuration.</p>
 <tr>
 <td><code>generate-metadata</code></td>
 <td><code>version</code></td>
-<td>TODO</td>
+<td>The version to be used to deploy to artifactory.</td>
 </tr>
 <tr>
 <td><code>package</code></td>
 <td><code>artifacts</code></td>
+<td>Artifacts is an array of <code>artifact</code>.</td>
+</tr>
+<tr>
 <td></td>
+<td></td>
+<td>Each element of an <code>artifact</code> will be used</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>as a parameter to deploy to artifactory:</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>* artifact.group-id</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>* artifact.artifact-id</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>* artifact.path</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>* artifact.package-type</td>
 </tr>
 </tbody>
 </table>
 <h2 id="results">Results</h2>
-<p>Results output by this step.</p>
+<p>Results output by this step:</p>
 <table>
 <thead>
 <tr>
-<th>Result Key</th>
+<th>Key</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>artifacts</code></td>
-<td>An array of dictionaries with information on the pushed artifacts.</td>
+<td>An array of dictionaries describing the push results</td>
 </tr>
 </tbody>
 </table>
-<p><strong>artifacts</strong>
-Keys in the dictionary elements in the <code>artifacts</code> array in the step results.</p>
+<p>Elements in the <code>artifacts</code> dictionary:</p>
 <table>
 <thead>
 <tr>
-<th><code>artifacts</code> Key</th>
+<th>Elements</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -128,6 +156,36 @@ Keys in the dictionary elements in the <code>artifacts</code> array in the step 
 </tr>
 </tbody>
 </table>
+<h2 id="examples">Examples</h2>
+<p>Example: Step Configuration (minimal)</p>
+<pre><code>push-artifacts:
+- implementer: Maven
+  config:
+    url: &lt;http://artifactory.company.com/repo&gt;
+</code></pre>
+<p>Example: Generated Maven Deploy (uses both step configuration and previous results)</p>
+<pre><code>mvn
+  deploy:deploy-file'
+  -Durl=url
+  -Dversion=generate-metadata.version
+  -DgroupId=package.artifact.group-id
+  -DartifactId=package.artifact.artifact-id
+  -Dfile=package.artifact.path
+  -Dpackaging=package.artifact.package-type
+</code></pre>
+<p>Example: Results</p>
+<pre><code>'tssc-results': {
+    'artifacts': [
+         {
+         'path':''
+         'artifact-id': ''
+         'group-id': ''
+         'package-type': ''
+         'version': ''
+         }
+    ]
+}
+</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -137,46 +195,86 @@ Keys in the dictionary elements in the <code>artifacts</code> array in the step 
 Step Configuration
 ------------------
 
-Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Step configuration key(s) for this step:
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `url`             | True      |         | URL to the artifact repository to push the artifact to.
-| `user`            | False     |         | User to authenticate with the artifact repository.
-| `password`        | False     |         | Password to authenticate with the artifact repository.
+| Key                 | Required | Default | Description
+|---------------------|----------|---------|------------
+| `url`               | True     | N/A     | URL to the artifact repository
+| `user`              | False    | N/A     | Repository user for authenication
+| `password`          | False    | N/A     | Resository password for authentication
 
+`user` and `password` can be specifed as runtime arguments.
 
 Expected Previous Step Results
 ------------------------------
 
-Results expected from previous steps that this step requires.
+Results expected from previous steps:
 
-| Step Name           | Result Key  | Description
-|---------------------|-------------|------------
-| `generate-metadata` | `version`   | TODO
-| `package`           | `artifacts` |
+| Step Name           |  Key               | Description
+|---------------------|--------------------|------------
+| `generate-metadata` | `version`          | The version to be used to deploy to artifactory.
+| `package`           | `artifacts`        | Artifacts is an array of `artifact`.
+|                     |                    | Each element of an `artifact` will be used
+|                     |                    | as a parameter to deploy to artifactory:
+|                     |                    | * artifact.group-id
+|                     |                    | * artifact.artifact-id
+|                     |                    | * artifact.path
+|                     |                    | * artifact.package-type
 
 Results
 -------
 
-Results output by this step.
+Results output by this step:
 
-| Result Key  | Description
-|-------------|------------
-| `artifacts` | An array of dictionaries with information on the pushed artifacts.
+| Key             | Description
+|-----------------|------------
+| `artifacts`     | An array of dictionaries describing the push results
 
-**artifacts**
-Keys in the dictionary elements in the `artifacts` array in the step results.
+Elements in the `artifacts` dictionary:
 
-| `artifacts` Key | Description
+| Elements        | Description
 |-----------------|------------
 | `url`           | URL to the artifact pushed to the artifact repository
 | `path`          | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`   | Maven artifact ID pushed to the artifact repository
 | `group-id`      | Maven group ID pushed to the artifact repository
 | `version`       | Version pushed to the artifact repository
+
+Examples
+--------
+
+Example: Step Configuration (minimal)
+
+    push-artifacts:
+    - implementer: Maven
+      config:
+        url: http://artifactory.company.com/repo
+
+Example: Generated Maven Deploy (uses both step configuration and previous results)
+
+    mvn
+      deploy:deploy-file&#39;
+      -Durl=url
+      -Dversion=generate-metadata.version
+      -DgroupId=package.artifact.group-id
+      -DartifactId=package.artifact.artifact-id
+      -Dfile=package.artifact.path
+      -Dpackaging=package.artifact.package-type
+
+Example: Results
+
+    &#39;tssc-results&#39;: {
+        &#39;artifacts&#39;: [
+             {
+             &#39;path&#39;:&#39;&#39;
+             &#39;artifact-id&#39;: &#39;&#39;
+             &#39;group-id&#39;: &#39;&#39;
+             &#39;package-type&#39;: &#39;&#39;
+             &#39;version&#39;: &#39;&#39;
+             }
+        ]
+    }
+
 &#34;&#34;&#34;
 import re
 import sys
@@ -665,6 +763,7 @@ def step_name():
 <li><a href="#step-configuration">Step Configuration</a></li>
 <li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
 <li><a href="#results">Results</a></li>
+<li><a href="#examples">Examples</a></li>
 </ul>
 </div>
 <ul id="index">

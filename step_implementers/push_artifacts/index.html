@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.1" />
 <title>tssc.step_implementers.push_artifacts API documentation</title>
-<meta name="description" content="tssc.StepImplementers for the &#39;tag-source&#39; TSSC step …" />
+<meta name="description" content="tssc.StepImplementers for the &#39;push-artifacts&#39; TSSC step …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,14 +22,14 @@
 <h1 class="title">Module <code>tssc.step_implementers.push_artifacts</code></h1>
 </header>
 <section id="section-intro">
-<p>tssc.StepImplementers for the 'tag-source' TSSC step.</p>
+<p>tssc.StepImplementers for the 'push-artifacts' TSSC step.</p>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>All tssc.StepImplementers for this step should
 accept minimally the following configuration options.</p>
 <table>
 <thead>
 <tr>
-<th>Configuration Key</th>
+<th>Key</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -54,7 +54,7 @@ minimally produce the following step results.</p>
 <table>
 <thead>
 <tr>
-<th>Result Key</th>
+<th>Key</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -65,54 +65,32 @@ minimally produce the following step results.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>artifacts</strong>
-Keys in the dictionary elements in the <code>artifacts</code> array in the step results.</p>
-<table>
-<thead>
-<tr>
-<th><code>artifacts</code> Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>url</code></td>
-<td>URL to the artifact pushed to the artifact repository</td>
-</tr>
-</tbody>
-</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;tssc.StepImplementers for the &#39;tag-source&#39; TSSC step.
+<pre><code class="python">&#34;&#34;&#34;tssc.StepImplementers for the &#39;push-artifacts&#39; TSSC step.
 
 Step Configuration
 ------------------
 All tssc.StepImplementers for this step should
 accept minimally the following configuration options.
 
-| Configuration Key | Description
-|-------------------|------------
-| `url`             | URL to the artifact repository to push the artifact to.
-| `user`            | User to authenticate with the artifact repository.
-| `password`        | Password to authenticate with the artifact repository.
+| Key                 | Description
+|---------------------|------------
+| `url`               | URL to the artifact repository to push the artifact to.
+| `user`              | User to authenticate with the artifact repository.
+| `password`          | Password to authenticate with the artifact repository.
 
 Results
 -------
 All tssc.StepImplementers for this step should
 minimally produce the following step results.
 
-| Result Key       | Description
-|------------------|------------
-| `artifacts`      | An array of dictionaries with information on the pushed artifacts.
+| Key                 | Description
+|---------------------|------------
+| `artifacts`         | An array of dictionaries with information on the pushed artifacts.
 
-**artifacts**
-Keys in the dictionary elements in the `artifacts` array in the step results.
-
-| `artifacts` Key | Description
-|-----------------|------------
-| `url`           | URL to the artifact pushed to the artifact repository
 &#34;&#34;&#34;
 
 from .maven import Maven
