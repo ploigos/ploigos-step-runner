@@ -1,7 +1,7 @@
 """Step Implementer for the 'validate-environment-config' step for ConfiglintFromArgocd.
 
 The ConfiglintFromArogcd step takes the output of the Deploy (argocd) step and prepares
-it as input for the Configlint step.
+it as input for the Configlint step.  
 
 Step Configuration
 ------------------
@@ -22,7 +22,7 @@ Results expected from previous steps:
 
 | Step Name           |  Key                | Description
 |---------------------|---------------------|------------
-| `deploy`            | `report-artifacts`  | name='argocd'
+| `deploy`            | `report-artifacts`  | name='argocd-result-set'
 |                     |                     | path='file:///folder/file.yml'
 
 Results
