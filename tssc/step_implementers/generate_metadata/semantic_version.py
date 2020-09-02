@@ -175,15 +175,8 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         """
         return []
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -193,34 +186,32 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         app_version = None
         pre_release = None
         build = None
-        release_branch = runtime_step_config['release-branch']
+        release_branch = self.get_config_value('release-branch')
 
         current_step_results = self.current_step_results()
-        if 'app-version' in runtime_step_config:
-            app_version = runtime_step_config['app-version']
-        elif 'app-version' in current_step_results:
+
+        app_version = self.get_config_value('app-version')
+        if app_version is None and 'app-version' in current_step_results:
             app_version = current_step_results['app-version']
-        else:
+        if app_version is None:
             raise ValueError(
                 """No value for (app-version) provided via runtime flag
                 (app-version) or from prior step implementer ({0}).
                 """.format(self.step_name))
 
-        if 'pre-release' in runtime_step_config:
-            pre_release = runtime_step_config['pre-release']
-        elif 'pre-release' in current_step_results:
+        pre_release = self.get_config_value('pre-release')
+        if pre_release is None and 'pre-release' in current_step_results:
             pre_release = current_step_results['pre-release']
-        else:
+        if pre_release is None:
             raise ValueError(
                 """No value for (pre_release) provided via runtime flag
                 (pre-release) or from prior step implementer ({0})
                 """.format(self.step_name))
 
-        if 'build' in runtime_step_config:
-            build = runtime_step_config['build']
-        elif 'build' in current_step_results:
+        build = self.get_config_value('build')
+        if build is None and 'build' in current_step_results:
             build = current_step_results['build']
-        else:
+        if build is None:
             raise ValueError(
                 """No value for (build) provided via runtime flag
                 (build) or from prior step implementer ({0})

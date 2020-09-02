@@ -94,22 +94,15 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
         dict
             Results of running this step.
         """
-        package_file = runtime_step_config['package-file']
+        package_file = self.get_config_value('package-file')
 
         # verify runtime config
         if not os.path.exists(package_file):

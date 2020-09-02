@@ -812,7 +812,50 @@ class TSSCSubStepConfig:
                     f" for sub step ({self.sub_step_name}) of step ({self.step_name}): {error}"
                 ) from error
 
-    def get_runtime_step_config(self, environment=None, defaults=None):
+    def get_config_value(self, key, environment=None, defaults=None):
+        """Get the configuration value for a given configuration key from the
+        merged set of configuration sources.
+
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
+        Also See
+        --------
+        get_copy_of_runtime_step_config
+
+        Parameters
+        ----------
+        key : str
+            Key to get the configuration value for.
+        environment : str, optional
+            Environment to include the configuration for if running in the context of
+            a specific environment.
+        defaults : dict, optional
+            If no value for the given configuration key found in any of the configuration
+            sources then use these defaults as last resort.
+
+        Returns
+        -------
+        str, int, dict, list, or bool or None
+            Value of the given configuration key or None if one does not exist
+            for this sub step in the given context with the given defaults.
+        """
+        runtime_step_config = self.__merge_runtime_step_config(environment, defaults)
+
+        if key in runtime_step_config:
+            value = copy.deepcopy(runtime_step_config[key])
+        else:
+            value = None
+
+        return value
+
+    def get_copy_of_runtime_step_config(self, environment=None, defaults=None):
         """Take all of the context about this sub step merges together a single dictionary
         with all of the configuration for a given step.
 
@@ -825,6 +868,10 @@ class TSSCSubStepConfig:
             5. Step Environment Configuration (self.step_environment_config)
             6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
 
+        Also See
+        --------
+        get_config_value
+
         Parameters
         ----------
         environment : str, optional
@@ -836,15 +883,51 @@ class TSSCSubStepConfig:
         Returns
         -------
         dict
-            TODO
+            A deep copy of the merged runtime step configuration
         """
         defaults = defaults if defaults else {}
 
-        return copy.deepcopy({
+        return copy.deepcopy(self.__merge_runtime_step_config(environment, defaults))
+
+    def __merge_runtime_step_config(self, environment=None, defaults=None):
+        """Take all of the context about this sub step merges together a single dictionary
+        with all of the configuration for a given step.
+
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Step Configuration ( self.step_config)
+            5. Step Environment Configuration (self.step_environment_config)
+            6. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
+        Notes
+        -----
+        This is not intended to be accessed outside of this class since it gives direct access
+        to the underlying dictionaries which could in theory be changed, which would not be the
+        intended use.
+
+        Parameters
+        ----------
+        environment : str, optional
+            Environment to get the runtime step configuration for
+        defaults : dict, optional
+            Defaults to use if no other configuration specified from any other source
+            for each given key.
+
+        Returns
+        -------
+        dict
+            Merged runtime step configuration
+        """
+        defaults = defaults if defaults else {}
+
+        return {
             **defaults,
             **self.global_defaults,
             **self.get_global_environment_defaults(environment),
             **self.sub_step_config,
             **self.get_sub_step_env_config(environment),
             **self.step_config_overrides,
-        })
+        }

@@ -67,7 +67,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -117,7 +116,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.login.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
     def test_deploy_git_username_missing(self):
 
@@ -193,7 +192,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -238,9 +236,9 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                r"No image url was specified"):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    r"No image url was specified"):
+                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -295,7 +293,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -341,7 +338,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -398,7 +401,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -448,7 +450,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             shutil_mock.side_effect = OSError
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(
+                    temp_dir=temp_dir,
+                    step_name='deploy',
+                    config=config,
+                    expected_step_results=expected_step_results,
+                    runtime_args=runtime_args,
+                    environment=environment_name)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -500,7 +508,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -522,6 +529,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -534,9 +542,9 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                        'argocd-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
+                        'config-repo-git-tag' :  f'{git_tag}.HASH'
                     }
                 }
             }
@@ -549,7 +557,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.side_effect=self.git_rev_parse_side_effect
             argocd_mock.app.get.side_effect = sh.ErrorReturnCode_1('argocd', b'stdout', b'stderror')
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='deploy',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args,
+                environment=environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -627,7 +641,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -677,7 +690,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.checkout.side_effect = [sh.ErrorReturnCode('git', b'stdout', b'stderror'), None]
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -736,7 +755,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -784,7 +802,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -843,7 +867,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -893,7 +916,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.commit.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -1041,7 +1070,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1087,9 +1115,15 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                'For a http:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    'For a http:// git url, you need to also provide username/password pair'):
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
@@ -1138,7 +1172,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1184,9 +1217,15 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                ValueError,
-                'For a https:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                    ValueError,
+                    'For a https:// git url, you need to also provide username/password pair'):
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
 
     @patch('sh.git', create=True)
@@ -1237,7 +1276,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1285,7 +1323,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
 
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1353,7 +1397,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1400,7 +1443,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1431,7 +1480,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         image_url = 'quay.io/tssc/myimage'
         helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
         argocd_api = 'http://argocd.example.com'
-        argocd_sync_timeout_seconds = '60'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -1463,7 +1511,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1510,7 +1557,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1573,7 +1626,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1620,7 +1672,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1682,7 +1740,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1731,7 +1788,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)
 
     @staticmethod
     def git_rev_parse_side_effect(*args, **kwargs):
@@ -1788,7 +1851,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1837,7 +1899,13 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'deploy',
+                config,
+                expected_step_results,
+                runtime_args,
+                environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -1900,7 +1968,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
                         'kube-app-domain' : kube_app_domain,
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1952,5 +2019,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.cluster.add.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
-
+                run_step_test_with_result_validation(
+                    temp_dir,
+                    'deploy',
+                    config,
+                    expected_step_results,
+                    runtime_args,
+                    environment_name)

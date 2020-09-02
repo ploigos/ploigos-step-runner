@@ -37,7 +37,7 @@ class FooStepImplementer(StepImplementer):
         """
         return []
 
-    def _run_step(self, runtime_step_config):
+    def _run_step(self):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
@@ -79,7 +79,7 @@ class RequiredStepConfigStepImplementer(StepImplementer):
             'required-config-key'
         ]
 
-    def _run_step(self, runtime_step_config):
+    def _run_step(self):
         pass
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
@@ -119,5 +119,7 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
         """
         return []
 
-    def _run_step(self, runtime_step_config):
-        return runtime_step_config
+    def _run_step(self):
+        return self.config.get_copy_of_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())

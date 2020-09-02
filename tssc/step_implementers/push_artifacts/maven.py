@@ -173,15 +173,8 @@ class Maven(StepImplementer):
             not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
         ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -191,13 +184,12 @@ class Maven(StepImplementer):
         user = ''
         password = ''
 
-        url = runtime_step_config['url']
+        url = self.get_config_value('url')
 
-        if any(element in runtime_step_config for element in AUTHENTICATION_CONFIG):
-            if(runtime_step_config.get('user') \
-              and runtime_step_config.get('password')):
-                user = runtime_step_config.get('user')
-                password = runtime_step_config.get('password')
+        if self.has_config_value(AUTHENTICATION_CONFIG):
+            if(self.get_config_value('user') and self.get_config_value('password')):
+                user = self.get_config_value('user')
+                password = self.get_config_value('password')
 
         # ----- get generate-metadata items
         # Required: Get the generate-metadata.version

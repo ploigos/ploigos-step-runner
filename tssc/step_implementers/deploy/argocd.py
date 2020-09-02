@@ -194,15 +194,8 @@ class ArgoCD(StepImplementer):
             not any(element in runtime_step_config for element in GIT_AUTHENTICATION_CONFIG) \
         ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self, runtime_step_config):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _run_step(self):
+        """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
         -------
@@ -212,21 +205,18 @@ class ArgoCD(StepImplementer):
 
         try:
             sh.argocd.login( # pylint: disable=no-member
-                runtime_step_config['argocd-api'],
-                '--username=' + runtime_step_config['argocd-username'],
-                '--password=' + runtime_step_config['argocd-password'],
+                self.get_config_value('argocd-api'),
+                '--username=' + self.get_config_value('argocd-username'),
+                '--password=' + self.get_config_value('argocd-password'),
                 '--insecure', _out=sys.stdout)
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error logging in to ArgoCD: {all}".format(all=error)) from error
 
-        kube_api = runtime_step_config['kube-api-uri']
+        kube_api = self.get_config_value('kube-api-uri')
         # If the cluster is an external cluster and an api token was provided,
         # add the cluster to ArgoCD
-        if  kube_api != DEFAULT_CONFIG['kube-api-uri'] and \
-            runtime_step_config.get('kube-api-token'):
-
-            context_name = '{server}-context'.format(server=kube_api)
-
+        if  kube_api != DEFAULT_CONFIG['kube-api-uri']:
+            context_name = f'{kube_api}-context'
             kubeconfig = """
 current-context: {context}
 apiVersion: v1
@@ -250,8 +240,8 @@ users:
     token: {kube_token}
             """.format(context=context_name,
                        kube_api=kube_api,
-                       kube_token=runtime_step_config['kube-api-token'],
-                       skip_tls=str(runtime_step_config['insecure-skip-tls-verify']).lower())
+                       kube_token=self.get_config_value('kube-api-token'),
+                       skip_tls=str(self.get_config_value('insecure-skip-tls-verify').lower()))
 
             with tempfile.NamedTemporaryFile(buffering=0) as temp_file:
                 temp_file.write(bytes(kubeconfig, 'utf-8'))
@@ -266,8 +256,7 @@ users:
                     raise RuntimeError("Error adding cluster to ArgoCD: {cluster}".format(
                         cluster=kube_api)) from error
 
-        values_file_name = 'values-{env}.yaml'.format(env=runtime_step_config['environment-name']) \
-            if runtime_step_config.get('environment-name') else 'values.yaml'
+        values_file_name = f'values-{self.environment}.yaml' if self.environment else 'values.yaml'
 
         # NOTE: In this block the reference app config repo is cloned and checked out to a temp
         #       directory so that it can update the values.yml based on values.yaml.j2 template.
@@ -278,9 +267,9 @@ users:
             results = {}
 
             try:
-                git_url = runtime_step_config.get('helm-config-repo')
+                git_url = self.get_config_value('helm-config-repo')
                 repo_branch = self._get_repo_branch()
-                sh.git.clone(runtime_step_config['helm-config-repo'], repo_directory,
+                sh.git.clone(self.get_config_value('helm-config-repo'), repo_directory,
                              _out=sys.stdout)
 
                 try:
@@ -289,16 +278,16 @@ users:
                 except sh.ErrorReturnCode:
                     sh.git.checkout('-b', repo_branch, _cwd=repo_directory, _out=sys.stdout)
 
-                self._update_values_yaml(repo_directory, runtime_step_config, values_file_name)
+                self._update_values_yaml(repo_directory, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
                                  '{repo}'.format(repo=git_url)
 
-                sh.git.config('--global', 'user.email', runtime_step_config['git-email'],
+                sh.git.config('--global', 'user.email', self.get_config_value('git-email'),
                               _out=sys.stdout)
 
                 sh.git.config('--global', 'user.name',
-                              runtime_step_config['git-friendly-name'],
+                              self.get_config_value('git-friendly-name'),
                               _out=sys.stdout)
 
                 sh.git.add(values_file_name, _cwd=repo_directory,
@@ -313,9 +302,9 @@ users:
             except sh.ErrorReturnCode as error: # pylint: disable=undefined-variable
                 raise RuntimeError("Error invoking git: {all}".format(all=error)) from error
 
-            self._git_tag_and_push(repo_directory, runtime_step_config)
+            self._git_tag_and_push(repo_directory)
 
-            argocd_app_name = self._get_app_name(runtime_step_config)
+            argocd_app_name = self._get_app_name()
 
             try:
                 sh.argocd.app.get(argocd_app_name, _out=sys.stdout) # pylint: disable=no-member
@@ -325,38 +314,40 @@ users:
             repo_branch = self._get_repo_branch()
 
             sync_policy = 'automated' if str(
-                runtime_step_config['argocd-auto-sync']).lower() == 'true' else 'none'
+                self.get_config_value('argocd-auto-sync')).lower() == 'true' else 'none'
 
             sh.argocd.app.create( # pylint: disable=no-member
                 argocd_app_name,
-                '--repo=' + runtime_step_config['helm-config-repo'],
+                '--repo=' + self.get_config_value('helm-config-repo'),
                 '--revision=' + repo_branch,
-                '--path=' + runtime_step_config['argocd-helm-chart-path'],
-                '--dest-server=' + runtime_step_config['kube-api-uri'],
+                '--path=' + self.get_config_value('argocd-helm-chart-path'),
+                '--dest-server=' + self.get_config_value('kube-api-uri'),
                 '--dest-namespace=' + argocd_app_name,
                 '--sync-policy=' + sync_policy,
                 '--values=' + values_file_name,
                 _out=sys.stdout
             )
 
-            sh.argocd.app.sync('--timeout', runtime_step_config['argocd-sync-timeout-seconds'], # pylint: disable=no-member
-                               argocd_app_name,
-                               _out=sys.stdout)
+            sh.argocd.app.sync( # pylint: disable=no-member
+                '--timeout',
+                self.get_config_value('argocd-sync-timeout-seconds'),
+                argocd_app_name,
+                _out=sys.stdout)
 
             results = {
                 'argocd-app-name': argocd_app_name,
                 'config-repo-git-tag' : self._get_tag(repo_directory),
                 'argocd-endpoint-url': 'http://{endpoint}'.format(
-                    endpoint=self._get_endpoint_url(runtime_step_config))
+                    endpoint=self._get_endpoint_url())
             }
 
         return results
 
-    def _get_image_url(self, runtime_step_config):
+    def _get_image_url(self):
         image_url = None
 
-        if runtime_step_config.get('image-url'):
-            image_url = runtime_step_config.get('image-url')
+        if self.get_config_value('image-url'):
+            image_url = self.get_config_value('image-url')
         else:
             if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
             and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get('image-url')):
@@ -367,11 +358,11 @@ users:
                 raise ValueError('No image url was specified')
         return image_url
 
-    def _get_image_version(self, runtime_step_config):
+    def _get_image_version(self):
         image_version = 'latest'
 
-        if runtime_step_config.get('image-version'):
-            image_version = runtime_step_config.get('image-version')
+        if self.get_config_value('image-version'):
+            image_version = self.get_config_value('image-version')
         else:
             if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
             and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get('image-version')):
@@ -381,27 +372,31 @@ users:
                 print('No image version found in metadata, using \"latest\"')
         return image_version
 
-    def _update_values_yaml(self, repo_directory, runtime_step_config, values_file_name):
-        env = Environment(loader=FileSystemLoader(runtime_step_config['values-yaml-directory']),
-                          trim_blocks=True, lstrip_blocks=True)
+    def _update_values_yaml(self, repo_directory, values_file_name): # pylint: disable=too-many-locals
+        env = Environment(
+            loader=FileSystemLoader(self.get_config_value('values-yaml-directory')),
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
 
-        argocd_app_name = self._get_app_name(runtime_step_config)
-        version = self._get_image_version(runtime_step_config)
-        url = self._get_image_url(runtime_step_config)
+        argocd_app_name = self._get_app_name()
+        version = self._get_image_version()
+        url = self._get_image_url()
+        timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
-        endpoint_url = self._get_endpoint_url(runtime_step_config)
-
+        endpoint_url = self._get_endpoint_url()
         jinja_runtime_step_config = {'image_url' : url,
                                      'image_version' : version,
-                                     'timestamp' : str(datetime.now()),
+                                     'timestamp' : timestamp,
                                      'repo_branch' : repo_branch,
                                      'deployment_namespace' : argocd_app_name,
                                      'endpoint_url' : endpoint_url}
 
-        for key in runtime_step_config:
-            jinja_runtime_step_config[key.replace('-', '_')] = runtime_step_config[key]
+        copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
+        for key in copy_of_runtime_step_config:
+            jinja_runtime_step_config[key.replace('-', '_')] = copy_of_runtime_step_config[key]
 
-        template = env.get_template(runtime_step_config['values-yaml-template'])
+        template = env.get_template(self.get_config_value('values-yaml-template'))
 
         rendered_values_file = self.write_temp_file(
             'values.yml',
@@ -429,15 +424,15 @@ users:
 
         return full_tag
 
-    def _git_tag_and_push(self, repo_directory, runtime_step_config):
+    def _git_tag_and_push(self, repo_directory):
         username = None
         password = None
 
-        if any(element in runtime_step_config for element in GIT_AUTHENTICATION_CONFIG):
-            if(runtime_step_config.get('git-username') \
-            and runtime_step_config.get('git-password')):
-                username = runtime_step_config.get('git-username')
-                password = runtime_step_config.get('git-password')
+        if self.has_config_value(GIT_AUTHENTICATION_CONFIG):
+            if(self.get_config_value('git-username') \
+            and self.get_config_value('git-password')):
+                username = self.get_config_value('git-username')
+                password = self.get_config_value('git-password')
             else:
                 raise ValueError(
                     'Both username and password must have ' \
@@ -445,7 +440,7 @@ users:
                 )
         else:
             print('No username/password found, assuming ssh')
-        git_url = runtime_step_config.get('helm-config-repo')
+        git_url = self.get_config_value('helm-config-repo')
         if git_url.startswith('http://'):
             if username and password:
                 self._git_push(repo_directory,
@@ -514,25 +509,26 @@ users:
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value) from error
 
-    def _get_app_name(self, runtime_step_config):
+    def _get_app_name(self):
         repo_branch = self._get_repo_branch()
         app_name = "{organization}-{application}-{service}-{repo_branch}".\
-                   format(organization=runtime_step_config['organization'],
-                          application=runtime_step_config['application-name'],
-                          service=runtime_step_config['service-name'],
+                   format(organization=self.get_config_value('organization'),
+                          application=self.get_config_value('application-name'),
+                          service=self.get_config_value('service-name'),
                           repo_branch=repo_branch)
 
-        if runtime_step_config.get('environment-name'):
-            app_name = app_name + '-' + runtime_step_config.get('environment-name')
+        if self.environment:
+            app_name = app_name + '-' + self.environment
 
         return app_name.lower().replace('/', '-').replace('_', '-').replace('.', '-')
 
-    def _get_endpoint_url(self, runtime_step_config):
-        argocd_app_name = self._get_app_name(runtime_step_config)
-        endpoint_url = "{service}.{namespace}.{domain}".\
-                      format(service=runtime_step_config['service-name'],
-                      namespace=argocd_app_name,
-                      domain=runtime_step_config['kube-app-domain'])
+    def _get_endpoint_url(self):
+        argocd_app_name = self._get_app_name()
+        endpoint_url = "{service}.{namespace}.{domain}".format(
+            service=self.get_config_value('service-name'),
+            namespace=argocd_app_name,
+            domain=self.get_config_value('kube-app-domain')
+        )
         return endpoint_url
 
     @staticmethod
