@@ -1,4 +1,4 @@
-"""tssc.StepImplementers for the 'tag-source' TSSC step.
+"""tssc.StepImplementers for the 'package' TSSC step.
 
 Step Configuration
 ------------------
