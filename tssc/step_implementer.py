@@ -32,7 +32,8 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     PUBLISH_WROKFLOW_RESULTS = 'publish-workflow-results'
 
 
-class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
+class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
     """
     Abstract representation of a TSSC step implementer.
 
