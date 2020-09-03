@@ -41,13 +41,12 @@ Results output by this step.
 
 import sys
 import os
-from xml.etree import ElementTree
-import re
 import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
+from ..utils.xml import get_xml_element_by_path
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -127,15 +126,24 @@ class Maven(StepImplementer):
         fail_on_no_tests = runtime_step_config['fail-on-no-tests']
 
         if not os.path.exists(pom_file):
-            raise ValueError('Given pom file does not exist: ' + pom_file)
+            raise ValueError(f'Given pom file does not exist: {pom_file}')
 
-        maven_surefire_plugin = self.find_reference_in_pom(pom_file, 'maven-surefire-plugin')
+        surefire_path = 'mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId="maven-surefire-plugin"]'
+        maven_surefire_plugin = get_xml_element_by_path(
+            pom_file,
+            surefire_path,
+            default_namespace='mvn'
+        )
         if maven_surefire_plugin is None:
             raise ValueError('Uat dependency "maven-surefire-plugin" missing from POM.')
 
-        reports_dir = self.find_reference_in_pom(pom_file, 'reportsDirectory')
+        reports_dir = get_xml_element_by_path(
+            pom_file,
+            f'{surefire_path}/mvn:configuration/mvn:reportsDirectory',
+            default_namespace='mvn'
+        )
         if reports_dir is not None:
-            test_results_dir = reports_dir
+            test_results_dir = reports_dir.text
         else:
             test_results_dir = os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
@@ -193,31 +201,6 @@ class Maven(StepImplementer):
                 ]
             }
         return results
-
-    @staticmethod
-    def find_reference_in_pom(pom_file, reference):
-        """ Return the report directory specified in the pom """
-        # extract and set namespace
-        xml_file = ElementTree.parse(pom_file).getroot()
-        xml_namespace_match = re.findall(r'{(.*?)}', xml_file.tag)
-        xml_namespace = xml_namespace_match[0] if xml_namespace_match else ''
-        maven_xml_namespace_dict = {'maven': xml_namespace}
-
-        if reference == 'maven-surefire-plugin':
-            xpath = 'maven:build/'\
-                    'maven:plugins/'\
-                    'maven:plugin/'\
-                    '[maven:artifactId="maven-surefire-plugin"]/'
-        elif reference == 'reportsDirectory':
-            xpath = 'maven:build/'\
-                    'maven:plugins/'\
-                    'maven:plugin/'\
-                    '[maven:artifactId="maven-surefire-plugin"]/'\
-                    'maven:configuration/'\
-                    'maven:reportsDirectory'
-
-        result = xml_file.find(xpath, maven_xml_namespace_dict)
-        return None if result is None else result.text
 
 # register step implementer
 TSSCFactory.register_step_implementer(Maven)

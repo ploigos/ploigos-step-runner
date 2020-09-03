@@ -46,3 +46,37 @@ def get_xml_element(xml_file, element_name):
         )
 
     return xml_element
+
+def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_namespace_dict=None):
+    """Gets a given element from a given xml file given an xpath.
+
+    Parameters
+    ----------
+    xml_file_path : str
+        Path of the xml file
+    xpath : str
+        Xpath of the element you want
+    default_namespace : str
+        Optional string specifying the default namespace you are using in your xpath selector.
+        This is the most common argument that will most likely be used.
+    xml_namespace_dict : Dict[str, str]
+        Optional dictionary if default_namespace is not enough and you have multiple
+        namespaces that you need to deal with in your xpath selector.
+
+    Returns
+    -------
+    None
+        No element was found
+    xml.etree.ElementTree.Element
+        The Element found given the xpath
+    """
+
+    xml_file = ElementTree.parse(xml_file_path).getroot()
+    namespaces = xml_namespace_dict
+    if xml_namespace_dict is None and default_namespace is not None:
+        xml_namespace_match = re.findall(r'{(.*?)}', xml_file.tag)
+        xml_namespace = xml_namespace_match[0] if xml_namespace_match else ''
+        namespaces = {}
+        namespaces[default_namespace] = xml_namespace
+
+    return xml_file.find(xpath, namespaces)
