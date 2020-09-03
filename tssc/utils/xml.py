@@ -59,6 +59,8 @@ def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_na
     default_namespace : str
         Optional string specifying the default namespace you are using in your xpath selector.
         This is the most common argument that will most likely be used.
+        If your XML is namespaced, then even if your elements are in the default namespace,
+        you must specify and use this namespace in both your xpath as well as specifying it here.
     xml_namespace_dict : Dict[str, str]
         Optional dictionary if default_namespace is not enough and you have multiple
         namespaces that you need to deal with in your xpath selector.
@@ -78,5 +80,8 @@ def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_na
         xml_namespace = xml_namespace_match[0] if xml_namespace_match else ''
         namespaces = {}
         namespaces[default_namespace] = xml_namespace
+
+    if xml_namespace_dict is None and default_namespace is None:
+        return xml_file.find(xpath)
 
     return xml_file.find(xpath, namespaces)
