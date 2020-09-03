@@ -3,7 +3,7 @@
 The Configlint step executes the config-lint against yml files for user-defined
 rules.   The inputs to this step include:
 
-  - Rules defined by the user in a specified file
+  - Rules defined by the user in a specified file:
 
     * Reference:  https://stelligent.github.io/config-lint/#/
 
