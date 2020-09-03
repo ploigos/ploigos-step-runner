@@ -2,7 +2,9 @@ import unittest
 
 import re
 
-from tssc import TSSCFactory, TSSCException, StepImplementer, TSSCConfig
+from tssc import TSSCFactory, TSSCException, StepImplementer
+from tssc.config import TSSCConfig
+
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
 

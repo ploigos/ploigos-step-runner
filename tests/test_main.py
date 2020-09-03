@@ -7,6 +7,7 @@ from testfixtures import TempDirectory
 
 from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
+
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
 

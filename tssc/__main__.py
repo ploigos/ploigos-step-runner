@@ -17,7 +17,8 @@ import sys
 import argparse
 import os.path
 
-from tssc import TSSCConfig, TSSCFactory, TSSCException
+from tssc import TSSCFactory, TSSCException
+from tssc.config import TSSCConfig
 
 def print_error(msg):
     """

@@ -664,9 +664,9 @@ Example Running the 'generate-metadata' step
 """
 
 import __main__
-from .config import TSSCConfig, TSSCStepConfig, TSSCSubStepConfig
-from .factory import TSSCFactory
-from .exceptions import TSSCException
+from .config import *
+from .factory import *
+from .exceptions import *
 from .step_implementer import DefaultSteps, StepImplementer
 from .utils import *
 
