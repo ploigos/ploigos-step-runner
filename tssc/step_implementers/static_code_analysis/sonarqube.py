@@ -129,7 +129,7 @@ Example: Results
 import os
 import sys
 import sh
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 DEFAULT_CONFIG = {
     'properties': './sonar-project.properties'
@@ -151,18 +151,6 @@ class SonarQube(StepImplementer):
     """
     StepImplementer for the tag-source step for SonarQube.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.STATIC_CODE_ANALYSIS
 
     @staticmethod
     def step_implementer_config_defaults():

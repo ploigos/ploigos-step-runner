@@ -125,19 +125,7 @@ GIT_AUTHENTICATION_CONFIG = {
 
 class ArgoCD(StepImplementer):
     """ StepImplementer for the deploy step for ArgoCD.
-
     """
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.DEPLOY
 
     @staticmethod
     def step_implementer_config_defaults():

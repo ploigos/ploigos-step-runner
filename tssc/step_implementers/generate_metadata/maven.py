@@ -31,7 +31,7 @@ Results output by this step.
 
 import os.path
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 from tssc.utils.xml import get_xml_element
 
@@ -47,18 +47,6 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Maven.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():

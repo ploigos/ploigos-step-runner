@@ -118,7 +118,7 @@ Examples
     }}
 """
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 DEFAULT_CONFIG = {
     'release-branch': 'master'
@@ -128,18 +128,6 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for SemanticVersion.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():

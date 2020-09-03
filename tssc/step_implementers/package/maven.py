@@ -124,7 +124,7 @@ import sys
 import os
 import sh
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
@@ -143,18 +143,6 @@ class Maven(StepImplementer):
     only be a single jar, ear, or war output for running mvn clean install against the given
     pom.xml file.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PACKAGE
 
     @staticmethod
     def step_implementer_config_defaults():

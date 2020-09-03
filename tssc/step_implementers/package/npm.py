@@ -39,24 +39,12 @@ Results output by this step.
     }
 """
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 class NPM(StepImplementer):
     """
     StepImplementer for the package step for NPM.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.PACKAGE
 
     @staticmethod
     def step_implementer_config_defaults():

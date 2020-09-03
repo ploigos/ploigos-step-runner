@@ -89,18 +89,6 @@ class Buildah(StepImplementer):
     """
 
     @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.CREATE_CONTAINER_IMAGE
-
-    @staticmethod
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.

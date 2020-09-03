@@ -170,9 +170,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return self.__results_file_path
 
-    @staticmethod
-    @abstractmethod
-    def step_name():
+    @property
+    def step_name(self):
         """
         Getter for the TSSC Step name implemented by this step.
         Returns
@@ -180,6 +179,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             TSSC step name implemented by this step.
         """
+        return self.config.step_name
 
     @staticmethod
     @abstractmethod
@@ -257,7 +257,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         """
 
-        StepImplementer.__print_section_title("TSSC Step Start - {}".format(self.step_name()))
+        StepImplementer.__print_section_title(f"TSSC Step Start - {self.step_name}")
 
         # print information about the static step configuration
         StepImplementer.__print_data(
@@ -291,10 +291,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         self.write_results(results)
 
         # print the step run results
-        StepImplementer.__print_section_title("TSSC Step Results - {}".format(self.step_name()))
+        StepImplementer.__print_section_title(f"TSSC Step Results - {self.step_name}")
         StepImplementer.__print_data('Results File Path', self.results_file_path)
         StepImplementer.__print_data('Step Results', results)
-        StepImplementer.__print_section_title("TSSC Step End - {}".format(self.step_name()))
+        StepImplementer.__print_section_title(f"TSSC Step End - {self.step_name}")
 
     def write_results(self, results):
         """
@@ -316,14 +316,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if results is not None:
             current_results = self.current_results()
             if current_results:
-                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name()):
+                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name):
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **current_results \
                                   [StepImplementer.__TSSC_RESULTS_KEY] \
-                                  [self.step_name()], \
+                                  [self.step_name], \
                                   **results
                             }
                         }
@@ -332,7 +332,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **results
                             }
                         }
@@ -340,7 +340,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             else:
                 updated_step_results = {
                     StepImplementer.__TSSC_RESULTS_KEY: {
-                        self.step_name(): {
+                        self.step_name: {
                             **results
                         }
                     }
@@ -395,7 +395,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         else:
             current_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {}
+                    self.step_name: {}
                 }
             }
 
@@ -522,7 +522,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         """
-        return self.get_step_results(self.step_name())
+        return self.get_step_results(self.step_name)
 
     def write_temp_file(self, filename, contents):
         """
@@ -535,11 +535,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         if not os.path.exists(self.__work_dir_path):
             os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name())
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
         file_path = os.path.join(step_path, filename)
         with open(file_path, 'wb') as file:
             file.write(contents)
