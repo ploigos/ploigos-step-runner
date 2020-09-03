@@ -14,6 +14,9 @@ from tssc import TSSCFactory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import run_step_test_with_result_validation
 
+SELENIUM_HUB_URL = 'http://selenium:4444'
+TARGET_BASE_URL = 'http://app:8080'
+
 def create_pom(temp_dir, build_config,
                group_id='com.mycompany.app', artifact_id='my-app', version='1.0'):
     """Creates pom file.
@@ -97,6 +100,24 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
     """
 
     @patch('sh.mvn', create=True)
+    def test_uat_mandatory_urls_missing(self, _mvn_mock):
+        """Test when mandatory urls are missing."""
+        config = {
+            'tssc-config': {
+                'uat': {
+                    'implementer': 'Maven'
+                }
+            }
+        }
+        factory = TSSCFactory(config)
+        error_message = '.* is missing the required configuration keys ' \
+            '\\(\\[\'selenium-hub-url\', \'target-base-url\'\\]\\).*'
+        with self.assertRaisesRegex(
+                AssertionError,
+                error_message):
+            factory.run_step('uat')
+
+    @patch('sh.mvn', create=True)
     def test_uat_default_pom_file_missing(self, _mvn_mock):
         """ Test if the default pom file is missing
         """
@@ -104,7 +125,6 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             'tssc-config': {
                 'uat': {
                     'implementer': 'Maven',
-                    'config': {}
                 }
             }
         }
@@ -112,7 +132,10 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: pom.xml'):
-            factory.run_step('uat')
+            factory.run_step('uat', {
+                'selenium-hub-url': SELENIUM_HUB_URL,
+                'target-base-url': TARGET_BASE_URL
+            })
 
     @patch('sh.mvn', create=True)
     def test_uat_runtime_pom_file_missing(self, _mvn_mock):
@@ -128,7 +151,11 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: does-not-exist-pom.xml'):
-            factory.run_step('uat', {'pom-file': 'does-not-exist-pom.xml'})
+            factory.run_step('uat', {
+                'pom-file': 'does-not-exist-pom.xml',
+                'selenium-hub-url': SELENIUM_HUB_URL,
+                'target-base-url': TARGET_BASE_URL
+            })
 
     @patch('sh.mvn', create=True)
     def test_uat_config_file_pom_file_missing(self, _mvn_mock):
@@ -138,7 +165,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'uat': {
                     'implementer': 'Maven',
                     'config': {
-                        'pom-file': 'does-not-exist.pom'
+                        'pom-file': 'does-not-exist.pom',
+                        'selenium-hub-url': SELENIUM_HUB_URL,
+                        'target-base-url': TARGET_BASE_URL
                     }
                 }
             }
@@ -182,7 +211,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -235,7 +266,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -274,8 +307,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             mvn_mock.assert_called_once_with(
                 'clean',
                 '-Pintegration-test',
-                '-Dselenium.hub.url=http://192.168.1.11:4444',
-                '-Dtarget.base.url=http://192.168.1.11:8080',
+                f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
+                f'-Dtarget.base.url={TARGET_BASE_URL}',
                 '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
                 'test',
                 '-f', pom_file_path,
@@ -311,7 +344,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -351,8 +386,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             mvn_mock.assert_called_once_with(
                 'clean',
                 '-Pintegration-test',
-                '-Dselenium.hub.url=http://192.168.1.11:4444',
-                '-Dtarget.base.url=http://192.168.1.11:8080',
+                f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
+                f'-Dtarget.base.url={TARGET_BASE_URL}',
                 '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
                 'test',
                 '-f', pom_file_path,
@@ -369,7 +404,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -400,7 +437,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -449,7 +488,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'implementer': 'Maven',
                         'config': {
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -501,7 +542,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                         'implementer': 'Maven',
                         'config': {
                             'fail-on-no-tests': False,
-                            'pom-file': str(pom_file_path)
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
                         }
                     }
                 }
@@ -531,8 +574,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             mvn_mock.assert_called_once_with(
                 'clean',
                 '-Pintegration-test',
-                '-Dselenium.hub.url=http://192.168.1.11:4444',
-                '-Dtarget.base.url=http://192.168.1.11:8080',
+                f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
+                f'-Dtarget.base.url={TARGET_BASE_URL}',
                 '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
                 'test',
                 '-f', pom_file_path,
