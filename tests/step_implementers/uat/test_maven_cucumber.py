@@ -14,6 +14,34 @@ from tssc import TSSCFactory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import run_step_test_with_result_validation
 
+def create_pom(temp_dir, build_config,
+               group_id='com.mycompany.app', artifact_id='my-app', version='1.0'):
+    """Creates pom file.
+
+    Will create the pom.xml file and return the location.
+    """
+    data = bytes('''<project
+                    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+                    xmlns="http://maven.apache.org/POM/4.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <modelVersion>4.0.0</modelVersion>
+                        <groupId>{group_id}</groupId>
+                        <artifactId>{artifact_id}</artifactId>
+                        <version>{version}</version>
+                        <properties>
+                            <maven.compiler.source>1.8</maven.compiler.source>
+                            <maven.compiler.target>1.8</maven.compiler.target>
+                        </properties>
+                        {build_config}
+                    </project>'''.format(
+                        group_id=group_id,
+                        artifact_id=artifact_id,
+                        version=version,
+                        build_config=build_config), 'utf-8')
+
+    temp_dir.write('pom.xml', data)
+    return path.join(temp_dir.path, 'pom.xml')
+
 def create_resources(target_dir_path, artifact_names):
     """Create resources.
 
@@ -44,7 +72,8 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
 
     target_dir_path = path.join(
         path.dirname(path.abspath(pom_file)),
-        artifact_parent_dir)
+        artifact_parent_dir
+    )
 
     def mvn_side_effect(*args, **_kwargs):
         if 'clean' in args and path.exists(target_dir_path):
@@ -60,11 +89,11 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
 
     return mvn_side_effect
 
-# pylint: disable=R0201,C0301
+# pylint: disable=R0201
 class TestStepImplementerUatTest(BaseTSSCTestCase):
     """Test Step Implementer UAT
 
-    Runner for the UAT Step Implementer
+    Runner for the UAT Step Implementer.
     """
 
     @patch('sh.mvn', create=True)
@@ -120,45 +149,34 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'Given pom file does not exist: does-not-exist.pom'):
             factory.run_step('uat')
 
-    @patch('sh.mvn', create=True, side_effect=ErrorReturnCode('mvn clean -Pintegration-test test', b'mock out', b'mock error'))
+    @patch(
+        'sh.mvn',
+        create=True,
+        side_effect=ErrorReturnCode('mvn clean -Pintegration-test test', b'mock out', b'mock error')
+    )
     def test_uat_mvn_error_return_code(self, _mvn_mock):
-        """Test when maven returns an error code"""
-        group_id = 'com.mycompany.app'
-        artifact_id = 'my-app'
-        version = '1.0'
+        """Test when maven returns an error code."""
         with TempDirectory() as temp_dir:
-            temp_dir.write('src/main/java/com/mycompany/app/App.java', b'''package com.mycompany.app;
-    public class App {
-        public static void main( String[] args ) {
-            System.out.println( "Hello World!" );
-        }
-    }''')
             temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
+                'src/main/java/com/mycompany/app/App.java',
+                b'''package com.mycompany.app;
+                    public class App {
+                        public static void main( String[] args ) {
+                            System.out.println( "Hello World!" );
+                        }
+                    }
+                '''
             )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(temp_dir, build_config)
             config = {
                 'tssc-config': {
                     'uat': {
@@ -195,35 +213,23 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         reports_dir = 'target/surefire-reports'
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(
+                temp_dir,
+                build_config,
+                group_id=group_id,
+                artifact_id=artifact_id
             )
             test_results_dir = path.join(temp_dir.path, reports_dir)
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
             config = {
                 'tssc-config': {
                     'uat': {
@@ -238,8 +244,10 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 pom_file_path,
                 reports_dir,
                 [
-                    '{group_id}.{artifact_id}.ClassNameTest.txt'.format(group_id=group_id, artifact_id=artifact_id),
-                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'.format(group_id=group_id, artifact_id=artifact_id)
+                    '{group_id}.{artifact_id}.ClassNameTest.txt' \
+                        .format(group_id=group_id, artifact_id=artifact_id),
+                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml' \
+                        .format(group_id=group_id, artifact_id=artifact_id)
                 ]
             )
             expected_step_results = {
@@ -279,36 +287,25 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         """Test when the reports directory exists in the pom."""
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
             reports_dir = path.join(temp_dir.path, 'target/custom-reports-dir')
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                    <reportsDirectory>{reports_dir}</reportsDirectory>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version, reports_dir=reports_dir), 'utf-8')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration>
+                                              <reportsDirectory>{reports_dir}</reportsDirectory>
+                                          </configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''.format(reports_dir=reports_dir)
+            pom_file_path = create_pom(
+                temp_dir,
+                build_config,
+                group_id=group_id,
+                artifact_id=artifact_id
             )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
             config = {
                 'tssc-config': {
                     'uat': {
@@ -323,8 +320,10 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 pom_file_path,
                 reports_dir,
                 [
-                    '{group_id}.{artifact_id}.ClassNameTest.txt'.format(group_id=group_id, artifact_id=artifact_id),
-                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'.format(group_id=group_id, artifact_id=artifact_id)
+                    '{group_id}.{artifact_id}.ClassNameTest.txt' \
+                        .format(group_id=group_id, artifact_id=artifact_id),
+                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml' \
+                        .format(group_id=group_id, artifact_id=artifact_id)
                 ]
             )
 
@@ -362,22 +361,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
 
     def test_uat_test_missing_surefire_plugin_in_pom(self):
         """Test when missing surefire plugin in pom."""
-        group_id = 'com.mycompany.app'
-        artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>{group_id}</groupId>
-        <artifactId>{artifact_id}</artifactId>
-        <version>{version}</version>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
-            )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
+            build_config = ''
+            pom_file_path = create_pom(temp_dir, build_config)
             config = {
                 'tssc-config': {
                     'uat': {
@@ -398,36 +384,17 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
     def test_uat_empty_reports_dir(self, mvn_mock):
         """Test when report dir is empty."""
         reports_dir = 'target/surefire-reports'
-        group_id = 'com.mycompany.app'
-        artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
-            )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(temp_dir, build_config)
             config = {
                 'tssc-config': {
                     'uat': {
@@ -466,36 +433,17 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
     def test_uat_run_attempt_fails_default_fail_on_no_tests_flag(self, mvn_mock):
         """Test when failure on no tests."""
         reports_dir = 'target/surefire-reports'
-        group_id = 'com.mycompany.app'
-        artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>{group_id}</groupId>
-        <artifactId>{artifact_id}</artifactId>
-        <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
-            )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(temp_dir, build_config)
             config = {
                 'tssc-config': {
                     'uat': {
@@ -536,36 +484,17 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
     def test_uat_run_attempt_fails_fail_on_no_tests_flag_false(self, mvn_mock):
         """Test when failure on no tests with flag to ignore it set."""
         reports_dir = 'target/surefire-reports'
-        group_id = 'com.mycompany.app'
-        artifact_id = 'my-app'
-        version = '1.0'
         with TempDirectory() as temp_dir:
-            temp_dir.write(
-                'pom.xml',
-                bytes('''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>{group_id}</groupId>
-        <artifactId>{artifact_id}</artifactId>
-        <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(group_id=group_id, artifact_id=artifact_id, version=version), 'utf-8')
-            )
-            pom_file_path = path.join(temp_dir.path, 'pom.xml')
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(temp_dir, build_config)
             config = {
                 'tssc-config': {
                     'uat': {
