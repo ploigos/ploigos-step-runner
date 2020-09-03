@@ -254,7 +254,6 @@ users:
             results = {}
 
             try:
-                git_url = self.get_config_value('helm-config-repo')
                 repo_branch = self._get_repo_branch()
                 sh.git.clone(self.get_config_value('helm-config-repo'), repo_directory,
                              _out=sys.stdout)
@@ -268,7 +267,7 @@ users:
                 self._update_values_yaml(repo_directory, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
-                                 '{repo}'.format(repo=git_url)
+                                 '{repo}'.format(repo=self.get_config_value('helm-config-repo'))
 
                 sh.git.config('--global', 'user.email', self.get_config_value('git-email'),
                               _out=sys.stdout)
@@ -321,11 +320,29 @@ users:
                 argocd_app_name,
                 _out=sys.stdout)
 
+            # NOTE: Creating a file to pass to the next step
+            manifest_file = self.write_working_file(
+                'deploy_argocd_manifests.yml',
+                b''
+            )
+
+            sh.argocd.app.manifests(argocd_app_name, _out=manifest_file) # pylint: disable=no-member
+
             results = {
-                'argocd-app-name': argocd_app_name,
-                'config-repo-git-tag' : self._get_tag(repo_directory),
-                'argocd-endpoint-url': 'http://{endpoint}'.format(
-                    endpoint=self._get_endpoint_url())
+                'result': {
+                    'success': True,
+                    'message': 'deploy step completed - see report-artifacts',
+                    'argocd-app-name': argocd_app_name,
+                    'argocd-endpoint-url': 'http://{endpoint}'.format(
+                         endpoint=self._get_endpoint_url()),
+                    'config-repo-git-tag' : self._get_tag(repo_directory)
+                },
+                'report-artifacts': [
+                    {
+                        'name' : 'argocd-result-set',
+                        'path': f'file://{manifest_file}'
+                    }
+                ]
             }
 
         return results
@@ -385,7 +402,7 @@ users:
 
         template = env.get_template(self.get_config_value('values-yaml-template'))
 
-        rendered_values_file = self.write_temp_file(
+        rendered_values_file = self.write_working_file(
             'values.yml',
             bytes(template.render(jinja_runtime_step_config), 'utf-8')
         )
