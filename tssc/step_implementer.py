@@ -540,7 +540,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        file_path = os.path.join(step_path, filename)
+        folder_path = os.path.join(self.__work_dir_path, self.step_name)
 
         return os.path.abspath(folder_path)
 

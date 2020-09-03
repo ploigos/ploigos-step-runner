@@ -254,7 +254,6 @@ users:
             results = {}
 
             try:
-                git_url = self.get_config_value('helm-config-repo')
                 repo_branch = self._get_repo_branch()
                 sh.git.clone(self.get_config_value('helm-config-repo'), repo_directory,
                              _out=sys.stdout)
@@ -268,7 +267,7 @@ users:
                 self._update_values_yaml(repo_directory, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
-                                 '{repo}'.format(repo=runtime_step_config.get('helm-config-repo'))
+                                 '{repo}'.format(repo=self.get_config_value('helm-config-repo'))
 
                 sh.git.config('--global', 'user.email', self.get_config_value('git-email'),
                               _out=sys.stdout)
@@ -336,7 +335,7 @@ users:
                     'argocd-app-name': argocd_app_name,
                     'argocd-endpoint-url': 'http://{endpoint}'.format(
                          endpoint=self._get_endpoint_url()),
-                    'config-repo-git-tag' : self._get_tag(repo_directory) 
+                    'config-repo-git-tag' : self._get_tag(repo_directory)
                 },
                 'report-artifacts': [
                     {

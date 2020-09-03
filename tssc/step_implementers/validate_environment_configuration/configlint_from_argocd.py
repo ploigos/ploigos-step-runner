@@ -1,7 +1,7 @@
 """Step Implementer for the 'validate-environment-config' step for ConfiglintFromArgocd.
 
 The ConfiglintFromArogcd step takes the output of the Deploy (argocd) step and prepares
-it as input for the Configlint step.  
+it as input for the Configlint step.
 
 Step Configuration
 ------------------
@@ -83,9 +83,7 @@ Examples
 import os
 from urllib.parse import urlparse
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
 }
@@ -100,18 +98,6 @@ class ConfiglintFromArgocd(StepImplementer):
     """
     StepImplementer for the tag-source step for Config_lint.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.VALIDATE_ENVIRONMENT_CONFIGURATION
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -145,7 +131,7 @@ class ConfiglintFromArgocd(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
+    def _run_step(self):
         """
         Runs the TSSC step implemented by this StepImplementer.
 
@@ -189,7 +175,3 @@ class ConfiglintFromArgocd(StepImplementer):
             }
         }
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(ConfiglintFromArgocd)

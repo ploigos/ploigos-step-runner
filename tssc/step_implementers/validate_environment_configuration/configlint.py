@@ -117,9 +117,7 @@ provide the yml_path option.
 import os
 import sys
 import sh
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
     'rules': './config-lint.rules'
@@ -135,18 +133,6 @@ class Configlint(StepImplementer):
     """
     StepImplementer for the tag-source step for Config_lint.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.VALIDATE_ENVIRONMENT_CONFIGURATION
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -180,7 +166,7 @@ class Configlint(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self, runtime_step_config):
+    def _run_step(self):
         """
         Runs the TSSC step implemented by this StepImplementer.
 
@@ -197,10 +183,8 @@ class Configlint(StepImplementer):
         """
 
         # Find yml_path
-        yml_path = ''
-        if 'yml_path' in runtime_step_config:
-            yml_path = runtime_step_config['yml_path']
-        else:
+        yml_path = self.get_config_value('yml_path')
+        if yml_path is None:
             try:
                 current_step_results = self.current_step_results()
                 if 'options' in current_step_results:
@@ -211,14 +195,14 @@ class Configlint(StepImplementer):
                     'yml_path not found in runtime args or in options'
                 ) from err
 
-        if yml_path == '':
+        if yml_path is None:
             raise ValueError('yml_path not specified in runtime args or in options')
 
         if not os.path.exists(yml_path):
             raise ValueError(f'Specified file in yml_path not found: {yml_path}')
 
         # Required: rules and exists
-        rules_file: object = runtime_step_config['rules']
+        rules_file = self.get_config_value('rules')
         if not os.path.exists(rules_file):
             raise ValueError(f'Rules file specified in tssc config not found: {rules_file}')
 
@@ -245,7 +229,3 @@ class Configlint(StepImplementer):
             ]
         }
         return results
-
-
-# register step implementer
-TSSCFactory.register_step_implementer(Configlint)
