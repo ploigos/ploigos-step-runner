@@ -4,7 +4,8 @@ from testfixtures import TempDirectory
 import os
 import yaml
 
-from tssc import TSSCFactory, StepImplementer, TSSCException, TSSCConfig
+from tssc import TSSCFactory, StepImplementer, TSSCException
+from tssc.config import TSSCConfig
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
