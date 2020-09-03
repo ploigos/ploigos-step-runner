@@ -39,7 +39,7 @@ import re
 from git import Repo
 from git import InvalidGitRepositoryError
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 DEFAULT_CONFIG = {
     'repo-root': './',
@@ -54,18 +54,6 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Git.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.GENERATE_METADATA
 
     @staticmethod
     def step_implementer_config_defaults():

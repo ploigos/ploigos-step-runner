@@ -2,10 +2,6 @@ from tssc import StepImplementer, TSSCException
 
 class FooStepImplementer(StepImplementer):
     @staticmethod
-    def step_name():
-        return 'foo'
-
-    @staticmethod
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.
@@ -41,10 +37,6 @@ class FooStepImplementer(StepImplementer):
         pass
 
 class RequiredStepConfigStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'required-step-config-test'
-
     @staticmethod
     def step_implementer_config_defaults():
         """
@@ -83,10 +75,6 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         pass
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
-    @staticmethod
-    def step_name():
-        return 'write-config-as-results'
-
     @staticmethod
     def step_implementer_config_defaults():
         """

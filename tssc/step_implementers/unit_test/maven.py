@@ -67,7 +67,7 @@ from xml.etree import ElementTree
 import re
 import sh
 
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -83,18 +83,6 @@ class Maven(StepImplementer):
     """
     StepImplementer for the unit-test step for Maven generating JUnit reports.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.UNIT_TEST
 
     @staticmethod
     def step_implementer_config_defaults():
