@@ -32,7 +32,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     PUBLISH_WROKFLOW_RESULTS = 'publish-workflow-results'
 
 
-class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
+class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     """
     Abstract representation of a TSSC step implementer.
 
@@ -539,7 +539,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        return step_path
+        return os.path.abspath(step_path)
+
 
     def write_working_file(self, filename, contents):
         """
