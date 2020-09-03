@@ -131,7 +131,7 @@ class Maven(StepImplementer):
 
         maven_surefire_plugin = self.find_reference_in_pom(pom_file, 'maven-surefire-plugin')
         if maven_surefire_plugin is None:
-            raise ValueError('Unit test dependency "maven-surefire-plugin" missing from POM.')
+            raise ValueError('Uat dependency "maven-surefire-plugin" missing from POM.')
 
         reports_dir = self.find_reference_in_pom(pom_file, 'reportsDirectory')
         if reports_dir is not None:
@@ -163,7 +163,7 @@ class Maven(StepImplementer):
                 results = {
                     'result': {
                         'success': True,
-                        'message': 'unit test step run successfully, but no tests were found'
+                        'message': 'Uat step run successfully, but no tests were found'
                     },
                     'report-artifacts': [],
                     'options': {
@@ -175,19 +175,19 @@ class Maven(StepImplementer):
                 # Added 'no cover' to bypass missing unit-test step coverage error
                 # that is covered by the following unit test:
                 #   test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true
-                raise RuntimeError('Error: No unit tests defined')
+                raise RuntimeError('Error: No uat defined')
         else:
             results = {
                 'result': {
                     'success': True,
-                    'message': 'unit test step run successfully and junit reports were generated'
+                    'message': 'uat step run successfully and junit reports were generated'
                 },
                 'options': {
                     'pom-path': pom_file
                 },
                 'report-artifacts': [
                     {
-                        'name': 'maven unit test results generated using junit',
+                        'name': 'uat results generated using junit',
                         'path': f'file://{test_results_output_path}'
                     }
                 ]
