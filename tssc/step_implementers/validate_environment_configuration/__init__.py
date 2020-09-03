@@ -17,7 +17,7 @@ minimally produce the following step results.
 
 | Result Key       | Description
 |------------------|------------
-| TBD              | 
+| TBD              |
 
 """
 from .configlint import Configlint
