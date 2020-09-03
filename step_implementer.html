@@ -199,9 +199,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return self.__results_file_path
 
-    @staticmethod
-    @abstractmethod
-    def step_name():
+    @property
+    def step_name(self):
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
         Returns
@@ -209,6 +208,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             TSSC step name implemented by this step.
         &#34;&#34;&#34;
+        return self.config.step_name
 
     @staticmethod
     @abstractmethod
@@ -286,7 +286,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         &#34;&#34;&#34;
 
-        StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step Start - {self.step_name}&#34;)
 
         # print information about the static step configuration
         StepImplementer.__print_data(
@@ -320,10 +320,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         self.write_results(results)
 
         # print the step run results
-        StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step Results - {self.step_name}&#34;)
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
         StepImplementer.__print_data(&#39;Step Results&#39;, results)
-        StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step End - {self.step_name}&#34;)
 
     def write_results(self, results):
         &#34;&#34;&#34;
@@ -345,14 +345,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if results is not None:
             current_results = self.current_results()
             if current_results:
-                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name()):
+                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name):
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **current_results \
                                   [StepImplementer.__TSSC_RESULTS_KEY] \
-                                  [self.step_name()], \
+                                  [self.step_name], \
                                   **results
                             }
                         }
@@ -361,7 +361,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **results
                             }
                         }
@@ -369,7 +369,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             else:
                 updated_step_results = {
                     StepImplementer.__TSSC_RESULTS_KEY: {
-                        self.step_name(): {
+                        self.step_name: {
                             **results
                         }
                     }
@@ -424,7 +424,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         else:
             current_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {}
+                    self.step_name: {}
                 }
             }
 
@@ -551,7 +551,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        return self.get_step_results(self.step_name())
+        return self.get_step_results(self.step_name)
 
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
@@ -564,11 +564,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         if not os.path.exists(self.__work_dir_path):
             os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name())
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
         file_path = os.path.join(step_path, filename)
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
@@ -894,9 +893,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return self.__results_file_path
 
-    @staticmethod
-    @abstractmethod
-    def step_name():
+    @property
+    def step_name(self):
         &#34;&#34;&#34;
         Getter for the TSSC Step name implemented by this step.
         Returns
@@ -904,6 +902,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             TSSC step name implemented by this step.
         &#34;&#34;&#34;
+        return self.config.step_name
 
     @staticmethod
     @abstractmethod
@@ -981,7 +980,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         &#34;&#34;&#34;
 
-        StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step Start - {self.step_name}&#34;)
 
         # print information about the static step configuration
         StepImplementer.__print_data(
@@ -1015,10 +1014,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         self.write_results(results)
 
         # print the step run results
-        StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step Results - {self.step_name}&#34;)
         StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
         StepImplementer.__print_data(&#39;Step Results&#39;, results)
-        StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))
+        StepImplementer.__print_section_title(f&#34;TSSC Step End - {self.step_name}&#34;)
 
     def write_results(self, results):
         &#34;&#34;&#34;
@@ -1040,14 +1039,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if results is not None:
             current_results = self.current_results()
             if current_results:
-                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name()):
+                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name):
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **current_results \
                                   [StepImplementer.__TSSC_RESULTS_KEY] \
-                                  [self.step_name()], \
+                                  [self.step_name], \
                                   **results
                             }
                         }
@@ -1056,7 +1055,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                     updated_step_results = {
                         StepImplementer.__TSSC_RESULTS_KEY: {
                             **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name(): {
+                            self.step_name: {
                                 **results
                             }
                         }
@@ -1064,7 +1063,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             else:
                 updated_step_results = {
                     StepImplementer.__TSSC_RESULTS_KEY: {
-                        self.step_name(): {
+                        self.step_name: {
                             **results
                         }
                     }
@@ -1119,7 +1118,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         else:
             current_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {}
+                    self.step_name: {}
                 }
             }
 
@@ -1246,7 +1245,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             Existing results file has invalid yaml or existing results file does not have expected
             element.
         &#34;&#34;&#34;
-        return self.get_step_results(self.step_name())
+        return self.get_step_results(self.step_name)
 
     def write_temp_file(self, filename, contents):
         &#34;&#34;&#34;
@@ -1259,11 +1258,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         if not os.path.exists(self.__work_dir_path):
             os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name())
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
         file_path = os.path.join(step_path, filename)
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
@@ -1397,33 +1395,6 @@ def step_implementer_config_defaults():
     -------
     dict
         Default values to use for step configuration values.
-    &#34;&#34;&#34;</code></pre>
-</details>
-</dd>
-<dt id="tssc.step_implementer.StepImplementer.step_name"><code class="name flex">
-<span>def <span class="ident">step_name</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the TSSC Step name implemented by this step.
-Returns</p>
-<hr>
-<dl>
-<dt><code>str</code></dt>
-<dd>TSSC step name implemented by this step.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-@abstractmethod
-def step_name():
-    &#34;&#34;&#34;
-    Getter for the TSSC Step name implemented by this step.
-    Returns
-    -------
-    str
-        TSSC step name implemented by this step.
     &#34;&#34;&#34;</code></pre>
 </details>
 </dd>
@@ -1620,6 +1591,31 @@ def step_environment_config(self):
     return self.config.get_sub_step_env_config(self.environment)</code></pre>
 </details>
 </dd>
+<dt id="tssc.step_implementer.StepImplementer.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dd>
+<div class="desc"><p>Getter for the TSSC Step name implemented by this step.
+Returns</p>
+<hr>
+<dl>
+<dt><code>str</code></dt>
+<dd>TSSC step name implemented by this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def step_name(self):
+    &#34;&#34;&#34;
+    Getter for the TSSC Step name implemented by this step.
+    Returns
+    -------
+    str
+        TSSC step name implemented by this step.
+    &#34;&#34;&#34;
+    return self.config.step_name</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Methods</h3>
 <dl>
@@ -1691,7 +1687,7 @@ element.</dd>
     else:
         current_results = {
             StepImplementer.__TSSC_RESULTS_KEY: {
-                self.step_name(): {}
+                self.step_name: {}
             }
         }
 
@@ -1733,7 +1729,7 @@ element.</dd>
         Existing results file has invalid yaml or existing results file does not have expected
         element.
     &#34;&#34;&#34;
-    return self.get_step_results(self.step_name())</code></pre>
+    return self.get_step_results(self.step_name)</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.get_config_value"><code class="name flex">
@@ -1956,7 +1952,7 @@ False otherwise.</dd>
     Wrapper for running the implemented step.
     &#34;&#34;&#34;
 
-    StepImplementer.__print_section_title(&#34;TSSC Step Start - {}&#34;.format(self.step_name()))
+    StepImplementer.__print_section_title(f&#34;TSSC Step Start - {self.step_name}&#34;)
 
     # print information about the static step configuration
     StepImplementer.__print_data(
@@ -1990,10 +1986,10 @@ False otherwise.</dd>
     self.write_results(results)
 
     # print the step run results
-    StepImplementer.__print_section_title(&#34;TSSC Step Results - {}&#34;.format(self.step_name()))
+    StepImplementer.__print_section_title(f&#34;TSSC Step Results - {self.step_name}&#34;)
     StepImplementer.__print_data(&#39;Results File Path&#39;, self.results_file_path)
     StepImplementer.__print_data(&#39;Step Results&#39;, results)
-    StepImplementer.__print_section_title(&#34;TSSC Step End - {}&#34;.format(self.step_name()))</code></pre>
+    StepImplementer.__print_section_title(f&#34;TSSC Step End - {self.step_name}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.write_results"><code class="name flex">
@@ -2036,14 +2032,14 @@ element.</dd>
     if results is not None:
         current_results = self.current_results()
         if current_results:
-            if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name()):
+            if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name):
                 updated_step_results = {
                     StepImplementer.__TSSC_RESULTS_KEY: {
                         **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                        self.step_name(): {
+                        self.step_name: {
                             **current_results \
                               [StepImplementer.__TSSC_RESULTS_KEY] \
-                              [self.step_name()], \
+                              [self.step_name], \
                               **results
                         }
                     }
@@ -2052,7 +2048,7 @@ element.</dd>
                 updated_step_results = {
                     StepImplementer.__TSSC_RESULTS_KEY: {
                         **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                        self.step_name(): {
+                        self.step_name: {
                             **results
                         }
                     }
@@ -2060,7 +2056,7 @@ element.</dd>
         else:
             updated_step_results = {
                 StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name(): {
+                    self.step_name: {
                         **results
                     }
                 }
@@ -2095,11 +2091,10 @@ element.</dd>
     &#34;&#34;&#34;
     if not os.path.exists(self.__work_dir_path):
         os.makedirs(self.__work_dir_path)
-    step_path = os.path.join(self.__work_dir_path, self.step_name())
+    step_path = os.path.join(self.__work_dir_path, self.step_name)
     if not os.path.exists(step_path):
         os.makedirs(step_path)
 
-    #file_path = os.path.join(self.__work_dir_path, self.step_name(), filename)
     file_path = os.path.join(step_path, filename)
     with open(file_path, &#39;wb&#39;) as file:
         file.write(contents)

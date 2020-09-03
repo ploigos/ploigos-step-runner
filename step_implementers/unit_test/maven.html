@@ -227,9 +227,7 @@ from xml.etree import ElementTree
 import re
 import sh
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_CONFIG = {
     &#39;fail-on-no-tests&#39;: True,
@@ -245,18 +243,6 @@ class Maven(StepImplementer):
     &#34;&#34;&#34;
     StepImplementer for the unit-test step for Maven generating JUnit reports.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_name():
-        &#34;&#34;&#34;
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        &#34;&#34;&#34;
-        return DefaultSteps.UNIT_TEST
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -388,10 +374,7 @@ class Maven(StepImplementer):
                     &#39;maven:reportsDirectory&#39;
 
         result = xml_file.find(xpath, maven_xml_namespace_dict)
-        return None if result is None else result.text
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)</code></pre>
+        return None if result is None else result.text</code></pre>
 </details>
 </section>
 <section>
@@ -417,18 +400,6 @@ TSSCFactory.register_step_implementer(Maven)</code></pre>
     &#34;&#34;&#34;
     StepImplementer for the unit-test step for Maven generating JUnit reports.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_name():
-        &#34;&#34;&#34;
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        &#34;&#34;&#34;
-        return DefaultSteps.UNIT_TEST
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -604,33 +575,6 @@ def find_reference_in_pom(pom_file, reference):
     return None if result is None else result.text</code></pre>
 </details>
 </dd>
-<dt id="tssc.step_implementers.unit_test.maven.Maven.step_name"><code class="name flex">
-<span>def <span class="ident">step_name</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the TSSC Step name implemented by this step.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>TSSC step name implemented by this step.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_name():
-    &#34;&#34;&#34;
-    Getter for the TSSC Step name implemented by this step.
-
-    Returns
-    -------
-    str
-        TSSC step name implemented by this step.
-    &#34;&#34;&#34;
-    return DefaultSteps.UNIT_TEST</code></pre>
-</details>
-</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -653,6 +597,7 @@ def step_name():
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
@@ -683,7 +628,6 @@ def step_name():
 <h4><code><a title="tssc.step_implementers.unit_test.maven.Maven" href="#tssc.step_implementers.unit_test.maven.Maven">Maven</a></code></h4>
 <ul class="">
 <li><code><a title="tssc.step_implementers.unit_test.maven.Maven.find_reference_in_pom" href="#tssc.step_implementers.unit_test.maven.Maven.find_reference_in_pom">find_reference_in_pom</a></code></li>
-<li><code><a title="tssc.step_implementers.unit_test.maven.Maven.step_name" href="#tssc.step_implementers.unit_test.maven.Maven.step_name">step_name</a></code></li>
 </ul>
 </li>
 </ul>

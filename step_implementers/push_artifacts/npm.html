@@ -131,9 +131,7 @@ Results output by this step.
     }
 &#34;&#34;&#34;
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
-from tssc import DefaultSteps
 
 DEFAULT_ARGS = {}
 
@@ -141,18 +139,6 @@ class NPM(StepImplementer):
     &#34;&#34;&#34;
     StepImplementer for the push-artifacts step for NPM.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_name():
-        &#34;&#34;&#34;
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        &#34;&#34;&#34;
-        return DefaultSteps.PUSH_ARTIFACTS
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -195,10 +181,7 @@ class NPM(StepImplementer):
             Results of running this step.
         &#34;&#34;&#34;
         results = {}
-        return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(NPM)</code></pre>
+        return results</code></pre>
 </details>
 </section>
 <section>
@@ -224,18 +207,6 @@ TSSCFactory.register_step_implementer(NPM)</code></pre>
     &#34;&#34;&#34;
     StepImplementer for the push-artifacts step for NPM.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_name():
-        &#34;&#34;&#34;
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        &#34;&#34;&#34;
-        return DefaultSteps.PUSH_ARTIFACTS
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -285,36 +256,6 @@ TSSCFactory.register_step_implementer(NPM)</code></pre>
 <li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="tssc.step_implementers.push_artifacts.npm.NPM.step_name"><code class="name flex">
-<span>def <span class="ident">step_name</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the TSSC Step name implemented by this step.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>TSSC step name implemented by this step.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_name():
-    &#34;&#34;&#34;
-    Getter for the TSSC Step name implemented by this step.
-
-    Returns
-    -------
-    str
-        TSSC step name implemented by this step.
-    &#34;&#34;&#34;
-    return DefaultSteps.PUSH_ARTIFACTS</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
@@ -336,6 +277,7 @@ def step_name():
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
 </ul>
@@ -364,9 +306,6 @@ def step_name():
 <ul>
 <li>
 <h4><code><a title="tssc.step_implementers.push_artifacts.npm.NPM" href="#tssc.step_implementers.push_artifacts.npm.NPM">NPM</a></code></h4>
-<ul class="">
-<li><code><a title="tssc.step_implementers.push_artifacts.npm.NPM.step_name" href="#tssc.step_implementers.push_artifacts.npm.NPM.step_name">step_name</a></code></li>
-</ul>
 </li>
 </ul>
 </li>
