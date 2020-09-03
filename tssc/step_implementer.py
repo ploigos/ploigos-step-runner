@@ -26,7 +26,6 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = 'container-image-static-vulnerability-scan'
     CREATE_DEPLOYMENT_ENVIRONMENT = 'create-deployment-environment'
     DEPLOY = 'deploy'
-    VALIDATE_ENVIRONMENT_CONFIGURATION  = 'validate-environment-configuration'
     UAT = 'uat'
     RUNTIME_VULNERABILITY_SCAN = 'runtime-vulnerability-scan'
     CANARY_TEST = 'canary-test'
@@ -540,9 +539,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
-        folder_path = os.path.join(self.__work_dir_path, self.step_name)
-
-        return os.path.abspath(folder_path)
+        return step_path
 
     def write_working_file(self, filename, contents):
         """
