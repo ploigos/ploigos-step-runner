@@ -367,6 +367,8 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       validate-environment-configuration:
+      - implementer: ConfiglintFromArgocd
+        config: {}
       - implementer: Configlint
         config: {
           # Optional.

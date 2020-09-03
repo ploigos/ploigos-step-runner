@@ -1,4 +1,5 @@
-"""tssc.StepImplementers for the 'security-static-code-analysis' TSSC step.
+"""tssc.StepImplementers for the 'validate-environment-configuration' TSSC step.
+
 
 Step Configuration
 ------------------
@@ -7,7 +8,7 @@ accept minimally the following configuration options.
 
 | Parameter       | Description
 |-----------------|------------
-| `TODO`          | TODO
+| `yaml_path`     | Path to the files to be reviewed.
 
 Results
 -------
@@ -16,7 +17,8 @@ minimally produce the following step results.
 
 | Result Key       | Description
 |------------------|------------
-| `TODO`           | TODO
+| TBD              | 
+
 """
 from .configlint import Configlint
 from .configlint_from_argocd import ConfiglintFromArgocd
