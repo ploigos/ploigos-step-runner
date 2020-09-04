@@ -108,6 +108,12 @@ Example: Results
             'options': {
                 'yml_path': '/home/user/tssc-working/file.yml'
             }
+            'report-artifacts': [
+                {
+                    'name' : 'configlint-result-set',
+                    'path': 'file://f/validate/configlint_results_file.txt'
+                }
+            ]
 
     }
 
