@@ -21,6 +21,7 @@ minimally produce the following step results.
 | Result Key            | Description
 |-----------------------|------------
 | `config-repo-git-tag` | The git tag applied to the configuration repo for deployment
+| `deploy-endpoint-url` | The endpoint url for the deployed app
 """
 
 from .argocd import ArgoCD

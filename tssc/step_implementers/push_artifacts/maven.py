@@ -194,7 +194,7 @@ class Maven(StepImplementer):
             raise ValueError('Severe error: Package does not have artifacts')
 
         # Build a temporary settings.xml file for the mvn user/pass
-        settings_path = self.write_temp_file('ci-settings.xml', b'''
+        settings_path = self.write_working_file('ci-settings.xml', b'''
         <settings>
               <servers>
                   <server>
