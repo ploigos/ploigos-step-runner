@@ -100,8 +100,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
     """
 
     @patch('sh.mvn', create=True)
-    def test_uat_mandatory_urls_missing(self, _mvn_mock):
-        """Test when mandatory urls are missing."""
+    def test_uat_mandatory_selenium_hub_url_missing(self, _mvn_mock):
+        """Test when mandatory selenium hub url is missing."""
         config = {
             'tssc-config': {
                 'uat': {
@@ -111,11 +111,29 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         }
         factory = TSSCFactory(config)
         error_message = '.* is missing the required configuration keys ' \
-            '\\(\\[\'selenium-hub-url\', \'target-base-url\'\\]\\).*'
+            '\\(\\[\'selenium-hub-url\'\\]\\).*'
         with self.assertRaisesRegex(
                 AssertionError,
                 error_message):
             factory.run_step('uat')
+
+    @patch('sh.mvn', create=True)
+    def test_uat_mandatory_target_base_url_missing(self, _mvn_mock):
+        """Test when mandatory target base url is missing."""
+        config = {
+            'tssc-config': {
+                'uat': {
+                    'implementer': 'Maven'
+                }
+            }
+        }
+        factory = TSSCFactory(config)
+        with self.assertRaisesRegex(
+                ValueError,
+                'No target base url was specified'):
+            factory.run_step('uat', {
+                'selenium-hub-url': SELENIUM_HUB_URL
+            })
 
     @patch('sh.mvn', create=True)
     def test_uat_default_pom_file_missing(self, _mvn_mock):
@@ -288,14 +306,14 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'result': {
                             'success': True,
-                            'message': 'uat step run successfully and junit reports were generated'
+                            'message': 'Uat step run successfully and reports were generated'
                         },
                         'options': {
                             'pom-path': str(pom_file_path)
                         },
                         'report-artifacts': [
                             {
-                                'name': 'uat results generated using junit',
+                                'name': 'Uat results generated',
                                 'path': f'file://{str(test_results_dir)}'
                             }
                         ]
@@ -309,7 +327,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 '-Pintegration-test',
                 f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
                 f'-Dtarget.base.url={TARGET_BASE_URL}',
-                '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
+                '-Dcucumber.plugin=html:target/cucumber/cucumber.html,' \
+                    'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
                 _out=stdout
@@ -367,14 +386,14 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'uat': {
                         'result': {
                             'success': True,
-                            'message': 'uat step run successfully and junit reports were generated'
+                            'message': 'Uat step run successfully and reports were generated'
                         },
                         'options': {
                             'pom-path': str(pom_file_path)
                         },
                         'report-artifacts': [
                             {
-                                'name': 'uat results generated using junit',
+                                'name': 'Uat results generated',
                                 'path': f'file://{str(reports_dir)}'
                             }
                         ]
@@ -388,7 +407,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 '-Pintegration-test',
                 f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
                 f'-Dtarget.base.url={TARGET_BASE_URL}',
-                '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
+                '-Dcucumber.plugin=html:target/cucumber/cucumber.html,' \
+                    'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
                 _out=stdout
@@ -576,7 +596,91 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 '-Pintegration-test',
                 f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
                 f'-Dtarget.base.url={TARGET_BASE_URL}',
-                '-Dcucumber.plugin=html:target/cucumber.html,json:target/cucumber.json',
+                '-Dcucumber.plugin=html:target/cucumber/cucumber.html,' \
+                    'json:target/cucumber/cucumber.json',
+                'test',
+                '-f', pom_file_path,
+                _out=stdout
+            )
+
+    # @patch('sh.mvn', create=True)
+    # def test_uat_target_base_url_from_deploy(self, mvn_mock):
+        # """Test passes using target base url from deploy step."""
+
+    @patch('sh.mvn', create=True)
+    def test_uat_with_custom_report_dir(self, mvn_mock):
+        """Test with custom report directory."""
+        group_id = 'com.mycompany.app'
+        artifact_id = 'my-app'
+        reports_dir = 'target/surefire-reports'
+        with TempDirectory() as temp_dir:
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(
+                temp_dir,
+                build_config,
+                group_id=group_id,
+                artifact_id=artifact_id
+            )
+            config = {
+                'tssc-config': {
+                    'uat': {
+                        'implementer': 'Maven',
+                        'config': {
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL,
+                            'report-dir': 'custom-cucumber'
+                        }
+                    }
+                }
+            }
+            mvn_mock.side_effect = create_mvn_side_effect(
+                pom_file_path,
+                reports_dir,
+                [
+                    '{group_id}.{artifact_id}.ClassNameTest.txt' \
+                        .format(group_id=group_id, artifact_id=artifact_id),
+                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml' \
+                        .format(group_id=group_id, artifact_id=artifact_id)
+                ]
+            )
+
+            test_results_dir = path.join(temp_dir.path, reports_dir)
+            expected_step_results = {
+                'tssc-results': {
+                    'uat': {
+                        'result': {
+                            'success': True,
+                            'message': 'Uat step run successfully and reports were generated'
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        },
+                        'report-artifacts': [
+                            {
+                                'name': 'Uat results generated',
+                                'path': f'file://{str(test_results_dir)}'
+                            }
+                        ]
+                    }
+                }
+            }
+
+            run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                '-Pintegration-test',
+                f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
+                f'-Dtarget.base.url={TARGET_BASE_URL}',
+                '-Dcucumber.plugin=html:target/custom-cucumber/cucumber.html,' \
+                    'json:target/custom-cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
                 _out=stdout
