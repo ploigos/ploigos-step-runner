@@ -1,4 +1,4 @@
-"""Step Implementer for the uat step for Maven generating JUnit reports.
+"""Step Implementer for the UAT step for Maven generating Cucumber reports.
 
 Step Configuration
 ------------------
@@ -94,7 +94,7 @@ REQUIRED_CONFIG_KEYS = [
 
 class Maven(StepImplementer):
     """
-    StepImplementer for the unit-test step for Maven generating JUnit reports.
+    StepImplementer for the unit-test step for Maven generating Cucumber reports.
     """
 
     @staticmethod
@@ -206,7 +206,7 @@ class Maven(StepImplementer):
                 _out=sys.stdout
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
+            raise RuntimeError(f'Error invoking mvn: {error}') from error
 
         if not os.path.isdir(test_results_dir) or \
             len(os.listdir(test_results_dir)) == 0:
@@ -223,9 +223,9 @@ class Maven(StepImplementer):
                     }
                 }
             else:# pragma: no cover
-                # Added 'no cover' to bypass missing unit-test step coverage error
-                # that is covered by the following unit test:
-                #   test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true
+                # Added 'no cover' to bypass missing uat step coverage error
+                # that is covered by the following test:
+                #   test_uat_run_attempt_fails_fail_on_no_tests_flag_true
                 raise RuntimeError('Error: No uat defined')
         else:
             results = {

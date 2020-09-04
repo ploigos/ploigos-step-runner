@@ -554,7 +554,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
 
     @patch('sh.mvn', create=True)
     def test_uat_run_attempt_fails_fail_on_no_tests_flag_false(self, mvn_mock):
-        """Test when failure on no tests with flag to ignore it set."""
+        """Test when failure on no tests with flag to ignore it set to false."""
         reports_dir = 'target/surefire-reports'
         with TempDirectory() as temp_dir:
             build_config = '''<build>
@@ -613,6 +613,58 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 '-f', pom_file_path,
                 _out=stdout
             )
+
+    @patch('sh.mvn', create=True)
+    def test_uat_run_attempt_fails_fail_on_no_tests_flag_true(self, mvn_mock):
+        """Test when failure on no tests with flag to ignore it set to true."""
+        reports_dir = 'target/surefire-reports'
+        with TempDirectory() as temp_dir:
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                          <configuration></configuration>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(temp_dir, build_config)
+            config = {
+                'tssc-config': {
+                    'uat': {
+                        'implementer': 'Maven',
+                        'config': {
+                            'fail-on-no-tests': True,
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL,
+                            'target-base-url': TARGET_BASE_URL
+                        }
+                    }
+                }
+            }
+            mvn_mock.side_effect = create_mvn_side_effect(
+                pom_file_path,
+                reports_dir,
+                []
+            )
+            expected_step_results = {
+                'tssc-results': {
+                    'uat': {
+                        'result': {
+                            'success': False,
+                            'message': "Failure message"
+                        },
+                        'report-artifacts': [],
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        }
+                    }
+                }
+            }
+
+            with self.assertRaisesRegex(
+                    RuntimeError, 'Error: No uat defined'):
+                run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
 
     @patch('sh.mvn', create=True)
     def test_uat_with_custom_report_dir(self, mvn_mock):
