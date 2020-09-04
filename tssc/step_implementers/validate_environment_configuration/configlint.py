@@ -225,10 +225,8 @@ class Configlint(StepImplementer):
                 _err_to_out=True
             )
 
-            sh.cat(configlint_results_file) # pylint: disable=no-member
-
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking config-lint: {all}'.format(all=error)) from error
+            raise RuntimeError(f'Error invoking config-lint: {error}') from error
 
         results = {
             'result': {
@@ -241,5 +239,8 @@ class Configlint(StepImplementer):
                     'path': f'file://{configlint_results_file}'
                 }
             ]
+            'options': {
+                'yml_path': yml_path
+            }
         }
         return results
