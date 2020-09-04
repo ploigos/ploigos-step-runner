@@ -19,8 +19,8 @@ minimally produce the following step results.
 | `TODO`           | TODO
 """
 
-from .cucumber import Cucumber
+from .maven import Maven
 
 __all__ = [
-    'cucumber'
+    'maven'
 ]
