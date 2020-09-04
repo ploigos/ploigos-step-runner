@@ -11,8 +11,9 @@ def run_step_test_with_result_validation(
         environment=None):
 
     results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+    working_dir_path = os.path.join(temp_dir.path, 'tssc-working')
 
-    factory = TSSCFactory(config, results_dir_path)
+    factory = TSSCFactory(config, results_dir_path, work_dir_path=working_dir_path)
     if runtime_args:
         factory.config.set_step_config_overrides(step_name, runtime_args)
 
