@@ -62,6 +62,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
 
 
 class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
     &#34;&#34;&#34;
     Abstract representation of a TSSC step implementer.
 
@@ -553,7 +554,25 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name)
 
-    def write_temp_file(self, filename, contents):
+    def create_working_folder(self):
+        &#34;&#34;&#34;
+        If it does not exist, create working folder
+
+        Returns
+        -------
+        str
+            return a string to the absolute path
+        &#34;&#34;&#34;
+        if not os.path.exists(self.__work_dir_path):
+            os.makedirs(self.__work_dir_path)
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        return os.path.abspath(step_path)
+
+
+    def write_working_file(self, filename, contents):
         &#34;&#34;&#34;
         Write content to filename in working directory
 
@@ -562,13 +581,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        if not os.path.exists(self.__work_dir_path):
-            os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name)
-        if not os.path.exists(step_path):
-            os.makedirs(step_path)
+        working_folder = self.create_working_folder()
 
-        file_path = os.path.join(step_path, filename)
+        file_path = os.path.join(working_folder, filename)
+
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
         return file_path
@@ -756,6 +772,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-public-methods
     &#34;&#34;&#34;
     Abstract representation of a TSSC step implementer.
 
@@ -1247,7 +1264,25 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name)
 
-    def write_temp_file(self, filename, contents):
+    def create_working_folder(self):
+        &#34;&#34;&#34;
+        If it does not exist, create working folder
+
+        Returns
+        -------
+        str
+            return a string to the absolute path
+        &#34;&#34;&#34;
+        if not os.path.exists(self.__work_dir_path):
+            os.makedirs(self.__work_dir_path)
+        step_path = os.path.join(self.__work_dir_path, self.step_name)
+        if not os.path.exists(step_path):
+            os.makedirs(step_path)
+
+        return os.path.abspath(step_path)
+
+
+    def write_working_file(self, filename, contents):
         &#34;&#34;&#34;
         Write content to filename in working directory
 
@@ -1256,13 +1291,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        if not os.path.exists(self.__work_dir_path):
-            os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name)
-        if not os.path.exists(step_path):
-            os.makedirs(step_path)
+        working_folder = self.create_working_folder()
 
-        file_path = os.path.join(step_path, filename)
+        file_path = os.path.join(working_folder, filename)
+
         with open(file_path, &#39;wb&#39;) as file:
             file.write(contents)
         return file_path
@@ -1329,6 +1361,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <li><a title="tssc.step_implementers.tag_source.git.Git" href="step_implementers/tag_source/git.html#tssc.step_implementers.tag_source.git.Git">Git</a></li>
 <li><a title="tssc.step_implementers.uat.cucumber.Cucumber" href="step_implementers/uat/cucumber.html#tssc.step_implementers.uat.cucumber.Cucumber">Cucumber</a></li>
 <li><a title="tssc.step_implementers.unit_test.maven.Maven" href="step_implementers/unit_test/maven.html#tssc.step_implementers.unit_test.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.validate_environment_configuration.configlint.Configlint" href="step_implementers/validate_environment_configuration/configlint.html#tssc.step_implementers.validate_environment_configuration.configlint.Configlint">Configlint</a></li>
+<li><a title="tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd" href="step_implementers/validate_environment_configuration/configlint_from_argocd.html#tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd">ConfiglintFromArgocd</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -1619,6 +1653,38 @@ def step_name(self):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="tssc.step_implementer.StepImplementer.create_working_folder"><code class="name flex">
+<span>def <span class="ident">create_working_folder</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>If it does not exist, create working folder</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>return a string to the absolute path</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_working_folder(self):
+    &#34;&#34;&#34;
+    If it does not exist, create working folder
+
+    Returns
+    -------
+    str
+        return a string to the absolute path
+    &#34;&#34;&#34;
+    if not os.path.exists(self.__work_dir_path):
+        os.makedirs(self.__work_dir_path)
+    step_path = os.path.join(self.__work_dir_path, self.step_name)
+    if not os.path.exists(step_path):
+        os.makedirs(step_path)
+
+    return os.path.abspath(step_path)</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.current_results"><code class="name flex">
 <span>def <span class="ident">current_results</span></span>(<span>self)</span>
 </code></dt>
@@ -2066,8 +2132,8 @@ element.</dd>
             yaml.dump(updated_step_results, step_results_file)</code></pre>
 </details>
 </dd>
-<dt id="tssc.step_implementer.StepImplementer.write_temp_file"><code class="name flex">
-<span>def <span class="ident">write_temp_file</span></span>(<span>self, filename, contents)</span>
+<dt id="tssc.step_implementer.StepImplementer.write_working_file"><code class="name flex">
+<span>def <span class="ident">write_working_file</span></span>(<span>self, filename, contents)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Write content to filename in working directory</p>
@@ -2080,7 +2146,7 @@ element.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def write_temp_file(self, filename, contents):
+<pre><code class="python">def write_working_file(self, filename, contents):
     &#34;&#34;&#34;
     Write content to filename in working directory
 
@@ -2089,13 +2155,10 @@ element.</dd>
     str
         return a string to the absolute file path
     &#34;&#34;&#34;
-    if not os.path.exists(self.__work_dir_path):
-        os.makedirs(self.__work_dir_path)
-    step_path = os.path.join(self.__work_dir_path, self.step_name)
-    if not os.path.exists(step_path):
-        os.makedirs(step_path)
+    working_folder = self.create_working_folder()
 
-    file_path = os.path.join(step_path, filename)
+    file_path = os.path.join(working_folder, filename)
+
     with open(file_path, &#39;wb&#39;) as file:
         file.write(contents)
     return file_path</code></pre>
@@ -2145,6 +2208,7 @@ element.</dd>
 <h4><code><a title="tssc.step_implementer.StepImplementer" href="#tssc.step_implementer.StepImplementer">StepImplementer</a></code></h4>
 <ul class="">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
@@ -2163,7 +2227,7 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
 </ul>

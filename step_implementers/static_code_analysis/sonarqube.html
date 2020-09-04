@@ -221,7 +221,7 @@ sonar.java.test.binaries=target/test-classes/org/acme/rest/json
         'report-artifacts': [
             {
               'name': 'sonarqube result set',
-              'path': 'file://folder/report-task.txt'
+              'path': 'file:///folder/tssc-working/static_code_analysis/report-task.txt'
             }
          ]
      }
@@ -351,7 +351,7 @@ Example: Results
             &#39;report-artifacts&#39;: [
                 {
                   &#39;name&#39;: &#39;sonarqube result set&#39;,
-                  &#39;path&#39;: &#39;file://folder/report-task.txt&#39;
+                  &#39;path&#39;: &#39;file:///folder/tssc-working/static_code_analysis/report-task.txt&#39;
                 }
              ]
          }
@@ -472,7 +472,7 @@ class SonarQube(StepImplementer):
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
-            working_directory = os.path.join(os.getcwd(), &#39;sonar-scanner&#39;)
+            working_directory = self.create_working_folder()
             if user == &#39;&#39;:
                 sh.sonar_scanner(  # pylint: disable=no-member
                     &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
@@ -511,7 +511,7 @@ class SonarQube(StepImplementer):
             &#39;report-artifacts&#39;: [
                 {
                     &#39;name&#39;: &#39;sonarqube result set&#39;,
-                    &#39;path&#39;: &#39;file://&#39; + working_directory + &#39;/report-task.txt&#39;
+                     &#39;path&#39;: f&#39;file://{working_directory}/report-task.txt&#39;
                 }
             ]
         }
@@ -629,7 +629,7 @@ class SonarQube(StepImplementer):
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
-            working_directory = os.path.join(os.getcwd(), &#39;sonar-scanner&#39;)
+            working_directory = self.create_working_folder()
             if user == &#39;&#39;:
                 sh.sonar_scanner(  # pylint: disable=no-member
                     &#39;-Dproject.settings=&#39; + self.get_config_value(&#39;properties&#39;),
@@ -668,7 +668,7 @@ class SonarQube(StepImplementer):
             &#39;report-artifacts&#39;: [
                 {
                     &#39;name&#39;: &#39;sonarqube result set&#39;,
-                    &#39;path&#39;: &#39;file://&#39; + working_directory + &#39;/report-task.txt&#39;
+                     &#39;path&#39;: f&#39;file://{working_directory}/report-task.txt&#39;
                 }
             ]
         }
@@ -684,6 +684,7 @@ class SonarQube(StepImplementer):
 <li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
 <ul class="hlist">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
@@ -702,7 +703,7 @@ class SonarQube(StepImplementer):
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.write_temp_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_temp_file">write_temp_file</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
 </ul>
