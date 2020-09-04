@@ -49,7 +49,7 @@ Keys in the `result` dictionary element in the `uat` dictionary of the step resu
 | `message`    | Human readable message describing results of this step
 
 **options**
-Keys in the `options` dictionary element in the `unit-test` dictionary of the step results.
+Keys in the `options` dictionary element in the `uat` dictionary of the step results.
 These keys are to be minimally displayed only when a non-default value is used.
 
 | `options` Key       | Description
