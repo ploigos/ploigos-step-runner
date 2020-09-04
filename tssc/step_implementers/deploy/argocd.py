@@ -89,7 +89,7 @@ Elements in `result` dictionary:
 | `success`             | Boolean value describing success/failure of this step
 | `message`             | Human readable message describing results of this step
 | `argocd-app-name`     | The argocd app name that was created or updated
-| `argocd-endpoint-url` | The endpoint url for the deployed app in argocd
+| `deploy-endpoint-url` | The endpoint url for the deployed app
 | `config-repo-git-tag` | The git tag applied to the configuration repo for deployment
 
 Elements in `report-artifacts` dictionary:
@@ -351,7 +351,7 @@ users:
                     'success': True,
                     'message': 'deploy step completed - see report-artifacts',
                     'argocd-app-name': argocd_app_name,
-                    'argocd-endpoint-url': 'http://{endpoint}'.format(
+                    'deploy-endpoint-url': 'http://{endpoint}'.format(
                          endpoint=self._get_endpoint_url()),
                     'config-repo-git-tag' : self._get_tag(repo_directory)
                 },
