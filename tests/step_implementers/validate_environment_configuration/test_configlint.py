@@ -68,6 +68,11 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             temp_dir.write('file.yml', yml_file.encode())
             yml_path = str(os.path.join(temp_dir.path, 'file.yml'))
             tssc_results = '''tssc-results:
+                validate-environment-configuration:
+                    'badoptions':
+                            {
+                                'yml_path':''' + yml_path + '''
+                            }
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
             configlint_rules = ''
@@ -103,7 +108,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
 
             with self.assertRaisesRegex(
                     ValueError,
-                    r'yml_path not found in runtime args or in options'):
+                    r'yml_path not specified in runtime args or in options'):
                 run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
@@ -189,6 +194,10 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                             'yml_path': yml_path
                         },
                         'report-artifacts': [
+                            {
+                                'name' : 'configlint-result-set',
+                                'path': f'file://{temp_dir.path}/tssc-working/validate-environment-configuration/configlint_results_file.txt'
+                            }
                         ]
                     }
                 }

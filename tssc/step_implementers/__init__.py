@@ -28,8 +28,8 @@ __all__ = [
     'push_container_image',
     'container_image_static_compliance_scan',
     'container_image_static_vulnerability_scan',
-    'uat',
-    'canary_test',
     'deploy',
-    'validate_environment_configuration'
+    'validate_environment_configuration',
+    'uat',
+    'canary_test'
 ]

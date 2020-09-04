@@ -111,7 +111,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -244,7 +244,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -356,7 +356,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -478,7 +478,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -597,7 +597,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -740,7 +740,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -863,7 +863,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -988,7 +988,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
 
             }
                     ]
@@ -1105,7 +1105,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -1214,7 +1214,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -1327,7 +1327,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -1442,7 +1442,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
             }
                     ]
                     }
@@ -1574,7 +1574,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -1699,7 +1699,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -1825,7 +1825,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -1950,7 +1950,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -2074,7 +2074,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
@@ -2202,7 +2202,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     {
                         #'name': 'deploy result set: includes manifests for next step',
                         'name' : 'argocd-result-set',
-                        'path': f'file://{temp_dir.path}' + '/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
                     }
                     ]
                     }
