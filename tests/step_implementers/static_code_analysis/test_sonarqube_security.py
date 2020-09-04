@@ -19,9 +19,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -44,7 +43,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                 'user': 'unit.test.user',
                 'password': 'unit.test.password'
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
@@ -58,7 +56,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'file://' + working_directory + '/report-task.txt'
+                                'path': f'file://{temp_dir.path}' +
+                                        '/tssc-working/static-code-analysis/report-task.txt'
                             }
                         ]
                     }
@@ -75,9 +74,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -116,9 +114,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -156,9 +153,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -177,7 +173,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     }
                 }
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
@@ -191,7 +186,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                         'report-artifacts': [
                             {
                                 'name': 'sonarqube result set',
-                                'path': 'file://' + working_directory + '/report-task.txt'
+                                'path': f'file://{temp_dir.path}' +
+                                        '/tssc-working/static-code-analysis/report-task.txt'
                             }
                         ]
                     }
@@ -209,9 +205,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -247,9 +242,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -285,9 +279,8 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     version: 1.0-123abc
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            sonar_properties = '''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
+            sonar_properties = '''
+                used to test existence of file
             '''
             temp_dir.write('sonar-project.properties', sonar_properties.encode())
             properties = os.path.join(temp_dir.path, 'sonar-project.properties')
@@ -305,7 +298,6 @@ class TestStepImplementerSonarQube(unittest.TestCase):
                     }
                 }
             }
-            working_directory = os.path.join(os.getcwd(), 'sonar-scanner')
             expected_step_results = {
             }
             with self.assertRaisesRegex(
