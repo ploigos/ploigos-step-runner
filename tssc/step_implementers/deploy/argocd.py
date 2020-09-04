@@ -324,7 +324,7 @@ users:
             results = {
                 'argocd-app-name': argocd_app_name,
                 'config-repo-git-tag' : self._get_tag(repo_directory),
-                'argocd-endpoint-url': 'http://{endpoint}'.format(
+                'deploy-endpoint-url': 'http://{endpoint}'.format(
                     endpoint=self._get_endpoint_url())
             }
 

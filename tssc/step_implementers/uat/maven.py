@@ -25,7 +25,7 @@ Results expected from previous steps that this step may require.
 
 | Step Name | Result Key            | Description
 |-----------|-----------------------|------------
-| `deploy`  | `argocd-endpoint-url` | The git tag to apply to the config repo
+| `deploy`  | `deploy-endpoint-url` | The git tag to apply to the config repo
 
 
 Results
@@ -141,7 +141,7 @@ class Maven(StepImplementer):
         if target_base_url is None:
             deploy_config = self.get_step_results(DefaultSteps.DEPLOY)
             if deploy_config is not None:
-                target_base_url = deploy_config.get('argocd-endpoint-url')
+                target_base_url = deploy_config.get('deploy-endpoint-url')
 
         if target_base_url is None:
             raise ValueError('No target base url was specified')

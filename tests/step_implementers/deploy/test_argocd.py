@@ -101,7 +101,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -223,7 +223,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -324,7 +324,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -435,7 +435,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -543,7 +543,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
-                        'argocd-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
+                        'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
                         'config-repo-git-tag' :  f'{git_tag}.HASH'
                     }
                 }
@@ -675,7 +675,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -787,7 +787,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -901,7 +901,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1006,7 +1006,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch'),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1104,7 +1104,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1206,7 +1206,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1310,7 +1310,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1431,7 +1431,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1545,7 +1545,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1660,7 +1660,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1774,7 +1774,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -1887,7 +1887,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
@@ -2004,7 +2004,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     },
                     'deploy': {
                         'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
+                        'deploy-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
                         'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
                     }
                 }
