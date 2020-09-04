@@ -221,8 +221,6 @@ class Maven(StepImplementer):
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
 
-        test_results_output_path = test_results_dir
-
         if not os.path.isdir(test_results_dir) or \
             len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
@@ -254,7 +252,8 @@ class Maven(StepImplementer):
                 'report-artifacts': [
                     {
                         'name': 'Uat results generated',
-                        'path': f'file://{test_results_output_path}'
+                        'path': f'file://{os.path.dirname(os.path.abspath(pom_file))}' \
+                            f'/target/{report_dir}'
                     }
                 ]
             }

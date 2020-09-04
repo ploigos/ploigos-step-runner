@@ -278,7 +278,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 group_id=group_id,
                 artifact_id=artifact_id
             )
-            test_results_dir = path.join(temp_dir.path, reports_dir)
+            test_results_dir = path.join(temp_dir.path, 'target/cucumber')
             config = {
                 'tssc-config': {
                     'uat': {
@@ -394,7 +394,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                         'report-artifacts': [
                             {
                                 'name': 'Uat results generated',
-                                'path': f'file://{str(reports_dir)}'
+                                'path': f'file://{path.join(temp_dir.path, "target/cucumber")}'
                             }
                         ]
                     }
@@ -652,7 +652,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 ]
             )
 
-            test_results_dir = path.join(temp_dir.path, reports_dir)
+            test_results_dir = path.join(temp_dir.path, 'target/custom-cucumber')
             expected_step_results = {
                 'tssc-results': {
                     'uat': {
