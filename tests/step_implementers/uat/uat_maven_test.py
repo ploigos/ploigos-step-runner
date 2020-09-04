@@ -141,8 +141,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
 
     @patch('sh.mvn', create=True)
     def test_uat_default_pom_file_missing(self, _mvn_mock):
-        """ Test if the default pom file is missing
-        """
+        """Test if the default pom file is missing."""
         config = {
             'tssc-config': {
                 'uat': {
@@ -615,10 +614,6 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 _out=stdout
             )
 
-    # @patch('sh.mvn', create=True)
-    # def test_uat_target_base_url_from_deploy(self, mvn_mock):
-        # """Test passes using target base url from deploy step."""
-
     @patch('sh.mvn', create=True)
     def test_uat_with_custom_report_dir(self, mvn_mock):
         """Test with custom report directory."""
@@ -693,6 +688,95 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 f'-Dtarget.base.url={TARGET_BASE_URL}',
                 '-Dcucumber.plugin=html:target/custom-cucumber/cucumber.html,' \
                     'json:target/custom-cucumber/cucumber.json',
+                'test',
+                '-f', pom_file_path,
+                _out=stdout
+            )
+
+    @patch('sh.mvn', create=True)
+    def test_uat_with_deploy_dir(self, mvn_mock):
+        """Test with report directory from the deploy."""
+        group_id = 'com.mycompany.app'
+        artifact_id = 'my-app'
+        reports_dir = 'target/surefire-reports'
+        endpoint_url = 'http://new-unique-app:8080'
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('tssc-results')
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(f'''tssc-results:
+                             deploy:
+                                 deploy-endpoint-url: {endpoint_url}''', 'utf-8')
+            )
+
+            build_config = '''<build>
+                                  <plugins>
+                                      <plugin>
+                                          <artifactId>maven-surefire-plugin</artifactId>
+                                          <version>${{surefire-plugin.version}}</version>
+                                      </plugin>
+                                  </plugins>
+                              </build>'''
+            pom_file_path = create_pom(
+                temp_dir,
+                build_config,
+                group_id=group_id,
+                artifact_id=artifact_id
+            )
+            config = {
+                'tssc-config': {
+                    'uat': {
+                        'implementer': 'Maven',
+                        'config': {
+                            'pom-file': str(pom_file_path),
+                            'selenium-hub-url': SELENIUM_HUB_URL
+                        }
+                    }
+                }
+            }
+            mvn_mock.side_effect = create_mvn_side_effect(
+                pom_file_path,
+                reports_dir,
+                [
+                    '{group_id}.{artifact_id}.ClassNameTest.txt' \
+                        .format(group_id=group_id, artifact_id=artifact_id),
+                    'TEST-{group_id}.{artifact_id}.ClassNameTest.xml' \
+                        .format(group_id=group_id, artifact_id=artifact_id)
+                ]
+            )
+
+            test_results_dir = path.join(temp_dir.path, 'target/cucumber')
+            expected_step_results = {
+                'tssc-results': {
+                    'deploy': {
+                        'deploy-endpoint-url': f'{endpoint_url}'
+                    },
+                    'uat': {
+                        'result': {
+                            'success': True,
+                            'message': 'Uat step run successfully and reports were generated'
+                        },
+                        'options': {
+                            'pom-path': str(pom_file_path)
+                        },
+                        'report-artifacts': [
+                            {
+                                'name': 'Uat results generated',
+                                'path': f'file://{str(test_results_dir)}'
+                            }
+                        ]
+                    }
+                }
+            }
+
+            run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                '-Pintegration-test',
+                f'-Dselenium.hub.url={SELENIUM_HUB_URL}',
+                f'-Dtarget.base.url={endpoint_url}',
+                '-Dcucumber.plugin=html:target/cucumber/cucumber.html,' \
+                    'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
                 _out=stdout
