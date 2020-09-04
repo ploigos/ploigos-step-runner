@@ -367,7 +367,6 @@ From least precedence to highest precedence.
 
 
       uat:
-      # WARNING: not yet implemented
       - implementer: Maven
         config: {}
 
@@ -623,7 +622,6 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       uat:
-      # WARNING: not yet implemented
       - implementer: Maven
         config: {}
 

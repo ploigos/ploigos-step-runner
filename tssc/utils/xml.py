@@ -73,6 +73,10 @@ def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_na
         The Element found given the xpath
     """
 
+    # verify runtime config
+    if not os.path.exists(xml_file_path):
+        raise ValueError(f'Given xml file does not exist: {xml_file_path}')
+
     xml_file = ElementTree.parse(xml_file_path).getroot()
     namespaces = xml_namespace_dict
     if xml_namespace_dict is None and default_namespace is not None:

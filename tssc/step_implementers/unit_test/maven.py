@@ -65,7 +65,6 @@ import sys
 import os
 import sh
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc.utils.xml import get_xml_element_by_path
 
