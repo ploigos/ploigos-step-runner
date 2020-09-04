@@ -238,7 +238,7 @@ class Configlint(StepImplementer):
                     'name' : 'configlint-result-set',
                     'path': f'file://{configlint_results_file}'
                 }
-            ]
+            ],
             'options': {
                 'yml_path': yml_path
             }
