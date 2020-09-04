@@ -74,7 +74,50 @@ def get_xml_element(xml_file, element_name):
              &#39; element&#39; \
         )
 
-    return xml_element</code></pre>
+    return xml_element
+
+def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_namespace_dict=None):
+    &#34;&#34;&#34;Gets a given element from a given xml file given an xpath.
+
+    Parameters
+    ----------
+    xml_file_path : str
+        Path of the xml file
+    xpath : str
+        Xpath of the element you want
+    default_namespace : str
+        Optional string specifying the default namespace you are using in your xpath selector.
+        This is the most common argument that will most likely be used.
+        If your XML is namespaced, then even if your elements are in the default namespace,
+        you must specify and use this namespace in both your xpath as well as specifying it here.
+    xml_namespace_dict : Dict[str, str]
+        Optional dictionary if default_namespace is not enough and you have multiple
+        namespaces that you need to deal with in your xpath selector.
+
+    Returns
+    -------
+    None
+        No element was found
+    xml.etree.ElementTree.Element
+        The Element found given the xpath
+    &#34;&#34;&#34;
+
+    # verify runtime config
+    if not os.path.exists(xml_file_path):
+        raise ValueError(f&#39;Given xml file does not exist: {xml_file_path}&#39;)
+
+    xml_file = ElementTree.parse(xml_file_path).getroot()
+    namespaces = xml_namespace_dict
+    if xml_namespace_dict is None and default_namespace is not None:
+        xml_namespace_match = re.findall(r&#39;{(.*?)}&#39;, xml_file.tag)
+        xml_namespace = xml_namespace_match[0] if xml_namespace_match else &#39;&#39;
+        namespaces = {}
+        namespaces[default_namespace] = xml_namespace
+
+    if xml_namespace_dict is None and default_namespace is None:
+        return xml_file.find(xpath)
+
+    return xml_file.find(xpath, namespaces)</code></pre>
 </details>
 </section>
 <section>
@@ -146,6 +189,81 @@ If the given xml_file does not contain an element with the given element_name.</
     return xml_element</code></pre>
 </details>
 </dd>
+<dt id="tssc.utils.xml.get_xml_element_by_path"><code class="name flex">
+<span>def <span class="ident">get_xml_element_by_path</span></span>(<span>xml_file_path, xpath, default_namespace=None, xml_namespace_dict=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets a given element from a given xml file given an xpath.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>xml_file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path of the xml file</dd>
+<dt><strong><code>xpath</code></strong> :&ensp;<code>str</code></dt>
+<dd>Xpath of the element you want</dd>
+<dt><strong><code>default_namespace</code></strong> :&ensp;<code>str</code></dt>
+<dd>Optional string specifying the default namespace you are using in your xpath selector.
+This is the most common argument that will most likely be used.
+If your XML is namespaced, then even if your elements are in the default namespace,
+you must specify and use this namespace in both your xpath as well as specifying it here.</dd>
+<dt><strong><code>xml_namespace_dict</code></strong> :&ensp;<code>Dict[str, str]</code></dt>
+<dd>Optional dictionary if default_namespace is not enough and you have multiple
+namespaces that you need to deal with in your xpath selector.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>No element was found</dd>
+<dt><code>xml.etree.ElementTree.Element</code></dt>
+<dd>The Element found given the xpath</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_namespace_dict=None):
+    &#34;&#34;&#34;Gets a given element from a given xml file given an xpath.
+
+    Parameters
+    ----------
+    xml_file_path : str
+        Path of the xml file
+    xpath : str
+        Xpath of the element you want
+    default_namespace : str
+        Optional string specifying the default namespace you are using in your xpath selector.
+        This is the most common argument that will most likely be used.
+        If your XML is namespaced, then even if your elements are in the default namespace,
+        you must specify and use this namespace in both your xpath as well as specifying it here.
+    xml_namespace_dict : Dict[str, str]
+        Optional dictionary if default_namespace is not enough and you have multiple
+        namespaces that you need to deal with in your xpath selector.
+
+    Returns
+    -------
+    None
+        No element was found
+    xml.etree.ElementTree.Element
+        The Element found given the xpath
+    &#34;&#34;&#34;
+
+    # verify runtime config
+    if not os.path.exists(xml_file_path):
+        raise ValueError(f&#39;Given xml file does not exist: {xml_file_path}&#39;)
+
+    xml_file = ElementTree.parse(xml_file_path).getroot()
+    namespaces = xml_namespace_dict
+    if xml_namespace_dict is None and default_namespace is not None:
+        xml_namespace_match = re.findall(r&#39;{(.*?)}&#39;, xml_file.tag)
+        xml_namespace = xml_namespace_match[0] if xml_namespace_match else &#39;&#39;
+        namespaces = {}
+        namespaces[default_namespace] = xml_namespace
+
+    if xml_namespace_dict is None and default_namespace is None:
+        return xml_file.find(xpath)
+
+    return xml_file.find(xpath, namespaces)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -165,6 +283,7 @@ If the given xml_file does not contain an element with the given element_name.</
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="tssc.utils.xml.get_xml_element" href="#tssc.utils.xml.get_xml_element">get_xml_element</a></code></li>
+<li><code><a title="tssc.utils.xml.get_xml_element_by_path" href="#tssc.utils.xml.get_xml_element_by_path">get_xml_element_by_path</a></code></li>
 </ul>
 </li>
 </ul>
