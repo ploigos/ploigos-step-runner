@@ -131,9 +131,13 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 'No target base url was specified'):
-            factory.run_step('uat', {
-                'selenium-hub-url': SELENIUM_HUB_URL
-            })
+            factory.config.set_step_config_overrides(
+                'uat',
+                {
+                    'selenium-hub-url': SELENIUM_HUB_URL,
+                }
+            )
+            factory.run_step('uat')
 
     @patch('sh.mvn', create=True)
     def test_uat_default_pom_file_missing(self, _mvn_mock):
@@ -150,10 +154,14 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: pom.xml'):
-            factory.run_step('uat', {
-                'selenium-hub-url': SELENIUM_HUB_URL,
-                'target-base-url': TARGET_BASE_URL
-            })
+            factory.config.set_step_config_overrides(
+                'uat',
+                {
+                    'selenium-hub-url': SELENIUM_HUB_URL,
+                    'target-base-url': TARGET_BASE_URL
+                }
+            )
+            factory.run_step('uat')
 
     @patch('sh.mvn', create=True)
     def test_uat_runtime_pom_file_missing(self, _mvn_mock):
@@ -169,11 +177,15 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: does-not-exist-pom.xml'):
-            factory.run_step('uat', {
-                'pom-file': 'does-not-exist-pom.xml',
-                'selenium-hub-url': SELENIUM_HUB_URL,
-                'target-base-url': TARGET_BASE_URL
-            })
+            factory.config.set_step_config_overrides(
+                'uat',
+                {
+                    'pom-file': 'does-not-exist-pom.xml',
+                    'selenium-hub-url': SELENIUM_HUB_URL,
+                    'target-base-url': TARGET_BASE_URL
+                }
+            )
+            factory.run_step('uat')
 
     @patch('sh.mvn', create=True)
     def test_uat_config_file_pom_file_missing(self, _mvn_mock):

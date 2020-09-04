@@ -74,10 +74,9 @@ import sys
 import os
 import sh
 
-from tssc import TSSCFactory
 from tssc import StepImplementer
 from tssc import DefaultSteps
-from ..utils.xml import get_xml_element_by_path
+from tssc.utils.xml import get_xml_element_by_path
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -97,18 +96,6 @@ class Maven(StepImplementer):
     """
     StepImplementer for the unit-test step for Maven generating JUnit reports.
     """
-
-    @staticmethod
-    def step_name():
-        """
-        Getter for the TSSC Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            TSSC step name implemented by this step.
-        """
-        return DefaultSteps.UAT
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -142,7 +129,7 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _get_target_base_url(self, runtime_step_config):
+    def _get_target_base_url(self):
         """Gets the target-base-url.
 
         Gets the target-base-url first from the configs. If not found
@@ -150,7 +137,7 @@ class Maven(StepImplementer):
 
         If still unable to find, then throw ValueError.
         """
-        target_base_url = runtime_step_config['target-base-url']
+        target_base_url = self.get_config_value('target-base-url')
         if target_base_url is None:
             deploy_config = self.get_step_results(DefaultSteps.DEPLOY)
             if deploy_config is not None:
@@ -161,7 +148,7 @@ class Maven(StepImplementer):
 
         return target_base_url
 
-    def _run_step(self, runtime_step_config):
+    def _run_step(self):
         """
         Runs the TSSC step implemented by this StepImplementer.
 
@@ -176,11 +163,11 @@ class Maven(StepImplementer):
         dict
             Results of running this step.
         """
-        pom_file = runtime_step_config['pom-file']
-        fail_on_no_tests = runtime_step_config['fail-on-no-tests']
-        selenium_hub_url = runtime_step_config['selenium-hub-url']
-        report_dir = runtime_step_config['report-dir']
-        target_base_url = self._get_target_base_url(runtime_step_config)
+        pom_file = self.get_config_value('pom-file')
+        fail_on_no_tests = self.get_config_value('fail-on-no-tests')
+        selenium_hub_url = self.get_config_value('selenium-hub-url')
+        report_dir = self.get_config_value('report-dir')
+        target_base_url = self._get_target_base_url()
 
         if not os.path.exists(pom_file):
             raise ValueError(f'Given pom file does not exist: {pom_file}')
@@ -258,6 +245,3 @@ class Maven(StepImplementer):
                 ]
             }
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)

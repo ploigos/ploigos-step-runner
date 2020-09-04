@@ -67,7 +67,7 @@ import sh
 
 from tssc import TSSCFactory
 from tssc import StepImplementer
-from ..utils.xml import get_xml_element_by_path
+from tssc.utils.xml import get_xml_element_by_path
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -199,6 +199,3 @@ class Maven(StepImplementer):
                 ]
             }
         return results
-
-# register step implementer
-TSSCFactory.register_step_implementer(Maven)
