@@ -141,7 +141,9 @@ class Maven(StepImplementer):
         if target_base_url is None:
             deploy_config = self.get_step_results(DefaultSteps.DEPLOY)
             if deploy_config is not None:
-                target_base_url = deploy_config.get('deploy-endpoint-url')
+                result = deploy_config.get('result')
+                if result is not None:
+                    target_base_url = result['deploy-endpoint-url']
 
         if target_base_url is None:
             raise ValueError('No target base url was specified')

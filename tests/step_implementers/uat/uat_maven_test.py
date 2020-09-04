@@ -757,8 +757,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(f'''tssc-results:
-                             deploy:
-                                 deploy-endpoint-url: {endpoint_url}''', 'utf-8')
+                            deploy:
+                              result:
+                                deploy-endpoint-url: {endpoint_url}''', 'utf-8')
             )
 
             build_config = '''<build>
@@ -801,7 +802,9 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'deploy': {
-                        'deploy-endpoint-url': f'{endpoint_url}'
+                        'result': {
+                            'deploy-endpoint-url': f'{endpoint_url}'
+                        }
                     },
                     'uat': {
                         'result': {
