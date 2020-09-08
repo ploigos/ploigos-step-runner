@@ -4,7 +4,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import TSSCConfig
+from tssc.config import TSSCConfig, TSSCConfigValue
 
 class TestTSSCConfig(BaseTSSCTestCase):
     def test_add_config_invalid_type(self):
@@ -324,9 +324,12 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
         })
 
-        self.assertEqual(tssc_config.global_defaults, {
-            'test1' : 'foo1'
-        })
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(tssc_config.global_defaults),
+            {
+                'test1' : 'foo1'
+            }
+        )
         self.assertEqual(tssc_config.global_environment_defaults, {})
 
     def test_global_environment_defaults(self):
@@ -346,28 +349,40 @@ class TestTSSCConfig(BaseTSSCTestCase):
         })
 
         self.assertEqual(tssc_config.global_defaults, {})
-        self.assertEqual(tssc_config.global_environment_defaults, {
-            'env1': {
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(tssc_config.global_environment_defaults),
+            {
+                'env1': {
+                    'environment-name' : 'env1',
+                    'test1' : 'env1',
+                    'test2' : 'test2'
+                },
+                'env2': {
+                    'environment-name' : 'env2',
+                    'test1' : 'env2',
+                    'test3' : 'test3'
+                }
+            }
+        )
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                tssc_config.get_global_environment_defaults_for_environment('env1')
+            ),
+            {
                 'environment-name' : 'env1',
                 'test1' : 'env1',
                 'test2' : 'test2'
-            },
-            'env2': {
+            }
+        )
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                tssc_config.get_global_environment_defaults_for_environment('env2')
+            ), {
                 'environment-name' : 'env2',
                 'test1' : 'env2',
                 'test3' : 'test3'
             }
-        })
-        self.assertEqual(tssc_config.get_global_environment_defaults_for_environment('env1'), {
-            'environment-name' : 'env1',
-            'test1' : 'env1',
-            'test2' : 'test2'
-        })
-        self.assertEqual(tssc_config.get_global_environment_defaults_for_environment('env2'), {
-            'environment-name' : 'env2',
-            'test1' : 'env2',
-            'test3' : 'test3'
-        })
+        )
         self.assertEqual(tssc_config.get_global_environment_defaults_for_environment('does-not-exist'), {})
         self.assertEqual(tssc_config.get_global_environment_defaults_for_environment(None), {})
 
@@ -590,15 +605,23 @@ class TestTSSCConfig(BaseTSSCTestCase):
 
             tssc_config = TSSCConfig()
             tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
-            self.assertEqual(tssc_config.get_global_environment_defaults_for_environment('env1'), {
-                'environment-name': 'env1',
-                'foo-key': 'foo',
-                'bar-key': 'bar'
-            })
+            self.assertEqual(
+                TSSCConfigValue.convert_leaves_to_values(
+                    tssc_config.get_global_environment_defaults_for_environment('env1')
+                ),
+                {
+                    'environment-name': 'env1',
+                    'foo-key': 'foo',
+                    'bar-key': 'bar'
+                }
+            )
     def test_invalid_sub_steps(self):
         with self.assertRaisesRegex(
             ValueError,
-            r"Expected step \(step-foo\) to have have step config \(bad-step-config\) of type dict or list but got: <class 'str'>"
+            r"Expected step \(step-foo\) to have have step config " \
+            r"\(TSSCConfigValue\(value=bad-step-config, " \
+            r"value_path='\[\"tssc-config\"\]\[\"step-foo\"]\'\)\) of " \
+            r"type dict or list but got: <class 'tssc.config.config_value.TSSCConfigValue'>"
         ):
             TSSCConfig({
                 TSSCConfig.TSSC_CONFIG_KEY: {
@@ -630,12 +653,22 @@ class TestTSSCConfig(BaseTSSCTestCase):
         step_config = tssc_config.get_step_config('step-foo')
         self.assertEqual(len(step_config.sub_steps), 2)
 
-        self.assertEqual(step_config.get_sub_step('foo1').sub_step_config, {
-            'test1': 'foo'
-        })
-        self.assertEqual(step_config.get_sub_step('foo2').sub_step_config, {
-            'test2': 'foo'
-        })
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').sub_step_config,
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo2').sub_step_config
+            ),
+            {
+                'test2': 'foo'
+            }
+        )
 
     def test_sub_step_with_name(self):
         tssc_config = TSSCConfig({
@@ -656,9 +689,14 @@ class TestTSSCConfig(BaseTSSCTestCase):
         step_config = tssc_config.get_step_config('step-foo')
         self.assertEqual(len(step_config.sub_steps), 1)
 
-        self.assertEqual(step_config.get_sub_step('sub-step-name-test').sub_step_config, {
-            'test1': 'foo'
-        })
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('sub-step-name-test').sub_step_config
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
 
     def test_sub_step_with_environment_config(self):
         tssc_config = TSSCConfig({
@@ -683,12 +721,22 @@ class TestTSSCConfig(BaseTSSCTestCase):
         step_config = tssc_config.get_step_config('step-foo')
         self.assertEqual(len(step_config.sub_steps), 1)
 
-        self.assertEqual(step_config.get_sub_step('foo1').sub_step_config, {
-            'test1': 'foo'
-        })
-        self.assertEqual(step_config.get_sub_step('foo1').get_sub_step_env_config('env1'), {
-            'test2': 'bar'
-        })
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').sub_step_config
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').get_sub_step_env_config('env1')
+            ),
+            {
+                'test2': 'bar'
+            }
+        )
 
     def test_sub_step_with_no_environment_config(self):
         tssc_config = TSSCConfig({
@@ -708,7 +756,12 @@ class TestTSSCConfig(BaseTSSCTestCase):
         step_config = tssc_config.get_step_config('step-foo')
         self.assertEqual(len(step_config.sub_steps), 1)
 
-        self.assertEqual(step_config.get_sub_step('foo1').sub_step_config, {
-            'test1': 'foo'
-        })
+        self.assertEqual(
+            TSSCConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').sub_step_config
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
         self.assertEqual(step_config.get_sub_step('foo1').get_sub_step_env_config('env1'), {})

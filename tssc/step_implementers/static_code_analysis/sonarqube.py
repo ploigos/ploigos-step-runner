@@ -278,7 +278,7 @@ class SonarQube(StepImplementer):
             'report-artifacts': [
                 {
                     'name': 'sonarqube result set',
-                     'path': f'file://{working_directory}/report-task.txt'
+                    'path': f'file://{working_directory}/report-task.txt'
                 }
             ]
         }
