@@ -1,4 +1,5 @@
 from tssc import StepImplementer, TSSCException
+from tssc.config.config_value import TSSCConfigValue
 
 class FooStepImplementer(StepImplementer):
     @staticmethod
@@ -108,9 +109,11 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
         return []
 
     def _run_step(self):
-        return self.config.get_copy_of_runtime_step_config(
+        runtime_step_config = self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())
+
+        return TSSCConfigValue.convert_leaves_to_values(runtime_step_config)
 
 class NotSubClassOfStepImplementer():
     pass

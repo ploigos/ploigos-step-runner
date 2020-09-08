@@ -6,6 +6,7 @@ import glob
 import os.path
 
 from tssc.config.step_config import TSSCStepConfig
+from tssc.config.config_value import TSSCConfigValue
 from tssc.utils.file import parse_yaml_or_json_file
 from tssc.utils.dict import deep_merge
 
@@ -252,19 +253,21 @@ class TSSCConfig:
 
         # add the config parsed from file
         try:
-            self.__add_config_dict(parsed_config_file)
+            self.__add_config_dict(parsed_config_file, config_file)
         except AssertionError as error:
             raise AssertionError(
                 f"Failed to add parsed configuration file ({config_file}): {error}"
             ) from error
 
-    def __add_config_dict(self, config_dict): # pylint: disable=too-many-locals, too-many-branches
+    def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches
         """Add a TSSC configuration dictionary to the list of TSSC configuration dictionaries.
 
         Parameters
         ----------
         config_dict : dict
             A dictionary to validate as a TSSC configuration and to add to this TSSCConfig.
+        source_file_path : str, optional
+            File path to the file from which the given config_dict came from.
 
         Raises
         ------
@@ -288,8 +291,22 @@ class TSSCConfig:
             f"Missing expected top level key ({TSSCConfig.TSSC_CONFIG_KEY}): " + \
             f"{config_dict}"
 
-        tssc_config = config_dict[TSSCConfig.TSSC_CONFIG_KEY]
-        for key, value in tssc_config.items():
+        # if file path given use that as the source when creating TSSCConfigValue objects
+        # else use a copy of the given configuration dictionary
+        if source_file_path is not None:
+            parent_source = source_file_path
+        else:
+            parent_source = copy.deepcopy(config_dict)
+
+        # convert all the leaves of the configuration dictionary under
+        # the TSSCConfig.TSSC_CONFIG_KEY to TSSCConfigValue objects
+        tssc_config_values = TSSCConfigValue.convert_leaves_to_config_values(
+            values=config_dict[TSSCConfig.TSSC_CONFIG_KEY],
+            parent_source=parent_source,
+            path_parts=[TSSCConfig.TSSC_CONFIG_KEY]
+        )
+
+        for key, value in tssc_config_values.items():
             # if global default key
             # else if global env defaults key
             # else assume step config
@@ -341,12 +358,12 @@ class TSSCConfig:
                         f"{TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER}"
 
                     sub_step_implementer_name = \
-                        sub_step[TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER]
+                        sub_step[TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER].value
 
                     # if sub step name given
                     # else if no sub step name given use step implementer as sub step name
                     if TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_NAME in sub_step:
-                        sub_step_name = sub_step[TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_NAME]
+                        sub_step_name = sub_step[TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_NAME].value
                     else:
                         sub_step_name = sub_step_implementer_name
 
