@@ -36,7 +36,8 @@ import os
 import pprint
 import yaml
 from tabulate import tabulate
-from .exceptions import TSSCException
+from tssc.exceptions import TSSCException
+from tssc.config.config_value import TSSCConfigValue
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
@@ -276,11 +277,9 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                 missing_required_config_keys.append(required_config_key)
 
         assert (not missing_required_config_keys), \
-            &#34;The runtime step configuration ({runtime_step_config}) is missing the required&#34;.format(
-                runtime_step_config=runtime_step_config,) + \
-            &#34; configuration keys ({missing_required_config_keys})&#34;.format(
-                missing_required_config_keys=missing_required_config_keys
-            )
+            &#34;The runtime step configuration (&#34; + \
+            f&#34;{TSSCConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
+            f&#34;the required configuration keys ({missing_required_config_keys})&#34;
 
     def run_step(self):
         &#34;&#34;&#34;
@@ -986,11 +985,9 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
                 missing_required_config_keys.append(required_config_key)
 
         assert (not missing_required_config_keys), \
-            &#34;The runtime step configuration ({runtime_step_config}) is missing the required&#34;.format(
-                runtime_step_config=runtime_step_config,) + \
-            &#34; configuration keys ({missing_required_config_keys})&#34;.format(
-                missing_required_config_keys=missing_required_config_keys
-            )
+            &#34;The runtime step configuration (&#34; + \
+            f&#34;{TSSCConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
+            f&#34;the required configuration keys ({missing_required_config_keys})&#34;
 
     def run_step(self):
         &#34;&#34;&#34;

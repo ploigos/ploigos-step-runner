@@ -793,9 +793,8 @@ users:
                     &#39;success&#39;: True,
                     &#39;message&#39;: &#39;deploy step completed - see report-artifacts&#39;,
                     &#39;argocd-app-name&#39;: argocd_app_name,
-                    &#39;deploy-endpoint-url&#39;: &#39;http://{endpoint}&#39;.format(
-                         endpoint=self._get_endpoint_url()),
-                    &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory)
+                    &#39;deploy-endpoint-url&#39;: f&#39;http://{self._get_endpoint_url()}&#39;,
+                    &#39;config-repo-git-tag&#39;: self._get_tag(repo_directory)
                 },
                 &#39;report-artifacts&#39;: [
                     {
@@ -1229,9 +1228,8 @@ users:
                     &#39;success&#39;: True,
                     &#39;message&#39;: &#39;deploy step completed - see report-artifacts&#39;,
                     &#39;argocd-app-name&#39;: argocd_app_name,
-                    &#39;deploy-endpoint-url&#39;: &#39;http://{endpoint}&#39;.format(
-                         endpoint=self._get_endpoint_url()),
-                    &#39;config-repo-git-tag&#39; : self._get_tag(repo_directory)
+                    &#39;deploy-endpoint-url&#39;: f&#39;http://{self._get_endpoint_url()}&#39;,
+                    &#39;config-repo-git-tag&#39;: self._get_tag(repo_directory)
                 },
                 &#39;report-artifacts&#39;: [
                     {
