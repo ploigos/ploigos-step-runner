@@ -88,6 +88,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -100,9 +101,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -213,6 +224,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -222,9 +234,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -314,6 +336,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -323,9 +346,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -422,6 +455,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -434,9 +468,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -542,9 +586,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
-                        'argocd-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
-                        'config-repo-git-tag' :  f'{git_tag}.HASH'
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -662,6 +716,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -673,10 +728,20 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     'tag-source' : {
                         'tag' : git_tag
                     },
-                    'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch', environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                    'deploy' :{
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}',
+                            'config-repo-git-tag':  f'{git_tag}.HASH'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -776,6 +841,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -786,9 +852,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'image-version' : image_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -888,6 +964,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -900,9 +977,20 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+
+                        }
+                        ]
                     }
                 }
             }
@@ -993,6 +1081,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1005,9 +1094,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch'),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1090,7 +1189,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                     }
                 }
             }
-
+            
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1103,9 +1203,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1193,6 +1303,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1205,9 +1316,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1297,6 +1418,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1309,9 +1431,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1418,6 +1550,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1430,9 +1563,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1532,6 +1675,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1544,9 +1688,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1647,6 +1801,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1659,9 +1814,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1761,6 +1926,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1773,9 +1939,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1874,6 +2050,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -1886,9 +2063,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }
@@ -1991,6 +2178,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 }
             }
 
+            repo_branch_name = 'testbranch'
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
@@ -2003,9 +2191,19 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'tag' : git_tag
                     },
                     'deploy': {
-                        'argocd-app-name' : '{org}-{app}-{service}-{repo_branch_name}-{environment}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name),
-                        'argocd-endpoint-url': 'http://{service}.{org}-{app}-{service}-{repo_branch_name}-{environment}.{domain}'.format(org=organization_name, service=service_name, app=application_name, repo_branch_name='testbranch' , environment=environment_name, domain=kube_app_domain),
-                        'config-repo-git-tag' :  '{tag}.HASH'.format(tag=git_tag)
+                        'result': {
+                            'success': True,
+                            'message': 'deploy step completed - see report-artifacts',
+                            'argocd-app-name' : f'{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}',
+                            'config-repo-git-tag' :  f'{git_tag}.HASH',
+                            'deploy-endpoint-url': f'http://{service_name}.{organization_name}-{application_name}-{service_name}-{repo_branch_name}-{environment_name}.{kube_app_domain}'
+                        },
+                        'report-artifacts': [
+                        {
+                            'name' : 'argocd-result-set',
+                            'path': f'file://{temp_dir.path}/tssc-working/deploy/deploy_argocd_manifests.yml'
+                        }
+                        ]
                     }
                 }
             }

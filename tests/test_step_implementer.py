@@ -617,7 +617,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 'foo': "bar",
             })
 
-    def test_write_temp_file(self):
+    def test_write_working_file(self):
         config = TSSCConfig({
             'tssc-config': {
                 'foo': {
@@ -639,7 +639,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 config=sub_step
             )
 
-            step.write_temp_file('test-working-file', b'hello world')
+            step.write_working_file('test-working-file', b'hello world')
 
             with open(os.path.join(working_dir_path, 'foo', 'test-working-file'), 'r') as working_file:
                 self.assertEqual(working_file.read(), 'hello world')
