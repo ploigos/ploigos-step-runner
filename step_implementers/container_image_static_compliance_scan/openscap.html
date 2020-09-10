@@ -38,10 +38,22 @@ from runtime configuration.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>TODO</code></td>
+<td><code>log-level</code></td>
+<td>True</td>
+<td>Info</td>
+<td>log level for buildah, podman</td>
+</tr>
+<tr>
+<td>and scap utilities</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>scap-input-file</code></td>
 <td>True</td>
 <td></td>
-<td></td>
+<td>Input file for scap base scan</td>
 </tr>
 </tbody>
 </table>
@@ -57,9 +69,9 @@ from runtime configuration.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>TODO</code></td>
-<td><code>TODO</code></td>
-<td>TODO</td>
+<td><code>push-container-image</code></td>
+<td><code>image-tag</code></td>
+<td>Image to scan</td>
 </tr>
 </tbody>
 </table>
@@ -74,18 +86,11 @@ from runtime configuration.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>TODO</code></td>
-<td>TODO</td>
+<td><code>compliance_scan_results_path</code></td>
+<td>Absolute path to directory of compliance scan results</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Example</strong></p>
-<pre><code>'tssc-results': {
-    'TODO': {
-        'TODO': ''
-    }
-}
-</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -99,39 +104,47 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key | Required? | Default | Description
-|-------------------|-----------|---------|-----------
-| `TODO`            | True      |         |
+| Configuration Key           | Required? | Default | Description
+|-----------------------------|-----------|---------|-----------
+| `log-level`                 | True      | Info    | log level for buildah, podman
+                                                      and scap utilities
+| `scap-input-file`           | True      |         | Input file for scap base scan
 
 Expected Previous Step Results
 ------------------------------
 
 Results expected from previous steps that this step requires.
 
-| Step Name | Result Key | Description
-|-----------|------------|------------
-| `TODO`    | `TODO`     | TODO
+| Step Name              | Result Key      | Description
+|------------------------|-----------------|------------
+| `push-container-image` | `image-tag`     | Image to scan
 
 Results
 -------
 
 Results output by this step.
 
-| Result Key | Description
-|------------|------------
-| `TODO`     | TODO
+| Result Key                      | Description
+|---------------------------------|------------
+| `compliance_scan_results_path`  | Absolute path to directory of compliance scan results
 
-
-**Example**
-
-    &#39;tssc-results&#39;: {
-        &#39;TODO&#39;: {
-            &#39;TODO&#39;: &#39;&#39;
-        }
-    }
 &#34;&#34;&#34;
 
-from tssc import StepImplementer
+import sys
+import sh
+from tssc import StepImplementer, DefaultSteps
+
+DEFAULT_CONFIG = {
+    &#39;log-level&#39;: &#39;info&#39;
+}
+
+REQUIRED_CONFIG_KEYS = [
+    &#39;service-name&#39;,
+    &#39;application-name&#39;,
+    &#39;organization&#39;,
+    &#39;log-level&#39;,
+    &#39;scap-input-file&#39;,
+]
 
 class OpenSCAP(StepImplementer):
     &#34;&#34;&#34;
@@ -152,7 +165,7 @@ class OpenSCAP(StepImplementer):
         dict
             Default values to use for step configuration values.
         &#34;&#34;&#34;
-        return {}
+        return DEFAULT_CONFIG
 
     @staticmethod
     def required_runtime_step_config_keys():
@@ -168,9 +181,9 @@ class OpenSCAP(StepImplementer):
         array_list
             Array of configuration keys that are required before running the step.
         &#34;&#34;&#34;
-        return []
+        return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self):
+    def _run_step(self): # pylint: disable=too-many-locals
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
@@ -178,7 +191,80 @@ class OpenSCAP(StepImplementer):
         dict
             Results of running this step.
         &#34;&#34;&#34;
-        results = {}
+
+        image_to_scan = &#39;&#39;
+        if self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) and \
+            self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-tag&#39;):
+            image_to_scan = self.get_step_results(
+                DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-tag&#39;)
+        else:
+            raise ValueError(
+                f&#39;Unable to find image to scan from {DefaultSteps.PUSH_CONTAINER_IMAGE} step&#39;)
+
+        log_level = &#39;info&#39;
+        if self.get_config_value(&#39;log-level&#39;):
+            log_level = self.get_config_value(&#39;log-level&#39;)
+
+        result = sh.buildah(&#39;containers&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;-q&#39;,  # pylint: disable=no-member
+                            _out=sys.stdout,
+                            _tee=True)
+
+        num_containers = result.stdout.count(b&#39;\n&#39;)
+        if num_containers &gt; 0:
+            raise ValueError(&#39;Zero vfs base containers should be running&#39;)
+
+        try:
+            sh.buildah(&#39;from&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;--log-level&#39;,  # pylint: disable=no-member
+                        log_level,
+                        image_to_scan,
+                        _out=sys.stdout)
+
+            result = sh.buildah(&#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;containers&#39;, &#39;-q&#39;,  # pylint: disable=no-member
+                              _out=sys.stdout,
+                              _tee=True
+                             )
+            container_id = result.stdout.rstrip()
+
+            print(f&#34;container_id to scan = {container_id}&#34;)
+
+            result = sh.buildah(&#39;mount&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, container_id,  # pylint: disable=no-member
+                                _out=sys.stdout,
+                                _tee=True)
+            mount_path = result.stdout.rstrip()
+            print(f&#34;mount_path to scan = {mount_path}&#34;)
+
+            # Execute scan
+            scan_input_file = self.get_config_value(&#39;scap-input-file&#39;).rstrip()
+            scan_output_absolute_path = self.write_working_file(&#39;scap-compliance-output.txt&#39;, b&#39;&#39;)
+            scan_report_absolute_path = self.write_working_file(&#39;scap-compliance-report.html&#39;, b&#39;&#39;)
+
+            result = sh.oscap_chroot(mount_path, &#39;oval&#39;, &#39;eval&#39;, &#39;--report&#39;,  # pylint: disable=no-member
+                                     scan_report_absolute_path,
+                                     scan_input_file,
+                                     _out=sys.stdout,
+                                     _tee=True)
+
+            result_file = open(scan_output_absolute_path, &#34;w+&#34;)
+            result_file.write(result.stdout.decode(&#34;utf-8&#34;) )
+            result_file.close()
+            print(&#34;Compliance Scan Completed.  Report found at following path: &#34; +
+                  scan_report_absolute_path)
+
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(&#39;Unexpected runtime error&#39;) from error
+
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True,
+                &#39;message&#39;: &#39;container-image-static-compliance-scan step completed&#39;,
+            },
+            &#39;report-artifacts&#39;: [
+                {
+                    &#39;name&#39;: &#39;container-image-static-compliance-scan result set&#39;,
+                    &#39;path&#39;: &#39;file://&#39; + scan_report_absolute_path
+                }
+            ]
+        }
         return results</code></pre>
 </details>
 </section>
@@ -220,7 +306,7 @@ class OpenSCAP(StepImplementer):
         dict
             Default values to use for step configuration values.
         &#34;&#34;&#34;
-        return {}
+        return DEFAULT_CONFIG
 
     @staticmethod
     def required_runtime_step_config_keys():
@@ -236,9 +322,9 @@ class OpenSCAP(StepImplementer):
         array_list
             Array of configuration keys that are required before running the step.
         &#34;&#34;&#34;
-        return []
+        return REQUIRED_CONFIG_KEYS
 
-    def _run_step(self):
+    def _run_step(self): # pylint: disable=too-many-locals
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
         Returns
@@ -246,7 +332,80 @@ class OpenSCAP(StepImplementer):
         dict
             Results of running this step.
         &#34;&#34;&#34;
-        results = {}
+
+        image_to_scan = &#39;&#39;
+        if self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) and \
+            self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-tag&#39;):
+            image_to_scan = self.get_step_results(
+                DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-tag&#39;)
+        else:
+            raise ValueError(
+                f&#39;Unable to find image to scan from {DefaultSteps.PUSH_CONTAINER_IMAGE} step&#39;)
+
+        log_level = &#39;info&#39;
+        if self.get_config_value(&#39;log-level&#39;):
+            log_level = self.get_config_value(&#39;log-level&#39;)
+
+        result = sh.buildah(&#39;containers&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;-q&#39;,  # pylint: disable=no-member
+                            _out=sys.stdout,
+                            _tee=True)
+
+        num_containers = result.stdout.count(b&#39;\n&#39;)
+        if num_containers &gt; 0:
+            raise ValueError(&#39;Zero vfs base containers should be running&#39;)
+
+        try:
+            sh.buildah(&#39;from&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;--log-level&#39;,  # pylint: disable=no-member
+                        log_level,
+                        image_to_scan,
+                        _out=sys.stdout)
+
+            result = sh.buildah(&#39;--storage-driver&#39;, &#39;vfs&#39;, &#39;containers&#39;, &#39;-q&#39;,  # pylint: disable=no-member
+                              _out=sys.stdout,
+                              _tee=True
+                             )
+            container_id = result.stdout.rstrip()
+
+            print(f&#34;container_id to scan = {container_id}&#34;)
+
+            result = sh.buildah(&#39;mount&#39;, &#39;--storage-driver&#39;, &#39;vfs&#39;, container_id,  # pylint: disable=no-member
+                                _out=sys.stdout,
+                                _tee=True)
+            mount_path = result.stdout.rstrip()
+            print(f&#34;mount_path to scan = {mount_path}&#34;)
+
+            # Execute scan
+            scan_input_file = self.get_config_value(&#39;scap-input-file&#39;).rstrip()
+            scan_output_absolute_path = self.write_working_file(&#39;scap-compliance-output.txt&#39;, b&#39;&#39;)
+            scan_report_absolute_path = self.write_working_file(&#39;scap-compliance-report.html&#39;, b&#39;&#39;)
+
+            result = sh.oscap_chroot(mount_path, &#39;oval&#39;, &#39;eval&#39;, &#39;--report&#39;,  # pylint: disable=no-member
+                                     scan_report_absolute_path,
+                                     scan_input_file,
+                                     _out=sys.stdout,
+                                     _tee=True)
+
+            result_file = open(scan_output_absolute_path, &#34;w+&#34;)
+            result_file.write(result.stdout.decode(&#34;utf-8&#34;) )
+            result_file.close()
+            print(&#34;Compliance Scan Completed.  Report found at following path: &#34; +
+                  scan_report_absolute_path)
+
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(&#39;Unexpected runtime error&#39;) from error
+
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True,
+                &#39;message&#39;: &#39;container-image-static-compliance-scan step completed&#39;,
+            },
+            &#39;report-artifacts&#39;: [
+                {
+                    &#39;name&#39;: &#39;container-image-static-compliance-scan result set&#39;,
+                    &#39;path&#39;: &#39;file://&#39; + scan_report_absolute_path
+                }
+            ]
+        }
         return results</code></pre>
 </details>
 <h3>Ancestors</h3>

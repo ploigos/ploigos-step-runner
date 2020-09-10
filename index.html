@@ -341,9 +341,13 @@ tssc-config:
   container-image-unit-test: []
 
   container-image-static-compliance-scan:
-  # WARNING: not yet implemented
   - implementer: OpenSCAP
-    config: {}
+    config:
+      # Required
+      scap-input-file: ''
+
+      # Optional
+      #log-level: 'Info'
 
   container-image-static-vulnerability-scan:
   # WARNING: not yet implemented
@@ -602,9 +606,13 @@ tssc-config:
   container-image-unit-test: []
 
   container-image-static-compliance-scan:
-  # WARNING: not yet implemented
   - implementer: OpenSCAP
-    config: {}
+    config:
+      # Required
+      scap-input-file: ''
+
+      # Optional
+      #log-level: 'Info'
 
   container-image-static-vulnerability-scan:
   # WARNING: not yet implemented
@@ -1002,9 +1010,13 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      # WARNING: not yet implemented
       - implementer: OpenSCAP
-        config: {}
+        config:
+          # Required
+          scap-input-file: &#39;&#39;
+
+          # Optional
+          #log-level: &#39;Info&#39;
 
       container-image-static-vulnerability-scan:
       # WARNING: not yet implemented
@@ -1264,9 +1276,13 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      # WARNING: not yet implemented
       - implementer: OpenSCAP
-        config: {}
+        config:
+          # Required
+          scap-input-file: &#39;&#39;
+
+          # Optional
+          #log-level: &#39;Info&#39;
 
       container-image-static-vulnerability-scan:
       # WARNING: not yet implemented
