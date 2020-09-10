@@ -9,7 +9,6 @@ from runtime configuration.
 
 | Configuration Key           | Required? | Default | Description
 |-----------------------------|-----------|---------|-----------
-| `image-tag`                 | True      |         | URL of image to be scanned
 | `log-level`                 | True      | Info    | log level for buildah, podman
                                                       and scap utilities
 | `scap-input-file`           | True      |         | Input file for scap base scan
@@ -21,7 +20,7 @@ Results expected from previous steps that this step requires.
 
 | Step Name              | Result Key      | Description
 |------------------------|-----------------|------------
-| `push-container-image` | `image-tag`     | Image to scanz
+| `push-container-image` | `image-tag`     | Image to scan
 
 Results
 -------
@@ -49,11 +48,6 @@ REQUIRED_CONFIG_KEYS = [
     'log-level',
     'scap-input-file',
 ]
-
-<<<<<<< HEAD
-=======
-from tssc import StepImplementer
->>>>>>> f9fdd66f46d1640f6b2697f1c09ba2d36b53ee08
 
 class OpenSCAP(StepImplementer):
     """
