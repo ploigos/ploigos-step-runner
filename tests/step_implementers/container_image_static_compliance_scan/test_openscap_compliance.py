@@ -87,16 +87,16 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             }
 
             result1 = MagicMock()
-            result1.stdout='\n\n\n'
+            result1.stdout=b'\n\n\n'
 
             result2 = ''
 
             result3 = MagicMock()
-            result3.stdout='containerid'
+            result3.stdout=b'containerid'
 
             result4 = MagicMock()
-            result4.stderr='stderr'
-            result4.stdout='mount path'
+            result4.stderr=b'stderr'
+            result4.stdout=b'mount path'
             result4.returncode=123
 
             buildah_mock.side_effect = [result1,
@@ -154,7 +154,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             }
 
             result1 = MagicMock()
-            result1.stdout="test"
+            result1.stdout=b"test"
             buildah_mock.side_effect = [result1, sh.ErrorReturnCode('buildah', b'stdout', b'stderror')]
 
             with self.assertRaisesRegex(
@@ -207,16 +207,16 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             }
 
             result1 = MagicMock()
-            result1.stdout='no containers'
+            result1.stdout=b'no containers'
 
             result2 = ''
 
             result3 = MagicMock()
-            result3.stdout='containerid'
+            result3.stdout=b'containerid'
 
             result4 = MagicMock()
-            result4.stderr='stderr'
-            result4.stdout='mount path'
+            result4.stderr=b'stderr'
+            result4.stdout=b'mount path'
             result4.returncode=123
 
             buildah_mock.side_effect = [result1,
@@ -225,7 +225,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                                         result4]
 
             oscap_result = MagicMock()
-            oscap_result.stdout = 'report\nresults\n'
+            oscap_result.stdout = b'report\nresults\n'
             oscap_mock.side_effect = [oscap_result]
 
             expected_step_results =  {'tssc-results': {'container-image-static-compliance-scan': {'report-artifacts': [{'name': 'container-image-static-compliance-scan '
@@ -286,16 +286,16 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             }
 
             result1 = MagicMock()
-            result1.stdout='no containers'
+            result1.stdout=b'no containers'
 
             result2 = ''
 
             result3 = MagicMock()
-            result3.stdout='containerid'
+            result3.stdout=b'containerid'
 
             result4 = MagicMock()
-            result4.stderr='stderr'
-            result4.stdout='mount path'
+            result4.stderr=b'stderr'
+            result4.stdout=b'mount path'
             result4.returncode=123
 
             buildah_mock.side_effect = [result1,
@@ -304,7 +304,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                                         result4]
 
             oscap_result = MagicMock()
-            oscap_result.stdout = 'report\nresults\n'
+            oscap_result.stdout = b'report\nresults\n'
             oscap_mock.side_effect = [oscap_result]
 
             with self.assertRaisesRegex(
@@ -357,16 +357,16 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             }
 
             result1 = MagicMock()
-            result1.stdout='no containers'
+            result1.stdout=b'no containers'
 
             result2 = ''
 
             result3 = MagicMock()
-            result3.stdout='containerid'
+            result3.stdout=b'containerid'
 
             result4 = MagicMock()
-            result4.stderr='stderr'
-            result4.stdout='mount path'
+            result4.stderr=b'stderr'
+            result4.stdout=b'mount path'
             result4.returncode=123
 
             buildah_mock.side_effect = [result1,
@@ -375,7 +375,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                                         result4]
 
             oscap_result = MagicMock()
-            oscap_result.stdout = 'report\nresults\n'
+            oscap_result.stdout = b'report\nresults\n'
             oscap_mock.side_effect = [oscap_result]
             expected_step_results =  {'tssc-results': {'container-image-static-compliance-scan': {'report-artifacts': [{'name': 'container-image-static-compliance-scan '
                                                                                            'result '

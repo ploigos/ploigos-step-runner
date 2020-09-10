@@ -114,7 +114,7 @@ class OpenSCAP(StepImplementer):
                             _out=sys.stdout,
                             _tee=True)
 
-        num_containers = result.stdout.count("\n")
+        num_containers = result.stdout.count(b'\n')
         if num_containers > 0:
             raise ValueError('Zero vfs base containers should be running')
 
@@ -135,8 +135,6 @@ class OpenSCAP(StepImplementer):
             result = sh.buildah('mount', '--storage-driver', 'vfs', container_id,  # pylint: disable=no-member
                                 _out=sys.stdout,
                                 _tee=True)
-            print("mount_path execution results:\n\tstderr = " +
-                  result.stderr+"\n\treturn code = " + str(result.exit_code))
             mount_path = result.stdout.rstrip()
             print(f"mount_path to scan = {mount_path}")
 
@@ -152,7 +150,7 @@ class OpenSCAP(StepImplementer):
                                      _tee=True)
 
             result_file = open(scan_output_absolute_path, "w+")
-            result_file.write(result.stdout)
+            result_file.write(result.stdout.decode("utf-8") )
             result_file.close()
             print("Compliance Scan Completed.  Report found at following path: " +
                   scan_report_absolute_path)
