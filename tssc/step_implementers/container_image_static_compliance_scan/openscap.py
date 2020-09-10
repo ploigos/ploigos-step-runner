@@ -50,6 +50,10 @@ REQUIRED_CONFIG_KEYS = [
     'scap-input-file',
 ]
 
+<<<<<<< HEAD
+=======
+from tssc import StepImplementer
+>>>>>>> f9fdd66f46d1640f6b2697f1c09ba2d36b53ee08
 
 class OpenSCAP(StepImplementer):
     """
