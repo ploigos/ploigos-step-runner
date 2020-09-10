@@ -326,9 +326,13 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      # WARNING: not yet implemented
       - implementer: OpenSCAP
-        config: {}
+        config:
+          # Required
+          scap-input-file: ''
+
+          # Optional
+          #log-level: 'Info'
 
       container-image-static-vulnerability-scan:
       # WARNING: not yet implemented
@@ -588,9 +592,13 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      # WARNING: not yet implemented
       - implementer: OpenSCAP
-        config: {}
+        config:
+          # Required
+          scap-input-file: ''
+
+          # Optional
+          #log-level: 'Info'
 
       container-image-static-vulnerability-scan:
       # WARNING: not yet implemented
