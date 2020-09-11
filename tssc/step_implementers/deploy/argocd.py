@@ -116,7 +116,7 @@ import sh
 from jinja2 import Environment, FileSystemLoader
 
 from tssc import StepImplementer, DefaultSteps
-from tssc.config import TSSCConfigValue
+from tssc.config import ConfigValue
 
 DEFAULT_CONFIG = {
     'values-yaml-directory': './cicd/Deployment',
@@ -421,14 +421,11 @@ users:
                                      'deployment_namespace' : argocd_app_name,
                                      'endpoint_url' : endpoint_url}
 
-        copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
+        copy_of_runtime_step_config = ConfigValue.convert_leaves_to_values(
+            self.get_copy_of_runtime_step_config()
+        )
         for key in copy_of_runtime_step_config:
-            if isinstance(copy_of_runtime_step_config[key], TSSCConfigValue):
-                jinja_runtime_step_config[key.replace(
-                    '-', '_')] = copy_of_runtime_step_config[key].value
-            else:
-                jinja_runtime_step_config[key.replace(
-                    '-', '_')] = copy_of_runtime_step_config[key]
+            jinja_runtime_step_config[key.replace('-', '_')] = copy_of_runtime_step_config[key]
 
         template = env.get_template(self.get_config_value('values-yaml-template'))
 
