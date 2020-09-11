@@ -13,7 +13,7 @@ import sh
 
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
 
-class SOPSConfigValueDecryptor(ConfigValueDecryptor):
+class SOPS(ConfigValueDecryptor):
     """ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
 
     Parameters
@@ -51,7 +51,7 @@ class SOPSConfigValueDecryptor(ConfigValueDecryptor):
             False if this ConfigValueDecryptor can NOT decrypt the given ConfigValue.
         """
         return re.match(
-            SOPSConfigValueDecryptor.SOPS_ENCRYPTED_VALUE_REGEX,
+            SOPS.SOPS_ENCRYPTED_VALUE_REGEX,
             config_value.raw_value
         ) is not None
 
@@ -79,7 +79,7 @@ class SOPSConfigValueDecryptor(ConfigValueDecryptor):
             If config_value#parent_source is not of type dict or str
         """
         decrypted_value = None
-        sops_path = SOPSConfigValueDecryptor.get_sops_value_path(config_value)
+        sops_path = SOPS.get_sops_value_path(config_value)
 
         # if source is a string assume it is a file path and decrypt from that
         # else if source is a dict then dump to json and decrypt from that

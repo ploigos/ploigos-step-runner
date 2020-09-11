@@ -61,14 +61,14 @@ From least precedence to highest precedence.
 ** Example 1 **
 
     ---
+    tssc-decryptors:
+    - implementer: SOPS
+      #config:
+      #  additional_sops_args: [
+      #    '--any-valid-sops-cmd-arg-here=value',
+      #    '--aws-profile=FOO'
+      #  ]
     tssc-config:
-      decryptors:
-      - implementer: CustomeThing
-        config:
-      - implementer: SOPS
-        config:
-          overirdie_someting: bla
-
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
       # given by global-environment-defaults.
@@ -125,6 +125,13 @@ From least precedence to highest precedence.
 ** Example TSSC Config file for a Maven built Application **
 
     ---
+    tssc-decryptors:
+    - implementer: SOPS
+      #config:
+      #  additional_sops_args: [
+      #    '--any-valid-sops-cmd-arg-here=value',
+      #    '--aws-profile=FOO'
+      #  ]
     tssc-config:
       # Optional
       # Dictionary of configuration options which will be used in step configuration if that
@@ -405,6 +412,13 @@ From least precedence to highest precedence.
 ** Example TSSC Config file for a NPM built Application **
 
     ---
+    tssc-decryptors:
+    - implementer: SOPS
+      #config:
+      #  additional_sops_args: [
+      #    '--any-valid-sops-cmd-arg-here=value',
+      #    '--aws-profile=FOO'
+      #  ]
     tssc-config:
       # Optional
       # Dictionary of configuration options which will be used in step configuration if that
@@ -680,7 +694,7 @@ Example Running the 'generate-metadata' step
 
 import __main__
 from .config import *
-from .decription_utils import DecryptionUtils
+from .decryption_utils import DecryptionUtils
 from .factory import *
 from .exceptions import *
 from .step_implementer import DefaultSteps, StepImplementer
