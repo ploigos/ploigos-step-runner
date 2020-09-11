@@ -29,3 +29,16 @@ def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name = 's
     open(sample_file, 'wb').close()
     git_repo.index.add([sample_file])
     git_repo.index.commit(commit_message)
+
+def Any(cls):
+    """
+    Source
+    ------
+    https://stackoverflow.com/questions/21611559/assert-that-a-method-was-called-with-one-argument-out-of-several
+    """
+    class Any(cls):
+        def __eq__(self, other):
+            return True
+        def __hash__(self):
+            return hash(tuple(self))
+    return Any()

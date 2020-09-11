@@ -62,6 +62,13 @@ From least precedence to highest precedence.
 
     ---
     tssc-config:
+      decryptors:
+      - implementer: CustomeThing
+        config:
+      - implementer: SOPS
+        config:
+          overirdie_someting: bla
+
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
       # given by global-environment-defaults.
@@ -673,6 +680,7 @@ Example Running the 'generate-metadata' step
 
 import __main__
 from .config import *
+from .decription_utils import DecryptionUtils
 from .factory import *
 from .exceptions import *
 from .step_implementer import DefaultSteps, StepImplementer
