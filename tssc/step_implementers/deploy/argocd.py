@@ -116,6 +116,7 @@ import sh
 from jinja2 import Environment, FileSystemLoader
 
 from tssc import StepImplementer, DefaultSteps
+from tssc.config import TSSCConfigValue
 
 DEFAULT_CONFIG = {
     'values-yaml-directory': './cicd/Deployment',
@@ -338,6 +339,13 @@ users:
                 argocd_app_name,
                 _out=sys.stdout)
 
+            sh.argocd.app.wait( # pylint: disable=no-member
+                '--timeout',
+                self.get_config_value('argocd-sync-timeout-seconds'),
+                '--health',
+                argocd_app_name,
+                _out=sys.stdout)
+
             # NOTE: Creating a file to pass to the next step
             manifest_file = self.write_working_file(
                 'deploy_argocd_manifests.yml',
@@ -415,7 +423,12 @@ users:
 
         copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         for key in copy_of_runtime_step_config:
-            jinja_runtime_step_config[key.replace('-', '_')] = copy_of_runtime_step_config[key]
+            if isinstance(copy_of_runtime_step_config[key], TSSCConfigValue):
+                jinja_runtime_step_config[key.replace(
+                    '-', '_')] = copy_of_runtime_step_config[key].value
+            else:
+                jinja_runtime_step_config[key.replace(
+                    '-', '_')] = copy_of_runtime_step_config[key]
 
         template = env.get_template(self.get_config_value('values-yaml-template'))
 
