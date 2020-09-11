@@ -339,6 +339,13 @@ users:
                 argocd_app_name,
                 _out=sys.stdout)
 
+            sh.argocd.app.wait( # pylint: disable=no-member
+                '--timeout',
+                self.get_config_value('argocd-sync-timeout-seconds'),
+                '--health',
+                argocd_app_name,
+                _out=sys.stdout)
+
             # NOTE: Creating a file to pass to the next step
             manifest_file = self.write_working_file(
                 'deploy_argocd_manifests.yml',
