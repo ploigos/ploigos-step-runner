@@ -6,7 +6,7 @@ from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from tssc.config import Config, ConfigValue
 
-class TestTSSCConfig(BaseTSSCTestCase):
+class TestConfig(BaseTSSCTestCase):
     def test_add_config_invalid_type(self):
         tssc_config = Config()
         with self.assertRaisesRegex(
