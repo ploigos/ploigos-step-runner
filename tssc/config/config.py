@@ -5,6 +5,7 @@ import copy
 import glob
 import os.path
 
+from tssc.decryption_utils import DecryptionUtils
 from tssc.config.step_config import StepConfig
 from tssc.config.config_value import ConfigValue
 from tssc.utils.file import parse_yaml_or_json_file
@@ -45,6 +46,9 @@ class Config:
     TSSC_CONFIG_KEY_SUB_STEP_NAME = 'name'
     TSSC_CONFIG_KEY_SUB_STEP_CONFIG = 'config'
     TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = 'environment-config'
+    TSSC_CONFIG_KEY_DECRYPTORS = 'tssc-decryptors'
+    TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER = 'implementer'
+    TSSC_CONFIG_KEY_DECRYPTOR_CONFIG = 'config'
 
     def __init__(self, config=None):
         self.__global_defaults = {}
@@ -386,6 +390,50 @@ class Config:
                         sub_step_config=sub_step_config,
                         sub_step_env_config=sub_step_env_config
                     )
+
+        if Config.TSSC_CONFIG_KEY_DECRYPTORS in config_dict:
+            Config.parse_and_register_decryptors_definitions(
+                config_dict[Config.TSSC_CONFIG_KEY_DECRYPTORS]
+            )
+
+    @staticmethod
+    def parse_and_register_decryptors_definitions(decryptors_definitions):
+        """Parse decryptor definitions from a list and then register them with the DecryptionUtils.
+
+        Parameters
+        ----------
+        decryptors_definitions : list of dicts
+            List of decryptor definitions. Each element should be a dict with at least an
+            'implementer' key with a string value and optionally a 'config' key with a dict value.
+
+        Raises
+        ------
+        AssertionError
+            If decryptors_definitions is not a list.
+            If a decryptor definition does not have a
+                Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
+        """
+        assert isinstance(decryptors_definitions, list), \
+            f"Decryptors configuration ({decryptors_definitions}) must be of type " + \
+            f"(list) got: {type(decryptors_definitions)}"
+
+        for decryptor_definition in decryptors_definitions:
+            assert Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
+                "Decryptor configuration is missing key " + \
+                f"({Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}"
+
+            decryptor_implementer_name = \
+                decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
+
+            if Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
+                decryptor_config = decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG]
+            else:
+                decryptor_config = {}
+
+            DecryptionUtils.create_and_register_config_value_decryptor(
+                decryptor_implementer_name,
+                decryptor_config
+            )
 
     def add_or_update_step_config( # pylint: disable=too-many-arguments
             self,

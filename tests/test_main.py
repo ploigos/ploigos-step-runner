@@ -1,15 +1,18 @@
 import unittest
 from unittest.mock import patch
 
+import io
 import os
 import yaml
 from testfixtures import TempDirectory
+from contextlib import redirect_stdout
 
 from tssc.__main__ import main
 from tssc import TSSCFactory, StepImplementer, TSSCException
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
+from tests.helpers.test_utils import create_sops_side_effect
 
 class TestInit(BaseTSSCTestCase):
     def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
@@ -20,12 +23,15 @@ class TestInit(BaseTSSCTestCase):
             if config_files:
                 argv.append('--config')
                 for config_file in config_files:
-                    config_file_name = config_file['name']
-                    config_file_contents = config_file['contents']
+                    if isinstance(config_file, dict):
+                        config_file_name = config_file['name']
+                        config_file_contents = config_file['contents']
 
-                    temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
-                    config_file_path = os.path.join(temp_dir.path, config_file_name)
-                    argv.append(config_file_path)
+                        temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
+                        config_file_path = os.path.join(temp_dir.path, config_file_name)
+                        argv.append(config_file_path)
+                    else:
+                        argv.append(config_file)
 
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             argv.append('--results-dir')
@@ -366,3 +372,72 @@ class TestInit(BaseTSSCTestCase):
                     }
                 }
             )
+
+    def test_encrypted_value_no_decryptor(self):
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config-secret-stuff.yml'
+        )
+
+        config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config.yml'
+        )
+
+        self._run_main_test(
+            argv=[
+                '--step', 'required-step-config-test',
+                '--environment', 'DEV'
+            ],
+            config_files=[encrypted_config_file_path, config_file_path],
+            expected_results={
+                'tssc-results': {
+                    'required-step-config-test': {
+                        'environment-name': 'DEV',
+                        'kube-api-token':'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
+                        'required-config-key':'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
+                    }
+                }
+            }
+        )
+
+    @patch('sh.sops', create=True)
+    def test_encrypted_value_with_sops_decryptor(self, sops_mock):
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config-secret-stuff.yml'
+        )
+
+        config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config.yml'
+        )
+
+        decryptors_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config-decryptors.yml'
+        )
+
+        mock_decrypted_value = 'mock decrypted value'
+        sops_mock.side_effect=create_sops_side_effect(mock_decrypted_value)
+        self._run_main_test(
+            argv=[
+                '--step', 'required-step-config-test',
+                '--environment', 'DEV'
+            ],
+            config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
+            expected_results={
+                'tssc-results': {
+                    'required-step-config-test': {
+                        'environment-name': 'DEV',
+                        'kube-api-token': mock_decrypted_value,
+                        'required-config-key': mock_decrypted_value
+                    }
+                }
+            }
+        )

@@ -12,7 +12,7 @@ from tests.helpers.sops_integration_test_case import SOPSIntegrationTestCase
 from tests.helpers.test_utils import Any
 
 from tssc.config.config_value import ConfigValue
-from tssc.config.decryptors.sops_config_value_decryptor import SOPSConfigValueDecryptor
+from tssc.config.decryptors.sops import SOPS
 from tssc.utils.file import parse_yaml_or_json_file
 
 @patch('sh.sops', create=True)
@@ -30,7 +30,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
         self.assertTrue(
             sops_decryptor.can_decrypt(config_value)
         )
@@ -48,7 +48,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
         self.assertFalse(
             sops_decryptor.can_decrypt(config_value)
         )
@@ -66,7 +66,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         sops_decryptor.decrypt(config_value)
         sops_mock.assert_called_once_with(
@@ -91,7 +91,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor(
+        sops_decryptor = SOPS(
             additional_sops_args=[
                 '--aws-profile=foo'
             ]
@@ -124,7 +124,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         sops_decryptor.decrypt(config_value)
         sops_mock.assert_called_once_with(
@@ -143,7 +143,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         with self.assertRaisesRegex(
             ValueError,
@@ -159,7 +159,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         with self.assertRaisesRegex(
             ValueError,
@@ -181,7 +181,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         sh.sops.side_effect = sh.ErrorReturnCode('sops', b'mock stdout', b'mock error about issue running sops')
         with self.assertRaisesRegex(
@@ -197,7 +197,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             path_parts=["tssc-config", "step-foo", 0, "config", "test1"]
         )
 
-        sops_value_path = SOPSConfigValueDecryptor.get_sops_value_path(config_value)
+        sops_value_path = SOPS.get_sops_value_path(config_value)
         self.assertEqual(
             sops_value_path,
             '["tssc-config"]["step-foo"][0]["config"]["test1"]')
@@ -216,7 +216,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
         self.assertTrue(
             sops_decryptor.can_decrypt(config_value)
         )
@@ -234,7 +234,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
         self.assertFalse(
             sops_decryptor.can_decrypt(config_value)
         )
@@ -252,7 +252,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         decrypted_value = sops_decryptor.decrypt(config_value)
 
@@ -276,7 +276,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         decrypted_value = sops_decryptor.decrypt(config_value)
 
@@ -292,7 +292,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         with self.assertRaisesRegex(
             ValueError,
@@ -308,7 +308,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         with self.assertRaisesRegex(
             ValueError,
@@ -330,7 +330,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        sops_decryptor = SOPSConfigValueDecryptor()
+        sops_decryptor = SOPS()
 
         # delete the gpg key needed to decrypt the value
         self.delete_gpg_key()

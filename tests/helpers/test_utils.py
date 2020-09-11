@@ -42,3 +42,9 @@ def Any(cls):
         def __hash__(self):
             return hash(tuple(self))
     return Any()
+
+def create_sops_side_effect(mock_stdout):
+    def sops_side_effect(*args, **kwargs):
+        kwargs['_out'].write(mock_stdout)
+
+    return sops_side_effect

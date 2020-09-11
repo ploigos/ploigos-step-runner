@@ -2,7 +2,7 @@
 """
 
 import copy
-from tssc.decription_utils import DecryptionUtils
+from tssc.decryption_utils import DecryptionUtils
 
 class ConfigValue:
     """Representation of a TSSC configuration value.

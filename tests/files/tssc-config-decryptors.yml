@@ -1,0 +1,4 @@
+---
+tssc-decryptors:
+- implementer: 'SOPS'
+tssc-config: {}

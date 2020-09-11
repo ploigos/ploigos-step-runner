@@ -1,7 +1,7 @@
 import unittest
 import shutil
 
-from tssc.decription_utils import DecryptionUtils
+from tssc.decryption_utils import DecryptionUtils
 
 class BaseTSSCTestCase(unittest.TestCase):
     def setUp(self):
@@ -13,6 +13,7 @@ class BaseTSSCTestCase(unittest.TestCase):
 
     def tearDown(self):
         DecryptionUtils._DecryptionUtils__config_value_decryptors = []
+        DecryptionUtils._DecryptionUtils__obfuscation_streams = []
 
         try:
             shutil.rmtree("./tssc-working")

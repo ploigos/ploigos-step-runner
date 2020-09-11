@@ -4,7 +4,9 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
+from tssc.decryption_utils import DecryptionUtils
 from tssc.config import Config, ConfigValue
+from tssc.config.decryptors.sops import SOPS
 
 class TestConfig(BaseTSSCTestCase):
     def test_add_config_invalid_type(self):
@@ -765,3 +767,65 @@ class TestConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(step_config.get_sub_step('foo1').get_sub_step_env_config('env1'), {})
+
+    def test_parse_and_register_decryptors_definitions_one_definition(self):
+        Config.parse_and_register_decryptors_definitions(
+            [
+                {
+                    'implementer': 'SOPS'
+                }
+            ]
+        )
+
+        sops_decryptor = DecryptionUtils._DecryptionUtils__config_value_decryptors[0]
+        self.assertEqual(
+            type(sops_decryptor),
+            SOPS
+        )
+
+    def test_parse_and_register_decryptors_definitions_one_definition_with_config(self):
+        Config.parse_and_register_decryptors_definitions(
+            [
+                {
+                    'implementer': 'SOPS',
+                    'config': {
+                        'additional_sops_args': [
+                            '--aws-profile=foo'
+                        ]
+                    }
+                }
+            ]
+        )
+
+        sops_decryptor = DecryptionUtils._DecryptionUtils__config_value_decryptors[0]
+        self.assertEqual(
+            sops_decryptor._SOPS__additional_sops_args,
+            ['--aws-profile=foo']
+        )
+
+    def test_initial_config_dict_valid_with_decryptor_definition(self):
+        tssc_config = Config({
+            'tssc-config': {},
+            'tssc-decryptors': [
+                {
+                    'implementer': 'SOPS',
+                    'config': {
+                        'additional_sops_args': [
+                            '--aws-profile=foo'
+                        ]
+                    }
+                }
+            ]
+        })
+
+        self.assertEqual(tssc_config.global_defaults, {})
+        self.assertEqual(tssc_config.global_environment_defaults, {})
+        sops_decryptor = DecryptionUtils._DecryptionUtils__config_value_decryptors[0]
+        self.assertEqual(
+            type(sops_decryptor),
+            SOPS
+        )
+        self.assertEqual(
+            sops_decryptor._SOPS__additional_sops_args,
+            ['--aws-profile=foo']
+        )

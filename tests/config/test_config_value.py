@@ -6,20 +6,13 @@ from testfixtures import TempDirectory
 from unittest.mock import patch
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import Any
+from tests.helpers.test_utils import Any, create_sops_side_effect
 
 from tssc.config import Config, ConfigValue
-from tssc.decription_utils import DecryptionUtils
-from tssc.config.decryptors.sops_config_value_decryptor import SOPSConfigValueDecryptor
+from tssc.decryption_utils import DecryptionUtils
+from tssc.config.decryptors.sops import SOPS
 
 class TestConfigValue(BaseTSSCTestCase):
-    @staticmethod
-    def create_sops_side_effect(mock_stdout):
-        def sops_side_effect(*args, **kwargs):
-            kwargs['_out'].write(mock_stdout)
-
-        return sops_side_effect
-
     def test__eq__is_equal_basic(self):
         test1 = ConfigValue('foo1', None, None)
         test2 = ConfigValue('foo1', None, None)
@@ -316,9 +309,9 @@ class TestConfigValue(BaseTSSCTestCase):
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
-        DecryptionUtils.register_config_value_decryptor(SOPSConfigValueDecryptor())
+        DecryptionUtils.register_config_value_decryptor(SOPS())
 
-        sops_mock.side_effect=TestConfigValue.create_sops_side_effect('mock decrypted value')
+        sops_mock.side_effect=create_sops_side_effect('mock decrypted value')
         decrypted_value = config_value.value
         sops_mock.assert_called_once_with(
             '--decrypt',

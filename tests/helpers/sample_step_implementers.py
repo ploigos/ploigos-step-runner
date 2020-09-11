@@ -73,7 +73,11 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         ]
 
     def _run_step(self):
-        pass
+        runtime_step_config = self.config.get_copy_of_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
+
+        return ConfigValue.convert_leaves_to_values(runtime_step_config)
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
     @staticmethod

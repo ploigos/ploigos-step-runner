@@ -1,8 +1,11 @@
 
-from tssc.decription_utils import DecryptionUtils
+
 from tssc.config.config_value import ConfigValue
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
+from tssc.decryption_utils import DecryptionUtils
+from tssc.exceptions import TSSCException
 from tssc.utils.io import TextIOSelectiveObfuscator
+from tssc.config.decryptors.sops import SOPS
 
 from contextlib import redirect_stdout
 import io
@@ -15,6 +18,23 @@ from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 class SampleConfigValueDecryptor(ConfigValueDecryptor):
     ENCRYPTED_VALUE_REGEX = r'^TEST_ENC\[(.*)\]$'
 
+    def can_decrypt(self, config_value):
+        return re.match(
+            SampleConfigValueDecryptor.ENCRYPTED_VALUE_REGEX,
+            config_value.raw_value
+        ) is not None
+
+    def decrypt(self, config_value):
+        return re.match(
+            SampleConfigValueDecryptor.ENCRYPTED_VALUE_REGEX,
+            config_value.raw_value
+        ).group(1)
+
+class RequiredConstructorParamsConfigValueDecryptor(ConfigValueDecryptor):
+    ENCRYPTED_VALUE_REGEX = r'^TEST_ENC\[(.*)\]$'
+
+    def __init__(self, required_arg):
+        assert required_arg is not None
 
     def can_decrypt(self, config_value):
         return re.match(
@@ -27,6 +47,9 @@ class SampleConfigValueDecryptor(ConfigValueDecryptor):
             SampleConfigValueDecryptor.ENCRYPTED_VALUE_REGEX,
             config_value.raw_value
         ).group(1)
+
+class BadConfigValueDecryptor:
+    pass
 
 class TestDecryptionUtils(BaseTSSCTestCase):
     def test_decrypt_no_decryptors(self):
@@ -98,3 +121,96 @@ class TestDecryptionUtils(BaseTSSCTestCase):
             finally:
                 new_stdout.close()
                 sys.stdout = old_stdout
+
+    def test__get_decryption_class_sops_short_name(self):
+        decryptor_class = DecryptionUtils._DecryptionUtils__get_decryption_class('SOPS')
+        self.assertEqual(
+            decryptor_class,
+            SOPS
+        )
+
+    def test__get_decryption_class_sops_full_name(self):
+        decryptor_class = DecryptionUtils._DecryptionUtils__get_decryption_class(
+            'tssc.config.decryptors.sops.SOPS'
+        )
+        self.assertEqual(
+            decryptor_class,
+            SOPS
+        )
+
+    def test__get_decryption_class_does_not_exist_short_name(self):
+        with self.assertRaisesRegex(
+            TSSCException,
+            r"Could not dynamically load decryptor implementer \(DoesNotExist\) " \
+            r"from module \(tssc.config.decryptors\) with class name \(DoesNotExist\)"
+        ):
+            DecryptionUtils._DecryptionUtils__get_decryption_class('DoesNotExist')
+
+    def test__get_decryption_class_does_not_exist_with_module_name(self):
+        with self.assertRaisesRegex(
+            TSSCException,
+            r"Could not dynamically load decryptor implementer \(foo.bar.hello.DoesNotExist\) " \
+            r"from module \(foo.bar.hello\) with class name \(DoesNotExist\)"
+        ):
+            DecryptionUtils._DecryptionUtils__get_decryption_class('foo.bar.hello.DoesNotExist')
+
+    def test__get_decryption_class_not_correct_type(self):
+        with self.assertRaisesRegex(
+            TSSCException,
+            r"For decryptor implementer \(tests.test_decryption_utils.BadConfigValueDecryptor\) " \
+            r"dynamically loaded class \(<class 'tests.test_decryption_utils." \
+            r"BadConfigValueDecryptor'>\) which is not sub class of " \
+            r"\(<class 'tssc.config.config_value_decryptor.ConfigValueDecryptor'>\) and should be."
+        ):
+            DecryptionUtils._DecryptionUtils__get_decryption_class(
+                'tests.test_decryption_utils.BadConfigValueDecryptor'
+            )
+
+    def test_create_and_register_config_value_decryptor_no_constructor_args(self):
+        DecryptionUtils.create_and_register_config_value_decryptor(
+            'tests.test_decryption_utils.SampleConfigValueDecryptor'
+        )
+
+        secret_value = "decrypt me"
+        config_value = ConfigValue(
+            f'TEST_ENC[{secret_value}]'
+        )
+        decrypted_value = DecryptionUtils.decrypt(
+            config_value
+        )
+        self.assertEqual(
+            decrypted_value,
+            secret_value
+        )
+
+    def test_create_and_register_config_value_decryptor_required_constructor_args_missing_arg(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            r"Loaded decryptor class \(<class 'tests.test_decryption_utils." +
+            r"RequiredConstructorParamsConfigValueDecryptor'>\) failed to construct with " +
+            r"given constructor arugments \({}\): __init__\(\) missing 1 " +
+            r"required positional argument: 'required_arg'"
+        ):
+            DecryptionUtils.create_and_register_config_value_decryptor(
+                'tests.test_decryption_utils.RequiredConstructorParamsConfigValueDecryptor'
+            )
+
+    def test_create_and_register_config_value_decryptor_required_constructor_args(self):
+        DecryptionUtils.create_and_register_config_value_decryptor(
+            'tests.test_decryption_utils.RequiredConstructorParamsConfigValueDecryptor',
+            {
+                'required_arg': 'hello world'
+            }
+        )
+
+        secret_value = "decrypt me"
+        config_value = ConfigValue(
+            f'TEST_ENC[{secret_value}]'
+        )
+        decrypted_value = DecryptionUtils.decrypt(
+            config_value
+        )
+        self.assertEqual(
+            decrypted_value,
+            secret_value
+        )
