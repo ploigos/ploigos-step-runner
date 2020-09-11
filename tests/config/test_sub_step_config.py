@@ -5,11 +5,11 @@ import os.path
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import Config, StepConfig, TSSCSubStepConfig, ConfigValue
+from tssc.config import Config, StepConfig, SubStepConfig, ConfigValue
 
 class TestTSSCSubStepConfig(BaseTSSCTestCase):
     def test_constructor_no_sub_step_config_or_step_env_config(self):
-        sub_step_config = TSSCSubStepConfig(
+        sub_step_config = SubStepConfig(
             parent_step_config=None,
             sub_step_name='sub-step-foo',
             sub_step_implementer_name='foo'

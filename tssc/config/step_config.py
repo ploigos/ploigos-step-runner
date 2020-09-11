@@ -3,7 +3,7 @@
 
 import copy
 
-from tssc.config.sub_step_config import TSSCSubStepConfig
+from tssc.config.sub_step_config import SubStepConfig
 
 class StepConfig:
     """Representation of a TSSC step configuration.
@@ -143,7 +143,7 @@ class StepConfig:
                 break
 
         if existing_tssc_sub_step_config is None:
-            tssc_sub_step_config = TSSCSubStepConfig(
+            tssc_sub_step_config = SubStepConfig(
                 parent_step_config=self,
                 sub_step_name=sub_step_name,
                 sub_step_implementer_name=sub_step_implementer_name,

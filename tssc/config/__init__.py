@@ -5,7 +5,7 @@ from .config import Config
 from .config_value import ConfigValue
 from .decryptors import *
 from .step_config import StepConfig
-from .sub_step_config import TSSCSubStepConfig
+from .sub_step_config import SubStepConfig
 
 
 __all__ = [

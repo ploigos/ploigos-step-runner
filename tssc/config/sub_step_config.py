@@ -6,7 +6,7 @@ import copy
 from tssc.utils.dict import deep_merge
 from tssc.config.config_value import ConfigValue
 
-class TSSCSubStepConfig:
+class SubStepConfig:
     """Representation of a TSSC sub step configuration.
 
     Parameters
