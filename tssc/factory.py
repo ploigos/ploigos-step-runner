@@ -2,7 +2,7 @@
 Factory for creating TSSC workflow and running steps.
 """
 
-from tssc.config import TSSCConfig
+from tssc.config import Config
 from tssc.exceptions import TSSCException
 from tssc.step_implementer import StepImplementer
 from tssc.utils.reflection import import_and_get_class
@@ -49,10 +49,10 @@ class TSSCFactory:
             results_file_name='tssc-results.yml', \
             work_dir_path='tssc-working'):
 
-        if isinstance(config, TSSCConfig):
+        if isinstance(config, Config):
             self.__config = config
         else:
-            self.__config = TSSCConfig(config)
+            self.__config = Config(config)
 
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name

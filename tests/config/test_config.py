@@ -4,11 +4,11 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import TSSCConfig, TSSCConfigValue
+from tssc.config import Config, TSSCConfigValue
 
 class TestTSSCConfig(BaseTSSCTestCase):
     def test_add_config_invalid_type(self):
-        tssc_config = TSSCConfig()
+        tssc_config = Config()
         with self.assertRaisesRegex(
             ValueError,
             r"Given config \(True\) is unexpected type \(<class 'bool'>\) not a dictionary, string, or list of former."
@@ -16,7 +16,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             tssc_config.add_config(True)
 
     def test_add_config_dict_missing_config_key(self):
-        tssc_config = TSSCConfig()
+        tssc_config = Config()
         with self.assertRaisesRegex(
             AssertionError,
             r"Failed to add invalid TSSC config. Missing expected top level key \(tssc-config\):"
@@ -26,17 +26,17 @@ class TestTSSCConfig(BaseTSSCTestCase):
             })
 
     def test_add_config_dict_valid_basic(self):
-        tssc_config = TSSCConfig()
+        tssc_config = Config()
         tssc_config.add_config({
-            TSSCConfig.TSSC_CONFIG_KEY: {}
+            Config.TSSC_CONFIG_KEY: {}
         })
 
         self.assertEqual(tssc_config.global_defaults, {})
         self.assertEqual(tssc_config.global_environment_defaults, {})
 
     def test_initial_config_dict_valid_basic(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {}
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {}
         })
 
         self.assertEqual(tssc_config.global_defaults, {})
@@ -47,13 +47,13 @@ class TestTSSCConfig(BaseTSSCTestCase):
             AssertionError,
             r"Failed to add invalid TSSC config. Missing expected top level key \(tssc-config\):"
         ):
-            TSSCConfig({
+            Config({
                 'foo': 'foo'
             })
 
     def test_add_config_file_missing_file(self):
         with TempDirectory() as temp_dir:
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             with self.assertRaisesRegex(
                 ValueError,
                 r"Given config string \(.*\) is not a valid path."
@@ -66,7 +66,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             config_file_contents = ": blarg this: is {} bad syntax"
             temp_dir.write(config_file_name, bytes(f"{config_file_contents}", 'utf-8'))
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             with self.assertRaisesRegex(
                 ValueError,
                 r"Error parsing config file \(.*\) as json or yaml"
@@ -81,7 +81,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
             temp_dir.write(config_file_name, bytes(f"{config_file_contents}", 'utf-8'))
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             with self.assertRaisesRegex(
                 AssertionError,
                 r"Failed to add parsed configuration file \(.*\): Failed to add invalid TSSC config. Missing expected top level key \(tssc-config\):"
@@ -92,11 +92,11 @@ class TestTSSCConfig(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             config_file_name = "foo.json"
             config_file_contents = {
-                TSSCConfig.TSSC_CONFIG_KEY: {}
+                Config.TSSC_CONFIG_KEY: {}
             }
             temp_dir.write(config_file_name, bytes(f"{config_file_contents}", 'utf-8'))
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(os.path.join(temp_dir.path, config_file_name))
 
             self.assertEqual(tssc_config.global_defaults, {})
@@ -104,7 +104,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
 
     def test_add_config_dir_no_files(self):
         with TempDirectory() as temp_dir:
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             with self.assertRaisesRegex(
                 ValueError,
                 r"Given config string \(.*\) is a directory with no recursive children files."
@@ -119,7 +119,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {}
+                        Config.TSSC_CONFIG_KEY: {}
                     }
                 }
             ]
@@ -132,7 +132,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
 
             self.assertEqual(tssc_config.global_defaults, {})
@@ -146,7 +146,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-test-foo' : {
                                 'implementer': 'foo'
                             }
@@ -156,7 +156,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'bar.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-test-bar' : {
                                 'implementer': 'bar'
                             }
@@ -173,7 +173,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
 
             self.assertEqual(tssc_config.global_defaults, {})
@@ -187,7 +187,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-test-foo' : {
                                 'implementer': 'foo'
                             }
@@ -197,7 +197,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'bar.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-test-bar' : {
                                 'implementer': 'bar'
                             }
@@ -214,7 +214,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(
                 [
                     os.path.join(temp_dir.path, config_dir, 'foo.yml'),
@@ -233,7 +233,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {}
+                        Config.TSSC_CONFIG_KEY: {}
                     }
                 },
                 {
@@ -254,7 +254,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             with self.assertRaisesRegex(
                 AssertionError,
                 r"Failed to add parsed configuration file \(.*\): Failed to add invalid TSSC config. Missing expected top level key \(tssc-config\):"
@@ -269,7 +269,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-foo': {
                                 'implementer': 'foo'
                             }
@@ -286,12 +286,12 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(
                 [
                     os.path.join(temp_dir.path, config_dir),
                     {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'step-bar': {
                                 'implementer': 'bar'
                             }
@@ -309,15 +309,15 @@ class TestTSSCConfig(BaseTSSCTestCase):
             AssertionError,
             r"Step \(invalid-step\) defines a single sub step with values \({}\) but is missing value for key: implementer"
         ):
-            TSSCConfig({
-                TSSCConfig.TSSC_CONFIG_KEY: {
+            Config({
+                Config.TSSC_CONFIG_KEY: {
                     'invalid-step' : {}
                 }
             })
 
     def test_global_defaults(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-defaults' : {
                     'test1' : 'foo1'
                 }
@@ -333,8 +333,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(tssc_config.global_environment_defaults, {})
 
     def test_global_environment_defaults(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-environment-defaults' : {
                     'env1': {
                         'test1': 'env1',
@@ -387,8 +387,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(tssc_config.get_global_environment_defaults_for_environment(None), {})
 
     def test_get_sub_step_configs_for_non_existent_step(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo'
                 }
@@ -398,8 +398,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(tssc_config.get_sub_step_configs('does-not-exist'), [])
 
     def test_get_sub_step_configs_single_sub_step_no_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo',
                 }
@@ -412,8 +412,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(sub_step_config.sub_step_config, {})
 
     def test_set_step_config_overrides_existing_step(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo',
                 }
@@ -433,8 +433,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         })
 
     def test_set_step_config_override_overrides_existing_step(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo',
                 }
@@ -460,8 +460,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         })
 
     def test_set_step_config_overrides_not_existing_step(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
             }
         })
         self.assertIsNone(tssc_config.get_step_config('step-bar'))
@@ -484,7 +484,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-defaults' : {
                                 'dup-key': 'foo'
                             }
@@ -494,7 +494,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'bar.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-defaults' : {
                                 'dup-key': 'bar'
                             }
@@ -515,7 +515,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 ValueError,
                 r"Error merging global defaults: Conflict at dup-key"
             ):
-                tssc_config = TSSCConfig()
+                tssc_config = Config()
                 tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
 
     def test_duplicate_global_environment_default_keys(self):
@@ -526,7 +526,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-environment-defaults' : {
                                 'env1' : {
                                     'dup-key': 'foo'
@@ -538,7 +538,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'bar.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-environment-defaults' : {
                                 'env1' : {
                                     'dup-key': 'bar'
@@ -561,7 +561,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 ValueError,
                 r"Error merging global environment \(env1\) defaults: Conflict at dup-key"
             ):
-                tssc_config = TSSCConfig()
+                tssc_config = Config()
                 tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
 
     def test_merge_valid_global_environment_defaults_same_env_diff_keys(self):
@@ -572,7 +572,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'foo.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-environment-defaults' : {
                                 'env1' : {
                                     'foo-key': 'foo'
@@ -584,7 +584,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                 {
                     'name': os.path.join(config_dir,'bar.yml'),
                     'contents' : {
-                        TSSCConfig.TSSC_CONFIG_KEY: {
+                        Config.TSSC_CONFIG_KEY: {
                             'global-environment-defaults' : {
                                 'env1' : {
                                     'bar-key': 'bar'
@@ -603,7 +603,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
                     bytes(f"{config_file_contents}", 'utf-8')
                 )
 
-            tssc_config = TSSCConfig()
+            tssc_config = Config()
             tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
             self.assertEqual(
                 TSSCConfigValue.convert_leaves_to_values(
@@ -623,15 +623,15 @@ class TestTSSCConfig(BaseTSSCTestCase):
             r"value_path='\['tssc-config', 'step-foo'\]\'\)\) of " \
             r"type dict or list but got: <class 'tssc.config.config_value.TSSCConfigValue'>"
         ):
-            TSSCConfig({
-                TSSCConfig.TSSC_CONFIG_KEY: {
+            Config({
+                Config.TSSC_CONFIG_KEY: {
                     'step-foo': "bad-step-config"
                 }
             })
 
     def test_multiple_sub_steps(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -671,8 +671,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         )
 
     def test_sub_step_with_name(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'name': 'sub-step-name-test',
@@ -699,8 +699,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         )
 
     def test_sub_step_with_environment_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -739,8 +739,8 @@ class TestTSSCConfig(BaseTSSCTestCase):
         )
 
     def test_sub_step_with_no_environment_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',

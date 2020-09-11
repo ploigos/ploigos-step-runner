@@ -1,7 +1,7 @@
 """Configuration for TSSC workflow.
 """
 
-from .config import TSSCConfig
+from .config import Config
 from .config_value import TSSCConfigValue
 from .decryptors import *
 from .step_config import TSSCStepConfig

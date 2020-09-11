@@ -3,7 +3,7 @@ import unittest
 import re
 
 from tssc import TSSCFactory, TSSCException, StepImplementer
-from tssc.config import TSSCConfig
+from tssc.config import Config
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
@@ -99,20 +99,20 @@ class TestFactory(BaseTSSCTestCase):
 
     def test_init_with_tsscconfig(self):
         config = {
-            TSSCConfig.TSSC_CONFIG_KEY: {
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo'
                 }
             }
         }
-        tssc_config = TSSCConfig(config)
+        tssc_config = Config(config)
         factory = TSSCFactory(tssc_config, 'results.yml')
 
         self.assertEqual(factory.config, tssc_config)
 
     def test_init_with_dict(self):
         config = {
-            TSSCConfig.TSSC_CONFIG_KEY: {
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
                     'implementer': 'foo'
                 }

@@ -5,7 +5,7 @@ import os.path
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import TSSCConfig, TSSCStepConfig, TSSCSubStepConfig, TSSCConfigValue
+from tssc.config import Config, TSSCStepConfig, TSSCSubStepConfig, TSSCConfigValue
 
 class TestTSSCSubStepConfig(BaseTSSCTestCase):
     def test_constructor_no_sub_step_config_or_step_env_config(self):
@@ -19,8 +19,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         self.assertEqual(sub_step_config.sub_step_config, {})
 
     def test_parent_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -39,8 +39,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         self.assertEqual(sub_step.parent_config, tssc_config)
 
     def test_step_name(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -59,8 +59,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         self.assertEqual(sub_step.step_name, 'step-foo')
 
     def test_global_defaults(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-defaults': {
                     'test1': 'global-default-1',
                     'test2': 'global-default-2'
@@ -94,8 +94,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         })
 
     def test_global_environment_defaults(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-environment-defaults': {
                     'env1': {
                         'test1': 'global-env1-default-1',
@@ -143,8 +143,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         )
 
     def test_get_sub_step_env_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -179,9 +179,9 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
                 ValueError,
                 r"Error merging new sub step configuration into existing sub step configuration for sub step \(foo1\) of step \(step-foo\): Conflict at test1"
         ):
-            TSSCConfig([
+            Config([
                 {
-                    TSSCConfig.TSSC_CONFIG_KEY: {
+                    Config.TSSC_CONFIG_KEY: {
                         'step-foo': [
                             {
                                 'implementer': 'foo1',
@@ -194,7 +194,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
                     }
                 },
                 {
-                    TSSCConfig.TSSC_CONFIG_KEY: {
+                    Config.TSSC_CONFIG_KEY: {
                         'step-foo': [
                             {
                                 'implementer': 'foo1',
@@ -213,9 +213,9 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
                 ValueError,
                 r"Error merging new sub step environment configuration into existing sub step environment configuration for sub step \(foo1\) of step \(step-foo\): Conflict at env1.dup-key"
         ):
-            TSSCConfig([
+            Config([
                 {
-                    TSSCConfig.TSSC_CONFIG_KEY: {
+                    Config.TSSC_CONFIG_KEY: {
                         'step-foo': [
                             {
                                 'implementer': 'foo1',
@@ -233,7 +233,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
                     }
                 },
                 {
-                    TSSCConfig.TSSC_CONFIG_KEY: {
+                    Config.TSSC_CONFIG_KEY: {
                         'step-foo': [
                             {
                                 'implementer': 'foo1',
@@ -252,8 +252,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             ])
 
     def test_get_copy_of_runtime_step_config_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-defaults': {
                     'global-default-unique-0': 'global-default',
                     'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -372,8 +372,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         )
 
     def test_get_copy_of_runtime_step_config_default_global_defaults_global_env_defaults_sub_step_config_sub_step_env_config_step_config_overrides(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-defaults': {
                     'global-default-unique-0': 'global-default',
                     'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -526,8 +526,8 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         )
 
     def test_get_config_value(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'global-defaults': {
                     'global-default-unique-0': 'global-default',
                     'global-default-override-by-global-env-default-0': 'global-default-override-me',

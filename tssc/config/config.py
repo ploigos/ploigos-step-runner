@@ -10,7 +10,7 @@ from tssc.config.config_value import TSSCConfigValue
 from tssc.utils.file import parse_yaml_or_json_file
 from tssc.utils.dict import deep_merge
 
-class TSSCConfig:
+class Config:
     """Representation of configuration for TSSC workflow.
 
     Parameters
@@ -286,9 +286,9 @@ class TSSCConfig:
                 existing sub step environment configuration.
         """
 
-        assert TSSCConfig.TSSC_CONFIG_KEY in config_dict, \
+        assert Config.TSSC_CONFIG_KEY in config_dict, \
             "Failed to add invalid TSSC config. " + \
-            f"Missing expected top level key ({TSSCConfig.TSSC_CONFIG_KEY}): " + \
+            f"Missing expected top level key ({Config.TSSC_CONFIG_KEY}): " + \
             f"{config_dict}"
 
         # if file path given use that as the source when creating TSSCConfigValue objects
@@ -301,16 +301,16 @@ class TSSCConfig:
         # convert all the leaves of the configuration dictionary under
         # the TSSCConfig.TSSC_CONFIG_KEY to TSSCConfigValue objects
         tssc_config_values = TSSCConfigValue.convert_leaves_to_config_values(
-            values=config_dict[TSSCConfig.TSSC_CONFIG_KEY],
+            values=config_dict[Config.TSSC_CONFIG_KEY],
             parent_source=parent_source,
-            path_parts=[TSSCConfig.TSSC_CONFIG_KEY]
+            path_parts=[Config.TSSC_CONFIG_KEY]
         )
 
         for key, value in tssc_config_values.items():
             # if global default key
             # else if global env defaults key
             # else assume step config
-            if key == TSSCConfig.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS:
+            if key == Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS:
                 try:
                     self.__global_defaults = deep_merge(
                         copy.deepcopy(self.__global_defaults),
@@ -320,11 +320,11 @@ class TSSCConfig:
                     raise ValueError(
                         f"Error merging global defaults: {error}"
                     ) from error
-            elif key == TSSCConfig.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
+            elif key == Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
                 for env, env_config in value.items():
                     if env not in self.__global_environment_defaults:
                         self.__global_environment_defaults[env] = {
-                            TSSCConfig.TSSC_CONFIG_KEY_ENVIRONMENT_NAME: env
+                            Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME: env
                         }
 
                     try:
@@ -352,30 +352,30 @@ class TSSCConfig:
                     )
 
                 for sub_step in sub_steps:
-                    assert TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
+                    assert Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
                         f"Step ({step_name}) defines a single sub step with values " + \
                         f"({sub_step}) but is missing value for key: " + \
-                        f"{TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER}"
+                        f"{Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER}"
 
                     sub_step_implementer_name = \
-                        sub_step[TSSCConfig.TSSC_CONFIG_KEY_STEP_IMPLEMENTER].value
+                        sub_step[Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER].value
 
                     # if sub step name given
                     # else if no sub step name given use step implementer as sub step name
-                    if TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_NAME in sub_step:
-                        sub_step_name = sub_step[TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_NAME].value
+                    if Config.TSSC_CONFIG_KEY_SUB_STEP_NAME in sub_step:
+                        sub_step_name = sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_NAME].value
                     else:
                         sub_step_name = sub_step_implementer_name
 
-                    if TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
+                    if Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
                         sub_step_config = copy.deepcopy(
-                            sub_step[TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_CONFIG])
+                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG])
                     else:
                         sub_step_config = {}
 
-                    if TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
+                    if Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
                         sub_step_env_config = copy.deepcopy(
-                            sub_step[TSSCConfig.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
+                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
                     else:
                         sub_step_env_config = {}
 

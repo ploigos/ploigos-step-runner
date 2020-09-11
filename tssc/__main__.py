@@ -18,7 +18,7 @@ import argparse
 import os.path
 
 from tssc import TSSCFactory, TSSCException, DecryptionUtils
-from tssc.config import TSSCConfig
+from tssc.config import Config
 from tssc.utils.io import TextIOSelectiveObfuscator
 
 def print_error(msg):
@@ -108,7 +108,7 @@ def main(argv=None):
                 sys.exit(101)
 
         try:
-            tssc_config = TSSCConfig(args.config)
+            tssc_config = Config(args.config)
         except (ValueError, AssertionError) as error:
             print_error(f"specified -c/--config is invalid TSSC configuration: {error}")
             sys.exit(102)
