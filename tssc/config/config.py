@@ -152,7 +152,7 @@ class Config:
         return sub_step_configs
 
     def add_config(self, config):
-        """Parses, validates, and adds a given config to this TSSCConfig.
+        """Parses, validates, and adds a given config to this Config.
 
         Parameters
         ----------
@@ -228,13 +228,13 @@ class Config:
         self.step_configs[step_name].step_config_overrides = step_config_overrides
 
     def __add_config_file(self, config_file):
-        """Adds a JSON or YAML file as config to this TSSCConfig.
+        """Adds a JSON or YAML file as config to this Config.
 
         Parameters
         ----------
         config_file : str (file path)
             A string that is a path to an existing YAML or JSON file to
-            parse and validate as a TSSC configuration to add to this TSSCConfig.
+            parse and validate as a TSSC configuration to add to this Config.
 
         Raises
         ------
@@ -265,7 +265,7 @@ class Config:
         Parameters
         ----------
         config_dict : dict
-            A dictionary to validate as a TSSC configuration and to add to this TSSCConfig.
+            A dictionary to validate as a TSSC configuration and to add to this Config.
         source_file_path : str, optional
             File path to the file from which the given config_dict came from.
 
@@ -299,7 +299,7 @@ class Config:
             parent_source = copy.deepcopy(config_dict)
 
         # convert all the leaves of the configuration dictionary under
-        # the TSSCConfig.TSSC_CONFIG_KEY to ConfigValue objects
+        # the Config.TSSC_CONFIG_KEY to ConfigValue objects
         tssc_config_values = ConfigValue.convert_leaves_to_config_values(
             values=config_dict[Config.TSSC_CONFIG_KEY],
             parent_source=parent_source,

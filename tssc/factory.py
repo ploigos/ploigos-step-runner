@@ -13,8 +13,8 @@ class TSSCFactory:
 
     Parameters
     ----------
-    config : TSSCConfig, dict, list, str (file or directory)
-        A TSSCConfig object,
+    config : Config, dict, list, str (file or directory)
+        A Config object,
         a dictionary that is a valid TSSC configuration,
         a string that is a path to a YAML or JSON file that is
         a valid TSSC configuration,
@@ -63,7 +63,7 @@ class TSSCFactory:
         """
         Returns
         -------
-        TSSCConfig
+        Config
             Configuration used by this factory.
         """
         return self.__config

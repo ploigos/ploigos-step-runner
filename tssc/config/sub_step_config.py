@@ -56,7 +56,7 @@ class SubStepConfig:
         """
         Returns
         -------
-        TSSCConfig
+        Config
             Parent TSSC config.
         """
         return self.parent_step_config.parent_config

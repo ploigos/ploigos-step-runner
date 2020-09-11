@@ -10,14 +10,14 @@ class StepConfig:
 
     Parameters
     ----------
-    parent_config : TSSCConfig
+    parent_config : Config
         Parent TSSC configuration containing this step configuration.
     step_name : str
         Name of the TSSC step.
 
     Attributes
     ----------
-    __parent_config : TSSCConfig
+    __parent_config : Config
     __step_name : str
     __sub_steps : list of TSSCSubStepConfig
     __sub_step_config_overrides : dict
@@ -34,7 +34,7 @@ class StepConfig:
         """
         Returns
         -------
-        TSSCConfig
+        Config
         """
         return self.__parent_config
 

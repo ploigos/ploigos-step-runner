@@ -97,7 +97,7 @@ class TestFactory(BaseTSSCTestCase):
 
         factory.run_step('foo')
 
-    def test_init_with_tsscconfig(self):
+    def test_init_with_config_object(self):
         config = {
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': {
