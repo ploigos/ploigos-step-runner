@@ -4,12 +4,12 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import TSSCConfig, TSSCConfigValue
+from tssc.config import Config, TSSCConfigValue
 
 class TestTSSCStepConfig(BaseTSSCTestCase):
     def test_parent_config(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -26,8 +26,8 @@ class TestTSSCStepConfig(BaseTSSCTestCase):
         self.assertEqual(step_config.parent_config, tssc_config)
 
     def test_step_name(self):
-        tssc_config = TSSCConfig({
-            TSSCConfig.TSSC_CONFIG_KEY: {
+        tssc_config = Config({
+            Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -44,9 +44,9 @@ class TestTSSCStepConfig(BaseTSSCTestCase):
         self.assertEqual(step_config.step_name, 'step-foo')
 
     def test_add_or_update_sub_step_config_exising_sub_step(self):
-        tssc_config = TSSCConfig([
+        tssc_config = Config([
             {
-                TSSCConfig.TSSC_CONFIG_KEY: {
+                Config.TSSC_CONFIG_KEY: {
                     'step-foo': [
                         {
                             'implementer': 'foo1',
@@ -59,7 +59,7 @@ class TestTSSCStepConfig(BaseTSSCTestCase):
                 }
             },
             {
-                TSSCConfig.TSSC_CONFIG_KEY: {
+                Config.TSSC_CONFIG_KEY: {
                     'step-foo': [
                         {
                             'implementer': 'foo1',
@@ -87,9 +87,9 @@ class TestTSSCStepConfig(BaseTSSCTestCase):
         )
 
     def test_get_sub_step_non_existing_sub_step_name(self):
-        tssc_config = TSSCConfig([
+        tssc_config = Config([
             {
-                TSSCConfig.TSSC_CONFIG_KEY: {
+                Config.TSSC_CONFIG_KEY: {
                     'step-foo': [
                         {
                             'implementer': 'foo1',

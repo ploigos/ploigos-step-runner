@@ -5,7 +5,7 @@ import os
 import yaml
 
 from tssc import TSSCFactory, StepImplementer, TSSCException
-from tssc.config import TSSCConfig
+from tssc.config import Config
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
@@ -487,7 +487,7 @@ class TestStepImplementer(BaseTSSCTestCase):
             )
 
     def test_empty_constructor_params(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
@@ -532,7 +532,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 )
 
     def test_get_step_results(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
@@ -586,7 +586,7 @@ class TestStepImplementer(BaseTSSCTestCase):
             })
 
     def test_current_step_results(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
@@ -618,7 +618,7 @@ class TestStepImplementer(BaseTSSCTestCase):
             })
 
     def test_write_working_file(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
@@ -645,7 +645,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 self.assertEqual(working_file.read(), 'hello world')
 
     def test_get_config_value(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
@@ -672,7 +672,7 @@ class TestStepImplementer(BaseTSSCTestCase):
             self.assertIsNone(step.get_config_value('does-not-exist'))
 
     def test_get_config_value_with_env(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
@@ -712,7 +712,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 'step env config - env 1 value - 1')
 
     def test_has_config_value(self):
-        config = TSSCConfig({
+        config = Config({
             'tssc-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
