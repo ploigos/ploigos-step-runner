@@ -17,8 +17,9 @@ import sys
 import argparse
 import os.path
 
-from tssc import TSSCFactory, TSSCException
+from tssc import TSSCFactory, TSSCException, DecryptionUtils
 from tssc.config import TSSCConfig
+from tssc.utils.io import TextIOSelectiveObfuscator
 
 def print_error(msg):
     """
@@ -89,26 +90,42 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
-    # validate args
-    for config_file in args.config:
-        if not os.path.exists(config_file) or os.stat(config_file).st_size == 0:
-            print_error('specified -c/--config must exist and not be empty')
-            sys.exit(101)
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    new_stdout = TextIOSelectiveObfuscator(old_stdout)
+    new_stderr = TextIOSelectiveObfuscator(old_stderr)
+    DecryptionUtils.register_obfuscation_stream(new_stdout)
+    DecryptionUtils.register_obfuscation_stream(new_stderr)
 
     try:
-        tssc_config = TSSCConfig(args.config)
-    except (ValueError, AssertionError) as error:
-        print_error(f"specified -c/--config is invalid TSSC configuration: {error}")
-        sys.exit(102)
+        sys.stdout = new_stdout
+        sys.stderr = new_stderr
 
-    tssc_config.set_step_config_overrides(args.step, args.step_config)
-    tssc_factory = TSSCFactory(tssc_config, args.results_dir)
+        # validate args
+        for config_file in args.config:
+            if not os.path.exists(config_file) or os.stat(config_file).st_size == 0:
+                print_error('specified -c/--config must exist and not be empty')
+                sys.exit(101)
 
-    try:
-        tssc_factory.run_step(args.step, args.environment)
-    except (ValueError, AssertionError, TSSCException) as error:
-        print_error(f"Error calling step ({args.step}): {str(error)}")
-        sys.exit(200)
+        try:
+            tssc_config = TSSCConfig(args.config)
+        except (ValueError, AssertionError) as error:
+            print_error(f"specified -c/--config is invalid TSSC configuration: {error}")
+            sys.exit(102)
+
+        tssc_config.set_step_config_overrides(args.step, args.step_config)
+        tssc_factory = TSSCFactory(tssc_config, args.results_dir)
+
+        try:
+            tssc_factory.run_step(args.step, args.environment)
+        except (ValueError, AssertionError, TSSCException) as error:
+            print_error(f"Error calling step ({args.step}): {str(error)}")
+            sys.exit(200)
+    finally:
+        new_stdout.close()
+        new_stderr.close()
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
 def init():
     """

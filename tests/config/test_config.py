@@ -620,7 +620,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             ValueError,
             r"Expected step \(step-foo\) to have have step config " \
             r"\(TSSCConfigValue\(value=bad-step-config, " \
-            r"value_path='\[\"tssc-config\"\]\[\"step-foo\"]\'\)\) of " \
+            r"value_path='\['tssc-config', 'step-foo'\]\'\)\) of " \
             r"type dict or list but got: <class 'tssc.config.config_value.TSSCConfigValue'>"
         ):
             TSSCConfig({

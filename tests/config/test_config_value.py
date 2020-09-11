@@ -1,13 +1,25 @@
-import unittest
-from testfixtures import TempDirectory
-
+from io import StringIO
 import os.path
 
+import unittest
+from testfixtures import TempDirectory
+from unittest.mock import patch
+
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import Any
 
 from tssc.config import TSSCConfig, TSSCConfigValue
+from tssc.decription_utils import DecryptionUtils
+from tssc.config.decryptors.sops_config_value_decryptor import SOPSConfigValueDecryptor
 
 class TestTSSCConfigValue(BaseTSSCTestCase):
+    @staticmethod
+    def create_sops_side_effect(mock_stdout):
+        def sops_side_effect(*args, **kwargs):
+            kwargs['_out'].write(mock_stdout)
+
+        return sops_side_effect
+
     def test__eq__is_equal_basic(self):
         test1 = TSSCConfigValue('foo1', None, None)
         test2 = TSSCConfigValue('foo1', None, None)
@@ -66,7 +78,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
 
         self.assertEqual(
             str(source[TSSCConfig.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1']),
-            'TSSCConfigValue(value=foo, value_path=\'["tssc-config"]["step-foo"][0]["config"]["test1"]\')'
+            "TSSCConfigValue(value=foo, value_path='['tssc-config', 'step-foo', 0, 'config', 'test1']')"
         )
 
     def test_convert_leaves_to_config_values_0(self):
@@ -197,8 +209,8 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
         )
 
         self.assertEqual(
-            source[TSSCConfig.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path,
-            '["tssc-config"]["step-foo"][0]["config"]["test1"]')
+            source[TSSCConfig.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
+            ['tssc-config', 'step-foo', 0, 'config', 'test1'])
 
     def test_value_path_given_no_inital_value_path_parts(self):
         source = {
@@ -220,8 +232,8 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
         )
 
         self.assertEqual(
-            source[TSSCConfig.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path,
-            '["tssc-config"]["step-foo"][0]["config"]["test1"]')
+            source[TSSCConfig.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
+            ['tssc-config', 'step-foo', 0, 'config', 'test1'])
 
     def test_convert_leaves_to_values_all_config_value_leaves(self):
         source_values = {
@@ -287,4 +299,36 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
                     ]
                 }
             }
+        )
+
+    @patch('sh.sops', create=True)
+    def test_value_decyrpt(self, sops_mock):
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'decryptors',
+            'files',
+            'tssc-config-secret-stuff.yml'
+        )
+
+        config_value = TSSCConfigValue(
+            value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
+            parent_source=encrypted_config_file_path,
+            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+        )
+
+        DecryptionUtils.register_config_value_decryptor(SOPSConfigValueDecryptor())
+
+        sops_mock.side_effect=TestTSSCConfigValue.create_sops_side_effect('mock decrypted value')
+        decrypted_value = config_value.value
+        sops_mock.assert_called_once_with(
+            '--decrypt',
+            '--extract=["tssc-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
+            None,
+            encrypted_config_file_path,
+            _in=None,
+            _out=Any(StringIO)
+        )
+        self.assertEqual(
+            decrypted_value,
+            'mock decrypted value'
         )

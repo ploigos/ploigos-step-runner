@@ -1,7 +1,7 @@
 import unittest
 import shutil
 
-from tests.helpers.sample_step_implementers import *
+from tssc.decription_utils import DecryptionUtils
 
 class BaseTSSCTestCase(unittest.TestCase):
     def setUp(self):
@@ -12,6 +12,8 @@ class BaseTSSCTestCase(unittest.TestCase):
             pass
 
     def tearDown(self):
+        DecryptionUtils._DecryptionUtils__config_value_decryptors = []
+
         try:
             shutil.rmtree("./tssc-working")
         except FileNotFoundError:

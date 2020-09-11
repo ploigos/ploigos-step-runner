@@ -2,6 +2,7 @@
 """
 
 import copy
+from tssc.decription_utils import DecryptionUtils
 
 class TSSCConfigValue:
     """Representation of a TSSC configuration value.
@@ -37,12 +38,46 @@ class TSSCConfigValue:
 
     @property
     def value(self):
-        """Gets the value of the config option this is the value for.
+        """Get the value of this configuration value (decrypted if applicable).
+
+        If the value happens to be decrypted then will decrypt and then return the decrypted value.
 
         Returns
         -------
         obj
-            The value of the config option this is the value for.
+            Value (decrypted if applicable) of this configuration value.
+
+        See Also
+        --------
+        raw_value
+        """
+        # attemp tto decrypt the value
+        decrypted_value = DecryptionUtils.decrypt(self)
+
+        # If this value was able to be decrypted, return the decrypted result
+        # else return the raw value
+        if decrypted_value is not None:
+            value = decrypted_value
+        else:
+            value = self.raw_value
+
+        return value
+
+    @property
+    def raw_value(self):
+        """Get the value of this configuration value as originally given.
+
+        If the value happens to be encrypted this will return that raw encrypted value as it was
+        given to this configuration value.
+
+        Returns
+        -------
+        obj
+            Value of this configuration value as originally given.
+
+        See Also
+        --------
+        value
         """
         return copy.deepcopy(self.__value)
 
@@ -58,27 +93,16 @@ class TSSCConfigValue:
         return copy.deepcopy(self.__path_parts)
 
     @property
-    def path(self):
-        """Gets a stringified version of the path parts.
-
-        Example 1
-        self.path_parts: ['tssc-config', 'step-foo', 0, 'config', 'test1']
-        Output: '["tssc-config"]["step-foo"][0]["config"]["test1"]'
+    def parent_source(self):
+        """Get a copy of the source that this configuration value came from.
 
         Returns
         -------
-        str
-            Stringified version of the path parts.
+        str file path or dict
+            Path to the YML or JSON file that this value is found in or
+            the dict that this value is found in.
         """
-        path = ""
-
-        for path_part in self.path_parts:
-            if isinstance(path_part, str):
-                path += f"[\"{path_part}\"]"
-            else:
-                path += f"[{path_part}]"
-
-        return path
+        return copy.deepcopy(self.__parent_source)
 
     def __eq__(self, other):
         """Equality for this object.
@@ -111,7 +135,7 @@ class TSSCConfigValue:
         str
             Human readable representation of the object.
         """
-        return f"TSSCConfigValue(value={self.value}, value_path='{self.path}')"
+        return f"TSSCConfigValue(value={self.raw_value}, value_path='{self.path_parts}')"
 
     @staticmethod
     def convert_leaves_to_config_values(values, parent_source=None, path_parts=None):
