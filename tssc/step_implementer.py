@@ -8,7 +8,7 @@ import pprint
 import yaml
 from tabulate import tabulate
 from tssc.exceptions import TSSCException
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     """
@@ -249,7 +249,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         assert (not missing_required_config_keys), \
             "The runtime step configuration (" + \
-            f"{TSSCConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing " + \
+            f"{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing " + \
             f"the required configuration keys ({missing_required_config_keys})"
 
     def run_step(self):

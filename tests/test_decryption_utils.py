@@ -1,6 +1,6 @@
 
 from tssc.decription_utils import DecryptionUtils
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
 from tssc.utils.io import TextIOSelectiveObfuscator
 
@@ -30,7 +30,7 @@ class SampleConfigValueDecryptor(ConfigValueDecryptor):
 
 class TestDecryptionUtils(BaseTSSCTestCase):
     def test_decrypt_no_decryptors(self):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             'attempt to decrypt me'
         )
         decrypted_value = DecryptionUtils.decrypt(
@@ -39,7 +39,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
         self.assertIsNone(decrypted_value)
 
     def test_decrypt_sample_decryptor_does_not_match(self):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             'attempt to decrypt me'
         )
 
@@ -54,7 +54,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test_decrypt_sample_decryptor(self):
         secret_value = "decrypt me"
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             f'TEST_ENC[{secret_value}]'
         )
 
@@ -72,7 +72,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test_register_obfuscation_stream(self):
         secret_value = "decrypt me"
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             f'TEST_ENC[{secret_value}]'
         )
 

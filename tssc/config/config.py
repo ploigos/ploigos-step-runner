@@ -5,8 +5,8 @@ import copy
 import glob
 import os.path
 
-from tssc.config.step_config import TSSCStepConfig
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.step_config import StepConfig
+from tssc.config.config_value import ConfigValue
 from tssc.utils.file import parse_yaml_or_json_file
 from tssc.utils.dict import deep_merge
 
@@ -223,7 +223,7 @@ class Config:
             Overrides for all sub steps for the step with the given name.
         """
         if step_name not in self.step_configs:
-            self.step_configs[step_name] = TSSCStepConfig(self, step_name)
+            self.step_configs[step_name] = StepConfig(self, step_name)
 
         self.step_configs[step_name].step_config_overrides = step_config_overrides
 
@@ -291,7 +291,7 @@ class Config:
             f"Missing expected top level key ({Config.TSSC_CONFIG_KEY}): " + \
             f"{config_dict}"
 
-        # if file path given use that as the source when creating TSSCConfigValue objects
+        # if file path given use that as the source when creating ConfigValue objects
         # else use a copy of the given configuration dictionary
         if source_file_path is not None:
             parent_source = source_file_path
@@ -299,8 +299,8 @@ class Config:
             parent_source = copy.deepcopy(config_dict)
 
         # convert all the leaves of the configuration dictionary under
-        # the TSSCConfig.TSSC_CONFIG_KEY to TSSCConfigValue objects
-        tssc_config_values = TSSCConfigValue.convert_leaves_to_config_values(
+        # the TSSCConfig.TSSC_CONFIG_KEY to ConfigValue objects
+        tssc_config_values = ConfigValue.convert_leaves_to_config_values(
             values=config_dict[Config.TSSC_CONFIG_KEY],
             parent_source=parent_source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -429,7 +429,7 @@ class Config:
         """
 
         if step_name not in self.step_configs:
-            self.step_configs[step_name] = TSSCStepConfig(self, step_name)
+            self.step_configs[step_name] = StepConfig(self, step_name)
 
         tssc_step_config = self.step_configs[step_name]
         tssc_step_config.add_or_update_sub_step_config(

@@ -4,7 +4,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import Config, TSSCConfigValue
+from tssc.config import Config, ConfigValue
 
 class TestTSSCStepConfig(BaseTSSCTestCase):
     def test_parent_config(self):
@@ -77,7 +77,7 @@ class TestTSSCStepConfig(BaseTSSCTestCase):
         self.assertEqual(len(step_config.sub_steps), 1)
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo1').sub_step_config
             ),
             {

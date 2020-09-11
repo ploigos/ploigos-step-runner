@@ -1,4 +1,4 @@
-"""ConfigValueDecryptor that uses SOPS to decyrpt TSSCConfigValues
+"""ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
 
 Also See
 --------
@@ -14,7 +14,7 @@ import sh
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
 
 class SOPSConfigValueDecryptor(ConfigValueDecryptor):
-    """ConfigValueDecryptor that uses SOPS to decyrpt TSSCConfigValues
+    """ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
 
     Parameters
     ----------
@@ -41,14 +41,14 @@ class SOPSConfigValueDecryptor(ConfigValueDecryptor):
 
         Parameters
         ----------
-        config_value : TSSCConfigValue
+        config_value : ConfigValue
             Determine if this decryptor can decrypt this configuration value.
 
         Returns
         -------
         bool
-            True if this ConfigValueDecryptor can decrypt the given TSSCConfigValue
-            False if this ConfigValueDecryptor can NOT decrypt the given TSSCConfigValue.
+            True if this ConfigValueDecryptor can decrypt the given ConfigValue
+            False if this ConfigValueDecryptor can NOT decrypt the given ConfigValue.
         """
         return re.match(
             SOPSConfigValueDecryptor.SOPS_ENCRYPTED_VALUE_REGEX,
@@ -56,18 +56,18 @@ class SOPSConfigValueDecryptor(ConfigValueDecryptor):
         ) is not None
 
     def decrypt(self, config_value):
-        """Decrypt the value of the given TSSCConfigValue.
+        """Decrypt the value of the given ConfigValue.
 
         Parameters
         ----------
-        config_value : TSSCConfigValue
-            Decrypt the value of this TSSCConfigValue.
+        config_value : ConfigValue
+            Decrypt the value of this ConfigValue.
 
         Returns
         -------
         obj or None
-            Decrypted value of the TSSCConfigValue
-            None if this decryptor can't decrypt the given TSSCConfigValue
+            Decrypted value of the ConfigValue
+            None if this decryptor can't decrypt the given ConfigValue
 
         Raises
         ------
@@ -129,7 +129,7 @@ class SOPSConfigValueDecryptor(ConfigValueDecryptor):
 
     @staticmethod
     def get_sops_value_path(config_value):
-        """Gets a stringified version of the path parts of a TSSCConfigValue for extration
+        """Gets a stringified version of the path parts of a ConfigValue for extration
         from a SOPS encrypted file.
 
         Example 1
