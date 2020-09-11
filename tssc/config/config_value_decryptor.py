@@ -13,28 +13,28 @@ class ConfigValueDecryptor(ABC):
 
         Parameters
         ----------
-        config_value : TSSCConfigValue
+        config_value : ConfigValue
             Determine if this decryptor can decrypt this configuration value.
 
         Returns
         -------
         bool
-            True if this ConfigValueDecryptor can decrypt the given TSSCConfigValue
-            False if this ConfigValueDecryptor can NOT decrypt the given TSSCConfigValue.
+            True if this ConfigValueDecryptor can decrypt the given ConfigValue
+            False if this ConfigValueDecryptor can NOT decrypt the given ConfigValue.
         """
 
     @abstractmethod
     def decrypt(self, config_value):
-        """Decrypt the value of the given TSSCConfigValue.
+        """Decrypt the value of the given ConfigValue.
 
         Parameters
         ----------
-        config_value : TSSCConfigValue
-            Decrypt the value of this TSSCConfigValue.
+        config_value : ConfigValue
+            Decrypt the value of this ConfigValue.
 
         Returns
         -------
         obj or None
-            Decrypted value of the TSSCConfigValue
-            None if this decryptor can't decrypt the given TSSCConfigValue
+            Decrypted value of the ConfigValue
+            None if this decryptor can't decrypt the given ConfigValue
         """

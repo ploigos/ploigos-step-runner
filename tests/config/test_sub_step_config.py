@@ -5,7 +5,7 @@ import os.path
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import Config, TSSCStepConfig, TSSCSubStepConfig, TSSCConfigValue
+from tssc.config import Config, StepConfig, TSSCSubStepConfig, ConfigValue
 
 class TestTSSCSubStepConfig(BaseTSSCTestCase):
     def test_constructor_no_sub_step_config_or_step_env_config(self):
@@ -81,12 +81,12 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         sub_step = step_config.get_sub_step('foo1')
 
         self.assertEqual(sub_step.global_defaults, {
-            'test1': TSSCConfigValue(
+            'test1': ConfigValue(
                 'global-default-1',
                 None,
                 ["tssc-config", "global-defaults", "test1"]
             ),
-            'test2': TSSCConfigValue(
+            'test2': ConfigValue(
                 'global-default-2',
                 None,
                 ["tssc-config", "global-defaults", "test2"]
@@ -122,7 +122,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         sub_step = step_config.get_sub_step('foo1')
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 sub_step.get_global_environment_defaults('env1')
             ),
             {
@@ -132,7 +132,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 sub_step.get_global_environment_defaults('env2')
             ),
             {
@@ -166,7 +166,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
         sub_step = step_config.get_sub_step('foo1')
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 sub_step.get_sub_step_env_config('env1')
             ),
             {
@@ -314,7 +314,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_no_given_env = sub_step.get_copy_of_runtime_step_config()
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_no_given_env),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_no_given_env),
             {
                 'global-default-unique-0': 'global-default',
                 'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -331,7 +331,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_env1 = sub_step.get_copy_of_runtime_step_config('env1')
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_env1),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_env1),
             {
                 'environment-name': 'env1',
                 'global-default-unique-0': 'global-default',
@@ -352,7 +352,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_env2 = sub_step.get_copy_of_runtime_step_config('env2')
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_env2),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_env2),
             {
                 'environment-name': 'env2',
                 'global-default-unique-0': 'global-default',
@@ -450,7 +450,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_no_given_env = sub_step.get_copy_of_runtime_step_config(None, defaults)
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_no_given_env),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_no_given_env),
             {
                 'global-default-unique-0': 'global-default',
                 'global-default-override-by-global-env-default-0': 'global-default-override-me',
@@ -473,7 +473,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_env1 = sub_step.get_copy_of_runtime_step_config('env1', defaults)
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_env1),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_env1),
             {
                 'environment-name': 'env1',
                 'global-default-unique-0': 'global-default',
@@ -500,7 +500,7 @@ class TestTSSCSubStepConfig(BaseTSSCTestCase):
 
         runtime_step_config_env2 = sub_step.get_copy_of_runtime_step_config('env2', defaults)
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(runtime_step_config_env2),
+            ConfigValue.convert_leaves_to_values(runtime_step_config_env2),
             {
                 'environment-name': 'env2',
                 'global-default-unique-0': 'global-default',

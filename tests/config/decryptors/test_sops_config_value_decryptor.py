@@ -11,7 +11,7 @@ from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sops_integration_test_case import SOPSIntegrationTestCase
 from tests.helpers.test_utils import Any
 
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 from tssc.config.decryptors.sops_config_value_decryptor import SOPSConfigValueDecryptor
 from tssc.utils.file import parse_yaml_or_json_file
 
@@ -24,7 +24,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -42,7 +42,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='not a sops encrypted value',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -60,7 +60,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -85,7 +85,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -118,7 +118,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config = parse_yaml_or_json_file(encrypted_config_file_path)
         encrypted_config_json = json.dumps(encrypted_config)
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -137,7 +137,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         )
 
     def test_decrypt_parent_source_file_does_not_exist(self, sops_mock):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source='does-not-exist.yml',
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -147,13 +147,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            r"Given config value \(TSSCConfigValue\(.*\)\) parent source \(does-not-exist.yml\)" \
+            r"Given config value \(ConfigValue\(.*\)\) parent source \(does-not-exist.yml\)" \
             r" is of type \(str\) but is not a path to a file that exists"
         ):
             sops_decryptor.decrypt(config_value)
 
     def test_decrypt_parent_source_none(self, sops_mock):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -163,7 +163,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            r"Given config value \(TSSCConfigValue\(.*\)\) parent source \(None\) " \
+            r"Given config value \(ConfigValue\(.*\)\) parent source \(None\) " \
             r"is expected to be of type dict or str but is of type: <class 'NoneType'>"
         ):
             sops_decryptor.decrypt(config_value)
@@ -175,7 +175,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -186,12 +186,12 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         sh.sops.side_effect = sh.ErrorReturnCode('sops', b'mock stdout', b'mock error about issue running sops')
         with self.assertRaisesRegex(
             RuntimeError,
-            r"Error invoking sops when trying to decrypt config value \(TSSCConfigValue\(.*\)\):"
+            r"Error invoking sops when trying to decrypt config value \(ConfigValue\(.*\)\):"
         ):
             sops_decryptor.decrypt(config_value)
 
     def test_get_sops_value_path(self, sops_mock):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
             path_parts=["tssc-config", "step-foo", 0, "config", "test1"]
@@ -210,7 +210,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -228,7 +228,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='not a sops encrypted value',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -246,7 +246,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -270,7 +270,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
 
         encrypted_config = parse_yaml_or_json_file(encrypted_config_file_path)
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -286,7 +286,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         )
 
     def test_decrypt_parent_source_file_does_not_exist(self):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source='does-not-exist.yml',
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -296,13 +296,13 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            r"Given config value \(TSSCConfigValue\(.*\)\) parent source \(does-not-exist.yml\)" \
+            r"Given config value \(ConfigValue\(.*\)\) parent source \(does-not-exist.yml\)" \
             r" is of type \(str\) but is not a path to a file that exists"
         ):
             sops_decryptor.decrypt(config_value)
 
     def test_decrypt_parent_source_none(self):
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -312,7 +312,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            r"Given config value \(TSSCConfigValue\(.*\)\) parent source \(None\) " \
+            r"Given config value \(ConfigValue\(.*\)\) parent source \(None\) " \
             r"is expected to be of type dict or str but is of type: <class 'NoneType'>"
         ):
             sops_decryptor.decrypt(config_value)
@@ -324,7 +324,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -338,6 +338,6 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         # attempt to decrypt the value
         with self.assertRaisesRegex(
             RuntimeError,
-            r"Error invoking sops when trying to decrypt config value \(TSSCConfigValue\(.*\)\):"
+            r"Error invoking sops when trying to decrypt config value \(ConfigValue\(.*\)\):"
         ):
             sops_decryptor.decrypt(config_value)

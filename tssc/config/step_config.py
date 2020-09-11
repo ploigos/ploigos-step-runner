@@ -5,7 +5,7 @@ import copy
 
 from tssc.config.sub_step_config import TSSCSubStepConfig
 
-class TSSCStepConfig:
+class StepConfig:
     """Representation of a TSSC step configuration.
 
     Parameters

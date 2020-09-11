@@ -4,7 +4,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
-from tssc.config import Config, TSSCConfigValue
+from tssc.config import Config, ConfigValue
 
 class TestTSSCConfig(BaseTSSCTestCase):
     def test_add_config_invalid_type(self):
@@ -325,7 +325,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
         })
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(tssc_config.global_defaults),
+            ConfigValue.convert_leaves_to_values(tssc_config.global_defaults),
             {
                 'test1' : 'foo1'
             }
@@ -350,7 +350,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
 
         self.assertEqual(tssc_config.global_defaults, {})
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(tssc_config.global_environment_defaults),
+            ConfigValue.convert_leaves_to_values(tssc_config.global_environment_defaults),
             {
                 'env1': {
                     'environment-name' : 'env1',
@@ -365,7 +365,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 tssc_config.get_global_environment_defaults_for_environment('env1')
             ),
             {
@@ -375,7 +375,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 tssc_config.get_global_environment_defaults_for_environment('env2')
             ), {
                 'environment-name' : 'env2',
@@ -606,7 +606,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             tssc_config = Config()
             tssc_config.add_config(os.path.join(temp_dir.path, config_dir))
             self.assertEqual(
-                TSSCConfigValue.convert_leaves_to_values(
+                ConfigValue.convert_leaves_to_values(
                     tssc_config.get_global_environment_defaults_for_environment('env1')
                 ),
                 {
@@ -619,9 +619,9 @@ class TestTSSCConfig(BaseTSSCTestCase):
         with self.assertRaisesRegex(
             ValueError,
             r"Expected step \(step-foo\) to have have step config " \
-            r"\(TSSCConfigValue\(value=bad-step-config, " \
+            r"\(ConfigValue\(value=bad-step-config, " \
             r"value_path='\['tssc-config', 'step-foo'\]\'\)\) of " \
-            r"type dict or list but got: <class 'tssc.config.config_value.TSSCConfigValue'>"
+            r"type dict or list but got: <class 'tssc.config.config_value.ConfigValue'>"
         ):
             Config({
                 Config.TSSC_CONFIG_KEY: {
@@ -654,7 +654,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(len(step_config.sub_steps), 2)
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo1').sub_step_config,
             ),
             {
@@ -662,7 +662,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo2').sub_step_config
             ),
             {
@@ -690,7 +690,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(len(step_config.sub_steps), 1)
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('sub-step-name-test').sub_step_config
             ),
             {
@@ -722,7 +722,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(len(step_config.sub_steps), 1)
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo1').sub_step_config
             ),
             {
@@ -730,7 +730,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
             }
         )
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo1').get_sub_step_env_config('env1')
             ),
             {
@@ -757,7 +757,7 @@ class TestTSSCConfig(BaseTSSCTestCase):
         self.assertEqual(len(step_config.sub_steps), 1)
 
         self.assertEqual(
-            TSSCConfigValue.convert_leaves_to_values(
+            ConfigValue.convert_leaves_to_values(
                 step_config.get_sub_step('foo1').sub_step_config
             ),
             {

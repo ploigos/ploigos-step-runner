@@ -4,7 +4,7 @@
 import copy
 
 from tssc.utils.dict import deep_merge
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 
 class TSSCSubStepConfig:
     """Representation of a TSSC sub step configuration.
@@ -277,7 +277,7 @@ class TSSCSubStepConfig:
         runtime_step_config = self.__merge_runtime_step_config(environment, defaults)
 
         if key in runtime_step_config:
-            if isinstance(runtime_step_config[key], TSSCConfigValue):
+            if isinstance(runtime_step_config[key], ConfigValue):
                 value = runtime_step_config[key].value
             else:
                 value = copy.deepcopy(runtime_step_config[key])

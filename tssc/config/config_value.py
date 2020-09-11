@@ -4,7 +4,7 @@
 import copy
 from tssc.decription_utils import DecryptionUtils
 
-class TSSCConfigValue:
+class ConfigValue:
     """Representation of a TSSC configuration value.
 
     Parameters
@@ -115,12 +115,12 @@ class TSSCConfigValue:
         Returns
         -------
         bool
-            True if this and the other object are both TSSCConfigValue
+            True if this and the other object are both ConfigValue
                 objects and have the same value.
             False otherwise.
         """
 
-        if isinstance(other, TSSCConfigValue):
+        if isinstance(other, ConfigValue):
             equal = self.value == other.value
         else:
             equal = False
@@ -135,17 +135,17 @@ class TSSCConfigValue:
         str
             Human readable representation of the object.
         """
-        return f"TSSCConfigValue(value={self.raw_value}, value_path='{self.path_parts}')"
+        return f"ConfigValue(value={self.raw_value}, value_path='{self.path_parts}')"
 
     @staticmethod
     def convert_leaves_to_config_values(values, parent_source=None, path_parts=None):
         """In place recursively change all of the leaves of the given
-        object to a TSSCConfigValue objects.
+        object to a ConfigValue objects.
 
         Parameters
         ----------
-        values : dict, list, tuple, TSSCConfigValue, None, obj
-            Change all the leaves of the given object to TSSCConfigValue objects.
+        values : dict, list, tuple, ConfigValue, None, obj
+            Change all the leaves of the given object to ConfigValue objects.
         parent_source : str file path or dict
             Path to the YML or JSON file that this value is found in or
             the dict that this value is found in.
@@ -154,24 +154,24 @@ class TSSCConfigValue:
 
         Returns
         -------
-        dict, list, None, or TSSCConfigValue
+        dict, list, None, or ConfigValue
             If given values is a a dict then returns the same dict with all of the leaf values
-                changed to TSSCConfigValue or None if already None.
+                changed to ConfigValue or None if already None.
             If given values is list then returns the same list with all of the leaf values
-                changes to TSSCConfigValue or None if already None.
+                changes to ConfigValue or None if already None.
             If given values is None, return None.
-            If given values is already a TSSCConfigValue return the same TSSCConfigValue
+            If given values is already a ConfigValue return the same ConfigValue
 
         See Also
         --------
-        TSSCConfigValue.convert_leaves_to_config_values
+        ConfigValue.convert_leaves_to_config_values
         """
         if path_parts is None:
             path_parts = []
 
         if isinstance(values, dict): # pylint: disable=no-else-return
             for child_key in values:
-                values[child_key] = TSSCConfigValue.convert_leaves_to_config_values(
+                values[child_key] = ConfigValue.convert_leaves_to_config_values(
                     values=values[child_key],
                     parent_source=parent_source,
                     path_parts=(path_parts + [child_key])
@@ -180,19 +180,19 @@ class TSSCConfigValue:
             return values
         elif isinstance(values, (list, tuple)):
             for child_key, child_value in enumerate(values):
-                values[child_key] = TSSCConfigValue.convert_leaves_to_config_values(
+                values[child_key] = ConfigValue.convert_leaves_to_config_values(
                     values=child_value,
                     parent_source=parent_source,
                     path_parts=(path_parts + [child_key])
                 )
 
             return values
-        elif isinstance(values, TSSCConfigValue):
+        elif isinstance(values, ConfigValue):
             return values
         elif values is None:
             return None
         else:
-            return TSSCConfigValue(
+            return ConfigValue(
                 value=values,
                 parent_source=parent_source,
                 path_parts=path_parts
@@ -200,39 +200,39 @@ class TSSCConfigValue:
 
     @staticmethod
     def convert_leaves_to_values(values):
-        """Recursively transforms all leaves of type TSSCConfigValue to TSSCConfigValue.value
+        """Recursively transforms all leaves of type ConfigValue to ConfigValue.value
 
         Parameters
         ----------
-        values : dict, list, TSSCConfigValue, or obj
-            A collection where the leaves contain TSSCConfigValue to transform back to
-            TSSCConfigValue.value
+        values : dict, list, ConfigValue, or obj
+            A collection where the leaves contain ConfigValue to transform back to
+            ConfigValue.value
 
         Returns
         -------
         dict, list, or obj
             If given a dictionary returns that dictionary with all leaves transformed from
-                TSSCConfigValue to TSSCConfigValue.value.
+                ConfigValue to ConfigValue.value.
             If given a list returns that dictionary with all leaves transformed from
-                TSSCConfigValue to TSSCConfigValue.value.
-            If given a TSSCConfigValue returns TSSCConfigValue.value
+                ConfigValue to ConfigValue.value.
+            If given a ConfigValue returns ConfigValue.value
             If any other object returns that object
 
         See Also
         --------
-        TSSCConfigValue.convert_leaves_to_config_values
+        ConfigValue.convert_leaves_to_config_values
         """
         if isinstance(values, dict): # pylint: disable=no-else-return
             for child_key in values:
-                values[child_key] = TSSCConfigValue.convert_leaves_to_values(values[child_key])
+                values[child_key] = ConfigValue.convert_leaves_to_values(values[child_key])
 
             return values
         elif isinstance(values, (list, tuple)):
             for child_key, child_value in enumerate(values):
-                values[child_key] = TSSCConfigValue.convert_leaves_to_values(child_value)
+                values[child_key] = ConfigValue.convert_leaves_to_values(child_value)
 
             return values
-        elif isinstance(values, TSSCConfigValue):
+        elif isinstance(values, ConfigValue):
             return values.value
         else:
             return values

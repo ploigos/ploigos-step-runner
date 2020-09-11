@@ -16,7 +16,7 @@ class DecryptionUtils:
         TextIOSelectiveObfuscators to be sure that any decrypted values are obfuscated
         on those streams.
     __config_value_decryptors : list of ConfigValueDecryptor
-        ConfigValueDecryptors that can be used to decrypt given TSSCConfigValue.
+        ConfigValueDecryptors that can be used to decrypt given ConfigValue.
     """
 
     __obfuscation_streams = []
@@ -41,13 +41,13 @@ class DecryptionUtils:
 
     @staticmethod
     def register_config_value_decryptor(config_value_decryptor):
-        """Add a ConfigValueDecryptor that can be used to decrypt TSSCConfigValues.
+        """Add a ConfigValueDecryptor that can be used to decrypt ConfigValues.
 
         Parameters
         ----------
         config_value_decryptor : ConfigValueDecryptor
             ConfigValueDecryptor to add to the list of decryptors that can be
-            used to decrypt TSSCConfigValues.
+            used to decrypt ConfigValues.
 
         Raises
         ------
@@ -59,21 +59,21 @@ class DecryptionUtils:
 
     @staticmethod
     def decrypt(config_value):
-        """If possible decrypt the given TSSCConfigValue using one of the
+        """If possible decrypt the given ConfigValue using one of the
         registered ConfigValueDecryptors.
 
         Parameters
         ----------
-        config_value : TSSCConfigValue
-            TSSCConfigValue to decrypt the value of with one of the
+        config_value : ConfigValue
+            ConfigValue to decrypt the value of with one of the
             registered ConfigValueDecryptors if possible.
 
         Returns
         -------
         obj or None
-            Decrypted value of the given TSSCConfigValue or
+            Decrypted value of the given ConfigValue or
             None if none of the registered ConfigValueDecryptors can decrypt the given
-            TSSCConfigValue.
+            ConfigValue.
         """
 
         decrypted_value = None

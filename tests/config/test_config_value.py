@@ -8,11 +8,11 @@ from unittest.mock import patch
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import Any
 
-from tssc.config import Config, TSSCConfigValue
+from tssc.config import Config, ConfigValue
 from tssc.decription_utils import DecryptionUtils
 from tssc.config.decryptors.sops_config_value_decryptor import SOPSConfigValueDecryptor
 
-class TestTSSCConfigValue(BaseTSSCTestCase):
+class TestConfigValue(BaseTSSCTestCase):
     @staticmethod
     def create_sops_side_effect(mock_stdout):
         def sops_side_effect(*args, **kwargs):
@@ -21,37 +21,37 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
         return sops_side_effect
 
     def test__eq__is_equal_basic(self):
-        test1 = TSSCConfigValue('foo1', None, None)
-        test2 = TSSCConfigValue('foo1', None, None)
+        test1 = ConfigValue('foo1', None, None)
+        test2 = ConfigValue('foo1', None, None)
 
         self.assertEqual(test1, test2)
 
     def test__eq__is_equal_diff_source(self):
-        test1 = TSSCConfigValue('foo1', "does not matter for equality", None)
-        test2 = TSSCConfigValue('foo1', "really does not matter for equality", None)
+        test1 = ConfigValue('foo1', "does not matter for equality", None)
+        test2 = ConfigValue('foo1', "really does not matter for equality", None)
 
         self.assertEqual(test1, test2)
 
     def test__eq__is_equal_diff_path_parts(self):
-        test1 = TSSCConfigValue('foo1', None, ['a','b'])
-        test2 = TSSCConfigValue('foo1', None, ['1', '2'])
+        test1 = ConfigValue('foo1', None, ['a','b'])
+        test2 = ConfigValue('foo1', None, ['1', '2'])
 
         self.assertEqual(test1, test2)
 
     def test__eq__is_equal_diff_source_and_path_parts(self):
-        test1 = TSSCConfigValue('foo1', "does not matter for equality", ['a','b'])
-        test2 = TSSCConfigValue('foo1', "really does not matter for equality", ['1', '2'])
+        test1 = ConfigValue('foo1', "does not matter for equality", ['a','b'])
+        test2 = ConfigValue('foo1', "really does not matter for equality", ['1', '2'])
 
         self.assertEqual(test1, test2)
 
     def test__eq__is_not_equal_both_tssc_config_value_objects(self):
-        test1 = TSSCConfigValue('foo1', None, None)
-        test2 = TSSCConfigValue('foo2', None, None)
+        test1 = ConfigValue('foo1', None, None)
+        test2 = ConfigValue('foo2', None, None)
 
         self.assertNotEqual(test1, test2)
 
     def test__eq__is_not_equal_different_objects(self):
-        test1 = TSSCConfigValue('foo1', None, None)
+        test1 = ConfigValue('foo1', None, None)
         test2 = "foo1"
 
         self.assertNotEqual(test1, test2)
@@ -70,7 +70,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source[Config.TSSC_CONFIG_KEY],
             parent_source=source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -78,7 +78,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
 
         self.assertEqual(
             str(source[Config.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1']),
-            "TSSCConfigValue(value=foo, value_path='['tssc-config', 'step-foo', 0, 'config', 'test1']')"
+            "ConfigValue(value=foo, value_path='['tssc-config', 'step-foo', 0, 'config', 'test1']')"
         )
 
     def test_convert_leaves_to_config_values_0(self):
@@ -95,7 +95,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source[Config.TSSC_CONFIG_KEY],
             parent_source=source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -105,9 +105,9 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
-                        'implementer': TSSCConfigValue('foo1', None, None),
+                        'implementer': ConfigValue('foo1', None, None),
                         'config': {
-                            'test1': TSSCConfigValue('foo', None, None)
+                            'test1': ConfigValue('foo', None, None)
                         }
                     }
                 ]
@@ -116,7 +116,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
 
         self.assertEqual(source, expected)
 
-    def test_convert_leaves_to_config_values_existing_TSSCConfigValue_leaf(self):
+    def test_convert_leaves_to_config_values_existing_ConfigValue_leaf(self):
         source = {
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
@@ -124,14 +124,14 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
                         'implementer': 'foo1',
                         'config': {
                             'test1': 'foo',
-                            'test2': TSSCConfigValue('foo1')
+                            'test2': ConfigValue('foo1')
                         }
                     }
                 ]
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source[Config.TSSC_CONFIG_KEY],
             parent_source=source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -141,10 +141,10 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
-                        'implementer': TSSCConfigValue('foo1', None, None),
+                        'implementer': ConfigValue('foo1', None, None),
                         'config': {
-                            'test1': TSSCConfigValue('foo', None, None),
-                            'test2': TSSCConfigValue('foo1')
+                            'test1': ConfigValue('foo', None, None),
+                            'test2': ConfigValue('foo1')
                         }
                     }
                 ]
@@ -167,7 +167,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source[Config.TSSC_CONFIG_KEY],
             parent_source=source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -177,7 +177,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
-                        'implementer': TSSCConfigValue('foo1', None, None),
+                        'implementer': ConfigValue('foo1', None, None),
                         'config': {
                             'test1': None
                         }
@@ -202,7 +202,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source[Config.TSSC_CONFIG_KEY],
             parent_source=source,
             path_parts=[Config.TSSC_CONFIG_KEY]
@@ -226,7 +226,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        TSSCConfigValue.convert_leaves_to_config_values(
+        ConfigValue.convert_leaves_to_config_values(
             values=source,
             parent_source=source
         )
@@ -240,16 +240,16 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
-                        'implementer': TSSCConfigValue('foo1', None, None),
+                        'implementer': ConfigValue('foo1', None, None),
                         'config': {
-                            'test1': TSSCConfigValue('foo', None, None)
+                            'test1': ConfigValue('foo', None, None)
                         }
                     }
                 ]
             }
         }
 
-        converted = TSSCConfigValue.convert_leaves_to_values(source_values)
+        converted = ConfigValue.convert_leaves_to_values(source_values)
 
         self.assertEqual(
             converted,
@@ -272,9 +272,9 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             Config.TSSC_CONFIG_KEY: {
                 'step-foo': [
                     {
-                        'implementer': TSSCConfigValue('foo1', None, None),
+                        'implementer': ConfigValue('foo1', None, None),
                         'config': {
-                            'test1': TSSCConfigValue('foo', None, None),
+                            'test1': ConfigValue('foo', None, None),
                             'test': 'not a tssc config value object'
                         }
                     }
@@ -282,7 +282,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             }
         }
 
-        converted = TSSCConfigValue.convert_leaves_to_values(source_values)
+        converted = ConfigValue.convert_leaves_to_values(source_values)
 
         self.assertEqual(
             converted,
@@ -310,7 +310,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
             'tssc-config-secret-stuff.yml'
         )
 
-        config_value = TSSCConfigValue(
+        config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
             path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
@@ -318,7 +318,7 @@ class TestTSSCConfigValue(BaseTSSCTestCase):
 
         DecryptionUtils.register_config_value_decryptor(SOPSConfigValueDecryptor())
 
-        sops_mock.side_effect=TestTSSCConfigValue.create_sops_side_effect('mock decrypted value')
+        sops_mock.side_effect=TestConfigValue.create_sops_side_effect('mock decrypted value')
         decrypted_value = config_value.value
         sops_mock.assert_called_once_with(
             '--decrypt',
