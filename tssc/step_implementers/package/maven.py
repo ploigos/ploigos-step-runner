@@ -127,6 +127,9 @@ import sh
 from tssc import StepImplementer
 from tssc.utils.xml import get_xml_element
 
+from tssc.utils.maven import generate_maven_settings
+from tssc.config import ConfigValue
+
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml',
     'artifact-extensions': ["jar", "war", "ear"],
@@ -136,6 +139,7 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_KEYS = [
     'pom-file'
 ]
+
 
 class Maven(StepImplementer):
     """
@@ -176,6 +180,22 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
+    def _settings_file(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-servers')
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-repositories')
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-mirrors')
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         """Runs the TSSC step implemented by this StepImplementer.
 
@@ -191,16 +211,19 @@ class Maven(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
+        settings_file = self._settings_file()
+
         try:
             sh.mvn(  # pylint: disable=no-member,
                 'clean',
                 'install',
                 '-f', pom_file,
+                '-s', settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
+            raise RuntimeError(f'Error invoking mvn: {error}') from error
 
         # find the artifacts
         artifact_file_names = []

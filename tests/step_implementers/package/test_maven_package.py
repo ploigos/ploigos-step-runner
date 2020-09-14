@@ -1,14 +1,12 @@
 import os
 import sys
-import sh
 from pathlib import Path
-
-import unittest
 from unittest.mock import patch
+import sh
+
 from testfixtures import TempDirectory
 
-from tssc import TSSCFactory
-from tssc.step_implementers.package import Maven
+import tssc
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import run_step_test_with_result_validation
@@ -65,7 +63,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
+            factory = tssc.TSSCFactory(config)
             with self.assertRaisesRegex(
                     ValueError,
                     'Given pom file does not exist: .*'):
@@ -130,13 +128,18 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
 
-            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
+            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path,
+                                                          'target',
+                                                          [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
@@ -202,8 +205,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'pom resulted in 0 with expected artifact extensions (.*), this is unsupported'):
-
-                    run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+                run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
 
     @patch('sh.mvn', create=True)
     def test_mvn_multiple_jars(self, mvn_mock):
@@ -292,7 +294,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
+            factory = tssc.TSSCFactory(config)
             artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
@@ -361,11 +363,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
 
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
@@ -420,11 +425,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             }
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
@@ -455,7 +463,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
+            factory = tssc.TSSCFactory(config)
             with self.assertRaisesRegex(
                     RuntimeError,
                     'Error invoking mvn:.*'):
@@ -470,7 +478,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config)
+        factory = tssc.TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 "Given pom file does not exist: pom.xml"):
@@ -485,7 +493,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config)
+        factory = tssc.TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 "Given pom file does not exist: does-not-exist-pom.xml"):
@@ -507,7 +515,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config)
+        factory = tssc.TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: does-not-exist.pom'):
@@ -525,7 +533,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config)
+        factory = tssc.TSSCFactory(config)
         with self.assertRaisesRegex(
                 AssertionError,
                 r"The runtime step configuration \(\{'pom-file': None, 'artifact-extensions': \['jar', 'war', 'ear'\], 'artifact-parent-dir': 'target'\}\) is missing the required configuration keys \(\['pom-file'\]\)"):

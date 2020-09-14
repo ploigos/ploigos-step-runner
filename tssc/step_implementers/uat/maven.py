@@ -78,6 +78,9 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 from tssc.utils.xml import get_xml_element_by_path
 
+from tssc.utils.maven import generate_maven_settings
+from tssc.config import ConfigValue
+
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
     'pom-file': 'pom.xml',
@@ -91,6 +94,9 @@ REQUIRED_CONFIG_KEYS = [
     'selenium-hub-url',
     'report-dir'
 ]
+
+
+
 
 class Maven(StepImplementer):
     """
@@ -150,21 +156,32 @@ class Maven(StepImplementer):
 
         return target_base_url
 
+    def _settings_file(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-servers')
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-repositories')
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value('maven-mirrors')
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         """
         Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
 
         Returns
         -------
         dict
             Results of running this step.
         """
+        settings_file = self._settings_file()
         pom_file = self.get_config_value('pom-file')
         fail_on_no_tests = self.get_config_value('fail-on-no-tests')
         selenium_hub_url = self.get_config_value('selenium-hub-url')
@@ -178,8 +195,8 @@ class Maven(StepImplementer):
         maven_surefire_plugin = get_xml_element_by_path(
             pom_file,
             surefire_path,
-            default_namespace='mvn'
-        )
+            default_namespace='mvn')
+
         if maven_surefire_plugin is None:
             raise ValueError('Uat dependency "maven-surefire-plugin" missing from POM.')
 
@@ -195,24 +212,25 @@ class Maven(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 'target/surefire-reports')
 
+
         try:
             sh.mvn(  # pylint: disable=no-member
                 'clean',
                 '-Pintegration-test',
                 f'-Dselenium.hub.url={selenium_hub_url}',
                 f'-Dtarget.base.url={target_base_url}',
-                f'-Dcucumber.plugin=html:target/{report_dir}/cucumber.html,' \
-                    f'json:target/{report_dir}/cucumber.json',
+                f'-Dcucumber.plugin=html:target/{report_dir}/cucumber.html,'\
+                f'json:target/{report_dir}/cucumber.json',
                 'test',
                 '-f', pom_file,
+                '-s', settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(f'Error invoking mvn: {error}') from error
 
-        if not os.path.isdir(test_results_dir) or \
-            len(os.listdir(test_results_dir)) == 0:
+        if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
                 results = {
                     'result': {
@@ -225,7 +243,7 @@ class Maven(StepImplementer):
                         'fail-on-no-tests': False
                     }
                 }
-            else:# pragma: no cover
+            else:  # pragma: no cover
                 # Added 'no cover' to bypass missing uat step coverage error
                 # that is covered by the following test:
                 #   test_uat_run_attempt_fails_fail_on_no_tests_flag_true
@@ -242,8 +260,8 @@ class Maven(StepImplementer):
                 'report-artifacts': [
                     {
                         'name': 'Uat results generated',
-                        'path': f'file://{os.path.dirname(os.path.abspath(pom_file))}' \
-                            f'/target/{report_dir}'
+                        'path': f'file://{os.path.dirname(os.path.abspath(pom_file))}' +
+                                f'/target/{report_dir}'
                     }
                 ]
             }
