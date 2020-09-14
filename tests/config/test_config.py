@@ -805,17 +805,18 @@ class TestConfig(BaseTSSCTestCase):
 
     def test_initial_config_dict_valid_with_decryptor_definition(self):
         tssc_config = Config({
-            'tssc-config': {},
-            'tssc-decryptors': [
-                {
-                    'implementer': 'SOPS',
-                    'config': {
-                        'additional_sops_args': [
-                            '--aws-profile=foo'
-                        ]
+            'tssc-config': {
+                'config-decryptors': [
+                    {
+                        'implementer': 'SOPS',
+                        'config': {
+                            'additional_sops_args': [
+                                '--aws-profile=foo'
+                            ]
+                        }
                     }
-                }
-            ]
+                ]
+            }
         })
 
         self.assertEqual(tssc_config.global_defaults, {})
