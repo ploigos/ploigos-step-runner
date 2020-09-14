@@ -262,28 +262,35 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         # print information about the static step configuration
         StepImplementer.__print_data(
             "Step Implementer Configuration Defaults",
-            self.step_implementer_config_defaults())
+            ConfigValue.convert_leaves_to_values(self.step_implementer_config_defaults())
+        )
         StepImplementer.__print_data(
             "Global Configuration Defaults",
-            self.global_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_config_defaults)
+        )
         StepImplementer.__print_data(
             "Global Environment Configuration Defaults",
-            self.global_environment_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_environment_config_defaults)
+        )
         StepImplementer.__print_data(
             "Step Configuration",
-            self.step_config)
+            ConfigValue.convert_leaves_to_values(self.step_config)
+        )
         StepImplementer.__print_data(
             "Step Environment Configuration",
-            self.step_environment_config)
+            ConfigValue.convert_leaves_to_values(self.step_environment_config)
+        )
         StepImplementer.__print_data(
             "Step Configuration Runtime Overrides",
-            self.step_config_overrides)
+            ConfigValue.convert_leaves_to_values(self.step_config_overrides)
+        )
 
         # create the munged runtime step configuration and print
         copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         StepImplementer.__print_data(
             "Runtime Step Configuration",
-            copy_of_runtime_step_config)
+            ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
+        )
 
         # validate the runtime step configuration, run the step, and save the results
         self._validate_runtime_step_config(copy_of_runtime_step_config)
