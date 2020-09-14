@@ -46,7 +46,7 @@ class Config:
     TSSC_CONFIG_KEY_SUB_STEP_NAME = 'name'
     TSSC_CONFIG_KEY_SUB_STEP_CONFIG = 'config'
     TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = 'environment-config'
-    TSSC_CONFIG_KEY_DECRYPTORS = 'tssc-decryptors'
+    TSSC_CONFIG_KEY_DECRYPTORS = 'config-decryptors'
     TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER = 'implementer'
     TSSC_CONFIG_KEY_DECRYPTOR_CONFIG = 'config'
 
@@ -340,6 +340,9 @@ class Config:
                         raise ValueError(
                             f"Error merging global environment ({env}) defaults: {error}"
                         ) from error
+            elif key == Config.TSSC_CONFIG_KEY_DECRYPTORS:
+                config_decryptor_definitions = ConfigValue.convert_leaves_to_values(value)
+                Config.parse_and_register_decryptors_definitions(config_decryptor_definitions)
             else:
                 step_name = key
                 step_config = value
@@ -390,11 +393,6 @@ class Config:
                         sub_step_config=sub_step_config,
                         sub_step_env_config=sub_step_env_config
                     )
-
-        if Config.TSSC_CONFIG_KEY_DECRYPTORS in config_dict:
-            Config.parse_and_register_decryptors_definitions(
-                config_dict[Config.TSSC_CONFIG_KEY_DECRYPTORS]
-            )
 
     @staticmethod
     def parse_and_register_decryptors_definitions(decryptors_definitions):

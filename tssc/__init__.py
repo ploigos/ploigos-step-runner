@@ -61,14 +61,16 @@ From least precedence to highest precedence.
 ** Example 1 **
 
     ---
-    tssc-decryptors:
-    - implementer: SOPS
-      #config:
-      #  additional_sops_args: [
-      #    '--any-valid-sops-cmd-arg-here=value',
-      #    '--aws-profile=FOO'
-      #  ]
     tssc-config:
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    '--any-valid-sops-cmd-arg-here=value',
+        #    '--aws-profile=FOO'
+        #  ]
+
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
       # given by global-environment-defaults.
@@ -125,14 +127,17 @@ From least precedence to highest precedence.
 ** Example TSSC Config file for a Maven built Application **
 
     ---
-    tssc-decryptors:
-    - implementer: SOPS
-      #config:
-      #  additional_sops_args: [
-      #    '--any-valid-sops-cmd-arg-here=value',
-      #    '--aws-profile=FOO'
-      #  ]
     tssc-config:
+      # Optional
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    '--any-valid-sops-cmd-arg-here=value',
+        #    '--aws-profile=FOO'
+        #  ]
+
       # Optional
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
@@ -412,14 +417,17 @@ From least precedence to highest precedence.
 ** Example TSSC Config file for a NPM built Application **
 
     ---
-    tssc-decryptors:
-    - implementer: SOPS
-      #config:
-      #  additional_sops_args: [
-      #    '--any-valid-sops-cmd-arg-here=value',
-      #    '--aws-profile=FOO'
-      #  ]
     tssc-config:
+      # Optional
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    '--any-valid-sops-cmd-arg-here=value',
+        #    '--aws-profile=FOO'
+        #  ]
+
       # Optional
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
