@@ -63,14 +63,14 @@ class DecryptionUtils:
 
     @staticmethod
     def create_and_register_config_value_decryptor(
-        config_value_decryptor_implemetner_name,
+        config_value_decryptor_implementer_name,
         config_value_decryptor_constructor_params=None
     ):
         """Attempts to dynamically create a ConfigValueDecryptor and register it.
 
         Parameters
         ----------
-        config_value_decryptor_implemetner_name : str
+        config_value_decryptor_implementer_name : str
             Name of the ConfigValueDecryptor to dynamically load and create.
         config_value_decryptor_constructor_params : dict, optional
             Dictionary of constructor parameters to expand and pass to the ConfigValueDecryptor
@@ -90,7 +90,7 @@ class DecryptionUtils:
             config_value_decryptor_constructor_params = {}
 
         decryptor_class = DecryptionUtils.__get_decryption_class(
-            config_value_decryptor_implemetner_name
+            config_value_decryptor_implementer_name
         )
         try:
             config_value_decryptor = decryptor_class(**config_value_decryptor_constructor_params)
@@ -98,7 +98,7 @@ class DecryptionUtils:
         except TypeError as error:
             raise ValueError(
                 f"Loaded decryptor class ({decryptor_class}) failed to construct with given" +
-                f" constructor arugments ({config_value_decryptor_constructor_params}): {error}"
+                f" constructor arguments ({config_value_decryptor_constructor_params}): {error}"
             ) from error
 
     @staticmethod

@@ -188,7 +188,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
             ValueError,
             r"Loaded decryptor class \(<class 'tests.test_decryption_utils." +
             r"RequiredConstructorParamsConfigValueDecryptor'>\) failed to construct with " +
-            r"given constructor arugments \({}\): __init__\(\) missing 1 " +
+            r"given constructor arguments \({}\): __init__\(\) missing 1 " +
             r"required positional argument: 'required_arg'"
         ):
             DecryptionUtils.create_and_register_config_value_decryptor(
