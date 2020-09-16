@@ -3,7 +3,7 @@
 Tests the Maven Cucumber UAT step.
 """
 from os import path, rmdir, makedirs
-from sys import stdout
+from sys import stdout, stderr
 from unittest.mock import patch
 from pathlib import Path
 from sh import ErrorReturnCode
@@ -342,7 +342,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
-                _out=stdout
+                _out=stdout,
+                _err=stderr
             )
 
     @patch('sh.mvn', create=True)
@@ -422,7 +423,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
-                _out=stdout
+                _out=stdout,
+                _err=stderr
             )
 
     def test_uat_test_missing_surefire_plugin_in_pom(self):
@@ -611,7 +613,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
-                _out=stdout
+                _out=stdout,
+                _err=stderr
             )
 
     @patch('sh.mvn', create=True)
@@ -742,7 +745,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/custom-cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
-                _out=stdout
+                _out=stdout,
+                _err=stderr
             )
 
     @patch('sh.mvn', create=True)
@@ -834,5 +838,6 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
-                _out=stdout
+                _out=stdout,
+                _err=stderr
             )

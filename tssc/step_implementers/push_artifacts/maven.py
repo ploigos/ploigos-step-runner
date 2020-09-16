@@ -231,7 +231,8 @@ class Maven(StepImplementer):
                         '-Dpackaging=' + package_type,
                         '-DrepositoryId=tssc',
                         '-s' + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
                 else:
                     sh.mvn(  # pylint: disable=no-member
@@ -246,7 +247,8 @@ class Maven(StepImplementer):
                         '-DrepositoryUser=' + user,
                         '-DrepositoryPassword=' + password,
                         '-s' + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
 
             except sh.ErrorReturnCode as error:

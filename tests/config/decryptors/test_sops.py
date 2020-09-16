@@ -75,7 +75,8 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             None,
             encrypted_config_file_path,
             _in=None,
-            _out=Any(StringIO)
+            _out=Any(StringIO),
+            _err=Any(StringIO)
         )
 
     def test_decrypt_additional_sops_args(self, sops_mock):
@@ -105,7 +106,8 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             encrypted_config_file_path,
             '--aws-profile=foo',
             _in=None,
-            _out=Any(StringIO)
+            _out=Any(StringIO),
+            _err=Any(StringIO)
         )
 
     def test_decrypt_parent_source_dict(self, sops_mock):
@@ -133,7 +135,8 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             '--input-type=json',
             '/dev/stdin',
             _in=encrypted_config_json,
-            _out=Any(StringIO)
+            _out=Any(StringIO),
+            _err=Any(StringIO)
         )
 
     def test_decrypt_parent_source_file_does_not_exist(self, sops_mock):

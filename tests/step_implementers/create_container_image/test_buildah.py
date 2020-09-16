@@ -177,7 +177,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
             buildah_mock.push.assert_called()
 
@@ -251,7 +252,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', '{tag}'.format(tag=tag),
                 temp_dir.path,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
             buildah_mock.push.assert_called()
 
@@ -303,12 +305,14 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
 
     @patch('sh.buildah', create=True)
@@ -397,12 +401,14 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
 
     @patch('sh.buildah', create=True)
@@ -471,6 +477,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
             buildah_mock.push.assert_called()
