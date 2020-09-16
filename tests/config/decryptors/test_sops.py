@@ -53,6 +53,24 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
             sops_decryptor.can_decrypt(config_value)
         )
 
+    def test_can_can_decrypt_not_string(self, sops_mock):
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'tssc-config-secret-stuff.yml'
+        )
+
+        config_value = ConfigValue(
+            value=True,
+            parent_source=encrypted_config_file_path,
+            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+        )
+
+        sops_decryptor = SOPS()
+        self.assertFalse(
+            sops_decryptor.can_decrypt(config_value)
+        )
+
     def test_decrypt_parent_source_file(self, sops_mock):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),

@@ -16,6 +16,7 @@ Exit Codes
 import sys
 import argparse
 import os.path
+import traceback
 
 from tssc import TSSCFactory, DecryptionUtils
 from tssc.config import Config
@@ -120,6 +121,8 @@ def main(argv=None):
             tssc_factory.run_step(args.step, args.environment)
         except Exception as error: # pylint: disable=broad-except
             print_error(f"Error calling step ({args.step}): {str(error)}")
+            track = traceback.format_exc()
+            print(track)
             sys.exit(200)
     finally:
         new_stdout.close()

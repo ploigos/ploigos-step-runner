@@ -18,9 +18,9 @@ Expected Previous Step Results
 
 Results expected from previous steps that this step requires.
 
-| Step Name              | Result Key      | Description
-|------------------------|-----------------|------------
-| `push-container-image` | `image-tag`     | Image to scan
+| Step Name                | Result Key       | Description
+|--------------------------|------------------|------------
+| `create-container-image` | `image-tar-file` | Image to scan
 
 Results
 -------
@@ -95,14 +95,13 @@ class OpenSCAP(StepImplementer):
             Results of running this step.
         """
 
-        image_to_scan = ''
-        if self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) and \
-            self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get('image-tag'):
-            image_to_scan = self.get_step_results(
-                DefaultSteps.PUSH_CONTAINER_IMAGE).get('image-tag')
+        image_tar_file = ''
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image-tar-file')):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image-tar-file']
         else:
-            raise ValueError(
-                f'Unable to find image to scan from {DefaultSteps.PUSH_CONTAINER_IMAGE} step')
+            raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
         log_level = 'info'
         if self.get_config_value('log-level'):
@@ -123,17 +122,19 @@ class OpenSCAP(StepImplementer):
             raise ValueError('Zero vfs base containers should be running')
 
         try:
+            # import image tar file to vfs file system
             sh.buildah( # pylint: disable=no-member
                 'from',
                 '--storage-driver',
                 'vfs',
                 '--log-level',
                 log_level,
-                image_to_scan,
+                f"docker-archive:{image_tar_file}",
                 _out=sys.stdout,
                 _err=sys.stderr
             )
 
+            # get container id
             result = sh.buildah( # pylint: disable=no-member
                 '--storage-driver',
                 'vfs',
@@ -144,9 +145,9 @@ class OpenSCAP(StepImplementer):
                 _tee=True
             )
             container_id = result.stdout.rstrip()
-
             print(f"container_id to scan = {container_id}")
 
+            # mount the container filesystem and get mount path
             result = sh.buildah( # pylint: disable=no-member
                 'mount',
                 '--storage-driver',
