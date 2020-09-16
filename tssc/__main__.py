@@ -118,7 +118,7 @@ def main(argv=None):
 
         try:
             tssc_factory.run_step(args.step, args.environment)
-        except (ValueError, AssertionError, TSSCException) as error:
+        except Exception as error:
             print_error(f"Error calling step ({args.step}): {str(error)}")
             sys.exit(200)
     finally:
