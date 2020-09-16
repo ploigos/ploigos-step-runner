@@ -132,7 +132,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
 
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'install',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
     @patch('sh.mvn', create=True)
     def test_mvn_quickstart_no_jar(self, mvn_mock):
@@ -354,7 +361,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
 
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'install',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
     @patch('sh.mvn', create=True)
     def test_pom_file_valid_with_namespace_empty_jar(self, mvn_mock):
@@ -406,7 +420,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             }
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'install', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'install',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile (default-compile) on project my-app: Compilation failure: Compilation failure'))
     def test_mvn_quickstart_single_jar_java_error(self, mvn_mock):

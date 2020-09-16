@@ -260,7 +260,14 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             }
 
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'test',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
     @patch('sh.mvn', create=True)
     def test_unit_test_reports_directory_reference_exists_in_pom(self, mvn_mock):
@@ -337,7 +344,14 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             }
 
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'test',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
     def test_unit_test_missing_surefire_plugin_in_pom(self):
         reports_dir = 'target/surefire-reports'
@@ -582,4 +596,11 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             }
 
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-            mvn_mock.assert_called_once_with('clean', 'test', '-f', pom_file_path, _out=sys.stdout)
+            mvn_mock.assert_called_once_with(
+                'clean',
+                'test',
+                '-f',
+                pom_file_path,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )

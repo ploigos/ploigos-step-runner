@@ -214,7 +214,10 @@ class ArgoCD(StepImplementer):
                 self.get_config_value('argocd-api'),
                 '--username=' + self.get_config_value('argocd-username'),
                 '--password=' + self.get_config_value('argocd-password'),
-                '--insecure', _out=sys.stdout)
+                '--insecure',
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
         except sh.ErrorReturnCode as error:
             raise RuntimeError("Error logging in to ArgoCD: {all}".format(all=error)) from error
 
@@ -256,7 +259,8 @@ users:
                         '--kubeconfig',
                         temp_file.name,
                         context_name,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
                 except sh.ErrorReturnCode as error:
                     raise RuntimeError("Error adding cluster to ArgoCD: {cluster}".format(
@@ -276,35 +280,71 @@ users:
             repo_branch = self._get_repo_branch()
 
             try:
-                sh.git.clone(git_url, repo_directory,
-                             _out=sys.stdout)
+                sh.git.clone(
+                    git_url,
+                    repo_directory,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
                 try:
-                    sh.git.checkout(repo_branch, _cwd=repo_directory, _out=sys.stdout)
+                    sh.git.checkout(
+                        repo_branch,
+                        _cwd=repo_directory,
+                        _out=sys.stdout,
+                        _err=sys.stderr
+                    )
 
                 except sh.ErrorReturnCode:
-                    sh.git.checkout('-b', repo_branch, _cwd=repo_directory, _out=sys.stdout)
+                    sh.git.checkout(
+                        '-b',
+                        repo_branch,
+                        _cwd=repo_directory,
+                        _out=sys.stdout,
+                        _err=sys.stderr
+                    )
 
                 self._update_values_yaml(repo_directory, values_file_name)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
                                  '{repo}'.format(repo=git_url)
 
-                sh.git.config('--global', 'user.email', self.get_config_value('git-email'),
-                              _out=sys.stdout)
+                sh.git.config(
+                    '--global',
+                    'user.email',
+                    self.get_config_value('git-email'),
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
-                sh.git.config('--global', 'user.name',
-                              self.get_config_value('git-friendly-name'),
-                              _out=sys.stdout)
+                sh.git.config(
+                    '--global',
+                    'user.name',
+                    self.get_config_value('git-friendly-name'),
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
-                sh.git.add(values_file_name, _cwd=repo_directory,
-                           _out=sys.stdout)
+                sh.git.add(
+                    values_file_name,
+                    _cwd=repo_directory,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
-                sh.git.commit('-am', git_commit_msg, _cwd=repo_directory,
-                              _out=sys.stdout)
+                sh.git.commit(
+                    '-am',
+                    git_commit_msg,
+                    _cwd=repo_directory,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
-                sh.git.status(_cwd=repo_directory,
-                              _out=sys.stdout)
+                sh.git.status(
+                    _cwd=repo_directory,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
 
             except sh.ErrorReturnCode as error: # pylint: disable=undefined-variable
                 raise RuntimeError("Error invoking git: {all}".format(all=error)) from error
@@ -314,7 +354,11 @@ users:
             argocd_app_name = self._get_app_name()
 
             try:
-                sh.argocd.app.get(argocd_app_name, _out=sys.stdout) # pylint: disable=no-member
+                sh.argocd.app.get( # pylint: disable=no-member
+                    argocd_app_name,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
             except sh.ErrorReturnCode_1:  # pylint: disable=undefined-variable, no-member
                 print('No app found, creating a new app...')
 
@@ -330,21 +374,26 @@ users:
                 '--dest-namespace=' + argocd_app_name,
                 '--sync-policy=' + sync_policy,
                 '--values=' + values_file_name,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
 
             sh.argocd.app.sync( # pylint: disable=no-member
                 '--timeout',
                 self.get_config_value('argocd-sync-timeout-seconds'),
                 argocd_app_name,
-                _out=sys.stdout)
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
             sh.argocd.app.wait( # pylint: disable=no-member
                 '--timeout',
                 self.get_config_value('argocd-sync-timeout-seconds'),
                 '--health',
                 argocd_app_name,
-                _out=sys.stdout)
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
 
             # NOTE: Creating a file to pass to the next step
             manifest_file = self.write_working_file(
@@ -352,7 +401,11 @@ users:
                 b''
             )
 
-            sh.argocd.app.manifests(argocd_app_name, _out=manifest_file) # pylint: disable=no-member
+            sh.argocd.app.manifests( # pylint: disable=no-member
+                argocd_app_name,
+                _out=manifest_file,
+                _err=sys.stderr
+            )
 
             results = {
                 'result': {
@@ -535,6 +588,7 @@ users:
                 git_tag_value,
                 '-f',
                 _out=sys.stdout,
+                _err=sys.stderr,
                 _cwd=repo_directory
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable

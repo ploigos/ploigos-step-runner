@@ -319,7 +319,8 @@ class TestConfigValue(BaseTSSCTestCase):
             None,
             encrypted_config_file_path,
             _in=None,
-            _out=Any(StringIO)
+            _out=Any(StringIO),
+            _err=Any(StringIO)
         )
         self.assertEqual(
             decrypted_value,

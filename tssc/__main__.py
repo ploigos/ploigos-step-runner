@@ -17,7 +17,7 @@ import sys
 import argparse
 import os.path
 
-from tssc import TSSCFactory, TSSCException, DecryptionUtils
+from tssc import TSSCFactory, DecryptionUtils
 from tssc.config import Config
 from tssc.utils.io import TextIOSelectiveObfuscator
 
@@ -118,7 +118,7 @@ def main(argv=None):
 
         try:
             tssc_factory.run_step(args.step, args.environment)
-        except Exception as error:
+        except Exception as error: # pylint: disable=broad-except
             print_error(f"Error calling step ({args.step}): {str(error)}")
             sys.exit(200)
     finally:

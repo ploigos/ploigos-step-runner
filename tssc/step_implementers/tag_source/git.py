@@ -219,7 +219,8 @@ class Git(StepImplementer):
             sh.git.tag(  # pylint: disable=no-member
                 git_tag_value,
                 '-f',
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git tag ' + git_tag_value) from error
@@ -231,12 +232,14 @@ class Git(StepImplementer):
                 sh.git.push(
                     url,
                     '--tag',
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
             else:
                 sh.git.push(
                     '--tag',
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push') from error

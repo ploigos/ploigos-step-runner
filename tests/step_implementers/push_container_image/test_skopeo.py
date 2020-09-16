@@ -113,7 +113,8 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                 '--dest-tls-verify=true',
                 "docker-archive:{destination}".format(destination=destination),
                 "docker://{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
 
     @patch('sh.skopeo', create=True)

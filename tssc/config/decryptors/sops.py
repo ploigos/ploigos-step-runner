@@ -9,6 +9,7 @@ from io import StringIO
 import json
 import os.path
 import re
+import sys
 import sh
 
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
@@ -117,6 +118,7 @@ class SOPS(ConfigValueDecryptor):
                 target_file,
                 _in=stdin,
                 _out=out,
+                _err=sys.stderr,
                 *self.__additional_sops_args
             )
             decrypted_value = out.getvalue()
