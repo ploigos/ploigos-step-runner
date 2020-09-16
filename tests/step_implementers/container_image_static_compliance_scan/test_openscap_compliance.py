@@ -46,12 +46,11 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
 
         image_tag = 'not_latest'
         git_tag = 'git_tag'
-        image_url = 'quay.io/tssc/myimage'
-        image_location = 'quay-quay-enterprise.apps.tssc.rht-set.com/tssc-team/ref-app-quarkus-backend:1.0.0-feature_napsspo-999'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
 
+            image_tar_file_path = f'{temp_dir.path}//image.tar'
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(
@@ -60,8 +59,8 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                     image-tag: {image_tag}
                   tag-source:
                     tag: {git_tag}
-                  push-container-image:
-                    image-tag: {image_location}
+                  create-container-image:
+                    image-tar-file: {image_tar_file_path}
                 ''',
                 'utf-8')
                 )
@@ -115,20 +114,19 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
     def test_container_image_static_compliance_scan_specify_openscap_implementer_buildah_error(self, buildah_mock):
 
         git_tag = 'git_tag'
-        image_url = 'quay.io/tssc/myimage'
-        image_location = 'quay-quay-enterprise.apps.tssc.rht-set.com/tssc-team/ref-app-quarkus-backend:1.0.0-feature_napsspo-999'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
 
+            image_tar_file_path = f'{temp_dir.path}//image.tar'
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(
                     f'''tssc-results:
                   tag-source:
                     tag: {git_tag}
-                  push-container-image:
-                    image-tag: {image_location}
+                  create-container-image:
+                    image-tar-file: {image_tar_file_path}
                 ''',
                 'utf-8')
                 )
@@ -174,14 +172,15 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
 
+            image_tar_file_path = f'{temp_dir.path}//image.tar'
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(
                     f'''tssc-results:
                   tag-source:
                     tag: {git_tag}
-                  push-container-image:
-                    image-tag: {image_location}
+                  create-container-image:
+                    image-tar-file: {image_tar_file_path}
                 ''',
                 'utf-8')
                 )
@@ -228,16 +227,24 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             oscap_result.stdout = b'report\nresults\n'
             oscap_mock.side_effect = [oscap_result]
 
-            expected_step_results =  {'tssc-results': {'container-image-static-compliance-scan': {'report-artifacts': [{'name': 'container-image-static-compliance-scan '
-                                                                                           'result '
-                                                                                           'set',
-                                                                                   'path': f'file://{temp_dir.path}/tssc-working/container-image-static-compliance-scan/scap-compliance-report.html'}],
-                                                             'result': {'message': 'container-image-static-compliance-scan '
-                                                                                   'step '
-                                                                                   'completed',
-                                                                        'success': True}},
-                    'push-container-image' : {'image-tag': f'{image_location}'},
-                  'tag-source': {'tag': 'git_tag'}} }
+            expected_step_results =  {
+                'tssc-results': {
+                    'container-image-static-compliance-scan': {
+                        'report-artifacts': [
+                            {
+                                'name': 'container-image-static-compliance-scan result set',
+                                'path': f'file://{temp_dir.path}/tssc-working/container-image-static-compliance-scan/scap-compliance-report.html'
+                            }
+                        ],
+                        'result': {
+                            'message': 'container-image-static-compliance-scan step completed',
+                            'success': True
+                        }
+                    },
+                    'create-container-image': {'image-tar-file': f'{image_tar_file_path}'},
+                    'tag-source': {'tag': 'git_tag'}
+                }
+            }
 
             run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, expected_step_results)
 
@@ -308,8 +315,8 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             oscap_mock.side_effect = [oscap_result]
 
             with self.assertRaisesRegex(
-                    ValueError,
-                    r"Unable to find image to scan from push-container-image"):
+                    RuntimeError,
+                    r"Missing image tar file from create-container-image"):
                 run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, {})
 
     @patch('sh.oscap_chroot', create=True)
@@ -323,14 +330,15 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
 
+            image_tar_file_path = f'{temp_dir.path}//image.tar'
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(
                     f'''tssc-results:
                   generate-metadata:
                     image-tag: {image_tag}
-                  push-container-image:
-                    image-tag: {image_location}
+                  create-container-image:
+                    image-tar-file: {image_tar_file_path}
                   tag-source:
                     tag: {git_tag}
                 ''',
@@ -377,17 +385,25 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
             oscap_result = MagicMock()
             oscap_result.stdout = b'report\nresults\n'
             oscap_mock.side_effect = [oscap_result]
-            expected_step_results =  {'tssc-results': {'container-image-static-compliance-scan': {'report-artifacts': [{'name': 'container-image-static-compliance-scan '
-                                                                                           'result '
-                                                                                           'set',
-                                                                                   'path': f'file://{temp_dir.path}/tssc-working/container-image-static-compliance-scan/scap-compliance-report.html'}],
-                                                             'result': {'message': 'container-image-static-compliance-scan '
-                                                                                   'step '
-                                                                                   'completed',
-                                                                        'success': True}},
+            expected_step_results =  {
+                'tssc-results': {
+                    'container-image-static-compliance-scan': {
+                        'report-artifacts': [
+                            {
+                                'name': 'container-image-static-compliance-scan result set',
+                                'path': f'file://{temp_dir.path}/tssc-working/container-image-static-compliance-scan/scap-compliance-report.html'
+                            }
+                        ],
+                        'result': {
+                            'message': 'container-image-static-compliance-scan step completed',
+                            'success': True
+                        }
+                    },
                     'generate-metadata': {'image-tag': 'not_latest'},
-                    'push-container-image' : {'image-tag': f'{image_location}'},
-                  'tag-source': {'tag': 'git_tag'}} }
+                    'create-container-image': {'image-tar-file': f'{image_tar_file_path}'},
+                    'tag-source': {'tag': 'git_tag'}
+                }
+            }
 
             run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, expected_step_results)
 

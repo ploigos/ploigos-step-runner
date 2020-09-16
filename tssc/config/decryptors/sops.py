@@ -53,7 +53,7 @@ class SOPS(ConfigValueDecryptor):
         """
         return re.match(
             SOPS.SOPS_ENCRYPTED_VALUE_REGEX,
-            config_value.raw_value
+            str(config_value.raw_value)
         ) is not None
 
     def decrypt(self, config_value):
