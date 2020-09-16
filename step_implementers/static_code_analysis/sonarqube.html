@@ -483,7 +483,8 @@ class SonarQube(StepImplementer):
                         &#39;:&#39; + \
                         self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
@@ -497,7 +498,8 @@ class SonarQube(StepImplementer):
                     &#39;-Dsonar.login=&#39; + user,
                     &#39;-Dsonar.password=&#39; + password,
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
 
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
@@ -640,7 +642,8 @@ class SonarQube(StepImplementer):
                         &#39;:&#39; + \
                         self.get_config_value(&#39;service-name&#39;),
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
@@ -654,7 +657,8 @@ class SonarQube(StepImplementer):
                     &#39;-Dsonar.login=&#39; + user,
                     &#39;-Dsonar.password=&#39; + password,
                     &#39;-Dsonar.working.directory=&#39; + working_directory,
-                    _out=sys.stdout
+                    _out=sys.stdout,
+                    _err=sys.stderr
                 )
 
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable

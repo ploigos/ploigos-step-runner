@@ -277,7 +277,8 @@ class Buildah(StepImplementer):
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
                 &#39;-t&#39;, tag,
                 context,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
@@ -298,7 +299,8 @@ class Buildah(StepImplementer):
             sh.buildah.push( #pylint: disable=no-member
                 tag,
                 &#34;docker-archive:&#34; + image_tar_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(
@@ -425,7 +427,8 @@ If destination is not specified (not defaulted)</dd>
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
                 &#39;-t&#39;, tag,
                 context,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Issue invoking buildah bud with given image &#39;
@@ -446,7 +449,8 @@ If destination is not specified (not defaulted)</dd>
             sh.buildah.push( #pylint: disable=no-member
                 tag,
                 &#34;docker-archive:&#34; + image_tar_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(

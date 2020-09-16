@@ -37,7 +37,7 @@ import pprint
 import yaml
 from tabulate import tabulate
 from tssc.exceptions import TSSCException
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
@@ -278,7 +278,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         assert (not missing_required_config_keys), \
             &#34;The runtime step configuration (&#34; + \
-            f&#34;{TSSCConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
+            f&#34;{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
             f&#34;the required configuration keys ({missing_required_config_keys})&#34;
 
     def run_step(self):
@@ -291,28 +291,35 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         # print information about the static step configuration
         StepImplementer.__print_data(
             &#34;Step Implementer Configuration Defaults&#34;,
-            self.step_implementer_config_defaults())
+            ConfigValue.convert_leaves_to_values(self.step_implementer_config_defaults())
+        )
         StepImplementer.__print_data(
             &#34;Global Configuration Defaults&#34;,
-            self.global_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_config_defaults)
+        )
         StepImplementer.__print_data(
             &#34;Global Environment Configuration Defaults&#34;,
-            self.global_environment_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_environment_config_defaults)
+        )
         StepImplementer.__print_data(
             &#34;Step Configuration&#34;,
-            self.step_config)
+            ConfigValue.convert_leaves_to_values(self.step_config)
+        )
         StepImplementer.__print_data(
             &#34;Step Environment Configuration&#34;,
-            self.step_environment_config)
+            ConfigValue.convert_leaves_to_values(self.step_environment_config)
+        )
         StepImplementer.__print_data(
             &#34;Step Configuration Runtime Overrides&#34;,
-            self.step_config_overrides)
+            ConfigValue.convert_leaves_to_values(self.step_config_overrides)
+        )
 
         # create the munged runtime step configuration and print
         copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
-            copy_of_runtime_step_config)
+            ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
+        )
 
         # validate the runtime step configuration, run the step, and save the results
         self._validate_runtime_step_config(copy_of_runtime_step_config)
@@ -986,7 +993,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         assert (not missing_required_config_keys), \
             &#34;The runtime step configuration (&#34; + \
-            f&#34;{TSSCConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
+            f&#34;{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing &#34; + \
             f&#34;the required configuration keys ({missing_required_config_keys})&#34;
 
     def run_step(self):
@@ -999,28 +1006,35 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         # print information about the static step configuration
         StepImplementer.__print_data(
             &#34;Step Implementer Configuration Defaults&#34;,
-            self.step_implementer_config_defaults())
+            ConfigValue.convert_leaves_to_values(self.step_implementer_config_defaults())
+        )
         StepImplementer.__print_data(
             &#34;Global Configuration Defaults&#34;,
-            self.global_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_config_defaults)
+        )
         StepImplementer.__print_data(
             &#34;Global Environment Configuration Defaults&#34;,
-            self.global_environment_config_defaults)
+            ConfigValue.convert_leaves_to_values(self.global_environment_config_defaults)
+        )
         StepImplementer.__print_data(
             &#34;Step Configuration&#34;,
-            self.step_config)
+            ConfigValue.convert_leaves_to_values(self.step_config)
+        )
         StepImplementer.__print_data(
             &#34;Step Environment Configuration&#34;,
-            self.step_environment_config)
+            ConfigValue.convert_leaves_to_values(self.step_environment_config)
+        )
         StepImplementer.__print_data(
             &#34;Step Configuration Runtime Overrides&#34;,
-            self.step_config_overrides)
+            ConfigValue.convert_leaves_to_values(self.step_config_overrides)
+        )
 
         # create the munged runtime step configuration and print
         copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
         StepImplementer.__print_data(
             &#34;Runtime Step Configuration&#34;,
-            copy_of_runtime_step_config)
+            ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
+        )
 
         # validate the runtime step configuration, run the step, and save the results
         self._validate_runtime_step_config(copy_of_runtime_step_config)
@@ -2020,28 +2034,35 @@ False otherwise.</dd>
     # print information about the static step configuration
     StepImplementer.__print_data(
         &#34;Step Implementer Configuration Defaults&#34;,
-        self.step_implementer_config_defaults())
+        ConfigValue.convert_leaves_to_values(self.step_implementer_config_defaults())
+    )
     StepImplementer.__print_data(
         &#34;Global Configuration Defaults&#34;,
-        self.global_config_defaults)
+        ConfigValue.convert_leaves_to_values(self.global_config_defaults)
+    )
     StepImplementer.__print_data(
         &#34;Global Environment Configuration Defaults&#34;,
-        self.global_environment_config_defaults)
+        ConfigValue.convert_leaves_to_values(self.global_environment_config_defaults)
+    )
     StepImplementer.__print_data(
         &#34;Step Configuration&#34;,
-        self.step_config)
+        ConfigValue.convert_leaves_to_values(self.step_config)
+    )
     StepImplementer.__print_data(
         &#34;Step Environment Configuration&#34;,
-        self.step_environment_config)
+        ConfigValue.convert_leaves_to_values(self.step_environment_config)
+    )
     StepImplementer.__print_data(
         &#34;Step Configuration Runtime Overrides&#34;,
-        self.step_config_overrides)
+        ConfigValue.convert_leaves_to_values(self.step_config_overrides)
+    )
 
     # create the munged runtime step configuration and print
     copy_of_runtime_step_config = self.get_copy_of_runtime_step_config()
     StepImplementer.__print_data(
         &#34;Runtime Step Configuration&#34;,
-        copy_of_runtime_step_config)
+        ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
+    )
 
     # validate the runtime step configuration, run the step, and save the results
     self._validate_runtime_step_config(copy_of_runtime_step_config)

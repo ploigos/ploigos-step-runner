@@ -78,6 +78,15 @@
 <p><strong> Example 1 </strong></p>
 <pre><code>---
 tssc-config:
+  # List of decryptors to use to decrypt any encrypted configuration.
+  config-decryptors:
+  - implementer: SOPS
+    #config:
+    #  additional_sops_args: [
+    #    '--any-valid-sops-cmd-arg-here=value',
+    #    '--aws-profile=FOO'
+    #  ]
+
   # Dictionary of configuration options which will be used in step configuration if that
   # step does not have a specific value for that configuration already or one is not
   # given by global-environment-defaults.
@@ -134,6 +143,16 @@ tssc-config:
 <p><strong> Example TSSC Config file for a Maven built Application </strong></p>
 <pre><code>---
 tssc-config:
+  # Optional
+  # List of decryptors to use to decrypt any encrypted configuration.
+  config-decryptors:
+  - implementer: SOPS
+    #config:
+    #  additional_sops_args: [
+    #    '--any-valid-sops-cmd-arg-here=value',
+    #    '--aws-profile=FOO'
+    #  ]
+
   # Optional
   # Dictionary of configuration options which will be used in step configuration if that
   # step does not have a specific value for that configuration already or one is not
@@ -413,6 +432,16 @@ tssc-config:
 <p><strong> Example TSSC Config file for a NPM built Application </strong></p>
 <pre><code>---
 tssc-config:
+  # Optional
+  # List of decryptors to use to decrypt any encrypted configuration.
+  config-decryptors:
+  - implementer: SOPS
+    #config:
+    #  additional_sops_args: [
+    #    '--any-valid-sops-cmd-arg-here=value',
+    #    '--aws-profile=FOO'
+    #  ]
+
   # Optional
   # Dictionary of configuration options which will be used in step configuration if that
   # step does not have a specific value for that configuration already or one is not
@@ -746,6 +775,15 @@ From least precedence to highest precedence.
 
     ---
     tssc-config:
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    &#39;--any-valid-sops-cmd-arg-here=value&#39;,
+        #    &#39;--aws-profile=FOO&#39;
+        #  ]
+
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
       # given by global-environment-defaults.
@@ -803,6 +841,16 @@ From least precedence to highest precedence.
 
     ---
     tssc-config:
+      # Optional
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    &#39;--any-valid-sops-cmd-arg-here=value&#39;,
+        #    &#39;--aws-profile=FOO&#39;
+        #  ]
+
       # Optional
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
@@ -1084,6 +1132,16 @@ From least precedence to highest precedence.
     ---
     tssc-config:
       # Optional
+      # List of decryptors to use to decrypt any encrypted configuration.
+      config-decryptors:
+      - implementer: SOPS
+        #config:
+        #  additional_sops_args: [
+        #    &#39;--any-valid-sops-cmd-arg-here=value&#39;,
+        #    &#39;--aws-profile=FOO&#39;
+        #  ]
+
+      # Optional
       # Dictionary of configuration options which will be used in step configuration if that
       # step does not have a specific value for that configuration already or one is not
       # given by global-environment-defaults.
@@ -1357,6 +1415,7 @@ Example Running the &#39;generate-metadata&#39; step
 
 import __main__
 from .config import *
+from .decryption_utils import DecryptionUtils
 from .factory import *
 from .exceptions import *
 from .step_implementer import DefaultSteps, StepImplementer
@@ -1377,6 +1436,10 @@ __all__ = [
 <dt><code class="name"><a title="tssc.config" href="config/index.html">tssc.config</a></code></dt>
 <dd>
 <div class="desc"><p>Configuration for TSSC workflow.</p></div>
+</dd>
+<dt><code class="name"><a title="tssc.decryption_utils" href="decryption_utils.html">tssc.decryption_utils</a></code></dt>
+<dd>
+<div class="desc"><p>Shared utilities for doing decryption.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></dt>
 <dd>
@@ -1429,6 +1492,7 @@ __all__ = [
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="tssc.config" href="config/index.html">tssc.config</a></code></li>
+<li><code><a title="tssc.decryption_utils" href="decryption_utils.html">tssc.decryption_utils</a></code></li>
 <li><code><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></li>
 <li><code><a title="tssc.factory" href="factory.html">tssc.factory</a></code></li>
 <li><code><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></li>

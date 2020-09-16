@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>tssc.config.decryptors.sops API documentation</title>
+<meta name="description" content="ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tssc.config.decryptors.sops</code></h1>
+</header>
+<section id="section-intro">
+<p>ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues</p>
+<h2 id="also-see">Also See</h2>
+<p><a href="https://github.com/mozilla/sops">https://github.com/mozilla/sops</a></p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
+
+Also See
+--------
+https://github.com/mozilla/sops
+&#34;&#34;&#34;
+
+from io import StringIO
+import json
+import os.path
+import re
+import sys
+import sh
+
+from tssc.config.config_value_decryptor import ConfigValueDecryptor
+
+class SOPS(ConfigValueDecryptor):
+    &#34;&#34;&#34;ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
+
+    Parameters
+    ----------
+    additional_sops_args : list
+        Additional arguments to pass to the SOPS command
+
+    Also See
+    --------
+    https://github.com/mozilla/sops
+    &#34;&#34;&#34;
+
+    SOPS_ENCRYPTED_VALUE_REGEX = r&#39;^ENC\[.*\]$&#39;
+
+    def __init__(self, additional_sops_args=None):
+        self.__additional_sops_args = additional_sops_args
+
+        if not self.__additional_sops_args:
+            self.__additional_sops_args = []
+
+        super().__init__()
+
+    def can_decrypt(self, config_value):
+        &#34;&#34;&#34;Determine if a given config value can be decrypted by this decryptor.
+
+        Parameters
+        ----------
+        config_value : ConfigValue
+            Determine if this decryptor can decrypt this configuration value.
+
+        Returns
+        -------
+        bool
+            True if this ConfigValueDecryptor can decrypt the given ConfigValue
+            False if this ConfigValueDecryptor can NOT decrypt the given ConfigValue.
+        &#34;&#34;&#34;
+        return re.match(
+            SOPS.SOPS_ENCRYPTED_VALUE_REGEX,
+            str(config_value.raw_value)
+        ) is not None
+
+    def decrypt(self, config_value):
+        &#34;&#34;&#34;Decrypt the value of the given ConfigValue.
+
+        Parameters
+        ----------
+        config_value : ConfigValue
+            Decrypt the value of this ConfigValue.
+
+        Returns
+        -------
+        obj or None
+            Decrypted value of the ConfigValue
+            None if this decryptor can&#39;t decrypt the given ConfigValue
+
+        Raises
+        ------
+        RuntimeError
+            If error attempting to run &#39;sops&#39; command
+        ValueError
+            If given config_value#parent_source is of type string but is not a path to a file
+                that exists
+            If config_value#parent_source is not of type dict or str
+        &#34;&#34;&#34;
+        decrypted_value = None
+        sops_path = SOPS.get_sops_value_path(config_value)
+
+        # if source is a string assume it is a file path and decrypt from that
+        # else if source is a dict then dump to json and decrypt from that
+        # else error
+        parent_source = config_value.parent_source
+        if isinstance(parent_source, str):
+            # if path exists then use as file path to decrypt from
+            # else error
+            if os.path.exists(parent_source):
+                target_file = parent_source
+                stdin = None
+                input_type_arg = None
+            else:
+                raise ValueError(
+                    f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+                    &#34;is of type (str) but is not a path to a file that exists&#34;
+                )
+        elif isinstance(parent_source, dict):
+            target_file = &#39;/dev/stdin&#39;
+            stdin = json.dumps(parent_source)
+            input_type_arg = &#39;--input-type=json&#39;
+        else:
+            raise ValueError(
+                f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+                f&#34;is expected to be of type dict or str but is of type: {type(parent_source)}&#34;
+            )
+
+        try:
+            # use sops to decrypt the value
+            out = StringIO()
+            sh.sops( # pylint: disable=no-member
+                &#39;--decrypt&#39;,
+                f&#39;--extract={sops_path}&#39;,
+                input_type_arg,
+                target_file,
+                _in=stdin,
+                _out=out,
+                _err=sys.stderr,
+                *self.__additional_sops_args
+            )
+            decrypted_value = out.getvalue()
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Error invoking sops when trying to decrypt config value ({config_value}): {error}&#34;
+            ) from error
+
+        return decrypted_value
+
+    @staticmethod
+    def get_sops_value_path(config_value):
+        &#34;&#34;&#34;Gets a stringified version of the path parts of a ConfigValue for extration
+        from a SOPS encrypted file.
+
+        Example 1
+        config_value.path_parts: [&#39;tssc-config&#39;, &#39;step-foo&#39;, 0, &#39;config&#39;, &#39;test1&#39;]
+        Output: &#39;[&#34;tssc-config&#34;][&#34;step-foo&#34;][0][&#34;config&#34;][&#34;test1&#34;]&#39;
+
+        Returns
+        -------
+        str
+            SOPS path Stringified version of the path parts.
+        &#34;&#34;&#34;
+        path = &#34;&#34;
+
+        for path_part in config_value.path_parts:
+            if isinstance(path_part, str):
+                path += f&#34;[\&#34;{path_part}\&#34;]&#34;
+            else:
+                path += f&#34;[{path_part}]&#34;
+
+        return path</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="tssc.config.decryptors.sops.SOPS"><code class="flex name class">
+<span>class <span class="ident">SOPS</span></span>
+<span>(</span><span>additional_sops_args=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>additional_sops_args</code></strong> :&ensp;<code>list</code></dt>
+<dd>Additional arguments to pass to the SOPS command</dd>
+</dl>
+<h2 id="also-see">Also See</h2>
+<p><a href="https://github.com/mozilla/sops">https://github.com/mozilla/sops</a></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SOPS(ConfigValueDecryptor):
+    &#34;&#34;&#34;ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
+
+    Parameters
+    ----------
+    additional_sops_args : list
+        Additional arguments to pass to the SOPS command
+
+    Also See
+    --------
+    https://github.com/mozilla/sops
+    &#34;&#34;&#34;
+
+    SOPS_ENCRYPTED_VALUE_REGEX = r&#39;^ENC\[.*\]$&#39;
+
+    def __init__(self, additional_sops_args=None):
+        self.__additional_sops_args = additional_sops_args
+
+        if not self.__additional_sops_args:
+            self.__additional_sops_args = []
+
+        super().__init__()
+
+    def can_decrypt(self, config_value):
+        &#34;&#34;&#34;Determine if a given config value can be decrypted by this decryptor.
+
+        Parameters
+        ----------
+        config_value : ConfigValue
+            Determine if this decryptor can decrypt this configuration value.
+
+        Returns
+        -------
+        bool
+            True if this ConfigValueDecryptor can decrypt the given ConfigValue
+            False if this ConfigValueDecryptor can NOT decrypt the given ConfigValue.
+        &#34;&#34;&#34;
+        return re.match(
+            SOPS.SOPS_ENCRYPTED_VALUE_REGEX,
+            str(config_value.raw_value)
+        ) is not None
+
+    def decrypt(self, config_value):
+        &#34;&#34;&#34;Decrypt the value of the given ConfigValue.
+
+        Parameters
+        ----------
+        config_value : ConfigValue
+            Decrypt the value of this ConfigValue.
+
+        Returns
+        -------
+        obj or None
+            Decrypted value of the ConfigValue
+            None if this decryptor can&#39;t decrypt the given ConfigValue
+
+        Raises
+        ------
+        RuntimeError
+            If error attempting to run &#39;sops&#39; command
+        ValueError
+            If given config_value#parent_source is of type string but is not a path to a file
+                that exists
+            If config_value#parent_source is not of type dict or str
+        &#34;&#34;&#34;
+        decrypted_value = None
+        sops_path = SOPS.get_sops_value_path(config_value)
+
+        # if source is a string assume it is a file path and decrypt from that
+        # else if source is a dict then dump to json and decrypt from that
+        # else error
+        parent_source = config_value.parent_source
+        if isinstance(parent_source, str):
+            # if path exists then use as file path to decrypt from
+            # else error
+            if os.path.exists(parent_source):
+                target_file = parent_source
+                stdin = None
+                input_type_arg = None
+            else:
+                raise ValueError(
+                    f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+                    &#34;is of type (str) but is not a path to a file that exists&#34;
+                )
+        elif isinstance(parent_source, dict):
+            target_file = &#39;/dev/stdin&#39;
+            stdin = json.dumps(parent_source)
+            input_type_arg = &#39;--input-type=json&#39;
+        else:
+            raise ValueError(
+                f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+                f&#34;is expected to be of type dict or str but is of type: {type(parent_source)}&#34;
+            )
+
+        try:
+            # use sops to decrypt the value
+            out = StringIO()
+            sh.sops( # pylint: disable=no-member
+                &#39;--decrypt&#39;,
+                f&#39;--extract={sops_path}&#39;,
+                input_type_arg,
+                target_file,
+                _in=stdin,
+                _out=out,
+                _err=sys.stderr,
+                *self.__additional_sops_args
+            )
+            decrypted_value = out.getvalue()
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Error invoking sops when trying to decrypt config value ({config_value}): {error}&#34;
+            ) from error
+
+        return decrypted_value
+
+    @staticmethod
+    def get_sops_value_path(config_value):
+        &#34;&#34;&#34;Gets a stringified version of the path parts of a ConfigValue for extration
+        from a SOPS encrypted file.
+
+        Example 1
+        config_value.path_parts: [&#39;tssc-config&#39;, &#39;step-foo&#39;, 0, &#39;config&#39;, &#39;test1&#39;]
+        Output: &#39;[&#34;tssc-config&#34;][&#34;step-foo&#34;][0][&#34;config&#34;][&#34;test1&#34;]&#39;
+
+        Returns
+        -------
+        str
+            SOPS path Stringified version of the path parts.
+        &#34;&#34;&#34;
+        path = &#34;&#34;
+
+        for path_part in config_value.path_parts:
+            if isinstance(path_part, str):
+                path += f&#34;[\&#34;{path_part}\&#34;]&#34;
+            else:
+                path += f&#34;[{path_part}]&#34;
+
+        return path</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tssc.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#tssc.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="tssc.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX"><code class="name">var <span class="ident">SOPS_ENCRYPTED_VALUE_REGEX</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="tssc.config.decryptors.sops.SOPS.get_sops_value_path"><code class="name flex">
+<span>def <span class="ident">get_sops_value_path</span></span>(<span>config_value)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets a stringified version of the path parts of a ConfigValue for extration
+from a SOPS encrypted file.</p>
+<p>Example 1
+config_value.path_parts: ['tssc-config', 'step-foo', 0, 'config', 'test1']
+Output: '["tssc-config"]["step-foo"][0]["config"]["test1"]'</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>SOPS path Stringified version of the path parts.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_sops_value_path(config_value):
+    &#34;&#34;&#34;Gets a stringified version of the path parts of a ConfigValue for extration
+    from a SOPS encrypted file.
+
+    Example 1
+    config_value.path_parts: [&#39;tssc-config&#39;, &#39;step-foo&#39;, 0, &#39;config&#39;, &#39;test1&#39;]
+    Output: &#39;[&#34;tssc-config&#34;][&#34;step-foo&#34;][0][&#34;config&#34;][&#34;test1&#34;]&#39;
+
+    Returns
+    -------
+    str
+        SOPS path Stringified version of the path parts.
+    &#34;&#34;&#34;
+    path = &#34;&#34;
+
+    for path_part in config_value.path_parts:
+        if isinstance(path_part, str):
+            path += f&#34;[\&#34;{path_part}\&#34;]&#34;
+        else:
+            path += f&#34;[{path_part}]&#34;
+
+    return path</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="tssc.config.decryptors.sops.SOPS.decrypt"><code class="name flex">
+<span>def <span class="ident">decrypt</span></span>(<span>self, config_value)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decrypt the value of the given ConfigValue.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>config_value</code></strong> :&ensp;<code>ConfigValue</code></dt>
+<dd>Decrypt the value of this ConfigValue.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>obj</code> or <code>None</code></dt>
+<dd>Decrypted value of the ConfigValue
+None if this decryptor can't decrypt the given ConfigValue</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If error attempting to run 'sops' command</dd>
+<dt><code>ValueError</code></dt>
+<dd>If given config_value#parent_source is of type string but is not a path to a file
+that exists
+If config_value#parent_source is not of type dict or str</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def decrypt(self, config_value):
+    &#34;&#34;&#34;Decrypt the value of the given ConfigValue.
+
+    Parameters
+    ----------
+    config_value : ConfigValue
+        Decrypt the value of this ConfigValue.
+
+    Returns
+    -------
+    obj or None
+        Decrypted value of the ConfigValue
+        None if this decryptor can&#39;t decrypt the given ConfigValue
+
+    Raises
+    ------
+    RuntimeError
+        If error attempting to run &#39;sops&#39; command
+    ValueError
+        If given config_value#parent_source is of type string but is not a path to a file
+            that exists
+        If config_value#parent_source is not of type dict or str
+    &#34;&#34;&#34;
+    decrypted_value = None
+    sops_path = SOPS.get_sops_value_path(config_value)
+
+    # if source is a string assume it is a file path and decrypt from that
+    # else if source is a dict then dump to json and decrypt from that
+    # else error
+    parent_source = config_value.parent_source
+    if isinstance(parent_source, str):
+        # if path exists then use as file path to decrypt from
+        # else error
+        if os.path.exists(parent_source):
+            target_file = parent_source
+            stdin = None
+            input_type_arg = None
+        else:
+            raise ValueError(
+                f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+                &#34;is of type (str) but is not a path to a file that exists&#34;
+            )
+    elif isinstance(parent_source, dict):
+        target_file = &#39;/dev/stdin&#39;
+        stdin = json.dumps(parent_source)
+        input_type_arg = &#39;--input-type=json&#39;
+    else:
+        raise ValueError(
+            f&#34;Given config value ({config_value}) parent source ({parent_source}) &#34; +
+            f&#34;is expected to be of type dict or str but is of type: {type(parent_source)}&#34;
+        )
+
+    try:
+        # use sops to decrypt the value
+        out = StringIO()
+        sh.sops( # pylint: disable=no-member
+            &#39;--decrypt&#39;,
+            f&#39;--extract={sops_path}&#39;,
+            input_type_arg,
+            target_file,
+            _in=stdin,
+            _out=out,
+            _err=sys.stderr,
+            *self.__additional_sops_args
+        )
+        decrypted_value = out.getvalue()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#34;Error invoking sops when trying to decrypt config value ({config_value}): {error}&#34;
+        ) from error
+
+    return decrypted_value</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tssc.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#tssc.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tssc.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt" href="../config_value_decryptor.html#tssc.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt">can_decrypt</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#also-see">Also See</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tssc.config.decryptors" href="index.html">tssc.config.decryptors</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="tssc.config.decryptors.sops.SOPS" href="#tssc.config.decryptors.sops.SOPS">SOPS</a></code></h4>
+<ul class="">
+<li><code><a title="tssc.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX" href="#tssc.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX">SOPS_ENCRYPTED_VALUE_REGEX</a></code></li>
+<li><code><a title="tssc.config.decryptors.sops.SOPS.decrypt" href="#tssc.config.decryptors.sops.SOPS.decrypt">decrypt</a></code></li>
+<li><code><a title="tssc.config.decryptors.sops.SOPS.get_sops_value_path" href="#tssc.config.decryptors.sops.SOPS.get_sops_value_path">get_sops_value_path</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>

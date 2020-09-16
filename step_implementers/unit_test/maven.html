@@ -315,7 +315,8 @@ class Maven(StepImplementer):
                 &#39;clean&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error
@@ -456,7 +457,8 @@ class Maven(StepImplementer):
                 &#39;clean&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error

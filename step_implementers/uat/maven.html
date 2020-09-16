@@ -396,7 +396,8 @@ class Maven(StepImplementer):
                     f&#39;json:target/{report_dir}/cucumber.json&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
@@ -572,7 +573,8 @@ class Maven(StepImplementer):
                     f&#39;json:target/{report_dir}/cucumber.json&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error

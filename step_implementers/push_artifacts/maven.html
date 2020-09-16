@@ -423,7 +423,8 @@ class Maven(StepImplementer):
                         &#39;-Dpackaging=&#39; + package_type,
                         &#39;-DrepositoryId=tssc&#39;,
                         &#39;-s&#39; + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
                 else:
                     sh.mvn(  # pylint: disable=no-member
@@ -438,7 +439,8 @@ class Maven(StepImplementer):
                         &#39;-DrepositoryUser=&#39; + user,
                         &#39;-DrepositoryPassword=&#39; + password,
                         &#39;-s&#39; + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
 
             except sh.ErrorReturnCode as error:
@@ -611,7 +613,8 @@ class Maven(StepImplementer):
                         &#39;-Dpackaging=&#39; + package_type,
                         &#39;-DrepositoryId=tssc&#39;,
                         &#39;-s&#39; + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
                 else:
                     sh.mvn(  # pylint: disable=no-member
@@ -626,7 +629,8 @@ class Maven(StepImplementer):
                         &#39;-DrepositoryUser=&#39; + user,
                         &#39;-DrepositoryPassword=&#39; + password,
                         &#39;-s&#39; + settings_path,
-                        _out=sys.stdout
+                        _out=sys.stdout,
+                        _err=sys.stderr
                     )
 
             except sh.ErrorReturnCode as error:

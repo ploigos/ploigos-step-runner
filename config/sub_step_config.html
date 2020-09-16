@@ -33,9 +33,9 @@
 import copy
 
 from tssc.utils.dict import deep_merge
-from tssc.config.config_value import TSSCConfigValue
+from tssc.config.config_value import ConfigValue
 
-class TSSCSubStepConfig:
+class SubStepConfig:
     &#34;&#34;&#34;Representation of a TSSC sub step configuration.
 
     Parameters
@@ -85,7 +85,7 @@ class TSSCSubStepConfig:
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCConfig
+        Config
             Parent TSSC config.
         &#34;&#34;&#34;
         return self.parent_step_config.parent_config
@@ -306,7 +306,7 @@ class TSSCSubStepConfig:
         runtime_step_config = self.__merge_runtime_step_config(environment, defaults)
 
         if key in runtime_step_config:
-            if isinstance(runtime_step_config[key], TSSCConfigValue):
+            if isinstance(runtime_step_config[key], ConfigValue):
                 value = runtime_step_config[key].value
             else:
                 value = copy.deepcopy(runtime_step_config[key])
@@ -402,8 +402,8 @@ class TSSCSubStepConfig:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig"><code class="flex name class">
-<span>class <span class="ident">TSSCSubStepConfig</span></span>
+<dt id="tssc.config.sub_step_config.SubStepConfig"><code class="flex name class">
+<span>class <span class="ident">SubStepConfig</span></span>
 <span>(</span><span>parent_step_config, sub_step_name, sub_step_implementer_name, sub_step_config=None, sub_step_env_config=None)</span>
 </code></dt>
 <dd>
@@ -438,7 +438,7 @@ class TSSCSubStepConfig:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class TSSCSubStepConfig:
+<pre><code class="python">class SubStepConfig:
     &#34;&#34;&#34;Representation of a TSSC sub step configuration.
 
     Parameters
@@ -488,7 +488,7 @@ class TSSCSubStepConfig:
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCConfig
+        Config
             Parent TSSC config.
         &#34;&#34;&#34;
         return self.parent_step_config.parent_config
@@ -709,7 +709,7 @@ class TSSCSubStepConfig:
         runtime_step_config = self.__merge_runtime_step_config(environment, defaults)
 
         if key in runtime_step_config:
-            if isinstance(runtime_step_config[key], TSSCConfigValue):
+            if isinstance(runtime_step_config[key], ConfigValue):
                 value = runtime_step_config[key].value
             else:
                 value = copy.deepcopy(runtime_step_config[key])
@@ -797,7 +797,7 @@ class TSSCSubStepConfig:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.global_defaults"><code class="name">var <span class="ident">global_defaults</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.global_defaults"><code class="name">var <span class="ident">global_defaults</span></code></dt>
 <dd>
 <div class="desc"><p>Convince function for getting the global defaults from the parent config.</p>
 <h2 id="returns">Returns</h2>
@@ -821,11 +821,11 @@ def global_defaults(self):
     return self.parent_config.global_defaults</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
-<dt><code>TSSCConfig</code></dt>
+<dt><code>Config</code></dt>
 <dd>Parent TSSC config.</dd>
 </dl></div>
 <details class="source">
@@ -837,13 +837,13 @@ def parent_config(self):
     &#34;&#34;&#34;
     Returns
     -------
-    TSSCConfig
+    Config
         Parent TSSC config.
     &#34;&#34;&#34;
     return self.parent_step_config.parent_config</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.parent_step_config"><code class="name">var <span class="ident">parent_step_config</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.parent_step_config"><code class="name">var <span class="ident">parent_step_config</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -865,7 +865,7 @@ def parent_step_config(self):
     return self.__parent_step_config</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
 <dd>
 <div class="desc"><p>Convenience function to get step config overrides</p>
 <h2 id="returns">Returns</h2>
@@ -889,7 +889,7 @@ def step_config_overrides(self):
     return self.parent_step_config.step_config_overrides</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
 <dd>
 <div class="desc"><p>Convenience function to get parent TSSC step name.</p>
 <h2 id="returns">Returns</h2>
@@ -913,7 +913,7 @@ def step_name(self):
     return self.parent_step_config.step_name</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_config"><code class="name">var <span class="ident">sub_step_config</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.sub_step_config"><code class="name">var <span class="ident">sub_step_config</span></code></dt>
 <dd>
 <div class="desc"><p>Get a deep copy of the sub step configuration.</p>
 <h2 id="returns">Returns</h2>
@@ -937,7 +937,7 @@ def sub_step_config(self):
     return copy.deepcopy(self.__sub_step_config)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_env_config"><code class="name">var <span class="ident">sub_step_env_config</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.sub_step_env_config"><code class="name">var <span class="ident">sub_step_env_config</span></code></dt>
 <dd>
 <div class="desc"><p>Gets the environment specific configuration for all environments for this sub step.</p>
 <h2 id="returns">Returns</h2>
@@ -961,7 +961,7 @@ def sub_step_env_config(self):
     return copy.deepcopy(self.__sub_step_env_config)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_implementer_name"><code class="name">var <span class="ident">sub_step_implementer_name</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.sub_step_implementer_name"><code class="name">var <span class="ident">sub_step_implementer_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -983,7 +983,7 @@ def sub_step_implementer_name(self):
     return self.__sub_step_implementer_name</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_name"><code class="name">var <span class="ident">sub_step_name</span></code></dt>
+<dt id="tssc.config.sub_step_config.SubStepConfig.sub_step_name"><code class="name">var <span class="ident">sub_step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1008,7 +1008,7 @@ def sub_step_name(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.get_config_value"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.get_config_value"><code class="name flex">
 <span>def <span class="ident">get_config_value</span></span>(<span>self, key, environment=None, defaults=None)</span>
 </code></dt>
 <dd>
@@ -1082,7 +1082,7 @@ for this sub step in the given context with the given defaults.</dd>
     runtime_step_config = self.__merge_runtime_step_config(environment, defaults)
 
     if key in runtime_step_config:
-        if isinstance(runtime_step_config[key], TSSCConfigValue):
+        if isinstance(runtime_step_config[key], ConfigValue):
             value = runtime_step_config[key].value
         else:
             value = copy.deepcopy(runtime_step_config[key])
@@ -1092,7 +1092,7 @@ for this sub step in the given context with the given defaults.</dd>
     return value</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.get_copy_of_runtime_step_config"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.get_copy_of_runtime_step_config"><code class="name flex">
 <span>def <span class="ident">get_copy_of_runtime_step_config</span></span>(<span>self, environment=None, defaults=None)</span>
 </code></dt>
 <dd>
@@ -1160,7 +1160,7 @@ for each given key.</dd>
     return copy.deepcopy(self.__merge_runtime_step_config(environment, defaults))</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.get_global_environment_defaults"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.get_global_environment_defaults"><code class="name flex">
 <span>def <span class="ident">get_global_environment_defaults</span></span>(<span>self, env)</span>
 </code></dt>
 <dd>
@@ -1195,7 +1195,7 @@ for each given key.</dd>
     return self.parent_config.get_global_environment_defaults_for_environment(env)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.get_sub_step_env_config"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.get_sub_step_env_config"><code class="name flex">
 <span>def <span class="ident">get_sub_step_env_config</span></span>(<span>self, env)</span>
 </code></dt>
 <dd>
@@ -1237,7 +1237,7 @@ Empty dict if no environment specific sub step configuration.</dd>
     return sub_step_env_config</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_config"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.merge_sub_step_config"><code class="name flex">
 <span>def <span class="ident">merge_sub_step_config</span></span>(<span>self, new_sub_step_config)</span>
 </code></dt>
 <dd>
@@ -1286,7 +1286,7 @@ existing sub step configuration.</dd>
             ) from error</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_env_config"><code class="name flex">
+<dt id="tssc.config.sub_step_config.SubStepConfig.merge_sub_step_env_config"><code class="name flex">
 <span>def <span class="ident">merge_sub_step_env_config</span></span>(<span>self, new_sub_step_env_config)</span>
 </code></dt>
 <dd>
@@ -1358,23 +1358,23 @@ existing sub step environment configuration.</dd>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig" href="#tssc.config.sub_step_config.TSSCSubStepConfig">TSSCSubStepConfig</a></code></h4>
+<h4><code><a title="tssc.config.sub_step_config.SubStepConfig" href="#tssc.config.sub_step_config.SubStepConfig">SubStepConfig</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.get_config_value" href="#tssc.config.sub_step_config.TSSCSubStepConfig.get_config_value">get_config_value</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.get_copy_of_runtime_step_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.get_global_environment_defaults" href="#tssc.config.sub_step_config.TSSCSubStepConfig.get_global_environment_defaults">get_global_environment_defaults</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.get_sub_step_env_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.get_sub_step_env_config">get_sub_step_env_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.global_defaults" href="#tssc.config.sub_step_config.TSSCSubStepConfig.global_defaults">global_defaults</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_config">merge_sub_step_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_env_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.merge_sub_step_env_config">merge_sub_step_env_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.parent_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.parent_config">parent_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.parent_step_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.parent_step_config">parent_step_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.step_config_overrides" href="#tssc.config.sub_step_config.TSSCSubStepConfig.step_config_overrides">step_config_overrides</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.step_name" href="#tssc.config.sub_step_config.TSSCSubStepConfig.step_name">step_name</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_config">sub_step_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_env_config" href="#tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_env_config">sub_step_env_config</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_implementer_name" href="#tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
-<li><code><a title="tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_name" href="#tssc.config.sub_step_config.TSSCSubStepConfig.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.get_config_value" href="#tssc.config.sub_step_config.SubStepConfig.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.get_copy_of_runtime_step_config" href="#tssc.config.sub_step_config.SubStepConfig.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.get_global_environment_defaults" href="#tssc.config.sub_step_config.SubStepConfig.get_global_environment_defaults">get_global_environment_defaults</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.get_sub_step_env_config" href="#tssc.config.sub_step_config.SubStepConfig.get_sub_step_env_config">get_sub_step_env_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.global_defaults" href="#tssc.config.sub_step_config.SubStepConfig.global_defaults">global_defaults</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.merge_sub_step_config" href="#tssc.config.sub_step_config.SubStepConfig.merge_sub_step_config">merge_sub_step_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.merge_sub_step_env_config" href="#tssc.config.sub_step_config.SubStepConfig.merge_sub_step_env_config">merge_sub_step_env_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.parent_config" href="#tssc.config.sub_step_config.SubStepConfig.parent_config">parent_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.parent_step_config" href="#tssc.config.sub_step_config.SubStepConfig.parent_step_config">parent_step_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.step_config_overrides" href="#tssc.config.sub_step_config.SubStepConfig.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.step_name" href="#tssc.config.sub_step_config.SubStepConfig.step_name">step_name</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.sub_step_config" href="#tssc.config.sub_step_config.SubStepConfig.sub_step_config">sub_step_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.sub_step_env_config" href="#tssc.config.sub_step_config.SubStepConfig.sub_step_env_config">sub_step_env_config</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.sub_step_implementer_name" href="#tssc.config.sub_step_config.SubStepConfig.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
+<li><code><a title="tssc.config.sub_step_config.SubStepConfig.sub_step_name" href="#tssc.config.sub_step_config.SubStepConfig.sub_step_name">sub_step_name</a></code></li>
 </ul>
 </li>
 </ul>

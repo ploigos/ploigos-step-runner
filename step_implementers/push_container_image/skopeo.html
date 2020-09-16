@@ -239,7 +239,8 @@ class Skopeo(StepImplementer):
                 &#39;--dest-tls-verify=&#39; + str(self.get_config_value(&#39;dest-tls-verify&#39;)),
                 &#39;docker-archive:&#39; + image_tar_file,
                 &#39;docker://&#39; + destination_with_version,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error
@@ -344,7 +345,8 @@ class Skopeo(StepImplementer):
                 &#39;--dest-tls-verify=&#39; + str(self.get_config_value(&#39;dest-tls-verify&#39;)),
                 &#39;docker-archive:&#39; + image_tar_file,
                 &#39;docker://&#39; + destination_with_version,
-                _out=sys.stdout
+                _out=sys.stdout,
+                _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error

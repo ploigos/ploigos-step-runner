@@ -31,7 +31,7 @@
 Factory for creating TSSC workflow and running steps.
 &#34;&#34;&#34;
 
-from tssc.config import TSSCConfig
+from tssc.config import Config
 from tssc.exceptions import TSSCException
 from tssc.step_implementer import StepImplementer
 from tssc.utils.reflection import import_and_get_class
@@ -42,8 +42,8 @@ class TSSCFactory:
 
     Parameters
     ----------
-    config : TSSCConfig, dict, list, str (file or directory)
-        A TSSCConfig object,
+    config : Config, dict, list, str (file or directory)
+        A Config object,
         a dictionary that is a valid TSSC configuration,
         a string that is a path to a YAML or JSON file that is
         a valid TSSC configuration,
@@ -78,10 +78,10 @@ class TSSCFactory:
             results_file_name=&#39;tssc-results.yml&#39;, \
             work_dir_path=&#39;tssc-working&#39;):
 
-        if isinstance(config, TSSCConfig):
+        if isinstance(config, Config):
             self.__config = config
         else:
-            self.__config = TSSCConfig(config)
+            self.__config = Config(config)
 
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
@@ -92,7 +92,7 @@ class TSSCFactory:
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCConfig
+        Config
             Configuration used by this factory.
         &#34;&#34;&#34;
         return self.__config
@@ -211,8 +211,8 @@ class TSSCFactory:
 <div class="desc"><p>Enables the running of arbitrary TSSC steps via TSSC step implementers.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>config</code></strong> :&ensp;<code>TSSCConfig, dict, list, str (file</code> or <code>directory)</code></dt>
-<dd>A TSSCConfig object,
+<dt><strong><code>config</code></strong> :&ensp;<code>Config, dict, list, str (file</code> or <code>directory)</code></dt>
+<dd>A Config object,
 a dictionary that is a valid TSSC configuration,
 a string that is a path to a YAML or JSON file that is
 a valid TSSC configuration,
@@ -247,8 +247,8 @@ Default: tssc-working</dd>
 
     Parameters
     ----------
-    config : TSSCConfig, dict, list, str (file or directory)
-        A TSSCConfig object,
+    config : Config, dict, list, str (file or directory)
+        A Config object,
         a dictionary that is a valid TSSC configuration,
         a string that is a path to a YAML or JSON file that is
         a valid TSSC configuration,
@@ -283,10 +283,10 @@ Default: tssc-working</dd>
             results_file_name=&#39;tssc-results.yml&#39;, \
             work_dir_path=&#39;tssc-working&#39;):
 
-        if isinstance(config, TSSCConfig):
+        if isinstance(config, Config):
             self.__config = config
         else:
-            self.__config = TSSCConfig(config)
+            self.__config = Config(config)
 
         self.results_dir_path = results_dir_path
         self.results_file_name = results_file_name
@@ -297,7 +297,7 @@ Default: tssc-working</dd>
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCConfig
+        Config
             Configuration used by this factory.
         &#34;&#34;&#34;
         return self.__config
@@ -404,7 +404,7 @@ Default: tssc-working</dd>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
-<dt><code>TSSCConfig</code></dt>
+<dt><code>Config</code></dt>
 <dd>Configuration used by this factory.</dd>
 </dl></div>
 <details class="source">
@@ -416,7 +416,7 @@ def config(self):
     &#34;&#34;&#34;
     Returns
     -------
-    TSSCConfig
+    Config
         Configuration used by this factory.
     &#34;&#34;&#34;
     return self.__config</code></pre>
