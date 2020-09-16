@@ -63,3 +63,11 @@ class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
             obfuscation_targets=['secret'],
             randomize_replacment_length=True
         )
+
+    def test_byte_obfuscation(self):
+        self.run_test(
+            input=b'hello world secret should be hidden because secret is not for your eyes',
+            expected=r'hello world \*\*\*\*\*\* should be hidden because ' \
+                     r'\*\*\*\*\*\* is not for your eyes',
+            obfuscation_targets='secret'
+        )

@@ -52,6 +52,7 @@ Results output by this step.
         }
     }
 """
+from io import StringIO
 import sys
 import sh
 from tssc import StepImplementer, DefaultSteps
@@ -191,14 +192,16 @@ class Git(StepImplementer):
             return_val = self.get_config_value('url')
         else:
             try:
-                return_val = sh.git.config(
+                out = StringIO()
+                sh.git.config(
                     '--get',
                     'remote.origin.url',
-                    _out=sys.stdout,
+                    _out=out,
                     _tee=True,
                     _encoding='UTF-8',
                     _decode_errors='ignore'
-                    ).rstrip()
+                )
+                return_val = out.getvalue().rstrip()
 
             except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError('Error invoking git config --get remote.origin.url') from error

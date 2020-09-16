@@ -138,7 +138,12 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         --------
         io.TextIOBase.write
         """
-        obfuscated = given
+
+        if isinstance(given, bytes):
+            obfuscated = given.decode('utf-8')
+        else:
+            obfuscated = given
+
         for obfuscation_target in self.__obfuscation_targets:
             obfuscated = re.sub(obfuscation_target, self.__obfuscator, obfuscated)
 
