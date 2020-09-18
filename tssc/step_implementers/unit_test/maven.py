@@ -122,7 +122,7 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _settings_file(self):
+    def _generate_maven_settings(self):
         # ----- build settings.xml
         maven_servers = ConfigValue.convert_leaves_to_values(
             self.get_config_value('maven-servers')
@@ -173,7 +173,7 @@ class Maven(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 'target/surefire-reports')
 
-        settings_file = self._settings_file()
+        settings_file = self._generate_maven_settings()
 
         try:
             sh.mvn(  # pylint: disable=no-member

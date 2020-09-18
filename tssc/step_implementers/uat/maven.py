@@ -156,7 +156,7 @@ class Maven(StepImplementer):
 
         return target_base_url
 
-    def _settings_file(self):
+    def _generate_maven_settings(self):
         # ----- build settings.xml
         maven_servers = ConfigValue.convert_leaves_to_values(
             self.get_config_value('maven-servers')
@@ -181,7 +181,7 @@ class Maven(StepImplementer):
         dict
             Results of running this step.
         """
-        settings_file = self._settings_file()
+        settings_file = self._generate_maven_settings()
         pom_file = self.get_config_value('pom-file')
         fail_on_no_tests = self.get_config_value('fail-on-no-tests')
         selenium_hub_url = self.get_config_value('selenium-hub-url')

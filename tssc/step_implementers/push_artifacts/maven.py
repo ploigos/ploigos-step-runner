@@ -160,7 +160,7 @@ class Maven(StepImplementer):
             return self.get_step_results('package')['artifacts']
         raise ValueError('package results missing artifacts')
 
-    def _settings_file(self):
+    def _generate_maven_settings(self):
         # ----- build settings.xml
         maven_servers = ConfigValue.convert_leaves_to_values(
             self.get_config_value('maven-servers')
@@ -193,7 +193,7 @@ class Maven(StepImplementer):
 
         maven_push_artifact_repo_id = self.get_config_value('maven-push-artifact-repo-id')
         maven_push_artifact_repo_url = self.get_config_value('maven-push-artifact-repo-url')
-        settings_file = self._settings_file()
+        settings_file = self._generate_maven_settings()
 
         report_artifacts = []
 

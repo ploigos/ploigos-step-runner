@@ -180,7 +180,7 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_KEYS
 
-    def _settings_file(self):
+    def _generate_maven_settings(self):
         # ----- build settings.xml
         maven_servers = ConfigValue.convert_leaves_to_values(
             self.get_config_value('maven-servers')
@@ -211,7 +211,7 @@ class Maven(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError('Given pom file does not exist: ' + pom_file)
 
-        settings_file = self._settings_file()
+        settings_file = self._generate_maven_settings()
 
         try:
             sh.mvn(  # pylint: disable=no-member,
