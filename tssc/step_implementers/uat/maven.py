@@ -96,8 +96,6 @@ REQUIRED_CONFIG_KEYS = [
 ]
 
 
-
-
 class Maven(StepImplementer):
     """
     StepImplementer for the unit-test step for Maven generating Cucumber reports.

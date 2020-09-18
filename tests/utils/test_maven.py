@@ -109,6 +109,15 @@ class TestMavenUtils(BaseTSSCTestCase):
                                         'id, url and mirrorOf are required for maven_mirrors.'):
                 generate_maven_settings(temp_dir.path, None, None, maven_mirrors)
 
+    def test_generate_maven_params_empty(self):
+        settings = '<settings />'
+
+        with TempDirectory() as temp_dir:
+            generate_maven_settings(temp_dir.path, None, None, None)
+            with open(temp_dir.path + '/settings.xml', 'r') as tester:
+                results = tester.read()
+                assert results == settings
+
     def test_generate_maven_mirrors_empty(self):
         settings = '<settings />'
 

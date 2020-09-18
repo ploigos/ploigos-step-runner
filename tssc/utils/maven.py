@@ -5,7 +5,6 @@ Shared utils for maven deeds
 import xml.etree.ElementTree as ET
 
 def generate_maven_settings(working_dir, maven_servers, maven_repositories, maven_mirrors):
-
     """
     Generates and returns a settings.xml file from the inputs it is provided.
 
@@ -42,10 +41,9 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
 
     tree = ET.ElementTree(root)
 
-    with open(working_dir + '/settings.xml', 'wb') as files:
-        tree.write(files)
-
     settings_path = working_dir + '/settings.xml'
+    with open(settings_path, 'wb') as file:
+        tree.write(file)
 
     return settings_path
 

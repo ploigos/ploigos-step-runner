@@ -74,6 +74,7 @@ Example: Generated Maven Deploy (uses both step configuration and previous resul
       -Dfile=package.artifact.path
       -Dpackaging=package.artifact.package-type
       -DrepositoryId=maven-push-artifact-repo-id
+      -s settings.xml
 
 Example: Results
 
