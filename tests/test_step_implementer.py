@@ -644,6 +644,37 @@ class TestStepImplementer(BaseTSSCTestCase):
             with open(os.path.join(working_dir_path, 'foo', 'test-working-file'), 'r') as working_file:
                 self.assertEqual(working_file.read(), 'hello world')
 
+
+    def test_write_working_file_touch(self):
+        config = Config({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step('tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
+            step.write_working_file('test.json')
+
+            working_file_path = os.path.join(working_dir_path, 'foo/test.json')
+            self.assertTrue(os.path.exists(working_file_path))
+
+            with open(working_file_path, 'r') as working_file:
+                self.assertEqual(working_file.read(), '')
+
     def test_get_config_value(self):
         config = Config({
             'tssc-config': {

@@ -152,6 +152,19 @@ From least precedence to highest precedence.
         # part of the application it is a part of.
         service-name: ''
 
+        # Optional.
+        # Dictionary of container registries to authenticate with.
+        # Suggest putting in global configuration so it can be used for creating and pushing
+        # images. But can also or instead be put in the individual steps if say different
+        # registires are used for building images then pushing them.
+        #container-registries:
+        #  registry.redhat.io:
+        #    username: account_number|acount_name
+        #    password: encrypt_me
+        #  registry.internal.example.xyz:
+        #    username: team_name+project_name
+        #    password: encrypt_me
+
       # Optional
       # Dictionary of dictionaries where the first level keys are environment names and their
       # dictionary values are configuration defaults to use when invoking a step in the context
@@ -441,6 +454,19 @@ From least precedence to highest precedence.
         # Name of the service this artifact built and deployed by this TSSC workflow implements as
         # part of the application it is a part of.
         service-name: ''
+
+        # Optional.
+        # Dictionary of container registries to authenticate with.
+        # Suggest putting in global configuration so it can be used for creating and pushing
+        # images. But can also or instead be put in the individual steps if say different
+        # registires are used for building images then pushing them.
+        #container-registries:
+        #  registry.redhat.io:
+        #    username: account_number|acount_name
+        #    password: encrypt_me
+        #  registry.internal.example.xyz:
+        #    username: team_name+project_name
+        #    password: encrypt_me
 
       # Optional
       # Dictionary of dictionaries where the first level keys are environment names and their
