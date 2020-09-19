@@ -701,12 +701,9 @@ Example Running the 'generate-metadata' step
 """
 
 import __main__
-from .config import *
-from .decryption_utils import DecryptionUtils
-from .factory import *
-from .exceptions import *
-from .step_implementer import DefaultSteps, StepImplementer
-from .utils import *
+from .step_implementer import StepImplementer, DefaultSteps
+from .factory import TSSCFactory
+from .exceptions import TSSCException
 
 __all__ = [
     'config',

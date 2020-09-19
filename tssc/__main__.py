@@ -18,8 +18,9 @@ import argparse
 import os.path
 import traceback
 
-from tssc import TSSCFactory, DecryptionUtils
-from tssc.config import Config
+from tssc.factory import TSSCFactory
+from tssc.decryption_utils import DecryptionUtils
+from tssc.config.config import Config
 from tssc.utils.io import TextIOSelectiveObfuscator
 
 def print_error(msg):
