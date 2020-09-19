@@ -1,5 +1,5 @@
 import sh
-import sys
+from io import IOBase
 
 import unittest
 from unittest.mock import patch
@@ -177,8 +177,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             buildah_mock.push.assert_called()
 
@@ -252,8 +252,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', '{tag}'.format(tag=tag),
                 temp_dir.path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             buildah_mock.push.assert_called()
 
@@ -305,14 +305,14 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.buildah', create=True)
@@ -401,14 +401,14 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.buildah', create=True)
@@ -477,7 +477,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '-f', file,
                 '-t', tag,
                 temp_dir.path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             buildah_mock.push.assert_called()

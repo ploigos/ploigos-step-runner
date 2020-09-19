@@ -3,12 +3,15 @@ Abstract class and helper constants for StepImplementer.
 """
 
 from abc import ABC, abstractmethod
+from contextlib import redirect_stdout, redirect_stderr
 import os
 import pprint
+import textwrap
+import sys
 import yaml
-from tabulate import tabulate
 from tssc.exceptions import TSSCException
 from tssc.config.config_value import ConfigValue
+from tssc.utils.io import TextIOIndenter
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     """
@@ -257,9 +260,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         """
 
-        StepImplementer.__print_section_title(f"TSSC Step Start - {self.step_name}")
+        StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
 
-        # print information about the static step configuration
+        # print information about theconfiguration
+        StepImplementer.__print_section_title(
+            f"Configuration - {self.step_name}",
+            div_char="-",
+            indent=1
+        )
         StepImplementer.__print_data(
             "Step Implementer Configuration Defaults",
             ConfigValue.convert_leaves_to_values(self.step_implementer_config_defaults())
@@ -292,16 +300,36 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
         )
 
-        # validate the runtime step configuration, run the step, and save the results
+        # validate the runtime step configuration
+        StepImplementer.__print_section_title(
+            f"Standard Out - {self.step_name}",
+            div_char="-",
+            indent=1
+        )
         self._validate_runtime_step_config(copy_of_runtime_step_config)
-        results = self._run_step()
-        self.write_results(results)
+
+        # run the step and save the results
+        indented_stdout = TextIOIndenter(
+            parent_stream=sys.stdout,
+            indent_level=2
+        )
+        indented_stderr = TextIOIndenter(
+            parent_stream=sys.stderr,
+            indent_level=2
+        )
+        with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
+            results = self._run_step()
+            self.write_results(results)
 
         # print the step run results
-        StepImplementer.__print_section_title(f"TSSC Step Results - {self.step_name}")
+        StepImplementer.__print_section_title(
+            f"Results - {self.step_name}",
+            div_char="-",
+            indent=1
+        )
         StepImplementer.__print_data('Results File Path', self.results_file_path)
-        StepImplementer.__print_data('Step Results', results)
-        StepImplementer.__print_section_title(f"TSSC Step End - {self.step_name}")
+        StepImplementer.__print_data('Results', results)
+        StepImplementer.__print_section_title(f"Step End - {self.step_name}")
 
     def write_results(self, results):
         """
@@ -566,8 +594,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             file.write(contents)
         return file_path
 
-    @classmethod
-    def __print_section_title(cls, title):
+    @staticmethod
+    def __print_section_title(title, div_char="=", indent=0):
         """
         Utility function for pretty printing section title.
 
@@ -578,16 +606,26 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         print()
         print()
-        print(tabulate(
-            [[]],
-            [title.center(StepImplementer.__TITLE_LENGTH)],
-            tablefmt="pretty"
-        ))
+        StepImplementer.__print_indented(
+            text=div_char * StepImplementer.__TITLE_LENGTH,
+            indent=indent
+        )
+        StepImplementer.__print_indented(
+            text=title.center(StepImplementer.__TITLE_LENGTH),
+            indent=indent
+        )
+        StepImplementer.__print_indented(
+            text=div_char * StepImplementer.__TITLE_LENGTH,
+            indent=indent
+        )
 
-    @classmethod
-    def __print_data(cls, title, data):
-        """
-        Utility function for pretty printing data.
+    @staticmethod
+    def __print_data(title, data, indent=2):
+        """Utility function for pretty printing data.
+
+        Notes
+        -----
+        Indent levels are each are 4 spaces wide.
 
         Parameters
         ----------
@@ -595,11 +633,36 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             Title of the data to print.
         data
             Data to print
+        indent : int
+            Amount to indent the title by and then the content by this +1
         """
         printer = pprint.PrettyPrinter()
-        print(tabulate(
-            [[printer.pformat(data)]],
-            [title.ljust(StepImplementer.__TITLE_LENGTH)],
-            tablefmt="pretty",
-            colalign=("left",)
+        StepImplementer.__print_indented(
+            text=title,
+            indent=indent
+        )
+        StepImplementer.__print_indented(
+            text=printer.pformat(data),
+            indent=indent+1
+        )
+        print()
+
+    @staticmethod
+    def __print_indented(text, indent=0):
+        """Prints the given text indented by a given indent level.
+
+        Notes
+        -----
+        Indent levels are each are 4 spaces wide.
+
+        Parameters
+        ----------
+        text : str
+            Text to print indented.
+        indent : indent
+            amount to indent the given text by before printing.
+        """
+        print(textwrap.indent(
+            text=text,
+            prefix=" " * (4 * indent)
         ))

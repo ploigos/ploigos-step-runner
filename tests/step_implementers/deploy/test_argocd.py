@@ -1,6 +1,6 @@
-import sys
 import shutil
 import sh
+from io import IOBase
 import tempfile
 from testfixtures import TempDirectory
 import unittest
@@ -267,8 +267,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.git', create=True)
@@ -385,8 +385,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('shutil.copyfile', create=True)
@@ -627,14 +627,14 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             argocd_mock.app.get.assert_called_once_with(
                organization_name + '-' + application_name + '-' + service_name + '-testbranch-' + environment_name,
-               _out=sys.stdout,
-               _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
             argocd_mock.app.create.assert_called_once_with(
                 organization_name + '-' + application_name + '-' + service_name + '-testbranch-' + environment_name,
@@ -645,8 +645,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--dest-namespace=' + organization_name + '-' + application_name + '-' + service_name + '-testbranch-' + environment_name,
                 '--sync-policy=none',
                 '--values=values-{env}.yaml'.format(env=environment_name),
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -774,8 +774,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -898,8 +898,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -1476,8 +1476,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -1486,8 +1486,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--timeout',
                 argocd_sync_timeout_seconds,
                 organization_name + '-' + application_name + '-' + service_name + '-testbranch-' + environment_name,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.git', create=True)
@@ -1608,8 +1608,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -1733,8 +1733,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -1859,8 +1859,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()
@@ -2108,8 +2108,8 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                 '--username=' + argocd_username,
                 '--password=' + argocd_password,
                 '--insecure',
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
             git_mock.clone.assert_called_once()

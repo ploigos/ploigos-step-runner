@@ -1,5 +1,5 @@
 import sh
-import sys
+from io import IOBase
 
 import unittest
 from unittest.mock import patch
@@ -113,8 +113,8 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                 '--dest-tls-verify=true',
                 "docker-archive:{destination}".format(destination=destination),
                 "docker://{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.skopeo', create=True)

@@ -1,5 +1,5 @@
 import os
-import sys
+from io import IOBase
 import sh
 from pathlib import Path
 
@@ -265,8 +265,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 'test',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -349,8 +349,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 'test',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     def test_unit_test_missing_surefire_plugin_in_pom(self):
@@ -601,6 +601,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 'test',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
