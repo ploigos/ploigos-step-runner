@@ -1,6 +1,6 @@
 import os
-import sys
 import sh
+from io import IOBase
 from pathlib import Path
 
 import unittest
@@ -11,7 +11,7 @@ from tssc import TSSCFactory
 from tssc.step_implementers.package import Maven
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import run_step_test_with_result_validation
+from tests.helpers.test_utils import run_step_test_with_result_validation, Any
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names):
     """simulates what mvn does by touching files.
@@ -137,8 +137,8 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 'install',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -366,8 +366,8 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 'install',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -425,8 +425,8 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 'install',
                 '-f',
                 pom_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean install', b'mock out', b'Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile (default-compile) on project my-app: Compilation failure: Compilation failure'))

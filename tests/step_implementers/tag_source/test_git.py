@@ -1,4 +1,5 @@
-import sys
+from io import IOBase
+
 from testfixtures import TempDirectory
 import unittest
 from unittest.mock import patch
@@ -33,7 +34,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             }
 
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('latest','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                'latest',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
@@ -57,7 +63,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 }
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results)
-            git_mock.tag.assert_called_once_with('latest','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                'latest',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
@@ -83,7 +94,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('latest','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                'latest',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
@@ -111,7 +127,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('latest','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                'latest',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
@@ -148,7 +169,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('1.0+69442c8','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                '1.0+69442c8',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
@@ -187,7 +213,12 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'password': 'unit_test_password'
             }
             run_step_test_with_result_validation(temp_dir, 'tag-source', config, expected_step_results, runtime_args)
-            git_mock.tag.assert_called_once_with('1.0+69442c8','-f', _out=sys.stdout, _err=sys.stderr)
+            git_mock.tag.assert_called_once_with(
+                '1.0+69442c8',
+                '-f',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
