@@ -1,5 +1,6 @@
 import os
 import yaml
+import re
 from tssc import TSSCFactory
 
 def run_step_test_with_result_validation(
@@ -42,6 +43,16 @@ def Any(cls):
         def __hash__(self):
             return hash(tuple(self))
     return Any()
+
+class StringRegexParam():
+    def __init__(self, regex):
+        self.__regex = regex
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return re.match(self.__regex, other)
+        else:
+            return False
 
 def create_sops_side_effect(mock_stdout):
     def sops_side_effect(*args, **kwargs):

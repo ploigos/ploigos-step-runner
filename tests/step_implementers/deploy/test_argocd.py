@@ -12,12 +12,6 @@ from tssc.step_implementers.tag_source import Git
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import *
 
-def Any(cls):
-    class Any(cls):
-        def __eq__(self, other):
-            return True
-    return Any()
-
 class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
     @patch('sh.git', create=True)

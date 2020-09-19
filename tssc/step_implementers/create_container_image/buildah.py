@@ -13,6 +13,9 @@ from runtime configuration.
 | `context`         | True      | `'.'`          | Context to build the container image in
 | `tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
 | `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
+| `containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
+    Path to the container registry authentication file \
+    to use for container registry authentication.
 
 Expected Previous Step Results
 ------------------------------
@@ -47,12 +50,17 @@ Results output by this step.
 
 """
 import os
+from pathlib import Path
 import sys
 import sh
 
 from tssc import StepImplementer, DefaultSteps
+from tssc.utils.containers import container_registries_login
 
 DEFAULT_CONFIG = {
+    # Path to the container registry authentication file to read and write to/from.
+    'containers-config-auth-file': os.path.join(Path.home(), '.buildah-auth.json'),
+
     # Image specification file name
     'imagespecfile': 'Dockerfile',
 
@@ -67,6 +75,7 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_KEYS = [
+    'containers-config-auth-file',
     'imagespecfile',
     'context',
     'tlsverify',
@@ -155,14 +164,26 @@ class Buildah(StepImplementer):
         )
 
         try:
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_config_value('containers-config-auth-file')
+            container_registries_login(
+                registries=self.get_config_value('container-registries'),
+                containers_config_auth_file=containers_config_auth_file
+            )
+
+            # perform build
             sh.buildah.bud(  # pylint: disable=no-member
                 '--format=' + self.get_config_value('format'),
                 '--tls-verify=' + str(self.get_config_value('tlsverify')),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
+                '--authfile', containers_config_auth_file,
                 context,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee='err'
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Issue invoking buildah bud with given image '
@@ -184,7 +205,8 @@ class Buildah(StepImplementer):
                 tag,
                 "docker-archive:" + image_tar_file,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee='err'
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(

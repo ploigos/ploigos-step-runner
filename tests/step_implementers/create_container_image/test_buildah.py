@@ -176,9 +176,11 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '--layers',
                 '-f', file,
                 '-t', tag,
+                '--authfile', StringRegexParam(r".*/\.buildah-auth.json"),
                 temp_dir.path,
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             buildah_mock.push.assert_called()
 
@@ -251,9 +253,11 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '--layers',
                 '-f', file,
                 '-t', '{tag}'.format(tag=tag),
+                '--authfile', StringRegexParam(r".*/\.buildah-auth.json"),
                 temp_dir.path,
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             buildah_mock.push.assert_called()
 
@@ -304,15 +308,18 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '--layers',
                 '-f', file,
                 '-t', tag,
+                '--authfile', StringRegexParam(r".*/\.buildah-auth.json"),
                 temp_dir.path,
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
 
     @patch('sh.buildah', create=True)
@@ -400,15 +407,18 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '--layers',
                 '-f', file,
                 '-t', tag,
+                '--authfile', StringRegexParam(r".*/\.buildah-auth.json"),
                 temp_dir.path,
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             buildah_mock.push.assert_called_once_with(
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
 
     @patch('sh.buildah', create=True)
@@ -476,8 +486,10 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 '--layers',
                 '-f', file,
                 '-t', tag,
+                '--authfile', StringRegexParam(r".*/\.buildah-auth.json"),
                 temp_dir.path,
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             buildah_mock.push.assert_called()
