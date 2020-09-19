@@ -2,7 +2,7 @@
 Factory for creating TSSC workflow and running steps.
 """
 
-from tssc.config import Config
+from tssc.config.config import Config
 from tssc.exceptions import TSSCException
 from tssc.step_implementer import StepImplementer
 from tssc.utils.reflection import import_and_get_class
