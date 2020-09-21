@@ -5,6 +5,8 @@ import sh
 import unittest
 from unittest.mock import patch, MagicMock
 from testfixtures import TempDirectory
+
+from io import IOBase
 import yaml
 
 from tssc import TSSCFactory
@@ -37,9 +39,6 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                     AssertionError,
                     r"The runtime step configuration \(.*\) is missing the required configuration keys \(\['scap-input-file'\]\)"):
                 run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, {})
-
-
-
 
     @patch('sh.buildah', create=True)
     def test_container_image_static_compliance_scan_specify_openscap_implementer_with_existing_vfs_containers (self, buildah_mock):
@@ -160,19 +159,18 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                     r"Unexpected runtime error"):
                 run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, {})
 
-
-    @patch('sh.oscap_chroot', create=True)
     @patch('sh.buildah', create=True)
-    def test_container_image_static_compliance_scan_specify_openscap_implementer_no_version(self, buildah_mock, oscap_mock):
-
+    def test_container_image_static_compliance_scan_specify_openscap_implementer_no_version(
+        self,
+        buildah_mock
+    ):
         git_tag = 'git_tag'
-        image_url = 'quay.io/tssc/myimage'
-        image_location = 'quay-quay-enterprise.apps.tssc.rht-set.com/tssc-team/ref-app-quarkus-backend:1.0.0-feature_napsspo-999'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
 
             image_tar_file_path = f'{temp_dir.path}//image.tar'
+            scan_input_file = '/usr/share/xml/scap/ssg/content/ssg-jre-oval.xml'
             temp_dir.write(
                 'tssc-results/tssc-results.yml',
                 bytes(
@@ -197,7 +195,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                         'config': {
                            'destination-url': 'quay-quay-enterprise.apps.tssc.rht-set.com',
                            'log-level': 'info',
-                           'scap-input-file': '/usr/share/xml/scap/ssg/content/ssg-jre-oval.xml',
+                           'scap-input-file': scan_input_file,
                            'scan-output-absolute-path': '/tmp/scap_output.txt',
                            'scan-report-absolute-path': '/tmp/scap_compliance_report.html'
                         }
@@ -205,27 +203,30 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 }
             }
 
-            result1 = MagicMock()
-            result1.stdout=b'no containers'
+            # mock the calls to `sh.buildah.*`
+            buildah_containers_pre_import_result = MagicMock()
+            buildah_containers_pre_import_result.stdout = b'no containers'
+            buildah_import_image_result = MagicMock()
+            buildah_import_image_result.stdout = 'image imported'
+            buildah_containers_result = MagicMock()
+            container_id = 'abc123'
+            buildah_containers_result.stdout = container_id
+            buildah_mock.side_effect = [
+                buildah_containers_pre_import_result,
+                buildah_import_image_result,
+                buildah_containers_result
+            ]
 
-            result2 = ''
-
-            result3 = MagicMock()
-            result3.stdout=b'containerid'
-
-            result4 = MagicMock()
-            result4.stderr=b'stderr'
-            result4.stdout=b'mount path'
-            result4.returncode=123
-
-            buildah_mock.side_effect = [result1,
-                                        result2,
-                                        result3,
-                                        result4]
-
+            # mock the calls to sh.buildah.bake.*
+            buildah_mount_result = MagicMock()
+            mount_path = '/this/is/a/path'
+            buildah_mount_result.stdout = mount_path
             oscap_result = MagicMock()
-            oscap_result.stdout = b'report\nresults\n'
-            oscap_mock.side_effect = [oscap_result]
+            oscap_result.stdout = b'mocked oscap test results'
+            buildah_mock.bake().bake().side_effect = [
+                buildah_mount_result,
+                oscap_result
+            ]
 
             expected_step_results =  {
                 'tssc-results': {
@@ -246,18 +247,42 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 }
             }
 
-            run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, expected_step_results)
+            run_step_test_with_result_validation(
+                temp_dir,
+                'container-image-static-compliance-scan',
+                config,
+                expected_step_results
+            )
 
-            buildah_mock.assert_called
-            oscap_mock.assert_called
+            # validate everything was called as expected
+            buildah_mock.bake.assert_called_with('unshare')
+            buildah_mock.bake('unshare').bake.assert_any_call('buildah', 'mount')
+            buildah_mock.bake('unshare').bake.assert_any_call('oscap-chroot')
+            buildah_mock.bake('unshare').bake().assert_any_call(
+                '--storage-driver', 'vfs',
+                container_id,
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee=True
+            )
+            buildah_mock.bake('unshare').bake().assert_any_call(
+                mount_path,
+                'oval',
+                'eval',
+                '--report', StringRegexParam(r".*/scap-compliance-report\.html"),
+                scan_input_file,
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee=True
+            )
 
-
-    @patch('sh.oscap_chroot', create=True)
     @patch('sh.buildah', create=True)
-    def test_container_image_static_compliance_scan_specify_openscap_implementer_no_image_to_scan(self, buildah_mock, oscap_mock):
+    def test_container_image_static_compliance_scan_specify_openscap_implementer_no_image_to_scan(
+        self,
+        buildah_mock
+    ):
 
         git_tag = 'git_tag'
-        image_url = 'quay.io/tssc/myimage'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -292,40 +317,44 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 }
             }
 
-            result1 = MagicMock()
-            result1.stdout=b'no containers'
+            # mock the calls to `sh.buildah.*`
+            buildah_containers_pre_import_result = MagicMock()
+            buildah_containers_pre_import_result.stdout = b'no containers'
+            buildah_import_image_result = MagicMock()
+            buildah_import_image_result.stdout = 'image imported'
+            buildah_containers_result = MagicMock()
+            container_id = 'abc123'
+            buildah_containers_result.stdout = container_id
+            buildah_mock.side_effect = [
+                buildah_containers_pre_import_result,
+                buildah_import_image_result,
+                buildah_containers_result
+            ]
 
-            result2 = ''
-
-            result3 = MagicMock()
-            result3.stdout=b'containerid'
-
-            result4 = MagicMock()
-            result4.stderr=b'stderr'
-            result4.stdout=b'mount path'
-            result4.returncode=123
-
-            buildah_mock.side_effect = [result1,
-                                        result2,
-                                        result3,
-                                        result4]
-
+            # mock the calls to sh.buildah.bake.*
+            buildah_mount_result = MagicMock()
+            mount_path = '/this/is/a/path'
+            buildah_mount_result.stdout = mount_path
             oscap_result = MagicMock()
-            oscap_result.stdout = b'report\nresults\n'
-            oscap_mock.side_effect = [oscap_result]
+            oscap_result.stdout = b'mocked oscap test results'
+            buildah_mock.bake().bake().side_effect = [
+                buildah_mount_result,
+                oscap_result
+            ]
 
             with self.assertRaisesRegex(
                     RuntimeError,
                     r"Missing image tar file from create-container-image"):
                 run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, {})
 
-    @patch('sh.oscap_chroot', create=True)
     @patch('sh.buildah', create=True)
-    def test_container_image_static_compliance_scan_specify_openscap_implementer_happy_path(self, buildah_mock, oscap_mock):
+    def test_container_image_static_compliance_scan_specify_openscap_implementer_happy_path(
+        self,
+        buildah_mock
+    ):
 
         image_tag = 'not_latest'
         git_tag = 'git_tag'
-        image_location = 'quay-quay-enterprise.apps.tssc.rht-set.com/tssc-team/ref-app-quarkus-backend:1.0.0-feature_napsspo-999'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -345,6 +374,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 'utf-8')
                 )
 
+            scan_input_file = '/usr/share/xml/scap/ssg/content/ssg-jre-oval.xml'
             config = {
                 'tssc-config': {
                     'global-defaults': {
@@ -356,7 +386,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                         'implementer': 'OpenSCAP',
                         'config': {
                            'log-level': 'info',
-                           'scap-input-file': '/usr/share/xml/scap/ssg/content/ssg-jre-oval.xml',
+                           'scap-input-file': scan_input_file,
                            'scan-output-absolute-path': '/tmp/scap_output.txt',
                            'scan-report-absolute-path': '/tmp/scap_compliance_report.html'
                         }
@@ -364,27 +394,31 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 }
             }
 
-            result1 = MagicMock()
-            result1.stdout=b'no containers'
+            # mock the calls to `sh.buildah.*`
+            buildah_containers_pre_import_result = MagicMock()
+            buildah_containers_pre_import_result.stdout = b'no containers'
+            buildah_import_image_result = MagicMock()
+            buildah_import_image_result.stdout = 'image imported'
+            buildah_containers_result = MagicMock()
+            container_id = 'abc123'
+            buildah_containers_result.stdout = container_id
+            buildah_mock.side_effect = [
+                buildah_containers_pre_import_result,
+                buildah_import_image_result,
+                buildah_containers_result
+            ]
 
-            result2 = ''
-
-            result3 = MagicMock()
-            result3.stdout=b'containerid'
-
-            result4 = MagicMock()
-            result4.stderr=b'stderr'
-            result4.stdout=b'mount path'
-            result4.returncode=123
-
-            buildah_mock.side_effect = [result1,
-                                        result2,
-                                        result3,
-                                        result4]
-
+            # mock the calls to sh.buildah.bake.*
+            buildah_mount_result = MagicMock()
+            mount_path = '/this/is/a/path'
+            buildah_mount_result.stdout = mount_path
             oscap_result = MagicMock()
-            oscap_result.stdout = b'report\nresults\n'
-            oscap_mock.side_effect = [oscap_result]
+            oscap_result.stdout = b'mocked oscap test results'
+            buildah_mock.bake().bake().side_effect = [
+                buildah_mount_result,
+                oscap_result
+            ]
+
             expected_step_results =  {
                 'tssc-results': {
                     'container-image-static-compliance-scan': {
@@ -407,5 +441,24 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
 
             run_step_test_with_result_validation(temp_dir, 'container-image-static-compliance-scan', config, expected_step_results)
 
-            buildah_mock.assert_called
-            oscap_mock.assert_called
+            # validate everything was called as expected
+            buildah_mock.bake.assert_called_with('unshare')
+            buildah_mock.bake('unshare').bake.assert_any_call('buildah', 'mount')
+            buildah_mock.bake('unshare').bake.assert_any_call('oscap-chroot')
+            buildah_mock.bake('unshare').bake().assert_any_call(
+                '--storage-driver', 'vfs',
+                container_id,
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee=True
+            )
+            buildah_mock.bake('unshare').bake().assert_any_call(
+                mount_path,
+                'oval',
+                'eval',
+                '--report', StringRegexParam(r".*/scap-compliance-report\.html"),
+                scan_input_file,
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee=True
+            )
