@@ -176,7 +176,213 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         for obfuscation_target in self.__obfuscation_targets:
             obfuscated = re.sub(obfuscation_target, self.__obfuscator, obfuscated)
 
-        return self.parent_stream.write(obfuscated)</code></pre>
+        return self.parent_stream.write(obfuscated)
+
+    def flush(self):
+        &#34;&#34;&#34;Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        &#34;&#34;&#34;
+        self.parent_stream.flush()
+
+class TextIOIndenter(io.TextIOBase):
+    &#34;&#34;&#34;Adds an indent to the first string written and after every new line written to this stream.
+
+    Notes
+    -----
+    WARNING:    There will be a dangling indent after the last new line written to this stream
+                because there is no &#34;good&#34; way of knowing the last new line ever written to this
+                stream.
+
+    Parameters
+    ----------
+    parent_stream : IOBase
+        Stream to write to after indenting what is written to this stream
+    indent_level : int, optional
+        Level to indent to.
+        Will be multiplied by the indent_size.
+    indent_size : int, optional
+        Size of each indent.
+        Will be multipled by the indent_level.
+    indent_char : str, optional
+        Character to use for indent.
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+    &#34;&#34;&#34;
+
+    def __init__(self, parent_stream, indent_level=0, indent_size=4, indent_char=&#39; &#39;):
+        self.__parent_stream = parent_stream
+        self.__indent_level = indent_level
+        self.__indent_size = indent_size
+        self.__indent_char = indent_char
+        self.__unwritten_to = True
+        super().__init__()
+
+    @property
+    def parent_stream(self):
+        &#34;&#34;&#34;Returns parent stream that this stream wraps
+
+        Returns
+        -------
+        IOBase
+            Stream to write to after indenting what is written to this stream
+        &#34;&#34;&#34;
+        return self.__parent_stream
+
+    @property
+    def indent_level(self):
+        &#34;&#34;&#34;Level to indent to.
+
+        Returns
+        -------
+        int
+            Level to indent to.
+        &#34;&#34;&#34;
+        return self.__indent_level
+
+    @property
+    def indent_size(self):
+        &#34;&#34;&#34;Size of each indent.
+
+        Returns
+        -------
+        int
+            Size of each indent.
+        &#34;&#34;&#34;
+        return self.__indent_size
+
+    @property
+    def indent_char(self):
+        &#34;&#34;&#34;Character to use for indent.
+
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+
+        Returns
+        -------
+        str
+            Character to use for indent.
+        &#34;&#34;&#34;
+        return self.__indent_char
+
+    def write(self, given):
+        &#34;&#34;&#34;Indents the begining of the given text as well as every new line in the given text
+        and then writes it to this steams parent_stream.
+
+        Notes
+        -----
+        If there is a new line at the end of the given string there will not be an indent
+        written after that new line assuming that the next line will be written by this stream
+        and therefor get indented as being initially written to this stream.
+
+        Parameters
+        ----------
+        given : str or bytes (utf-8)
+            String to indent every line of before writing to parent stream.
+
+        Examples
+        --------
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;hello world\\n&#34;)
+        hello world
+        &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello world\\n&#34;)
+            hello world
+            &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello world\\n&#34;)
+                hello world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;\\nhello world\\n&#34;)
+        &lt;BLANKLINE&gt;
+        hello world
+        &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;\\nhello world\\n&#34;)
+            &lt;BLANKLINE&gt;
+            hello world
+            &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;\\nhello world\\n&#34;)
+                &lt;BLANKLINE&gt;
+                hello world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+        hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+        --hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, &#39;-&#39;).write(hello world&#34;)
+        ----hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello\\nworld\\n&#34;)
+            hello
+            world
+            &lt;BLANKLINE&gt;
+
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello\\nworld\\n&#34;)
+                hello
+                world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write(&#34;hello\\nworld\\n&#34;)
+        ... indenter.write(&#34;foo bar\\n&#34;)
+            hello
+            world
+            foo bar
+
+        &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write(&#34;hello world &#34;)
+        ... indenter.write(&#34;foo bar\\n&#34;)
+        ... indenter.write(&#34;this is a test, &#34;)
+        ... indenter.write(&#34;more testing\\n&#34;)
+        ... indenter.write(&#34;fortytwo\\n&#34;)
+            hello world foo bar
+            this is a test more testing
+            fortytwo
+
+        Returns
+        -------
+        int
+            Number of characters written.
+
+        See Also
+        --------
+        io.TextIOBase.write
+        &#34;&#34;&#34;
+        if isinstance(given, bytes):
+            indented = given.decode(&#39;utf-8&#39;)
+        else:
+            indented = given
+
+        # create the indent to insert at begining of given text and every new line in that text
+        indent_chars = self.indent_char * (self.indent_size * self.indent_level)
+
+        if self.__unwritten_to:
+            self.__unwritten_to = False
+            indented = f&#34;{indent_chars}{indented}&#34;
+
+        # add indent after every new line
+        # NOTE: \1 is capture group one and contains the original new line character
+        indented = re.sub(r&#34;(\r\n|\r|\n)&#34;, r&#34;\1&#34; + indent_chars, indented)
+
+        return self.parent_stream.write(indented)
+
+    def flush(self):
+        &#34;&#34;&#34;Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        &#34;&#34;&#34;
+        self.parent_stream.flush()</code></pre>
 </details>
 </section>
 <section>
@@ -188,6 +394,568 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="tssc.utils.io.TextIOIndenter"><code class="flex name class">
+<span>class <span class="ident">TextIOIndenter</span></span>
+<span>(</span><span>parent_stream, indent_level=0, indent_size=4, indent_char=' ')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds an indent to the first string written and after every new line written to this stream.</p>
+<h2 id="notes">Notes</h2>
+<p>WARNING:
+There will be a dangling indent after the last new line written to this stream
+because there is no "good" way of knowing the last new line ever written to this
+stream.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>parent_stream</code></strong> :&ensp;<code>IOBase</code></dt>
+<dd>Stream to write to after indenting what is written to this stream</dd>
+<dt><strong><code>indent_level</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Level to indent to.
+Will be multiplied by the indent_size.</dd>
+<dt><strong><code>indent_size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of each indent.
+Will be multipled by the indent_level.</dd>
+<dt><strong><code>indent_char</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Character to use for indent.
+Will be multiplied by the indent_size and the ident_level and prepended before
+each line written to this stream.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TextIOIndenter(io.TextIOBase):
+    &#34;&#34;&#34;Adds an indent to the first string written and after every new line written to this stream.
+
+    Notes
+    -----
+    WARNING:    There will be a dangling indent after the last new line written to this stream
+                because there is no &#34;good&#34; way of knowing the last new line ever written to this
+                stream.
+
+    Parameters
+    ----------
+    parent_stream : IOBase
+        Stream to write to after indenting what is written to this stream
+    indent_level : int, optional
+        Level to indent to.
+        Will be multiplied by the indent_size.
+    indent_size : int, optional
+        Size of each indent.
+        Will be multipled by the indent_level.
+    indent_char : str, optional
+        Character to use for indent.
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+    &#34;&#34;&#34;
+
+    def __init__(self, parent_stream, indent_level=0, indent_size=4, indent_char=&#39; &#39;):
+        self.__parent_stream = parent_stream
+        self.__indent_level = indent_level
+        self.__indent_size = indent_size
+        self.__indent_char = indent_char
+        self.__unwritten_to = True
+        super().__init__()
+
+    @property
+    def parent_stream(self):
+        &#34;&#34;&#34;Returns parent stream that this stream wraps
+
+        Returns
+        -------
+        IOBase
+            Stream to write to after indenting what is written to this stream
+        &#34;&#34;&#34;
+        return self.__parent_stream
+
+    @property
+    def indent_level(self):
+        &#34;&#34;&#34;Level to indent to.
+
+        Returns
+        -------
+        int
+            Level to indent to.
+        &#34;&#34;&#34;
+        return self.__indent_level
+
+    @property
+    def indent_size(self):
+        &#34;&#34;&#34;Size of each indent.
+
+        Returns
+        -------
+        int
+            Size of each indent.
+        &#34;&#34;&#34;
+        return self.__indent_size
+
+    @property
+    def indent_char(self):
+        &#34;&#34;&#34;Character to use for indent.
+
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+
+        Returns
+        -------
+        str
+            Character to use for indent.
+        &#34;&#34;&#34;
+        return self.__indent_char
+
+    def write(self, given):
+        &#34;&#34;&#34;Indents the begining of the given text as well as every new line in the given text
+        and then writes it to this steams parent_stream.
+
+        Notes
+        -----
+        If there is a new line at the end of the given string there will not be an indent
+        written after that new line assuming that the next line will be written by this stream
+        and therefor get indented as being initially written to this stream.
+
+        Parameters
+        ----------
+        given : str or bytes (utf-8)
+            String to indent every line of before writing to parent stream.
+
+        Examples
+        --------
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;hello world\\n&#34;)
+        hello world
+        &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello world\\n&#34;)
+            hello world
+            &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello world\\n&#34;)
+                hello world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;\\nhello world\\n&#34;)
+        &lt;BLANKLINE&gt;
+        hello world
+        &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;\\nhello world\\n&#34;)
+            &lt;BLANKLINE&gt;
+            hello world
+            &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;\\nhello world\\n&#34;)
+                &lt;BLANKLINE&gt;
+                hello world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+        hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+        --hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, &#39;-&#39;).write(hello world&#34;)
+        ----hello world
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello\\nworld\\n&#34;)
+            hello
+            world
+            &lt;BLANKLINE&gt;
+
+
+        &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello\\nworld\\n&#34;)
+                hello
+                world
+                &lt;BLANKLINE&gt;
+
+        &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write(&#34;hello\\nworld\\n&#34;)
+        ... indenter.write(&#34;foo bar\\n&#34;)
+            hello
+            world
+            foo bar
+
+        &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write(&#34;hello world &#34;)
+        ... indenter.write(&#34;foo bar\\n&#34;)
+        ... indenter.write(&#34;this is a test, &#34;)
+        ... indenter.write(&#34;more testing\\n&#34;)
+        ... indenter.write(&#34;fortytwo\\n&#34;)
+            hello world foo bar
+            this is a test more testing
+            fortytwo
+
+        Returns
+        -------
+        int
+            Number of characters written.
+
+        See Also
+        --------
+        io.TextIOBase.write
+        &#34;&#34;&#34;
+        if isinstance(given, bytes):
+            indented = given.decode(&#39;utf-8&#39;)
+        else:
+            indented = given
+
+        # create the indent to insert at begining of given text and every new line in that text
+        indent_chars = self.indent_char * (self.indent_size * self.indent_level)
+
+        if self.__unwritten_to:
+            self.__unwritten_to = False
+            indented = f&#34;{indent_chars}{indented}&#34;
+
+        # add indent after every new line
+        # NOTE: \1 is capture group one and contains the original new line character
+        indented = re.sub(r&#34;(\r\n|\r|\n)&#34;, r&#34;\1&#34; + indent_chars, indented)
+
+        return self.parent_stream.write(indented)
+
+    def flush(self):
+        &#34;&#34;&#34;Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        &#34;&#34;&#34;
+        self.parent_stream.flush()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>io.TextIOBase</li>
+<li>_io._TextIOBase</li>
+<li>io.IOBase</li>
+<li>_io._IOBase</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="tssc.utils.io.TextIOIndenter.indent_char"><code class="name">var <span class="ident">indent_char</span></code></dt>
+<dd>
+<div class="desc"><p>Character to use for indent.</p>
+<p>Will be multiplied by the indent_size and the ident_level and prepended before
+each line written to this stream.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Character to use for indent.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def indent_char(self):
+    &#34;&#34;&#34;Character to use for indent.
+
+    Will be multiplied by the indent_size and the ident_level and prepended before
+    each line written to this stream.
+
+    Returns
+    -------
+    str
+        Character to use for indent.
+    &#34;&#34;&#34;
+    return self.__indent_char</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.io.TextIOIndenter.indent_level"><code class="name">var <span class="ident">indent_level</span></code></dt>
+<dd>
+<div class="desc"><p>Level to indent to.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Level to indent to.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def indent_level(self):
+    &#34;&#34;&#34;Level to indent to.
+
+    Returns
+    -------
+    int
+        Level to indent to.
+    &#34;&#34;&#34;
+    return self.__indent_level</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.io.TextIOIndenter.indent_size"><code class="name">var <span class="ident">indent_size</span></code></dt>
+<dd>
+<div class="desc"><p>Size of each indent.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Size of each indent.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def indent_size(self):
+    &#34;&#34;&#34;Size of each indent.
+
+    Returns
+    -------
+    int
+        Size of each indent.
+    &#34;&#34;&#34;
+    return self.__indent_size</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.io.TextIOIndenter.parent_stream"><code class="name">var <span class="ident">parent_stream</span></code></dt>
+<dd>
+<div class="desc"><p>Returns parent stream that this stream wraps</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>IOBase</code></dt>
+<dd>Stream to write to after indenting what is written to this stream</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def parent_stream(self):
+    &#34;&#34;&#34;Returns parent stream that this stream wraps
+
+    Returns
+    -------
+    IOBase
+        Stream to write to after indenting what is written to this stream
+    &#34;&#34;&#34;
+    return self.__parent_stream</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="tssc.utils.io.TextIOIndenter.flush"><code class="name flex">
+<span>def <span class="ident">flush</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Flush the parent stream.</p>
+<h2 id="see-also">See Also</h2>
+<p><code>io.TextIOBase.flush</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def flush(self):
+    &#34;&#34;&#34;Flush the parent stream.
+
+    See Also
+    --------
+    io.TextIOBase.flush
+    &#34;&#34;&#34;
+    self.parent_stream.flush()</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.io.TextIOIndenter.write"><code class="name flex">
+<span>def <span class="ident">write</span></span>(<span>self, given)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Indents the begining of the given text as well as every new line in the given text
+and then writes it to this steams parent_stream.</p>
+<h2 id="notes">Notes</h2>
+<p>If there is a new line at the end of the given string there will not be an indent
+written after that new line assuming that the next line will be written by this stream
+and therefor get indented as being initially written to this stream.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>given</code></strong> :&ensp;<code>str</code> or <code>bytes (utf-8)</code></dt>
+<dd>String to indent every line of before writing to parent stream.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;hello world\n&quot;)
+hello world
+&lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello world\n&quot;)
+    hello world
+    &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello world\n&quot;)
+        hello world
+        &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;\nhello world\n&quot;)
+&lt;BLANKLINE&gt;
+hello world
+&lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;\nhello world\n&quot;)
+    &lt;BLANKLINE&gt;
+    hello world
+    &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;\nhello world\n&quot;)
+        &lt;BLANKLINE&gt;
+        hello world
+        &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, '-').write(&quot;hello world&quot;)
+hello world
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, '-').write(&quot;hello world&quot;)
+--hello world
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, '-').write(hello world&quot;)
+----hello world
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello\nworld\n&quot;)
+    hello
+    world
+    &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello\nworld\n&quot;)
+        hello
+        world
+        &lt;BLANKLINE&gt;
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+... indenter.write(&quot;hello\nworld\n&quot;)
+... indenter.write(&quot;foo bar\n&quot;)
+    hello
+    world
+    foo bar
+</code></pre>
+<pre><code class="python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+... indenter.write(&quot;hello world &quot;)
+... indenter.write(&quot;foo bar\n&quot;)
+... indenter.write(&quot;this is a test, &quot;)
+... indenter.write(&quot;more testing\n&quot;)
+... indenter.write(&quot;fortytwo\n&quot;)
+    hello world foo bar
+    this is a test more testing
+    fortytwo
+</code></pre>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>Number of characters written.</dd>
+</dl>
+<h2 id="see-also">See Also</h2>
+<p><code>io.TextIOBase.write</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write(self, given):
+    &#34;&#34;&#34;Indents the begining of the given text as well as every new line in the given text
+    and then writes it to this steams parent_stream.
+
+    Notes
+    -----
+    If there is a new line at the end of the given string there will not be an indent
+    written after that new line assuming that the next line will be written by this stream
+    and therefor get indented as being initially written to this stream.
+
+    Parameters
+    ----------
+    given : str or bytes (utf-8)
+        String to indent every line of before writing to parent stream.
+
+    Examples
+    --------
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;hello world\\n&#34;)
+    hello world
+    &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello world\\n&#34;)
+        hello world
+        &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello world\\n&#34;)
+            hello world
+            &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&#34;\\nhello world\\n&#34;)
+    &lt;BLANKLINE&gt;
+    hello world
+    &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;\\nhello world\\n&#34;)
+        &lt;BLANKLINE&gt;
+        hello world
+        &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;\\nhello world\\n&#34;)
+            &lt;BLANKLINE&gt;
+            hello world
+            &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+    hello world
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, &#39;-&#39;).write(&#34;hello world&#34;)
+    --hello world
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, &#39;-&#39;).write(hello world&#34;)
+    ----hello world
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&#34;hello\\nworld\\n&#34;)
+        hello
+        world
+        &lt;BLANKLINE&gt;
+
+
+    &gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&#34;hello\\nworld\\n&#34;)
+            hello
+            world
+            &lt;BLANKLINE&gt;
+
+    &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+    ... indenter.write(&#34;hello\\nworld\\n&#34;)
+    ... indenter.write(&#34;foo bar\\n&#34;)
+        hello
+        world
+        foo bar
+
+    &gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+    ... indenter.write(&#34;hello world &#34;)
+    ... indenter.write(&#34;foo bar\\n&#34;)
+    ... indenter.write(&#34;this is a test, &#34;)
+    ... indenter.write(&#34;more testing\\n&#34;)
+    ... indenter.write(&#34;fortytwo\\n&#34;)
+        hello world foo bar
+        this is a test more testing
+        fortytwo
+
+    Returns
+    -------
+    int
+        Number of characters written.
+
+    See Also
+    --------
+    io.TextIOBase.write
+    &#34;&#34;&#34;
+    if isinstance(given, bytes):
+        indented = given.decode(&#39;utf-8&#39;)
+    else:
+        indented = given
+
+    # create the indent to insert at begining of given text and every new line in that text
+    indent_chars = self.indent_char * (self.indent_size * self.indent_level)
+
+    if self.__unwritten_to:
+        self.__unwritten_to = False
+        indented = f&#34;{indent_chars}{indented}&#34;
+
+    # add indent after every new line
+    # NOTE: \1 is capture group one and contains the original new line character
+    indented = re.sub(r&#34;(\r\n|\r|\n)&#34;, r&#34;\1&#34; + indent_chars, indented)
+
+    return self.parent_stream.write(indented)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="tssc.utils.io.TextIOSelectiveObfuscator"><code class="flex name class">
 <span>class <span class="ident">TextIOSelectiveObfuscator</span></span>
 <span>(</span><span>parent_stream, randomize_replacment_length=True, replacement_char='*')</span>
@@ -366,7 +1134,16 @@ False to use the same length replacement for any obfuscated text in the stream.<
         for obfuscation_target in self.__obfuscation_targets:
             obfuscated = re.sub(obfuscation_target, self.__obfuscator, obfuscated)
 
-        return self.parent_stream.write(obfuscated)</code></pre>
+        return self.parent_stream.write(obfuscated)
+
+    def flush(self):
+        &#34;&#34;&#34;Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        &#34;&#34;&#34;
+        self.parent_stream.flush()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -476,6 +1253,27 @@ def replacement_char(self):
         self.__obfuscation_targets.append(targets)</code></pre>
 </details>
 </dd>
+<dt id="tssc.utils.io.TextIOSelectiveObfuscator.flush"><code class="name flex">
+<span>def <span class="ident">flush</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Flush the parent stream.</p>
+<h2 id="see-also">See Also</h2>
+<p><code>io.TextIOBase.flush</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def flush(self):
+    &#34;&#34;&#34;Flush the parent stream.
+
+    See Also
+    --------
+    io.TextIOBase.flush
+    &#34;&#34;&#34;
+    self.parent_stream.flush()</code></pre>
+</details>
+</dd>
 <dt id="tssc.utils.io.TextIOSelectiveObfuscator.write"><code class="name flex">
 <span>def <span class="ident">write</span></span>(<span>self, given)</span>
 </code></dt>
@@ -545,9 +1343,21 @@ def replacement_char(self):
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="tssc.utils.io.TextIOIndenter" href="#tssc.utils.io.TextIOIndenter">TextIOIndenter</a></code></h4>
+<ul class="two-column">
+<li><code><a title="tssc.utils.io.TextIOIndenter.flush" href="#tssc.utils.io.TextIOIndenter.flush">flush</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOIndenter.indent_char" href="#tssc.utils.io.TextIOIndenter.indent_char">indent_char</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOIndenter.indent_level" href="#tssc.utils.io.TextIOIndenter.indent_level">indent_level</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOIndenter.indent_size" href="#tssc.utils.io.TextIOIndenter.indent_size">indent_size</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOIndenter.parent_stream" href="#tssc.utils.io.TextIOIndenter.parent_stream">parent_stream</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOIndenter.write" href="#tssc.utils.io.TextIOIndenter.write">write</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="tssc.utils.io.TextIOSelectiveObfuscator" href="#tssc.utils.io.TextIOSelectiveObfuscator">TextIOSelectiveObfuscator</a></code></h4>
 <ul class="">
 <li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets" href="#tssc.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets">add_obfuscation_targets</a></code></li>
+<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.flush" href="#tssc.utils.io.TextIOSelectiveObfuscator.flush">flush</a></code></li>
 <li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.parent_stream" href="#tssc.utils.io.TextIOSelectiveObfuscator.parent_stream">parent_stream</a></code></li>
 <li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.randomize_replacment_length" href="#tssc.utils.io.TextIOSelectiveObfuscator.randomize_replacment_length">randomize_replacment_length</a></code></li>
 <li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.replacement_char" href="#tssc.utils.io.TextIOSelectiveObfuscator.replacement_char">replacement_char</a></code></li>
