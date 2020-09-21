@@ -228,6 +228,9 @@ import sh
 from tssc import StepImplementer
 from tssc.utils.xml import get_xml_element_by_path
 
+from tssc.utils.maven import generate_maven_settings
+from tssc.config import ConfigValue
+
 DEFAULT_CONFIG = {
     &#39;fail-on-no-tests&#39;: True,
     &#39;pom-file&#39;: &#39;pom.xml&#39;
@@ -237,6 +240,7 @@ REQUIRED_CONFIG_KEYS = [
     &#39;fail-on-no-tests&#39;,
     &#39;pom-file&#39;
 ]
+
 
 class Maven(StepImplementer):
     &#34;&#34;&#34;
@@ -275,6 +279,22 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
@@ -310,11 +330,14 @@ class Maven(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 &#39;target/surefire-reports&#39;)
 
+        settings_file = self._generate_maven_settings()
+
         try:
             sh.mvn(  # pylint: disable=no-member
                 &#39;clean&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
@@ -417,6 +440,22 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
@@ -452,11 +491,14 @@ class Maven(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 &#39;target/surefire-reports&#39;)
 
+        settings_file = self._generate_maven_settings()
+
         try:
             sh.mvn(  # pylint: disable=no-member
                 &#39;clean&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )

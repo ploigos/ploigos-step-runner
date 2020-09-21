@@ -36,26 +36,31 @@
 </thead>
 <tbody>
 <tr>
-<td><code>url</code></td>
+<td>`maven-push-</td>
 <td>True</td>
 <td>N/A</td>
-<td>URL to the artifact repository</td>
+<td>id for the maven servers and mirrors</td>
 </tr>
 <tr>
-<td><code>user</code></td>
-<td>False</td>
-<td>N/A</td>
-<td>Repository user for authenication</td>
+<td><code>artifact-repo-id</code></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td><code>password</code></td>
-<td>False</td>
+<td>`maven-push-</td>
+<td>True</td>
 <td>N/A</td>
-<td>Resository password for authentication</td>
+<td>url for the maven servers and mirrors</td>
+</tr>
+<tr>
+<td><code>artifact-repo-url</code></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
-<p><code>user</code> and <code>password</code> can be specifed as runtime arguments.</p>
 <h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
 <p>Results expected from previous steps:</p>
 <table>
@@ -70,7 +75,7 @@
 <tr>
 <td><code>generate-metadata</code></td>
 <td><code>version</code></td>
-<td>The version to be used to deploy to artifactory.</td>
+<td>The version to be used to deploy to the repository.</td>
 </tr>
 <tr>
 <td><code>package</code></td>
@@ -85,7 +90,7 @@
 <tr>
 <td></td>
 <td></td>
-<td>as a parameter to deploy to artifactory:</td>
+<td>as a parameter to deploy to repository:</td>
 </tr>
 <tr>
 <td></td>
@@ -120,12 +125,21 @@
 </thead>
 <tbody>
 <tr>
-<td><code>artifacts</code></td>
+<td><code>result</code></td>
+<td>Dictionary of results</td>
+</tr>
+<tr>
+<td><code>report-artifacts</code></td>
 <td>An array of dictionaries describing the push results</td>
 </tr>
 </tbody>
 </table>
-<p>Elements in the <code>artifacts</code> dictionary:</p>
+<p>Elements in the <code>result</code> dictionary:
+| <code>success</code>
+| True or False
+| <code>message</code>
+| Overall status</p>
+<p>Elements in the <code>report-artifacts</code> dictionary:</p>
 <table>
 <thead>
 <tr>
@@ -134,10 +148,6 @@
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><code>url</code></td>
-<td>URL to the artifact pushed to the artifact repository</td>
-</tr>
 <tr>
 <td><code>path</code></td>
 <td>Absolute path to the artifact pushed to the artifact repository</td>
@@ -151,6 +161,10 @@
 <td>Maven group ID pushed to the artifact repository</td>
 </tr>
 <tr>
+<td><code>package-type</code></td>
+<td>Package type of the artifact</td>
+</tr>
+<tr>
 <td><code>version</code></td>
 <td>Version pushed to the artifact repository</td>
 </tr>
@@ -161,21 +175,28 @@
 <pre><code>push-artifacts:
 - implementer: Maven
   config:
-    url: &lt;http://artifactory.company.com/repo&gt;
+    maven-push-artifact-repo-id: internal-id-name
+    maven-push-artifact-repo-url: url-to server
 </code></pre>
 <p>Example: Generated Maven Deploy (uses both step configuration and previous results)</p>
 <pre><code>mvn
   deploy:deploy-file'
-  -Durl=url
+  -Durl=maven-push-artifact-repo-url
   -Dversion=generate-metadata.version
   -DgroupId=package.artifact.group-id
   -DartifactId=package.artifact.artifact-id
   -Dfile=package.artifact.path
   -Dpackaging=package.artifact.package-type
+  -DrepositoryId=maven-push-artifact-repo-id
+  -s settings.xml
 </code></pre>
 <p>Example: Results</p>
 <pre><code>'tssc-results': {
-    'artifacts': [
+    'result: {
+        'success': True
+        'message': 'push artifacts step completed - see report-artifacts',
+    }
+    'report-artifacts': [
          {
          'path':''
          'artifact-id': ''
@@ -199,11 +220,10 @@ Step configuration key(s) for this step:
 
 | Key                 | Required | Default | Description
 |---------------------|----------|---------|------------
-| `url`               | True     | N/A     | URL to the artifact repository
-| `user`              | False    | N/A     | Repository user for authenication
-| `password`          | False    | N/A     | Resository password for authentication
-
-`user` and `password` can be specifed as runtime arguments.
+| `maven-push-        | True     | N/A     | id for the maven servers and mirrors
+| `artifact-repo-id`  |          |         |
+| `maven-push-        | True     | N/A     | url for the maven servers and mirrors
+| `artifact-repo-url` |          |         |
 
 Expected Previous Step Results
 ------------------------------
@@ -212,10 +232,10 @@ Results expected from previous steps:
 
 | Step Name           |  Key               | Description
 |---------------------|--------------------|------------
-| `generate-metadata` | `version`          | The version to be used to deploy to artifactory.
+| `generate-metadata` | `version`          | The version to be used to deploy to the repository.
 | `package`           | `artifacts`        | Artifacts is an array of `artifact`.
 |                     |                    | Each element of an `artifact` will be used
-|                     |                    | as a parameter to deploy to artifactory:
+|                     |                    | as a parameter to deploy to repository:
 |                     |                    | * artifact.group-id
 |                     |                    | * artifact.artifact-id
 |                     |                    | * artifact.path
@@ -226,19 +246,24 @@ Results
 
 Results output by this step:
 
-| Key             | Description
-|-----------------|------------
-| `artifacts`     | An array of dictionaries describing the push results
+| Key                | Description
+|--------------------|------------
+| `result`           | Dictionary of results
+| `report-artifacts` | An array of dictionaries describing the push results
 
-Elements in the `artifacts` dictionary:
+Elements in the `result` dictionary:
+| `success`          | True or False
+| `message`          | Overall status
 
-| Elements        | Description
-|-----------------|------------
-| `url`           | URL to the artifact pushed to the artifact repository
-| `path`          | Absolute path to the artifact pushed to the artifact repository
-| `artifact-id`   | Maven artifact ID pushed to the artifact repository
-| `group-id`      | Maven group ID pushed to the artifact repository
-| `version`       | Version pushed to the artifact repository
+Elements in the `report-artifacts` dictionary:
+
+| Elements           | Description
+|--------------------|------------
+| `path`             | Absolute path to the artifact pushed to the artifact repository
+| `artifact-id`      | Maven artifact ID pushed to the artifact repository
+| `group-id`         | Maven group ID pushed to the artifact repository
+| `package-type`     | Package type of the artifact
+| `version`          | Version pushed to the artifact repository
 
 Examples
 --------
@@ -248,23 +273,30 @@ Example: Step Configuration (minimal)
     push-artifacts:
     - implementer: Maven
       config:
-        url: http://artifactory.company.com/repo
+        maven-push-artifact-repo-id: internal-id-name
+        maven-push-artifact-repo-url: url-to server
 
 Example: Generated Maven Deploy (uses both step configuration and previous results)
 
     mvn
       deploy:deploy-file&#39;
-      -Durl=url
+      -Durl=maven-push-artifact-repo-url
       -Dversion=generate-metadata.version
       -DgroupId=package.artifact.group-id
       -DartifactId=package.artifact.artifact-id
       -Dfile=package.artifact.path
       -Dpackaging=package.artifact.package-type
+      -DrepositoryId=maven-push-artifact-repo-id
+      -s settings.xml
 
 Example: Results
 
     &#39;tssc-results&#39;: {
-        &#39;artifacts&#39;: [
+        &#39;result: {
+            &#39;success&#39;: True
+            &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
+        }
+        &#39;report-artifacts&#39;: [
              {
              &#39;path&#39;:&#39;&#39;
              &#39;artifact-id&#39;: &#39;&#39;
@@ -276,19 +308,18 @@ Example: Results
     }
 
 &#34;&#34;&#34;
-import re
 import sys
 import sh
 
 from tssc import StepImplementer
+from tssc.config import ConfigValue
+
+from tssc.utils.maven import generate_maven_settings
 
 DEFAULT_CONFIG = {}
-AUTHENTICATION_CONFIG = {
-    &#39;user&#39;: None,
-    &#39;password&#39;: None
-}
 REQUIRED_CONFIG_KEYS = [
-    &#39;url&#39;
+    &#39;maven-push-artifact-repo-url&#39;,
+    &#39;maven-push-artifact-repo-id&#39;
 ]
 
 
@@ -329,27 +360,35 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Validates the given `runtime_step_config` against the required step configuration keys.
+    def _get_version(self):
+        # Required: Get the generate-metadata.version
+        if (self.get_step_results(&#39;generate-metadata&#39;) and
+                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
+            return self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
+        raise ValueError(&#39;generate-metadata results missing version&#39;)
 
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _get_artifacts(self):
+        # Required: Get the package.artifacts
+        if (self.get_step_results(&#39;package&#39;) and
+                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
+            return self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
+        raise ValueError(&#39;package results missing artifacts&#39;)
 
-        Raises
-        ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
-        &#34;&#34;&#34;
-        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
-
-        assert ( \
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-        ), &#39;Either username or password is not set. Neither or both must be set.&#39;
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
@@ -359,47 +398,18 @@ class Maven(StepImplementer):
         dict
             Results of running this step.
         &#34;&#34;&#34;
-        user = &#39;&#39;
-        password = &#39;&#39;
-
-        url = self.get_config_value(&#39;url&#39;)
-
-        if self.has_config_value(AUTHENTICATION_CONFIG):
-            if(self.get_config_value(&#39;user&#39;) and self.get_config_value(&#39;password&#39;)):
-                user = self.get_config_value(&#39;user&#39;)
-                password = self.get_config_value(&#39;password&#39;)
 
         # ----- get generate-metadata items
-        # Required: Get the generate-metadata.version
-        if (self.get_step_results(&#39;generate-metadata&#39;) and
-                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
-            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
-        else:
-            raise ValueError(&#39;Severe error: Generate-metadata does not have a version&#39;)
+        version = self._get_version()
 
-        # ----- get package items this will change
-        # Required: Get the package.artifacts
-        if (self.get_step_results(&#39;package&#39;) and
-                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
-            artifacts = self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
-        else:
-            raise ValueError(&#39;Severe error: Package does not have artifacts&#39;)
+        # ----- get package items
+        artifacts = self._get_artifacts()
 
-        # Build a temporary settings.xml file for the mvn user/pass
-        settings_path = self.write_working_file(&#39;ci-settings.xml&#39;, b&#39;&#39;&#39;
-        &lt;settings&gt;
-              &lt;servers&gt;
-                  &lt;server&gt;
-                          &lt;id&gt;${repositoryId}&lt;/id&gt;
-                          &lt;username&gt;${repositoryUser}&lt;/username&gt;
-                          &lt;password&gt;${repositoryPassword}&lt;/password&gt;
-                  &lt;/server&gt;
-              &lt;/servers&gt;
-        &lt;/settings&gt;&#39;&#39;&#39;)
+        maven_push_artifact_repo_id = self.get_config_value(&#39;maven-push-artifact-repo-id&#39;)
+        maven_push_artifact_repo_url = self.get_config_value(&#39;maven-push-artifact-repo-url&#39;)
+        settings_file = self._generate_maven_settings()
 
-        results = {
-            &#39;artifacts&#39;: []
-        }
+        report_artifacts = []
 
         for artifact in artifacts:
             artifact_path = artifact[&#39;path&#39;]
@@ -408,58 +418,35 @@ class Maven(StepImplementer):
             package_type = artifact[&#39;package-type&#39;]
 
             try:
-                # Build the mvn command, settings is required even if no user/password
-                # The settings file is required, need to deal with empty userid,password
-                # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
-
-                if user == &#39;&#39;:
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Durl=&#39; + url,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-DrepositoryId=tssc&#39;,
-                        &#39;-s&#39; + settings_path,
-                        _out=sys.stdout,
-                        _err=sys.stderr
-                    )
-                else:
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Durl=&#39; + url,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-DrepositoryId=tssc&#39;,
-                        &#39;-DrepositoryUser=&#39; + user,
-                        &#39;-DrepositoryPassword=&#39; + password,
-                        &#39;-s&#39; + settings_path,
-                        _out=sys.stdout,
-                        _err=sys.stderr
-                    )
-
+                sh.mvn(  # pylint: disable=no-member
+                    &#39;deploy:deploy-file&#39;,
+                    &#39;-Dversion=&#39; + version,
+                    &#39;-Dfile=&#39; + artifact_path,
+                    &#39;-DgroupId=&#39; + group_id,
+                    &#39;-DartifactId=&#39; + artifact_id,
+                    &#39;-Dpackaging=&#39; + package_type,
+                    &#39;-Durl=&#39; + maven_push_artifact_repo_url,
+                    &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
+                    &#39;-s&#39; + settings_file,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
             except sh.ErrorReturnCode as error:
-                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error)) from error
+                raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
-            results[&#39;artifacts&#39;].append({
-                &#39;url&#39;: url + &#39;/&#39; +
-                       re.sub(r&#39;\.&#39;, &#39;/&#39;, group_id) + &#39;/&#39; +
-                       artifact_id + &#39;/&#39; +
-                       version + &#39;/&#39; +
-                       artifact_id + &#39;-&#39; +
-                       version + &#39;.&#39; +
-                       package_type,
+            report_artifacts.append({
                 &#39;artifact-id&#39;: artifact_id,
                 &#39;group-id&#39;: group_id,
                 &#39;version&#39;: version,
                 &#39;path&#39;: artifact_path,
             })
-
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True,
+                &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
+            },
+            &#39;report-artifacts&#39;: report_artifacts
+        }
         return results</code></pre>
 </details>
 </section>
@@ -519,27 +506,35 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Validates the given `runtime_step_config` against the required step configuration keys.
+    def _get_version(self):
+        # Required: Get the generate-metadata.version
+        if (self.get_step_results(&#39;generate-metadata&#39;) and
+                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
+            return self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
+        raise ValueError(&#39;generate-metadata results missing version&#39;)
 
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _get_artifacts(self):
+        # Required: Get the package.artifacts
+        if (self.get_step_results(&#39;package&#39;) and
+                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
+            return self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
+        raise ValueError(&#39;package results missing artifacts&#39;)
 
-        Raises
-        ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
-        &#34;&#34;&#34;
-        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
-
-        assert ( \
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-        ), &#39;Either username or password is not set. Neither or both must be set.&#39;
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
@@ -549,47 +544,18 @@ class Maven(StepImplementer):
         dict
             Results of running this step.
         &#34;&#34;&#34;
-        user = &#39;&#39;
-        password = &#39;&#39;
-
-        url = self.get_config_value(&#39;url&#39;)
-
-        if self.has_config_value(AUTHENTICATION_CONFIG):
-            if(self.get_config_value(&#39;user&#39;) and self.get_config_value(&#39;password&#39;)):
-                user = self.get_config_value(&#39;user&#39;)
-                password = self.get_config_value(&#39;password&#39;)
 
         # ----- get generate-metadata items
-        # Required: Get the generate-metadata.version
-        if (self.get_step_results(&#39;generate-metadata&#39;) and
-                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
-            version = self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
-        else:
-            raise ValueError(&#39;Severe error: Generate-metadata does not have a version&#39;)
+        version = self._get_version()
 
-        # ----- get package items this will change
-        # Required: Get the package.artifacts
-        if (self.get_step_results(&#39;package&#39;) and
-                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
-            artifacts = self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
-        else:
-            raise ValueError(&#39;Severe error: Package does not have artifacts&#39;)
+        # ----- get package items
+        artifacts = self._get_artifacts()
 
-        # Build a temporary settings.xml file for the mvn user/pass
-        settings_path = self.write_working_file(&#39;ci-settings.xml&#39;, b&#39;&#39;&#39;
-        &lt;settings&gt;
-              &lt;servers&gt;
-                  &lt;server&gt;
-                          &lt;id&gt;${repositoryId}&lt;/id&gt;
-                          &lt;username&gt;${repositoryUser}&lt;/username&gt;
-                          &lt;password&gt;${repositoryPassword}&lt;/password&gt;
-                  &lt;/server&gt;
-              &lt;/servers&gt;
-        &lt;/settings&gt;&#39;&#39;&#39;)
+        maven_push_artifact_repo_id = self.get_config_value(&#39;maven-push-artifact-repo-id&#39;)
+        maven_push_artifact_repo_url = self.get_config_value(&#39;maven-push-artifact-repo-url&#39;)
+        settings_file = self._generate_maven_settings()
 
-        results = {
-            &#39;artifacts&#39;: []
-        }
+        report_artifacts = []
 
         for artifact in artifacts:
             artifact_path = artifact[&#39;path&#39;]
@@ -598,58 +564,35 @@ class Maven(StepImplementer):
             package_type = artifact[&#39;package-type&#39;]
 
             try:
-                # Build the mvn command, settings is required even if no user/password
-                # The settings file is required, need to deal with empty userid,password
-                # https://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html
-
-                if user == &#39;&#39;:
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Durl=&#39; + url,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-DrepositoryId=tssc&#39;,
-                        &#39;-s&#39; + settings_path,
-                        _out=sys.stdout,
-                        _err=sys.stderr
-                    )
-                else:
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Durl=&#39; + url,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-DrepositoryId=tssc&#39;,
-                        &#39;-DrepositoryUser=&#39; + user,
-                        &#39;-DrepositoryPassword=&#39; + password,
-                        &#39;-s&#39; + settings_path,
-                        _out=sys.stdout,
-                        _err=sys.stderr
-                    )
-
+                sh.mvn(  # pylint: disable=no-member
+                    &#39;deploy:deploy-file&#39;,
+                    &#39;-Dversion=&#39; + version,
+                    &#39;-Dfile=&#39; + artifact_path,
+                    &#39;-DgroupId=&#39; + group_id,
+                    &#39;-DartifactId=&#39; + artifact_id,
+                    &#39;-Dpackaging=&#39; + package_type,
+                    &#39;-Durl=&#39; + maven_push_artifact_repo_url,
+                    &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
+                    &#39;-s&#39; + settings_file,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
             except sh.ErrorReturnCode as error:
-                raise RuntimeError(&#34;Error invoking mvn: {all}&#34;.format(all=error)) from error
+                raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
-            results[&#39;artifacts&#39;].append({
-                &#39;url&#39;: url + &#39;/&#39; +
-                       re.sub(r&#39;\.&#39;, &#39;/&#39;, group_id) + &#39;/&#39; +
-                       artifact_id + &#39;/&#39; +
-                       version + &#39;/&#39; +
-                       artifact_id + &#39;-&#39; +
-                       version + &#39;.&#39; +
-                       package_type,
+            report_artifacts.append({
                 &#39;artifact-id&#39;: artifact_id,
                 &#39;group-id&#39;: group_id,
                 &#39;version&#39;: version,
                 &#39;path&#39;: artifact_path,
             })
-
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True,
+                &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
+            },
+            &#39;report-artifacts&#39;: report_artifacts
+        }
         return results</code></pre>
 </details>
 <h3>Ancestors</h3>

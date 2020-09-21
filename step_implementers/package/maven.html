@@ -330,6 +330,9 @@ import sh
 from tssc import StepImplementer
 from tssc.utils.xml import get_xml_element
 
+from tssc.utils.maven import generate_maven_settings
+from tssc.config import ConfigValue
+
 DEFAULT_CONFIG = {
     &#39;pom-file&#39;: &#39;pom.xml&#39;,
     &#39;artifact-extensions&#39;: [&#34;jar&#34;, &#34;war&#34;, &#34;ear&#34;],
@@ -339,6 +342,7 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_KEYS = [
     &#39;pom-file&#39;
 ]
+
 
 class Maven(StepImplementer):
     &#34;&#34;&#34;
@@ -379,6 +383,22 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
@@ -394,16 +414,19 @@ class Maven(StepImplementer):
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
+        settings_file = self._generate_maven_settings()
+
         try:
             sh.mvn(  # pylint: disable=no-member,
                 &#39;clean&#39;,
                 &#39;install&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error
+            raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
         # find the artifacts
         artifact_file_names = []
@@ -511,6 +534,22 @@ pom.xml file.</p></div>
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_KEYS
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
 
@@ -526,16 +565,19 @@ pom.xml file.</p></div>
         if not os.path.exists(pom_file):
             raise ValueError(&#39;Given pom file does not exist: &#39; + pom_file)
 
+        settings_file = self._generate_maven_settings()
+
         try:
             sh.mvn(  # pylint: disable=no-member,
                 &#39;clean&#39;,
                 &#39;install&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(&#34;Error invoking mvn: {error}&#34;.format(error=error)) from error
+            raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
         # find the artifacts
         artifact_file_names = []

@@ -35,16 +35,8 @@ accept minimally the following configuration options.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>url</code></td>
-<td>URL to the artifact repository to push the artifact to.</td>
-</tr>
-<tr>
-<td><code>user</code></td>
-<td>User to authenticate with the artifact repository.</td>
-</tr>
-<tr>
-<td><code>password</code></td>
-<td>Password to authenticate with the artifact repository.</td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -60,11 +52,20 @@ minimally produce the following step results.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>artifacts</code></td>
-<td>An array of dictionaries with information on the pushed artifacts.</td>
+<td><code>result</code></td>
+<td>Dictionary of results</td>
+</tr>
+<tr>
+<td><code>report-artifacts</code></td>
+<td>An array of dictionaries describing the push results</td>
 </tr>
 </tbody>
 </table>
+<p>Elements in the <code>result</code> dictionary:
+| <code>success</code>
+| True or False
+| <code>message</code>
+| Overall status</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -78,18 +79,21 @@ accept minimally the following configuration options.
 
 | Key                 | Description
 |---------------------|------------
-| `url`               | URL to the artifact repository to push the artifact to.
-| `user`              | User to authenticate with the artifact repository.
-| `password`          | Password to authenticate with the artifact repository.
+
 
 Results
 -------
 All tssc.StepImplementers for this step should
 minimally produce the following step results.
 
-| Key                 | Description
-|---------------------|------------
-| `artifacts`         | An array of dictionaries with information on the pushed artifacts.
+| Key                | Description
+|--------------------|------------
+| `result`           | Dictionary of results
+| `report-artifacts` | An array of dictionaries describing the push results
+
+Elements in the `result` dictionary:
+| `success`          | True or False
+| `message`          | Overall status
 
 &#34;&#34;&#34;
 

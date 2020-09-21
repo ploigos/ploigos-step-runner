@@ -269,6 +269,9 @@ from tssc import StepImplementer
 from tssc import DefaultSteps
 from tssc.utils.xml import get_xml_element_by_path
 
+from tssc.utils.maven import generate_maven_settings
+from tssc.config import ConfigValue
+
 DEFAULT_CONFIG = {
     &#39;fail-on-no-tests&#39;: True,
     &#39;pom-file&#39;: &#39;pom.xml&#39;,
@@ -282,6 +285,7 @@ REQUIRED_CONFIG_KEYS = [
     &#39;selenium-hub-url&#39;,
     &#39;report-dir&#39;
 ]
+
 
 class Maven(StepImplementer):
     &#34;&#34;&#34;
@@ -341,21 +345,32 @@ class Maven(StepImplementer):
 
         return target_base_url
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;
         Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
 
         Returns
         -------
         dict
             Results of running this step.
         &#34;&#34;&#34;
+        settings_file = self._generate_maven_settings()
         pom_file = self.get_config_value(&#39;pom-file&#39;)
         fail_on_no_tests = self.get_config_value(&#39;fail-on-no-tests&#39;)
         selenium_hub_url = self.get_config_value(&#39;selenium-hub-url&#39;)
@@ -369,8 +384,8 @@ class Maven(StepImplementer):
         maven_surefire_plugin = get_xml_element_by_path(
             pom_file,
             surefire_path,
-            default_namespace=&#39;mvn&#39;
-        )
+            default_namespace=&#39;mvn&#39;)
+
         if maven_surefire_plugin is None:
             raise ValueError(&#39;Uat dependency &#34;maven-surefire-plugin&#34; missing from POM.&#39;)
 
@@ -396,14 +411,14 @@ class Maven(StepImplementer):
                     f&#39;json:target/{report_dir}/cucumber.json&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
-        if not os.path.isdir(test_results_dir) or \
-            len(os.listdir(test_results_dir)) == 0:
+        if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
                 results = {
                     &#39;result&#39;: {
@@ -416,7 +431,7 @@ class Maven(StepImplementer):
                         &#39;fail-on-no-tests&#39;: False
                     }
                 }
-            else:# pragma: no cover
+            else:  # pragma: no cover
                 # Added &#39;no cover&#39; to bypass missing uat step coverage error
                 # that is covered by the following test:
                 #   test_uat_run_attempt_fails_fail_on_no_tests_flag_true
@@ -518,21 +533,32 @@ class Maven(StepImplementer):
 
         return target_base_url
 
+    def _generate_maven_settings(self):
+        # ----- build settings.xml
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-servers&#39;)
+        )
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_config_value(&#39;maven-mirrors&#39;)
+        )
+        return generate_maven_settings(self.create_working_folder(),
+                                       maven_servers,
+                                       maven_repositories,
+                                       maven_mirrors)
+
     def _run_step(self):
         &#34;&#34;&#34;
         Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
 
         Returns
         -------
         dict
             Results of running this step.
         &#34;&#34;&#34;
+        settings_file = self._generate_maven_settings()
         pom_file = self.get_config_value(&#39;pom-file&#39;)
         fail_on_no_tests = self.get_config_value(&#39;fail-on-no-tests&#39;)
         selenium_hub_url = self.get_config_value(&#39;selenium-hub-url&#39;)
@@ -546,8 +572,8 @@ class Maven(StepImplementer):
         maven_surefire_plugin = get_xml_element_by_path(
             pom_file,
             surefire_path,
-            default_namespace=&#39;mvn&#39;
-        )
+            default_namespace=&#39;mvn&#39;)
+
         if maven_surefire_plugin is None:
             raise ValueError(&#39;Uat dependency &#34;maven-surefire-plugin&#34; missing from POM.&#39;)
 
@@ -573,14 +599,14 @@ class Maven(StepImplementer):
                     f&#39;json:target/{report_dir}/cucumber.json&#39;,
                 &#39;test&#39;,
                 &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
 
-        if not os.path.isdir(test_results_dir) or \
-            len(os.listdir(test_results_dir)) == 0:
+        if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
                 results = {
                     &#39;result&#39;: {
@@ -593,7 +619,7 @@ class Maven(StepImplementer):
                         &#39;fail-on-no-tests&#39;: False
                     }
                 }
-            else:# pragma: no cover
+            else:  # pragma: no cover
                 # Added &#39;no cover&#39; to bypass missing uat step coverage error
                 # that is covered by the following test:
                 #   test_uat_run_attempt_fails_fail_on_no_tests_flag_true
