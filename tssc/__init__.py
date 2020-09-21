@@ -173,7 +173,7 @@ From least precedence to highest precedence.
         - id: ''
           url: ''
           mirror-of: ''
-          
+
         # Dictionary of container registries to authenticate with.
         # Suggest putting in global configuration so it can be used for creating and pushing
         # images. But can also or instead be put in the individual steps if say different
