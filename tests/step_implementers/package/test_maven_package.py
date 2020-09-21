@@ -3,7 +3,6 @@ import sh
 from io import IOBase
 from pathlib import Path
 from unittest.mock import patch
-import sh
 
 from testfixtures import TempDirectory
 

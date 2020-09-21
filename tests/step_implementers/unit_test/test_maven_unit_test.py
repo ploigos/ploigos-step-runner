@@ -114,7 +114,7 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 'Given pom file does not exist: does-not-exist.pom'):
             factory.run_step('unit-test')
 
-    @patch('sh.mvn', create=True, side_effect=sh.ErrorReturnCode('mvn clean test', b'mock out', b'mock error'))
+    @patch('sh.mvn', create=True, side_effect = sh.ErrorReturnCode('mvn clean test', b'mock out', b'mock error'))
     def test_mvn_error_return_code(self, mvn_mock):
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'

@@ -2,7 +2,6 @@
 
 Tests the Maven Cucumber UAT step.
 """
-import sys
 from os import path, rmdir, makedirs
 from io import IOBase
 from unittest.mock import patch
