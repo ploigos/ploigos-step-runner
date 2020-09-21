@@ -171,6 +171,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
             }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
+                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
@@ -248,6 +249,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 config,
                 expected_step_results)
             buildah_mock.bud.assert_called_once_with(
+                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
@@ -303,6 +305,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
             }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
+                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
@@ -315,6 +318,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 _tee='err'
             )
             buildah_mock.push.assert_called_once_with(
+                '--storage-driver=vfs',
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=Any(IOBase),
@@ -402,6 +406,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
             }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
+                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
@@ -414,6 +419,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                 _tee='err'
             )
             buildah_mock.push.assert_called_once_with(
+                '--storage-driver=vfs',
                 tag,
                 'docker-archive:{image_tar_file}'.format(image_tar_file=image_tar_file),
                 _out=Any(IOBase),
@@ -481,6 +487,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
             }}
             run_step_test_with_result_validation(temp_dir, 'create-container-image', config, expected_step_results)
             buildah_mock.bud.assert_called_once_with(
+                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers',
