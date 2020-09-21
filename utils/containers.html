@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>tssc.utils.containers API documentation</title>
+<meta name="description" content="Shared utils for dealing with containers." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tssc.utils.containers</code></h1>
+</header>
+<section id="section-intro">
+<p>Shared utils for dealing with containers.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Shared utils for dealing with containers.
+&#34;&#34;&#34;
+
+import sys
+import sh
+
+from tssc.config.config_value import ConfigValue
+
+def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
+    &#34;&#34;&#34;Logs into one or more container registries.
+
+    Requires one of the following to be installed to do the authentication:
+    * buidlah
+    * podman
+    * skopeo
+
+    Notes
+    -----
+    registries example 1 (dict of dicts where child dict keys are registry uri):
+        {
+            &#39;registry.redhat.io&#39;: {
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            &#39;registry.internal.example.xyz&#39;: {
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        }
+
+    registries example 2 (dict of dicts where uri is key in child dicts):
+        {
+            &#39;redhat&#39;: {
+                &#39;uri&#39;: registry.redhat.io
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            &#39;internal&#39;: {
+                &#39;uri&#39;: &#39;registry.internal.example.xyz&#39;
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        }
+
+    registries example 3 (list of dicts where uri is key in child dicts):
+        [
+            {
+                &#39;uri&#39;: registry.redhat.io
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            {
+                &#39;uri&#39;: &#39;registry.internal.example.xyz&#39;
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        ]
+
+    Parameters
+    ----------
+    registries : dict or list or None
+        Dict of dicts of registry configurations or a list of dicts of registry configurations.
+        See Notes section for details.
+        If none, does nothing.
+    containers_config_auth_file : str, optional
+        Path of the authentication file.
+        If not specified default of the underlying authentication system will be used.
+
+    See Also
+    --------
+    container_registry_login : Performs the login for a single container registry
+    sh.buildah : https://www.mankier.com/1/buildah-login
+    sh.podman : https://www.mankier.com/1/podman-login
+    sh.skopeo : https://www.mankier.com/1/skopeo-login
+    &#34;&#34;&#34;
+
+    if registries is None:
+        return
+
+    assert isinstance(registries, (dict, list))
+
+    if isinstance(registries, dict):
+        for registry_key, registry_conf in registries.items():
+            if isinstance(registry_conf, ConfigValue):
+                registry_conf = registry_conf.value
+
+            assert &#39;username&#39; in registry_conf, \
+                f&#34;Configuration for container registry ({registry_key}) &#34; \
+                f&#34;must specify a &#39;username&#39;: {registry_conf}&#34;
+            assert &#39;password&#39; in registry_conf, \
+                f&#34;Configuration for container registry ({registry_key}) &#34; \
+                f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
+
+            # if uri is key in the dict then use that for the registry uri
+            # else use the dict key for the registry conf as the registry uri
+            if &#39;uri&#39; in registry_conf:
+                registry_uri = registry_conf[&#39;uri&#39;]
+            else:
+                registry_uri = registry_key
+
+            if &#39;tls-verify&#39; in registry_conf:
+                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            else:
+                registry_tls_verify = True
+
+            container_registry_login(
+                container_registry_uri=registry_uri,
+                container_registry_username=registry_conf[&#39;username&#39;],
+                container_registry_password=registry_conf[&#39;password&#39;],
+                container_registry_tls_verify=registry_tls_verify,
+                containers_config_auth_file=containers_config_auth_file
+            )
+    elif isinstance(registries, list):
+        for registry_conf in registries:
+            if isinstance(registry_conf, ConfigValue):
+                registry_conf = registry_conf.value
+
+            assert &#39;uri&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;uri&#39;: {registry_conf}&#34;
+            assert &#39;username&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;username&#39;: {registry_conf}&#34;
+            assert &#39;password&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
+
+            if &#39;tls-verify&#39; in registry_conf:
+                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            else:
+                registry_tls_verify = True
+
+            container_registry_login(
+                container_registry_uri=registry_conf[&#39;uri&#39;],
+                container_registry_username=registry_conf[&#39;username&#39;],
+                container_registry_password=registry_conf[&#39;password&#39;],
+                container_registry_tls_verify=registry_tls_verify,
+                containers_config_auth_file=containers_config_auth_file
+            )
+
+def container_registry_login(
+    container_registry_uri,
+    container_registry_username,
+    container_registry_password,
+    container_registry_tls_verify=True,
+    containers_config_auth_file=None
+):
+    &#34;&#34;&#34;Performs the login for a single container registry.
+
+    Requires one of the following to be installed to do the authentication:
+    * buidlah
+    * podman
+    * skopeo
+
+    Parametes
+    ---------
+    container_registry_uri : str or ConfigValue
+        URI to the container registry to log into.
+    container_registry_username : str or ConfigValue
+        Username to log into the container registry with.
+    container_registry_password : str or ConfigValue
+        Password to log into the container registry with.
+    container_registry_tls_verify : bool or str or ConfigValue
+        True to verify container registry certificates as part of authenticating.
+        False to ignore certificate chain.
+        NOTE: no matter what SSL is used to authenticate with container registry
+    containers_config_auth_file : str or ConfigValue, optional
+        Path of the authentication file.
+        If not specified default of the underlying authentication system will be used.
+
+    Raises
+    ------
+    RuntimeError
+        When can not find tool to login to container registry with.
+        When error loging into container registry.
+
+    See Also
+    --------
+    container_registries_login : authenticate with multiple container registries
+    sh.buildah : https://www.mankier.com/1/buildah-login
+    sh.podman : https://www.mankier.com/1/podman-login
+    sh.skopeo : https://www.mankier.com/1/skopeo-login
+    &#34;&#34;&#34;
+
+    assert container_registry_uri
+    assert container_registry_username
+    assert container_registry_password
+
+    if isinstance(container_registry_uri, ConfigValue):
+        container_registry_uri = container_registry_uri.value
+    if isinstance(container_registry_username, ConfigValue):
+        container_registry_username = container_registry_username.value
+    if isinstance(container_registry_password, ConfigValue):
+        container_registry_password = container_registry_password.value
+    if isinstance(container_registry_tls_verify, ConfigValue):
+        container_registry_tls_verify = container_registry_tls_verify.value
+    if isinstance(containers_config_auth_file, ConfigValue):
+        containers_config_auth_file = containers_config_auth_file.value
+
+    # can use any of these tools to authenticate, look for them all and use first available
+    #
+    # NOTE: this all works because these three commands take the exact same parameters for login
+    # if implementing some new command, like docker, you will need to deal with the differences
+    buildah_path = sh.which(&#39;buildah&#39;)
+    podman_path = sh.which(&#39;podman&#39;)
+    skopeo_path = sh.which(&#39;skopeo&#39;)
+    if buildah_path is not None:
+        container_command = sh.buildah.bake() #pylint: disable=no-member
+    elif podman_path is not None:
+        container_command = sh.podman.bake() #pylint: disable=no-member
+    elif skopeo_path is not None:
+        container_command = sh.skopeo.bake() #pylint: disable=no-member
+    else:
+        raise RuntimeError(
+            f&#34;When attempting to login to container registry ({container_registry_uri}) &#34;
+            &#34;could not find one of the expected tools (buildah, podman, skopeo) to login with.&#34;
+        )
+
+    login_command_named_flags = {
+        &#39;password_stdin&#39;: True,
+        &#39;username&#39;: container_registry_username,
+        &#39;tls_verify&#39;: str(container_registry_tls_verify).lower()
+    }
+    if containers_config_auth_file:
+        login_command_named_flags[&#39;authfile&#39;] = containers_config_auth_file
+
+    try:
+        # NOTE: need to bake in the flags prior to the registry due to nonesense with
+        #       required ordering by the login command and how sh handles
+        #       escaping and ordering parameters
+        login_comnmand = container_command.login.bake(**login_command_named_flags)
+        login_comnmand(
+            container_registry_uri,
+            _in=container_registry_password,
+            _out=sys.stdout,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#34;Failed to login to container registry ({container_registry_uri}) &#34;
+            f&#34;with username ({container_registry_username}): {error}&#34;
+        ) from error</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="tssc.utils.containers.container_registries_login"><code class="name flex">
+<span>def <span class="ident">container_registries_login</span></span>(<span>registries, containers_config_auth_file=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Logs into one or more container registries.</p>
+<p>Requires one of the following to be installed to do the authentication:
+* buidlah
+* podman
+* skopeo</p>
+<h2 id="notes">Notes</h2>
+<p>registries example 1 (dict of dicts where child dict keys are registry uri):
+{
+'registry.redhat.io': {
+'username': 'hello@world.xyz',
+'password': 'nope'
+},
+'registry.internal.example.xyz': {
+'username': 'hello@example.xyz',
+'password': 'nope'
+}
+}</p>
+<p>registries example 2 (dict of dicts where uri is key in child dicts):
+{
+'redhat': {
+'uri': registry.redhat.io
+'username': 'hello@world.xyz',
+'password': 'nope'
+},
+'internal': {
+'uri': 'registry.internal.example.xyz'
+'username': 'hello@example.xyz',
+'password': 'nope'
+}
+}</p>
+<p>registries example 3 (list of dicts where uri is key in child dicts):
+[
+{
+'uri': registry.redhat.io
+'username': 'hello@world.xyz',
+'password': 'nope'
+},
+{
+'uri': 'registry.internal.example.xyz'
+'username': 'hello@example.xyz',
+'password': 'nope'
+}
+]</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>registries</code></strong> :&ensp;<code>dict</code> or <code>list</code> or <code>None</code></dt>
+<dd>Dict of dicts of registry configurations or a list of dicts of registry configurations.
+See Notes section for details.
+If none, does nothing.</dd>
+<dt><strong><code>containers_config_auth_file</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Path of the authentication file.
+If not specified default of the underlying authentication system will be used.</dd>
+</dl>
+<h2 id="see-also">See Also</h2>
+<dl>
+<dt><code><a title="tssc.utils.containers.container_registry_login" href="#tssc.utils.containers.container_registry_login">container_registry_login()</a></code></dt>
+<dd>Performs the login for a single container registry</dd>
+<dt><code>sh.buildah</code></dt>
+<dd><a href="https://www.mankier.com/1/buildah-login">https://www.mankier.com/1/buildah-login</a></dd>
+<dt><code>sh.podman</code></dt>
+<dd><a href="https://www.mankier.com/1/podman-login">https://www.mankier.com/1/podman-login</a></dd>
+<dt><code>sh.skopeo</code></dt>
+<dd><a href="https://www.mankier.com/1/skopeo-login">https://www.mankier.com/1/skopeo-login</a></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
+    &#34;&#34;&#34;Logs into one or more container registries.
+
+    Requires one of the following to be installed to do the authentication:
+    * buidlah
+    * podman
+    * skopeo
+
+    Notes
+    -----
+    registries example 1 (dict of dicts where child dict keys are registry uri):
+        {
+            &#39;registry.redhat.io&#39;: {
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            &#39;registry.internal.example.xyz&#39;: {
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        }
+
+    registries example 2 (dict of dicts where uri is key in child dicts):
+        {
+            &#39;redhat&#39;: {
+                &#39;uri&#39;: registry.redhat.io
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            &#39;internal&#39;: {
+                &#39;uri&#39;: &#39;registry.internal.example.xyz&#39;
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        }
+
+    registries example 3 (list of dicts where uri is key in child dicts):
+        [
+            {
+                &#39;uri&#39;: registry.redhat.io
+                &#39;username&#39;: &#39;hello@world.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            },
+            {
+                &#39;uri&#39;: &#39;registry.internal.example.xyz&#39;
+                &#39;username&#39;: &#39;hello@example.xyz&#39;,
+                &#39;password&#39;: &#39;nope&#39;
+            }
+        ]
+
+    Parameters
+    ----------
+    registries : dict or list or None
+        Dict of dicts of registry configurations or a list of dicts of registry configurations.
+        See Notes section for details.
+        If none, does nothing.
+    containers_config_auth_file : str, optional
+        Path of the authentication file.
+        If not specified default of the underlying authentication system will be used.
+
+    See Also
+    --------
+    container_registry_login : Performs the login for a single container registry
+    sh.buildah : https://www.mankier.com/1/buildah-login
+    sh.podman : https://www.mankier.com/1/podman-login
+    sh.skopeo : https://www.mankier.com/1/skopeo-login
+    &#34;&#34;&#34;
+
+    if registries is None:
+        return
+
+    assert isinstance(registries, (dict, list))
+
+    if isinstance(registries, dict):
+        for registry_key, registry_conf in registries.items():
+            if isinstance(registry_conf, ConfigValue):
+                registry_conf = registry_conf.value
+
+            assert &#39;username&#39; in registry_conf, \
+                f&#34;Configuration for container registry ({registry_key}) &#34; \
+                f&#34;must specify a &#39;username&#39;: {registry_conf}&#34;
+            assert &#39;password&#39; in registry_conf, \
+                f&#34;Configuration for container registry ({registry_key}) &#34; \
+                f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
+
+            # if uri is key in the dict then use that for the registry uri
+            # else use the dict key for the registry conf as the registry uri
+            if &#39;uri&#39; in registry_conf:
+                registry_uri = registry_conf[&#39;uri&#39;]
+            else:
+                registry_uri = registry_key
+
+            if &#39;tls-verify&#39; in registry_conf:
+                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            else:
+                registry_tls_verify = True
+
+            container_registry_login(
+                container_registry_uri=registry_uri,
+                container_registry_username=registry_conf[&#39;username&#39;],
+                container_registry_password=registry_conf[&#39;password&#39;],
+                container_registry_tls_verify=registry_tls_verify,
+                containers_config_auth_file=containers_config_auth_file
+            )
+    elif isinstance(registries, list):
+        for registry_conf in registries:
+            if isinstance(registry_conf, ConfigValue):
+                registry_conf = registry_conf.value
+
+            assert &#39;uri&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;uri&#39;: {registry_conf}&#34;
+            assert &#39;username&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;username&#39;: {registry_conf}&#34;
+            assert &#39;password&#39; in registry_conf, \
+                f&#34;Configuration for container registry &#34; \
+                f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
+
+            if &#39;tls-verify&#39; in registry_conf:
+                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            else:
+                registry_tls_verify = True
+
+            container_registry_login(
+                container_registry_uri=registry_conf[&#39;uri&#39;],
+                container_registry_username=registry_conf[&#39;username&#39;],
+                container_registry_password=registry_conf[&#39;password&#39;],
+                container_registry_tls_verify=registry_tls_verify,
+                containers_config_auth_file=containers_config_auth_file
+            )</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.containers.container_registry_login"><code class="name flex">
+<span>def <span class="ident">container_registry_login</span></span>(<span>container_registry_uri, container_registry_username, container_registry_password, container_registry_tls_verify=True, containers_config_auth_file=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Performs the login for a single container registry.</p>
+<p>Requires one of the following to be installed to do the authentication:
+* buidlah
+* podman
+* skopeo</p>
+<h2 id="parametes">Parametes</h2>
+<p>container_registry_uri : str or ConfigValue
+URI to the container registry to log into.
+container_registry_username : str or ConfigValue
+Username to log into the container registry with.
+container_registry_password : str or ConfigValue
+Password to log into the container registry with.
+container_registry_tls_verify : bool or str or ConfigValue
+True to verify container registry certificates as part of authenticating.
+False to ignore certificate chain.
+NOTE: no matter what SSL is used to authenticate with container registry
+containers_config_auth_file : str or ConfigValue, optional
+Path of the authentication file.
+If not specified default of the underlying authentication system will be used.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>When can not find tool to login to container registry with.
+When error loging into container registry.</dd>
+</dl>
+<h2 id="see-also">See Also</h2>
+<dl>
+<dt><code><a title="tssc.utils.containers.container_registries_login" href="#tssc.utils.containers.container_registries_login">container_registries_login()</a></code></dt>
+<dd>authenticate with multiple container registries</dd>
+<dt><code>sh.buildah</code></dt>
+<dd><a href="https://www.mankier.com/1/buildah-login">https://www.mankier.com/1/buildah-login</a></dd>
+<dt><code>sh.podman</code></dt>
+<dd><a href="https://www.mankier.com/1/podman-login">https://www.mankier.com/1/podman-login</a></dd>
+<dt><code>sh.skopeo</code></dt>
+<dd><a href="https://www.mankier.com/1/skopeo-login">https://www.mankier.com/1/skopeo-login</a></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def container_registry_login(
+    container_registry_uri,
+    container_registry_username,
+    container_registry_password,
+    container_registry_tls_verify=True,
+    containers_config_auth_file=None
+):
+    &#34;&#34;&#34;Performs the login for a single container registry.
+
+    Requires one of the following to be installed to do the authentication:
+    * buidlah
+    * podman
+    * skopeo
+
+    Parametes
+    ---------
+    container_registry_uri : str or ConfigValue
+        URI to the container registry to log into.
+    container_registry_username : str or ConfigValue
+        Username to log into the container registry with.
+    container_registry_password : str or ConfigValue
+        Password to log into the container registry with.
+    container_registry_tls_verify : bool or str or ConfigValue
+        True to verify container registry certificates as part of authenticating.
+        False to ignore certificate chain.
+        NOTE: no matter what SSL is used to authenticate with container registry
+    containers_config_auth_file : str or ConfigValue, optional
+        Path of the authentication file.
+        If not specified default of the underlying authentication system will be used.
+
+    Raises
+    ------
+    RuntimeError
+        When can not find tool to login to container registry with.
+        When error loging into container registry.
+
+    See Also
+    --------
+    container_registries_login : authenticate with multiple container registries
+    sh.buildah : https://www.mankier.com/1/buildah-login
+    sh.podman : https://www.mankier.com/1/podman-login
+    sh.skopeo : https://www.mankier.com/1/skopeo-login
+    &#34;&#34;&#34;
+
+    assert container_registry_uri
+    assert container_registry_username
+    assert container_registry_password
+
+    if isinstance(container_registry_uri, ConfigValue):
+        container_registry_uri = container_registry_uri.value
+    if isinstance(container_registry_username, ConfigValue):
+        container_registry_username = container_registry_username.value
+    if isinstance(container_registry_password, ConfigValue):
+        container_registry_password = container_registry_password.value
+    if isinstance(container_registry_tls_verify, ConfigValue):
+        container_registry_tls_verify = container_registry_tls_verify.value
+    if isinstance(containers_config_auth_file, ConfigValue):
+        containers_config_auth_file = containers_config_auth_file.value
+
+    # can use any of these tools to authenticate, look for them all and use first available
+    #
+    # NOTE: this all works because these three commands take the exact same parameters for login
+    # if implementing some new command, like docker, you will need to deal with the differences
+    buildah_path = sh.which(&#39;buildah&#39;)
+    podman_path = sh.which(&#39;podman&#39;)
+    skopeo_path = sh.which(&#39;skopeo&#39;)
+    if buildah_path is not None:
+        container_command = sh.buildah.bake() #pylint: disable=no-member
+    elif podman_path is not None:
+        container_command = sh.podman.bake() #pylint: disable=no-member
+    elif skopeo_path is not None:
+        container_command = sh.skopeo.bake() #pylint: disable=no-member
+    else:
+        raise RuntimeError(
+            f&#34;When attempting to login to container registry ({container_registry_uri}) &#34;
+            &#34;could not find one of the expected tools (buildah, podman, skopeo) to login with.&#34;
+        )
+
+    login_command_named_flags = {
+        &#39;password_stdin&#39;: True,
+        &#39;username&#39;: container_registry_username,
+        &#39;tls_verify&#39;: str(container_registry_tls_verify).lower()
+    }
+    if containers_config_auth_file:
+        login_command_named_flags[&#39;authfile&#39;] = containers_config_auth_file
+
+    try:
+        # NOTE: need to bake in the flags prior to the registry due to nonesense with
+        #       required ordering by the login command and how sh handles
+        #       escaping and ordering parameters
+        login_comnmand = container_command.login.bake(**login_command_named_flags)
+        login_comnmand(
+            container_registry_uri,
+            _in=container_registry_password,
+            _out=sys.stdout,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#34;Failed to login to container registry ({container_registry_uri}) &#34;
+            f&#34;with username ({container_registry_username}): {error}&#34;
+        ) from error</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tssc.utils" href="index.html">tssc.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="tssc.utils.containers.container_registries_login" href="#tssc.utils.containers.container_registries_login">container_registries_login</a></code></li>
+<li><code><a title="tssc.utils.containers.container_registry_login" href="#tssc.utils.containers.container_registry_login">container_registry_login</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>

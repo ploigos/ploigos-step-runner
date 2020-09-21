@@ -67,6 +67,13 @@ from runtime configuration.</p>
 <td><code>'true'</code></td>
 <td>Whether to verify TLS for destination of image</td>
 </tr>
+<tr>
+<td><code>containers-config-auth-file</code></td>
+<td>True</td>
+<td><code>'~/.skopeo-auth.json'</code></td>
+<td>Path to the container registry authentication file
+to use for container registry authentication.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
@@ -128,6 +135,9 @@ from runtime configuration.
                                              automatically be applied
 | `src-tls-verify`  | True      | `&#39;true&#39;` | Whether to very TLS for source of image
 | `dest-tls-verify` | True      | `&#39;true&#39;` | Whether to verify TLS for destination of image
+| `containers-config-auth-file` | True | `&#39;~/.skopeo-auth.json&#39;` | \
+    Path to the container registry authentication file \
+    to use for container registry authentication.
 
 Expected Previous Step Results
 ------------------------------
@@ -149,16 +159,21 @@ Results output by this step.
 | `image-tag` | Pushed destination image tag
 
 &#34;&#34;&#34;
+import os
+from pathlib import Path
 import sys
 import sh
 from tssc import StepImplementer, DefaultSteps
+from tssc.utils.containers import container_registries_login
 
 DEFAULT_CONFIG = {
     &#39;src-tls-verify&#39;: &#39;true&#39;,
     &#39;dest-tls-verify&#39;: &#39;true&#39;,
+    &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.skopeo-auth.json&#39;)
 }
 
 REQUIRED_CONFIG_KEYS = [
+    &#39;containers-config-auth-file&#39;,
     &#39;destination-url&#39;,
     &#39;src-tls-verify&#39;,
     &#39;dest-tls-verify&#39;,
@@ -234,13 +249,25 @@ class Skopeo(StepImplementer):
         destination_with_version = self.get_config_value(&#39;destination-url&#39;) + &#39;/&#39; + organization + \
          &#39;/&#39; + application_name + &#39;-&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_config_value(&#39;containers-config-auth-file&#39;)
+            container_registries_login(
+                registries=self.get_config_value(&#39;container-registries&#39;),
+                containers_config_auth_file=containers_config_auth_file
+            )
+
+            # push image
             sh.skopeo.copy( # pylint: disable=no-member
-                &#39;--src-tls-verify=&#39; + str(self.get_config_value(&#39;src-tls-verify&#39;)),
-                &#39;--dest-tls-verify=&#39; + str(self.get_config_value(&#39;dest-tls-verify&#39;)),
+                f&#34;--src-tls-verify={str(self.get_config_value(&#39;src-tls-verify&#39;))}&#34;,
+                f&#34;--dest-tls-verify={str(self.get_config_value(&#39;dest-tls-verify&#39;))}&#34;,
+                f&#34;--authfile={containers_config_auth_file}&#34;,
                 &#39;docker-archive:&#39; + image_tar_file,
                 &#39;docker://&#39; + destination_with_version,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error
@@ -340,13 +367,25 @@ class Skopeo(StepImplementer):
         destination_with_version = self.get_config_value(&#39;destination-url&#39;) + &#39;/&#39; + organization + \
          &#39;/&#39; + application_name + &#39;-&#39; + service_name + &#39;:&#39; + (version).lower()
         try:
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_config_value(&#39;containers-config-auth-file&#39;)
+            container_registries_login(
+                registries=self.get_config_value(&#39;container-registries&#39;),
+                containers_config_auth_file=containers_config_auth_file
+            )
+
+            # push image
             sh.skopeo.copy( # pylint: disable=no-member
-                &#39;--src-tls-verify=&#39; + str(self.get_config_value(&#39;src-tls-verify&#39;)),
-                &#39;--dest-tls-verify=&#39; + str(self.get_config_value(&#39;dest-tls-verify&#39;)),
+                f&#34;--src-tls-verify={str(self.get_config_value(&#39;src-tls-verify&#39;))}&#34;,
+                f&#34;--dest-tls-verify={str(self.get_config_value(&#39;dest-tls-verify&#39;))}&#34;,
+                f&#34;--authfile={containers_config_auth_file}&#34;,
                 &#39;docker-archive:&#39; + image_tar_file,
                 &#39;docker://&#39; + destination_with_version,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking skopeo: {error}&#39;.format(error=error)) from error
