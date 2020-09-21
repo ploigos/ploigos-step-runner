@@ -14,7 +14,6 @@ from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
 from test_utils import *
 
-
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_mvn_exception=False):
     """simulates what mvn does by touching files.
 
@@ -61,7 +60,6 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
                 Path(artifact_path).touch()
 
     return mvn_side_effect
-
 
 class TestStepImplementerUnitTest(BaseTSSCTestCase):
 
