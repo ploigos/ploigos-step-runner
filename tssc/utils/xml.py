@@ -67,8 +67,6 @@ def get_xml_element_by_path(xml_file_path, xpath, default_namespace=None, xml_na
 
     Returns
     -------
-    None
-        No element was found
     xml.etree.ElementTree.Element
         The Element found given the xpath
     """

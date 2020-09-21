@@ -7,5 +7,6 @@ __all__ = [
     'file',
     'io',
     'reflection',
-    'xml'
+    'xml',
+    'maven'
 ]

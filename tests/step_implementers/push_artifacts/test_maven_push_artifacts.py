@@ -1,86 +1,33 @@
-import sh
 import os
-
-import unittest 
 from unittest.mock import patch
-
+import sh
 from testfixtures import TempDirectory
-
-from tssc.step_implementers.push_artifacts import Maven
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.test_utils import run_step_test_with_result_validation
 
-from test_utils import *
 
 class TestStepImplementerPushArtifact(BaseTSSCTestCase):
 
     # ------------ SIMPLE tests that test the config required items
     @patch('sh.mvn', create=True)
-    def test_push_artifact_with_repository_url_missing_from_config(self, mvn_mock):
+    def test_push_artifact_with_repo_id_missing_from_config(self, mvn_mock):
         with TempDirectory() as temp_dir:
             config = {
                 'tssc-config': {
                     'push-artifacts': {
-                        'implementer': 'Maven',
-                        'config': {
-                        }
+                        'implementer': 'Maven'
                     }
                 }
             }
-            runtime_args = {
-                'user': 'unit.test.user',
-                'password': 'unit.test.password'
-            }
+            runtime_args = {}
             expected_step_results = {}
             with self.assertRaisesRegex(
                     AssertionError,
-                    r'The runtime step configuration \(\{\'user\': \'unit.test.user\', \'password\': \'unit.test.password\'\}\) is missing the required configuration keys \(\[\'url\'\]\)'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
+                    'The .* configuration .* is missing .*maven-push-artifact-repo-id.*'):
+                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                     config, expected_step_results, runtime_args)
 
-    @patch('sh.mvn', create=True)
-    def test_push_artifact_with_user_missing_from_runtime(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            config = {
-                'tssc-config': {
-                    'push-artifacts': {
-                        'implementer': 'Maven',
-                        'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
-                        }
-                     }
-                 }
-            }
-            runtime_args = {
-                'password': 'unit.test.password',
-            }
-            expected_step_results = {}
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    'Either username or password is not set. Neither or both must be set.'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
-
-    @patch('sh.mvn', create=True)
-    def test_push_artifact_with_password_missing_from_runtime(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            config = {
-                'tssc-config': {
-                    'push-artifacts': {
-                        'implementer': 'Maven',
-                        'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
-                        }
-                    }
-                }
-            }
-            runtime_args = {
-                'user': 'unit.test.user',
-            }
-            expected_step_results = {}
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    'Either username or password is not set. Neither or both must be set.'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
-
-    # ------------  Tests that require generate-metadata 
+    # ------------  Tests that require generate-metadata
     @patch('sh.mvn', create=True)
     def test_push_artifact_with_version_missing_from_results(self, mvn_mock):
         with TempDirectory() as temp_dir:
@@ -94,20 +41,19 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     'push-artifacts': {
                         'implementer': 'Maven',
                         'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
+                            'maven-push-artifact-repo-id': 'id',
+                            'maven-push-artifact-repo-url': 'repo',
                         }
                     }
                 }
             }
-            runtime_args = {
-                'user': 'unit.test.user',
-                'password': 'unit.test.password'
-            }
+            runtime_args = {}
             expected_step_results = {}
             with self.assertRaisesRegex(
                     ValueError,
-                    'Severe error: Generate-metadata does not have a version'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
+                    'generate-metadata results missing version'):
+                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                     config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
     def test_push_artifact_with_artifacts_missing_from_results(self, mvn_mock):
@@ -119,23 +65,36 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
               ''')
             config = {
                'tssc-config': {
-                    'push-artifacts': {
+                   'global-defaults': {
+                       'maven-servers': [
+                           {'id': 'ID1', 'username': 'USER1', 'password': 'PW1'},
+                           {'id': 'ID2'}
+                       ],
+                       'maven-repositories': [
+                           {'id': 'ID1', 'url': 'URL1', 'snapshots': 'true', 'releases': 'false'},
+                           {'id': 'ID2', 'url': 'URL2'}
+                       ],
+                       'maven-mirrors': [
+                           {'id': 'ID1', 'url': 'URL1', 'mirror-of': '*'},
+                           {'id': 'ID2', 'url': 'URL2', 'mirror-of': '*'}
+                       ],
+                   },
+                   'push-artifacts': {
                         'implementer': 'Maven',
                         'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
+                            'maven-push-artifact-repo-id': 'repoid',
+                            'maven-push-artifact-repo-url': 'repourl'
                         }
                     }
                 }
             }
-            runtime_args = {
-                'user': 'user',
-                'password': 'password'
-            }
+            runtime_args = {}
             expected_step_results = {}
             with self.assertRaisesRegex(
                     ValueError,
-                    'Severe error: Package does not have artifacts'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
+                    'package results missing artifacts'):
+                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                     config, expected_step_results, runtime_args)
 
 
     @patch('sh.mvn', create=True)
@@ -143,13 +102,13 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('target')
             temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
-            jar_file_path = os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar')
-            tssc_results='''tssc-results:
+            jar_file_path = str(os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar'))
+            tssc_results = '''tssc-results:
                 generate-metadata:
                     version: 1.0-123abc
                 package:
                     'artifacts': [{
-                        'path':'''+ str(jar_file_path)+''',
+                        'path':''' + jar_file_path + ''',
                         'artifact-id': 'my-app',
                         'group-id': 'com.mycompany.app',
                         'package-type': 'jar',
@@ -159,47 +118,62 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
             config = {
                 'tssc-config': {
+                    'global-defaults': {
+                        'maven-servers': [
+                            {'id': 'ID1', 'username': 'USER1', 'password': 'PW1'},
+                            {'id': 'ID2'}
+                        ],
+                        'maven-repositories': [
+                            {'id': 'ID1', 'url': 'URL1', 'snapshots': 'true', 'releases': 'false'},
+                            {'id': 'ID2', 'url': 'URL2'}
+                        ],
+                        'maven-mirrors': [
+                            {'id': 'ID1', 'url': 'URL1', 'mirror-of': '*'},
+                            {'id': 'ID2', 'url': 'URL2', 'mirror-of': '*'}
+                        ],
+                    },
                     'push-artifacts': {
                         'implementer': 'Maven',
                         'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
+                                    'maven-push-artifact-repo-id': 'repoid',
+                                    'maven-push-artifact-repo-url': 'repourl',
                         }
                     }
-                 }
+                }
             }
-            runtime_args = {
-                'user': 'unit.test.user',
-                'password': 'unit.test.password'
-            }
+            runtime_args = {}
             expected_step_results = {
-                'tssc-results': 
+                'tssc-results':
                     {
-                        'generate-metadata': 
+                        'generate-metadata':
                         {
                             'version': '1.0-123abc'
-                        }, 
-                        'package': 
+                        },
+                        'package':
                         {
-                            'artifacts': 
+                            'artifacts':
                             [
                                 {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'package-type': 'jar', 
-                                    'path': str(jar_file_path), 
+                                    'artifact-id': 'my-app',
+                                    'group-id': 'com.mycompany.app',
+                                    'package-type': 'jar',
+                                    'path': jar_file_path,
                                     'pom-path': 'pom.xml'
                                 }
                              ]
                         },
-                        'push-artifacts': 
+                        'push-artifacts':
                         {
-                            'artifacts': 
+                            'result': {
+                                'success': True,
+                                'message': 'push artifacts step completed - see report-artifacts',
+                            },
+                            'report-artifacts':
                             [
                                 {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'path': str(jar_file_path), 
-                                    'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc//com/mycompany/app/my-app/1.0-123abc/my-app-1.0-123abc.jar', 
+                                    'artifact-id': 'my-app',
+                                    'group-id': 'com.mycompany.app',
+                                    'path': jar_file_path,
                                     'version': '1.0-123abc'
                                 }
                             ]
@@ -207,74 +181,8 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     }
             }
 
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
-
-    @patch('sh.mvn', create=True)
-    def test_push_artifact_with_no_user_password_results(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            temp_dir.makedir('target')
-            temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
-            jar_file_path = os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar')
-            tssc_results='''tssc-results:
-                generate-metadata:
-                    version: 1.0-123abc
-                package:
-                    'artifacts': [{
-                        'path':'''+ str(jar_file_path)+''',
-                        'artifact-id': 'my-app',
-                        'group-id': 'com.mycompany.app',
-                        'package-type': 'jar',
-                        'pom-path': 'pom.xml'
-                    }]
-            '''
-            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            config = {
-                'tssc-config': {
-                    'push-artifacts': {
-                        'implementer': 'Maven',
-                        'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
-                        }
-                    }
-                 }
-            }
-            expected_step_results = {
-                'tssc-results': 
-                    {
-                        'generate-metadata': 
-                        {
-                            'version': '1.0-123abc'
-                        }, 
-                        'package': 
-                        {
-                            'artifacts': 
-                            [
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'package-type': 'jar', 
-                                    'path': str(jar_file_path), 
-                                    'pom-path': 'pom.xml'
-                                }
-                             ]
-                        },
-                        'push-artifacts': 
-                        {
-                            'artifacts': 
-                            [
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'path': str(jar_file_path), 
-                                    'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc//com/mycompany/app/my-app/1.0-123abc/my-app-1.0-123abc.jar', 
-                                    'version': '1.0-123abc'
-                                }
-                            ]
-                        }
-                    }
-            }
-
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results)
+            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                 config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
     def test_push_artifact_with_artifacts_results_bad(self, mock_mvn):
@@ -282,13 +190,13 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('target')
             temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
-            jar_file_path = os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar')
-            tssc_results='''tssc-results:
+            jar_file_path = str(os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar'))
+            tssc_results = '''tssc-results:
                 generate-metadata:
                     version: 1.0-123abc
                 package:
                     'artifacts': [{
-                        'path':'''+ str(jar_file_path)+''',
+                        'path':''' + jar_file_path + ''',
                         'artifact-id': 'my-app',
                         'group-id': 'com.mycompany.app',
                         'package-type': 'jar',
@@ -296,49 +204,64 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     }]
             '''
             temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
-            runtime_args = {
-                'user': 'unit.test.user',
-                'password': 'unit.test.password'
-            }
+            runtime_args = {}
             config = {
                 'tssc-config': {
+                    'global-defaults' : {
+                        'maven-servers': [
+                            {'id': 'ID1', 'username': 'USER1', 'password': 'PW1'},
+                            {'id': 'ID2'}
+                        ],
+                        'maven-repositories': [
+                            {'id': 'ID1', 'url': 'URL1', 'snapshots': 'true', 'releases': 'false'},
+                            {'id': 'ID2', 'url': 'URL2'}
+                        ],
+                        'maven-mirrors': [
+                            {'id': 'ID1', 'url': 'URL1', 'mirror-of': '*'},
+                            {'id': 'ID2', 'url': 'URL2', 'mirror-of': '*'}
+                        ],
+                    },
                     'push-artifacts': {
                         'implementer': 'Maven',
                         'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
+                            'maven-push-artifact-repo-id': 'repoid',
+                            'maven-push-artifact-repo-url': 'repourl',
                         }
                     }
                  }
             }
             expected_step_results = {
-                'tssc-results': 
+                'tssc-results':
                     {
-                        'generate-metadata': 
+                        'generate-metadata':
                         {
                             'version': '1.0-123abc'
-                        }, 
-                        'package': 
+                        },
+                        'package':
                         {
-                            'artifacts': 
+                            'artifacts':
                             [
                                 {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'package-type': 'jar', 
-                                    'path': str(jar_file_path), 
+                                    'artifact-id': 'my-app',
+                                    'group-id': 'com.mycompany.app',
+                                    'package-type': 'jar',
+                                    'path': jar_file_path,
                                     'pom-path': 'pom.xml'
                                 }
                             ]
                         },
-                        'push-artifacts': 
+                        'push-artifacts':
                         {
-                            'artifacts': 
+                            'result': {
+                                'success': True,
+                                'message': 'push artifacts step completed - see report-artifacts',
+                            },
+                            'report-artifacts':
                             [
                                 {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'path': str(jar_file_path), 
-                                    'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc//com/mycompany/app/my-app/1.0-123abc/my-app-1.0-123abc.jar', 
+                                    'artifact-id': 'my-app',
+                                    'group-id': 'com.mycompany.app',
+                                    'path': jar_file_path,
                                     'version': '1.0-123abc'
                                 }
                             ]
@@ -350,27 +273,28 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     RuntimeError,
                     'Error invoking mvn'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
+                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                     config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
-    def test_push_artifact_with_artifacts_results_multi(self, mvn_mock):
+    def test_push_artifact_with_artifacts_results_multi_no_maven_config(self, mvn_mock):
         with TempDirectory() as temp_dir:
             temp_dir.makedir('target')
             temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
-            jar_file_path = os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar')
-            tssc_results='''tssc-results:
+            jar_file_path = str(os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar'))
+            tssc_results = '''tssc-results:
                 generate-metadata:
                     version: 1.0-123abc
                 package:
                     'artifacts': [{
-                        'path':'''+ str(jar_file_path)+''',
+                        'path':''' + jar_file_path + ''',
                         'artifact-id': 'my-app',
                         'group-id': 'com.mycompany.app',
                         'package-type': 'jar',
                         'pom-path': 'pom.xml'
                     },
                     {
-                        'path':'''+ str(jar_file_path)+''',
+                        'path':''' + jar_file_path + ''',
                         'artifact-id': 'my-app',
                         'group-id': 'com.mycompany.app',
                         'package-type': 'jar',
@@ -383,64 +307,261 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     'push-artifacts': {
                         'implementer': 'Maven',
                         'config': {
-                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc/',
+                            'maven-push-artifact-repo-id': 'repoid',
+                            'maven-push-artifact-repo-url': 'repourl',
                         }
                     }
-                 }
+                }
             }
-            runtime_args = {
-                'user': 'unit.test.user',
-                'password': 'unit.test.password'
-            }
+            runtime_args = {}
             expected_step_results = {
-                'tssc-results': 
+                'tssc-results':
                     {
-                        'generate-metadata': 
-                        {
-                            'version': '1.0-123abc'
-                        }, 
-                        'package': 
-                        {
-                            'artifacts': 
-                            [
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'package-type': 'jar', 
-                                    'path': str(jar_file_path), 
-                                    'pom-path': 'pom.xml'
+                        'generate-metadata':
+                            {
+                                'version': '1.0-123abc'
+                            },
+                        'package':
+                            {
+                                'artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        }
+                                    ]
+                            },
+                        'push-artifacts':
+                            {
+                                'result': {
+                                    'success': True,
+                                    'message': 'push artifacts step completed - see report-artifacts',
                                 },
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'package-type': 'jar', 
-                                    'path': str(jar_file_path), 
-                                    'pom-path': 'pom.xml'
-                                }
-                             ]
-                        },
-                        'push-artifacts': 
-                        {
-                            'artifacts': 
-                            [
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'path': str(jar_file_path), 
-                                    'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc//com/mycompany/app/my-app/1.0-123abc/my-app-1.0-123abc.jar', 
-                                    'version': '1.0-123abc'
-                                },
-                                {
-                                    'artifact-id': 'my-app', 
-                                    'group-id': 'com.mycompany.app', 
-                                    'path': str(jar_file_path), 
-                                    'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/tssc//com/mycompany/app/my-app/1.0-123abc/my-app-1.0-123abc.jar', 
-                                    'version': '1.0-123abc'
-                                }
+                                'report-artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        }
+                                    ]
+                            }
+                    }
+            }
+            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                 config, expected_step_results, runtime_args)
+    @patch('sh.mvn', create=True)
+    def test_push_artifact_with_artifacts_results_multi(self, mvn_mock):
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('target')
+            temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
+            jar_file_path = str(os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar'))
+            tssc_results = '''tssc-results:
+                generate-metadata:
+                    version: 1.0-123abc
+                package:
+                    'artifacts': [{
+                        'path':''' + jar_file_path + ''',
+                        'artifact-id': 'my-app',
+                        'group-id': 'com.mycompany.app',
+                        'package-type': 'jar',
+                        'pom-path': 'pom.xml'
+                    },
+                    {
+                        'path':''' + jar_file_path + ''',
+                        'artifact-id': 'my-app',
+                        'group-id': 'com.mycompany.app',
+                        'package-type': 'jar',
+                        'pom-path': 'pom.xml'
+                    }]
+            '''
+            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
+            config = {
+                'tssc-config': {
+                    'push-artifacts': {
+                        'implementer': 'Maven',
+                        'config': {
+                            'maven-push-artifact-repo-id': 'repoid',
+                            'maven-push-artifact-repo-url': 'repourl',
+                            'maven-servers': [
+                                {'id': 'ID1', 'username': 'USER1', 'password': 'PW1'},
+                            ],
+                            'maven-repositories': [
+                                {'id': 'ID1', 'url': 'URL1', 'snapshots': 'true', 'releases': 'false'},
+                            ],
+                            'maven-mirrors': [
+                                {'id': 'ID1', 'url': 'URL1', 'mirror-of': '*'},
                             ]
                         }
                     }
+                }
             }
+            runtime_args = {}
+            expected_step_results = {
+                'tssc-results':
+                    {
+                        'generate-metadata':
+                            {
+                                'version': '1.0-123abc'
+                            },
+                        'package':
+                            {
+                                'artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        }
+                                    ]
+                            },
+                        'push-artifacts':
+                            {
+                                'result': {
+                                    'success': True,
+                                    'message': 'push artifacts step completed - see report-artifacts',
+                                },
+                                'report-artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        }
+                                    ]
+                            }
+                    }
+            }
+            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                 config, expected_step_results, runtime_args)
 
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts', config, expected_step_results, runtime_args)
-
+    @patch('sh.mvn', create=True)
+    def test_push_artifact_with_artifacts_results_multi_missing_id(self, mvn_mock):
+        with TempDirectory() as temp_dir:
+            temp_dir.makedir('target')
+            temp_dir.write('target/my-app-1.0-SNAPSHOT.jar', b'''sandbox''')
+            jar_file_path = str(os.path.join(temp_dir.path, 'target/my-app-1.0-SNAPSHOT.jar'))
+            tssc_results = '''tssc-results:
+                generate-metadata:
+                    version: 1.0-123abc
+                package:
+                    'artifacts': [{
+                        'path':''' + jar_file_path + ''',
+                        'artifact-id': 'my-app',
+                        'group-id': 'com.mycompany.app',
+                        'package-type': 'jar',
+                        'pom-path': 'pom.xml'
+                    },
+                    {
+                        'path':''' + jar_file_path + ''',
+                        'artifact-id': 'my-app',
+                        'group-id': 'com.mycompany.app',
+                        'package-type': 'jar',
+                        'pom-path': 'pom.xml'
+                    }]
+            '''
+            temp_dir.write('tssc-results/tssc-results.yml', tssc_results.encode())
+            config = {
+                'tssc-config': {
+                    'push-artifacts': {
+                        'implementer': 'Maven',
+                        'config': {
+                            'maven-push-artifact-repo-id': 'repoid',
+                            'maven-push-artifact-repo-url': 'repourl',
+                            'maven-servers': [
+                                {'username': 'USER1', 'password': 'PW1'},
+                            ],
+                        }
+                    }
+                }
+            }
+            runtime_args = {}
+            expected_step_results = {
+                'tssc-results':
+                    {
+                        'generate-metadata':
+                            {
+                                'version': '1.0-123abc'
+                            },
+                        'package':
+                            {
+                                'artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'package-type': 'jar',
+                                            'path': jar_file_path,
+                                            'pom-path': 'pom.xml'
+                                        }
+                                    ]
+                            },
+                        'push-artifacts':
+                            {
+                                'result': {
+                                    'success': True,
+                                    'message': 'push artifacts step completed - see report-artifacts',
+                                },
+                                'report-artifacts':
+                                    [
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        },
+                                        {
+                                            'artifact-id': 'my-app',
+                                            'group-id': 'com.mycompany.app',
+                                            'path': jar_file_path,
+                                            'version': '1.0-123abc'
+                                        }
+                                    ]
+                            }
+                    }
+            }
+            with self.assertRaisesRegex(
+                    ValueError,
+                    'id is required for maven_servers.'):
+                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                                                     config, expected_step_results, runtime_args)

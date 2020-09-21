@@ -31,7 +31,6 @@ def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_
         os.path.dirname(os.path.abspath(pom_file)),
         artifact_parent_dir)
 
-
     def mvn_side_effect(*args, **kwargs):
         if 'clean' in args:
             if os.path.exists(target_dir_path):
@@ -92,7 +91,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 ValueError,
                 "Given pom file does not exist: does-not-exist-pom.xml"):
-
             factory.config.set_step_config_overrides(
                 'unit-test',
                 {'pom-file': 'does-not-exist-pom.xml'})
@@ -121,9 +119,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
         version = '1.0'
-        package = 'jar'
         with TempDirectory() as temp_dir:
-            temp_dir.write('src/main/java/com/mycompany/app/App.java',b'''package com.mycompany.app;
+            temp_dir.write('src/main/java/com/mycompany/app/App.java', b'''package com.mycompany.app;
     public class App {
         public static void main( String[] args ) {
             System.out.println( "Hello World!" );
@@ -229,7 +226,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
 
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
@@ -259,12 +255,15 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/unit-test/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
                 'test',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -313,7 +312,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
                 reports_dir,
@@ -343,18 +341,20 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/unit-test/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
                 'test',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
 
     def test_unit_test_missing_surefire_plugin_in_pom(self):
-        reports_dir = 'target/surefire-reports'
         group_id = 'com.mycompany.app'
         artifact_id = 'my-app'
         version = '1.0'
@@ -383,8 +383,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             }
             factory = TSSCFactory(config)
             with self.assertRaisesRegex(
-                ValueError,
-                'Unit test dependency "maven-surefire-plugin" missing from POM.'):
+                    ValueError,
+                    'Unit test dependency "maven-surefire-plugin" missing from POM.'):
                 factory.run_step('unit-test')
 
     @patch('sh.mvn', create=True)
@@ -430,7 +430,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
 
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
@@ -500,7 +499,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
 
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
@@ -526,7 +524,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     RuntimeError, 'Error: No unit tests defined'):
                 run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
-
 
     @patch('sh.mvn', create=True)
     def test_unit_test_run_attempt_fails_fail_on_no_tests_flag_false(self, mvn_mock):
@@ -572,7 +569,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
 
             mvn_mock.side_effect = create_mvn_side_effect(
                 pom_file_path,
@@ -595,12 +591,15 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/unit-test/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'unit-test', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
                 'test',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )

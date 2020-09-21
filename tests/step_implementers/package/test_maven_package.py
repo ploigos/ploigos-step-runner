@@ -2,13 +2,11 @@ import os
 import sh
 from io import IOBase
 from pathlib import Path
-
-import unittest
 from unittest.mock import patch
+
 from testfixtures import TempDirectory
 
 from tssc import TSSCFactory
-from tssc.step_implementers.package import Maven
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import run_step_test_with_result_validation, Any
@@ -130,13 +128,18 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
 
-            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
+            mvn_mock.side_effect = create_mvn_side_effect(pom_file_path,
+                                                          'target',
+                                                          [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -202,8 +205,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'pom resulted in 0 with expected artifact extensions (.*), this is unsupported'):
-
-                    run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+                run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
 
     @patch('sh.mvn', create=True)
     def test_mvn_multiple_jars(self, mvn_mock):
@@ -361,11 +363,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
 
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -420,11 +425,14 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
             }
             mvn_mock.side_effect = create_mvn_side_effect(pom_file_path, 'target', [artifact_file_name])
             run_step_test_with_result_validation(temp_dir, 'package', config, expected_step_results)
+            settings_file_path = temp_dir.path + "/tssc-working/package/settings.xml"
             mvn_mock.assert_called_once_with(
                 'clean',
                 'install',
                 '-f',
                 pom_file_path,
+                '-s',
+                settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )

@@ -153,6 +153,27 @@ From least precedence to highest precedence.
         service-name: ''
 
         # Optional.
+        # Maven server settings for settings.xml file
+        maven-servers:
+        -  id: ''
+           username: ''
+           password: ''
+
+        # Optional.
+        # Maven repository settings for settings.xml file
+        maven-repositories:
+        - id: ''
+          url: ''
+          snapshots: ''
+          releases: ''
+
+        # Optional.
+        # Maven mirror settings for settings.xml file
+        maven-mirrors:
+        - id: ''
+          url: ''
+          mirror-of: ''
+
         # Dictionary of container registries to authenticate with.
         # Suggest putting in global configuration so it can be used for creating and pushing
         # images. But can also or instead be put in the individual steps if say different
@@ -321,13 +342,12 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
-          url: ''
+          maven-push-artifact-repo-url: ''
 
-          # Optional.
-          #user: None
+          # Required.
+          # Id to the artifact repository to push the artifact to.
+          maven-push-artifact-repo-id: ''
 
-          # Optional.
-          #password: None
         }
 
       create-container-image:
@@ -607,17 +627,7 @@ From least precedence to highest precedence.
       push-artifacts:
       # WARNING: not yet implemented
       - implementer: NPM
-        config: {
-          # Required.
-          # URL to the artifact repository to push the artifact to.
-          url: ''
-
-          # Optional.
-          #user: None
-
-          # Optional.
-          #password: None
-        }
+        config: {}
 
       create-container-image:
       - implementer: Buildah

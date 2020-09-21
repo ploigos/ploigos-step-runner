@@ -332,6 +332,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/uat/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
@@ -342,6 +343,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
+                '-s', settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -413,6 +415,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/uat/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
@@ -423,6 +426,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
+                '-s', settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -444,7 +448,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = TSSCFactory(config)
+            factory = TSSCFactory(config, temp_dir)
             with self.assertRaisesRegex(
                     ValueError,
                     'Uat dependency "maven-surefire-plugin" missing from POM.'):
@@ -603,6 +607,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/uat/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
@@ -613,6 +618,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
+                '-s', settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -735,6 +741,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/uat/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
@@ -745,6 +752,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/custom-cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
+                '-s', settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
@@ -828,6 +836,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 }
             }
 
+            settings_file_path = f'{temp_dir.path}/tssc-working/uat/settings.xml'
             run_step_test_with_result_validation(temp_dir, 'uat', config, expected_step_results)
             mvn_mock.assert_called_once_with(
                 'clean',
@@ -838,6 +847,7 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                     'json:target/cucumber/cucumber.json',
                 'test',
                 '-f', pom_file_path,
+                '-s', settings_file_path,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
