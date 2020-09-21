@@ -210,15 +210,14 @@ class Maven(StepImplementer):
                 os.path.dirname(os.path.abspath(pom_file)),
                 'target/surefire-reports')
 
-
         try:
             sh.mvn(  # pylint: disable=no-member
                 'clean',
                 '-Pintegration-test',
                 f'-Dselenium.hub.url={selenium_hub_url}',
                 f'-Dtarget.base.url={target_base_url}',
-                f'-Dcucumber.plugin=html:target/{report_dir}/cucumber.html,'\
-                f'json:target/{report_dir}/cucumber.json',
+                f'-Dcucumber.plugin=html:target/{report_dir}/cucumber.html,' \
+                    f'json:target/{report_dir}/cucumber.json',
                 'test',
                 '-f', pom_file,
                 '-s', settings_file,
@@ -258,8 +257,8 @@ class Maven(StepImplementer):
                 'report-artifacts': [
                     {
                         'name': 'Uat results generated',
-                        'path': f'file://{os.path.dirname(os.path.abspath(pom_file))}' +
-                                f'/target/{report_dir}'
+                        'path': f'file://{os.path.dirname(os.path.abspath(pom_file))}' \
+                            f'/target/{report_dir}'
                     }
                 ]
             }

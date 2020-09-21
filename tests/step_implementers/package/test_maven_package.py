@@ -7,7 +7,7 @@ import sh
 
 from testfixtures import TempDirectory
 
-import tssc
+from tssc import TSSCFactory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import run_step_test_with_result_validation, Any
@@ -64,7 +64,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = tssc.TSSCFactory(config)
+            factory = TSSCFactory(config)
             with self.assertRaisesRegex(
                     ValueError,
                     'Given pom file does not exist: .*'):
@@ -295,7 +295,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = tssc.TSSCFactory(config)
+            factory = TSSCFactory(config)
             artifact_file_name = '{artifact_id}-{version}.{package}'.format(
                 artifact_id=artifact_id,
                 version=version,
@@ -464,7 +464,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                     }
                 }
             }
-            factory = tssc.TSSCFactory(config)
+            factory = TSSCFactory(config)
             with self.assertRaisesRegex(
                     RuntimeError,
                     'Error invoking mvn:.*'):
@@ -479,7 +479,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = tssc.TSSCFactory(config)
+        factory = TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 "Given pom file does not exist: pom.xml"):
@@ -494,7 +494,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = tssc.TSSCFactory(config)
+        factory = TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 "Given pom file does not exist: does-not-exist-pom.xml"):
@@ -516,7 +516,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = tssc.TSSCFactory(config)
+        factory = TSSCFactory(config)
         with self.assertRaisesRegex(
                 ValueError,
                 'Given pom file does not exist: does-not-exist.pom'):
@@ -534,7 +534,7 @@ class TestStepImplementerPackageMaven(BaseTSSCTestCase):
                 }
             }
         }
-        factory = tssc.TSSCFactory(config)
+        factory = TSSCFactory(config)
         with self.assertRaisesRegex(
                 AssertionError,
                 r"The runtime step configuration \(\{'pom-file': None, 'artifact-extensions': \['jar', 'war', 'ear'\], 'artifact-parent-dir': 'target'\}\) is missing the required configuration keys \(\['pom-file'\]\)"):
