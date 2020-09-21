@@ -4,7 +4,7 @@ Tests the Maven Cucumber UAT step.
 """
 import sys
 from os import path, rmdir, makedirs
-from sys import stdout, stderr
+from io import IOBase
 from unittest.mock import patch
 from pathlib import Path
 from sh import ErrorReturnCode
@@ -13,7 +13,7 @@ from testfixtures import TempDirectory
 
 from tssc import TSSCFactory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import run_step_test_with_result_validation
+from tests.helpers.test_utils import run_step_test_with_result_validation, Any
 
 SELENIUM_HUB_URL = 'http://selenium:4444'
 TARGET_BASE_URL = 'http://app:8080'
@@ -345,8 +345,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'test',
                 '-f', pom_file_path,
                 '-s', settings_file_path,
-                _out=stdout,
-                _err=stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -428,8 +428,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'test',
                 '-f', pom_file_path,
                 '-s', settings_file_path,
-                _out=stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     def test_uat_test_missing_surefire_plugin_in_pom(self):
@@ -620,8 +620,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'test',
                 '-f', pom_file_path,
                 '-s', settings_file_path,
-                _out=stdout,
-                _err=stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -754,8 +754,8 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'test',
                 '-f', pom_file_path,
                 '-s', settings_file_path,
-                _out=stdout,
-                _err=stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -849,6 +849,6 @@ class TestStepImplementerUatTest(BaseTSSCTestCase):
                 'test',
                 '-f', pom_file_path,
                 '-s', settings_file_path,
-                _out=stdout,
-                _err=stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )

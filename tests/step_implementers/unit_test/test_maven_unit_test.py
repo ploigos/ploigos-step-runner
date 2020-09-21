@@ -1,14 +1,18 @@
 import os
-import sys
-from unittest.mock import patch
-from pathlib import Path
+from io import IOBase
 import sh
+from pathlib import Path
 
 from testfixtures import TempDirectory
+import unittest
+from unittest.mock import patch
+import yaml
 
 from tssc import TSSCFactory
+from tssc.step_implementers.unit_test import Maven
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import run_step_test_with_result_validation
+
+from test_utils import *
 
 
 def create_mvn_side_effect(pom_file, artifact_parent_dir, artifact_names, throw_mvn_exception=False):
@@ -262,8 +266,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 pom_file_path,
                 '-s',
                 settings_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     @patch('sh.mvn', create=True)
@@ -348,8 +352,8 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 pom_file_path,
                 '-s',
                 settings_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )
 
     def test_unit_test_missing_surefire_plugin_in_pom(self):
@@ -598,6 +602,6 @@ class TestStepImplementerUnitTest(BaseTSSCTestCase):
                 pom_file_path,
                 '-s',
                 settings_file_path,
-                _out=sys.stdout,
-                _err=sys.stderr
+                _out=Any(IOBase),
+                _err=Any(IOBase)
             )

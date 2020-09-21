@@ -152,6 +152,28 @@ From least precedence to highest precedence.
         # part of the application it is a part of.
         service-name: ''
 
+        # Optional.
+        # Maven server settings for settings.xml file
+        maven-servers:
+        -  id: ''
+           username: ''
+           password: ''
+
+        # Optional.
+        # Maven repository settings for settings.xml file
+        maven-repositories:
+        - id: ''
+          url: ''
+          snapshots: ''
+          releases: ''
+
+        # Optional.
+        # Maven mirror settings for settings.xml file
+        maven-mirrors:
+        - id: ''
+          url: ''
+          mirror-of: ''
+
       # Optional
       # Dictionary of dictionaries where the first level keys are environment names and their
       # dictionary values are configuration defaults to use when invoking a step in the context
@@ -308,13 +330,12 @@ From least precedence to highest precedence.
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
-          url: ''
+          maven-push-artifact-repo-url: ''
 
-          # Optional.
-          #user: None
+          # Required.
+          # Id to the artifact repository to push the artifact to.
+          maven-push-artifact-repo-id: ''
 
-          # Optional.
-          #password: None
         }
 
       create-container-image:
@@ -581,17 +602,7 @@ From least precedence to highest precedence.
       push-artifacts:
       # WARNING: not yet implemented
       - implementer: NPM
-        config: {
-          # Required.
-          # URL to the artifact repository to push the artifact to.
-          url: ''
-
-          # Optional.
-          #user: None
-
-          # Optional.
-          #password: None
-        }
+        config: {}
 
       create-container-image:
       - implementer: Buildah
@@ -701,12 +712,9 @@ Example Running the 'generate-metadata' step
 """
 
 import __main__
-from .config import *
-from .decryption_utils import DecryptionUtils
-from .factory import *
-from .exceptions import *
-from .step_implementer import DefaultSteps, StepImplementer
-from .utils import *
+from .step_implementer import StepImplementer, DefaultSteps
+from .factory import TSSCFactory
+from .exceptions import TSSCException
 
 __all__ = [
     'config',

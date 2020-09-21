@@ -148,3 +148,209 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
             obfuscated = re.sub(obfuscation_target, self.__obfuscator, obfuscated)
 
         return self.parent_stream.write(obfuscated)
+
+    def flush(self):
+        """Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        """
+        self.parent_stream.flush()
+
+class TextIOIndenter(io.TextIOBase):
+    """Adds an indent to the first string written and after every new line written to this stream.
+
+    Notes
+    -----
+    WARNING:    There will be a dangling indent after the last new line written to this stream
+                because there is no "good" way of knowing the last new line ever written to this
+                stream.
+
+    Parameters
+    ----------
+    parent_stream : IOBase
+        Stream to write to after indenting what is written to this stream
+    indent_level : int, optional
+        Level to indent to.
+        Will be multiplied by the indent_size.
+    indent_size : int, optional
+        Size of each indent.
+        Will be multipled by the indent_level.
+    indent_char : str, optional
+        Character to use for indent.
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+    """
+
+    def __init__(self, parent_stream, indent_level=0, indent_size=4, indent_char=' '):
+        self.__parent_stream = parent_stream
+        self.__indent_level = indent_level
+        self.__indent_size = indent_size
+        self.__indent_char = indent_char
+        self.__unwritten_to = True
+        super().__init__()
+
+    @property
+    def parent_stream(self):
+        """Returns parent stream that this stream wraps
+
+        Returns
+        -------
+        IOBase
+            Stream to write to after indenting what is written to this stream
+        """
+        return self.__parent_stream
+
+    @property
+    def indent_level(self):
+        """Level to indent to.
+
+        Returns
+        -------
+        int
+            Level to indent to.
+        """
+        return self.__indent_level
+
+    @property
+    def indent_size(self):
+        """Size of each indent.
+
+        Returns
+        -------
+        int
+            Size of each indent.
+        """
+        return self.__indent_size
+
+    @property
+    def indent_char(self):
+        """Character to use for indent.
+
+        Will be multiplied by the indent_size and the ident_level and prepended before
+        each line written to this stream.
+
+        Returns
+        -------
+        str
+            Character to use for indent.
+        """
+        return self.__indent_char
+
+    def write(self, given):
+        """Indents the begining of the given text as well as every new line in the given text
+        and then writes it to this steams parent_stream.
+
+        Notes
+        -----
+        If there is a new line at the end of the given string there will not be an indent
+        written after that new line assuming that the next line will be written by this stream
+        and therefor get indented as being initially written to this stream.
+
+        Parameters
+        ----------
+        given : str or bytes (utf-8)
+            String to indent every line of before writing to parent stream.
+
+        Examples
+        --------
+        >>> TextIOIndenter(sys.stdout).write("hello world\\n")
+        hello world
+        <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout, 1).write("hello world\\n")
+            hello world
+            <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout, 2).write("hello world\\n")
+                hello world
+                <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout).write("\\nhello world\\n")
+        <BLANKLINE>
+        hello world
+        <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout, 1).write("\\nhello world\\n")
+            <BLANKLINE>
+            hello world
+            <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout, 2).write("\\nhello world\\n")
+                <BLANKLINE>
+                hello world
+                <BLANKLINE>
+
+        >>> TextIOIndenter(sys.stdout, 0, 2, '-').write("hello world")
+        hello world
+
+        >>> TextIOIndenter(sys.stdout, 1, 2, '-').write("hello world")
+        --hello world
+
+        >>> TextIOIndenter(sys.stdout, 2, 2, '-').write(hello world")
+        ----hello world
+
+        >>> TextIOIndenter(sys.stdout, 1).write("hello\\nworld\\n")
+            hello
+            world
+            <BLANKLINE>
+
+
+        >>> TextIOIndenter(sys.stdout, 2).write("hello\\nworld\\n")
+                hello
+                world
+                <BLANKLINE>
+
+        >>> indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write("hello\\nworld\\n")
+        ... indenter.write("foo bar\\n")
+            hello
+            world
+            foo bar
+
+        >>> indenter = TextIOIndenter(sys.stdout, 1)
+        ... indenter.write("hello world ")
+        ... indenter.write("foo bar\\n")
+        ... indenter.write("this is a test, ")
+        ... indenter.write("more testing\\n")
+        ... indenter.write("fortytwo\\n")
+            hello world foo bar
+            this is a test more testing
+            fortytwo
+
+        Returns
+        -------
+        int
+            Number of characters written.
+
+        See Also
+        --------
+        io.TextIOBase.write
+        """
+        if isinstance(given, bytes):
+            indented = given.decode('utf-8')
+        else:
+            indented = given
+
+        # create the indent to insert at begining of given text and every new line in that text
+        indent_chars = self.indent_char * (self.indent_size * self.indent_level)
+
+        if self.__unwritten_to:
+            self.__unwritten_to = False
+            indented = f"{indent_chars}{indented}"
+
+        # add indent after every new line
+        # NOTE: \1 is capture group one and contains the original new line character
+        indented = re.sub(r"(\r\n|\r|\n)", r"\1" + indent_chars, indented)
+
+        return self.parent_stream.write(indented)
+
+    def flush(self):
+        """Flush the parent stream.
+
+        See Also
+        --------
+        io.TextIOBase.flush
+        """
+        self.parent_stream.flush()

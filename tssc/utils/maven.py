@@ -43,7 +43,7 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
 
 def generate_maven_servers(ElementTree, maven_servers): # pylint: disable=invalid-name
     """
-    Generates maven servers section of settings.xml and appends to the file 
+    Generates maven servers section of settings.xml and appends to the file
 
     Parameters
     ----------

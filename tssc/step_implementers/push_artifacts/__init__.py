@@ -7,18 +7,21 @@ accept minimally the following configuration options.
 
 | Key                 | Description
 |---------------------|------------
-| `url`               | URL to the artifact repository to push the artifact to.
-| `user`              | User to authenticate with the artifact repository.
-| `password`          | Password to authenticate with the artifact repository.
+
 
 Results
 -------
 All tssc.StepImplementers for this step should
 minimally produce the following step results.
 
-| Key                 | Description
-|---------------------|------------
-| `artifacts`         | An array of dictionaries with information on the pushed artifacts.
+| Key                | Description
+|--------------------|------------
+| `result`           | Dictionary of results
+| `report-artifacts` | An array of dictionaries describing the push results
+
+Elements in the `result` dictionary:
+| `success`          | True or False
+| `message`          | Overall status
 
 """
 

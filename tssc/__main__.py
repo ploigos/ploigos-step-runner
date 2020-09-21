@@ -15,11 +15,13 @@ Exit Codes
 
 import sys
 import argparse
+from contextlib import redirect_stdout, redirect_stderr
 import os.path
 import traceback
 
-from tssc import TSSCFactory, DecryptionUtils
-from tssc.config import Config
+from tssc.factory import TSSCFactory
+from tssc.decryption_utils import DecryptionUtils
+from tssc.config.config import Config
 from tssc.utils.io import TextIOSelectiveObfuscator
 
 def print_error(msg):
@@ -91,17 +93,12 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
-    old_stdout = sys.stdout
-    old_stderr = sys.stderr
-    new_stdout = TextIOSelectiveObfuscator(old_stdout)
-    new_stderr = TextIOSelectiveObfuscator(old_stderr)
-    DecryptionUtils.register_obfuscation_stream(new_stdout)
-    DecryptionUtils.register_obfuscation_stream(new_stderr)
+    obfuscated_stdout = TextIOSelectiveObfuscator(sys.stdout)
+    obfuscated_stderr = TextIOSelectiveObfuscator(sys.stderr)
+    DecryptionUtils.register_obfuscation_stream(obfuscated_stdout)
+    DecryptionUtils.register_obfuscation_stream(obfuscated_stderr)
 
-    try:
-        sys.stdout = new_stdout
-        sys.stderr = new_stderr
-
+    with redirect_stdout(obfuscated_stdout), redirect_stderr(obfuscated_stderr):
         # validate args
         for config_file in args.config:
             if not os.path.exists(config_file) or os.stat(config_file).st_size == 0:
@@ -124,11 +121,6 @@ def main(argv=None):
             track = traceback.format_exc()
             print(track)
             sys.exit(200)
-    finally:
-        new_stdout.close()
-        new_stderr.close()
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
 
 def init():
     """

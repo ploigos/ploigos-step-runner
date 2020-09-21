@@ -49,7 +49,7 @@ class TestMavenUtils(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             with self.assertRaisesRegex(ValueError,
                                         'username and password are required for maven_servers.'):
-                generate_maven_settings(temp_dir.path, maven_servers, maven_mirrors, None)
+                generate_maven_settings(temp_dir.path, maven_servers, None, None)
 
     def test_generate_maven_repositories_exists(self):
         maven_repositories = [

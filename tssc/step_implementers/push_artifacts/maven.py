@@ -7,9 +7,9 @@ Step configuration key(s) for this step:
 
 | Key                 | Required | Default | Description
 |---------------------|----------|---------|------------
-| `maven-push_        | True     | N/A     | id for the maven servers and mirrors
+| `maven-push-        | True     | N/A     | id for the maven servers and mirrors
 | `artifact-repo-id`  |          |         |
-| `maven-push_        | True     | N/A     | url for the maven servers and mirrors
+| `maven-push-        | True     | N/A     | url for the maven servers and mirrors
 | `artifact-repo-url` |          |         |
 
 Expected Previous Step Results
@@ -46,10 +46,10 @@ Elements in the `report-artifacts` dictionary:
 
 | Elements           | Description
 |--------------------|------------
-| `url`              | URL to the artifact pushed to the artifact repository
 | `path`             | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`      | Maven artifact ID pushed to the artifact repository
 | `group-id`         | Maven group ID pushed to the artifact repository
+| `package-type`     | Package type of the artifact
 | `version`          | Version pushed to the artifact repository
 
 Examples
