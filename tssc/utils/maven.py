@@ -10,18 +10,12 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
 
     Parameters
     ----------
-    :
     maven_servers:
         Dictionary of id, username, password
     maven_repositories:
         Dictionary of id, url, snapshots, releases
     maven_mirrors:
         Dictionary of id, url, mirror_of
-
-    Returns
-    -------
-    dict
-        Dictionary parsed from given YAML or JSON file
 
     Raises
     ------
@@ -49,7 +43,17 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
 
 def generate_maven_servers(ElementTree, maven_servers): # pylint: disable=invalid-name
     """
-    Generates maven servers section of settings.xml
+    Generates maven servers section of settings.xml and appends to the file 
+
+    Parameters
+    ----------
+    maven_servers:
+        Dictionary of id, username, password
+
+    Raises
+    ------
+    ValueError
+        If required fields are not provided a value.
     """
 
     if maven_servers is not None:
@@ -74,7 +78,17 @@ def generate_maven_servers(ElementTree, maven_servers): # pylint: disable=invali
 
 def generate_maven_repositories(ElementTree, maven_repositories): # pylint: disable=invalid-name
     """
-    Generates maven repositories section of settings.xml
+    Generates maven repositories section of settings.xml and appends to the file
+
+    Parameters
+    ----------
+    maven_repositories:
+        Dictionary of id, username, password
+
+    Raises
+    ------
+    ValueError
+        If required fields are not provided a value.
     """
 
     if maven_repositories is not None:
@@ -106,7 +120,17 @@ def generate_maven_repositories(ElementTree, maven_repositories): # pylint: disa
 
 def generate_maven_mirrors(ElementTree, maven_mirrors): # pylint: disable=invalid-name
     """
-    Generates maven mirrors section of settings.xml
+    Generates maven mirrors section of settings.xml and appends to the file
+
+    Parameters
+    ----------
+    maven_mirrors:
+        Dictionary of id, username, password
+
+    Raises
+    ------
+    ValueError
+        If required fields are not provided a value.
     """
 
     if maven_mirrors is not None:

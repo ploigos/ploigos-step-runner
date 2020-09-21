@@ -28,6 +28,7 @@ class TestMavenUtils(BaseTSSCTestCase):
                 assert results == settings
 
     def test_generate_maven_servers_id_does_not_exist(self):
+        
         maven_servers = [
             {
                 "username": "user1",
@@ -48,7 +49,7 @@ class TestMavenUtils(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             with self.assertRaisesRegex(ValueError,
                                         'username and password are required for maven_servers.'):
-                generate_maven_settings(temp_dir.path, maven_servers, None, None)
+                generate_maven_settings(temp_dir.path, maven_servers, maven_mirrors, None)
 
     def test_generate_maven_repositories_exists(self):
         maven_repositories = [
