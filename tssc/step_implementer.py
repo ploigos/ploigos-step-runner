@@ -5,6 +5,7 @@ Abstract class and helper constants for StepImplementer.
 from abc import ABC, abstractmethod
 from contextlib import redirect_stdout, redirect_stderr
 import os
+from pathlib import Path
 import pprint
 import textwrap
 import sys
@@ -577,9 +578,16 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         return os.path.abspath(step_path)
 
 
-    def write_working_file(self, filename, contents):
+    def write_working_file(self, filename, contents=None):
         """
         Write content to filename in working directory
+
+        Parameters
+        ----------
+        filename : str
+            Relative path (to working dir), including file name, to create.
+        contents : str, optional
+            Contents to write to the file
 
         Returns
         -------
@@ -590,8 +598,17 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         file_path = os.path.join(working_folder, filename)
 
-        with open(file_path, 'wb') as file:
-            file.write(contents)
+        # if given contents write it to file
+        # else just touch empty file
+        #
+        # NOTE: in either case auto create any missing parent directories
+        if contents is not None:
+            with open(file_path, 'wb') as file:
+                file.write(contents)
+        else:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            Path(file_path).touch()
+
         return file_path
 
     @staticmethod

@@ -14,6 +14,9 @@ from runtime configuration.
                                              automatically be applied
 | `src-tls-verify`  | True      | `'true'` | Whether to very TLS for source of image
 | `dest-tls-verify` | True      | `'true'` | Whether to verify TLS for destination of image
+| `containers-config-auth-file` | True | `'~/.skopeo-auth.json'` | \
+    Path to the container registry authentication file \
+    to use for container registry authentication.
 
 Expected Previous Step Results
 ------------------------------
@@ -35,16 +38,21 @@ Results output by this step.
 | `image-tag` | Pushed destination image tag
 
 """
+import os
+from pathlib import Path
 import sys
 import sh
 from tssc import StepImplementer, DefaultSteps
+from tssc.utils.containers import container_registries_login
 
 DEFAULT_CONFIG = {
     'src-tls-verify': 'true',
     'dest-tls-verify': 'true',
+    'containers-config-auth-file': os.path.join(Path.home(), '.skopeo-auth.json')
 }
 
 REQUIRED_CONFIG_KEYS = [
+    'containers-config-auth-file',
     'destination-url',
     'src-tls-verify',
     'dest-tls-verify',
@@ -120,13 +128,25 @@ class Skopeo(StepImplementer):
         destination_with_version = self.get_config_value('destination-url') + '/' + organization + \
          '/' + application_name + '-' + service_name + ':' + (version).lower()
         try:
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_config_value('containers-config-auth-file')
+            container_registries_login(
+                registries=self.get_config_value('container-registries'),
+                containers_config_auth_file=containers_config_auth_file
+            )
+
+            # push image
             sh.skopeo.copy( # pylint: disable=no-member
-                '--src-tls-verify=' + str(self.get_config_value('src-tls-verify')),
-                '--dest-tls-verify=' + str(self.get_config_value('dest-tls-verify')),
+                f"--src-tls-verify={str(self.get_config_value('src-tls-verify'))}",
+                f"--dest-tls-verify={str(self.get_config_value('dest-tls-verify'))}",
+                f"--authfile={containers_config_auth_file}",
                 'docker-archive:' + image_tar_file,
                 'docker://' + destination_with_version,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee='err'
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking skopeo: {error}'.format(error=error)) from error

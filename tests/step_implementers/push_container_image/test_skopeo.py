@@ -33,8 +33,14 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
             expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
 
             with self.assertRaisesRegex(
-                    AssertionError,
-                    r'The runtime step configuration \(\{\'src-tls-verify\': \'true\', \'dest-tls-verify\': \'true\', \'application-name\': \'foo\', \'service-name\': \'bar\', \'organization\': \'xyzzy\'\}\) is missing the required configuration keys \(\[\'destination-url\'\]\)'):
+                AssertionError,
+                r"The runtime step configuration \(\{'src-tls-verify': 'true', "
+                r"'dest-tls-verify': 'true', "
+                r"'containers-config-auth-file': '.*/\.skopeo-auth.json', "
+                r"'application-name': 'foo', "
+                r"'service-name': 'bar', 'organization': 'xyzzy'\}\) "
+                r"is missing the required configuration keys \(\['destination-url'\]\)"
+            ):
                 run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
 
     @patch('sh.skopeo', create=True)
@@ -101,20 +107,32 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                     }
                 }
             }
-            expected_step_results = {'tssc-results': { 'create-container-image': {'image-tar-file': destination}, 'generate-metadata': {'image-tag': version }, 'push-container-image': {'image-tag': "{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
-            'image-url': destination,
-            'image-version' : version
-
-            }}}
+            expected_step_results = {
+                'tssc-results': {
+                    'create-container-image': {
+                        'image-tar-file': destination
+                    },
+                    'generate-metadata': {
+                        'image-tag': version
+                    },
+                    'push-container-image': {
+                        'image-tag': "{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
+                        'image-url': destination,
+                        'image-version' : version
+                    }
+                }
+            }
 
             run_step_test_with_result_validation(temp_dir, 'push-container-image', config, expected_step_results)
             skopeo_mock.copy.assert_called_once_with(
                 '--src-tls-verify=true',
                 '--dest-tls-verify=true',
+                StringRegexParam(r"--authfile=.*/\.skopeo-auth.json"),
                 "docker-archive:{destination}".format(destination=destination),
                 "docker://{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
 
     @patch('sh.skopeo', create=True)

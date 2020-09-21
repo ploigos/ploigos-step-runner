@@ -2,6 +2,8 @@
 """
 
 __all__ = [
+    'containers',
+    'dict',
     'file',
     'io',
     'reflection',
