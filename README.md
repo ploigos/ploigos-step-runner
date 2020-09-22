@@ -1,4 +1,6 @@
+[![Publish Release](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Release/badge.svg)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Release%22)
 [![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Dev%22+branch%3Amaster)
+<br />
 [![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+GitHub+Pages%22+branch%3Amaster)
 <br />
 [![codecov](https://codecov.io/gh/rhtconsulting/tssc-python-package/branch/master/graph/badge.svg)](https://codecov.io/gh/rhtconsulting/tssc-python-package)
