@@ -52,13 +52,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
-    config : TSSCSubStepConfig
+    config : SubStepConfig
         Configuration for this step.
     environment : str
         Environment name to execute this step against
 
     Attributes
-    __config : TSSCSubStepConfig
+    __config : SubStepConfig
     __environment : str
     """
 
@@ -88,7 +88,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         Returns
         -------
-        TSSCSubStepConfig
+        SubStepConfig
             Configuration for this step.
         """
         return self.__config
