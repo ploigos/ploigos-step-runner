@@ -740,11 +740,15 @@ import __main__
 from .step_implementer import StepImplementer, DefaultSteps
 from .factory import TSSCFactory
 from .exceptions import TSSCException
+from .step_results import StepResults
+from .step_results_list import StepResultsList
 
 __all__ = [
     'config',
     'factory',
     'exceptions',
     'step_implementer',
-    'utils'
+    'utils',
+    'step_results',
+    'step_results_list'
 ]
