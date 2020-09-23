@@ -225,6 +225,7 @@ Results output by this step.
     }
 &#34;&#34;&#34;
 from io import StringIO
+import re
 import sys
 import sh
 from tssc import StepImplementer, DefaultSteps
@@ -359,9 +360,9 @@ class Git(StepImplementer):
         return tag
 
     def _git_url(self):
-        return_val = None
+        git_url = None
         if self.get_config_value(&#39;url&#39;):
-            return_val = self.get_config_value(&#39;url&#39;)
+            git_url = self.get_config_value(&#39;url&#39;)
         else:
             try:
                 out = StringIO()
@@ -373,11 +374,21 @@ class Git(StepImplementer):
                     _encoding=&#39;UTF-8&#39;,
                     _decode_errors=&#39;ignore&#39;
                 )
-                return_val = out.getvalue().rstrip()
+                git_url = out.getvalue().rstrip()
+
+                # remove ANYTHING@ from begining of git_url since step will pass in its own
+                # username and password
+                #
+                # Regex:
+                #   ^[^@]+@ - match from begining of line any charcter up until an @ and then the @
+                #   (.*) - match any character and capture to capture group 1
+                #   \1 - capture group 1 which is the http or https if there was one
+                #   \2 - capture group 2 which is anything after the first @ if there was one
+                git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
 
             except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
-        return return_val
+        return git_url
 
     @staticmethod
     def _git_tag(git_tag_value):  # pragma: no cover
@@ -561,9 +572,9 @@ for http and https git repos, and that is a desired use case.</p></div>
         return tag
 
     def _git_url(self):
-        return_val = None
+        git_url = None
         if self.get_config_value(&#39;url&#39;):
-            return_val = self.get_config_value(&#39;url&#39;)
+            git_url = self.get_config_value(&#39;url&#39;)
         else:
             try:
                 out = StringIO()
@@ -575,11 +586,21 @@ for http and https git repos, and that is a desired use case.</p></div>
                     _encoding=&#39;UTF-8&#39;,
                     _decode_errors=&#39;ignore&#39;
                 )
-                return_val = out.getvalue().rstrip()
+                git_url = out.getvalue().rstrip()
+
+                # remove ANYTHING@ from begining of git_url since step will pass in its own
+                # username and password
+                #
+                # Regex:
+                #   ^[^@]+@ - match from begining of line any charcter up until an @ and then the @
+                #   (.*) - match any character and capture to capture group 1
+                #   \1 - capture group 1 which is the http or https if there was one
+                #   \2 - capture group 2 which is anything after the first @ if there was one
+                git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
 
             except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
-        return return_val
+        return git_url
 
     @staticmethod
     def _git_tag(git_tag_value):  # pragma: no cover

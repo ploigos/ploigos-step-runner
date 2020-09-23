@@ -81,13 +81,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
-    config : TSSCSubStepConfig
+    config : SubStepConfig
         Configuration for this step.
     environment : str
         Environment name to execute this step against
 
     Attributes
-    __config : TSSCSubStepConfig
+    __config : SubStepConfig
     __environment : str
     &#34;&#34;&#34;
 
@@ -117,7 +117,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCSubStepConfig
+        SubStepConfig
             Configuration for this step.
         &#34;&#34;&#34;
         return self.__config
@@ -842,13 +842,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <dd>Path to the directory to write step working files to</dd>
 <dt><strong><code>step_environment_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
 <dd>Step configuration specific to the current environment.</dd>
-<dt><strong><code>config</code></strong> :&ensp;<code>TSSCSubStepConfig</code></dt>
+<dt><strong><code>config</code></strong> :&ensp;<code>SubStepConfig</code></dt>
 <dd>Configuration for this step.</dd>
 <dt><strong><code>environment</code></strong> :&ensp;<code>str</code></dt>
 <dd>Environment name to execute this step against</dd>
 <dt><strong><code>Attributes</code></strong></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>__config</code></strong> :&ensp;<code>TSSCSubStepConfig</code></dt>
+<dt><strong><code>__config</code></strong> :&ensp;<code>SubStepConfig</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>__environment</code></strong> :&ensp;<code>str</code></dt>
 <dd>&nbsp;</dd>
@@ -872,13 +872,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
-    config : TSSCSubStepConfig
+    config : SubStepConfig
         Configuration for this step.
     environment : str
         Environment name to execute this step against
 
     Attributes
-    __config : TSSCSubStepConfig
+    __config : SubStepConfig
     __environment : str
     &#34;&#34;&#34;
 
@@ -908,7 +908,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         Returns
         -------
-        TSSCSubStepConfig
+        SubStepConfig
             Configuration for this step.
         &#34;&#34;&#34;
         return self.__config
@@ -1606,7 +1606,7 @@ def step_implementer_config_defaults():
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
-<dt><code>TSSCSubStepConfig</code></dt>
+<dt><code>SubStepConfig</code></dt>
 <dd>Configuration for this step.</dd>
 </dl></div>
 <details class="source">
@@ -1618,7 +1618,7 @@ def config(self):
     &#34;&#34;&#34;
     Returns
     -------
-    TSSCSubStepConfig
+    SubStepConfig
         Configuration for this step.
     &#34;&#34;&#34;
     return self.__config</code></pre>
