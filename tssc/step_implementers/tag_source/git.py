@@ -53,6 +53,7 @@ Results output by this step.
     }
 """
 from io import StringIO
+import re
 import sys
 import sh
 from tssc import StepImplementer, DefaultSteps
@@ -187,9 +188,9 @@ class Git(StepImplementer):
         return tag
 
     def _git_url(self):
-        return_val = None
+        git_url = None
         if self.get_config_value('url'):
-            return_val = self.get_config_value('url')
+            git_url = self.get_config_value('url')
         else:
             try:
                 out = StringIO()
@@ -201,11 +202,21 @@ class Git(StepImplementer):
                     _encoding='UTF-8',
                     _decode_errors='ignore'
                 )
-                return_val = out.getvalue().rstrip()
+                git_url = out.getvalue().rstrip()
+
+                # remove ANYTHING@ from begining of git_url since step will pass in its own
+                # username and password
+                #
+                # Regex:
+                #   ^[^@]+@ - match from begining of line any charcter up until an @ and then the @
+                #   (.*) - match any character and capture to capture group 1
+                #   \1 - capture group 1 which is the http or https if there was one
+                #   \2 - capture group 2 which is anything after the first @ if there was one
+                git_url = re.sub(r"^(http://|https://)[^@]+@(.*)", r"\1\2", git_url)
 
             except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
                 raise RuntimeError('Error invoking git config --get remote.origin.url') from error
-        return return_val
+        return git_url
 
     @staticmethod
     def _git_tag(git_tag_value):  # pragma: no cover
