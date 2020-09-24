@@ -147,7 +147,11 @@ class Maven(StepImplementer):
         fail_on_no_tests = self.get_config_value('fail-on-no-tests')
 
         if not os.path.exists(pom_file):
-            raise ValueError('Given pom file does not exist: ' + pom_file)
+            self.step_result_set_success_message(
+                False,
+                'Given pom file does not exist: ' + pom_file
+            )
+            return
 
         surefire_path = 'mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId="maven-surefire-plugin"]'
         maven_surefire_plugin = get_xml_element_by_path(
@@ -156,7 +160,11 @@ class Maven(StepImplementer):
             default_namespace='mvn'
         )
         if maven_surefire_plugin is None:
-            raise ValueError('Unit test dependency "maven-surefire-plugin" missing from POM.')
+            self.step_result_set_success_message(
+                False,
+                'Unit test dependency "maven-surefire-plugin" missing from POM.'
+            )
+            return
 
         reports_dir = get_xml_element_by_path(
             pom_file,
@@ -182,43 +190,48 @@ class Maven(StepImplementer):
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
+            self.step_result_set_success_message(
+                False,
+                f'Error invoking mvn: {error}'
+            )
+            return
 
         test_results_output_path = test_results_dir
 
         if not os.path.isdir(test_results_dir) or \
-            len(os.listdir(test_results_dir)) == 0:
+                len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
-                results = {
-                    'result': {
-                        'success': True,
-                        'message': 'unit test step run successfully, but no tests were found'
-                    },
-                    'report-artifacts': [],
-                    'options': {
-                        'pom-path': pom_file,
-                        'fail-on-no-tests': False
-                    }
-                }
-            else:# pragma: no cover
+                self.step_result_add_artifact(
+                    'option',
+                    'fail-on-no-tests',
+                    'boolean',
+                    False
+                )
+            else:  # pragma: no cover
                 # Added 'no cover' to bypass missing unit-test step coverage error
                 # that is covered by the following unit test:
                 #   test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true
-                raise RuntimeError('Error: No unit tests defined')
+                self.step_result_set_success_message(
+                    False,
+                    'Error: No unit tests defined'
+                )
+                return
         else:
-            results = {
-                'result': {
-                    'success': True,
-                    'message': 'unit test step run successfully and junit reports were generated'
-                },
-                'options': {
-                    'pom-path': pom_file
-                },
-                'report-artifacts': [
-                    {
-                        'name': 'maven unit test results generated using junit',
-                        'path': f'file://{test_results_output_path}'
-                    }
-                ]
-            }
-        return results
+            self.step_result_set_success_message(
+                True,
+                'unit test step run successfully'
+            )
+            self.step_result_add_artifact(
+                'generated',
+                'maven unit test results generated using junit',
+                'file',
+                f'file://{test_results_output_path}'
+            )
+            self.step_result_add_artifact(
+                'option',
+                'pom-file',
+                'file',
+                pom_file
+            )
+
+        return

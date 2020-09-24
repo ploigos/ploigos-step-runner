@@ -45,8 +45,8 @@ class TSSCFactory:
     def __init__(
             self,
             config,
-            results_dir_path='tssc-results', \
-            results_file_name='tssc-results.yml', \
+            results_dir_path='tssc-results',
+            results_file_name='tssc-results.pkl',
             work_dir_path='tssc-working'):
 
         if isinstance(config, Config):
