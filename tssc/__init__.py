@@ -756,8 +756,9 @@ import __main__
 from .step_implementer import StepImplementer, DefaultSteps
 from .factory import TSSCFactory
 from .exceptions import TSSCException
-from .step_results import StepResults
-from .step_results_list import StepResultsList
+from .step_result import StepResult
+from .workflow_result import WorkflowResult
+from .workflow_result import WorkflowFile
 
 __all__ = [
     'config',
@@ -765,6 +766,6 @@ __all__ = [
     'exceptions',
     'step_implementer',
     'utils',
-    'step_results',
-    'step_results_list'
+    'step_result',
+    'workflow_result'
 ]
