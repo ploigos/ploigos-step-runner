@@ -52,6 +52,3 @@ class TestStepResultTest(BaseTSSCTestCase):
         print(version)
         simple = workflow_test.get_artifact('simple')
         print(simple)
-
-
-        self.assertEquals(x, y)
