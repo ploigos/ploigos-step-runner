@@ -3,9 +3,7 @@
 """
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tssc.step_result import StepResult
-from tssc.workflow_result import load_workflow_results
-from tssc.workflow_result import delete_workflow_results
-
+from tssc.workflow_result import WorkflowResult
 
 class TestStepResultTest(BaseTSSCTestCase):
     """
@@ -17,8 +15,8 @@ class TestStepResultTest(BaseTSSCTestCase):
         :return:
         """
         result_file = 'tssc-results.pkl'
-        delete_workflow_results(result_file)
-        workflow_results = load_workflow_results(result_file)
+        WorkflowResult.delete(result_file)
+        workflow_results = WorkflowResult.load(result_file)
 
         step_1 = StepResult('step1', 'one')
         step_1.message = 'hello dolly!'
@@ -29,7 +27,8 @@ class TestStepResultTest(BaseTSSCTestCase):
                             )
         # # update the workflow by adding step_1
         workflow_results.add_step_result(step_1)
-        workflow_results.dump(result_file)
+        workflow_results.dump_pickle(result_file)
+        workflow_results.dump_yml('tssc-results.yml')
 
         #
         step_2 = StepResult('step2', 'one')
@@ -38,10 +37,14 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_2.add_artifact('simple', 'a value')
         workflow_results.add_step_result(step_2)
 
-        workflow_results.dump(result_file)
+        workflow_results.dump_pickle(result_file)
+        workflow_results.dump_yml('tssc-results.yml')
+        workflow_results.dump_json('tssc-results.json')
+
+
 
         # above we created one entry, let's read it
-        workflow_test = load_workflow_results(result_file)
+        workflow_test = WorkflowResult.load(result_file)
         workflow_test.print_json()
 
         workflow_test.get_artifact('bad')
@@ -49,3 +52,6 @@ class TestStepResultTest(BaseTSSCTestCase):
         print(version)
         simple = workflow_test.get_artifact('simple')
         print(simple)
+
+
+        self.assertEquals(x, y)

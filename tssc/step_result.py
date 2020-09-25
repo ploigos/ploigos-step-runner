@@ -154,8 +154,7 @@ class StepResult:
         str
             JSON formatted step result
         """
-        # return json.dumps(self.get_step_result())
-        return json.dumps(self.get_step_result(), indent=4)
+        return json.dumps(self.get_step_result())
 
     def get_step_result_yaml(self):
         """
