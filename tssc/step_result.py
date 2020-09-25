@@ -1,5 +1,5 @@
 """
-Abstract class and helper constants for StepResult
+Class and helper constants for StepResult
 """
 import json
 import yaml
@@ -7,23 +7,15 @@ import yaml
 
 class StepResult:
     """
-    Dictionary of result information for ONE step.
-     {
-    "newstep": {
-        "step-name": "newstep",
-        "step-implementer-name": "news",
-        "success": True,
-        "message": ""
-        "artifacts": {
-            "key": "key"
-            "name": {
-                "desc": "reporter",
-                "type": "file",
-                "value": "file://hello.txt"
-            },
-        }
-    }
-    }
+    TSSC step result dictionary.
+
+    Parameters
+    ----------
+    step_name : str
+        Name of the step
+    implementer_name : str
+        Name of the implementer
+
     """
 
     def __init__(self, step_name, implementer_name):
@@ -38,37 +30,48 @@ class StepResult:
 
     def __str__(self):
         """
-        Result String
+        Returns
+        -------
+        str
+            JSON formatted step result
         """
         return self.get_step_result_json()
 
     @property
     def step_name(self):
         """
-        hello
+        Returns
+        -------
+        str
+            Step name
         """
         return self._step_name
 
     @property
     def artifacts(self):
         """
-        hello
+        Returns
+        -------
+        dict
+            All artifacts of the step
         """
         return self._artifacts
 
     def get_artifact(self, name):
         """
-        hello
+        Returns
+        -------
+        dict
+            Specific artifact given name
         """
-        #
         return self._artifacts.get(name)
 
     def add_artifact(self, name, value, description='', value_type=None):
         """
-        hello
+        Adds an artifact with the given parameters
         """
         if not value_type:
-            value_type = type(value)
+            value_type = type(value).__name__
         self._artifacts[name] = {
             'description': description,
             'type': value_type,
@@ -78,28 +81,34 @@ class StepResult:
     @property
     def success(self):
         """
-        hello
+        Returns
+        -------
+        bool
+            Success
         """
         return self._success
 
     @success.setter
     def success(self, success=True):
         """
-        hello
+        Setter for success
         """
         self._success = success
 
     @property
     def message(self):
         """
-        hello
+        Returns
+        -------
+        str
+            Message/ error message
         """
         return self._message
 
     @message.setter
     def message(self, message):
         """
-        hello
+        Setter for message
         """
         self._message = message
 
@@ -107,7 +116,25 @@ class StepResult:
         """
         Returns
         -------
-        Dict
+        dict
+            Formatted with all step result components
+
+        result= {
+            "new_step": {
+                "step-name": "new_step",
+                "step-implementer-name": "implementer_name",
+                "success": True,
+                "message": "",
+                "artifacts": {
+                    "name": {
+                        "description": "file description",
+                        "type": "file",
+                        "value": "file://step-result.txt"
+                    }
+                }
+            }
+        }
+
         """
         result = {
             self._step_name: {
@@ -122,13 +149,19 @@ class StepResult:
 
     def get_step_result_json(self):
         """
-        hello
+        Returns
+        -------
+        str
+            JSON formatted step result
         """
         # return json.dumps(self.get_step_result())
         return json.dumps(self.get_step_result(), indent=4)
 
     def get_step_result_yaml(self):
         """
-        hello
+        Returns
+        -------
+        str
+            YAML formatted step result
         """
         return yaml.dump(self.get_step_result())
