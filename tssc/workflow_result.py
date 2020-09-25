@@ -3,6 +3,7 @@ Abstract class and helper constants for WorkflowResult
 """
 import pickle
 import os
+import json
 
 from tssc.step_result import StepResult
 from tssc.exceptions import TSSCException
@@ -111,8 +112,10 @@ class WorkflowResult:
         try:
             WorkflowResult._folder_create(json_filename)
             with open(json_filename, 'w') as file:
+                results = {}
                 for i in self.__workflow_list:
-                    file.write(i.get_step_result_json())
+                    results.update(i.get_step_result())
+                json.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
 
