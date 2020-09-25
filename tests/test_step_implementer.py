@@ -9,7 +9,10 @@ from tssc.config import Config
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
-from tssc.workflow_result import Wrapper
+
+from tssc.workflow_result import WorkflowResult
+
+
 
 class dummy_context_mgr():
     def __enter__(self):
@@ -36,8 +39,8 @@ class TestStepImplementer(BaseTSSCTestCase):
             environment=environment
         )
 
-        workflow = Wrapper(results_file_name)
-        step_results = workflow.results.get_step_result(step)
+        workflow_results = WorkflowResult(results_file_name)
+        step_results = workflow_results.get_step_result(step)
         print(step_results)
         print(expected_step_results)
         self.assertEqual(expected_step_results, step_results)

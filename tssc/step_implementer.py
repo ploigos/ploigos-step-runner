@@ -13,7 +13,7 @@ from tssc.config.config_value import ConfigValue
 from tssc.utils.io import TextIOIndenter
 
 from tssc.step_result import StepResult
-from tssc.workflow_result import Wrapper
+from tssc.workflow_result import WorkflowResult
 
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
@@ -87,11 +87,12 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         # results_file_path example: /home/me/tssc-results/tssc-results.plkl
         self.results_file_path()
 
-        # todo: Is this awkward wrapped into single class?
         # WORKFLOW
-        print(self.__results_file_path)
-        self.__workflow = Wrapper(self.__results_file_path)
+        # todo: Move this to the working folder (pkl will be in work folder)
+        self.__workflowResults = WorkflowResult(self.__results_file_path)
+
         # STEP_RESULTS
+        # todo: the step result will be in the constructor for workflow?  hmm.
         self.__step_result = StepResult(config.step_name, config.sub_step_name)
 
         super().__init__()
@@ -474,7 +475,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         dict
             The results of a specific step. None if results DNE
         """
-        return self.__workflow.results.get_step_result(step_name)
+        return self.__workflow_results.get_step_result(step_name)
 
 
     def current_step_results(self):
@@ -632,7 +633,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         :return: dict
         """
-        return self.__workflow
+        return self.__workflow_results
 
     # todo: how to organize this better?
     def _workflow_result_update(self):
@@ -640,15 +641,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         this is where we actually write the file to disk
         :return: dict
         """
-        # do in the run step function before calling _run_step
-        self.__step_result.runtime_config = ConfigValue.convert_leaves_to_values(
-            self.get_copy_of_runtime_step_config()
-        )
-        # do in the constructor of the workflow_result
-        self.__workflow.results.add_step_result(self.__step_result)
+        # peggy
+        # todo:  move to the constructor of the workflow_result
+        self.__workflow_results.add_step_result(self.__step_result)
 
-
-        self.__workflow.write(self.__step_result)
-        # dump the pkl to tssc-working
-        # dump the yml to tssc-results
-        #
+        self.__workflow_results.dump()
+        # todo: dump the pkl to tssc-working
+        # todo: dump the yml to tssc-results
