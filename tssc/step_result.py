@@ -15,14 +15,13 @@ class StepResult:
         "success": True,
         "message": ""
         "artifacts": {
-            "misc": { "key": "value" }
+            "key": "key"
             "name": {
                 "desc": "reporter",
                 "type": "file",
                 "value": "file://hello.txt"
             },
-        },
-        "runtime-config": {}
+        }
     }
     }
     """
@@ -36,7 +35,6 @@ class StepResult:
         self._success = True
         self._message = ''
         self._artifacts = {}
-        self._runtime_config = {}
 
     def __str__(self):
         """
@@ -65,20 +63,17 @@ class StepResult:
         #
         return self._artifacts.get(name)
 
-    # todo: add dictionary instead of params?
-    # do we want to be this prescriptive?
-    def add_artifact(self, name, desc, the_type, value):
+    def add_artifact(self, name, value, description='', value_type=None):
         """
         hello
         """
+        if not value_type:
+            value_type = type(value)
         self._artifacts[name] = {
-            'desc': desc,
-            'type': the_type,
+            'description': description,
+            'type': value_type,
             'value': value
         }
-
-    def add_artifact_misc(self, dictionary):
-        self._artifacts['misc'] = dictionary
 
     @property
     def success(self):
@@ -120,25 +115,10 @@ class StepResult:
                 'step-implementer-name': self._implementer_name,
                 'success': self._success,
                 'message': self._message,
-                'artifacts': self._artifacts,
-                'runtime-config': self._runtime_config
+                'artifacts': self._artifacts
             }
         }
         return result
-
-    @property
-    def runtime_config(self):
-        """
-        hello
-        """
-        return self._runtime_config
-
-    @runtime_config.setter
-    def runtime_config(self, runtime_config):
-        """
-        hello
-        """
-        self._runtime_config = runtime_config
 
     def get_step_result_json(self):
         """

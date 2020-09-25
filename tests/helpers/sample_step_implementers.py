@@ -1,6 +1,7 @@
 from tssc import StepImplementer, TSSCException
 from tssc.config.config_value import ConfigValue
 
+
 class FooStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
@@ -36,6 +37,7 @@ class FooStepImplementer(StepImplementer):
 
     def _run_step(self):
         pass
+
 
 class RequiredStepConfigStepImplementer(StepImplementer):
     @staticmethod
@@ -79,6 +81,7 @@ class RequiredStepConfigStepImplementer(StepImplementer):
 
         return ConfigValue.convert_leaves_to_values(runtime_step_config)
 
+
 class WriteConfigAsResultsStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
@@ -118,9 +121,9 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
             self.step_implementer_config_defaults())
 
         self.step_result.add_artifact_misc(
-             ConfigValue.convert_leaves_to_values(runtime_step_config)
+            ConfigValue.convert_leaves_to_values(runtime_step_config)
         )
+
 
 class NotSubClassOfStepImplementer():
     pass
-
