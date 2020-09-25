@@ -117,7 +117,9 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
             self.environment,
             self.step_implementer_config_defaults())
 
-        return ConfigValue.convert_leaves_to_values(runtime_step_config)
+        self.step_result.add_artifact_misc(
+             ConfigValue.convert_leaves_to_values(runtime_step_config)
+        )
 
 class NotSubClassOfStepImplementer():
     pass

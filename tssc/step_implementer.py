@@ -13,8 +13,7 @@ from tssc.config.config_value import ConfigValue
 from tssc.utils.io import TextIOIndenter
 
 from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
-from tssc.workflow_result import WorkflowFile
+from tssc.workflow_result import Wrapper
 
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
@@ -85,18 +84,20 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         self.__results_file_path = None
 
-        # step_result holds CURRENT results ...
-        self.__step_result = StepResult(
-            config.step_name,
-            config.sub_step_name
-        )
-
         # todo: how to organize this better?
+
+        # todo: results_file_path() method both returns and sets file_path:
+        # results_file_path example: /home/me/tssc-results/tssc-results.plkl
         self.results_file_path()
-        self.__workflow_file = WorkflowFile(self.__results_file_path)
-        self.__workflow_result = self.__workflow_file.load()
-        if self.__workflow_result is None:
-            self.__workflow_result = WorkflowResult()
+
+        # todo:this is awkward how to wrap into a single class?
+        # WORKFLOW_RESULTS
+        print('wwwwwwwwwwwwwwwwwwwwwwwwwww')
+        print(self.__results_file_path)
+        self.__workflow = Wrapper(self.__results_file_path)
+
+        # STEP_RESULTS
+        self.__step_result = StepResult(config.step_name, config.sub_step_name)
 
         super().__init__()
 
@@ -185,6 +186,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             OS path to the results file for this step.
         """
+        # todo: is this the best place to create the folder?
+        if not os.path.exists(self.__results_dir_path):
+            os.makedirs(self.__results_dir_path)
         if not self.__results_file_path:
             self.__results_file_path = os.path.join(
                 self.__results_dir_path,
@@ -335,8 +339,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             indent_level=2
         )
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
+            # peggy
             self._run_step()
-            self.workflow_result_update()
+            self._workflow_result_update()
 
         # print the step run results
         StepImplementer.__print_section_title(
@@ -347,7 +352,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         StepImplementer.__print_data('Results File Path', self.__results_file_path)
 
-        StepImplementer.__print_data('Results', self.step_result_print_json())
+        StepImplementer.__print_data('Results', self.__step_result.get_step_result_json())
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
@@ -367,7 +372,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         TSSCException
             Unexpected error
         """
-        return self.__step_result.get_artifacts()
+        return self.__step_result.get_step_result()
 
     def get_config_value(self, key):
         """Convenience function for self.config.get_config_value.
@@ -473,7 +478,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         dict
             The results of a specific step. None if results DNE
         """
-        return self.__workflow_result.get_step_result(step_name)
+        return self.__workflow.results.get_step_result(step_name)
+
 
     def current_step_results(self):
         """
@@ -624,40 +630,20 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         return self.__step_result
 
     @property
-    def workflow_result(self):
+    def workflow(self):
         """
         :return: dict
         """
-        return self.__workflow_result
+        return self.__workflow
 
     # todo: how to organize this better?
-    def workflow_result_update(self):
+    def _workflow_result_update(self):
         """
+        this is where we actually write the file to disk
         :return: dict
         """
-        self.__workflow_result.add_step_result(self.__step_result)
-        self.__workflow_file.dump(self.__workflow_result)
-
-    def step_result_print_json(self):
-        """
-        :return:
-        """
-        return self.__step_result.get_json()
-
-    def step_result_set_success_message(self, success=True, message=''):
-        """
-        :return:
-        """
-        self.__step_result.set_success_message(success, message)
-
-    def step_result_add_artifact(self, name, desc, the_type, value):
-        """
-        todo: this should be an dict obj... not params
-        :param value:
-        :param the_type:
-        :param desc:
-        :param name:
-        :param artifact:
-        :return:
-        """
-        self.__step_result.add_artifact(name, desc, the_type, value)
+        self.__step_result.runtime_config = ConfigValue.convert_leaves_to_values(
+            self.get_copy_of_runtime_step_config()
+        )
+        self.__workflow.results.add_step_result(self.__step_result)
+        self.__workflow.write(self.__step_result)

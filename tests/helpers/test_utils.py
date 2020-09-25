@@ -24,7 +24,7 @@ def run_step_test_with_result_validation(
 
     results_file_name = f'{results_dir_path}/tssc-results.pkl'
     workflow_file = WorkflowFile(results_file_name)
-    workflow_result = workflow_file.load()
+    workflow_result = workflow_file.load
     if working_dir_path is None:
         workflow_result = WorkflowResult()
     actual_step_result = workflow_result.get_step_result(step_name)

@@ -7,6 +7,7 @@ import yaml
 
 class StepResult:
     """
+    Dictionary of result information for ONE step.
      {
     "newstep": {
         "step-name": "newstep",
@@ -14,42 +15,44 @@ class StepResult:
         "success": True,
         "message": ""
         "artifacts": {
+            "misc": { "key": "value" }
             "name": {
                 "desc": "reporter",
                 "type": "file",
                 "value": "file://hello.txt"
             },
-        ]
+        },
+        "runtime-config": {}
     }
     }
     """
 
     def __init__(self, step_name, implementer_name):
         """
-        hello
+        Result
         """
         self._step_name = step_name
         self._implementer_name = implementer_name
         self._success = True
         self._message = ''
         self._artifacts = {}
+        self._runtime_config = {}
 
     def __str__(self):
         """
-        hello
+        Result String
         """
-        string = u'[step:%s %s message: %s]' %(self._step_name,
-                                               self._implementer_name,
-                                               self._message)
-        return string
+        return self.get_step_result_json()
 
-    def get_step_name(self):
+    @property
+    def step_name(self):
         """
         hello
         """
         return self._step_name
 
-    def get_artifacts(self):
+    @property
+    def artifacts(self):
         """
         hello
         """
@@ -62,6 +65,8 @@ class StepResult:
         #
         return self._artifacts.get(name)
 
+    # todo: add dictionary instead of params?
+    # do we want to be this prescriptive?
     def add_artifact(self, name, desc, the_type, value):
         """
         hello
@@ -72,29 +77,42 @@ class StepResult:
             'value': value
         }
 
-    def get_json(self):
-        """
-        public
-        """
-        #return json.dumps(self.get_result_set(), indent=4)
-        return json.dumps(self.get_step_result())
+    def add_artifact_misc(self, dictionary):
+        self._artifacts['misc'] = dictionary
 
-    def get_yaml(self):
+    @property
+    def success(self):
         """
         hello
         """
-        return yaml.dump(self.get_step_result())
+        return self._success
 
-    def set_success_message(self, success, message=''):
+    @success.setter
+    def success(self, success=True):
         """
         hello
         """
         self._success = success
+
+    @property
+    def message(self):
+        """
+        hello
+        """
+        return self._message
+
+    @message.setter
+    def message(self, message):
+        """
+        hello
+        """
         self._message = message
 
     def get_step_result(self):
         """
-        hello
+        Returns
+        -------
+        Dict
         """
         result = {
             self._step_name: {
@@ -102,7 +120,35 @@ class StepResult:
                 'step-implementer-name': self._implementer_name,
                 'success': self._success,
                 'message': self._message,
-                'artifacts': self._artifacts
+                'artifacts': self._artifacts,
+                'runtime-config': self._runtime_config
             }
         }
         return result
+
+    @property
+    def runtime_config(self):
+        """
+        hello
+        """
+        return self._runtime_config
+
+    @runtime_config.setter
+    def runtime_config(self, runtime_config):
+        """
+        hello
+        """
+        self._runtime_config = runtime_config
+
+    def get_step_result_json(self):
+        """
+        hello
+        """
+        # return json.dumps(self.get_step_result())
+        return json.dumps(self.get_step_result(), indent=4)
+
+    def get_step_result_yaml(self):
+        """
+        hello
+        """
+        return yaml.dump(self.get_step_result())
