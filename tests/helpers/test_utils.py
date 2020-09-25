@@ -1,15 +1,13 @@
 import os
+import yaml
 import re
 from tssc import TSSCFactory
-
-from tssc.workflow_result import WorkflowResult
-from tssc.workflow_result import WorkflowFile
 
 def run_step_test_with_result_validation(
         temp_dir,
         step_name,
         config,
-        expected_step_result,
+        expected_step_results,
         runtime_args=None,
         environment=None):
 
@@ -22,13 +20,10 @@ def run_step_test_with_result_validation(
 
     factory.run_step(step_name, environment)
 
-    results_file_name = f'{results_dir_path}/tssc-results.pkl'
-    workflow_file = WorkflowFile(results_file_name)
-    workflow_result = workflow_file.load
-    if working_dir_path is None:
-        workflow_result = WorkflowResult()
-    actual_step_result = workflow_result.get_step_result(step_name)
-    assert actual_step_result == expected_step_result
+    results_file_name = "tssc-results.yml"
+    with open(os.path.join(results_dir_path, results_file_name), 'r') as step_results_file:
+        actual_step_results = yaml.safe_load(step_results_file.read())
+        assert actual_step_results == expected_step_results
 
 def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name = 'sample-file', commit_message = 'test'):
     sample_file = os.path.join(temp_dir.path, sample_file_name)
@@ -56,7 +51,8 @@ class StringRegexParam():
     def __eq__(self, other):
         if isinstance(other, str):
             return re.match(self.__regex, other)
-        return False
+        else:
+            return False
 
 def create_sops_side_effect(mock_stdout):
     def sops_side_effect(*args, **kwargs):
