@@ -9,6 +9,7 @@ from tssc.config import Config
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
+from tssc.workflow_result import Wrapper
 
 class dummy_context_mgr():
     def __enter__(self):
@@ -25,16 +26,21 @@ class TestStepImplementer(BaseTSSCTestCase):
             test_dir,
             environment=None):
 
+        working_dir_path = os.path.join(test_dir.path, 'tssc-working')
         results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-        factory = TSSCFactory(config, results_dir_path)
+        results_file_name = f'{results_dir_path}/tssc-results.pkl'
+
+        factory = TSSCFactory(config, results_dir_path, 'tssc-results.pkl', working_dir_path)
         factory.run_step(
             step_name=step,
             environment=environment
         )
 
-        with open(os.path.join(results_dir_path, "tssc-results.yml"), 'r') as step_results_file:
-            step_results = yaml.safe_load(step_results_file.read())
-            self.assertEqual(step_results, expected_step_results)
+        workflow = Wrapper(results_file_name)
+        step_results = workflow.results.get_step_result(step)
+        print(step_results)
+        print(expected_step_results)
+        self.assertEqual(expected_step_results, step_results)
 
     def test_one_step_writes_to_empty_results_file(self):
         config1 = {
@@ -50,13 +56,18 @@ class TestStepImplementer(BaseTSSCTestCase):
             }
         }
         config1_expected_step_results = {
-            'tssc-results': {
                 'write-config-as-results': {
-                    'config-1': "config-1",
-                    'config-overwrite-me': 'config-1',
-                    'required-config-key': 'required'
+                    'step-name': 'write-config-as-results',
+                    'step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                    'success': True,
+                    'message': '',
+                    'artifacts': {
+                        'misc': {'config-1': 'config-1', 'config-overwrite-me': 'config-1',
+                                 'required-config-key': 'required'},
+                    },
+                    'runtime-config': {'config-1': 'config-1', 'config-overwrite-me': 'config-1',
+                                       'required-config-key': 'required'},
                 }
-            }
         }
 
         with TempDirectory() as test_dir:

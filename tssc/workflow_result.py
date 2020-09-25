@@ -1,11 +1,43 @@
 """
 Abstract class and helper constants for WorkflowResult
 """
-import os
 import pickle
+import os
 
 from tssc.step_result import StepResult
 from tssc.exceptions import TSSCException
+
+
+class Wrapper:
+    """
+    todo: not sure if this wrapper (inner/outer) is a bad idea yet...
+    """
+    def __init__(self, pickle_filename):
+
+        self.__workflow_file = WorkflowFile(pickle_filename)
+        self.__results = self.__workflow_file.load()
+        if self.__results is None:
+            self.__results = WorkflowResult()
+
+    @property
+    def results(self):
+        """
+        getter
+        """
+        return self.__results
+
+    def write(self, step_result):
+        """
+        dump to pickle
+        """
+        self.__results.add_step_result(step_result)
+        self.__workflow_file.dump(self.__results)
+
+    def read(self):
+        """
+        read from pickle
+        """
+        return self.__workflow_file.load()
 
 
 class WorkflowFile:
@@ -14,7 +46,11 @@ class WorkflowFile:
     """
 
     def __init__(self, pickle_filename):
+        """
+        create the file if it does not exist
+        """
         self.__pickle_filename = pickle_filename
+        self._file_check(self.__pickle_filename)
 
     def clear(self):
         """
@@ -34,11 +70,15 @@ class WorkflowFile:
         """
         :return:
         """
-        # load into memory
-        if os.path.exists(self.__pickle_filename):
-            with open(self.__pickle_filename, 'rb') as file:
-                return pickle.load(file)
-        return None
+        with open(self.__pickle_filename, 'rb') as file:
+            return pickle.load(file)
+
+    def _file_check(self, filename):
+        path = os.path.dirname(filename)
+        if path and not os.path.exists(path):
+            os.makedirs(os.path.dirname(filename))
+        if not os.path.exists(filename):
+            self.clear()
 
 
 class WorkflowResult:
@@ -47,61 +87,57 @@ class WorkflowResult:
     """
 
     def __init__(self):
-        self._workflow_list = []
+        self.__workflow_list = []
 
     def clear(self):
         """
         :return:
         """
-        self._workflow_list = []
+        self.__workflow_list = []
 
-    def add_step_result(self, data):
+    def add_step_result(self, step_result):
         """
         :return:
         """
-        if isinstance(data, list):
-            for i in data:
-                if isinstance(data, list):
-                    self._workflow_list.append(i)
-        elif isinstance(data, StepResult):
-            self._workflow_list.append(data)
+        if isinstance(step_result, StepResult):
+            self.__workflow_list.append(step_result)
         else:
-            raise TSSCException('can only add StepResult(s)')
+            raise TSSCException('can only add StepResult')
 
     def get_step_artifacts(self, step_name):
         """
-        get result step as a dictionary
+        look for the step_name in the list and return
         :return:
         """
-        step = None
-        for step_result in self._workflow_list:
-            if step_result.get_step_name() == step_name:
-                step = step_result.get_artifacts()
+        step_artifacts = None
+        for step_result in self.__workflow_list:
+            if step_result.step_name == step_name:
+                step_artifacts = step_result.artifacts
                 break
-        return step
+        return step_artifacts
 
     def get_step_result(self, step_name):
         """
         get result step as a dictionary
         :return:
         """
-        step = None
-        for step_result in self._workflow_list:
-            if step_result.get_step_name() == step_name:
-                step = step_result.get_step_result()
+        step_result = None
+        for step_result in self.__workflow_list:
+            if step_result.step_name == step_name:
+                step_result = step_result.get_step_result()
                 break
-        return step
+        return step_result
 
     def print_json(self):
         """
         :return:
         """
-        for i in self._workflow_list:
-            print(i.get_json())
+        for i in self.__workflow_list:
+            print(i.get_step_result_json())
 
     def print_yml(self):
         """
         :return:
         """
-        for i in self._workflow_list:
-            print(i.get_yaml())
+        for i in self.__workflow_list:
+            print(i.get_step_result_yaml())
