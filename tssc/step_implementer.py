@@ -84,18 +84,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         self.__results_file_path = None
 
-        # todo: how to organize this better?
-
-        # todo: results_file_path() method both returns and sets file_path:
         # results_file_path example: /home/me/tssc-results/tssc-results.plkl
         self.results_file_path()
 
-        # todo:this is awkward how to wrap into a single class?
-        # WORKFLOW_RESULTS
-        print('wwwwwwwwwwwwwwwwwwwwwwwwwww')
+        # todo: Is this awkward wrapped into single class?
+        # WORKFLOW
         print(self.__results_file_path)
         self.__workflow = Wrapper(self.__results_file_path)
-
         # STEP_RESULTS
         self.__step_result = StepResult(config.step_name, config.sub_step_name)
 
