@@ -147,11 +147,7 @@ class Maven(StepImplementer):
         fail_on_no_tests = self.get_config_value('fail-on-no-tests')
 
         if not os.path.exists(pom_file):
-            self.step_result_set_success_message(
-                False,
-                'Given pom file does not exist: ' + pom_file
-            )
-            return
+            raise ValueError('Given pom file does not exist: ' + pom_file)
 
         surefire_path = 'mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId="maven-surefire-plugin"]'
         maven_surefire_plugin = get_xml_element_by_path(
@@ -160,11 +156,7 @@ class Maven(StepImplementer):
             default_namespace='mvn'
         )
         if maven_surefire_plugin is None:
-            self.step_result_set_success_message(
-                False,
-                'Unit test dependency "maven-surefire-plugin" missing from POM.'
-            )
-            return
+            raise ValueError('Unit test dependency "maven-surefire-plugin" missing from POM.')
 
         reports_dir = get_xml_element_by_path(
             pom_file,
@@ -190,48 +182,43 @@ class Maven(StepImplementer):
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
-            self.step_result_set_success_message(
-                False,
-                f'Error invoking mvn: {error}'
-            )
-            return
+            raise RuntimeError("Error invoking mvn: {error}".format(error=error)) from error
 
         test_results_output_path = test_results_dir
 
         if not os.path.isdir(test_results_dir) or \
-                len(os.listdir(test_results_dir)) == 0:
+            len(os.listdir(test_results_dir)) == 0:
             if fail_on_no_tests is not True:
-                self.step_result_add_artifact(
-                    'option',
-                    'fail-on-no-tests',
-                    'boolean',
-                    False
-                )
-            else:  # pragma: no cover
+                results = {
+                    'result': {
+                        'success': True,
+                        'message': 'unit test step run successfully, but no tests were found'
+                    },
+                    'report-artifacts': [],
+                    'options': {
+                        'pom-path': pom_file,
+                        'fail-on-no-tests': False
+                    }
+                }
+            else:# pragma: no cover
                 # Added 'no cover' to bypass missing unit-test step coverage error
                 # that is covered by the following unit test:
                 #   test_unit_test_run_attempt_fails_fail_on_no_tests_flag_true
-                self.step_result_set_success_message(
-                    False,
-                    'Error: No unit tests defined'
-                )
-                return
+                raise RuntimeError('Error: No unit tests defined')
         else:
-            self.step_result_set_success_message(
-                True,
-                'unit test step run successfully'
-            )
-            self.step_result_add_artifact(
-                'generated',
-                'maven unit test results generated using junit',
-                'file',
-                f'file://{test_results_output_path}'
-            )
-            self.step_result_add_artifact(
-                'option',
-                'pom-file',
-                'file',
-                pom_file
-            )
-
-        return
+            results = {
+                'result': {
+                    'success': True,
+                    'message': 'unit test step run successfully and junit reports were generated'
+                },
+                'options': {
+                    'pom-path': pom_file
+                },
+                'report-artifacts': [
+                    {
+                        'name': 'maven unit test results generated using junit',
+                        'path': f'file://{test_results_output_path}'
+                    }
+                ]
+            }
+        return results
