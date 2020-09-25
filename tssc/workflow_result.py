@@ -4,6 +4,7 @@ Abstract class and helper constants for WorkflowResult
 import pickle
 import os
 import json
+import yaml
 
 from tssc.step_result import StepResult
 from tssc.exceptions import TSSCException
@@ -100,8 +101,10 @@ class WorkflowResult:
         try:
             WorkflowResult._folder_create(yml_filename)
             with open(yml_filename, 'w') as file:
+                results = {}
                 for i in self.__workflow_list:
-                    file.write(i.get_step_result_yaml())
+                    results.update(i.get_step_result())
+                yaml.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
 
