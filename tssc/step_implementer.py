@@ -315,6 +315,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             "Runtime Step Configuration",
             ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
         )
+        # add in the runtime-config
 
         # validate the runtime step configuration
         StepImplementer.__print_section_title(
@@ -494,6 +495,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         # todo: how to manage include previous implementers?
         return self.__step_result.get_step_result()
 
+    # todo: get_value or get_config_or_result_value
+
     def create_working_folder(self):
         """
         If it does not exist, create working folder
@@ -637,8 +640,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         this is where we actually write the file to disk
         :return: dict
         """
+        # do in the run step function before calling _run_step
         self.__step_result.runtime_config = ConfigValue.convert_leaves_to_values(
             self.get_copy_of_runtime_step_config()
         )
+        # do in the constructor of the workflow_result
         self.__workflow.results.add_step_result(self.__step_result)
+
+
         self.__workflow.write(self.__step_result)
+        # dump the pkl to tssc-working
+        # dump the yml to tssc-results
+        #

@@ -11,6 +11,7 @@ from tssc.exceptions import TSSCException
 class Wrapper:
     """
     todo: not sure if this wrapper (inner/outer) is a bad idea yet...
+    todo: merge back into - keep filename out of _init__
     """
     def __init__(self, pickle_filename):
 
@@ -59,6 +60,8 @@ class WorkflowFile:
         with open(self.__pickle_filename, 'wb') as file:
             pickle.dump(None, file)
 
+    # take pathname
+    # takes self
     def dump(self, pickle_object):
         """
         :return:
@@ -66,6 +69,7 @@ class WorkflowFile:
         with open(self.__pickle_filename, 'wb') as file:
             pickle.dump(pickle_object, file)
 
+    # static take pathname
     def load(self):
         """
         :return:
@@ -115,6 +119,9 @@ class WorkflowResult:
                 step_artifacts = step_result.artifacts
                 break
         return step_artifacts
+
+    # todo:  get specific artifact as well - pass in the key name - go right for key
+    # find first key name ...
 
     def get_step_result(self, step_name):
         """

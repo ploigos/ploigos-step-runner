@@ -3,6 +3,8 @@ import yaml
 import re
 from tssc import TSSCFactory
 
+# look at sop code
+# make a class extend current base test class
 def run_step_test_with_result_validation(
         temp_dir,
         step_name,
