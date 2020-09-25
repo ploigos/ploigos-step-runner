@@ -742,8 +742,6 @@ from .factory import TSSCFactory
 from .exceptions import TSSCException
 from .step_result import StepResult
 from .workflow_result import WorkflowResult
-from .workflow_result import WorkflowFile
-from .workflow_result import Wrapper
 
 __all__ = [
     'config',
