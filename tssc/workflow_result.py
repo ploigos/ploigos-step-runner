@@ -3,7 +3,6 @@ Abstract class and helper constants for WorkflowResult
 """
 import pickle
 import os
-import json
 
 from tssc.step_result import StepResult
 from tssc.exceptions import TSSCException
@@ -45,6 +44,10 @@ class WorkflowResult:
         return step_artifacts
 
     def get_artifact(self, search_artifact):
+        """
+        get artifact of result step
+        :return:
+        """
         artifact = None
         for step_result in self.__workflow_list:
             artifact = step_result.get_artifact(search_artifact)
@@ -88,7 +91,7 @@ class WorkflowResult:
                 pickle.dump(self, file)
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
-    
+
     def dump_yml(self, yml_filename):
         """
         :return:
@@ -138,7 +141,7 @@ class WorkflowResult:
 
         except Exception as error:
             raise RuntimeError(f'error loading {pickle_filename}: {error}') from error
-    
+
     @staticmethod
     def _folder_create(filename):
         """
@@ -148,7 +151,7 @@ class WorkflowResult:
         path = os.path.dirname(filename)
         if path and not os.path.exists(path):
             os.makedirs(os.path.dirname(filename))
-    
+
     @staticmethod
     def delete(filename):
         """
