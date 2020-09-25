@@ -8,83 +8,6 @@ from tssc.step_result import StepResult
 from tssc.exceptions import TSSCException
 
 
-class Wrapper:
-    """
-    todo: not sure if this wrapper (inner/outer) is a bad idea yet...
-    todo: merge back into - keep filename out of _init__
-    """
-    def __init__(self, pickle_filename):
-
-        self.__workflow_file = WorkflowFile(pickle_filename)
-        self.__results = self.__workflow_file.load()
-        if self.__results is None:
-            self.__results = WorkflowResult()
-
-    @property
-    def results(self):
-        """
-        getter
-        """
-        return self.__results
-
-    def write(self, step_result):
-        """
-        dump to pickle
-        """
-        self.__results.add_step_result(step_result)
-        self.__workflow_file.dump(self.__results)
-
-    def read(self):
-        """
-        read from pickle
-        """
-        return self.__workflow_file.load()
-
-
-class WorkflowFile:
-    """
-    :return:
-    """
-
-    def __init__(self, pickle_filename):
-        """
-        create the file if it does not exist
-        """
-        self.__pickle_filename = pickle_filename
-        self._file_check(self.__pickle_filename)
-
-    def clear(self):
-        """
-        :return:
-        """
-        with open(self.__pickle_filename, 'wb') as file:
-            pickle.dump(None, file)
-
-    # take pathname
-    # takes self
-    def dump(self, pickle_object):
-        """
-        :return:
-        """
-        with open(self.__pickle_filename, 'wb') as file:
-            pickle.dump(pickle_object, file)
-
-    # static take pathname
-    def load(self):
-        """
-        :return:
-        """
-        with open(self.__pickle_filename, 'rb') as file:
-            return pickle.load(file)
-
-    def _file_check(self, filename):
-        path = os.path.dirname(filename)
-        if path and not os.path.exists(path):
-            os.makedirs(os.path.dirname(filename))
-        if not os.path.exists(filename):
-            self.clear()
-
-
 class WorkflowResult:
     """
     :return:
@@ -106,7 +29,7 @@ class WorkflowResult:
         if isinstance(step_result, StepResult):
             self.__workflow_list.append(step_result)
         else:
-            raise TSSCException('can only add StepResult')
+            raise TSSCException('expect StepResult instance type')
 
     def get_step_artifacts(self, step_name):
         """
@@ -120,8 +43,13 @@ class WorkflowResult:
                 break
         return step_artifacts
 
-    # todo:  get specific artifact as well - pass in the key name - go right for key
-    # find first key name ...
+    def get_artifact(self, search_artifact):
+        artifact = None
+        for step_result in self.__workflow_list:
+            artifact = step_result.get_artifact(search_artifact)
+            if artifact:
+                break
+        return artifact
 
     def get_step_result(self, step_name):
         """
@@ -148,3 +76,66 @@ class WorkflowResult:
         """
         for i in self.__workflow_list:
             print(i.get_step_result_yaml())
+
+    def dump(self, pickle_filename):
+        """
+        :return:
+        """
+        try:
+            _folder_create(pickle_filename)
+            with open(pickle_filename, 'wb') as file:
+                pickle.dump(self, file)
+        except Exception as error:
+            raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
+
+
+#######
+# helper methods
+#######
+
+def _folder_create(pickle_filename):
+    """
+    :param filename:
+    :return:
+    """
+    path = os.path.dirname(pickle_filename)
+    if path and not os.path.exists(path):
+        os.makedirs(os.path.dirname(pickle_filename))
+
+
+def load_workflow_results(pickle_filename):
+    """
+    :return: Workflow_result object
+    """
+    try:
+        _folder_create(pickle_filename)
+
+        # if the file does not exist return empty object
+        if not os.path.isfile(pickle_filename):
+            return WorkflowResult()
+
+        # if the file is empty return empty object
+        if os.path.getsize(pickle_filename) == 0:
+            return WorkflowResult()
+
+        # check that the file has Workflow object
+        with open(pickle_filename, 'rb') as file:
+            workflow_result = pickle.load(file)
+            if not isinstance(workflow_result, WorkflowResult):
+                raise RuntimeError(f'error {pickle_filename} has invalid data')
+            return workflow_result
+
+    except Exception as error:
+        raise RuntimeError(f'error loading {pickle_filename}: {error}') from error
+
+
+def delete_workflow_results(pickle_filename):
+    """
+    Currently used for testing - makes an empty file
+    """
+    try:
+        _folder_create(pickle_filename)
+        if os.path.exists(pickle_filename):
+            os.remove(pickle_filename)
+    except Exception as error:
+        raise RuntimeError(f'error deleting {pickle_filename}: {error}') from error
