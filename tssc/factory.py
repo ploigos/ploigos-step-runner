@@ -46,7 +46,7 @@ class TSSCFactory:
             self,
             config,
             results_dir_path='tssc-results',
-            results_file_name='tssc-results.pkl',
+            results_file_name='tssc-results.yml',
             work_dir_path='tssc-working'):
 
         if isinstance(config, Config):

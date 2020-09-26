@@ -3,6 +3,7 @@ Class and helper constants for StepResult
 """
 import json
 import yaml
+from tssc.exceptions import TSSCException
 
 
 class StepResult:
@@ -59,6 +60,11 @@ class StepResult:
 
     def get_artifact(self, name):
         """
+        Parameters
+        ----------
+        name : str
+            The name of the artifact to return
+
         Returns
         -------
         dict
@@ -68,10 +74,34 @@ class StepResult:
 
     def add_artifact(self, name, value, description='', value_type=None):
         """
-        Adds an artifact with the given parameters
+        Inserts an artifact with the given pattern:
+            "name": {
+                "description": "file description",
+                "type": "file",
+                "value": "file://step-result.txt"
+            }
+
+        Parameters
+        ----------
+        name : str
+            Required name of the artifact
+        value : str
+            Required content
+        description : str, optional
+            Optional description (defaults to empty)
+        value_type : str, optional
+            Optional type of the value (defaults to str)
+
         """
+        if name is None:
+            raise TSSCException('name is required')
+
+        if value is None:
+            raise TSSCException('value is required')
+
         if not value_type:
             value_type = type(value).__name__
+
         self._artifacts[name] = {
             'description': description,
             'type': value_type,
@@ -114,11 +144,6 @@ class StepResult:
 
     def get_step_result(self):
         """
-        Returns
-        -------
-        dict
-            Formatted with all step result components
-
         result= {
             "new_step": {
                 "step-name": "new_step",
@@ -134,6 +159,11 @@ class StepResult:
                 }
             }
         }
+
+        Returns
+        -------
+        dict
+            Formatted with all step result components
 
         """
         result = {
