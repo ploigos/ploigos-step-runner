@@ -12,7 +12,8 @@ from tssc.exceptions import TSSCException
 
 class WorkflowResult:
     """
-    :return:
+    Class to manage a list of step_results
+    The Workflow represents the current results to this point in time
     """
 
     def __init__(self):
@@ -20,13 +21,23 @@ class WorkflowResult:
 
     def clear(self):
         """
-        :return:
+        clears the workflow list of step_results
         """
         self.__workflow_list = []
 
     def add_step_result(self, step_result):
         """
-        :return:
+        Add a single step_result to the workflow list
+
+        Parameters
+        ----------
+        step_result : StepResult
+           An StepResult object
+
+        Raises
+        ------
+        Raises a TSSCException if an instance other than
+        StepResult is passed as a parameter
         """
         if isinstance(step_result, StepResult):
             self.__workflow_list.append(step_result)
@@ -35,8 +46,18 @@ class WorkflowResult:
 
     def get_step_artifacts(self, step_name):
         """
-        look for the step_name in the list and return
-        :return:
+        Lookup artifacts by step_name
+
+        Parameters
+        ----------
+        step_name : str
+             Name of step to search
+
+        Returns
+        -------
+        dict
+            if found, return the artifacts dict
+            else return None
         """
         step_artifacts = None
         for step_result in self.__workflow_list:
@@ -45,22 +66,72 @@ class WorkflowResult:
                 break
         return step_artifacts
 
-    def get_artifact(self, search_artifact):
+    def search_for_artifact(self, search_artifact, verbose=False):
         """
-        get artifact of result step
-        :return:
+        Search for an artifact in ANY step
+
+        Parameters
+        ----------
+        search_artifact : str
+             Name of artifact to search
+        verbose : boolean
+             Return the entire step_result
+
+        Returns
+        -------
+        dict
+            if not found return Non
+            elif verbose, return the result-set dict
+            elif return the artifact dict
         """
-        artifact = None
+        result = None
         for step_result in self.__workflow_list:
-            artifact = step_result.get_artifact(search_artifact)
-            if artifact:
+            if step_result.get_artifact(search_artifact):
+                if verbose:
+                    result = step_result.get_step_result()
+                else:
+                    result = step_result.get_artifact(search_artifact)
                 break
-        return artifact
+        return result
 
     def get_step_result(self, step_name):
         """
-        get result step as a dictionary
-        :return:
+        Search for a step by name for a dict, eg:
+        {
+            'step1': {
+                'step-name': 'step1',
+                'step-implementer-name': 'one',
+                'success': True,
+                'message': '',
+                'artifacts': {
+                    'a': {
+                        'description': 'aA',
+                        'type': 'str',
+                        'value': 'A'
+                    },
+                    'b': {
+                        'description': 'bB',
+                        'type': 'file',
+                        'value': 'B'
+                    },
+                    'z': {
+                        'description': '',
+                        'type': 'str',
+                        'value': 'Z'
+                    }
+                }
+            }
+        }
+
+        Parameters
+        ----------
+        step_name : str
+             Name of step to search
+
+        Returns
+        -------
+        dict
+             StepResult dictionary
         """
         step_result = None
         for step_result in self.__workflow_list:
@@ -71,21 +142,30 @@ class WorkflowResult:
 
     def print_json(self):
         """
-        :return:
+        Print the list in json format
         """
         for i in self.__workflow_list:
             print(i.get_step_result_json())
 
     def print_yml(self):
         """
-        :return:
+        Print the list in yml format
         """
         for i in self.__workflow_list:
             print(i.get_step_result_yaml())
 
-    def dump_pickle(self, pickle_filename):
+    def write_to_pickle_file(self, pickle_filename):
         """
-        :return:
+        Write the workflow list in a pickle format to file
+
+        Parameters
+        ----------
+        pickle_filename : str
+             Name of file to write (eg: tssc-results.pkl)
+
+        Raises
+        ------
+        Raises a RuntimeError if the file cannot be dumped
         """
         try:
             WorkflowResult._folder_create(pickle_filename)
@@ -94,9 +174,18 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    def dump_yml(self, yml_filename):
+    def write_to_yml_file(self, yml_filename):
         """
-        :return:
+        Write the workflow list in a yaml format to file
+
+        Parameters
+        ----------
+        yml_filename : str
+             Name of file to write (eg: tssc-results.yml)
+
+        Raises
+        ------
+        Raises a RuntimeError if the file cannot be dumped
         """
         try:
             WorkflowResult._folder_create(yml_filename)
@@ -108,9 +197,18 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
 
-    def dump_json(self, json_filename):
+    def write_to_json_file(self, json_filename):
         """
-        :return:
+        Write the workflow list in a json format to file
+
+        Parameters
+        ----------
+        json_filename : str
+             Name of file to write (eg: tssc-results.json)
+
+        Raises
+        ------
+        Raises a RuntimeError if the file cannot be dumped
         """
         try:
             WorkflowResult._folder_create(json_filename)
@@ -123,9 +221,18 @@ class WorkflowResult:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
 
     @staticmethod
-    def load(pickle_filename):
+    def load_from_file(pickle_filename):
         """
-        :return: Workflow_result object
+        Load a pickled file into the Workflow list
+
+        Parameters
+        ----------
+        pickle_filename: str
+           Name of the file to load
+
+        Raises
+        ------
+        Raises a RuntimeError if the file cannot be loaded
         """
         try:
             WorkflowResult._folder_create(pickle_filename)
@@ -151,17 +258,26 @@ class WorkflowResult:
     @staticmethod
     def _folder_create(filename):
         """
-        :param filename:
-        :return:
+        Helper method to create folder if ncessary
+
+        Parameters
+        ----------
+        filename: str
+            Absolute name of a file.ext
         """
         path = os.path.dirname(filename)
         if path and not os.path.exists(path):
             os.makedirs(os.path.dirname(filename))
 
     @staticmethod
-    def delete(filename):
+    def delete_file(filename):
         """
-        Currently used for testing - makes an empty file
+        Used for testing to delete a file
+
+        Parameters
+        ----------
+        filename: str
+            name of file
         """
         try:
             WorkflowResult._folder_create(filename)

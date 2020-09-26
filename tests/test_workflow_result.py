@@ -11,24 +11,22 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     :return:
     """
 
-    def test_dump(self):
+    def test_search_for_artifact_and_verbose(self):
         """
         :return:
         """
         result_file = 'tssc-results.pkl'
-        WorkflowResult.delete(result_file)
-        workflow_results = WorkflowResult.load(result_file)
+        WorkflowResult.delete_file(result_file)
+        workflow_results = WorkflowResult.load_from_file(result_file)
 
         current_step = StepResult('step1', 'one')
-        current_step.add_artifact('version',
-                                  'v0.10.0+23',
-                                  'semantic version',
-                                  )
+        current_step.add_artifact('version', 'v0.10.0+23', 'semantic version')
+        current_step.add_artifact('a', 'A')
         # update the workflow by adding current_step
         workflow_results.add_step_result(current_step)
-        workflow_results.dump_pickle(result_file)
-        workflow_results.dump_yml('tssc-results.yml')
-        workflow_results.dump_json('tssc-results.json')
+        workflow_results.write_to_pickle_file(result_file)
+        workflow_results.write_to_yml_file('tssc-results.yml')
+        workflow_results.write_to_json_file('tssc-results.json')
 
         expected_result = {
             'description': 'semantic version',
@@ -36,45 +34,66 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             'value': 'v0.10.0+23'
         }
         self.assertEqual(
-            workflow_results.get_artifact('version'),
+            workflow_results.search_for_artifact('version'),
+            expected_result
+        )
+        expected_result = {
+            'step1': {
+                'step-implementer-name': 'one',
+                'step-name': 'step1',
+                'artifacts': {
+                    'a': {
+                        'description': '',
+                        'type': 'str',
+                        'value': 'A'
+                    },
+                    'version': {
+                        'description': 'semantic version',
+                        'type': 'str',
+                        'value': 'v0.10.0+23'
+                    }
+                },
+                'message': '',
+                'success': True
+            }
+        }
+        self.assertEqual(
+            workflow_results.search_for_artifact('version', True),
             expected_result
         )
 
-    def test_dump_load(self):
+    def test_dump_then_load(self):
         """
         :return:
         """
         result_file = 'tssc-results.pkl'
-        WorkflowResult.delete(result_file)
-        workflow_results = WorkflowResult.load(result_file)
+        WorkflowResult.delete_file(result_file)
+        workflow_results = WorkflowResult.load_from_file(result_file)
 
         current_step = StepResult('step1', 'one')
-        current_step.add_artifact('version',
-                                  'v0.10.0+23',
-                                  'semantic version',
-                                  )
+        current_step.add_artifact('version', 'v0.10.0+23', 'semantic version')
         # update the workflow by adding current_step
         workflow_results.add_step_result(current_step)
-        workflow_results.dump_pickle(result_file)
+        workflow_results.write_to_pickle_file(result_file)
 
-        test_results = WorkflowResult.load(result_file)
+        test_results = WorkflowResult.load_from_file(result_file)
         expected_result = {
             'description': 'semantic version',
             'type': 'str',
             'value': 'v0.10.0+23'
         }
         self.assertEqual(
-            test_results.get_artifact('version'),
+            test_results.search_for_artifact('version'),
             expected_result
         )
 
-    def test_dump_load_artifacts(self):
+    def test_dump_then_load_search_for_artifact(self):
         """
         :return:
         """
         result_file = 'tssc-results.pkl'
-        WorkflowResult.delete(result_file)
-        workflow_results = WorkflowResult.load(result_file)
+        WorkflowResult.delete_file(result_file)
+        workflow_results = WorkflowResult.load_from_file(result_file)
 
         # add step
         current_step = StepResult('step1', 'one')
@@ -90,10 +109,10 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
         workflow_results.add_step_result(current_step)
 
         # dump memory
-        workflow_results.dump_pickle(result_file)
+        workflow_results.write_to_pickle_file(result_file)
 
         # dump read file
-        test_results = WorkflowResult.load(result_file)
+        test_results = WorkflowResult.load_from_file(result_file)
 
         # TEST: look-up FIRST ARTIFACT C (any step)
         expected_result = {
@@ -102,28 +121,28 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             'value': 'C'
         }
         self.assertEqual(
-            test_results.get_artifact('c'),
+            test_results.search_for_artifact('c'),
             expected_result
         )
 
         # TEST: look-up ARTIFACTS for a STEP
         expected_result = {
-                    'a': {'description': '', 'type': 'str', 'value': 'A'},
-                    'b': {'description': '', 'type': 'str', 'value': 'B'},
-                    'z': {'description': '', 'type': 'str', 'value': 'Z'}
+            'a': {'description': '', 'type': 'str', 'value': 'A'},
+            'b': {'description': '', 'type': 'str', 'value': 'B'},
+            'z': {'description': '', 'type': 'str', 'value': 'Z'}
         }
         self.assertEqual(
             test_results.get_step_artifacts('step1'),
             expected_result
         )
 
-    def test_dump_load_results(self):
+    def test_dump_then_load_from_file_look_at_results(self):
         """
         :return:
         """
         result_file = 'tssc-results.pkl'
-        WorkflowResult.delete(result_file)
-        workflow_results = WorkflowResult.load(result_file)
+        WorkflowResult.delete_file(result_file)
+        workflow_results = WorkflowResult.load_from_file(result_file)
 
         # add step
         current_step = StepResult('step1', 'one')
@@ -141,11 +160,10 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
         workflow_results.add_step_result(current_step)
 
         # dump memory
-        workflow_results.dump_pickle(result_file)
+        workflow_results.write_to_pickle_file(result_file)
 
         # dump read file
-        test_results = WorkflowResult.load(result_file)
-        version = test_results.get_step_result('step1')
+        test_results = WorkflowResult.load_from_file(result_file)
         expected_result = {
             'step1': {
                 'artifacts': {
@@ -179,4 +197,3 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             test_results.get_step_result('step2'),
             expected_result
         )
-

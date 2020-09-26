@@ -120,9 +120,9 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
             self.environment,
             self.step_implementer_config_defaults())
 
-        self.step_result.add_artifact_misc(
-            ConfigValue.convert_leaves_to_values(runtime_step_config)
-        )
+        d = ConfigValue.convert_leaves_to_values(runtime_step_config)
+        for k, v in d.items():
+            self.step_result.add_artifact(k, v)
 
 
 class NotSubClassOfStepImplementer():
