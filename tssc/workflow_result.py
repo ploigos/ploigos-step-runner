@@ -68,7 +68,32 @@ class WorkflowResult:
 
     def search_for_artifact(self, search_artifact, verbose=False):
         """
-        Search for an artifact in ANY step
+        Search for an artifact in ANY step.
+        The FIRST match is returned
+
+        eg: search for 'version", the dictionary is returned:
+
+        {'description': 'semantic version', 'type': 'str', 'value': 'v0.10.0+23'}
+
+        eg: of search for 'version' with verbose=True:
+        'step1': {
+                'step-implementer-name': 'one',
+                'step-name': 'step1',
+                'artifacts': {
+                    'a': {
+                        'description': '',
+                        'type': 'str',
+                        'value': 'A'
+                    },
+                    'version': {
+                        'description': 'semantic version',
+                        'type': 'str',
+                        'value': 'v0.10.0+23'
+                    }
+                },
+                'message': '',
+                'success': True
+            }
 
         Parameters
         ----------
@@ -219,6 +244,21 @@ class WorkflowResult:
                 json.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
+
+    def get_all_step_result(self):
+        """
+        Return a dictionary of all the step results in memory
+
+        Returns
+        -------
+        results: dict
+            results of all steps from list
+            todo:   does this include current?
+        """
+        result = {}
+        for i in self.__workflow_list:
+            result.update(i.get_step_result())
+        return result
 
     @staticmethod
     def load_from_file(pickle_filename):
