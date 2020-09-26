@@ -82,20 +82,18 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self.__config = config
         self.__environment = environment
 
-        # DIRECTORIES - ensure results and working folders are created
+        # DIRECTORIES - ensure directories are created
         self._mkdir_work_dir_path()
         self._mkdir_results_dir_path()
 
-        # WORKFLOW - load serialized workflow_results into memory
-        self.__workflow_result = WorkflowResult.load_from_file(self.pickle_file_path)
-
-        # STEP_RESULTS - init this steps results
+        # STEP_RESULTS - init step result for THIS step
         self.__step_result = StepResult(config.step_name, config.sub_step_name)
-        # todo: put the step_result into the constructor for WorkflowResult??
+        # WORKFLOW - load serialized workflow_result for ALL previous steps
+        self.__workflow_result = WorkflowResult.load_from_file(self.pickle_file_path)
+        # WORKFLOW - add THIS step result to ALL, now memory has current and past
         self.__workflow_result.add_step_result(self.__step_result)
 
         super().__init__()
-
 
     @property
     def config(self):
@@ -323,7 +321,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             "Runtime Step Configuration",
             ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
         )
-        # add in the runtime-config
 
         # validate the runtime step configuration
         StepImplementer.__print_section_title(
@@ -376,9 +373,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         TSSCException
             Unexpected error
         """
-        # todo: MIA, peggy, need to get the entire list as a dictionary... heavy sigh
-        # return self.__workflow_result.MIA()  need to return the list as a dictionary heavy sigh
-        return None
+        return self.__workflow_result.get_current_workflow_result()
 
     def get_config_value(self, key):
         """Convenience function for self.config.get_config_value.
