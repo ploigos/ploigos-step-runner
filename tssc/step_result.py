@@ -49,6 +49,16 @@ class StepResult:
         return self._step_name
 
     @property
+    def implementer_name(self):
+        """
+        Returns
+        -------
+        str
+            Step implementer name
+        """
+        return self._implementer_name
+
+    @property
     def artifacts(self):
         """
         Returns
@@ -74,7 +84,7 @@ class StepResult:
 
     def add_artifact(self, name, value, description='', value_type=None):
         """
-        Inserts an artifact with the given pattern:
+        Insert/Update an artifact with the given pattern:
             "name": {
                 "description": "file description",
                 "type": "file",
@@ -107,6 +117,22 @@ class StepResult:
             'type': value_type,
             'value': value
         }
+
+    # todo: needs tests
+    def merge_artifacts(self, new_artifacts):
+        """
+        Merges an artifacts dictionary into the artifacts dictionary
+        eg:
+        {
+          'a': {'description': '', 'type': 'str', 'value': 'A'},
+          'x': {'description': '', 'type': 'str', 'value': 'X'}
+        }
+        Parameters
+        ----------
+        new_artifacts: dict
+           New set of artifacts to merge in
+        """
+        self.artifacts.update(new_artifacts)
 
     @property
     def success(self):

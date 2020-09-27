@@ -120,9 +120,10 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
             self.environment,
             self.step_implementer_config_defaults())
 
-        d = ConfigValue.convert_leaves_to_values(runtime_step_config)
-        for k, v in d.items():
-            self.step_result.add_artifact(k, v)
+        # copy the key/value pairs into the artifacts
+        for name, value in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
+            print(name, value)
+            self.step_result.add_artifact(name, value)
 
 
 class NotSubClassOfStepImplementer():
