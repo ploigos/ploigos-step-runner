@@ -138,6 +138,7 @@ class WorkflowResult:
             'step1': {
                 'step-name': 'step1',
                 'step-implementer-name': 'one',
+                'sub-step-name': '',
                 'success': True,
                 'message': '',
                 'artifacts': {

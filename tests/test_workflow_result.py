@@ -41,6 +41,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             'step1': {
                 'step-implementer-name': 'one',
                 'step-name': 'step1',
+                'sub-step-name': '',
                 'artifacts': {
                     'a': {
                         'description': '',
@@ -175,6 +176,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'message': '',
                     'step-implementer-name': 'one',
                     'step-name': 'step1',
+                    'sub-step-name': '',
                     'success': True
                 }
             }
@@ -194,6 +196,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'success': False,
                     'step-implementer-name': 'two',
                     'step-name': 'step2',
+                    'sub-step-name': '',
                 }
             }
         }
@@ -246,6 +249,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'message': '',
                     'step-implementer-name': 'one',
                     'step-name': 'past_1',
+                    'sub-step-name': '',
                     'success': True
                 },
                 'past_2': {
@@ -257,6 +261,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'success': False,
                     'step-implementer-name': 'two',
                     'step-name': 'past_2',
+                    'sub-step-name': '',
                 },
                 'current_step': {
                     'artifacts': {
@@ -268,6 +273,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'success': True,
                     'step-implementer-name': 'wip',
                     'step-name': 'current_step',
+                    'sub-step-name': '',
                 }
             }
         }
@@ -323,6 +329,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'success': False,
                     'step-implementer-name': 'wip',
                     'step-name': 'current_step',
+                    'sub-step-name': '',
                 }
             }
         }
@@ -355,6 +362,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     'success': True,
                     'step-implementer-name': 'wip',
                     'step-name': 'current_step',
+                    'sub-step-name': '',
                 }
             }
         }

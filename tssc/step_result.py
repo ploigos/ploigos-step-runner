@@ -19,7 +19,7 @@ class StepResult:
 
     """
 
-    def __init__(self, step_name, implementer_name):
+    def __init__(self, step_name, implementer_name, sub_step_name=''):
         """
         Result
         """
@@ -28,6 +28,12 @@ class StepResult:
         self._success = True
         self._message = ''
         self._artifacts = {}
+
+        # todo: what to do with sub_step info????  hack:
+        if sub_step_name != implementer_name:
+            self._sub_step_name = sub_step_name
+        else:
+            self._sub_step_name = ''
 
     def __str__(self):
         """
@@ -47,6 +53,16 @@ class StepResult:
             Step name
         """
         return self._step_name
+
+    @property
+    def sub_step_name(self):
+        """
+        Returns
+        -------
+        str
+            Sub Step name
+        """
+        return self._sub_step_name
 
     @property
     def implementer_name(self):
@@ -196,6 +212,7 @@ class StepResult:
             self._step_name: {
                 'step-name': self._step_name,
                 'step-implementer-name': self._implementer_name,
+                'sub-step-name': self._sub_step_name,
                 'success': self._success,
                 'message': self._message,
                 'artifacts': self._artifacts

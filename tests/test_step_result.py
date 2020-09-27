@@ -12,16 +12,17 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result = StepResult('step1', 'implementer1')
         self.assertEqual(step_result.step_name, step_result_expected)
 
-    def test_implementer_name(self):
-        step_result_expected = 'implementer1'
-        step_result = StepResult('step1', 'implementer1')
-        self.assertEqual(step_result.implementer_name, step_result_expected)
+    def test_sub_step_name(self):
+        expected = 'sub1'
+        step_result = StepResult('step1', 'implementer1', 'sub1')
+        self.assertEqual(step_result.sub_step_name, expected)
 
     def test_add_artifact(self):
         step_result_expected = {
             'step1': {
                 'step-name': 'step1',
                 'step-implementer-name': 'implementer1',
+                'sub-step-name': '',
                 'success': True,
                 'message': '',
                 'artifacts': {

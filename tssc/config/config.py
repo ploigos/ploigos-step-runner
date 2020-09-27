@@ -11,6 +11,7 @@ from tssc.config.config_value import ConfigValue
 from tssc.utils.file import parse_yaml_or_json_file
 from tssc.utils.dict import deep_merge
 
+
 class Config:
     """Representation of configuration for TSSC workflow.
 
@@ -263,7 +264,8 @@ class Config:
                 f"Failed to add parsed configuration file ({config_file}): {error}"
             ) from error
 
-    def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches
+    def __add_config_dict(self, config_dict,
+                          source_file_path=None):  # pylint: disable=too-many-locals, too-many-branches
         """Add a TSSC configuration dictionary to the list of TSSC configuration dictionaries.
 
         Parameters
@@ -433,7 +435,7 @@ class Config:
                 decryptor_config
             )
 
-    def add_or_update_step_config( # pylint: disable=too-many-arguments
+    def add_or_update_step_config(  # pylint: disable=too-many-arguments
             self,
             step_name,
             sub_step_name,

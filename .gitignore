@@ -11,6 +11,9 @@ coverage.xml
 # TSSC build & runtime
 tssc/version.py
 tssc-results
+tssc-results.pkl
+tssc-results.json
+tssc-results.yml
 tssc-working
 .venvs
 
