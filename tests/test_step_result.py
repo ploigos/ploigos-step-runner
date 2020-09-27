@@ -4,7 +4,18 @@
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tssc.step_result import StepResult
 
+
 class TestStepResultTest(BaseTSSCTestCase):
+
+    def test_step_name(self):
+        step_result_expected = 'step1'
+        step_result = StepResult('step1', 'implementer1')
+        self.assertEqual(step_result.step_name, step_result_expected)
+
+    def test_implementer_name(self):
+        step_result_expected = 'implementer1'
+        step_result = StepResult('step1', 'implementer1')
+        self.assertEqual(step_result.implementer_name, step_result_expected)
 
     def test_add_artifact(self):
         step_result_expected = {
@@ -64,4 +75,24 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result = StepResult('step1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
         step_result.add_artifact('artifact2', 'value2')
+        self.assertEqual(step_result.artifacts, step_result_expected)
+
+    def test_add_duplicate(self):
+        step_result_expected = {
+            'artifact1': {
+                'description': 'description1',
+                'type': 'type1',
+                'value': 'value1'
+            },
+            'artifact2': {
+                'description': '',
+                'type': 'str',
+                'value': 'lastonewins'
+            }
+        }
+        step_result = StepResult('step1', 'implementer1')
+        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact2', 'here')
+        step_result.add_artifact('artifact2', 'andhere')
+        step_result.add_artifact('artifact2', 'lastonewins')
         self.assertEqual(step_result.artifacts, step_result_expected)

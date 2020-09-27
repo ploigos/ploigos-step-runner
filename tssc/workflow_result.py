@@ -40,7 +40,19 @@ class WorkflowResult:
         StepResult is passed as a parameter
         """
         if isinstance(step_result, StepResult):
-            self.__workflow_list.append(step_result)
+            match = False
+            for i, old in enumerate(self.__workflow_list):
+                if old.step_name == step_result.step_name:
+                    if old.implementer_name == step_result.implementer_name:
+                        match = True
+                        # grab old artifacts to merge into the new
+                        step_result.merge_artifacts(old.artifacts)
+                        #delete the old
+                        del self.__workflow_list[i]
+                        #add the new
+                        self.__workflow_list.append(step_result)
+            if not match:
+                self.__workflow_list.append(step_result)
         else:
             raise TSSCException('expect StepResult instance type')
 
@@ -119,10 +131,10 @@ class WorkflowResult:
                 break
         return result
 
-    def get_step_result(self, step_name):
+    def get_tssc_step_result(self, step_name):
         """
         Search for a step by name for a dict, eg:
-        {
+        'tssc-results': {
             'step1': {
                 'step-name': 'step1',
                 'step-implementer-name': 'one',
@@ -158,12 +170,15 @@ class WorkflowResult:
         dict
              StepResult dictionary
         """
-        step_result = None
+        tssc_step_result = None
         for step_result in self.__workflow_list:
             if step_result.step_name == step_name:
                 step_result = step_result.get_step_result()
+                tssc_step_result = {
+                    'tssc-results': step_result
+                }
                 break
-        return step_result
+        return tssc_step_result
 
     def print_json(self):
         """
@@ -199,9 +214,10 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    def write_to_yml_file(self, yml_filename):
+    def write_tssc_results_to_yml_file(self, yml_filename):
         """
         Write the workflow list in a yaml format to file
+        Specifically using 'tssc-results'
 
         Parameters
         ----------
@@ -215,16 +231,15 @@ class WorkflowResult:
         try:
             WorkflowResult._folder_create(yml_filename)
             with open(yml_filename, 'w') as file:
-                results = {}
-                for i in self.__workflow_list:
-                    results.update(i.get_step_result())
-                yaml.dump(results, file, indent=4)
+                tssc_results = self.get_all_tssc_step_result()
+                yaml.dump(tssc_results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
 
-    def write_to_json_file(self, json_filename):
+    def write_tssc_results_to_json_file(self, json_filename):
         """
         Write the workflow list in a json format to file
+        Specifically using 'tssc-results'.
 
         Parameters
         ----------
@@ -238,27 +253,28 @@ class WorkflowResult:
         try:
             WorkflowResult._folder_create(json_filename)
             with open(json_filename, 'w') as file:
-                results = {}
-                for i in self.__workflow_list:
-                    results.update(i.get_step_result())
-                json.dump(results, file, indent=4)
+                tssc_results = self.get_all_tssc_step_result()
+                json.dump(tssc_results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
 
-    def get_all_step_result(self):
+    def get_all_tssc_step_result(self):
         """
-        Return a dictionary of all the step results in memory
+        Return a dictionary named tssc-results of all the step results in memory
+        Specifically using 'tssc-results'.
 
         Returns
         -------
         results: dict
             results of all steps from list
-            todo:   does this include current?
         """
         result = {}
         for i in self.__workflow_list:
             result.update(i.get_step_result())
-        return result
+        tssc_results = {
+            'tssc-results': result
+        }
+        return tssc_results
 
     @staticmethod
     def load_from_file(pickle_filename):
@@ -272,7 +288,7 @@ class WorkflowResult:
 
         Raises
         ------
-        Raises a RuntimeError if the file cannot be loaded
+        Raises a TSSCException if the file cannot be loaded
         """
         try:
             WorkflowResult._folder_create(pickle_filename)
@@ -293,7 +309,7 @@ class WorkflowResult:
                 return workflow_result
 
         except Exception as error:
-            raise RuntimeError(f'error loading {pickle_filename}: {error}') from error
+            raise TSSCException(f'error loading {pickle_filename}: {error}') from error
 
     @staticmethod
     def _folder_create(filename):

@@ -479,7 +479,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         dict
             The results of a specific step. None if results DNE
         """
-        return self.__workflow_result.get_step_result(step_name)
+        return self.__workflow_result.get_tssc_step_result(step_name)
 
     def current_step_results(self):
         """
@@ -648,12 +648,14 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self.__workflow_result.write_to_pickle_file(self.pickle_file_path)
 
         # eg:  tssc-results/tssc-results.yml (default)
-        self.__workflow_result.write_to_yml_file(self.results_file_path)
+        self.__workflow_result.write_tssc_results_to_yml_file(self.results_file_path)
 
     def _mkdir_work_dir_path(self):
-        if not os.path.exists(self.work_dir_path):
-            os.makedirs(self.work_dir_path)
+        if self.work_dir_path is not '':
+            if not os.path.exists(self.work_dir_path):
+                os.makedirs(self.work_dir_path)
 
     def _mkdir_results_dir_path(self):
-        if not os.path.exists(self.work_dir_path):
-            os.makedirs(self.work_dir_path)
+        if self.work_dir_path is not '':
+            if not os.path.exists(self.work_dir_path):
+                os.makedirs(self.work_dir_path)
