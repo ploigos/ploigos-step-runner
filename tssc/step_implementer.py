@@ -87,7 +87,12 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self._mkdir_results_dir_path()
 
         # STEP_RESULTS - init step result for THIS step
-        self.__step_result = StepResult(config.step_name, config.sub_step_name)
+        # todo: what about sub-step name?  see step_results for hack to get the name
+        self.__step_result = StepResult(
+            config.step_name,
+            config.sub_step_implementer_name,
+            config.sub_step_name
+        )
         # WORKFLOW - load serialized workflow_result for ALL previous steps
         self.__workflow_result = WorkflowResult.load_from_file(self.pickle_file_path)
         # WORKFLOW - add THIS step result to ALL, now memory has current and past
@@ -651,11 +656,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self.__workflow_result.write_tssc_results_to_yml_file(self.results_file_path)
 
     def _mkdir_work_dir_path(self):
-        if self.work_dir_path is not '':
+        if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
 
     def _mkdir_results_dir_path(self):
-        if self.work_dir_path is not '':
+        if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)

@@ -758,13 +758,13 @@ from .factory import TSSCFactory
 from .exceptions import TSSCException
 from .step_result import StepResult
 from .workflow_result import WorkflowResult
+from .decryption_utils import DecryptionUtils
 
 __all__ = [
-    'config',
     'factory',
     'exceptions',
     'step_implementer',
-    'utils',
+    'decryption_utils',
     'step_result',
     'workflow_result'
 ]
