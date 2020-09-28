@@ -96,11 +96,10 @@ Example: Results
 
 """
 import sys
-import sh
 
+import sh
 from tssc import StepImplementer
 from tssc.config import ConfigValue
-
 from tssc.utils.maven import generate_maven_settings
 
 DEFAULT_CONFIG = {}
@@ -216,7 +215,8 @@ class Maven(StepImplementer):
                     '-DrepositoryId=' + maven_push_artifact_repo_id,
                     '-s' + settings_file,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee='err'
                 )
             except sh.ErrorReturnCode as error:
                 raise RuntimeError(f'Error invoking mvn: {error}') from error

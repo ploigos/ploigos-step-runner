@@ -52,11 +52,12 @@ Results output by this step.
         }
     }
 """
-from io import StringIO
 import re
 import sys
+from io import StringIO
+
 import sh
-from tssc import StepImplementer, DefaultSteps
+from tssc import DefaultSteps, StepImplementer
 
 DEFAULT_CONFIG = {}
 
@@ -197,10 +198,11 @@ class Git(StepImplementer):
                 sh.git.config(
                     '--get',
                     'remote.origin.url',
-                    _out=out,
-                    _tee=True,
                     _encoding='UTF-8',
-                    _decode_errors='ignore'
+                    _decode_errors='ignore',
+                    _out=out,
+                    _err=sys.stderr,
+                    _tee='err'
                 )
                 git_url = out.getvalue().rstrip()
 
@@ -231,10 +233,11 @@ class Git(StepImplementer):
                 git_tag_value,
                 '-f',
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee='err'
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking git tag ' + git_tag_value) from error
+            raise RuntimeError(f"Error pushing git tag ({git_tag_value}): {error}") from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -244,13 +247,15 @@ class Git(StepImplementer):
                     url,
                     '--tag',
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee='err'
                 )
             else:
                 sh.git.push(
                     '--tag',
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee='err'
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking git push') from error

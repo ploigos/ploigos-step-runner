@@ -1,16 +1,16 @@
+
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import sh
 from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tssc.step_implementers.validate_environment_configuration import \
+    Configlint
 
-from tests.helpers.test_utils import run_step_test_with_result_validation
 
-from tssc.step_implementers.validate_environment_configuration import Configlint
-
-
-class TestStepImplementerConfiglint(unittest.TestCase):
+class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_configlint_missing_options_and_runtime(self, configlint_mock):
         with TempDirectory() as temp_dir:
@@ -59,7 +59,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     r'yml_path not specified in runtime args or in options'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
     def test_configlint_missing_options_and_runtime_and_steps(self, configlint_mock):
@@ -109,7 +109,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     r'yml_path not specified in runtime args or in options'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
     def test_configlint_using_runtime(self, configlint_mock):
@@ -152,7 +152,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     AttributeError,
                     r'.*.'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
     @patch('sh.config_lint', create=True)
     def test_configlint_ok(self, configlint_mock):
@@ -202,8 +202,26 @@ class TestStepImplementerConfiglint(unittest.TestCase):
                     }
                 }
             }
-            run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
-                                                 config, expected_step_results, runtime_args)
+
+            config_lint_stdout = 'success'
+            config_lint_result_mock = MagicMock()
+            config_lint_result_mock.stdout = config_lint_stdout
+
+            configlint_mock.side_effect = config_lint_stdout
+
+            expected_stdout = config_lint_stdout
+            expected_stderr = ""
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='validate-environment-configuration',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args,
+                expected_stdout=expected_stdout,
+                expected_stderr=expected_stderr
+            )
+
     @patch('sh.config_lint', create=True)
     def test_configlint_missing_rule(self, configlint_mock):
         with TempDirectory() as temp_dir:
@@ -251,7 +269,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     r'Rules file specified in tssc config not found: ./config-lint.rules'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
 
     @patch('sh.config_lint', create=True)
@@ -303,7 +321,7 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     RuntimeError,
                     r'Error invoking config-lint: .*'):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
 
     @patch('sh.config_lint', create=True)
@@ -353,5 +371,5 @@ class TestStepImplementerConfiglint(unittest.TestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     r'Specified file in yml_path not found: ' + yml_path):
-                run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
+                self.run_step_test_with_result_validation(temp_dir, 'validate-environment-configuration',
                                                      config, expected_step_results, runtime_args)
