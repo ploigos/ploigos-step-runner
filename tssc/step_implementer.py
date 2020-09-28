@@ -86,12 +86,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self._mkdir_work_dir_path()
         self._mkdir_results_dir_path()
 
-        # STEP_RESULTS - init step result for THIS step
-        # todo: what about sub-step name?  see step_results for hack to get the name
+        # STEP_RESULT - init step result for THIS step
         self.__step_result = StepResult(
-            config.step_name,
-            config.sub_step_implementer_name,
-            config.sub_step_name
+            step_name=self.__config.step_name,
+            sub_step_name=self.__config.sub_step_name,
+            sub_step_implementer_name=self.__config.sub_step_implementer_name
         )
         # WORKFLOW - load serialized workflow_result for ALL previous steps
         self.__workflow_result = WorkflowResult.load_from_file(self.pickle_file_path)
@@ -362,26 +361,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
-    def current_results(self):
-        """
-        Get the results of the TSSC so far from other step implementers that have already been run
-        for this step and other previous steps.
-
-        Returns
-        -------
-        dict
-            The results of the TSSC so far from other step implementers that have already been run
-            for this step and other previous steps.
-
-        Raises
-        ------
-        TSSCException
-            Unexpected error
-        """
-        return self.__workflow_result.get_current_workflow_result()
-
     def get_config_value(self, key):
-        """Convenience function for self.config.get_config_value.
+
+            """Convenience function for self.config.get_config_value.
 
         Get the configuration value for a given configuration key from the
         merged set of configuration sources.
@@ -622,6 +604,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             prefix=" " * (4 * indent)
         ))
 
+    # STEP_RESULT - init step result for THIS step
     @property
     def step_result(self):
         """
@@ -629,8 +612,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         return self.__step_result
 
+    # WORKFLOW helpers
     @property
-    def workflow(self):
+    def workflow_result(self):
         """
         :return: dict
         """

@@ -47,9 +47,9 @@ class WorkflowResult:
                         match = True
                         # grab old artifacts to merge into the new
                         step_result.merge_artifacts(old.artifacts)
-                        #delete the old
+                        # delete the old
                         del self.__workflow_list[i]
-                        #add the new
+                        # add the new
                         self.__workflow_list.append(step_result)
             if not match:
                 self.__workflow_list.append(step_result)
