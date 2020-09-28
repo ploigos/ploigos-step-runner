@@ -363,7 +363,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     def get_config_value(self, key):
 
-            """Convenience function for self.config.get_config_value.
+        """Convenience function for self.config.get_config_value.
 
         Get the configuration value for a given configuration key from the
         merged set of configuration sources.
@@ -400,8 +400,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             for this sub step in the given context with the given defaults.
         """
         return self.config.get_config_value(
-            key,
-            self.environment,
+            key, 
+            self.environment, 
             self.step_implementer_config_defaults())
 
     def get_copy_of_runtime_step_config(self):

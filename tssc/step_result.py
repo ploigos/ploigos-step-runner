@@ -14,21 +14,23 @@ class StepResult:
     ----------
     step_name : str
         Name of the step
-    implementer_name : str
-        Name of the implementer
+    sub_step_name : str
+        Name of the sub step
+    sub_step_implementer_name : str
+        Name of the sub step implementer
 
     """
 
-    def __init__(self, step_name, sub_step_name, implementer_name):
+    def __init__(self, step_name, sub_step_name, sub_step_implementer_name):
         """
-        Result
+        Step Result Init
         """
         self._step_name = step_name
-        self._implementer_name = implementer_name
+        self._sub_step_name = sub_step_name
+        self._sub_step_implementer_name = sub_step_implementer_name
         self._success = True
         self._message = ''
         self._artifacts = {}
-        self._sub_step_name = sub_step_name
 
     def __str__(self):
         """
@@ -60,14 +62,14 @@ class StepResult:
         return self._sub_step_name
 
     @property
-    def implementer_name(self):
+    def sub_step_implementer_name(self):
         """
         Returns
         -------
         str
             Step implementer name
         """
-        return self._implementer_name
+        return self._sub_step_implementer_name
 
     @property
     def artifacts(self):
@@ -114,11 +116,11 @@ class StepResult:
             Optional type of the value (defaults to str)
 
         """
-        if name is None:
-            raise TSSCException('name is required')
+        if not name:
+            raise TSSCException('Name is required to add artifact')
 
-        if value is None:
-            raise TSSCException('value is required')
+        if not value:
+            raise TSSCException('Value is required to add artifact')
 
         if not value_type:
             value_type = type(value).__name__
@@ -129,8 +131,7 @@ class StepResult:
             'value': value
         }
 
-    # todo: needs tests
-    def merge_artifacts(self, new_artifacts):
+    def merge_artifact(self, new_artifact):
         """
         Merges an artifacts dictionary into the artifacts dictionary
         eg:
@@ -143,7 +144,7 @@ class StepResult:
         new_artifacts: dict
            New set of artifacts to merge in
         """
-        self.artifacts.update(new_artifacts)
+        self.artifacts.update(new_artifact)
 
     @property
     def success(self):
@@ -184,7 +185,8 @@ class StepResult:
         result= {
             "new_step": {
                 "step-name": "new_step",
-                "step-implementer-name": "implementer_name",
+                "sub-step-name": "sub_step_name"
+                "sub-step-implementer-name": "sub_step_implementer_name",
                 "success": True,
                 "message": "",
                 "artifacts": {
@@ -206,8 +208,8 @@ class StepResult:
         result = {
             self._step_name: {
                 'step-name': self._step_name,
-                'step-implementer-name': self._implementer_name,
                 'sub-step-name': self._sub_step_name,
+                'sub-step-implementer-name': self._sub_step_implementer_name,
                 'success': self._success,
                 'message': self._message,
                 'artifacts': self._artifacts
