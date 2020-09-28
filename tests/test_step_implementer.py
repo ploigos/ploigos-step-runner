@@ -182,18 +182,28 @@ class TestStepImplementer(BaseTSSCTestCase):
             'tssc-results': {
                 'write-config-as-results': {
                     'step-name': 'write-config-as-results',
-                    'sub-step-name': 'sub-step-2',
+                    'sub-step-name': 'sub-step-1',
                     'step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                     'success': True,
                     'message': '',
                     'artifacts': {
                         'config-1': {'description': '', 'type': 'str', 'value': 'config-1'},
+                        'config-overwrite-me': {'description': '', 'type': 'str', 'value': 'config-1'},
+                        'required-config-key': {'description': '', 'type': 'str', 'value': 'required'}
+                    },
+                },
+                'write-config-as-results': {
+                    'step-name': 'write-config-as-results',
+                    'sub-step-name': 'sub-step-2',
+                    'step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                    'success': True,
+                    'message': '',
+                    'artifacts': {
                         'config-2': {'description': '', 'type': 'str', 'value': 'config-2'},
                         'config-overwrite-me': {'description': '', 'type': 'str', 'value': 'config-2'},
                         'required-config-key': {'description': '', 'type': 'str', 'value': 'required'}
                     }
                 }
-            }
         }
 
         with TempDirectory() as test_dir:
