@@ -108,14 +108,15 @@ Elements in `report-artifacts` dictionary:
         }
     }
 """
+import re
+import shutil
 import sys
 import tempfile
 from datetime import datetime
-import shutil
+
 import sh
 from jinja2 import Environment, FileSystemLoader
-
-from tssc import StepImplementer, DefaultSteps
+from tssc import DefaultSteps, StepImplementer
 from tssc.config import ConfigValue
 
 DEFAULT_CONFIG = {
@@ -142,10 +143,14 @@ GIT_AUTHENTICATION_CONFIG = {
     'git-password': None
 }
 
+KUBE_LABEL_NOT_SAFE_CHARS_REGEX = r"[^a-zA-Z0-9\-_\.]"
+KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$"
+KUBE_LABEL_MAX_LENGTH = 62
+KUBE_LABEL_REPLACEMENT_CHAR = '-'
+
 class ArgoCD(StepImplementer):
     """ StepImplementer for the deploy step for ArgoCD.
     """
-
     @staticmethod
     def step_implementer_config_defaults():
         """
@@ -596,16 +601,34 @@ users:
 
     def _get_app_name(self):
         repo_branch = self._get_repo_branch()
-        app_name = "{organization}-{application}-{service}-{repo_branch}".\
-                   format(organization=self.get_config_value('organization'),
-                          application=self.get_config_value('application-name'),
-                          service=self.get_config_value('service-name'),
-                          repo_branch=repo_branch)
+        organization = self.get_config_value('organization')
+        application = self.get_config_value('application-name')
+        service = self.get_config_value('service-name')
+        app_name = f"{organization}-{application}-{service}-{repo_branch}"
 
         if self.environment:
             app_name = app_name + '-' + self.environment
 
-        return app_name.lower().replace('/', '-').replace('_', '-').replace('.', '-')
+        # repalce dangerous characters in app name
+        app_name = app_name.lower()
+        app_name = re.sub(
+            KUBE_LABEL_NOT_SAFE_CHARS_REGEX,
+            KUBE_LABEL_REPLACEMENT_CHAR,
+            app_name
+        )
+
+        # max length for a kube label / resource name is 63
+        if len(app_name) > KUBE_LABEL_MAX_LENGTH:
+            app_name = app_name[len(app_name)-KUBE_LABEL_MAX_LENGTH:]
+
+        # be sure app name doesn't start or end with not safe chars
+        app_name = re.sub(
+            KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX,
+            '',
+            app_name
+        )
+
+        return app_name
 
     def _get_endpoint_url(self):
         argocd_app_name = self._get_app_name()
