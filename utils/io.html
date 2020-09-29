@@ -34,10 +34,47 @@ import io
 import random
 import re
 
+def create_sh_redirect_to_multiple_streams_fn_callback(streams):
+    &#34;&#34;&#34;Creates and returns a function callback that will write given data to multiple given streams.
+
+    AKA: this essentially allows you to do &#39;tee&#39; for sh commands.
+
+    Parameters
+    ----------
+    streams : list of io.IOBase
+        Streams to write to.
+
+    Examples
+    --------
+    Will write output directed at stdout to stdout and a results file and output directed
+    at stderr to stderr and a results file.
+    &gt;&gt;&gt; with open(&#39;/tmp/results_file&#39;, &#39;w&#39;) as results_file:
+    ...     out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stdout,
+    ...         results_file
+    ...     ])
+    ...     err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stderr,
+    ...         results_file
+    ...     ])
+    ...     sh.echo(&#39;hello world&#39;)
+    hello world
+
+    Returns
+    -------
+    function(data)
+        Function that takes one parameter, data, and writes that value to all the given streams.
+    &#34;&#34;&#34;
+    def sh_redirect_to_multiple_streams(data):
+        for stream in streams:
+            stream.write(data)
+
+    return sh_redirect_to_multiple_streams
+
 class TextIOSelectiveObfuscator(io.TextIOBase):
     &#34;&#34;&#34;Extends the base class for text streams to allow the obfuscation of given patterns.
 
-    This is useful to prevent accidently writing &#34;sensitive&#34; information to stdout/stderr.
+    This is useful to prevent accidentally writing &#34;sensitive&#34; information to stdout/stderr.
 
     Parameters
     ----------
@@ -390,6 +427,82 @@ class TextIOIndenter(io.TextIOBase):
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback"><code class="name flex">
+<span>def <span class="ident">create_sh_redirect_to_multiple_streams_fn_callback</span></span>(<span>streams)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates and returns a function callback that will write given data to multiple given streams.</p>
+<p>AKA: this essentially allows you to do 'tee' for sh commands.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>streams</code></strong> :&ensp;<code>list</code> of <code>io.IOBase</code></dt>
+<dd>Streams to write to.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<p>Will write output directed at stdout to stdout and a results file and output directed
+at stderr to stderr and a results file.</p>
+<pre><code class="python-repl">&gt;&gt;&gt; with open('/tmp/results_file', 'w') as results_file:
+...     out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+...         sys.stdout,
+...         results_file
+...     ])
+...     err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+...         sys.stderr,
+...         results_file
+...     ])
+...     sh.echo('hello world')
+hello world
+</code></pre>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>function(data)</code></dt>
+<dd>Function that takes one parameter, data, and writes that value to all the given streams.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_sh_redirect_to_multiple_streams_fn_callback(streams):
+    &#34;&#34;&#34;Creates and returns a function callback that will write given data to multiple given streams.
+
+    AKA: this essentially allows you to do &#39;tee&#39; for sh commands.
+
+    Parameters
+    ----------
+    streams : list of io.IOBase
+        Streams to write to.
+
+    Examples
+    --------
+    Will write output directed at stdout to stdout and a results file and output directed
+    at stderr to stderr and a results file.
+    &gt;&gt;&gt; with open(&#39;/tmp/results_file&#39;, &#39;w&#39;) as results_file:
+    ...     out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stdout,
+    ...         results_file
+    ...     ])
+    ...     err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stderr,
+    ...         results_file
+    ...     ])
+    ...     sh.echo(&#39;hello world&#39;)
+    hello world
+
+    Returns
+    -------
+    function(data)
+        Function that takes one parameter, data, and writes that value to all the given streams.
+    &#34;&#34;&#34;
+    def sh_redirect_to_multiple_streams(data):
+        for stream in streams:
+            stream.write(data)
+
+    return sh_redirect_to_multiple_streams</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -962,7 +1075,7 @@ hello world
 </code></dt>
 <dd>
 <div class="desc"><p>Extends the base class for text streams to allow the obfuscation of given patterns.</p>
-<p>This is useful to prevent accidently writing "sensitive" information to stdout/stderr.</p>
+<p>This is useful to prevent accidentally writing "sensitive" information to stdout/stderr.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>parent_stream</code></strong> :&ensp;<code>IOBase</code></dt>
@@ -995,7 +1108,7 @@ False to use the same length replacement for any obfuscated text in the stream.<
 <pre><code class="python">class TextIOSelectiveObfuscator(io.TextIOBase):
     &#34;&#34;&#34;Extends the base class for text streams to allow the obfuscation of given patterns.
 
-    This is useful to prevent accidently writing &#34;sensitive&#34; information to stdout/stderr.
+    This is useful to prevent accidentally writing &#34;sensitive&#34; information to stdout/stderr.
 
     Parameters
     ----------
@@ -1338,6 +1451,11 @@ def replacement_char(self):
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="tssc.utils" href="index.html">tssc.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback" href="#tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback">create_sh_redirect_to_multiple_streams_fn_callback</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

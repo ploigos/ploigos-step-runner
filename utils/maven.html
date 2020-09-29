@@ -58,9 +58,9 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
     &#34;&#34;&#34;
 
     root = ET.Element(&#39;settings&#39;)
-    generate_maven_servers(root, maven_servers)
-    generate_maven_repositories(root, maven_repositories)
-    generate_maven_mirrors(root, maven_mirrors)
+    add_maven_servers(root, maven_servers)
+    add_maven_repositories(root, maven_repositories)
+    add_maven_mirrors(root, maven_mirrors)
 
     tree = ET.ElementTree(root)
 
@@ -70,113 +70,353 @@ def generate_maven_settings(working_dir, maven_servers, maven_repositories, mave
 
     return settings_path
 
-def generate_maven_servers(ElementTree, maven_servers): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven servers section of settings.xml and appends to the file
+def add_maven_servers(parent_element, maven_servers):
+    &#34;&#34;&#34;Adds &lt;servers&gt; element to parent element and creates &lt;server&gt; elements for each given
+    maven server.
 
     Parameters
     ----------
-    maven_servers:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        Parent element to add the &lt;servers&gt; element too.
+
+    maven_servers : (dict, list)
+        List of dicts or dicts of dicts to create &lt;server&gt; elements for.
 
     Raises
     ------
-    ValueError
-        If required fields are not provided a value.
+    AssertionError
+        * if username given without password or password without username
+        * if no id given
     &#34;&#34;&#34;
 
-    if maven_servers is not None:
-        servers = ET.Element(&#39;servers&#39;)
-        ElementTree.append(servers)
-        for server in maven_servers:
-            if server.get(&#39;id&#39;):
-                server_element = ET.Element(&#39;server&#39;)
-                servers.append(server_element)
-                server_id = ET.SubElement(server_element, &#39;id&#39;)
-                server_id.text = server[&#39;id&#39;]
-                if server.get(&#39;username&#39;) and server.get(&#39;password&#39;):
-                    server_username = ET.SubElement(server_element, &#39;username&#39;)
-                    server_username.text = server[&#39;username&#39;]
-                    server_password = ET.SubElement(server_element, &#39;password&#39;)
-                    server_password.text = server[&#39;password&#39;]
-                else:
-                    if server.get(&#39;username&#39;) or server.get(&#39;password&#39;):
-                        raise ValueError(&#39;username and password are required for maven_servers.&#39;)
+    if maven_servers is None:
+        return
+
+    assert isinstance(maven_servers, (dict, list))
+
+    servers_element = ET.Element(&#39;servers&#39;)
+    parent_element.append(servers_element)
+
+    if isinstance(maven_servers, dict):
+        for maven_server_key, maven_server_conf in maven_servers.items():
+            assert \
+                ( \
+                    (&#39;username&#39; in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; in maven_server_conf) \
+                ) \
+                or \
+                ( \
+                    (&#39;username&#39; not in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; not in maven_server_conf) \
+                ), \
+                f&#34;Configuration for maven server ({maven_server_key})&#34; \
+                f&#34; must specify both &#39;username&#39; and &#39;password&#39; or neither: {maven_server_conf}&#34;
+
+            # if id is key in the dict then use that for the maven server id
+            # else use the dict key for the maven server conf as the maven server id
+            if &#39;id&#39; in maven_server_conf:
+                maven_server_id = maven_server_conf[&#39;id&#39;]
             else:
-                raise ValueError(&#39;id is required for maven_servers.&#39;)
+                maven_server_id = maven_server_key
 
-def generate_maven_repositories(ElementTree, maven_repositories): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven repositories section of settings.xml and appends to the file
+            add_maven_server(
+                parent_element=servers_element,
+                maven_server_id=maven_server_id,
+                maven_server_username=maven_server_conf.get(&#39;username&#39;),
+                maven_server_password=maven_server_conf.get(&#39;password&#39;)
+            )
+    elif isinstance(maven_servers, list):
+        for maven_server_conf in maven_servers:
+            assert &#39;id&#39; in maven_server_conf, \
+                &#34;Configuration for maven servers&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_server_conf}&#34;
+
+            assert \
+                ( \
+                    (&#39;username&#39; in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; in maven_server_conf) \
+                ) \
+                or \
+                ( \
+                    (&#39;username&#39; not in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; not in maven_server_conf) \
+                ), \
+                &#34;Configuration for maven servers&#34; \
+                f&#34; must specify both &#39;username&#39; and &#39;password&#39; or neither: {maven_server_conf}&#34;
+
+            maven_server_id = maven_server_conf[&#39;id&#39;]
+
+            add_maven_server(
+                parent_element=servers_element,
+                maven_server_id=maven_server_id,
+                maven_server_username=maven_server_conf.get(&#39;username&#39;),
+                maven_server_password=maven_server_conf.get(&#39;password&#39;)
+            )
+
+def add_maven_server(
+    parent_element,
+    maven_server_id,
+    maven_server_username=None,
+    maven_server_password=None
+):
+    &#34;&#34;&#34;Adds a &lt;server&gt; element to the given parent element.
 
     Parameters
     ----------
-    maven_repositories:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        The parent element to append the new server too.
 
-    Raises
-    ------
-    ValueError
-        If required fields are not provided a value.
+    maven_server_id : str
+        ID of the maven server to add.
+
+    maven_server_username : str, optional
+        Username for the maven server to add.
+        Only used if maven_server_password also provided.
+
+    maven_server_password : str, optional
+        Password for the maven server to add.
+        Only used if maven_server_username is provided.
     &#34;&#34;&#34;
+    server_element = ET.Element(&#39;server&#39;)
+    parent_element.append(server_element)
+    server_id = ET.SubElement(server_element, &#39;id&#39;)
+    server_id.text = maven_server_id
+    if maven_server_username and maven_server_password:
+        server_username = ET.SubElement(server_element, &#39;username&#39;)
+        server_username.text = maven_server_username
+        server_password = ET.SubElement(server_element, &#39;password&#39;)
+        server_password.text = maven_server_password
 
-    if maven_repositories is not None:
-        profiles = ET.Element(&#39;profiles&#39;)
-        ElementTree.append (profiles)
-        profile = ET.Element(&#39;profile&#39;)
-        profiles.append (profile)
-        repositories = ET.Element(&#39;repositories&#39;)
-        profile.append(repositories)
-
-        for repository in maven_repositories:
-            if repository.get(&#39;id&#39;) and repository.get(&#39;url&#39;):
-                repository_element = ET.Element(&#39;repository&#39;)
-                repositories.append(repository_element)
-                repository_id = ET.SubElement(repository_element, &#39;id&#39;)
-                repository_id.text = repository[&#39;id&#39;]
-                repository_url = ET.SubElement(repository_element, &#39;url&#39;)
-                repository_url.text = repository[&#39;url&#39;]
-                if repository.get(&#39;releases&#39;):
-                    repository_releases = ET.SubElement(repository_element, &#39;releases&#39;)
-                    repository_releases_enabled = ET.SubElement(repository_releases, &#39;enabled&#39;)
-                    repository_releases_enabled.text = repository[&#39;releases&#39;]
-                if repository.get(&#39;snapshots&#39;):
-                    repository_snapshots = ET.SubElement(repository_element, &#39;snapshots&#39;)
-                    repository_snapshots_enabled = ET.SubElement(repository_snapshots, &#39;enabled&#39;)
-                    repository_snapshots_enabled.text = repository[&#39;snapshots&#39;]
-            else:
-                raise ValueError(&#39;id and url are required for maven_repositories.&#39;)
-
-def generate_maven_mirrors(ElementTree, maven_mirrors): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven mirrors section of settings.xml and appends to the file
+def add_maven_repositories(parent_element, maven_repositories): # pylint: disable=invalid-name
+    &#34;&#34;&#34;Adds &lt;repositories&gt; element to parent element and child &lt;repository&gt; element for each
+    given maven repository.
 
     Parameters
     ----------
-    maven_mirrors:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        Parent element to add the &lt;repositories&gt; element to.
+
+    maven_repositories : (dict, list)
+        List of dicts or dicts of dicts to create &lt;repository&gt; elements for.
 
     Raises
     ------
-    ValueError
-        If required fields are not provided a value.
+    AssertionError
+        * id not specified
+        * url not specified
     &#34;&#34;&#34;
 
-    if maven_mirrors is not None:
-        mirrors = ET.Element(&#39;mirrors&#39;)
-        ElementTree.append(mirrors)
-        for mirror in maven_mirrors:
-            if mirror.get(&#39;id&#39;) and mirror.get(&#39;url&#39;) and mirror.get(&#39;mirror-of&#39;):
-                mirror_element = ET.Element(&#39;mirror&#39;)
-                mirrors.append(mirror_element)
-                mirror_id = ET.SubElement(mirror_element, &#39;id&#39;)
-                mirror_id.text = mirror[&#39;id&#39;]
-                mirror_url = ET.SubElement(mirror_element, &#39;url&#39;)
-                mirror_url.text = mirror[&#39;url&#39;]
-                mirror_mirror_of = ET.SubElement(mirror_element, &#39;mirrorOf&#39;)
-                mirror_mirror_of.text = mirror[&#39;mirror-of&#39;]
+    if maven_repositories is None:
+        return
+
+    assert isinstance(maven_repositories, (dict, list))
+
+    profiles_element = ET.Element(&#39;profiles&#39;)
+    parent_element.append(profiles_element)
+    profile_element = ET.Element(&#39;profile&#39;)
+    profiles_element.append(profile_element)
+    repositories_element = ET.Element(&#39;repositories&#39;)
+    profile_element.append(repositories_element)
+
+    if isinstance(maven_repositories, dict):
+        for maven_repository_key, maven_repository_conf in maven_repositories.items():
+            assert &#39;url&#39; in maven_repository_conf, \
+                f&#34;Configuration for maven repository ({maven_repository_key})&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_repository_conf}&#34;
+
+            # if id is key in the dict then use that for the maven repository id
+            # else use the dict key for the maven server conf as the maven server id
+            if &#39;id&#39; in maven_repository_conf:
+                repository_id = maven_repository_conf[&#39;id&#39;]
             else:
-                raise ValueError(&#39;id, url and mirrorOf are required for maven_mirrors.&#39;)</code></pre>
+                repository_id = maven_repository_key
+
+            repository_url = maven_repository_conf[&#39;url&#39;]
+            releases_enabled = maven_repository_conf.get(&#39;releases&#39;)
+            snapshots_enabled = maven_repository_conf.get(&#39;snapshots&#39;)
+
+            add_maven_repository(
+                parent_element=repositories_element,
+                repository_id=repository_id,
+                repository_url=repository_url,
+                releases_enabled=releases_enabled,
+                snapshots_enabled=snapshots_enabled
+            )
+    elif isinstance(maven_repositories, list):
+        for maven_repository_conf in maven_repositories:
+            assert &#39;id&#39; in maven_repository_conf, \
+                &#34;Configuration for maven repository&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_repository_conf}&#34;
+
+            assert &#39;url&#39; in maven_repository_conf, \
+                &#34;Configuration for maven repository&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_repository_conf}&#34;
+
+            repository_id = maven_repository_conf[&#39;id&#39;]
+            repository_url = maven_repository_conf[&#39;url&#39;]
+            releases_enabled = maven_repository_conf.get(&#39;releases&#39;)
+            snapshots_enabled = maven_repository_conf.get(&#39;snapshots&#39;)
+
+            add_maven_repository(
+                parent_element=repositories_element,
+                repository_id=repository_id,
+                repository_url=repository_url,
+                releases_enabled=releases_enabled,
+                snapshots_enabled=snapshots_enabled
+            )
+
+def add_maven_repository(
+    parent_element,
+    repository_id,
+    repository_url,
+    releases_enabled=None,
+    snapshots_enabled=None
+):
+    &#34;&#34;&#34;Add a &lt;repository&gt; element to the given parent element
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        Parent elemtnt to add the &lt;repository&gt; element to.
+
+    repository_id : str
+        Value for the &lt;id&gt; element
+
+    repository_url : str
+        Value for the &lt;url&gt; element
+
+    releases_enabled : (str, bool), optional
+        Value for &lt;releases&gt;&lt;enabled&gt;{snapshots_enabled}&lt;/enabled&gt;&lt;/releases&gt;
+
+    snapshots_enabled : (str, bool), optional
+        Value for &lt;snapshots&gt;&lt;enabled&gt;{snapshots_enabled}&lt;/enabled&gt;&lt;/snapshots&gt;
+
+    &#34;&#34;&#34;
+    repository_element = ET.Element(&#39;repository&#39;)
+    parent_element.append(repository_element)
+
+    repository_id_element = ET.SubElement(repository_element, &#39;id&#39;)
+    repository_id_element.text = repository_id
+
+    repository_url_element = ET.SubElement(repository_element, &#39;url&#39;)
+    repository_url_element.text = repository_url
+
+    if releases_enabled is not None:
+        repository_releases = ET.SubElement(repository_element, &#39;releases&#39;)
+        repository_releases_enabled = ET.SubElement(repository_releases, &#39;enabled&#39;)
+        repository_releases_enabled.text = str(releases_enabled)
+
+    if snapshots_enabled is not None:
+        repository_snapshots = ET.SubElement(repository_element, &#39;snapshots&#39;)
+        repository_snapshots_enabled = ET.SubElement(repository_snapshots, &#39;enabled&#39;)
+        repository_snapshots_enabled.text = str(snapshots_enabled)
+
+def add_maven_mirrors(parent_element, maven_mirrors):
+    &#34;&#34;&#34;Add &lt;mirror&gt; element for given maven mirror to &lt;mirrors&gt; element to given parent element.
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        Parent element to add &lt;mirrors&gt; element to.
+
+    maven_mirrors : (dict, list)
+        List of dicts or dicts of dicts of maven mirror configurations.
+
+    Raises
+    ------
+    AssertionError
+        * if maven mirror id not given
+        * if maven mirror url not given
+        * if maven mirror mirror-of not given
+    &#34;&#34;&#34;
+
+    if maven_mirrors is None:
+        return
+
+    assert isinstance(maven_mirrors, (dict, list))
+
+    mirrors_element = ET.Element(&#39;mirrors&#39;)
+    parent_element.append(mirrors_element)
+
+    if isinstance(maven_mirrors, dict):
+        for maven_mirror_key, maven_mirror_conf in maven_mirrors.items():
+            assert &#39;url&#39; in maven_mirror_conf, \
+                f&#34;Configuration for maven mirror ({maven_mirror_key})&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_mirror_conf}&#34;
+            assert &#39;mirror-of&#39; in maven_mirror_conf, \
+                f&#34;Configuration for maven mirror ({maven_mirror_key})&#34; \
+                f&#34; must specify a &#39;mirror-of&#39;: {maven_mirror_conf}&#34;
+
+            # if id is key in the dict then use that for the maven mirror id
+            # else use the dict key for the maven mirror conf as the maven mirror id
+            if &#39;id&#39; in maven_mirror_conf:
+                maven_mirror_id = maven_mirror_conf[&#39;id&#39;]
+            else:
+                maven_mirror_id = maven_mirror_key
+
+            add_maven_mirror(
+                parent_element=mirrors_element,
+                maven_mirror_id=maven_mirror_id,
+                maven_mirror_url=maven_mirror_conf[&#39;url&#39;],
+                maven_mirror_mirror_of=maven_mirror_conf[&#39;mirror-of&#39;]
+            )
+    elif isinstance(maven_mirrors, list):
+        for maven_mirror_conf in maven_mirrors:
+            assert &#39;id&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_mirror_conf}&#34;
+            assert &#39;url&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_mirror_conf}&#34;
+            assert &#39;mirror-of&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;mirror-of&#39;: {maven_mirror_conf}&#34;
+
+            add_maven_mirror(
+                parent_element=mirrors_element,
+                maven_mirror_id=maven_mirror_conf[&#39;id&#39;],
+                maven_mirror_url=maven_mirror_conf[&#39;url&#39;],
+                maven_mirror_mirror_of=maven_mirror_conf[&#39;mirror-of&#39;]
+            )
+
+def add_maven_mirror(
+    parent_element,
+    maven_mirror_id,
+    maven_mirror_url,
+    maven_mirror_mirror_of
+):
+    &#34;&#34;&#34;Adds a &lt;mirror&gt; element to given parent element.
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        Parent element to add new &lt;mirror&gt; element to
+
+    maven_mirror_id : str
+        Value for &lt;id&gt; element.
+
+    maven_mirror_url : str
+        Value for &lt;url&gt; element.
+
+    maven_mirror_mirror_of : str
+        Value for &lt;mirrorOf&gt; element.
+
+    &#34;&#34;&#34;
+    mirror_element = ET.Element(&#39;mirror&#39;)
+    parent_element.append(mirror_element)
+
+    mirror_id = ET.SubElement(mirror_element, &#39;id&#39;)
+    mirror_id.text = maven_mirror_id
+
+    mirror_url = ET.SubElement(mirror_element, &#39;url&#39;)
+    mirror_url.text = maven_mirror_url
+
+    mirror_mirror_of = ET.SubElement(mirror_element, &#39;mirrorOf&#39;)
+    mirror_mirror_of.text = maven_mirror_mirror_of</code></pre>
 </details>
 </section>
 <section>
@@ -186,166 +426,503 @@ def generate_maven_mirrors(ElementTree, maven_mirrors): # pylint: disable=invali
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="tssc.utils.maven.generate_maven_mirrors"><code class="name flex">
-<span>def <span class="ident">generate_maven_mirrors</span></span>(<span>ElementTree, maven_mirrors)</span>
+<dt id="tssc.utils.maven.add_maven_mirror"><code class="name flex">
+<span>def <span class="ident">add_maven_mirror</span></span>(<span>parent_element, maven_mirror_id, maven_mirror_url, maven_mirror_mirror_of)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generates maven mirrors section of settings.xml and appends to the file</p>
+<div class="desc"><p>Adds a <mirror> element to given parent element.</p>
 <h2 id="parameters">Parameters</h2>
-<p>maven_mirrors:
-Dictionary of id, username, password</p>
-<h2 id="raises">Raises</h2>
 <dl>
-<dt><code>ValueError</code></dt>
-<dd>If required fields are not provided a value.</dd>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>Parent element to add new <mirror> element to</dd>
+<dt><strong><code>maven_mirror_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Value for <id> element.</dd>
+<dt><strong><code>maven_mirror_url</code></strong> :&ensp;<code>str</code></dt>
+<dd>Value for <url> element.</dd>
+<dt><strong><code>maven_mirror_mirror_of</code></strong> :&ensp;<code>str</code></dt>
+<dd>Value for <mirrorOf> element.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def generate_maven_mirrors(ElementTree, maven_mirrors): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven mirrors section of settings.xml and appends to the file
+<pre><code class="python">def add_maven_mirror(
+    parent_element,
+    maven_mirror_id,
+    maven_mirror_url,
+    maven_mirror_mirror_of
+):
+    &#34;&#34;&#34;Adds a &lt;mirror&gt; element to given parent element.
 
     Parameters
     ----------
-    maven_mirrors:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        Parent element to add new &lt;mirror&gt; element to
 
-    Raises
-    ------
-    ValueError
-        If required fields are not provided a value.
+    maven_mirror_id : str
+        Value for &lt;id&gt; element.
+
+    maven_mirror_url : str
+        Value for &lt;url&gt; element.
+
+    maven_mirror_mirror_of : str
+        Value for &lt;mirrorOf&gt; element.
+
     &#34;&#34;&#34;
+    mirror_element = ET.Element(&#39;mirror&#39;)
+    parent_element.append(mirror_element)
 
-    if maven_mirrors is not None:
-        mirrors = ET.Element(&#39;mirrors&#39;)
-        ElementTree.append(mirrors)
-        for mirror in maven_mirrors:
-            if mirror.get(&#39;id&#39;) and mirror.get(&#39;url&#39;) and mirror.get(&#39;mirror-of&#39;):
-                mirror_element = ET.Element(&#39;mirror&#39;)
-                mirrors.append(mirror_element)
-                mirror_id = ET.SubElement(mirror_element, &#39;id&#39;)
-                mirror_id.text = mirror[&#39;id&#39;]
-                mirror_url = ET.SubElement(mirror_element, &#39;url&#39;)
-                mirror_url.text = mirror[&#39;url&#39;]
-                mirror_mirror_of = ET.SubElement(mirror_element, &#39;mirrorOf&#39;)
-                mirror_mirror_of.text = mirror[&#39;mirror-of&#39;]
-            else:
-                raise ValueError(&#39;id, url and mirrorOf are required for maven_mirrors.&#39;)</code></pre>
+    mirror_id = ET.SubElement(mirror_element, &#39;id&#39;)
+    mirror_id.text = maven_mirror_id
+
+    mirror_url = ET.SubElement(mirror_element, &#39;url&#39;)
+    mirror_url.text = maven_mirror_url
+
+    mirror_mirror_of = ET.SubElement(mirror_element, &#39;mirrorOf&#39;)
+    mirror_mirror_of.text = maven_mirror_mirror_of</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.maven.generate_maven_repositories"><code class="name flex">
-<span>def <span class="ident">generate_maven_repositories</span></span>(<span>ElementTree, maven_repositories)</span>
+<dt id="tssc.utils.maven.add_maven_mirrors"><code class="name flex">
+<span>def <span class="ident">add_maven_mirrors</span></span>(<span>parent_element, maven_mirrors)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generates maven repositories section of settings.xml and appends to the file</p>
+<div class="desc"><p>Add <mirror> element for given maven mirror to <mirrors> element to given parent element.</p>
 <h2 id="parameters">Parameters</h2>
-<p>maven_repositories:
-Dictionary of id, username, password</p>
+<dl>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>Parent element to add <mirrors> element to.</dd>
+<dt><strong><code>maven_mirrors</code></strong> :&ensp;<code>(dict, list)</code></dt>
+<dd>List of dicts or dicts of dicts of maven mirror configurations.</dd>
+</dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>ValueError</code></dt>
-<dd>If required fields are not provided a value.</dd>
+<dt><code>AssertionError</code></dt>
+<dd>
+<ul>
+<li>if maven mirror id not given</li>
+<li>if maven mirror url not given</li>
+<li>if maven mirror mirror-of not given</li>
+</ul>
+</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def generate_maven_repositories(ElementTree, maven_repositories): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven repositories section of settings.xml and appends to the file
+<pre><code class="python">def add_maven_mirrors(parent_element, maven_mirrors):
+    &#34;&#34;&#34;Add &lt;mirror&gt; element for given maven mirror to &lt;mirrors&gt; element to given parent element.
 
     Parameters
     ----------
-    maven_repositories:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        Parent element to add &lt;mirrors&gt; element to.
+
+    maven_mirrors : (dict, list)
+        List of dicts or dicts of dicts of maven mirror configurations.
 
     Raises
     ------
-    ValueError
-        If required fields are not provided a value.
+    AssertionError
+        * if maven mirror id not given
+        * if maven mirror url not given
+        * if maven mirror mirror-of not given
     &#34;&#34;&#34;
 
-    if maven_repositories is not None:
-        profiles = ET.Element(&#39;profiles&#39;)
-        ElementTree.append (profiles)
-        profile = ET.Element(&#39;profile&#39;)
-        profiles.append (profile)
-        repositories = ET.Element(&#39;repositories&#39;)
-        profile.append(repositories)
+    if maven_mirrors is None:
+        return
 
-        for repository in maven_repositories:
-            if repository.get(&#39;id&#39;) and repository.get(&#39;url&#39;):
-                repository_element = ET.Element(&#39;repository&#39;)
-                repositories.append(repository_element)
-                repository_id = ET.SubElement(repository_element, &#39;id&#39;)
-                repository_id.text = repository[&#39;id&#39;]
-                repository_url = ET.SubElement(repository_element, &#39;url&#39;)
-                repository_url.text = repository[&#39;url&#39;]
-                if repository.get(&#39;releases&#39;):
-                    repository_releases = ET.SubElement(repository_element, &#39;releases&#39;)
-                    repository_releases_enabled = ET.SubElement(repository_releases, &#39;enabled&#39;)
-                    repository_releases_enabled.text = repository[&#39;releases&#39;]
-                if repository.get(&#39;snapshots&#39;):
-                    repository_snapshots = ET.SubElement(repository_element, &#39;snapshots&#39;)
-                    repository_snapshots_enabled = ET.SubElement(repository_snapshots, &#39;enabled&#39;)
-                    repository_snapshots_enabled.text = repository[&#39;snapshots&#39;]
+    assert isinstance(maven_mirrors, (dict, list))
+
+    mirrors_element = ET.Element(&#39;mirrors&#39;)
+    parent_element.append(mirrors_element)
+
+    if isinstance(maven_mirrors, dict):
+        for maven_mirror_key, maven_mirror_conf in maven_mirrors.items():
+            assert &#39;url&#39; in maven_mirror_conf, \
+                f&#34;Configuration for maven mirror ({maven_mirror_key})&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_mirror_conf}&#34;
+            assert &#39;mirror-of&#39; in maven_mirror_conf, \
+                f&#34;Configuration for maven mirror ({maven_mirror_key})&#34; \
+                f&#34; must specify a &#39;mirror-of&#39;: {maven_mirror_conf}&#34;
+
+            # if id is key in the dict then use that for the maven mirror id
+            # else use the dict key for the maven mirror conf as the maven mirror id
+            if &#39;id&#39; in maven_mirror_conf:
+                maven_mirror_id = maven_mirror_conf[&#39;id&#39;]
             else:
-                raise ValueError(&#39;id and url are required for maven_repositories.&#39;)</code></pre>
+                maven_mirror_id = maven_mirror_key
+
+            add_maven_mirror(
+                parent_element=mirrors_element,
+                maven_mirror_id=maven_mirror_id,
+                maven_mirror_url=maven_mirror_conf[&#39;url&#39;],
+                maven_mirror_mirror_of=maven_mirror_conf[&#39;mirror-of&#39;]
+            )
+    elif isinstance(maven_mirrors, list):
+        for maven_mirror_conf in maven_mirrors:
+            assert &#39;id&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_mirror_conf}&#34;
+            assert &#39;url&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_mirror_conf}&#34;
+            assert &#39;mirror-of&#39; in maven_mirror_conf, \
+                &#34;Configuration for maven mirror&#34; \
+                f&#34; must specify a &#39;mirror-of&#39;: {maven_mirror_conf}&#34;
+
+            add_maven_mirror(
+                parent_element=mirrors_element,
+                maven_mirror_id=maven_mirror_conf[&#39;id&#39;],
+                maven_mirror_url=maven_mirror_conf[&#39;url&#39;],
+                maven_mirror_mirror_of=maven_mirror_conf[&#39;mirror-of&#39;]
+            )</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.maven.generate_maven_servers"><code class="name flex">
-<span>def <span class="ident">generate_maven_servers</span></span>(<span>ElementTree, maven_servers)</span>
+<dt id="tssc.utils.maven.add_maven_repositories"><code class="name flex">
+<span>def <span class="ident">add_maven_repositories</span></span>(<span>parent_element, maven_repositories)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generates maven servers section of settings.xml and appends to the file</p>
+<div class="desc"><p>Adds <repositories> element to parent element and child <repository> element for each
+given maven repository.</p>
 <h2 id="parameters">Parameters</h2>
-<p>maven_servers:
-Dictionary of id, username, password</p>
+<dl>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>Parent element to add the <repositories> element to.</dd>
+<dt><strong><code>maven_repositories</code></strong> :&ensp;<code>(dict, list)</code></dt>
+<dd>List of dicts or dicts of dicts to create <repository> elements for.</dd>
+</dl>
 <h2 id="raises">Raises</h2>
 <dl>
-<dt><code>ValueError</code></dt>
-<dd>If required fields are not provided a value.</dd>
+<dt><code>AssertionError</code></dt>
+<dd>
+<ul>
+<li>id not specified</li>
+<li>url not specified</li>
+</ul>
+</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def generate_maven_servers(ElementTree, maven_servers): # pylint: disable=invalid-name
-    &#34;&#34;&#34;
-    Generates maven servers section of settings.xml and appends to the file
+<pre><code class="python">def add_maven_repositories(parent_element, maven_repositories): # pylint: disable=invalid-name
+    &#34;&#34;&#34;Adds &lt;repositories&gt; element to parent element and child &lt;repository&gt; element for each
+    given maven repository.
 
     Parameters
     ----------
-    maven_servers:
-        Dictionary of id, username, password
+    parent_element : ET.Element
+        Parent element to add the &lt;repositories&gt; element to.
+
+    maven_repositories : (dict, list)
+        List of dicts or dicts of dicts to create &lt;repository&gt; elements for.
 
     Raises
     ------
-    ValueError
-        If required fields are not provided a value.
+    AssertionError
+        * id not specified
+        * url not specified
     &#34;&#34;&#34;
 
-    if maven_servers is not None:
-        servers = ET.Element(&#39;servers&#39;)
-        ElementTree.append(servers)
-        for server in maven_servers:
-            if server.get(&#39;id&#39;):
-                server_element = ET.Element(&#39;server&#39;)
-                servers.append(server_element)
-                server_id = ET.SubElement(server_element, &#39;id&#39;)
-                server_id.text = server[&#39;id&#39;]
-                if server.get(&#39;username&#39;) and server.get(&#39;password&#39;):
-                    server_username = ET.SubElement(server_element, &#39;username&#39;)
-                    server_username.text = server[&#39;username&#39;]
-                    server_password = ET.SubElement(server_element, &#39;password&#39;)
-                    server_password.text = server[&#39;password&#39;]
-                else:
-                    if server.get(&#39;username&#39;) or server.get(&#39;password&#39;):
-                        raise ValueError(&#39;username and password are required for maven_servers.&#39;)
+    if maven_repositories is None:
+        return
+
+    assert isinstance(maven_repositories, (dict, list))
+
+    profiles_element = ET.Element(&#39;profiles&#39;)
+    parent_element.append(profiles_element)
+    profile_element = ET.Element(&#39;profile&#39;)
+    profiles_element.append(profile_element)
+    repositories_element = ET.Element(&#39;repositories&#39;)
+    profile_element.append(repositories_element)
+
+    if isinstance(maven_repositories, dict):
+        for maven_repository_key, maven_repository_conf in maven_repositories.items():
+            assert &#39;url&#39; in maven_repository_conf, \
+                f&#34;Configuration for maven repository ({maven_repository_key})&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_repository_conf}&#34;
+
+            # if id is key in the dict then use that for the maven repository id
+            # else use the dict key for the maven server conf as the maven server id
+            if &#39;id&#39; in maven_repository_conf:
+                repository_id = maven_repository_conf[&#39;id&#39;]
             else:
-                raise ValueError(&#39;id is required for maven_servers.&#39;)</code></pre>
+                repository_id = maven_repository_key
+
+            repository_url = maven_repository_conf[&#39;url&#39;]
+            releases_enabled = maven_repository_conf.get(&#39;releases&#39;)
+            snapshots_enabled = maven_repository_conf.get(&#39;snapshots&#39;)
+
+            add_maven_repository(
+                parent_element=repositories_element,
+                repository_id=repository_id,
+                repository_url=repository_url,
+                releases_enabled=releases_enabled,
+                snapshots_enabled=snapshots_enabled
+            )
+    elif isinstance(maven_repositories, list):
+        for maven_repository_conf in maven_repositories:
+            assert &#39;id&#39; in maven_repository_conf, \
+                &#34;Configuration for maven repository&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_repository_conf}&#34;
+
+            assert &#39;url&#39; in maven_repository_conf, \
+                &#34;Configuration for maven repository&#34; \
+                f&#34; must specify a &#39;url&#39;: {maven_repository_conf}&#34;
+
+            repository_id = maven_repository_conf[&#39;id&#39;]
+            repository_url = maven_repository_conf[&#39;url&#39;]
+            releases_enabled = maven_repository_conf.get(&#39;releases&#39;)
+            snapshots_enabled = maven_repository_conf.get(&#39;snapshots&#39;)
+
+            add_maven_repository(
+                parent_element=repositories_element,
+                repository_id=repository_id,
+                repository_url=repository_url,
+                releases_enabled=releases_enabled,
+                snapshots_enabled=snapshots_enabled
+            )</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.maven.add_maven_repository"><code class="name flex">
+<span>def <span class="ident">add_maven_repository</span></span>(<span>parent_element, repository_id, repository_url, releases_enabled=None, snapshots_enabled=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a <repository> element to the given parent element</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>Parent elemtnt to add the <repository> element to.</dd>
+<dt><strong><code>repository_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Value for the <id> element</dd>
+<dt><strong><code>repository_url</code></strong> :&ensp;<code>str</code></dt>
+<dd>Value for the <url> element</dd>
+<dt><strong><code>releases_enabled</code></strong> :&ensp;<code>(str, bool)</code>, optional</dt>
+<dd>Value for <releases><enabled>{snapshots_enabled}</enabled></releases></dd>
+<dt><strong><code>snapshots_enabled</code></strong> :&ensp;<code>(str, bool)</code>, optional</dt>
+<dd>Value for <snapshots><enabled>{snapshots_enabled}</enabled></snapshots></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_maven_repository(
+    parent_element,
+    repository_id,
+    repository_url,
+    releases_enabled=None,
+    snapshots_enabled=None
+):
+    &#34;&#34;&#34;Add a &lt;repository&gt; element to the given parent element
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        Parent elemtnt to add the &lt;repository&gt; element to.
+
+    repository_id : str
+        Value for the &lt;id&gt; element
+
+    repository_url : str
+        Value for the &lt;url&gt; element
+
+    releases_enabled : (str, bool), optional
+        Value for &lt;releases&gt;&lt;enabled&gt;{snapshots_enabled}&lt;/enabled&gt;&lt;/releases&gt;
+
+    snapshots_enabled : (str, bool), optional
+        Value for &lt;snapshots&gt;&lt;enabled&gt;{snapshots_enabled}&lt;/enabled&gt;&lt;/snapshots&gt;
+
+    &#34;&#34;&#34;
+    repository_element = ET.Element(&#39;repository&#39;)
+    parent_element.append(repository_element)
+
+    repository_id_element = ET.SubElement(repository_element, &#39;id&#39;)
+    repository_id_element.text = repository_id
+
+    repository_url_element = ET.SubElement(repository_element, &#39;url&#39;)
+    repository_url_element.text = repository_url
+
+    if releases_enabled is not None:
+        repository_releases = ET.SubElement(repository_element, &#39;releases&#39;)
+        repository_releases_enabled = ET.SubElement(repository_releases, &#39;enabled&#39;)
+        repository_releases_enabled.text = str(releases_enabled)
+
+    if snapshots_enabled is not None:
+        repository_snapshots = ET.SubElement(repository_element, &#39;snapshots&#39;)
+        repository_snapshots_enabled = ET.SubElement(repository_snapshots, &#39;enabled&#39;)
+        repository_snapshots_enabled.text = str(snapshots_enabled)</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.maven.add_maven_server"><code class="name flex">
+<span>def <span class="ident">add_maven_server</span></span>(<span>parent_element, maven_server_id, maven_server_username=None, maven_server_password=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a <server> element to the given parent element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>The parent element to append the new server too.</dd>
+<dt><strong><code>maven_server_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>ID of the maven server to add.</dd>
+<dt><strong><code>maven_server_username</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Username for the maven server to add.
+Only used if maven_server_password also provided.</dd>
+<dt><strong><code>maven_server_password</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Password for the maven server to add.
+Only used if maven_server_username is provided.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_maven_server(
+    parent_element,
+    maven_server_id,
+    maven_server_username=None,
+    maven_server_password=None
+):
+    &#34;&#34;&#34;Adds a &lt;server&gt; element to the given parent element.
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        The parent element to append the new server too.
+
+    maven_server_id : str
+        ID of the maven server to add.
+
+    maven_server_username : str, optional
+        Username for the maven server to add.
+        Only used if maven_server_password also provided.
+
+    maven_server_password : str, optional
+        Password for the maven server to add.
+        Only used if maven_server_username is provided.
+    &#34;&#34;&#34;
+    server_element = ET.Element(&#39;server&#39;)
+    parent_element.append(server_element)
+    server_id = ET.SubElement(server_element, &#39;id&#39;)
+    server_id.text = maven_server_id
+    if maven_server_username and maven_server_password:
+        server_username = ET.SubElement(server_element, &#39;username&#39;)
+        server_username.text = maven_server_username
+        server_password = ET.SubElement(server_element, &#39;password&#39;)
+        server_password.text = maven_server_password</code></pre>
+</details>
+</dd>
+<dt id="tssc.utils.maven.add_maven_servers"><code class="name flex">
+<span>def <span class="ident">add_maven_servers</span></span>(<span>parent_element, maven_servers)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds <servers> element to parent element and creates <server> elements for each given
+maven server.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>parent_element</code></strong> :&ensp;<code>ET.Element</code></dt>
+<dd>Parent element to add the <servers> element too.</dd>
+<dt><strong><code>maven_servers</code></strong> :&ensp;<code>(dict, list)</code></dt>
+<dd>List of dicts or dicts of dicts to create <server> elements for.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>AssertionError</code></dt>
+<dd>
+<ul>
+<li>if username given without password or password without username</li>
+<li>if no id given</li>
+</ul>
+</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_maven_servers(parent_element, maven_servers):
+    &#34;&#34;&#34;Adds &lt;servers&gt; element to parent element and creates &lt;server&gt; elements for each given
+    maven server.
+
+    Parameters
+    ----------
+    parent_element : ET.Element
+        Parent element to add the &lt;servers&gt; element too.
+
+    maven_servers : (dict, list)
+        List of dicts or dicts of dicts to create &lt;server&gt; elements for.
+
+    Raises
+    ------
+    AssertionError
+        * if username given without password or password without username
+        * if no id given
+    &#34;&#34;&#34;
+
+    if maven_servers is None:
+        return
+
+    assert isinstance(maven_servers, (dict, list))
+
+    servers_element = ET.Element(&#39;servers&#39;)
+    parent_element.append(servers_element)
+
+    if isinstance(maven_servers, dict):
+        for maven_server_key, maven_server_conf in maven_servers.items():
+            assert \
+                ( \
+                    (&#39;username&#39; in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; in maven_server_conf) \
+                ) \
+                or \
+                ( \
+                    (&#39;username&#39; not in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; not in maven_server_conf) \
+                ), \
+                f&#34;Configuration for maven server ({maven_server_key})&#34; \
+                f&#34; must specify both &#39;username&#39; and &#39;password&#39; or neither: {maven_server_conf}&#34;
+
+            # if id is key in the dict then use that for the maven server id
+            # else use the dict key for the maven server conf as the maven server id
+            if &#39;id&#39; in maven_server_conf:
+                maven_server_id = maven_server_conf[&#39;id&#39;]
+            else:
+                maven_server_id = maven_server_key
+
+            add_maven_server(
+                parent_element=servers_element,
+                maven_server_id=maven_server_id,
+                maven_server_username=maven_server_conf.get(&#39;username&#39;),
+                maven_server_password=maven_server_conf.get(&#39;password&#39;)
+            )
+    elif isinstance(maven_servers, list):
+        for maven_server_conf in maven_servers:
+            assert &#39;id&#39; in maven_server_conf, \
+                &#34;Configuration for maven servers&#34; \
+                f&#34; must specify a &#39;id&#39;: {maven_server_conf}&#34;
+
+            assert \
+                ( \
+                    (&#39;username&#39; in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; in maven_server_conf) \
+                ) \
+                or \
+                ( \
+                    (&#39;username&#39; not in maven_server_conf) \
+                    and \
+                    (&#39;password&#39; not in maven_server_conf) \
+                ), \
+                &#34;Configuration for maven servers&#34; \
+                f&#34; must specify both &#39;username&#39; and &#39;password&#39; or neither: {maven_server_conf}&#34;
+
+            maven_server_id = maven_server_conf[&#39;id&#39;]
+
+            add_maven_server(
+                parent_element=servers_element,
+                maven_server_id=maven_server_id,
+                maven_server_username=maven_server_conf.get(&#39;username&#39;),
+                maven_server_password=maven_server_conf.get(&#39;password&#39;)
+            )</code></pre>
 </details>
 </dd>
 <dt id="tssc.utils.maven.generate_maven_settings"><code class="name flex">
@@ -399,9 +976,9 @@ Dictionary of id, url, mirror_of</p>
     &#34;&#34;&#34;
 
     root = ET.Element(&#39;settings&#39;)
-    generate_maven_servers(root, maven_servers)
-    generate_maven_repositories(root, maven_repositories)
-    generate_maven_mirrors(root, maven_mirrors)
+    add_maven_servers(root, maven_servers)
+    add_maven_repositories(root, maven_repositories)
+    add_maven_mirrors(root, maven_mirrors)
 
     tree = ET.ElementTree(root)
 
@@ -430,9 +1007,12 @@ Dictionary of id, url, mirror_of</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="tssc.utils.maven.generate_maven_mirrors" href="#tssc.utils.maven.generate_maven_mirrors">generate_maven_mirrors</a></code></li>
-<li><code><a title="tssc.utils.maven.generate_maven_repositories" href="#tssc.utils.maven.generate_maven_repositories">generate_maven_repositories</a></code></li>
-<li><code><a title="tssc.utils.maven.generate_maven_servers" href="#tssc.utils.maven.generate_maven_servers">generate_maven_servers</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_mirror" href="#tssc.utils.maven.add_maven_mirror">add_maven_mirror</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_mirrors" href="#tssc.utils.maven.add_maven_mirrors">add_maven_mirrors</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_repositories" href="#tssc.utils.maven.add_maven_repositories">add_maven_repositories</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_repository" href="#tssc.utils.maven.add_maven_repository">add_maven_repository</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_server" href="#tssc.utils.maven.add_maven_server">add_maven_server</a></code></li>
+<li><code><a title="tssc.utils.maven.add_maven_servers" href="#tssc.utils.maven.add_maven_servers">add_maven_servers</a></code></li>
 <li><code><a title="tssc.utils.maven.generate_maven_settings" href="#tssc.utils.maven.generate_maven_settings">generate_maven_settings</a></code></li>
 </ul>
 </li>

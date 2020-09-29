@@ -224,11 +224,12 @@ Results output by this step.
         }
     }
 &#34;&#34;&#34;
-from io import StringIO
 import re
 import sys
+from io import StringIO
+
 import sh
-from tssc import StepImplementer, DefaultSteps
+from tssc import DefaultSteps, StepImplementer
 
 DEFAULT_CONFIG = {}
 
@@ -369,10 +370,11 @@ class Git(StepImplementer):
                 sh.git.config(
                     &#39;--get&#39;,
                     &#39;remote.origin.url&#39;,
-                    _out=out,
-                    _tee=True,
                     _encoding=&#39;UTF-8&#39;,
-                    _decode_errors=&#39;ignore&#39;
+                    _decode_errors=&#39;ignore&#39;,
+                    _out=out,
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
                 git_url = out.getvalue().rstrip()
 
@@ -403,10 +405,11 @@ class Git(StepImplementer):
                 git_tag_value,
                 &#39;-f&#39;,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value) from error
+            raise RuntimeError(f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;) from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -416,13 +419,15 @@ class Git(StepImplementer):
                     url,
                     &#39;--tag&#39;,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
             else:
                 sh.git.push(
                     &#39;--tag&#39;,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;) from error</code></pre>
@@ -581,10 +586,11 @@ for http and https git repos, and that is a desired use case.</p></div>
                 sh.git.config(
                     &#39;--get&#39;,
                     &#39;remote.origin.url&#39;,
-                    _out=out,
-                    _tee=True,
                     _encoding=&#39;UTF-8&#39;,
-                    _decode_errors=&#39;ignore&#39;
+                    _decode_errors=&#39;ignore&#39;,
+                    _out=out,
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
                 git_url = out.getvalue().rstrip()
 
@@ -615,10 +621,11 @@ for http and https git repos, and that is a desired use case.</p></div>
                 git_tag_value,
                 &#39;-f&#39;,
                 _out=sys.stdout,
-                _err=sys.stderr
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git tag &#39; + git_tag_value) from error
+            raise RuntimeError(f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;) from error
 
     @staticmethod
     def _git_push(url=None):  # pragma: no cover
@@ -628,13 +635,15 @@ for http and https git repos, and that is a desired use case.</p></div>
                     url,
                     &#39;--tag&#39;,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
             else:
                 sh.git.push(
                     &#39;--tag&#39;,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError(&#39;Error invoking git push&#39;) from error</code></pre>

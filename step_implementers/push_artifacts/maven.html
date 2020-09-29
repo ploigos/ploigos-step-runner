@@ -309,11 +309,10 @@ Example: Results
 
 &#34;&#34;&#34;
 import sys
-import sh
 
+import sh
 from tssc import StepImplementer
 from tssc.config import ConfigValue
-
 from tssc.utils.maven import generate_maven_settings
 
 DEFAULT_CONFIG = {}
@@ -429,7 +428,8 @@ class Maven(StepImplementer):
                     &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
                     &#39;-s&#39; + settings_file,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
             except sh.ErrorReturnCode as error:
                 raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
@@ -575,7 +575,8 @@ class Maven(StepImplementer):
                     &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
                     &#39;-s&#39; + settings_file,
                     _out=sys.stdout,
-                    _err=sys.stderr
+                    _err=sys.stderr,
+                    _tee=&#39;err&#39;
                 )
             except sh.ErrorReturnCode as error:
                 raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error

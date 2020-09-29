@@ -199,7 +199,7 @@ rules:
         'report-artifacts': [
             {
                 'name' : 'configlint-result-set',
-                'path': 'file://f/validate/configlint_results_file.txt'
+                'path': 'file://f/validate/configlint_results_file_path.txt'
             }
         ]
 
@@ -325,7 +325,7 @@ Example: Results
             &#39;report-artifacts&#39;: [
                 {
                     &#39;name&#39; : &#39;configlint-result-set&#39;,
-                    &#39;path&#39;: &#39;file://f/validate/configlint_results_file.txt&#39;
+                    &#39;path&#39;: &#39;file://f/validate/configlint_results_file_path.txt&#39;
                 }
             ]
 
@@ -337,8 +337,11 @@ provide the yml_path option.
 &#34;&#34;&#34;
 
 import os
+import sys
+
 import sh
-from tssc import StepImplementer
+from tssc import StepImplementer, TSSCException
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
     &#39;rules&#39;: &#39;./config-lint.rules&#39;
@@ -422,25 +425,41 @@ class Configlint(StepImplementer):
         if not os.path.exists(rules_file):
             raise ValueError(f&#39;Rules file specified in tssc config not found: {rules_file}&#39;)
 
+        configlint_results_file_path = self.write_working_file(&#39;configlint_results_file.txt&#39;)
         try:
+            # run config-lint writing stdout and stderr to the standard streams
+            # as well as to a results file.
+            with open(configlint_results_file_path, &#39;w&#39;) as configlint_results_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    configlint_results_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    configlint_results_file
+                ])
 
-            configlint_results_file = self.write_working_file(
-                &#39;configlint_results_file.txt&#39;,
-                b&#39;&#39;
-            )
-            # Hint:  Call config-lint with sh.config_lint
-            sh.config_lint(  # pylint: disable=no-member
-                &#34;-verbose&#34;,
-                &#34;-debug&#34;,
-                &#34;-rules&#34;,
-                rules_file,
-                yml_path,
-                _out=configlint_results_file,
-                _err_to_out=True
-            )
-
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f&#39;Error invoking config-lint: {error}&#39;) from error
+                sh.config_lint(  # pylint: disable=no-member
+                    &#34;-verbose&#34;,
+                    &#34;-debug&#34;,
+                    &#34;-rules&#34;,
+                    rules_file,
+                    yml_path,
+                    _encoding=&#39;UTF-8&#39;,
+                    _out=out_callback,
+                    _err=err_callback,
+                    _tee=&#39;err&#39;
+                )
+        except sh.ErrorReturnCode_255 as error: # pylint: disable=no-member
+            # NOTE: expected failure condition,
+            #       aka, the config lint run, but found an issue
+            raise TSSCException(
+                &#39;Failed config-lint scan. See standard out and standard error.&#39;
+            ) from error
+        except sh.ErrorReturnCode as error:
+            # NOTE: un-expected failure condition
+            #       aka, the config lint failed to run for some reason
+            raise RuntimeError(f&#39;Unexpected Error invoking config-lint: {error}&#39;) from error
 
         results = {
             &#39;result&#39;: {
@@ -450,7 +469,7 @@ class Configlint(StepImplementer):
             &#39;report-artifacts&#39;: [
                 {
                     &#39;name&#39; : &#39;configlint-result-set&#39;,
-                    &#39;path&#39;: f&#39;file://{configlint_results_file}&#39;
+                    &#39;path&#39;: f&#39;file://{configlint_results_file_path}&#39;
                 }
             ],
             &#39;options&#39;: {
@@ -551,25 +570,41 @@ class Configlint(StepImplementer):
         if not os.path.exists(rules_file):
             raise ValueError(f&#39;Rules file specified in tssc config not found: {rules_file}&#39;)
 
+        configlint_results_file_path = self.write_working_file(&#39;configlint_results_file.txt&#39;)
         try:
+            # run config-lint writing stdout and stderr to the standard streams
+            # as well as to a results file.
+            with open(configlint_results_file_path, &#39;w&#39;) as configlint_results_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    configlint_results_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    configlint_results_file
+                ])
 
-            configlint_results_file = self.write_working_file(
-                &#39;configlint_results_file.txt&#39;,
-                b&#39;&#39;
-            )
-            # Hint:  Call config-lint with sh.config_lint
-            sh.config_lint(  # pylint: disable=no-member
-                &#34;-verbose&#34;,
-                &#34;-debug&#34;,
-                &#34;-rules&#34;,
-                rules_file,
-                yml_path,
-                _out=configlint_results_file,
-                _err_to_out=True
-            )
-
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f&#39;Error invoking config-lint: {error}&#39;) from error
+                sh.config_lint(  # pylint: disable=no-member
+                    &#34;-verbose&#34;,
+                    &#34;-debug&#34;,
+                    &#34;-rules&#34;,
+                    rules_file,
+                    yml_path,
+                    _encoding=&#39;UTF-8&#39;,
+                    _out=out_callback,
+                    _err=err_callback,
+                    _tee=&#39;err&#39;
+                )
+        except sh.ErrorReturnCode_255 as error: # pylint: disable=no-member
+            # NOTE: expected failure condition,
+            #       aka, the config lint run, but found an issue
+            raise TSSCException(
+                &#39;Failed config-lint scan. See standard out and standard error.&#39;
+            ) from error
+        except sh.ErrorReturnCode as error:
+            # NOTE: un-expected failure condition
+            #       aka, the config lint failed to run for some reason
+            raise RuntimeError(f&#39;Unexpected Error invoking config-lint: {error}&#39;) from error
 
         results = {
             &#39;result&#39;: {
@@ -579,7 +614,7 @@ class Configlint(StepImplementer):
             &#39;report-artifacts&#39;: [
                 {
                     &#39;name&#39; : &#39;configlint-result-set&#39;,
-                    &#39;path&#39;: f&#39;file://{configlint_results_file}&#39;
+                    &#39;path&#39;: f&#39;file://{configlint_results_file_path}&#39;
                 }
             ],
             &#39;options&#39;: {
