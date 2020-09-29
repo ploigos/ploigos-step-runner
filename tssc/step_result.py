@@ -120,7 +120,7 @@ class StepResult:
             raise TSSCException('Name is required to add artifact')
 
         # False can be the value
-        if value is '':
+        if value == '' or value is None:
             raise TSSCException('Value is required to add artifact')
 
         if not value_type:
