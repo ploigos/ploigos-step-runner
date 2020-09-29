@@ -1,12 +1,14 @@
 import os
 from unittest.mock import patch
+
 import sh
 from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import run_step_test_with_result_validation
 
 
-class TestStepImplementerPushArtifact(BaseTSSCTestCase):
+class TestStepImplementerPushArtifact(BaseStepImplementerTestCase):
 
     # ------------ SIMPLE tests that test the config required items
     @patch('sh.mvn', create=True)
@@ -24,7 +26,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     AssertionError,
                     'The .* configuration .* is missing .*maven-push-artifact-repo-id.*'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                      config, expected_step_results, runtime_args)
 
     # ------------  Tests that require generate-metadata
@@ -52,7 +54,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'generate-metadata results missing version'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                      config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -93,7 +95,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'package results missing artifacts'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                      config, expected_step_results, runtime_args)
 
 
@@ -181,7 +183,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     }
             }
 
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+            self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                  config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -273,7 +275,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     RuntimeError,
                     'Error invoking mvn'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+                self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                      config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -365,7 +367,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                             }
                     }
             }
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+            self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                  config, expected_step_results, runtime_args)
     @patch('sh.mvn', create=True)
     def test_push_artifact_with_artifacts_results_multi(self, mvn_mock):
@@ -465,7 +467,7 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                             }
                     }
             }
-            run_step_test_with_result_validation(temp_dir, 'push-artifacts',
+            self.run_step_test_with_result_validation(temp_dir, 'push-artifacts',
                                                  config, expected_step_results, runtime_args)
 
     @patch('sh.mvn', create=True)
@@ -561,7 +563,13 @@ class TestStepImplementerPushArtifact(BaseTSSCTestCase):
                     }
             }
             with self.assertRaisesRegex(
-                    ValueError,
-                    'id is required for maven_servers.'):
-                run_step_test_with_result_validation(temp_dir, 'push-artifacts',
-                                                     config, expected_step_results, runtime_args)
+                AssertionError,
+                r"Configuration for maven servers must specify a 'id':"
+                r" {'username': 'USER1', 'password': 'PW1'}"
+            ):
+                self.run_step_test_with_result_validation(
+                    temp_dir,
+                    'push-artifacts',
+                    config,
+                    expected_step_results, runtime_args
+                )
