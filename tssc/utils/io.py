@@ -5,10 +5,47 @@ import io
 import random
 import re
 
+def create_sh_redirect_to_multiple_streams_fn_callback(streams):
+    """Creates and returns a function callback that will write given data to multiple given streams.
+
+    AKA: this essentially allows you to do 'tee' for sh commands.
+
+    Parameters
+    ----------
+    streams : list of io.IOBase
+        Streams to write to.
+
+    Examples
+    --------
+    Will write output directed at stdout to stdout and a results file and output directed
+    at stderr to stderr and a results file.
+    >>> with open('/tmp/results_file', 'w') as results_file:
+    ...     out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stdout,
+    ...         results_file
+    ...     ])
+    ...     err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+    ...         sys.stderr,
+    ...         results_file
+    ...     ])
+    ...     sh.echo('hello world')
+    hello world
+
+    Returns
+    -------
+    function(data)
+        Function that takes one parameter, data, and writes that value to all the given streams.
+    """
+    def sh_redirect_to_multiple_streams(data):
+        for stream in streams:
+            stream.write(data)
+
+    return sh_redirect_to_multiple_streams
+
 class TextIOSelectiveObfuscator(io.TextIOBase):
     """Extends the base class for text streams to allow the obfuscation of given patterns.
 
-    This is useful to prevent accidently writing "sensitive" information to stdout/stderr.
+    This is useful to prevent accidentally writing "sensitive" information to stdout/stderr.
 
     Parameters
     ----------

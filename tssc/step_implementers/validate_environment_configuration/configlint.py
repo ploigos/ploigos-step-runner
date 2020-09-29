@@ -127,6 +127,7 @@ import sys
 
 import sh
 from tssc import StepImplementer, TSSCException
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
     'rules': './config-lint.rules'
@@ -210,28 +211,36 @@ class Configlint(StepImplementer):
         if not os.path.exists(rules_file):
             raise ValueError(f'Rules file specified in tssc config not found: {rules_file}')
 
-        config_lint_results = None
+        configlint_results_file_path = self.write_working_file('configlint_results_file.txt')
         try:
-            # Hint:  Call config-lint with sh.config_lint
-            config_lint_results = sh.config_lint(  # pylint: disable=no-member
-                "-verbose",
-                "-debug",
-                "-rules",
-                rules_file,
-                yml_path,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee='err'
-            )
-
-            configlint_results_file_path = self.write_working_file('configlint_results_file.txt')
+            # run config-lint writing stdout and stderr to the standard streams
+            # as well as to a results file.
             with open(configlint_results_file_path, 'w') as configlint_results_file:
-                configlint_results_file.write(config_lint_results.out)
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    configlint_results_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    configlint_results_file
+                ])
+
+                sh.config_lint(  # pylint: disable=no-member
+                    "-verbose",
+                    "-debug",
+                    "-rules",
+                    rules_file,
+                    yml_path,
+                    _encoding='UTF-8',
+                    _out=out_callback,
+                    _err=err_callback,
+                    _tee='err'
+                )
         except sh.ErrorReturnCode_255 as error: # pylint: disable=no-member
             # NOTE: expected failure condition,
             #       aka, the config lint run, but found an issue
             raise TSSCException(
-                f'Failed config-lint scan: {config_lint_results.out}'
+                'Failed config-lint scan. See standard out and standard error.'
             ) from error
         except sh.ErrorReturnCode as error:
             # NOTE: un-expected failure condition
