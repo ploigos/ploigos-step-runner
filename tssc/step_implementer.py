@@ -83,19 +83,23 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self.__environment = environment
 
         # DIRECTORIES - ensure directories are created
-        self._mkdir_work_dir_path()
-        self._mkdir_results_dir_path()
+        self.__mkdir_work_dir_path()
+        self.__mkdir_results_dir_path()
 
-        # STEP_RESULT - init step result for THIS step
+        # STEP_RESULT - init CURRENT step result for THIS step
         self.__step_result = StepResult(
             step_name=self.__config.step_name,
             sub_step_name=self.__config.sub_step_name,
             sub_step_implementer_name=self.__config.sub_step_implementer_name
         )
-        # WORKFLOW - load serialized workflow_result for ALL previous steps
-        self.__workflow_result = WorkflowResult.load_from_file(self.pickle_file_path)
-        # WORKFLOW - add THIS step result to ALL, now memory has current and past
-        self.__workflow_result.add_step_result(self.__step_result)
+        # WORKFLOW - init PAST step_result into workflow_result for ALL
+        self.__workflow_result = WorkflowResult.load_from_pickle_file(
+            pickle_filename=self.__workflow_result_pickle_file_path
+        )
+        # WORKFLOW - add (or merge) CURRENT step result to ALL
+        self.workflow_result.add_step_result(
+            step_result=self.step_result
+        )
 
         super().__init__()
 
@@ -211,6 +215,18 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             TSSC step name implemented by this step.
         """
         return self.config.step_name
+
+    @property
+    def step_result(self):
+        """
+        """
+        return self.__step_result
+
+    @property
+    def workflow_result(self):
+        """
+        """
+        return self.__workflow_result
 
     @staticmethod
     @abstractmethod
@@ -344,9 +360,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             indent_level=2
         )
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
-            # peggy
             self._run_step()
-            self._write_workflow_results()
+            self.__write_workflow_result
 
         # print the step run results
         StepImplementer.__print_section_title(
@@ -357,12 +372,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         StepImplementer.__print_data('Results File Path', self.results_file_path)
 
-        StepImplementer.__print_data('Results', self.__step_result.get_step_result_json())
+        StepImplementer.__print_data('Results', self.step_result.get_step_result_json())
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
     def get_config_value(self, key):
-
         """Convenience function for self.config.get_config_value.
 
         Get the configuration value for a given configuration key from the
@@ -386,12 +400,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         ----------
         key : str
             Key to get the configuration value for.
-        environment : str, optional
-            Environment to include the configuration for if running in the context of
-            a specific environment.
-        defaults : dict, optional
-            If no value for the given configuration key found in any of the configuration
-            sources then use these defaults as last resort.
 
         Returns
         -------
@@ -400,8 +408,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             for this sub step in the given context with the given defaults.
         """
         return self.config.get_config_value(
-            key, 
-            self.environment, 
+            key,
+            self.environment,
             self.step_implementer_config_defaults())
 
     def get_copy_of_runtime_step_config(self):
@@ -453,41 +461,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         return result
 
-    def get_step_results(self, step_name):
-        """Get the results of a specific step.
-
-        Parameters
-        ----------
-        step_name : str
-            TSSC step name to get the results for
-
-        Returns
-        -------
-        dict
-            The results of a specific step. None if results DNE
-        """
-        return self.__workflow_result.get_tssc_step_result(step_name)
-
-    def current_step_results(self):
-        """
-        Get the results of this step so far from other step implementers that have already been run.
-
-        Returns
-        -------
-        dict
-            The results of this step so far from other step implementers that have already been run
-
-        Raises
-        ------
-        TSSCException
-            Existing results file has invalid yaml or existing results file does not have expected
-            element.
-        """
-        return self.__step_result.get_step_result()
-
     def create_working_folder(self):
         """
         If it does not exist, create working folder
+        Working folder default: tssc-working/step-name
+                        eg: tssc-working/step-name/user-supplied-name
 
         Returns
         -------
@@ -499,7 +477,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             os.makedirs(step_path)
 
         return os.path.abspath(step_path)
-
 
     def write_working_file(self, filename, contents=None):
         """
@@ -520,7 +497,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         working_folder = self.create_working_folder()
         file_path = os.path.join(working_folder, filename)
-
         # sub-directories might be used, eg: tssc-working/foo
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         if contents is not None:
@@ -604,47 +580,55 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             prefix=" " * (4 * indent)
         ))
 
-    # STEP_RESULT - init step result for THIS step
-    @property
-    def step_result(self):
-        """
-        :return: dict
-        """
-        return self.__step_result
-
     # WORKFLOW helpers
-    @property
-    def workflow_result(self):
+    def get_artifact(self, artifact_name, step_name=None):
         """
-        :return: dict
+        Get the artifact matching value_name.
+        If step_name is provide, search the artifacts in that step_name only
+        Otherwise, search for the FIRST occurrance of the artifact
         """
-        return self.__workflow_result
+        self.workflow_result.get_artifact(
+            result_artifact_name=artifact_name,
+            step_name=step_name
+        )
+
+    def get_step_result(self, step_name=None):
+        return self.workflow_result.get_step_result(
+            step_name=step_name
+        )
 
     @property
-    def pickle_file_path(self):
+    def __workflow_result_pickle_file_path(self):
         """
-        internal file to store the "pickle" ...
-        it is hard coded to 'results.pkl'
+        internal file to store the "pickle" (serialized)
         """
         return os.path.join(self.work_dir_path, 'tssc-results.pkl')
 
-    def _write_workflow_results(self):
+    @property
+    def __write_workflow_result(self):
         """
-        Write the 'pickle' file (internal file)
+        Write the 'pickle' file
+          - internally used file in the working folder
+          - input and output
+          - eg: tssc-working/tssc-results.pkl
         Write the 'yml' file
+          - externally available file
+          - this is output only
+          - eg: tssc-results/tssc-results.yml
         """
         # eg:  tssc-working/results.pkl (internal named/managed file)
-        self.__workflow_result.write_to_pickle_file(self.pickle_file_path)
+        self.workflow_result.write_to_pickle_file(self.__workflow_result_pickle_file_path)
 
         # eg:  tssc-results/tssc-results.yml (default)
-        self.__workflow_result.write_tssc_results_to_yml_file(self.results_file_path)
+        self.workflow_result.write_results_to_yml_file(self.results_file_path)
 
-    def _mkdir_work_dir_path(self):
+    def __mkdir_work_dir_path(self):
         if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
 
-    def _mkdir_results_dir_path(self):
+    def __mkdir_results_dir_path(self):
         if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
+
