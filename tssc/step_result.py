@@ -25,12 +25,12 @@ class StepResult:
         """
         Step Result Init
         """
-        self._step_name = step_name
-        self._sub_step_name = sub_step_name
-        self._sub_step_implementer_name = sub_step_implementer_name
-        self._success = True
-        self._message = ''
-        self._artifacts = {}
+        self.__step_name = step_name
+        self.__sub_step_name = sub_step_name
+        self.__sub_step_implementer_name = sub_step_implementer_name
+        self.__success = True
+        self.__message = ''
+        self.__artifacts = {}
 
     def __str__(self):
         """
@@ -49,7 +49,7 @@ class StepResult:
         str
             Step name
         """
-        return self._step_name
+        return self.__step_name
 
     @property
     def sub_step_name(self):
@@ -57,9 +57,9 @@ class StepResult:
         Returns
         -------
         str
-            Sub Step name
+            Step name
         """
-        return self._sub_step_name
+        return self.__sub_step_name
 
     @property
     def sub_step_implementer_name(self):
@@ -69,7 +69,7 @@ class StepResult:
         str
             Step implementer name
         """
-        return self._sub_step_implementer_name
+        return self.__sub_step_implementer_name
 
     @property
     def artifacts(self):
@@ -79,7 +79,7 @@ class StepResult:
         dict
             All artifacts of the step
         """
-        return self._artifacts
+        return self.__artifacts
 
     def get_artifact(self, name):
         """
@@ -93,7 +93,7 @@ class StepResult:
         dict
             Specific artifact given name
         """
-        return self._artifacts.get(name)
+        return self.artifacts.get(name)
 
     def add_artifact(self, name, value, description='', value_type=None):
         """
@@ -126,7 +126,7 @@ class StepResult:
         if not value_type:
             value_type = type(value).__name__
 
-        self._artifacts[name] = {
+        self.__artifacts[name] = {
             'description': description,
             'type': value_type,
             'value': value
@@ -135,15 +135,13 @@ class StepResult:
     def merge_artifact(self, new_artifact):
         """
         Merges an artifacts dictionary into the artifacts dictionary
-        eg:
-        {
-          'a': {'description': '', 'type': 'str', 'value': 'A'},
-          'x': {'description': '', 'type': 'str', 'value': 'X'}
-        }
+
         Parameters
         ----------
-        new_artifacts: dict
+        new_artifact: dict
            New set of artifacts to merge in
+          eg:
+          { 'a': {'description': '', 'type': 'str', 'value': 'A'} }
         """
         self.artifacts.update(new_artifact)
 
@@ -155,14 +153,14 @@ class StepResult:
         bool
             Success
         """
-        return self._success
+        return self.__success
 
     @success.setter
     def success(self, success=True):
         """
         Setter for success
         """
-        self._success = success
+        self.__success = success
 
     @property
     def message(self):
@@ -172,29 +170,38 @@ class StepResult:
         str
             Message/ error message
         """
-        return self._message
+        return self.__message
 
     @message.setter
     def message(self, message):
         """
         Setter for message
         """
-        self._message = message
+        self.__message = message
+
+    def get_sub_step_result(self):
+        result = {
+            'sub-step-implementer-name': self.sub_step_implementer_name,
+            'success': self.success,
+            'message': self.message,
+            'artifacts': self.artifacts
+        }
+        return result
 
     def get_step_result(self):
         """
         result= {
-            "new_step": {
-                "step-name": "new_step",
-                "sub-step-name": "sub_step_name"
-                "sub-step-implementer-name": "sub_step_implementer_name",
-                "success": True,
-                "message": "",
-                "artifacts": {
-                    "name": {
-                        "description": "file description",
-                        "type": "file",
-                        "value": "file://step-result.txt"
+            "step-name: {
+                "sub-step-name": {
+                    "sub-step-implementer-name": "sub_step_implementer_name",
+                    "success": True,
+                    "message": "",
+                    "artifacts": {
+                        "name": {
+                            "description": "file description",
+                            "type": "file",
+                            "value": "file://step-result.txt"
+                        }
                     }
                 }
             }
@@ -207,13 +214,8 @@ class StepResult:
 
         """
         result = {
-            self._step_name: {
-                'step-name': self._step_name,
-                'sub-step-name': self._sub_step_name,
-                'sub-step-implementer-name': self._sub_step_implementer_name,
-                'success': self._success,
-                'message': self._message,
-                'artifacts': self._artifacts
+            self.step_name: {
+                self.sub_step_name: self.get_sub_step_result()
             }
         }
         return result
