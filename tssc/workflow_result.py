@@ -42,10 +42,9 @@ class WorkflowResult:
            eg: {'description': '', 'type': 'str', 'value': 'C'}:
         """
         if step_name:
-            if self._get_step_result_by_step_name(step_name):
-                return self._get_step_result_by_step_name(step_name).artifacts.get(artifact)
-        else:
-            return self.__search_for_artifact(artifact)
+            if self.get_step_result_by_step_name(step_name=step_name):
+                return self.get_step_result_by_step_name(step_name=step_name).artifacts.get(artifact)
+        return self.search_for_artifact(artifact=artifact)
 
     def get_step_result(self, step_name):
         """
@@ -61,35 +60,34 @@ class WorkflowResult:
         dict
              StepResult dictionary, eg:
             'tssc-results': {
-                'step1': {
-                    'step-name': 'step1',
-                    'step-implementer-name': 'one',
-                    'sub-step-name': '',
-                    'success': True,
-                    'message': '',
-                    'artifacts': {
-                        'a': {
-                            'description': 'aA',
-                            'type': 'str',
-                            'value': 'A'
-                        },
-                        'b': {
-                            'description': 'bB',
-                            'type': 'file',
-                            'value': 'B'
+                'step-name': {
+                    'sub-step-name': {
+                        'step-implementer-name': 'one',
+                        'sub-step-name': '',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'a': {
+                                'description': 'aA',
+                                'type': 'str',
+                                'value': 'A'
+                            },
+                            'b': {
+                                'description': 'bB',
+                                'type': 'file',
+                                'value': 'B'
+                            }
                         }
                     }
                 }
             }
         """
-        tssc_step_result = None
+        result = {}
         for step_result in self.workflow_list:
             if step_result.step_name == step_name:
-                tssc_step_result = {
-                    'tssc-results': step_result.get_step_result()
-                }
-                break
-        return tssc_step_result
+                result[step_result.sub_step_name] = step_result.get_sub_step_result()
+
+        return {'tssc-results': {step_name: result}}
 
     def add_step_result(self, step_result):
         """
@@ -114,15 +112,20 @@ class WorkflowResult:
         Raises a TSSCException if an instance other than
         StepResult is passed as a parameter
         """
+
         if isinstance(step_result, StepResult):
 
             step_name = step_result.step_name
+            sub_step_name = step_result.sub_step_name
 
-            if self._step_name_in_list(step_name):
-                # get the old results, merge into new, and delete old
-                old_step_result = self._get_step_result_by_step_name(step_name)
+            if self.step_name_in_list(step_name=step_name, sub_step_name=sub_step_name):
+                old_step_result = self.get_step_result_by_step_name(
+                    step_name=step_name,
+                    sub_step_name=sub_step_name)
                 step_result.artifacts.update(old_step_result.artifacts)
-                self._delete_step_result_by_name(step_name)
+                self.delete_step_result_by_name(
+                    step_name=step_name
+                )
 
             self.workflow_list.append(step_result)
 
@@ -131,7 +134,7 @@ class WorkflowResult:
 
     # ARTIFACT helpers:
 
-    def __search_for_artifact(self, artifact):
+    def search_for_artifact(self, artifact):
         """
         Search for an artifact in ANY step.
         The FIRST match is returned
@@ -152,7 +155,9 @@ class WorkflowResult:
         """
         result = None
         for step_result in self.workflow_list:
-            result = step_result.get_artifact(artifact)
+            result = step_result.get_artifact(
+                name=artifact
+            )
             if result:
                 break
         return result
@@ -173,9 +178,9 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.__folder_create(yml_filename)
+            WorkflowResult.folder_create(yml_filename)
             with open(yml_filename, 'w') as file:
-                results = self.__get_all_step_results()
+                results = self.get_all_step_results()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
@@ -194,9 +199,9 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.__folder_create(json_filename)
+            WorkflowResult.folder_create(json_filename)
             with open(json_filename, 'w') as file:
-                results = self.__get_all_step_results()
+                results = self.get_all_step_results()
                 json.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
@@ -220,7 +225,7 @@ class WorkflowResult:
         Raises a TSSCException if the file contains non WorkflowResult instances
         """
         try:
-            WorkflowResult.__folder_create(pickle_filename)
+            WorkflowResult.folder_create(filename=pickle_filename)
 
             # if the file does not exist return empty object
             if not os.path.isfile(pickle_filename):
@@ -254,7 +259,7 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.__folder_create(pickle_filename)
+            WorkflowResult.folder_create(pickle_filename)
             with open(pickle_filename, 'wb') as file:
                 pickle.dump(self, file)
         except Exception as error:
@@ -271,7 +276,7 @@ class WorkflowResult:
             name of file
         """
         try:
-            WorkflowResult.__folder_create(filename)
+            WorkflowResult.folder_create(filename=filename)
             if os.path.exists(filename):
                 os.remove(filename)
         except Exception as error:
@@ -279,7 +284,7 @@ class WorkflowResult:
 
     # PRIVATE Helpers helpers
 
-    def __get_all_step_results(self):
+    def get_all_step_results(self):
         """
         Return a dictionary named tssc-results of all the step results in memory
         Specifically using 'tssc-results'.
@@ -297,25 +302,27 @@ class WorkflowResult:
         }
         return tssc_results
 
-    def _step_name_in_list(self, step_name):
+    def step_name_in_list(self, step_name, sub_step_name):
         for current in self.workflow_list:
             if current.step_name == step_name:
-                return True
+                if current.sub_step_name == sub_step_name:
+                    return True
         return False
 
-    def _get_step_result_by_step_name(self, step_name):
+    def get_step_result_by_step_name(self, step_name, sub_step_name):
         for current in self.workflow_list:
             if current.step_name == step_name:
-                return current
+                if current.sub_step_name == sub_step_name:
+                    return current
         return None
 
-    def _delete_step_result_by_name(self, step_name):
+    def delete_step_result_by_name(self, step_name):
         for i, current in enumerate(self.workflow_list):
             if current.step_name == step_name:
                 del self.workflow_list[i]
 
     @staticmethod
-    def __folder_create(filename):
+    def folder_create(filename):
         """
         Helper method to create folder if necessary
 

@@ -97,9 +97,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             pickle_filename=self.__workflow_result_pickle_file_path
         )
         # WORKFLOW - add (or merge) CURRENT step result to ALL
-        self.workflow_result.add_step_result(
-            step_result=self.step_result
-        )
+        self.workflow_result.add_step_result(step_result=self.step_result)
 
         super().__init__()
 
