@@ -154,25 +154,41 @@ From least precedence to highest precedence.
 
         # Optional.
         # Maven server settings for settings.xml file
-        maven-servers:
-        -  id: ''
-           username: ''
-           password: ''
+        #maven-servers:
+        #  internal-mirror-1:
+        #    id: ''
+        #    username: ''
+        #    password: ''
+        #  internal-mirror-2:
+        #    id: ''
+        #    username: ''
+        #    password: ''
 
         # Optional.
         # Maven repository settings for settings.xml file
-        maven-repositories:
-        - id: ''
-          url: ''
-          snapshots: ''
-          releases: ''
+        #maven-repositories:
+        #  internal-mirror-1:
+        #    id: ''
+        #    url: ''
+        #    snapshots: ''
+        #    releases: ''
+        #  internal-mirror-2:
+        #    id: ''
+        #    url: ''
+        #    snapshots: ''
+        #    releases: ''
 
         # Optional.
         # Maven mirror settings for settings.xml file
-        maven-mirrors:
-        - id: ''
-          url: ''
-          mirror-of: ''
+        #maven-mirrors:
+        #  internal-mirror-1:
+        #    id: ''
+        #    url: ''
+        #    mirror-of: ''
+        #  internal-mirror-2:
+        #    id: ''
+        #    url: ''
+        #    mirror-of: ''
 
         # Dictionary of container registries to authenticate with.
         # Suggest putting in global configuration so it can be used for creating and pushing
