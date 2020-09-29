@@ -36,28 +36,29 @@ class TestStepResultTest(BaseTSSCTestCase):
     def test_add_artifact(self):
         step_result_expected = {
             'step1': {
-                'step-name': 'step1',
-                'sub-step-name': 'sub1',
-                'sub-step-implementer-name': 'implementer1',
-                'success': True,
-                'message': '',
-                'artifacts': {
-                    'artifact1': {
-                        'description': 'description1',
-                        'type': 'type1',
-                        'value': 'value1'
-                    },
-                    'artifact2': {
-                        'description': 'description2',
-                        'type': 'type2',
-                        'value': 'value2'
-                    },
-                    'artifact3': {
-                        'description': '',
-                        'type': 'str',
-                        'value': 'value3'
+                'sub1': {
+                    'sub-step-implementer-name': 'implementer1',
+                    'success': True,
+                    'message': '',
+                    'artifacts': {
+                        'artifact1': {
+                            'description': 'description1',
+                            'type': 'type1',
+                            'value': 'value1'
+                        },
+                        'artifact2': {
+                            'description': 'description2',
+                            'type': 'type2',
+                            'value': 'value2'
+                        },
+                        'artifact3': {
+                            'description': '',
+                            'type': 'str',
+                            'value': 'value3'
+                        }
                     }
                 }
+
             }
         }
         step_result = StepResult('step1', 'sub1', 'implementer1')
@@ -133,16 +134,16 @@ class TestStepResultTest(BaseTSSCTestCase):
     def test_merge_artifact(self):
         step_result_expected = {
             'step1': {
-                'step-name': 'step1',
-                'sub-step-name': 'sub1',
-                'sub-step-implementer-name': 'implementer1',
-                'success': True,
-                'message': '',
-                'artifacts': {
-                    'artifact1': {
-                        'description': 'new-description',
-                        'type': 'new-type',
-                        'value': 'new-value'
+                'sub1': {
+                    'sub-step-implementer-name': 'implementer1',
+                    'success': True,
+                    'message': '',
+                    'artifacts': {
+                        'artifact1': {
+                            'description': 'new-description',
+                            'type': 'new-type',
+                            'value': 'new-value'
+                        }
                     }
                 }
             }
@@ -160,7 +161,7 @@ class TestStepResultTest(BaseTSSCTestCase):
         self.assertEqual(step_result.get_step_result(), step_result_expected)
 
     def test_get_step_result_json(self):
-        step_result_expected = '{"step1": {"step-name": "step1", "sub-step-name": "sub1", "sub-step-implementer-name": "implementer1", "success": true, "message": "", "artifacts": {"artifact1": {"description": "description1", "type": "type1", "value": "value1"}}}}'
+        step_result_expected = '{"step1": {"sub1": {"sub-step-implementer-name": "implementer1", "success": true, "message": "", "artifacts": {"artifact1": {"description": "description1", "type": "type1", "value": "value1"}}}}}'
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
         print(step_result)
@@ -168,17 +169,17 @@ class TestStepResultTest(BaseTSSCTestCase):
     
     def test_get_step_result_yaml(self):
         step_result_expected = '''step1:
-  artifacts:
-    artifact1:
-      description: description1
-      type: type1
-      value: value1
-  message: ''
-  step-name: step1
-  sub-step-implementer-name: implementer1
-  sub-step-name: sub1
-  success: true
+  sub1:
+    artifacts:
+      artifact1:
+        description: description1
+        type: type1
+        value: value1
+    message: ''
+    sub-step-implementer-name: implementer1
+    success: true
 '''
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        print(step_result.get_step_result_yaml())
         self.assertEqual(step_result.get_step_result_yaml(), step_result_expected)
