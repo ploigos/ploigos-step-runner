@@ -4,11 +4,43 @@ from io import StringIO
 
 import yaml
 from tssc import TSSCFactory
+from tssc.config.config import Config
 
 from .base_tssc_test_case import BaseTSSCTestCase
 
 
 class BaseStepImplementerTestCase(BaseTSSCTestCase):
+    def create_given_step_implementer(
+        self,
+        step_implementer,
+        step_config={},
+        results_dir_path='',
+        results_file_name='',
+        work_dir_path='',
+    ):
+        config = Config({
+            Config.TSSC_CONFIG_KEY: {
+                'test': [
+                    {
+                        'implementer': 'OpenSCAP',
+                        'config': step_config
+                    }
+                ]
+
+            }
+        })
+        step_config = config.get_step_config('test')
+        sub_step_config = step_config.get_sub_step('OpenSCAP')
+
+        step_implementer = step_implementer(
+            results_dir_path=results_dir_path,
+            results_file_name=results_file_name,
+            work_dir_path=work_dir_path,
+            config=sub_step_config
+        )
+
+        return step_implementer
+
     def run_step_test_with_result_validation(
         self,
         temp_dir,

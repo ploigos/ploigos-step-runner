@@ -1,9 +1,15 @@
-"""
-Shared utils for dealing with files.
+"""Shared utils for dealing with files.
 """
 
+import bz2
 import json
+import os
+import re
+import shutil
+import urllib.request
+
 import yaml
+
 
 def parse_yaml_or_json_file(yaml_or_json_file):
     """
@@ -49,3 +55,89 @@ def parse_yaml_or_json_file(yaml_or_json_file):
             f"\n  YAML error: {str(yaml_parse_error)}")
 
     return parsed_file
+
+def download_and_decompress_source_to_destination(
+    source_url,
+    destination_dir
+):
+    """Given a source url using a known protocol downloads the file to a given destination
+    and decompresses it if known compression method.
+
+    Notes
+    -----
+    Known source protocols
+    * file://
+    * http://
+    * https://
+
+    Known compression types
+    * bz2
+
+    Parameters
+    ----------
+    source_url : url
+        URL to a source file using a known protocol to download to destination folder
+        and decompress if necessary.
+    destination_dir : path
+        Path to directory to download and decompress if necessary the source url to.
+
+    Raises
+    ------
+    AssertionError
+        * if source_url does not start with file://|http://|https://
+
+    Returns
+    -------
+    str
+        Path to the downloaded and decompressed (if needed) file from given source.
+    """
+
+    # depending on the protocol type get the source_file into the working dir
+    if re.match(r'^file://', source_url):
+        # remove file:// and turn into an absolute path
+        source_url_abs_path = os.path.abspath(
+            re.sub('^file://', '', source_url)
+        )
+
+        # copy the file to the working dir
+        source_file_name = os.path.basename(source_url_abs_path)
+        destination_path = os.path.join(destination_dir, source_file_name)
+        shutil.copyfile(
+            src=source_url_abs_path,
+            dst=destination_path
+        )
+    elif re.match(r'^http://|^https://', source_url):
+        # download the file to the working dir
+        source_file_name = os.path.basename(source_url)
+        destination_path = os.path.join(destination_dir, source_file_name)
+
+        try:
+            urllib.request.urlretrieve(
+                url=source_url,
+                filename=destination_path
+            )
+        except urllib.error.HTTPError as error:
+            raise RuntimeError(f"Error downloading file ({source_url}): {error}") from error
+    else:
+        # NOTE: this should NEVER happen because of the logic in _validate_runtime_step_config
+        #       but rather then failing silently need to do something.
+        raise AssertionError(
+            "Unexpected error, should have been caught by step validation."
+            f" Source ({source_url}) must start with known protocol (file://|http://|https://)."
+        )
+
+    # if extension is .bz2, decompress, else assume file is fine as as is
+    file_path, file_extension = os.path.splitext(destination_path)
+    if file_extension == '.bz2':
+        # NOTE: file_path is whats left after removeing .bz2 from the end
+        with \
+                bz2.BZ2File(destination_path) as decompressed_source, \
+                open(file_path,"wb") as decompressed_destination:
+
+            shutil.copyfileobj(decompressed_source, decompressed_destination)
+
+            # NOTE: the compressed file was decompressed to file_path
+            #       therefor that is now the actual file we want
+            destination_path = file_path
+
+    return destination_path

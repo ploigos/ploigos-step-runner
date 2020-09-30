@@ -101,7 +101,6 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
-                            'source' : source,
                             'destination-url' : destination
                         }
                     }
@@ -167,7 +166,6 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                     'push-container-image': {
                         'implementer': 'Skopeo',
                         'config': {
-                            'source' : source,
                             'destination-url' : destination
                         }
                     }

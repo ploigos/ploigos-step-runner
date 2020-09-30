@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cvrfdoc xmlns="http://www.icasi.org/CVRF/schema/cvrf/1.1" xmlns:cvrf="http://www.icasi.org/CVRF/schema/cvrf/1.1">
+  <DocumentTitle xml:lang="en">Red Hat Bug Fix Advisory: OpenShift Container Platform 3.11 bug fix and enhancement update</DocumentTitle>
+  <DocumentType>Security Advisory</DocumentType>
+  <DocumentPublisher Type="Vendor">
+    <ContactDetails>secalert@redhat.com</ContactDetails>
+    <IssuingAuthority>Red Hat Product Security</IssuingAuthority>
+  </DocumentPublisher>
+  <DocumentTracking>
+    <Identification><ID>RHBA-2020:0017</ID></Identification>
+    <Status>Final</Status>
+    <Version>1</Version>
+    <RevisionHistory>
+       <Revision>
+         <Number>1</Number>
+         <Date>2020-01-14T05:32:00Z</Date>
+         <Description>Current version</Description>
+       </Revision>
+    </RevisionHistory>
+    <InitialReleaseDate>2020-01-14T05:32:00Z</InitialReleaseDate>
+    <CurrentReleaseDate>2020-01-14T05:32:00Z</CurrentReleaseDate>
+    <Generator>
+      <Engine>Red Hat SDEngine 2.0.4</Engine>
+      <Date>2020-09-04T12:25:00Z</Date>
+    </Generator>
+  </DocumentTracking>
+  <DocumentNotes>
+    <Note Title="Topic" Type="Summary" Ordinal="1" xml:lang="en">
+Red Hat OpenShift Container Platform release 3.11.161 is now available with
+updates to packages and images that fix several bugs and add enhancements.
+    </Note>
+    <Note Title="Details" Type="General" Ordinal="2" xml:lang="en">
+Red Hat OpenShift Container Platform is Red Hat's cloud computing
+Kubernetes application platform solution designed for on-premise or private
+cloud deployments.
+
+This advisory contains the RPM packages for Red Hat OpenShift Container
+Platform 3.11.161. See the following advisory for the container images for
+this release:
+
+https://access.redhat.com/errata/RHBA-2020:0018
+
+This release fixes the following bugs:
+
+* In the openshift-logging update using Ansible, if a new value was set in the inventory file to apply the change to the existing cluster, the change was ignored. This occurred because the module logging_patch accidentally created a patch to change a new file into the original file. The patching direction was fixed and the changes made in an inventory file are now correctly applied. (BZ#1753593)
+
+* When the SDN pod was restarted on a node, it did not clean up any old Egress IP addresses. If the set of Egress IP addresses assigned to a node changed while the SDN pod was not running, then the node might continue to claim that it owned the Egress IP even after the IP had been assigned to another node. This caused traffic to that IP to be delivered to the wrong node and be lost. The SDN pod now cleans up stale Egress IP addresses at startup. (BZ#1762235)
+
+* SDN code would declare each node as READY before the SDN proxy was completely initialized. Some iptables rules would not be populated and the node is marked as ready. This caused some pods to not be able to communicate with the API while coming up. Now, all iptables rules exist before pods get schedules to the node, preventing issues where pod's cannot communicate with the API server. (BZ#1764150)
+
+This release includes the following enhancements: 
+
+* The latest Kuryr images are now hosted in Red Hat's registry. (BZ#1652571)
+
+All OpenShift Container Platform 3.11 users are advised to upgrade to these
+updated packages and images.
+    </Note>
+    <Note Title="Terms of Use" Ordinal="3" Type="Legal Disclaimer" xml:lang="en">This content is licensed under the Creative Commons Attribution 4.0 International License (https://creativecommons.org/licenses/by/4.0/). If you distribute this content, or a modified version of it, you must provide attribution to Red Hat Inc. and provide a link to the original.</Note>
+  </DocumentNotes>
+  <DocumentDistribution xml:lang="en">Copyright © 2020 Red Hat, Inc. All rights reserved.</DocumentDistribution>
+  <AggregateSeverity Namespace="https://access.redhat.com/security/updates/classification/">Moderate</AggregateSeverity>
+  <DocumentReferences>
+    <Reference Type="Self">
+       <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL>
+       <Description>https://access.redhat.com/errata/RHBA-2020:0017</Description>
+    </Reference>
+    <Reference Type="External">
+       <URL></URL>
+       <Description></Description>
+    </Reference>
+  </DocumentReferences>
+  <ProductTree xmlns="http://www.icasi.org/CVRF/schema/prod/1.1">
+    <Branch Type="Product Family" Name="Red Hat OpenShift Enterprise">
+      <Branch Type="Product Name" Name="Red Hat OpenShift Container Platform 3.11">
+        <FullProductName ProductID="7Server-RH7-RHOSE-3.11" CPE="cpe:/a:redhat:openshift:3.11::el7">Red Hat OpenShift Container Platform 3.11</FullProductName>
+      </Branch>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7">
+      <FullProductName ProductID="atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-enterprise-service-catalog-3.11.161-1.git.1.63434de.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7">
+      <FullProductName ProductID="atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-3.11.161-1.git.0.4ccbe25.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7">
+      <FullProductName ProductID="atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-cluster-autoscaler-3.11.161-1.git.1.ee040c2.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7">
+      <FullProductName ProductID="atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-descheduler-3.11.161-1.git.1.61a41f1.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7">
+      <FullProductName ProductID="atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-dockerregistry-3.11.161-1.git.1.a000456.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7">
+      <FullProductName ProductID="atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-metrics-server-3.11.161-1.git.1.5e2b4e0.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7">
+      <FullProductName ProductID="atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-node-problem-detector-3.11.161-1.git.1.5d93e31.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7">
+      <FullProductName ProductID="atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-service-idler-3.11.161-1.git.1.88f46ce.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7">
+      <FullProductName ProductID="atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-web-console-3.11.161-1.git.1.809b03f.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7">
+      <FullProductName ProductID="golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-openshift-oauth-proxy-3.11.161-1.git.1.934cf10.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7">
+      <FullProductName ProductID="golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-alertmanager-3.11.161-1.git.1.823bae5.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7">
+      <FullProductName ProductID="golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-node_exporter-3.11.161-1.git.1.c82b9a8.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7">
+      <FullProductName ProductID="golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-prometheus-3.11.161-1.git.1.3f7d286.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="jenkins-0:2.176.4.1578402941-1.el7">
+      <FullProductName ProductID="jenkins-0:2.176.4.1578402941-1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">jenkins-2.176.4.1578402941-1.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="jenkins-2-plugins-0:3.11.1577428005-1.el7">
+      <FullProductName ProductID="jenkins-2-plugins-0:3.11.1577428005-1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">jenkins-2-plugins-3.11.1577428005-1.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="openshift-ansible-0:3.11.161-2.git.5.029d67f.el7">
+      <FullProductName ProductID="openshift-ansible-0:3.11.161-2.git.5.029d67f.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-ansible-3.11.161-2.git.5.029d67f.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7">
+      <FullProductName ProductID="openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-enterprise-autoheal-3.11.161-1.git.1.cf7169d.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7">
+      <FullProductName ProductID="openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-enterprise-cluster-capacity-3.11.161-1.git.1.032be79.el7.src.rpm</FullProductName>
+    </Branch>
+    <Branch Type="Product Version" Name="openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7">
+      <FullProductName ProductID="openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-kuryr-3.11.161-1.git.1.33697e5.el7.src.rpm</FullProductName>
+    </Branch>
+    <Relationship ProductReference="atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="jenkins-0:2.176.4.1578402941-1.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">jenkins-0:2.176.4.1578402941-1.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="jenkins-2-plugins-0:3.11.1577428005-1.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">jenkins-2-plugins-0:3.11.1577428005-1.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="openshift-ansible-0:3.11.161-2.git.5.029d67f.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-ansible-0:3.11.161-2.git.5.029d67f.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+    <Relationship ProductReference="openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7" RelationType="Default Component Of" RelatesToProductReference="7Server-RH7-RHOSE-3.11">
+      <FullProductName ProductID="7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7" CPE="cpe:/a:redhat:openshift:3.11::el7">openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7 as a component of Red Hat OpenShift Container Platform 3.11</FullProductName>
+    </Relationship>
+  </ProductTree>
+
+  <Vulnerability Ordinal="1" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: Stored XSS vulnerability in expandable textbox form control</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10401</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10401</URL>
+        <Description>CVE-2019-10401</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764357</URL>
+        <Description>bz#1764357: CVE-2019-10401 jenkins: Stored XSS vulnerability in expandable textbox form control</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+
+  <Vulnerability Ordinal="2" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: XSS vulnerability in combobox form control</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10402</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10402</URL>
+        <Description>CVE-2019-10402</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764363</URL>
+        <Description>bz#1764363: CVE-2019-10402 jenkins: XSS vulnerability in combobox form control</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+
+  <Vulnerability Ordinal="3" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: Stored XSS vulnerability in SCM tag action tooltip</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10403</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10403</URL>
+        <Description>CVE-2019-10403</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764366</URL>
+        <Description>bz#1764366: CVE-2019-10403 jenkins: Stored XSS vulnerability in SCM tag action tooltip</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+
+  <Vulnerability Ordinal="4" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: Stored XSS vulnerability in queue item tooltip</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10404</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10404</URL>
+        <Description>CVE-2019-10404</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764367</URL>
+        <Description>bz#1764367: CVE-2019-10404 jenkins: Stored XSS vulnerability in queue item tooltip</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+
+  <Vulnerability Ordinal="5" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: Diagnostic web page exposed Cookie HTTP header</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10405</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10405</URL>
+        <Description>CVE-2019-10405</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764369</URL>
+        <Description>bz#1764369: CVE-2019-10405 jenkins: Diagnostic web page exposed Cookie HTTP header</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+
+  <Vulnerability Ordinal="6" xmlns="http://www.icasi.org/CVRF/schema/vuln/1.1">
+    <Notes><Note Title="Vulnerability Description" Type="General" Ordinal="1" xml:lang="en">jenkins: XSS vulnerability in Jenkins URL setting</Note></Notes>
+    <DiscoveryDate>2019-09-25T00:00:00Z</DiscoveryDate>
+    <ReleaseDate>2019-09-25T00:00:00Z</ReleaseDate>
+    <Involvements><Involvement Party="Vendor" Status="Completed"></Involvement></Involvements>
+    <CVE>CVE-2019-10406</CVE>
+    <ProductStatuses><Status Type="Fixed">
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-enterprise-service-catalog-1:3.11.161-1.git.1.63434de.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-0:3.11.161-1.git.0.4ccbe25.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-cluster-autoscaler-0:3.11.161-1.git.1.ee040c2.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-descheduler-0:3.11.161-1.git.1.61a41f1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-dockerregistry-0:3.11.161-1.git.1.a000456.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-metrics-server-0:3.11.161-1.git.1.5e2b4e0.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-node-problem-detector-0:3.11.161-1.git.1.5d93e31.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-service-idler-0:3.11.161-1.git.1.88f46ce.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:atomic-openshift-web-console-0:3.11.161-1.git.1.809b03f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-openshift-oauth-proxy-0:3.11.161-1.git.1.934cf10.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-alertmanager-0:3.11.161-1.git.1.823bae5.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-node_exporter-0:3.11.161-1.git.1.c82b9a8.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:golang-github-prometheus-prometheus-0:3.11.161-1.git.1.3f7d286.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-0:2.176.4.1578402941-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:jenkins-2-plugins-0:3.11.1577428005-1.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-ansible-0:3.11.161-2.git.5.029d67f.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-autoheal-0:3.11.161-1.git.1.cf7169d.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-enterprise-cluster-capacity-0:3.11.161-1.git.1.032be79.el7</ProductID>
+      <ProductID>7Server-RH7-RHOSE-3.11:openshift-kuryr-0:3.11.161-1.git.1.33697e5.el7</ProductID>
+    </Status></ProductStatuses>
+    <Threats><Threat Type="Impact"><Description>Moderate</Description></Threat></Threats>
+    <Remediations>
+      <Remediation Type="Vendor Fix"><Description xml:lang="en">
+Before applying this update, ensure all previously released errata relevant
+to your system is applied.
+
+See the following documentation, which will be updated shortly for release
+3.11.161, for important instructions on how to upgrade your cluster and fully apply this asynchronous errata update:
+
+https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html
+
+This update is available via the Red Hat Network. Details on how to use the
+Red Hat Network to apply this update are available at
+https://access.redhat.com/articles/11258.
+    </Description>
+      <URL>https://access.redhat.com/errata/RHBA-2020:0017</URL></Remediation>
+    </Remediations>
+    <References>
+      <Reference>
+        <URL>https://access.redhat.com/security/cve/CVE-2019-10406</URL>
+        <Description>CVE-2019-10406</Description>
+      </Reference>
+      <Reference>
+        <URL>https://bugzilla.redhat.com/show_bug.cgi?id=1764370</URL>
+        <Description>bz#1764370: CVE-2019-10406 jenkins: XSS vulnerability in Jenkins URL setting</Description>
+      </Reference>
+    </References>
+  </Vulnerability>
+</cvrfdoc>
