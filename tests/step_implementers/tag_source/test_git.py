@@ -1,14 +1,24 @@
-from io import IOBase
-
-from testfixtures import TempDirectory
 import unittest
+from io import IOBase
 from unittest.mock import patch
 
+import sh
 from test_utils import *
-from tssc.step_implementers.tag_source import Git
+from testfixtures import TempDirectory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tssc.config.config import Config
+from tssc.step_implementers.tag_source import Git
+
 
 class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
+    @staticmethod
+    def __create_git_config_side_effect(remote_origin_url):
+        def git_config_side_effect(*args, **kwargs):
+            if (args[0] == '--get') and (args[1] == 'remote.origin.url'):
+                kwargs['_out'].write(remote_origin_url)
+
+        return git_config_side_effect
+
     @patch('sh.git', create=True)
     def test_tag_ssh_latest_version(self, git_mock):
         with TempDirectory() as temp_dir:
@@ -38,7 +48,8 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'latest',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
@@ -67,7 +78,8 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'latest',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
@@ -98,7 +110,8 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'latest',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
@@ -131,7 +144,8 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 'latest',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
@@ -173,7 +187,8 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 '1.0+69442c8',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
@@ -217,13 +232,13 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                 '1.0+69442c8',
                 '-f',
                 _out=Any(IOBase),
-                _err=Any(IOBase)
+                _err=Any(IOBase),
+                _tee='err'
             )
             git_mock.push.assert_called_once()
 
     @patch('sh.git', create=True)
     def test_tag_http_metadata_version_missing_username(self, git_mock):
-        passed = False
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
@@ -377,4 +392,154 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
                     'For a http:// git url, you need to also provide username/password pair'):
                 run_step_test_with_result_validation(temp_dir, 'tag-source', config, \
                   expected_step_results)
+
+    def __create_git_step_implementer(self, git_mock, step_config={}):
+        config = Config({
+            Config.TSSC_CONFIG_KEY: {
+                'tag-source': [
+                    {
+                        'implementer': 'Git',
+                        'config': step_config
+                    }
+                ]
+
+            }
+        })
+
+        step_config = config.get_step_config('tag-source')
+        sub_step_config = step_config.get_sub_step('Git')
+
+        git_step = Git(
+            results_dir_path="",
+            results_file_name="",
+            work_dir_path="",
+            config=sub_step_config
+        )
+
+        return git_step
+
+    def __run__git_url_test(self, git_mock, remote_origin_url, expected_result, step_config={}):
+        git_mock.config.side_effect = \
+            TestStepImplementerTagSourceGit.__create_git_config_side_effect(
+                remote_origin_url=remote_origin_url
+            )
+
+        git_step = self.__create_git_step_implementer(
+            git_mock=git_mock,
+            step_config=step_config
+        )
+
+        self.assertEqual(
+            expected_result,
+            git_step._git_url()
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_http_with_username(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://test-user@gitea.example.xyz",
+            expected_result='http://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_https_with_username(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="https://test-user@gitea.example.xyz",
+            expected_result='https://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_http_with_username_and_password(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://test-user:test-pass@gitea.example.xyz",
+            expected_result='http://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_https_with_username_and_password(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="https://test-user:test-pass@gitea.example.xyz",
+            expected_result='https://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_http_with_no_username(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://gitea.example.xyz",
+            expected_result='http://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_no_config_https_with_no_username(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="https://gitea.example.xyz",
+            expected_result='https://gitea.example.xyz'
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_config_http(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://test-user@gitea.example.xyz",
+            expected_result='http://use-me-gitea.example.xyz',
+            step_config={
+                'url': 'http://use-me-gitea.example.xyz'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_config_https(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://test-user@gitea.example.xyz",
+            expected_result='https://use-me-gitea.example.xyz',
+            step_config={
+                'url': 'https://use-me-gitea.example.xyz'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_url_config_ssh(self, git_mock):
+        self.__run__git_url_test(
+            git_mock=git_mock,
+            remote_origin_url="http://test-user@gitea.example.xyz",
+            expected_result='git@use-me-gitea.example.xyz',
+            step_config={
+                'url': 'git@use-me-gitea.example.xyz'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    def test__git_tag_invalid_git_credentials(self, git_mock):
+        step_config = {
+            'url': 'https://gitea.example.xyz',
+            'username': 'bad-user',
+            'password': 'bad-password'
+        }
+
+        git_step = self.__create_git_step_implementer(
+            git_mock=git_mock,
+            step_config=step_config
+        )
+
+        git_mock.tag.side_effect = sh.ErrorReturnCode('git tag', b'mock out', b'mock authentication error')
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                r"Error pushing git tag \(v1.42.0\):"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock authentication error",
+                re.DOTALL
+            )
+        ):
+            git_step._git_tag('v1.42.0')
 

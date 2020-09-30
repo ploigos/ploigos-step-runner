@@ -107,17 +107,16 @@ class OpenSCAP(StepImplementer):
         if self.get_config_value('log-level'):
             log_level = self.get_config_value('log-level')
 
-        result = sh.buildah( # pylint: disable=no-member
-            'containers',
+        buildah_containers_pre_import_result = sh.buildah( # pylint: disable=no-member
             '--storage-driver',
             'vfs',
+            'containers',
             '-q',
             _out=sys.stdout,
             _err=sys.stderr,
             _tee=True
         )
-
-        num_containers = result.stdout.count(b'\n')
+        num_containers = buildah_containers_pre_import_result.stdout.count(b'\n')
         if num_containers > 0:
             raise ValueError('Zero vfs base containers should be running')
 
@@ -135,7 +134,7 @@ class OpenSCAP(StepImplementer):
             )
 
             # get container id
-            result = sh.buildah( # pylint: disable=no-member
+            buildah_containers_result = sh.buildah( # pylint: disable=no-member
                 '--storage-driver',
                 'vfs',
                 'containers',
@@ -144,41 +143,51 @@ class OpenSCAP(StepImplementer):
                 _err=sys.stderr,
                 _tee=True
             )
-            container_id = result.stdout.rstrip()
+            container_id = buildah_containers_result.stdout.rstrip()
             print(f"container_id to scan = {container_id}")
 
+            # baking `buildah unshare` command to wrap other buildah commands with
+            # so that container does not need to be running in a privilaged mode to be able
+            # to function
+            buildah_unshare_comand = sh.buildah.bake('unshare') # pylint: disable=no-member
+
             # mount the container filesystem and get mount path
-            result = sh.buildah( # pylint: disable=no-member
-                'mount',
-                '--storage-driver',
-                'vfs',
+            #
+            # NOTE: run in the context of `buildah unshare` so that container does not
+            #       need to be run in a privilaged mode
+            buildah_mount_command = buildah_unshare_comand.bake("buildah", "mount")
+            buildah_mount_result = buildah_mount_command(
+                '--storage-driver', 'vfs',
                 container_id,
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee=True
             )
-            mount_path = result.stdout.rstrip()
+            mount_path = buildah_mount_result.stdout.rstrip()
             print(f"mount_path to scan = {mount_path}")
 
-            # Execute scan
+            # Execute scan in the context of buildah unshare
+            #
+            # NOTE: run in the context of `buildah unshare` so that container does not
+            #       need to be run in a privilaged mode
             scan_input_file = self.get_config_value('scap-input-file').rstrip()
             scan_output_absolute_path = self.write_working_file('scap-compliance-output.txt', b'')
             scan_report_absolute_path = self.write_working_file('scap-compliance-report.html', b'')
-
-            result = sh.oscap_chroot( # pylint: disable=no-member
+            oscap_chroot_command = buildah_unshare_comand.bake("oscap-chroot")
+            oscap_result = oscap_chroot_command(
                 mount_path,
                 'oval',
                 'eval',
-                '--report',
-                scan_report_absolute_path,
+                '--report', scan_report_absolute_path,
                 scan_input_file,
                 _out=sys.stdout,
                 _err=sys.stderr,
-                _tee=True)
+                _tee=True
+            )
 
-            result_file = open(scan_output_absolute_path, "w+")
-            result_file.write(result.stdout.decode("utf-8") )
-            result_file.close()
+            oscap_result_file = open(scan_output_absolute_path, "w+")
+            oscap_result_file.write(oscap_result.stdout.decode("utf-8"))
+            oscap_result_file.close()
             print("Compliance Scan Completed.  Report found at following path: " +
                   scan_report_absolute_path)
 

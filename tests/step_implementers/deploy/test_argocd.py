@@ -1,27 +1,37 @@
 import shutil
-import sh
-from io import IOBase
 import tempfile
-from testfixtures import TempDirectory
-import unittest
 import types
-from unittest.mock import patch, MagicMock
+import unittest
+from io import IOBase
+from unittest.mock import MagicMock, patch
 
-from tssc.step_implementers.tag_source import Git
-
+import sh
+from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.test_utils import *
+from tssc.config.config import Config
+from tssc.step_implementers.deploy import ArgoCD
 
-class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
+
+class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
+    @staticmethod
+    def __create_git_rev_parse_side_effect(abbreviated_ref):
+        def git_rev_parse_side_effect(*args, **kwargs):
+            if (args[0] == 'rev-parse') and (args[1] == '--abbrev-ref') and (args[2] == 'HEAD'):
+                return abbreviated_ref
+
+        return git_rev_parse_side_effect
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
     def test_deploy_argo_login_error(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -121,7 +131,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.login.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
+                self.run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
     def test_deploy_git_username_missing(self):
 
@@ -150,16 +160,16 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                 AssertionError,
                 r"Either username or password is not set. Neither or both must be set."):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                self.run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
     def test_deploy_argo_image_url_missing(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -254,7 +264,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     r"No image url was specified"):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
+                self.run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
             argocd_mock.login.assert_called_once_with(
                 argocd_api,
@@ -269,10 +279,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_runtime_image_url_and_version(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -366,7 +376,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -388,10 +398,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_copyfile_error(self, argocd_mock, git_mock, shutil_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -491,7 +501,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             shutil_mock.side_effect = OSError
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir=temp_dir,
                     step_name='deploy',
                     config=config,
@@ -503,10 +513,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_app_missing_no_sync(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -608,7 +618,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.side_effect=self.git_rev_parse_side_effect
             argocd_mock.app.get.side_effect = sh.ErrorReturnCode_1('argocd', b'stdout', b'stderror')
 
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir=temp_dir,
                 step_name='deploy',
                 config=config,
@@ -649,10 +659,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_git_checkout_error(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -755,7 +765,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.checkout.side_effect = [sh.ErrorReturnCode('git', b'stdout', b'stderror'), None]
 
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -779,10 +789,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_url_no_tag(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'latest'
         argocd_username = 'username'
@@ -879,7 +889,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -902,10 +912,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_commit_error(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1006,7 +1016,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.commit.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir,
                     'deploy',
                     config,
@@ -1018,10 +1028,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_no_git_password(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1061,7 +1071,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
                         'service-name' : service_name,
                         'application-name' : application_name,
                         'organization' : organization_name,
-                        'environment-name' : environment_name,
+                        'env-name' : environment_name,
                         'kube-app-domain' : 'apps.tssc.rht-set.com',
                         'git-email' : 'nappspo+tssc@redhat.com'
                     },
@@ -1122,16 +1132,16 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                 ValueError,
                 'Both username and password must have non-empty value in the runtime step configuration'):
-                run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
+                self.run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args)
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_no_git_creds(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1229,7 +1239,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'For a http:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir,
                     'deploy',
                     config,
@@ -1241,10 +1251,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_no_git_creds_https(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1342,7 +1352,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             with self.assertRaisesRegex(
                     ValueError,
                     'For a https:// git url, you need to also provide username/password pair'):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir,
                     'deploy',
                     config,
@@ -1355,10 +1365,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_sync_missing(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1457,7 +1467,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
 
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -1488,10 +1498,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_http(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1589,7 +1599,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -1614,10 +1624,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_https(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1714,7 +1724,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -1739,10 +1749,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_no_http(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1840,7 +1850,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -1865,10 +1875,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.argocd', create=True)
     def test_deploy_argo_git_push_error(self, argocd_mock, git_mock):
 
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1967,7 +1977,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir,
                     'deploy',
                     config,
@@ -1984,12 +1994,11 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
-    def test_argo_create_cluster_nominal(self, argocd_mock, git_mock):
-
-        application_name = 'application-name'
+    def test_argo_create_cluster_norminal(self, argocd_mock, git_mock):
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -1998,7 +2007,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         image_url = 'quay.io/tssc/myimage'
         helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
         argocd_api = 'http://argocd.example.com'
-        argocd_sync_timeout_seconds = '60'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -2089,7 +2097,7 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
-            run_step_test_with_result_validation(
+            self.run_step_test_with_result_validation(
                 temp_dir,
                 'deploy',
                 config,
@@ -2113,11 +2121,10 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
     def test_argo_create_cluster_add_failure(self, argocd_mock, git_mock):
-
-        application_name = 'application-name'
+        application_name = 'app-name'
         service_name = 'service-name'
-        organization_name = 'organization-name'
-        environment_name = 'environment-name'
+        organization_name = 'org-name'
+        environment_name = 'env-name'
         kube_app_domain = 'apps.tssc.rht-set.com'
         git_tag = 'v1.2.3'
         argocd_username = 'username'
@@ -2126,7 +2133,6 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
         image_url = 'quay.io/tssc/myimage'
         helm_config_repo = 'https://gitrepo.com/helm-confg-repo.git'
         argocd_api = 'http://argocd.example.com'
-        argocd_sync_timeout_seconds = '60'
 
         with TempDirectory() as temp_dir:
             temp_dir.makedir('tssc-results')
@@ -2220,10 +2226,175 @@ class TestStepImplementerDeployArgoCD(BaseTSSCTestCase):
             argocd_mock.cluster.add.side_effect = sh.ErrorReturnCode('argocd', b'stdout', b'stderror')
 
             with self.assertRaises(RuntimeError):
-                run_step_test_with_result_validation(
+                self.run_step_test_with_result_validation(
                     temp_dir,
                     'deploy',
                     config,
                     expected_step_results,
                     runtime_args,
                     environment_name)
+
+    def __create_argocd_step_implementer(
+        self,
+        argocd_mock,
+        git_mock,
+        step_config={},
+        environment=None
+    ):
+        config = Config({
+            Config.TSSC_CONFIG_KEY: {
+                'deploy': [
+                    {
+                        'implementer': 'ArgoCD',
+                        'config': step_config
+                    }
+                ]
+
+            }
+        })
+
+        step_config = config.get_step_config('deploy')
+        sub_step_config = step_config.get_sub_step('ArgoCD')
+
+        argocd_step = ArgoCD(
+            results_dir_path="",
+            results_file_name="",
+            work_dir_path="",
+            config=sub_step_config,
+            environment=environment
+        )
+
+        return argocd_step
+
+    def __run__get_app_name_test(
+        self,
+        argocd_mock,
+        git_mock,
+        git_branch,
+        expected_result,
+        step_config={},
+        environment=None
+    ):
+        git_mock.side_effect = \
+            TestStepImplementerDeployArgoCD.__create_git_rev_parse_side_effect(
+                abbreviated_ref=git_branch
+            )
+
+        argocd_step = self.__create_argocd_step_implementer(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            step_config=step_config,
+            environment=environment
+        )
+
+        self.assertEqual(
+            expected_result,
+            argocd_step._get_app_name()
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_less_then_63(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repo_branch',
+            expected_result='org_name-app_name-srv_name-repo_branch',
+            step_config={
+                'organization' : 'org_name',
+                'application-name' : 'app_name',
+                'service-name' : 'srv_name'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_greater_then_63(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repository_branch_very_long',
+            expected_result='name-application_name-service_name-repository_branch_very_long',
+            step_config={
+                'organization' : 'organization_name',
+                'application-name' : 'application_name',
+                'service-name' : 'service_name'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_invalid_starting_char(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repo_branch',
+            expected_result='org_name-app_name-srv_name-repo_branch',
+            step_config={
+                'organization' : '--org_name',
+                'application-name' : 'app_name',
+                'service-name' : 'srv_name'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_invalid_end_char(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repo_branch--',
+            expected_result='org_name-app_name-srv_name-repo_branch',
+            step_config={
+                'organization' : 'org_name',
+                'application-name' : 'app_name',
+                'service-name' : 'srv_name'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_branch_name_with_slash(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='feature/foo42',
+            expected_result='org_name-app_name-srv_name-feature-foo42',
+            step_config={
+                'organization' : 'org_name',
+                'application-name' : 'app_name',
+                'service-name' : 'srv_name'
+            }
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_with_env_less_then_63(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repo_branch',
+            expected_result='org_name-app_name-srv_name-repo_branch-test',
+            step_config={
+                'organization' : 'org_name',
+                'application-name' : 'app_name',
+                'service-name' : 'srv_name'
+            },
+            environment='test'
+        )
+
+    @patch('sh.git', create=True)
+    @patch('sh.argocd', create=True)
+    def test__get_app_name_with_env_greater_then_63(self, argocd_mock, git_mock):
+        self.__run__get_app_name_test(
+            argocd_mock=argocd_mock,
+            git_mock=git_mock,
+            git_branch='repository_branch_very_long',
+            expected_result='application_name-service_name-repository_branch_very_long-test',
+            step_config={
+                'organization' : 'organization_name',
+                'application-name' : 'application_name',
+                'service-name' : 'service_name'
+            },
+            environment='test'
+        )

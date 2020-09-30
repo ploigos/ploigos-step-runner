@@ -1,7 +1,9 @@
-[![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Dev%22+branch%3Amaster)
-[![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=master)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+GitHub+Pages%22+branch%3Amaster)
+[![Publish Release](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Release/badge.svg)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Release%22)
+[![Publish Dev](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20Dev/badge.svg?branch=main)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+Dev%22+branch%3Amain)
 <br />
-[![codecov](https://codecov.io/gh/rhtconsulting/tssc-python-package/branch/master/graph/badge.svg)](https://codecov.io/gh/rhtconsulting/tssc-python-package)
+[![Publish GitHub Pages](https://github.com/rhtconsulting/tssc-python-package/workflows/Publish%20GitHub%20Pages/badge.svg?branch=main)](https://github.com/rhtconsulting/tssc-python-package/actions?query=workflow%3A%22Publish+GitHub+Pages%22+branch%3Amain)
+<br />
+[![codecov](https://codecov.io/gh/rhtconsulting/tssc-python-package/branch/main/graph/badge.svg)](https://codecov.io/gh/rhtconsulting/tssc-python-package)
 <br />
 [![License](https://img.shields.io/github/license/rhtconsulting/tssc-python-package?color=informational)](LICENSE)
 
@@ -54,8 +56,8 @@ python3 -m pytest --cov=tssc --cov-report term-missing tests/step_implementers/p
 python -m pylint --rcfile=setup.cfg tssc
 ```
 
-### Generate the Documenation Locally
-If you are updating the python documenation and want to generate locally this is how you do it.
+### Generate the Documentation Locally
+If you are updating the python documentation and want to generate locally this is how you do it.
 
 ```bash
 pip install pdoc3

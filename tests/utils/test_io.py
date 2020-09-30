@@ -1,10 +1,38 @@
-import sys
 import io
+import sys
 from contextlib import redirect_stdout
-
-from tssc.utils.io import TextIOSelectiveObfuscator, TextIOIndenter
+from io import StringIO
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tssc.utils.io import (TextIOIndenter, TextIOSelectiveObfuscator,
+                           create_sh_redirect_to_multiple_streams_fn_callback)
+
+
+class TestCreateSHRedirectToMultipleStreamsFNCallback(BaseTSSCTestCase):
+    def test_one_stream(self):
+        stream_one = StringIO()
+        sh_redirect_to_multiple_streams_fn_callback = \
+            create_sh_redirect_to_multiple_streams_fn_callback([
+                stream_one
+            ])
+
+        sh_redirect_to_multiple_streams_fn_callback('data1')
+
+        self.assertEqual('data1', stream_one.getvalue())
+
+    def test_two_streams(self):
+        stream_one = StringIO()
+        stream_two = StringIO()
+        sh_redirect_to_multiple_streams_fn_callback = \
+            create_sh_redirect_to_multiple_streams_fn_callback([
+                stream_one,
+                stream_two
+            ])
+
+        sh_redirect_to_multiple_streams_fn_callback('data1')
+
+        self.assertEqual('data1', stream_one.getvalue())
+        self.assertEqual('data1', stream_two.getvalue())
 
 class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
     def run_test(self, input, expected, randomize_replacment_length=False, obfuscation_targets=None, replacment_char=None):
