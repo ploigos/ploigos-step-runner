@@ -185,10 +185,13 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     def test_write_results_to_yml_file_exception(self):
         wfr = self.setup_test()
 
-        with self.assertRaisesRegex(
-                RuntimeError,
-                r"error dumping"):
-            wfr.write_results_to_yml_file("NotAStepResult/dir/test.yml")
+        # the sub-folders will be created
+        wfr.write_results_to_yml_file("NotAStepResult/dir/test.yml")
+
+        # with self.assertRaisesRegex(
+        #         RuntimeError,
+        #         r"error dumping"):
+        #     wfr.write_results_to_yml_file("NotAStepResult/dir/test.yml")
     
 #     def test_write_results_to_json_file(self):
 #         expected_json_result = """{
@@ -255,10 +258,12 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     def test_write_results_to_json_file_exception(self):
         wfr = self.setup_test()
 
-        with self.assertRaisesRegex(
-                RuntimeError,
-                r"error dumping"):
-            wfr.write_results_to_json_file("NotAStepResult/dir/test.json")
+        # the sub-folders will be created
+        wfr.write_results_to_json_file("NotAStepResult/dir/test.json")
+        # with self.assertRaisesRegex(
+        #         RuntimeError,
+        #         r"error dumping"):
+        #     wfr.write_results_to_json_file("NotAStepResult/dir/test.json")
 
     def test_load_from_pickle_file_no_file(self):
         pickle_wfr = WorkflowResult.load_from_pickle_file('test.pkl')
