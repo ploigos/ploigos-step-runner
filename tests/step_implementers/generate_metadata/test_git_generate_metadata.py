@@ -3,7 +3,6 @@ from testfixtures import TempDirectory
 from git import Repo
 
 from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-from tssc.step_implementers.generate_metadata import Git
 from tests.helpers.test_utils import create_git_commit_with_sample_file
 
 
@@ -28,12 +27,13 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
+            runtime_args = {'repo-root': str(temp_dir.path)}
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)}
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
             )
 
     def test_root_dir_is_bare_git_repo(self):
@@ -58,12 +58,13 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
+            runtime_args = {'repo-root': str(temp_dir.path)}
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)}
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
             )
 
     def test_no_commit_history(self):
@@ -88,12 +89,14 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
+            runtime_args = {'repo-root': str(temp_dir.path)}
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)})
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_git_repo_with_single_commit_on_master_branch(self):
         with TempDirectory() as temp_dir:
@@ -123,12 +126,14 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                     }
                 }
             }
+            runtime_args = {'repo-root': str(temp_dir.path)}
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)})
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_git_repo_with_single_commit_on_feature_branch(self):
         with TempDirectory() as temp_dir:
@@ -164,12 +169,14 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
+            runtime_args = {'repo-root': str(temp_dir.path)}
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)})
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_no_repo_root(self):
         with TempDirectory() as temp_dir:
@@ -191,15 +198,18 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
 
             git_branch_last_commit_hash = str(repo.head.reference.commit)
             expected_step_results = {}
+            runtime_args = {}
 
             with self.assertRaisesRegex(
                     AssertionError,
                     r"The runtime step configuration \(\{'repo-root': None, 'build-string-length': 7\}\) is missing the required configuration keys \(\['repo-root'\]\)"):
                 self.run_step_test_with_result_validation(
-                    temp_dir,
-                    'generate-metadata',
-                    config,
-                    expected_step_results)
+                    temp_dir=temp_dir,
+                    step_name='generate-metadata',
+                    config=config,
+                    expected_step_results=expected_step_results,
+                    runtime_args=runtime_args
+                )
 
     def test_directory_is_detached_head(self):
         with TempDirectory() as temp_dir:
@@ -230,9 +240,12 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
+            runtime_args = {'repo-root': str(temp_dir.path)}
+
             self.run_step_test_with_result_validation(
-                temp_dir,
-                'generate-metadata',
-                config,
-                expected_step_results,
-                runtime_args={'repo-root': str(temp_dir.path)})
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )

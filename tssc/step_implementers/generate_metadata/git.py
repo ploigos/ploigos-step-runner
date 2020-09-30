@@ -50,7 +50,8 @@ REQUIRED_CONFIG_KEYS = [
     'repo-root'
 ]
 
-class Git(StepImplementer): # pylint: disable=too-few-public-methods
+
+class Git(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Git.
     """
@@ -100,7 +101,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         try:
             repo = Repo(repo_root)
-        except InvalidGitRepositoryError as err:
+        except InvalidGitRepositoryError:
             self.step_result.success = False
             self.step_result.message = 'InvalidGitRepositoryError'
             return
@@ -112,16 +113,18 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         if repo.head.is_detached:
             self.step_result.success = False
-            self.step_result.message = f'Expected a Git branch in given directory ({repo_root}) but has a detached head.'
+            self.step_result.message = \
+                f'Expected a Git branch in given directory ({repo_root}) but has a detached head.'
             return
 
         git_branch = str(repo.head.reference)
 
         try:
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
-        except ValueError as err:
+        except ValueError:
             self.step_result.success = False
-            self.step_result.message = f'Given directory ({repo_root}) is a Git branch ({git_branch}) with no commit history'
+            self.step_result.message = f'Given directory ({repo_root}) is a Git branch ' \
+                f'({git_branch}) with no commit history'
             return
 
         # make the git branch safe
@@ -130,6 +133,5 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         # step_result
         self.step_result.success = True
-        self.step_result.add_artifact('pre-release', pre_release)
-        self.step_result.add_artifact('build', git_branch_last_commit_hash)
-
+        self.step_result.add_artifact(name='pre-release', value=pre_release)
+        self.step_result.add_artifact(name='build', value=git_branch_last_commit_hash)

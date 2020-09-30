@@ -124,7 +124,8 @@ DEFAULT_CONFIG = {
     'release-branch': 'master'
 }
 
-class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
+
+class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for SemanticVersion.
     """
@@ -174,34 +175,36 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         build = None
         release_branch = self.get_config_value('release-branch')
 
-        current_step_results = self.current_step_results()
+        current_step_results = self.step_result.get_step_result()
 
         app_version = self.get_config_value('app-version')
         if app_version is None and 'app-version' in current_step_results:
             app_version = current_step_results['app-version']
         if app_version is None:
-            raise ValueError(
-                """No value for (app-version) provided via runtime flag
-                (app-version) or from prior step implementer ({0}).
-                """.format(self.step_name))
+            self.step_result.success = False
+            self.step_result.message = f'No value for (app-version) provided via runtime flag ' \
+                                       f'(app-version) or from prior step implementer ' \
+                                       f'({self.step_name})'
+            return
 
         pre_release = self.get_config_value('pre-release')
         if pre_release is None and 'pre-release' in current_step_results:
             pre_release = current_step_results['pre-release']
         if pre_release is None:
-            raise ValueError(
-                """No value for (pre_release) provided via runtime flag
-                (pre-release) or from prior step implementer ({0})
-                """.format(self.step_name))
+            self.step_result.success = False
+            self.step_result.message = f'No value for (pre_release) provided via runtime flag ' \
+                                       f'(pre-release) or from prior step implementer ' \
+                                       f'({self.step_name})'
+            return
 
         build = self.get_config_value('build')
         if build is None and 'build' in current_step_results:
             build = current_step_results['build']
         if build is None:
-            raise ValueError(
-                """No value for (build) provided via runtime flag
-                (build) or from prior step implementer ({0})
-                """.format(self.step_name))
+            self.step_result.success = False
+            self.step_result.message = f'No value for (build) provided via runtime flag ' \
+                                       f'(build) or from prior step implementer ({self.step_name})'
+            return
 
         if pre_release == release_branch:
             version = "{0}+{1}".format(app_version, build)
@@ -210,9 +213,5 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
 
-        results = {
-            'version': version,
-            'image-tag': image_tag
-        }
-
-        return results
+        self.step_result.add_artifact(name='version', value=version)
+        self.step_result.add_artifact(name='image-tag', value=image_tag)

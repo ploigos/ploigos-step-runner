@@ -96,9 +96,17 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
             self.step_result.message = f'Given pom file does not exist: {pom_file}'
             return
 
-        pom_version_element = get_xml_element(pom_file, 'version')
-        pom_version = pom_version_element.text
+        try:
+            pom_version_element = get_xml_element(pom_file, 'version')
+            pom_version = pom_version_element.text
+        except ValueError:
+            self.step_result.success = False
+            self.step_result.message = f'Given pom file missing version: {pom_file}'
+            return
 
         # step_result
         self.step_result.success = True
-        self.step_result.add_artifact('app-version', pom_version)
+        self.step_result.add_artifact(
+            name='app-version',
+            value=pom_version
+        )

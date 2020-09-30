@@ -43,7 +43,8 @@ REQUIRED_CONFIG_KEYS = [
     'package-file'
 ]
 
-class Npm(StepImplementer): # pylint: disable=too-few-public-methods
+
+class Npm(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for npm.
     """
@@ -98,11 +99,11 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
             package_file_data = json.load(package_file_object)
 
         if not "version" in package_file_data:
-            raise ValueError('Given npm package file: ' + package_file + \
-              ' does not contain a \"version\" key')
+            self.step_result.success = False
+            self.step_result.message = f'Given npm package file: {package_file} ' \
+                                       'does not contain a \"version\" key'
+            return
 
-        results = {
-            'app-version': package_file_data["version"]
-        }
-
-        return results
+        self.step_result.add_artifact(
+            name='app-version',
+            value=package_file_data['version'])
