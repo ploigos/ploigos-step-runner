@@ -23,7 +23,7 @@ class WorkflowResult:
     def workflow_list(self):
         return self.__workflow_list
 
-    def get_artifact(self, artifact, step_name=None):
+    def get_artifact(self, artifact, step_name=None, sub_step_name=None):
         """
         Search for an artifact.
         -  if step_name is provided, look for the artifact in the ONE step
@@ -35,6 +35,8 @@ class WorkflowResult:
            The artifact name to search for
         step_name: str optional
            Optionally search only in one step
+        sub_step_name: str optional
+            Optionally search only in one step
 
         Returns
         -------
@@ -42,8 +44,8 @@ class WorkflowResult:
            eg: {'description': '', 'type': 'str', 'value': 'C'}:
         """
         if step_name:
-            if self.get_step_result_by_step_name(step_name=step_name):
-                return self.get_step_result_by_step_name(step_name=step_name).artifacts.get(artifact)
+            if self.get_step_result_by_step_name(step_name=step_name, sub_step_name=sub_step_name):
+                return self.get_step_result_by_step_name(step_name=step_name, sub_step_name=sub_step_name).artifacts.get(artifact)
         return self.search_for_artifact(artifact=artifact)
 
     def get_step_result(self, step_name):
