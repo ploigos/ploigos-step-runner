@@ -101,35 +101,35 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         try:
             repo = Repo(repo_root)
         except InvalidGitRepositoryError as err:
-            raise err
+            self.step_result.success = False
+            self.step_result.message = 'InvalidGitRepositoryError'
+            return
 
         if repo.bare:
-            raise ValueError("Given directory ({0}) is a bare Git repository".format(repo_root))
+            self.step_result.success = False
+            self.step_result.message = f"Given directory ({repo_root}) is a bare Git repository"
+            return
 
         if repo.head.is_detached:
-            raise ValueError(
-                "Expected a Git branch in given directory ({0}) but has a detached head."
-                .format(repo_root)
-            )
+            self.step_result.success = False
+            self.step_result.message = f'Expected a Git branch in given directory ({repo_root}) but has a detached head.'
+            return
 
         git_branch = str(repo.head.reference)
 
         try:
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
         except ValueError as err:
-            raise ValueError(
-                "Given directory ({0}) is a Git branch ({1}) with no commit history".format(
-                    repo_root, git_branch
-                )
-            ) from err
+            self.step_result.success = False
+            self.step_result.message = f'Given directory ({repo_root}) is a Git branch ({git_branch}) with no commit history'
+            return
 
         # make the git branch safe
         pre_release_regex = re.compile(r"/", re.IGNORECASE)
         pre_release = re.sub(pre_release_regex, '_', git_branch)
 
-        results = {
-            'pre-release': pre_release,
-            'build': git_branch_last_commit_hash
-        }
+        # step_result
+        self.step_result.success = True
+        self.step_result.add_artifact('pre-release', pre_release)
+        self.step_result.add_artifact('build', git_branch_last_commit_hash)
 
-        return results

@@ -83,8 +83,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         self.__environment = environment
 
         # DIRECTORIES - ensure directories are created
-        self.__mkdir_work_dir_path()
-        self.__mkdir_results_dir_path()
+        self.mkdir_work_dir_path()
+        self.mkdir_results_dir_path()
 
         # STEP_RESULT - init CURRENT step result for THIS step
         self.__step_result = StepResult(
@@ -94,7 +94,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         )
         # WORKFLOW - init PAST step_result into workflow_result for ALL
         self.__workflow_result = WorkflowResult.load_from_pickle_file(
-            pickle_filename=self.__workflow_result_pickle_file_path
+            pickle_filename=self.workflow_result_pickle_file_path
         )
         # WORKFLOW - add (or merge) CURRENT step result to ALL
         self.workflow_result.add_step_result(step_result=self.step_result)
@@ -285,8 +285,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         missing_required_config_keys = []
         for required_config_key in self.required_runtime_step_config_keys():
-            if ((required_config_key not in runtime_step_config) or \
-                    ((not runtime_step_config[required_config_key]) and \
+            if ((required_config_key not in runtime_step_config) or
+                    ((not runtime_step_config[required_config_key]) and
                      (not isinstance(runtime_step_config[required_config_key], bool)))):
                 missing_required_config_keys.append(required_config_key)
 
@@ -359,7 +359,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         )
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
             self._run_step()
-            self.__write_workflow_result
+            self.write_workflow_result
 
         # print the step run results
         StepImplementer.__print_section_title(
@@ -596,14 +596,14 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         )
 
     @property
-    def __workflow_result_pickle_file_path(self):
+    def workflow_result_pickle_file_path(self):
         """
         internal file to store the "pickle" (serialized)
         """
         return os.path.join(self.work_dir_path, 'tssc-results.pkl')
 
     @property
-    def __write_workflow_result(self):
+    def write_workflow_result(self):
         """
         Write the 'pickle' file
           - internally used file in the working folder
@@ -615,17 +615,17 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
           - eg: tssc-results/tssc-results.yml
         """
         # eg:  tssc-working/results.pkl (internal named/managed file)
-        self.workflow_result.write_to_pickle_file(self.__workflow_result_pickle_file_path)
+        self.workflow_result.write_to_pickle_file(self.workflow_result_pickle_file_path)
 
         # eg:  tssc-results/tssc-results.yml (default)
         self.workflow_result.write_results_to_yml_file(self.results_file_path)
 
-    def __mkdir_work_dir_path(self):
+    def mkdir_work_dir_path(self):
         if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
 
-    def __mkdir_results_dir_path(self):
+    def mkdir_results_dir_path(self):
         if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
