@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """Trusted Software Supply Chain Library (tssc) main entry point.
 
 Command-Line Options
@@ -394,18 +395,49 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      - implementer: OpenSCAP
+      # sample scans using DataStream file (preferred)
+      - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
+        implementer: OpenSCAP
         config:
-          # Required
-          scap-input-file: ''
+          oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+          oscap-tailoring-uri: https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+      #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+      #    oscap-profile: xccdf_org.ssgproject.content_profile_ospp
+      #- name: OpenSCAP - Compliance (DISA STIG for Red hat Enterprise Linux 8) - DataStream
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+      #    oscap-profile: xccdf_org.ssgproject.content_profile_stig
 
-          # Optional
-          #log-level: 'Info'
+      # sample scans using XCCDF file (okay if you don't have access to DataStream)
+      #- name: OpenSCAP - Compliance (DISA STIG for Red hat Enterprise Linux 8) - XCCDF
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-xccdf.xml
+      #    oscap-profile: stig
+      #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - XCCDF
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-xccdf.xml
+      #    oscap-profile: ospp
 
       container-image-static-vulnerability-scan:
-      # WARNING: not yet implemented
-      - implementer: OpenSCAP
-        config: {}
+      # sample vulnerability scan using XCCDF file (preferred)
+      - name: OpenSCAP - Vulnerability - DataStream
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
+
+      # sample scans using OVAL file (if you must, but XCCDF is muuuuch better if availabe)
+      #- name: OpenSCAP - Vulnerability - OVAL
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2
+      # sample scan using DataStream file
 
       deploy:
       - implementer: ArgoCD
@@ -673,18 +705,49 @@ From least precedence to highest precedence.
       container-image-unit-test: []
 
       container-image-static-compliance-scan:
-      - implementer: OpenSCAP
+      # sample scans using DataStream file (preferred)
+      - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
+        implementer: OpenSCAP
         config:
-          # Required
-          scap-input-file: ''
+          oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+          oscap-tailoring-uri: https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+      #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+      #    oscap-profile: xccdf_org.ssgproject.content_profile_ospp
+      #- name: OpenSCAP - Compliance (DISA STIG for Red hat Enterprise Linux 8) - DataStream
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
+      #    oscap-profile: xccdf_org.ssgproject.content_profile_stig
 
-          # Optional
-          #log-level: 'Info'
+      # sample scans using XCCDF file (okay if you don't have access to DataStream)
+      #- name: OpenSCAP - Compliance (DISA STIG for Red hat Enterprise Linux 8) - XCCDF
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-xccdf.xml
+      #    oscap-profile: stig
+      #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - XCCDF
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-xccdf.xml
+      #    oscap-profile: ospp
 
       container-image-static-vulnerability-scan:
-      # WARNING: not yet implemented
-      - implementer: OpenSCAP
-        config: {}
+      # sample vulnerability scan using XCCDF file (preferred)
+      - name: OpenSCAP - Vulnerability - DataStream
+        implementer: OpenSCAP
+        config:
+          oscap-input-definitions-uri: https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2
+
+      # sample scans using OVAL file (if you must, but XCCDF is muuuuch better if availabe)
+      #- name: OpenSCAP - Vulnerability - OVAL
+      #  implementer: OpenSCAP
+      #  config:
+      #    oscap-input-definitions-uri: https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2
+      # sample scan using DataStream file
 
       deploy:
       - implementer: ArgoCD

@@ -6,7 +6,7 @@ __all__ = [
     'dict',
     'file',
     'io',
+    'maven',
     'reflection',
-    'xml',
-    'maven'
+    'xml'
 ]

@@ -1,0 +1,6 @@
+---
+tssc-config:
+  config-decryptors:
+    foo:
+  - bar: test
+  implementer: SOPS

@@ -430,7 +430,7 @@ users:
 
         return results
 
-    def __get_container_image_repository_uri(self):
+    def __get_container_image_uri(self):
         """Get the container image repository uri.
 
         Returns
@@ -439,7 +439,6 @@ users:
             Container image repository URI.
         """
         push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
-
         container_image_repository_uri = self.get_config_value('container-image-uri')
 
         if container_image_repository_uri is None and push_container_image_results:
@@ -476,11 +475,11 @@ users:
 
         argocd_app_name = self._get_app_name()
         version = self._get_image_version()
-        container_image_repo_uri = self.__get_container_image_repository_uri()
+        container_image_uri = self.__get_container_image_uri()
         timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
         endpoint_url = self._get_endpoint_url()
-        jinja_runtime_step_config = {'container_image_repo_uri' : container_image_repo_uri,
+        jinja_runtime_step_config = {'container_image_uri' : container_image_uri,
                                      'image_version' : version,
                                      'timestamp' : timestamp,
                                      'repo_branch' : repo_branch,
