@@ -1,4 +1,4 @@
-"""StepImplementer for the sign-container-image step using Podman.
+"""StepImplementer for the sign-container-image step using Podman to sign an image.
 
 TODO: doc me
 """
