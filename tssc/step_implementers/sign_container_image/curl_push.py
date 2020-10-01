@@ -48,6 +48,7 @@ TODO: figure out output
 
 """
 
+import hashlib
 import re
 import sys
 from io import StringIO
@@ -124,16 +125,19 @@ class CurlPush(StepImplementer):
         )(step_results)
 
         # upload
-        container_image_signature_url = CurlPush.__curl_file(
-            container_image_signature_file_path=container_image_signature_file_path,
-            container_image_signature_name=container_image_signature_name,
-            signature_server_url=signature_server_url,
-            signature_server_username=signature_server_username,
-            signature_server_password=signature_server_password
-        )
+        container_image_signature_url, signature_file_md5, signature_file_sha1 = \
+            CurlPush.__curl_file(
+                container_image_signature_file_path=container_image_signature_file_path,
+                container_image_signature_name=container_image_signature_name,
+                signature_server_url=signature_server_url,
+                signature_server_username=signature_server_username,
+                signature_server_password=signature_server_password
+            )
 
         return {
-            'container-image-signature-url': container_image_signature_url
+            'container-image-signature-url': container_image_signature_url,
+            'container-image-signature-file-md5': signature_file_md5,
+            'container-image-signature-file-sha1': signature_file_sha1
         }
 
     @staticmethod
@@ -162,6 +166,13 @@ class CurlPush(StepImplementer):
         # remove any trailing / from url
         signature_server_url = re.sub(r'/$', '', signature_server_url)
         container_image_signature_url = f"{signature_server_url}/{container_image_signature_name}"
+
+        # calculate hashes
+        with open(container_image_signature_file_path, 'rb') as container_image_signature_file:
+            container_image_signature_file_contents = container_image_signature_file.read()
+            signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
+            signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
+
         try:
             stdout_result = StringIO()
             stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
@@ -175,6 +186,8 @@ class CurlPush(StepImplementer):
             sh.curl(  # pylint: disable=no-member
                 '-sSfv',
                 '-X', 'PUT',
+                '--header', f'X-Checksum-Sha1:{signature_file_sha1}',
+                '--header', f'X-Checksum-MD5:{signature_file_md5}',
                 '--user', f"{signature_server_username}:{signature_server_password}",
                 '--data-binary', f"@{container_image_signature_file_path}",
                 container_image_signature_url,
@@ -187,4 +200,4 @@ class CurlPush(StepImplementer):
                 f"Unexpected error curling signature file to signature server: {error}"
             ) from error
 
-        return container_image_signature_url
+        return container_image_signature_url, signature_file_md5, signature_file_sha1
