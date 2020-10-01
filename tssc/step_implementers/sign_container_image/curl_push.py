@@ -115,14 +115,17 @@ class CurlPush(StepImplementer):
         )
 
         # extract step results
-        step_results = CurlPush.__get_step_result_values(
-            self.get_step_results(DefaultSteps.SIGN_CONTAINER_IMAGE),
+        previous_sign_container_image_step_results = self.get_step_results(
+            DefaultSteps.SIGN_CONTAINER_IMAGE
+        )
+        CurlPush.__verify_previous_sign_container_image_step_results(
+            previous_sign_container_image_step_results,
             ['container-image-signature-file-path', 'container-image-signature-name']
         )
         container_image_signature_file_path, container_image_signature_name = itemgetter(
             'container-image-signature-file-path',
             'container-image-signature-name'
-        )(step_results)
+        )(previous_sign_container_image_step_results)
 
         # upload
         container_image_signature_url, signature_file_md5, signature_file_sha1 = \
@@ -141,19 +144,18 @@ class CurlPush(StepImplementer):
         }
 
     @staticmethod
-    def __get_step_result_values(step_results, keys):
+    def __verify_previous_sign_container_image_step_results(step_results, keys):
+        """Verifies that the given step results has the expected keys.
+        """
         if step_results is None:
             raise RuntimeError(f"Missing step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}")
 
-        results = {}
         for key in keys:
             result = step_results.get(key)
             if result is None:
                 raise RuntimeError(
                     f"Missing {key} step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}"
                 )
-            results[key] = result
-        return results
 
     @staticmethod
     def __curl_file(
@@ -192,8 +194,8 @@ class CurlPush(StepImplementer):
                 '--data-binary', f"@{container_image_signature_file_path}",
                 container_image_signature_url,
                 _out=stdout_callback,
-                _err=sys.stderr,
-                _tee='err'
+                _err_to_out=True,
+                _tee='out'
             )
         except sh.ErrorReturnCode as error:
             raise RuntimeError(

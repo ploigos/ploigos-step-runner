@@ -94,8 +94,8 @@ class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase)
                 '--data-binary', f"@{container_image_signature_file_path}",
                 f"https://sigserver/signatures/{container_image_signature_name}",
                 _out=Any(IOBase),
-                _err=Any(IOBase),
-                _tee='err'
+                _err_to_out=True,
+                _tee='out'
             )
 
     @patch('sh.curl', create=True)
