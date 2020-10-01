@@ -173,13 +173,15 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         app_version = None
         pre_release = None
         build = None
+
         release_branch = self.get_config_value('release-branch')
 
-        current_step_results = self.step_result.get_step_result()
-
         app_version = self.get_config_value('app-version')
-        if app_version is None and 'app-version' in current_step_results:
-            app_version = current_step_results['app-version']
+
+        if app_version is None:
+            app_version = self.get_artifact_value(step_name='generate-metadata', artifact_name='app-version',
+                                                  sub_step_name='Maven')
+
         if app_version is None:
             self.step_result.success = False
             self.step_result.message = f'No value for (app-version) provided via runtime flag ' \
@@ -188,18 +190,20 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             return
 
         pre_release = self.get_config_value('pre-release')
-        if pre_release is None and 'pre-release' in current_step_results:
-            pre_release = current_step_results['pre-release']
+
+        if pre_release is None:
+            pre_release = self.get_artifact_value(step_name=self.step_name, artifact_name='pre-release',
+                                                  sub_step_name='Maven')
         if pre_release is None:
             self.step_result.success = False
-            self.step_result.message = f'No value for (pre_release) provided via runtime flag ' \
+            self.step_result.message = f'No value for (pre-release) provided via runtime flag ' \
                                        f'(pre-release) or from prior step implementer ' \
                                        f'({self.step_name})'
             return
 
         build = self.get_config_value('build')
-        if build is None and 'build' in current_step_results:
-            build = current_step_results['build']
+        if build is None:
+            build = self.get_artifact_value(step_name=self.step_name, artifact_name='build', sub_step_name='Maven')
         if build is None:
             self.step_result.success = False
             self.step_result.message = f'No value for (build) provided via runtime flag ' \

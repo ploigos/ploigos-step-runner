@@ -8,7 +8,7 @@ from tssc.exceptions import TSSCException
 
 class StepResult:
     """
-    TSSC step result dictionary.
+    Step result object.
 
     Parameters
     ----------
@@ -23,7 +23,7 @@ class StepResult:
 
     def __init__(self, step_name, sub_step_name, sub_step_implementer_name):
         """
-        Step Result Init
+        Step Result Init.
         """
         self.__step_name = step_name
         self.__sub_step_name = sub_step_name
@@ -57,7 +57,7 @@ class StepResult:
         Returns
         -------
         str
-            Step name
+            Sub step name
         """
         return self.__sub_step_name
 
@@ -67,7 +67,7 @@ class StepResult:
         Returns
         -------
         str
-            Step implementer name
+            Sub step implementer name
         """
         return self.__sub_step_implementer_name
 
@@ -78,22 +78,53 @@ class StepResult:
         -------
         dict
             All artifacts of the step
+            For Example:
+            {
+                'artifact1': {'description': 'description1', 'type': 'type1', 'value': 'value1'},
+                'artifact2': {'description': '', 'type': 'str', 'value': 'value2'}
+            }
+
         """
         return self.__artifacts
 
     def get_artifact(self, name):
         """
+        Get the dictionary of a specified artifact.
+
         Parameters
         ----------
         name : str
-            The name of the artifact to return
+            The name of the artifact to return.
 
         Returns
         -------
         dict
-            Specific artifact given name
+            Dictionary for a specified artifact.
+            For example:
+            {'description': 'artifact1', 'type': 'type1', 'value': 'value1'}
+
         """
         return self.artifacts.get(name)
+
+    def get_artifact_value(self, name):
+        """
+        Get the value for a specified artifact.
+
+        Parameters
+        ----------
+        name : str
+            The name of the artifact.
+
+        Returns
+        -------
+        str
+            The value of the artifact.
+        """
+        value = None
+        if self.artifacts.get(name):
+            value = self.artifacts.get(name).get('value')
+
+        return value
 
     def add_artifact(self, name, value, description='', value_type=None):
         """
@@ -132,19 +163,6 @@ class StepResult:
             'value': value
         }
 
-    def merge_artifact(self, new_artifact):
-        """
-        Merges an artifacts dictionary into the artifacts dictionary
-
-        Parameters
-        ----------
-        new_artifact: dict
-           New set of artifacts to merge in
-          eg:
-          { 'a': {'description': '', 'type': 'str', 'value': 'A'} }
-        """
-        self.artifacts.update(new_artifact)
-
     @property
     def success(self):
         """
@@ -180,6 +198,19 @@ class StepResult:
         self.__message = message
 
     def get_sub_step_result(self):
+        """
+        Returns
+        -------
+        dict
+            Dictionary with the details for the sub-step.
+            For example:
+            {
+                'sub-step-implementer-name': 'value',
+                'success': Boolean,
+                'message': 'value',
+                'artifacts': {}
+            }
+        """
         result = {
             'sub-step-implementer-name': self.sub_step_implementer_name,
             'success': self.success,
@@ -190,7 +221,13 @@ class StepResult:
 
     def get_step_result(self):
         """
-        result= {
+        Get the step result dictionary
+
+        Returns
+        -------
+        dict
+            Results with all step result components.
+            For example:
             "step-name: {
                 "sub-step-name": {
                     "sub-step-implementer-name": "sub_step_implementer_name",
@@ -205,13 +242,6 @@ class StepResult:
                     }
                 }
             }
-        }
-
-        Returns
-        -------
-        dict
-            Formatted with all step result components
-
         """
         result = {
             self.step_name: {

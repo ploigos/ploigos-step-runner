@@ -3,7 +3,6 @@ import os
 from testfixtures import TempDirectory
 
 from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-from tssc import TSSCFactory
 
 
 class TestStepImplementerGenerateMetadataMaven(BaseStepImplementerTestCase):
@@ -188,7 +187,7 @@ class TestStepImplementerGenerateMetadataMaven(BaseStepImplementerTestCase):
                     'Maven': {
                         'sub-step-implementer-name': 'Maven',
                         'success': False,
-                        'message': f'Given pom file does not exist: pom.xml',
+                        'message': 'Given pom file does not exist: pom.xml',
                         'artifacts': {}
                     }
                 }

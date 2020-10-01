@@ -106,7 +106,4 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
 
         # step_result
         self.step_result.success = True
-        self.step_result.add_artifact(
-            name='app-version',
-            value=pom_version
-        )
+        self.step_result.add_artifact(name='app-version', value=pom_version)

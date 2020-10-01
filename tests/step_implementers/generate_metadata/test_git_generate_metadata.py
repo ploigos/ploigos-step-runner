@@ -200,6 +200,7 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
             expected_step_results = {}
             runtime_args = {}
 
+            # todo: should the assert be refactored
             with self.assertRaisesRegex(
                     AssertionError,
                     r"The runtime step configuration \(\{'repo-root': None, 'build-string-length': 7\}\) is missing the required configuration keys \(\['repo-root'\]\)"):

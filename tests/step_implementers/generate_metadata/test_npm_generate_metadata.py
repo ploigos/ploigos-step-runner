@@ -63,13 +63,25 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 }
             }
 
-            expected_step_results = {}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Npm': {
+                        'sub-step-implementer-name': 'Npm',
+                        'success': False,
+                        'message': f'Given npm package file: {temp_dir.path}/package.json does not contain a "version" key',
+                        'artifacts': {}
+                    }
+                }
+            }
+            runtime_args = {'repo-root': str(temp_dir.path), 'build': '1234'}
 
-            with self.assertRaisesRegex(
-                    ValueError,
-                    r"Given npm package file: " + package_file_path + " does not contain a \"version\" key"):
-                self.run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results,
-                                                     runtime_args={'repo-root': str(temp_dir.path), 'build': '1234'})
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                expected_step_results=expected_step_results,
+                config=config,
+                runtime_args=runtime_args
+            )
 
     def test_package_file_missing(self):
         with TempDirectory() as temp_dir:
@@ -85,27 +97,62 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 }
             }
 
-            expected_step_results = {}
-
-            with self.assertRaisesRegex(
-                    ValueError,
-                    r"Given npm package file does not exist: does_not_exist.json"):
-                self.run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results,
-                                                     runtime_args={'repo-root': str(temp_dir.path), 'build': '1234'})
-
-    def test_config_file_package_file_none_value(self):
-        config = {
-            'tssc-config': {
+            expected_step_results = {
                 'generate-metadata': {
-                    'implementer': 'Npm',
-                    'config': {
-                        'package-file': None
+                    'Npm': {
+                        'sub-step-implementer-name': 'Npm',
+                        'success': False,
+                        'message': 'Given npm package file does not exist: does_not_exist.json',
+                        'artifacts': {}
                     }
                 }
             }
-        }
-        factory = TSSCFactory(config)
-        with self.assertRaisesRegex(
-                AssertionError,
-                r"The runtime step configuration \(\{'package-file': None\}\) is missing the required configuration keys \(\['package-file'\]\)"):
-            factory.run_step('generate-metadata')
+
+            runtime_args = {'repo-root': str(temp_dir.path), 'build': '1234'}
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                expected_step_results=expected_step_results,
+                config=config,
+                runtime_args=runtime_args
+            )
+
+    def test_config_file_package_file_none_value(self):
+        with TempDirectory() as temp_dir:
+            config = {
+                'tssc-config': {
+                    'generate-metadata': {
+                        'implementer': 'Npm',
+                        'config': {
+                            'package-file': None
+                        }
+                    }
+                }
+            }
+
+            # todo: refactor the assert?
+            expected_step_results = {
+                'generate-metadata': {
+                    'Npm': {
+                        'sub-step-implementer-name': 'Npm',
+                        'success': False,
+                        'message': "The runtime step configuration (\{'package-file': None\}) is missing"
+                                   "the required configuration keys (\['package-file'\])",
+                        'artifacts': {}
+                    }
+                }
+            }
+
+            runtime_args = {}
+
+            with self.assertRaisesRegex(
+                    AssertionError,
+                    r"The runtime step configuration \(\{'package-file': None\}\) is missing the required configuration keys \(\['package-file'\]\)"):
+                self.run_step_test_with_result_validation(
+                    temp_dir=temp_dir,
+                    step_name='generate-metadata',
+                    config=config,
+                    expected_step_results=expected_step_results,
+                    runtime_args=runtime_args
+                )

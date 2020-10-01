@@ -12,8 +12,8 @@ from tssc.exceptions import TSSCException
 
 class WorkflowResult:
     """
-    Class to manage a list of StepResults
-    The WorkflowResult represents the current results
+    Class to manage a list of StepResults.
+    The WorkflowResult represents ALL results, including the current step.
     """
 
     def __init__(self):
@@ -23,11 +23,12 @@ class WorkflowResult:
     def workflow_list(self):
         return self.__workflow_list
 
-    def get_artifact(self, artifact, step_name=None, sub_step_name=None):
+    def get_artifact_value(self, artifact, step_name=None, sub_step_name=None):
         """
         Search for an artifact.
-        -  if step_name is provided, look for the artifact in the ONE step
-        -  else, search ALL steps for the FIRST match of the artifact.
+        1.  if step_name is provided, look for the artifact in the step
+        2.  elif step_name and sub_step_name is provided, look for the artifact in the step/sub_step
+        3.  else, search ALL steps for the FIRST match of the artifact.
 
         Parameters
         ----------
@@ -40,13 +41,29 @@ class WorkflowResult:
 
         Returns
         -------
-        Dict
-           eg: {'description': '', 'type': 'str', 'value': 'C'}:
+        Str
+           'v1.0.2'
         """
-        if step_name:
-            if self.get_step_result_by_step_name(step_name=step_name, sub_step_name=sub_step_name):
-                return self.get_step_result_by_step_name(step_name=step_name, sub_step_name=sub_step_name).artifacts.get(artifact)
-        return self.search_for_artifact(artifact=artifact)
+        value = None
+        if step_name is not None:
+            if sub_step_name is not None:
+                for step_result in self.workflow_list:
+                    if step_result.step_name == step_name:
+                        if step_result.sub_step_name == sub_step_name:
+                            value = step_result.get_artifact_value(name=artifact)
+                            break
+            else:
+                for step_result in self.workflow_list:
+                    if step_result.step_name is step_name:
+                        value = step_result.get_artifact_value(name=artifact)
+                        break
+        else:
+            for step_result in self.workflow_list:
+                value = step_result.get_artifact_value(name=artifact)
+                # value can be true/false/string
+                if value is not None:
+                    break
+        return value
 
     def get_step_result(self, step_name):
         """
@@ -98,11 +115,10 @@ class WorkflowResult:
            - simply append, done
         Else
            - find the old step result
-           - merge the old artifacts into the new artifacts
+           - update the old artifacts into the new artifacts
            - delete the old step result
            - append the new step result
            - note: the delete/append is needed because it is a list
-
 
         Parameters
         ----------
@@ -136,7 +152,7 @@ class WorkflowResult:
 
     # ARTIFACT helpers:
 
-    def search_for_artifact(self, artifact):
+    def search_for_artifact_value(self, artifact):
         """
         Search for an artifact in ANY step.
         The FIRST match is returned
@@ -146,23 +162,20 @@ class WorkflowResult:
         Parameters
         ----------
         artifact : str
-             Name of artifact to search
+             Name of artifact to search for value
 
         Returns
         -------
-        dict
+        value
             if not found return None
-            elif verbose, return the result-set dict
-            elif return the artifact dict
+            else return artifact.value
         """
-        result = None
+        value = None
         for step_result in self.workflow_list:
-            result = step_result.get_artifact(
-                name=artifact
-            )
-            if result:
+            value = step_result.get_artifact_value(name=artifact)
+            if value:
                 break
-        return result
+        return value
 
     # FILES
 
@@ -326,7 +339,7 @@ class WorkflowResult:
     @staticmethod
     def folder_create(filename):
         """
-        Helper method to create folder if necessary
+        Helper method to create folder if it does not exist.
 
         Parameters
         ----------

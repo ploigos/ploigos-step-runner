@@ -93,7 +93,9 @@ class Npm(StepImplementer):  # pylint: disable=too-few-public-methods
 
         # verify runtime config
         if not os.path.exists(package_file):
-            raise ValueError('Given npm package file does not exist: ' + package_file)
+            self.step_result.success = False
+            self.step_result.message = f'Given npm package file does not exist: {package_file}'
+            return
 
         with open(package_file) as package_file_object:
             package_file_data = json.load(package_file_object)

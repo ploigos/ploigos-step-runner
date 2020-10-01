@@ -188,7 +188,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             OS path to the results file for this step.
         """
-        return os.path.join( self.__results_dir_path, self.__results_file_name )
+        return os.path.join(self.__results_dir_path, self.__results_file_name)
 
     @property
     def work_dir_path(self):
@@ -290,6 +290,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                      (not isinstance(runtime_step_config[required_config_key], bool)))):
                 missing_required_config_keys.append(required_config_key)
 
+        # todo: should this be assertion?
         assert (not missing_required_config_keys), \
             "The runtime step configuration (" + \
             f"{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing " + \
@@ -359,7 +360,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         )
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
             self._run_step()
-            self.write_workflow_result
+            self.write_workflow_result()
 
         # print the step run results
         StepImplementer.__print_section_title(
@@ -579,15 +580,18 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         ))
 
     # WORKFLOW helpers
-    def get_artifact(self, artifact_name, step_name=None):
+    def get_artifact_value(self, artifact_name, step_name=None, sub_step_name=None):
         """
         Get the artifact matching value_name.
         If step_name is provide, search the artifacts in that step_name only
         Otherwise, search for the FIRST occurrance of the artifact
         """
-        self.workflow_result.get_artifact(
-            result_artifact_name=artifact_name,
-            step_name=step_name
+        return (
+            self.workflow_result.get_artifact_value(
+                artifact=artifact_name,
+                step_name=step_name,
+                sub_step_name=sub_step_name
+            )
         )
 
     def get_step_result(self, step_name=None):
@@ -602,7 +606,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         return os.path.join(self.work_dir_path, 'tssc-results.pkl')
 
-    @property
     def write_workflow_result(self):
         """
         Write the 'pickle' file
@@ -629,4 +632,3 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         if self.work_dir_path != '':
             if not os.path.exists(self.work_dir_path):
                 os.makedirs(self.work_dir_path)
-
