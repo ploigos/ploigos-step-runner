@@ -178,14 +178,25 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
     @property
     def step_name(self):
-        """
-        Getter for the TSSC Step name implemented by this step.
+        """Getter for the Step name implemented by this step.
+
         Returns
         -------
         str
-            TSSC step name implemented by this step.
+            Step name implemented by this step.
         """
         return self.config.step_name
+
+    @property
+    def sub_step_name(self):
+        """Getter for the Sub Step name implemented by this step.
+
+        Returns
+        -------
+        str
+            Sub step name implemented by this step.
+        """
+        return self.config.sub_step_name
 
     @staticmethod
     @abstractmethod
@@ -261,11 +272,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         """
 
-        StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
+        StepImplementer.__print_section_title(
+            f"Step Start - {self.step_name} - {self.sub_step_name}"
+        )
 
         # print information about theconfiguration
         StepImplementer.__print_section_title(
-            f"Configuration - {self.step_name}",
+            f"Configuration - {self.step_name} - {self.sub_step_name}",
             div_char="-",
             indent=1
         )
@@ -303,7 +316,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         # validate the runtime step configuration
         StepImplementer.__print_section_title(
-            f"Standard Out - {self.step_name}",
+            f"Standard Out - {self.step_name} - {self.sub_step_name}",
             div_char="-",
             indent=1
         )
@@ -324,13 +337,13 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         # print the step run results
         StepImplementer.__print_section_title(
-            f"Results - {self.step_name}",
+            f"Results - {self.step_name} - {self.sub_step_name}",
             div_char="-",
             indent=1
         )
         StepImplementer.__print_data('Results File Path', self.results_file_path)
         StepImplementer.__print_data('Results', results)
-        StepImplementer.__print_section_title(f"Step End - {self.step_name}")
+        StepImplementer.__print_section_title(f"Step End - {self.step_name} - {self.sub_step_name}")
 
     def write_results(self, results):
         """
