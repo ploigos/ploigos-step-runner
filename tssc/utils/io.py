@@ -60,7 +60,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
     Attributes
     ----------
     __parent_stream : IOBase
-    __obfuscation_targets : list
+    __obfuscation_paterns : list
     __replacement_char : char
     __randomize_replacment_length : bool
     __random_replacement_length_min : int
@@ -69,7 +69,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
 
     def __init__(self, parent_stream, randomize_replacment_length=True, replacement_char='*'):
         self.__parent_stream = parent_stream
-        self.__obfuscation_targets = []
+        self.__obfuscation_paterns = []
         self.__replacement_char = replacement_char
         self.__randomize_replacment_length = randomize_replacment_length
         self.__random_replacement_length_min = 5
@@ -120,15 +120,46 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
     def add_obfuscation_targets(self, targets):
         """Adds a target pattern to be obfuscated whenever writing to this stream.
 
+        Notes
+        -----
+        This is a bit involved to deal with secrets that span multiple lines and various ways they
+        can be printed. so the regex gets pretty involved to escape the right things and ignore
+        whitespace, so forth and so on.
+
+        There are unit tests covering the scenarios this is dealing with, if you are messing in
+        here be sure you don't break any of the existing unit tests.
+
         Parameters
         ----------
         targets : list or pattern
             The target patterns to be obfuscated when writing to this stream.
         """
-        if isinstance(targets, list):
-            self.__obfuscation_targets += targets
-        else:
-            self.__obfuscation_targets.append(targets)
+        if not isinstance(targets, list):
+            targets = [targets]
+
+        for target in targets:
+            target_pattern = target
+
+            # replace any amount of whitespace with a single space
+            target_pattern = re.sub(r'\s+', ' ', target_pattern)
+
+            # strip off leading and trialing whitespace
+            target_pattern = target_pattern.strip()
+
+            # escape for use in regex pattern
+            target_pattern = re.escape(target_pattern)
+
+            # the spaces we added in now got escaped, so unescape them and turn them into .*
+            target_pattern = re.sub(r'\\ ', r'.*', target_pattern)
+
+            # eat up pre and post newlines
+            #target_pattern = f"(\s*)({target_pattern})(\s*)"
+
+            # compile the pattern for re-use and make sure that .* matches accross lines
+            target_compiled_pattern = re.compile(target_pattern, re.DOTALL)
+
+            # add the pattern
+            self.__obfuscation_paterns.append(target_compiled_pattern)
 
     def __obfuscator(self, match):
         """Given a regex match returns a corresponding obfuscated string.
@@ -181,8 +212,8 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         else:
             obfuscated = given
 
-        for obfuscation_target in self.__obfuscation_targets:
-            obfuscated = re.sub(obfuscation_target, self.__obfuscator, obfuscated)
+        for obfuscation_pattern in self.__obfuscation_paterns:
+            obfuscated = obfuscation_pattern.sub(self.__obfuscator, obfuscated)
 
         return self.parent_stream.write(obfuscated)
 
