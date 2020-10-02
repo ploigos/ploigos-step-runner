@@ -351,7 +351,7 @@ for argocd to sync updates</td>
 </tr>
 <tr>
 <td><code>push-container-image</code></td>
-<td><code>image-version</code></td>
+<td><code>container-image-version</code></td>
 <td>The image version use in the deployment</td>
 </tr>
 </tbody>
@@ -510,7 +510,7 @@ Results expected from previous steps that this step may require.
 |------------------------|-----------------|------------
 | `tag-source`           | `tag`           | The git tag to apply to the config repo
 | `push-container-image` | `image-url`     | The image url to use in the deployment
-| `push-container-image` | `image-version` | The image version use in the deployment
+| `push-container-image` | `container-image-version` | The image version use in the deployment
 
 Results
 -------
@@ -872,31 +872,39 @@ users:
 
         return results
 
-    def _get_image_url(self):
-        image_url = None
+    def __get_container_image_repository_uri(self):
+        &#34;&#34;&#34;Get the container image repository uri.
 
-        if self.get_config_value(&#39;image-url&#39;):
-            image_url = self.get_config_value(&#39;image-url&#39;)
-        else:
-            if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
-            and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-url&#39;)):
-                image_url = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).\
-                            get(&#39;image-url&#39;)
-            else:
-                print(&#39;No image url found in metadata.&#39;)
-                raise ValueError(&#39;No image url was specified&#39;)
-        return image_url
+        Returns
+        -------
+        str
+            Container image repository URI.
+        &#34;&#34;&#34;
+        push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
+
+        container_image_repository_uri = self.get_config_value(&#39;container-image-uri&#39;)
+
+        if container_image_repository_uri is None and push_container_image_results:
+            container_image_repository_uri = push_container_image_results.get(
+                &#39;container-image-uri&#39;
+            )
+
+        assert container_image_repository_uri is not None, \
+            &#39;Can not determine container image repository uri.&#39;
+
+        return container_image_repository_uri
 
     def _get_image_version(self):
         image_version = &#39;latest&#39;
 
-        if self.get_config_value(&#39;image-version&#39;):
-            image_version = self.get_config_value(&#39;image-version&#39;)
+        if self.get_config_value(&#39;container-image-version&#39;):
+            image_version = self.get_config_value(&#39;container-image-version&#39;)
         else:
-            if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
-            and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-version&#39;)):
-                image_version = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).\
-                                get(&#39;image-version&#39;)
+            push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
+            if(push_container_image_results and \
+                push_container_image_results.get(&#39;container-image-version&#39;)
+            ):
+                image_version = push_container_image_results.get(&#39;container-image-version&#39;)
             else:
                 print(&#39;No image version found in metadata, using \&#34;latest\&#34;&#39;)
         return image_version
@@ -910,11 +918,11 @@ users:
 
         argocd_app_name = self._get_app_name()
         version = self._get_image_version()
-        url = self._get_image_url()
+        container_image_repo_uri = self.__get_container_image_repository_uri()
         timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
         endpoint_url = self._get_endpoint_url()
-        jinja_runtime_step_config = {&#39;image_url&#39; : url,
+        jinja_runtime_step_config = {&#39;container_image_repo_uri&#39; : container_image_repo_uri,
                                      &#39;image_version&#39; : version,
                                      &#39;timestamp&#39; : timestamp,
                                      &#39;repo_branch&#39; : repo_branch,
@@ -941,7 +949,8 @@ users:
                 values_file=values_file_name, all=error)) from error
 
     def _get_tag(self, repo_directory):
-
+        &#34;&#34;&#34;TODO: doc me
+        &#34;&#34;&#34;
         tag = &#39;latest&#39;
         if(self.get_step_results(DefaultSteps.TAG_SOURCE) \
           and self.get_step_results(DefaultSteps.TAG_SOURCE).get(&#39;tag&#39;)):
@@ -1387,31 +1396,39 @@ users:
 
         return results
 
-    def _get_image_url(self):
-        image_url = None
+    def __get_container_image_repository_uri(self):
+        &#34;&#34;&#34;Get the container image repository uri.
 
-        if self.get_config_value(&#39;image-url&#39;):
-            image_url = self.get_config_value(&#39;image-url&#39;)
-        else:
-            if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
-            and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-url&#39;)):
-                image_url = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).\
-                            get(&#39;image-url&#39;)
-            else:
-                print(&#39;No image url found in metadata.&#39;)
-                raise ValueError(&#39;No image url was specified&#39;)
-        return image_url
+        Returns
+        -------
+        str
+            Container image repository URI.
+        &#34;&#34;&#34;
+        push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
+
+        container_image_repository_uri = self.get_config_value(&#39;container-image-uri&#39;)
+
+        if container_image_repository_uri is None and push_container_image_results:
+            container_image_repository_uri = push_container_image_results.get(
+                &#39;container-image-uri&#39;
+            )
+
+        assert container_image_repository_uri is not None, \
+            &#39;Can not determine container image repository uri.&#39;
+
+        return container_image_repository_uri
 
     def _get_image_version(self):
         image_version = &#39;latest&#39;
 
-        if self.get_config_value(&#39;image-version&#39;):
-            image_version = self.get_config_value(&#39;image-version&#39;)
+        if self.get_config_value(&#39;container-image-version&#39;):
+            image_version = self.get_config_value(&#39;container-image-version&#39;)
         else:
-            if(self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE) \
-            and self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).get(&#39;image-version&#39;)):
-                image_version = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE).\
-                                get(&#39;image-version&#39;)
+            push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
+            if(push_container_image_results and \
+                push_container_image_results.get(&#39;container-image-version&#39;)
+            ):
+                image_version = push_container_image_results.get(&#39;container-image-version&#39;)
             else:
                 print(&#39;No image version found in metadata, using \&#34;latest\&#34;&#39;)
         return image_version
@@ -1425,11 +1442,11 @@ users:
 
         argocd_app_name = self._get_app_name()
         version = self._get_image_version()
-        url = self._get_image_url()
+        container_image_repo_uri = self.__get_container_image_repository_uri()
         timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
         endpoint_url = self._get_endpoint_url()
-        jinja_runtime_step_config = {&#39;image_url&#39; : url,
+        jinja_runtime_step_config = {&#39;container_image_repo_uri&#39; : container_image_repo_uri,
                                      &#39;image_version&#39; : version,
                                      &#39;timestamp&#39; : timestamp,
                                      &#39;repo_branch&#39; : repo_branch,
@@ -1456,7 +1473,8 @@ users:
                 values_file=values_file_name, all=error)) from error
 
     def _get_tag(self, repo_directory):
-
+        &#34;&#34;&#34;TODO: doc me
+        &#34;&#34;&#34;
         tag = &#39;latest&#39;
         if(self.get_step_results(DefaultSteps.TAG_SOURCE) \
           and self.get_step_results(DefaultSteps.TAG_SOURCE).get(&#39;tag&#39;)):

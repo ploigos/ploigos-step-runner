@@ -113,7 +113,7 @@ Uses a portion of the latest Git commit hash.</td>
 <td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
 </tr>
 <tr>
-<td><code>image-tag</code></td>
+<td><code>container-image-version</code></td>
 <td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build #</td>
 </tr>
 </tbody>
@@ -136,7 +136,7 @@ Uses a portion of the latest Git commit hash.</td>
     'pre-release': 'feature_test0',
     'build': 'abc123',
     'version': '42.1.0-feature_foo+abc123',
-    'image-tag': '42.1.0-feature_foo'
+    'container-image-version': '42.1.0-feature_foo'
   }
 }}
 </code></pre>
@@ -157,7 +157,7 @@ Uses a portion of the latest Git commit hash.</td>
     'pre-release': 'master',
     'build': 'abc123',
     'version': '42.1.0+abc123',
-    'image-tag': '42.1.0'
+    'container-image-version': '42.1.0'
   }
 }}
 </code></pre>
@@ -231,7 +231,7 @@ Results output by this step.
 | Result Key  | Description
 |-------------|------------
 | `version`   | Constructed semantic version (https://semver.org/).
-| `image-tag` | Constructed semantic version (https://semver.org/) without build #
+| `container-image-version` | Constructed semantic version (https://semver.org/) without build #
 
 Examples
 --------
@@ -256,7 +256,7 @@ Examples
         &#39;pre-release&#39;: &#39;feature_test0&#39;,
         &#39;build&#39;: &#39;abc123&#39;,
         &#39;version&#39;: &#39;42.1.0-feature_foo+abc123&#39;,
-        &#39;image-tag&#39;: &#39;42.1.0-feature_foo&#39;
+        &#39;container-image-version&#39;: &#39;42.1.0-feature_foo&#39;
       }
     }}
 
@@ -280,7 +280,7 @@ Examples
         &#39;pre-release&#39;: &#39;master&#39;,
         &#39;build&#39;: &#39;abc123&#39;,
         &#39;version&#39;: &#39;42.1.0+abc123&#39;,
-        &#39;image-tag&#39;: &#39;42.1.0&#39;
+        &#39;container-image-version&#39;: &#39;42.1.0&#39;
       }
     }}
 &#34;&#34;&#34;
@@ -379,7 +379,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
 
         results = {
             &#39;version&#39;: version,
-            &#39;image-tag&#39;: image_tag
+            &#39;container-image-version&#39;: image_tag
         }
 
         return results</code></pre>
@@ -492,7 +492,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
 
         results = {
             &#39;version&#39;: version,
-            &#39;image-tag&#39;: image_tag
+            &#39;container-image-version&#39;: image_tag
         }
 
         return results</code></pre>
