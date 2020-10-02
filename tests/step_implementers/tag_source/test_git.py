@@ -156,7 +156,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
                 version: 1.0+69442c8
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -170,7 +170,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8',
+                        'container-image-version': '1.0-69442c8',
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
@@ -199,7 +199,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
                 version: 1.0+69442c8
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -215,7 +215,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8',
+                        'container-image-version': '1.0-69442c8',
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
@@ -243,7 +243,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -259,7 +259,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8',
+                        'container-image-version': '1.0-69442c8',
                         'version': '1.0+69442c8'
                     },
                     'tag-source': {
@@ -288,7 +288,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -302,7 +302,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'container-image-version': '1.0-69442c8'
                     },
                     'tag-source': {
                         'tag': '1.0-69442c8'
@@ -327,7 +327,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -343,7 +343,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'container-image-version': '1.0-69442c8'
                     },
                     'tag-source': {
                         'tag': '1.0-69442c8'
@@ -363,7 +363,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             temp_dir.makedir('tssc-results')
             temp_dir.write('tssc-results/tssc-results.yml', b'''tssc-results:
               generate-metadata:
-                image-tag: 1.0-69442c8
+                container-image-version: 1.0-69442c8
                 ''')
             config = {
                 'tssc-config': {
@@ -379,7 +379,7 @@ class TestStepImplementerTagSourceGit(BaseTSSCTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata': {
-                        'image-tag': '1.0-69442c8'
+                        'container-image-version': '1.0-69442c8'
                     },
                     'tag-source': {
                         'tag': '1.0-69442c8'

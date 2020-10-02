@@ -25,7 +25,7 @@ Results expected from previous steps that this step requires.
 
 | Step Name                | Result Key       | Description
 |--------------------------|------------------|------------
-| `generate-metadata`      | `image-tag`      | Tag to push image with
+| `generate-metadata`      | `container-image-version`      | Tag to push image with
 | `create-container-image` | `image-tar-file` | Local tar file of image to push
 
 Results
@@ -35,7 +35,7 @@ Results output by this step.
 
 | Result Key  | Description
 |-------------|------------
-| `image-tag` | Pushed destination image tag
+TODO: doc me
 
 """
 import os
@@ -106,12 +106,15 @@ class Skopeo(StepImplementer):
         dict
             Results of running this step.
         """
-        version = "latest"
+        image_version = "latest"
         if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
-          self.get_step_results(DefaultSteps.GENERATE_METADATA).get('image-tag')):
-            version = self.get_step_results(DefaultSteps.GENERATE_METADATA)['image-tag']
+          self.get_step_results(DefaultSteps.GENERATE_METADATA).get('container-image-version')):
+            image_version = self.get_step_results(
+                DefaultSteps.GENERATE_METADATA
+            )['container-image-version']
         else:
             print('No version found in metadata. Using latest')
+        image_version = image_version.lower()
 
         application_name = self.get_config_value('application-name')
         service_name = self.get_config_value('service-name')
@@ -125,8 +128,10 @@ class Skopeo(StepImplementer):
         else:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
-        destination_with_version = self.get_config_value('destination-url') + '/' + organization + \
-         '/' + application_name + '-' + service_name + ':' + (version).lower()
+        destination_url = self.get_config_value('destination-url')
+        image_repository_uri = f"{destination_url}/{organization}/{application_name}-{service_name}"
+        image_tag = f"{image_repository_uri}:{image_version}"
+
         try:
             # login to any provider container registries
             # NOTE: important to specify the auth file because depending on the context this is
@@ -143,7 +148,7 @@ class Skopeo(StepImplementer):
                 f"--dest-tls-verify={str(self.get_config_value('dest-tls-verify'))}",
                 f"--authfile={containers_config_auth_file}",
                 'docker-archive:' + image_tar_file,
-                'docker://' + destination_with_version,
+                'docker://' + image_tag,
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -152,9 +157,9 @@ class Skopeo(StepImplementer):
             raise RuntimeError('Error invoking skopeo: {error}'.format(error=error)) from error
 
         results = {
-            'image-tag' : destination_with_version,
-            'image-version' : (version).lower(),
-            'image-url' : self.get_config_value('destination-url')
+            'container-image-version' : image_version,
+            'container-image-uri' : image_repository_uri,
+            'container-image-tag' : image_tag
         }
 
         return results

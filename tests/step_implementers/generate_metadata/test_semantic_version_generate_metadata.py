@@ -150,7 +150,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
 
@@ -190,7 +190,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
 
@@ -238,7 +238,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             pre_release = 'feature_test0'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
 
@@ -280,7 +280,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'app-version': app_version})
 
@@ -322,7 +322,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = "1234"
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': build})
 
@@ -370,6 +370,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             pre_release = 'beta1'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
             run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': pre_release})

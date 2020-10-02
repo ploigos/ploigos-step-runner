@@ -64,7 +64,7 @@ Results output by this step.
 | Result Key  | Description
 |-------------|------------
 | `version`   | Constructed semantic version (https://semver.org/).
-| `image-tag` | Constructed semantic version (https://semver.org/) without build #
+| `container-image-version` | Constructed semantic version (https://semver.org/) without build #
 
 Examples
 --------
@@ -89,7 +89,7 @@ Examples
         'pre-release': 'feature_test0',
         'build': 'abc123',
         'version': '42.1.0-feature_foo+abc123',
-        'image-tag': '42.1.0-feature_foo'
+        'container-image-version': '42.1.0-feature_foo'
       }
     }}
 
@@ -113,7 +113,7 @@ Examples
         'pre-release': 'master',
         'build': 'abc123',
         'version': '42.1.0+abc123',
-        'image-tag': '42.1.0'
+        'container-image-version': '42.1.0'
       }
     }}
 """
@@ -212,7 +212,7 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
 
         results = {
             'version': version,
-            'image-tag': image_tag
+            'container-image-version': image_tag
         }
 
         return results

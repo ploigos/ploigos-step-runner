@@ -17,7 +17,7 @@ minimally produce the following step results.
 | Result Key  | Description
 |-------------|------------
 | `version`   | Constructed semantic version (https://semver.org/).
-| `image-tag` | Constructed semantic version (https://semver.org/) modified \
+| `container-image-version` | Constructed semantic version (https://semver.org/) modified \
                 to work as a container image tag.
 """
 

@@ -165,7 +165,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             expected_step_results = {'tssc-results': {
                 'create-container-image': {
-                    'image-tag': tag,
+                    'container-image-version': tag,
                     'image-tar-file': image_tar_file
                 }
             }}
@@ -210,7 +210,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                     '''tssc-results:
                   generate-metadata:
                     version: {version}
-                    image-tag: {version}
+                    container-image-version: {version}
                 '''.format(version=version),
                     'utf-8')
                 )
@@ -235,11 +235,11 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             expected_step_results = {'tssc-results': {
                 'generate-metadata': {
-                    'image-tag': version,
+                    'container-image-version': version,
                     'version': version
                 },
                 'create-container-image': {
-                    'image-tag': tag,
+                    'container-image-version': tag,
                     'image-tar-file': image_tar_file
                 }
             }}
@@ -299,7 +299,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             expected_step_results = {'tssc-results': {
                 'create-container-image': {
-                    'image-tag': tag,
+                    'container-image-version': tag,
                     'image-tar-file' : image_tar_file
                 }
             }}
@@ -400,7 +400,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             expected_step_results = {'tssc-results': {
                 'create-container-image': {
-                    'image-tag': tag,
+                    'container-image-version': tag,
                     'image-tar-file' : image_tar_file
                 }
             }}
@@ -452,7 +452,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                     '''tssc-results:
                           generate-metadata:
                             version: {version}
-                            image-tag: {version}
+                            container-image-version: {version}
                         '''.format(version=version),
                             'utf-8')
                 )
@@ -477,11 +477,11 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             expected_step_results = {'tssc-results': {
                 'generate-metadata': {
-                    'image-tag': version,
+                    'container-image-version': version,
                     'version': version
                 },
                 'create-container-image': {
-                    'image-tag': tag,
+                    'container-image-version': tag,
                     'image-tar-file' : image_tar_file
                 }
             }}
