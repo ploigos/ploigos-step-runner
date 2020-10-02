@@ -55,7 +55,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 bytes(
                     f'''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version:: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   create-container-image:
@@ -365,7 +365,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                 bytes(
                     f'''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   create-container-image:
                     image-tar-file: {image_tar_file_path}
                   tag-source:
@@ -433,7 +433,7 @@ class TestStepImplementerContainerImageStaticComplianceScan(BaseTSSCTestCase):
                             'success': True
                         }
                     },
-                    'generate-metadata': {'image-tag': 'not_latest'},
+                    'generate-metadata': {'container-image-version': 'not_latest'},
                     'create-container-image': {'image-tar-file': f'{image_tar_file_path}'},
                     'tag-source': {'tag': 'git_tag'}
                 }

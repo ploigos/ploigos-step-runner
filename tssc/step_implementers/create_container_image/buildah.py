@@ -24,18 +24,17 @@ Results expected from previous steps that this step requires.
 
 | Step Name           | Result Key      | Description
 |---------------------|-----------------|------------
-| `generate-metadata` | `image-tag`     | Version to use when building the image
+| `generate-metadata` | `container-image-version`     | Version to use when building the image
 
 Results
 -------
 
 Results output by this step.
 
-| Result Key       | Description
-|------------------|------------
-| `image-tag`      | The image ID to tag the built image with when pushing it to a local file
-| `image-tar-file` | Path to the built container image as a tar file
-
+| Result Key                | Description
+|---------------------------|------------
+| `container-image-version` | Container version to tag built image with
+| `image-tar-file`          | Path to the built container image as a tar file
 
 ** Example **
 
@@ -148,8 +147,10 @@ class Buildah(StepImplementer):
                              + image_spec_file_location)
 
         if(self.get_step_results(DefaultSteps.GENERATE_METADATA) and \
-          self.get_step_results(DefaultSteps.GENERATE_METADATA).get('image-tag')):
-            image_tag_version = self.get_step_results(DefaultSteps.GENERATE_METADATA)['image-tag']
+          self.get_step_results(DefaultSteps.GENERATE_METADATA).get('container-image-version')):
+            image_tag_version = self.get_step_results(
+                DefaultSteps.GENERATE_METADATA
+            )['container-image-version']
         else:
             image_tag_version = "latest"
             print('No image tag version found in metadata. Using latest')
@@ -223,7 +224,7 @@ class Buildah(StepImplementer):
                 'Issue invoking buildah push to tar file ' + image_tar_file) from error
 
         results = {
-            'image-tag' : tag,
+            'container-image-version' : tag,
             'image-tar-file' : image_tar_file
         }
 

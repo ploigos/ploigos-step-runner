@@ -18,7 +18,7 @@ minimally produce the following step results.
 
 | Result Key  | Description
 |-------------|------------
-| `image-tag` | Pushed destination image tag
+| `container-image-version` | Pushed destination image tag
 """
 
 from .skopeo import Skopeo

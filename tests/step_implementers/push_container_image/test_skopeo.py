@@ -30,7 +30,7 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                     }
                 }
             }
-            expected_step_results = {'tssc-results': {'push-container-image': {'image-tag': ''}}}
+            expected_step_results = {'tssc-results': {'push-container-image': {'container-image-version': ''}}}
 
             with self.assertRaisesRegex(
                 AssertionError,
@@ -82,7 +82,7 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {version}
+                    container-image-version: {version}
                   create-container-image:
                     image-tar-file: {destination}
                 '''.format(version=version, destination=destination),
@@ -113,12 +113,12 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                         'image-tar-file': destination
                     },
                     'generate-metadata': {
-                        'image-tag': version
+                        'container-image-version': version
                     },
                     'push-container-image': {
-                        'image-tag': "{destination}/{organization}/{application_name}-{service_name}:{version}".format(destination=destination, organization=organization, application_name=application_name, service_name=service_name, version=version),
-                        'image-url': destination,
-                        'image-version' : version
+                        'container-image-uri': f"{destination}/xyzzy/foo-bar",
+                        "container-image-version": version,
+                        'container-image-tag': f"{destination}/xyzzy/foo-bar:1.0-69442c8"
                     }
                 }
             }
@@ -147,7 +147,7 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {version}
+                    container-image-version: {version}
                   create-container-image:
                     image-tar-file: image.tar
                 '''.format(version=version),
@@ -177,8 +177,8 @@ class TestStepImplementerPushContainerImageSkopeo(BaseTSSCTestCase):
                         'config' : {}
                     }
             }
-            expected_step_results = {'tssc-results': {'create-container-image': {'image-tar-file': 'image.tar'},'generate-metadata': {'image-tag': version},
-                                     'push-container-image': {'image-tag':"docker://{destination}:{version}".format(destination=destination, version=version)}}}
+            expected_step_results = {'tssc-results': {'create-container-image': {'image-tar-file': 'image.tar'},'generate-metadata': {'container-image-version': version},
+                                     'push-container-image': {'container-image-version':"docker://{destination}:{version}".format(destination=destination, version=version)}}}
 
             sh.skopeo.copy.side_effect = sh.ErrorReturnCode('skopeo', b'mock stdout', b'mock error about skopeo runtime')
             with self.assertRaisesRegex(

@@ -49,14 +49,14 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
-                )
+            )
             temp_dir.write(
                 'values.yaml.j2',
                 bytes(
@@ -96,10 +96,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -187,7 +187,7 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
@@ -232,7 +232,7 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -262,8 +262,9 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
 
             git_mock.side_effect=self.git_rev_parse_side_effect
             with self.assertRaisesRegex(
-                    ValueError,
-                    r"No image url was specified"):
+                AssertionError,
+                r'Can not determine container image repository uri.'
+            ):
                 self.run_step_test_with_result_validation(temp_dir, 'deploy', config, expected_step_results, runtime_args, environment_name)
 
             argocd_mock.login.assert_called_once_with(
@@ -300,7 +301,7 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
@@ -345,7 +346,7 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -371,8 +372,8 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             runtime_args = {
                 'git-username': 'unit_test_username',
                 'git-password': 'unit_test_password',
-                'image-url': image_url,
-                'image-version': image_tag
+                'container-image-uri': image_url,
+                'container-image-version': image_tag
             }
 
             git_mock.side_effect=self.git_rev_parse_side_effect
@@ -419,11 +420,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -466,10 +467,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -537,11 +538,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -584,10 +585,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -683,11 +684,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -730,10 +731,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -810,10 +811,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   push-container-image:
-                    image-url: {image_url}
-                    image-version: {image_tag}
+                    container-image-uri: {image_url}
+                    container-image-version: {image_tag}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -856,11 +857,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url,
-                        'image-version' : image_tag
+                        'container-image-uri' : image_url,
+                        'container-image-version' : image_tag
                     },
                     'deploy': {
                         'result': {
@@ -933,11 +934,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -980,10 +981,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1049,11 +1050,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1097,10 +1098,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1159,11 +1160,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1206,10 +1207,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1272,11 +1273,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1319,10 +1320,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1387,11 +1388,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1434,10 +1435,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1520,11 +1521,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1567,10 +1568,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1645,11 +1646,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1692,10 +1693,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1771,11 +1772,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1818,10 +1819,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -1896,11 +1897,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -1943,10 +1944,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -2016,11 +2017,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -2065,10 +2066,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
@@ -2142,11 +2143,11 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
                 bytes(
                     '''tssc-results:
                   generate-metadata:
-                    image-tag: {image_tag}
+                    container-image-version: {image_tag}
                   tag-source:
                     tag: {git_tag}
                   push-container-image:
-                    image-url: {image_url}
+                    container-image-uri: {image_url}
                 '''.format(image_tag=image_tag, image_url=image_url, git_tag=git_tag),
                     'utf-8')
                 )
@@ -2191,10 +2192,10 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
             expected_step_results = {
                 'tssc-results': {
                     'generate-metadata' : {
-                        'image-tag' : image_tag
+                        'container-image-version' : image_tag
                     },
                     'push-container-image' : {
-                        'image-url' : image_url
+                        'container-image-uri' : image_url
                     },
                     'tag-source' : {
                         'tag' : git_tag
