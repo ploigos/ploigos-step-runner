@@ -54,9 +54,10 @@ class WorkflowResult:
                             break
             else:
                 for step_result in self.workflow_list:
-                    if step_result.step_name is step_name:
+                    if step_result.step_name == step_name:
                         value = step_result.get_artifact_value(name=artifact)
-                        break
+                        if value is not None:
+                            break
         else:
             for step_result in self.workflow_list:
                 value = step_result.get_artifact_value(name=artifact)

@@ -179,8 +179,8 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         app_version = self.get_config_value('app-version')
 
         if app_version is None:
-            app_version = self.get_artifact_value(step_name='generate-metadata', artifact_name='app-version',
-                                                  sub_step_name='Maven')
+            app_version = self.get_artifact_value(step_name='generate-metadata',
+                                                  artifact_name='app-version')
 
         if app_version is None:
             self.step_result.success = False
@@ -192,8 +192,9 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         pre_release = self.get_config_value('pre-release')
 
         if pre_release is None:
-            pre_release = self.get_artifact_value(step_name=self.step_name, artifact_name='pre-release',
-                                                  sub_step_name='Maven')
+            pre_release = self.get_artifact_value(step_name=self.step_name,
+                                                  artifact_name='pre-release')
+
         if pre_release is None:
             self.step_result.success = False
             self.step_result.message = f'No value for (pre-release) provided via runtime flag ' \
@@ -203,7 +204,9 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
 
         build = self.get_config_value('build')
         if build is None:
-            build = self.get_artifact_value(step_name=self.step_name, artifact_name='build', sub_step_name='Maven')
+            build = self.get_artifact_value(step_name=self.step_name,
+                                            artifact_name='build')
+
         if build is None:
             self.step_result.success = False
             self.step_result.message = f'No value for (build) provided via runtime flag ' \
