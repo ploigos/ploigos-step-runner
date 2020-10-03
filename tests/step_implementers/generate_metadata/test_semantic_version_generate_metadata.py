@@ -1,27 +1,20 @@
 import os
 
 from testfixtures import TempDirectory
-import yaml
-import sys
 
 from git import Repo
-from git import InvalidGitRepositoryError
 
-from tssc import TSSCFactory
-from tssc.step_implementers.generate_metadata import Git
-from tssc.step_implementers.generate_metadata import Maven
-from tssc.step_implementers.generate_metadata import Npm
+from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.test_utils import create_git_commit_with_sample_file
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import *
 
-class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
+class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
     def test_no_provided_app_version(self):
         with TempDirectory() as temp_dir:
             repo = Repo.init(str(temp_dir.path))
 
-
             create_git_commit_with_sample_file(temp_dir, repo)
+            git_branch_last_commit_hash = str(repo.head.reference.commit)
 
             config = {
                 'tssc-config': {
@@ -36,16 +29,45 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
                 }
             }
 
-            expected_step_results = {}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'build': {
+                                'description': '', 'type': 'str',
+                                'value': git_branch_last_commit_hash[:7]
+                            }
+                        }
+                    },
+                    'SemanticVersion': {
+                        'sub-step-implementer-name': 'SemanticVersion',
+                        'success': False,
+                        'message': 'No value for (app-version) provided via runtime flag '
+                                   '(app-version) or from prior step implementer (generate-metadata)',
+                        'artifacts': {}
+                    }
+                }
+            }
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            runtime_args = {'repo-root': str(temp_dir.path)}
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_no_provided_build(self):
         with TempDirectory() as temp_dir:
             repo = Repo.init(str(temp_dir.path))
 
-            temp_dir.write('pom.xml',b'''<project>
+            temp_dir.write('pom.xml', b'''<project>
         <modelVersion>4.0.0</modelVersion>
         <groupId>com.mycompany.app</groupId>
         <artifactId>my-app</artifactId>
@@ -71,16 +93,39 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
                 }
             }
 
-            expected_step_results = {}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True, 'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'}
+                        }
+                    },
+                    'SemanticVersion': {
+                        'sub-step-implementer-name': 'SemanticVersion',
+                        'success': False,
+                        'message': 'No value for (build) provided via runtime flag '
+                                   '(build) or from prior step implementer (generate-metadata)',
+                        'artifacts': {}
+                    }
+                }
+            }
+            runtime_args = {'repo-root': str(temp_dir.path), 'pre-release': 'beta0'}
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': 'beta0'})
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_no_provided_pre_release(self):
         with TempDirectory() as temp_dir:
             repo = Repo.init(str(temp_dir.path))
 
-            temp_dir.write('pom.xml',b'''<project>
+            temp_dir.write('pom.xml', b'''<project>
         <modelVersion>4.0.0</modelVersion>
         <groupId>com.mycompany.app</groupId>
         <artifactId>my-app</artifactId>
@@ -106,11 +151,35 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
                 }
             }
 
-            expected_step_results = {}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'},
+                        }
+                    },
+                    'SemanticVersion': {
+                        'sub-step-implementer-name': 'SemanticVersion',
+                        'success': False,
+                        'message': 'No value for (pre-release) provided via runtime flag '
+                                   '(pre-release) or from prior step implementer (generate-metadata)',
+                        'artifacts': {}
+                    }
+                }
+            }
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': '1234'})
+            runtime_args = {'repo-root': str(temp_dir.path), 'build': '1234'}
 
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_maven_git_and_version_master_branch(self):
         with TempDirectory() as temp_dir:
@@ -150,9 +219,47 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            #{'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            runtime_args = {'repo-root': str(temp_dir.path)}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                            }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'build': {'description': '', 'type': 'str', 'value': build},
+                        }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': { 'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_npm_git_and_version_master_branch(self):
         with TempDirectory() as temp_dir:
@@ -190,9 +297,46 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            #{'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
+            runtime_args = {'repo-root': str(temp_dir.path)}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Npm': {
+                        'sub-step-implementer-name': 'Npm',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                        }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'build': {'description': '', 'type': 'str', 'value': build},
+                            }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_maven_git_and_version_feature_branch(self):
         with TempDirectory() as temp_dir:
@@ -238,9 +382,47 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             pre_release = 'feature_test0'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            #{'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'image-tag': image_tag}}}
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            runtime_args={'repo-root': str(temp_dir.path)}
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': app_version },
+                        }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': pre_release},
+                            'build': {'description': '', 'type': 'str', 'value': build},
+                            }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_override_app_version_at_runtime(self):
         with TempDirectory() as temp_dir:
@@ -280,9 +462,48 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            #{'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'app-version': app_version})
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'},
+                        }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'build': {'description': '', 'type': 'str', 'value': build},
+                            }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
+
+            runtime_args = {'repo-root': str(temp_dir.path), 'app-version': app_version}
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_override_build_at_runtime(self):
         with TempDirectory() as temp_dir:
@@ -322,9 +543,48 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             build = "1234"
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'container-image-version': image_tag}}}
+            #'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'image-tag': image_tag}}}
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': build})
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                        }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'build': {'description': '', 'type': 'str', 'value': git_branch_last_commit_hash[:7]},
+                            }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
+
+            runtime_args = {'repo-root': str(temp_dir.path), 'build': build}
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )
 
     def test_override_pre_release_at_runtime(self):
         with TempDirectory() as temp_dir:
@@ -370,6 +630,45 @@ class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
             pre_release = 'beta1'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            #{'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': pre_release})
+            expected_step_results = {
+                'generate-metadata': {
+                    'Maven': {
+                        'sub-step-implementer-name': 'Maven',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                        }
+                    },
+                    'Git': {
+                        'sub-step-implementer-name': 'Git',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'pre-release': {'description': '', 'type': 'str', 'value': 'feature_test0'},
+                            'build': {'description': '', 'type': 'str', 'value': build},
+                            }
+                    },
+                    'SemanticVersion': {
+                            'sub-step-implementer-name': 'SemanticVersion',
+                            'success': True,
+                            'message': '',
+                            'artifacts': {
+                                'version': {'description': '', 'type': 'str', 'value': version},
+                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                            }
+                    }
+                }
+            }
+
+            runtime_args = {'repo-root': str(temp_dir.path), 'pre-release': pre_release}
+
+            self.run_step_test_with_result_validation(
+                temp_dir=temp_dir,
+                step_name='generate-metadata',
+                config=config,
+                expected_step_results=expected_step_results,
+                runtime_args=runtime_args
+            )

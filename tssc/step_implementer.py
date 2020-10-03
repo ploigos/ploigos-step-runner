@@ -1,19 +1,20 @@
-"""Abstract class and helper constants for StepImplementer.
+"""
+Abstract class and helper constants for StepImplementer.
 """
 
-import json
-import os
-import sys
-import textwrap
 from abc import ABC, abstractmethod
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
+import os
 from pathlib import Path
+import pprint
+import textwrap
+import sys
 
-import yaml
-
-from tssc.config.config_value import ConfigValue
 from tssc.exceptions import TSSCException
+from tssc.config.config_value import ConfigValue
 from tssc.utils.io import TextIOIndenter
+from tssc.step_result import StepResult
+from tssc.workflow_result import WorkflowResult
 
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
@@ -38,7 +39,8 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     CANARY_TEST = 'canary-test'
     PUBLISH_WORKFLOW_RESULTS = 'publish-workflow-results'
 
-class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
+
+class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-public-methods
     """
     Abstract representation of a TSSC step implementer.
@@ -66,7 +68,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     __TSSC_RESULTS_KEY = 'tssc-results'
     __TITLE_LENGTH = 80
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
             self,
             results_dir_path,
             results_file_name,
@@ -81,7 +83,32 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         self.__config = config
         self.__environment = environment
 
-        self.__results_file_path = None
+        # Directories - ensure directories and sub-directories are created
+        try:
+            if self.work_dir_path is not '':
+                os.makedirs(self.work_dir_path, exist_ok=True)
+            if self.results_dir_path is not '':
+                os.makedirs(self.results_dir_path, exist_ok=True)
+        except TSSCException as error:
+            raise RuntimeError('error with folder creation '
+                               f'{work_dir_path} {results_dir_path}'
+                               ) from error
+
+        # StepResult - init CURRENT step result for THIS step
+        self.__step_result = StepResult(
+            step_name=self.__config.step_name,
+            sub_step_name=self.__config.sub_step_name,
+            sub_step_implementer_name=self.__config.sub_step_implementer_name
+        )
+        # WorkflowResult - init PAST step_result into workflow_result for ALL
+        self.__workflow_result = WorkflowResult.load_from_pickle_file(
+            pickle_filename=self.workflow_result_pickle_file_path
+        )
+        # Add (or merge) CURRENT step result to ALL
+        self.workflow_result.add_step_result(
+            step_result=self.step_result
+        )
+
         super().__init__()
 
     @property
@@ -164,40 +191,63 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     def results_file_path(self):
         """
         Get the OS path to the results file for this step.
+        Default from factory:  tssc-results/tssc-results.yml
 
         Returns
         -------
         str
             OS path to the results file for this step.
         """
-        if not self.__results_file_path:
-            self.__results_file_path = os.path.join(
-                self.__results_dir_path,
-                self.__results_file_name)
-
-        return self.__results_file_path
+        return os.path.join(self.__results_dir_path, self.__results_file_name)
 
     @property
-    def step_name(self):
-        """Getter for the Step name implemented by this step.
+    def results_dir_path(self):
+        """
+        Get the OS path to the results file for this step.
+        Default from factory:  tssc-results/tssc-results.yml
 
         Returns
         -------
         str
-            Step name implemented by this step.
+            OS path to the results file for this step.
+        """
+        return self.__results_dir_path
+
+    @property
+    def work_dir_path(self):
+        """
+        Get the OS path to the results file for this step.
+        Default from factory:  tssc-results/tssc-results.yml
+
+        Returns
+        -------
+        str
+            OS path to the results file for this step.
+        """
+        return self.__work_dir_path
+
+    @property
+    def step_name(self):
+        """
+        Getter for the TSSC Step name implemented by this step.
+        Returns
+        -------
+        str
+            TSSC step name implemented by this step.
         """
         return self.config.step_name
 
     @property
-    def sub_step_name(self):
-        """Getter for the Sub Step name implemented by this step.
-
-        Returns
-        -------
-        str
-            Sub step name implemented by this step.
+    def step_result(self):
         """
-        return self.config.sub_step_name
+        """
+        return self.__step_result
+
+    @property
+    def workflow_result(self):
+        """
+        """
+        return self.__workflow_result
 
     @staticmethod
     @abstractmethod
@@ -258,11 +308,12 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         missing_required_config_keys = []
         for required_config_key in self.required_runtime_step_config_keys():
-            if ((required_config_key not in runtime_step_config) or \
-                    ((not runtime_step_config[required_config_key]) and  \
-                    (not isinstance(runtime_step_config[required_config_key], bool)))):
+            if ((required_config_key not in runtime_step_config) or
+                    ((not runtime_step_config[required_config_key]) and
+                     (not isinstance(runtime_step_config[required_config_key], bool)))):
                 missing_required_config_keys.append(required_config_key)
 
+        # todo: should this be assertion?
         assert (not missing_required_config_keys), \
             "The runtime step configuration (" + \
             f"{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing " + \
@@ -273,13 +324,11 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         Wrapper for running the implemented step.
         """
 
-        StepImplementer.__print_section_title(
-            f"Step Start - {self.step_name} - {self.sub_step_name}"
-        )
+        StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
 
         # print information about theconfiguration
         StepImplementer.__print_section_title(
-            f"Configuration - {self.step_name} - {self.sub_step_name}",
+            f"Configuration - {self.step_name}",
             div_char="-",
             indent=1
         )
@@ -317,7 +366,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         # validate the runtime step configuration
         StepImplementer.__print_section_title(
-            f"Standard Out - {self.step_name} - {self.sub_step_name}",
+            f"Standard Out - {self.step_name}",
             div_char="-",
             indent=1
         )
@@ -333,123 +382,21 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             indent_level=2
         )
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
-            results = self._run_step()
-            self.write_results(results)
+            self._run_step()
+            self.write_workflow_result()
 
         # print the step run results
         StepImplementer.__print_section_title(
-            f"Results - {self.step_name} - {self.sub_step_name}",
+            f"Results - {self.step_name}",
             div_char="-",
             indent=1
         )
+
         StepImplementer.__print_data('Results File Path', self.results_file_path)
-        StepImplementer.__print_data('Results', results)
-        StepImplementer.__print_section_title(f"Step End - {self.step_name} - {self.sub_step_name}")
 
-    def write_results(self, results):
-        """
-        Write the given results to the run's results file.
+        StepImplementer.__print_data('Results', self.step_result.get_step_result())
 
-        Parameters
-        ----------
-        results : dict
-            Results to write to the run's specific results file that is set as part of the factory
-
-        Raises
-        ------
-        TSSCException
-            Existing results file has invalid yaml or existing results file does not have expected
-            element.
-        """
-        #If you are looking at this code you are going to need this:
-        # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
-        if results is not None:
-            current_results = self.current_results()
-            if current_results:
-                if current_results[StepImplementer.__TSSC_RESULTS_KEY].get(self.step_name):
-                    updated_step_results = {
-                        StepImplementer.__TSSC_RESULTS_KEY: {
-                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name: {
-                                **current_results \
-                                  [StepImplementer.__TSSC_RESULTS_KEY] \
-                                  [self.step_name], \
-                                  **results
-                            }
-                        }
-                    }
-                else:
-                    updated_step_results = {
-                        StepImplementer.__TSSC_RESULTS_KEY: {
-                            **current_results[StepImplementer.__TSSC_RESULTS_KEY],
-                            self.step_name: {
-                                **results
-                            }
-                        }
-                    }
-            else:
-                updated_step_results = {
-                    StepImplementer.__TSSC_RESULTS_KEY: {
-                        self.step_name: {
-                            **results
-                        }
-                    }
-                }
-            step_results_file_path = self.results_file_path
-            with open(step_results_file_path, 'w') as step_results_file:
-                yaml.dump(updated_step_results, step_results_file)
-
-    def current_results(self):
-        """
-        Get the results of the TSSC so far from other step implementers that have already been run
-        for this step and other previous steps.
-
-        Returns
-        -------
-        dict
-            The results of the TSSC so far from other step implementers that have already been run
-            for this step and other previous steps.
-
-        Raises
-        ------
-        TSSCException
-            Existing results file has invalid yaml or existing results file does not have expected
-            element.
-        """
-        if not os.path.exists(self.__results_dir_path):
-            os.makedirs(self.__results_dir_path)
-
-        step_results_file_path = self.results_file_path
-
-        current_results = None
-        if os.path.exists(step_results_file_path):
-            with open(step_results_file_path, 'r') as step_results_file:
-                try:
-                    current_results = yaml.safe_load(step_results_file.read())
-                except (yaml.scanner.ScannerError, yaml.parser.ParserError, ValueError) as err:
-                    raise TSSCException(
-                        'Existing results file'
-                        +' (' + step_results_file_path + ')'
-                        +' has invalid yaml: ' + str(err)
-                    ) from err
-
-            if current_results:
-                if StepImplementer.__TSSC_RESULTS_KEY not in current_results:
-                    raise TSSCException(
-                        'Existing results file'
-                        +' (' + step_results_file_path + ')'
-                        +' does not have expected top level element'
-                        +' (' + StepImplementer.__TSSC_RESULTS_KEY + '): '
-                        + str(current_results)
-                    )
-        else:
-            current_results = {
-                StepImplementer.__TSSC_RESULTS_KEY: {
-                    self.step_name: {}
-                }
-            }
-
-        return current_results
+        StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
     def get_config_value(self, key):
         """Convenience function for self.config.get_config_value.
@@ -475,12 +422,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         ----------
         key : str
             Key to get the configuration value for.
-        environment : str, optional
-            Environment to include the configuration for if running in the context of
-            a specific environment.
-        defaults : dict, optional
-            If no value for the given configuration key found in any of the configuration
-            sources then use these defaults as last resort.
 
         Returns
         -------
@@ -542,50 +483,18 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return result
 
-    def get_step_results(self, step_name):
-        """Get the results of a specific step.
-
-        Parameters
-        ----------
-        step_name : str
-            TSSC step name to get the results for
-
-        Returns
-        -------
-        dict
-            The results of a specific step. None if results DNE
-        """
-        return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY].get(step_name)
-
-    def current_step_results(self):
-        """
-        Get the results of this step so far from other step implementers that have already been run.
-
-        Returns
-        -------
-        dict
-            The results of this step so far from other step implementers that have already been run
-
-        Raises
-        ------
-        TSSCException
-            Existing results file has invalid yaml or existing results file does not have expected
-            element.
-        """
-        return self.get_step_results(self.step_name)
-
     def create_working_folder(self):
         """
         If it does not exist, create working folder
+        Working folder default: tssc-working/step-name
+                        eg: tssc-working/step-name/user-supplied-name
 
         Returns
         -------
         str
             return a string to the absolute path
         """
-        if not os.path.exists(self.__work_dir_path):
-            os.makedirs(self.__work_dir_path)
-        step_path = os.path.join(self.__work_dir_path, self.step_name)
+        step_path = os.path.join(self.work_dir_path, self.step_name)
         if not os.path.exists(step_path):
             os.makedirs(step_path)
 
@@ -607,19 +516,17 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         """
+
+        # eg: tssc-working
         working_folder = self.create_working_folder()
-
         file_path = os.path.join(working_folder, filename)
+        # sub-directories might be passed, eg: tssc-working/foo
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-        # if given contents write it to file
-        # else just touch empty file
-        #
-        # NOTE: in either case auto create any missing parent directories
         if contents is not None:
             with open(file_path, 'wb') as file:
                 file.write(contents)
         else:
-            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             Path(file_path).touch()
 
         return file_path
@@ -666,13 +573,14 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         indent : int
             Amount to indent the title by and then the content by this +1
         """
+        printer = pprint.PrettyPrinter()
         StepImplementer.__print_indented(
             text=title,
             indent=indent
         )
         StepImplementer.__print_indented(
-            text=json.dumps(data, indent=4),
-            indent=indent+1
+            text=printer.pformat(data),
+            indent=indent + 1
         )
         print()
 
@@ -695,3 +603,49 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             text=text,
             prefix=" " * (4 * indent)
         ))
+
+    # WORKFLOW helpers
+    def get_artifact_value(self, artifact_name, step_name=None, sub_step_name=None):
+        """
+        Get the value for the artifact.
+        If step_name is provide, search the artifacts step_name only
+        If step_name and sub_step_name,  search the artifacts step_name/sub_step only
+        Otherwise, search for the FIRST occurrence of the artifact
+        """
+        return (
+            self.workflow_result.get_artifact_value(
+                artifact=artifact_name,
+                step_name=step_name,
+                sub_step_name=sub_step_name
+            )
+        )
+
+    def get_step_result(self, step_name=None):
+        """
+        Pulls the step from the list.
+        """
+        return self.workflow_result.get_step_result(
+            step_name=step_name
+        )
+
+    @property
+    def workflow_result_pickle_file_path(self):
+        """
+        {folder}/tssc-working/tssc-results.pkl
+        """
+        return os.path.join(self.work_dir_path, 'tssc-results.pkl')
+
+    def write_workflow_result(self):
+        """
+        1. Write the 'pickle' file
+          - serialized WorkflowList objects
+          - internal working file
+          - input and output
+          - eg: tssc-working/tssc-results.pkl
+        2. Write the 'yml' file
+          - externally available file
+          - output only
+          - eg: tssc-results/tssc-results.yml
+        """
+        self.workflow_result.write_to_pickle_file(self.workflow_result_pickle_file_path)
+        self.workflow_result.write_results_to_yml_file(self.results_file_path)

@@ -14,6 +14,7 @@ from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
 from tests.helpers.test_utils import create_sops_side_effect
 
+
 class TestInit(BaseTSSCTestCase):
     def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
         if argv is None:
@@ -74,12 +75,12 @@ class TestInit(BaseTSSCTestCase):
         self._run_main_test(['--step', 'generate-metadata', '--config', 'does-not-exist.yml'], 101)
 
     def test_config_file_not_json_or_yaml(self):
-        self._run_main_test(['--step', 'generate-metadata'], 102,[
+        self._run_main_test(['--step', 'generate-metadata'], 102, [
             {
                 'name': 'tssc-config.yaml',
                 'contents': ": blarg this: is {} bad syntax"
             }]
-        )
+                            )
 
     def test_config_file_no_root_tssc_config_key(self):
         self._run_main_test(['--step', 'generate-metadata'], 102, [
@@ -87,7 +88,7 @@ class TestInit(BaseTSSCTestCase):
                 'name': 'tssc-config.yaml',
                 'contents': '{}'
             }]
-        )
+                            )
 
     def test_config_file_valid_yaml(self):
         self._run_main_test(['--step', 'foo'], None, [
@@ -99,10 +100,10 @@ class TestInit(BaseTSSCTestCase):
                         implementer: 'tests.helpers.sample_step_implementers.FooStepImplementer'
                 '''
             }]
-        )
+                            )
 
     def test_config_file_valid_json(self):
-        self._run_main_test(['--step', 'foo'], None,[
+        self._run_main_test(['--step', 'foo'], None, [
             {
                 'name': 'tssc-config.json',
                 'contents': '''
@@ -115,7 +116,7 @@ class TestInit(BaseTSSCTestCase):
                 }
                 '''
             }]
-        )
+                            )
 
     def test_required_step_config_missing(self):
         self._run_main_test(['--step', 'required-step-config-test'], 200, [
@@ -125,10 +126,10 @@ class TestInit(BaseTSSCTestCase):
                 tssc-config: {}
                 '''
             }]
-        )
+                            )
 
     def test_required_step_config_pass_via_config_file(self):
-        self._run_main_test(['--step', 'required-step-config-test'], None,[
+        self._run_main_test(['--step', 'required-step-config-test'], None, [
             {
                 'name': 'tssc-config.yaml',
                 'contents': '''---
@@ -139,7 +140,7 @@ class TestInit(BaseTSSCTestCase):
                                 required-config-key: "hello world"
                 '''
             }]
-        )
+                            )
 
     def test_required_step_config_pass_via_runtime_arg_missing(self):
         self._run_main_test(
@@ -396,8 +397,8 @@ class TestInit(BaseTSSCTestCase):
                 'tssc-results': {
                     'required-step-config-test': {
                         'environment-name': 'DEV',
-                        'kube-api-token':'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
-                        'required-config-key':'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
+                        'kube-api-token': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
+                        'required-config-key': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
                     }
                 }
             }
@@ -424,7 +425,7 @@ class TestInit(BaseTSSCTestCase):
         )
 
         mock_decrypted_value = 'mock decrypted value'
-        sops_mock.side_effect=create_sops_side_effect(mock_decrypted_value)
+        sops_mock.side_effect = create_sops_side_effect(mock_decrypted_value)
         self._run_main_test(
             argv=[
                 '--step', 'required-step-config-test',
