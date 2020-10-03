@@ -9,7 +9,6 @@ from tests.helpers.base_step_implementer_test_case import \
 from tests.helpers.test_utils import Any, StringRegexParam
 from tssc.step_implementers.sign_container_image import CurlPush
 
-
 class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase):
     @staticmethod
     def generate_config():
@@ -119,7 +118,7 @@ class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase)
                 ''', 'utf-8')
             )
 
-            sh.curl.side_effect = sh.ErrorReturnCode('CurlPush', b'mock stdout', b'mock error about curl runtime')
+            curl_mock.side_effect = sh.ErrorReturnCode('CurlPush', b'mock stdout', b'mock error about curl runtime')
             with self.assertRaisesRegex(
                 RuntimeError,
                 r'Unexpected error curling signature file to signature server.*'

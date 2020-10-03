@@ -1,6 +1,47 @@
 """StepImplementer for the sign-container-image step using Podman to sign an image.
 
-TODO: doc me
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key                        | Required? | Default | Description
+|------------------------------------------|-----------|---------|-------------
+| `container-image-signer-pgp-private-key` | True      |         | PGP Private Key /
+                                                                   used to sign
+
+
+Expected Previous Step Results
+------------------------------
+Results expected from previous steps that this step requires.
+
+| Step Name             | Result Key             | Description
+|-----------------------|------------------------|-------------------------------
+| `container-image-tag` | `push-container-image` | Tag of the container image
+
+
+Results
+-------
+Results output by this step.
+
+| Result Key                                          | Description
+|-----------------------------------------------------|------------
+| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for /
+                                                        image signing
+| `container-image-signature-file-path`               | File path where signature is located /
+                                                        eg) /tmp/jkeam/hello-node@/
+                                                            sha256=2cbdb73c9177e63/
+                                                            e85d267f738e99e368db3f/
+                                                            806eab4c541f5c6b719e69/
+                                                            f1a2b/signature-1
+| `container-image-signature-name`                    | Fully qualified name of the name /
+                                                        including organization, repo, and hash /
+                                                        eg) jkeam/hello-node@sha256=/
+                                                            2cbdb73c9177e63e85d267f738e9/
+                                                            9e368db3f806eab4c541f5c6b719/
+                                                            e69f1a2b/signature-1
 """
 
 import glob
@@ -70,7 +111,8 @@ class PodmanSign(StepImplementer):
 
         # get the uri to the image to sign
         push_container_image_step_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
-        assert 'container-image-tag' in push_container_image_step_results, \
+        assert push_container_image_step_results is not None and \
+            'container-image-tag' in push_container_image_step_results, \
             "Expected key (container-image-tag) to be in step results from step" \
             f" ({DefaultSteps.PUSH_CONTAINER_IMAGE}): {push_container_image_step_results}"
         container_image_tag = push_container_image_step_results.get('container-image-tag')
@@ -183,7 +225,7 @@ class PodmanSign(StepImplementer):
             recursive=True
         )
 
-        if len(signature_file_paths) > 1:
+        if len(signature_file_paths) != 1:
             raise RuntimeError(
                 f"Unexpected number of signature files, expected 1: {signature_file_paths}"
             )
