@@ -38,14 +38,16 @@ Results expected from previous steps that this step requires.
                                                                  9e368db3f806eab4c541f5c6b719/
                                                                  e69f1a2b/signature-1
 
+
 Results
 -------
 Results output by this step.
 
-| Result Key  | Description
-|-------------|------------
-TODO: figure out output
-
+| Result Key                            | Description
+|---------------------------------------|------------
+| `container-image-signature-url`       | URL signature was uploaded to
+| `container-image-signature-file-md5`  | MD5 hash of signature file
+| `container-image-signature-file-sha1` | SHA1 Hash of signature file
 """
 
 import hashlib
