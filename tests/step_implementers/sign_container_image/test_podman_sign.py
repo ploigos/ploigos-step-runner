@@ -1,3 +1,7 @@
+"""Test Podman Sign
+
+Tests signature generation for a container image.
+"""
 import os
 from io import IOBase
 from unittest.mock import patch
@@ -6,17 +10,22 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any, StringRegexParam
-from tssc.step_implementers.sign_container_image import CurlPush
+from tests.helpers.test_utils import Any
 
 class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCase):
+    """Test Step Implementer Sign Container Image Using Podman
+
+    Test runner for the PodmanSign.
+    """
 
     @staticmethod
-    def gpg_side_effect(*args, **kwargs):
+    def gpg_side_effect(*_args, **kwargs):
+        """Side effect for gpg key load"""
         kwargs['_out']('fpr:::::::::DD7208BA0A6359F65B906B29CF4AC14A3D109637:')
 
     @staticmethod
     def generate_config():
+        """Generate tssc config for tests"""
         return {
             'tssc-config': {
                 'sign-container-image': {
@@ -40,9 +49,10 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
                 }
             }
         }
-    
+
     @staticmethod
     def generate_results(temp_dir):
+        """Generate valid results"""
         container_image_tag = 'tssc:hello-node:latest'
         temp_dir.makedir('tssc-results')
         temp_dir.write(
@@ -56,6 +66,7 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
         return container_image_tag
 
     def test_push_container_signature_specify_podman_implementer_missing_config_values(self):
+        """Test for missing config values"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             config['tssc-config']['sign-container-image']['config'] = {}
@@ -63,29 +74,46 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
 
             with self.assertRaisesRegex(
                 AssertionError,
-                r"The runtime step configuration \(\{\}\) is missing the required configuration keys "
-                r"\(\['container-image-signer-pgp-private-key'\]\)"
+                r"The runtime step configuration \(\{\}\) is missing the required configuration "
+                r"keys \(\['container-image-signer-pgp-private-key'\]\)"
             ):
-                self.run_step_test_with_result_validation(temp_dir, 'sign-container-image', config, expected_step_results)
+                self.run_step_test_with_result_validation(
+                    temp_dir,
+                    'sign-container-image',
+                    config,
+                    expected_step_results
+                )
 
     def test_push_container_signature_specify_podman_implementer_missing_config_step_values(self):
+        """Test for missing result step values"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             expected_step_results = {'tssc-results': {'sign-container-image': {}}}
 
             with self.assertRaisesRegex(
                 AssertionError,
-                r"Expected key \(container-image-tag\) to be in step results from step \(push-container-image\): None"
+                r"Expected key \(container-image-tag\) to be in step results from step " \
+                r"\(push-container-image\): None"
             ):
-                self.run_step_test_with_result_validation(temp_dir, 'sign-container-image', config, expected_step_results)
+                self.run_step_test_with_result_validation(
+                    temp_dir,
+                    'sign-container-image',
+                    config,
+                    expected_step_results
+                )
 
     @patch('sh.gpg', create=True)
     def test_push_container_signature_specify_podman_implementer_pgp_failure(self, gpg_mock):
+        """Test for pgp key load failure"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             TestStepImplementerSignContainerImagePodmanSign.generate_results(temp_dir)
 
-            gpg_mock.side_effect = sh.ErrorReturnCode('PodmanSign', b'mock stdout', b'mock error about curl runtime')
+            gpg_mock.side_effect = sh.ErrorReturnCode(
+                'PodmanSign',
+                b'mock stdout',
+                b'mock error about curl runtime'
+            )
             with self.assertRaisesRegex(
                 RuntimeError,
                 r'Unexpected error importing pgp private key'
@@ -99,6 +127,7 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
 
     @patch('sh.gpg', create=True)
     def test_push_container_signature_specify_podman_implementer_pgp_no_fingerprint(self, gpg_mock):
+        """Test for pgp key missing fingerprint"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             TestStepImplementerSignContainerImagePodmanSign.generate_results(temp_dir)
@@ -117,13 +146,22 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
 
     @patch('sh.podman', create=True)
     @patch('sh.gpg', create=True)
-    def test_push_container_signature_specify_podman_implementer_podman_failure(self, gpg_mock, podman_mock):
+    def test_push_container_signature_specify_podman_implementer_podman_failure(
+        self,
+        gpg_mock,
+        podman_mock
+    ):
+        """Test for podman sign failure"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             TestStepImplementerSignContainerImagePodmanSign.generate_results(temp_dir)
 
             gpg_mock.side_effect = TestStepImplementerSignContainerImagePodmanSign.gpg_side_effect
-            podman_mock.image.side_effect = sh.ErrorReturnCode('PodmanSign', b'mock stdout', b'mock error about curl runtime')
+            podman_mock.image.side_effect = sh.ErrorReturnCode(
+                'PodmanSign',
+                b'mock stdout',
+                b'mock error about curl runtime'
+            )
 
             with self.assertRaisesRegex(
                 RuntimeError,
@@ -138,7 +176,12 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
 
     @patch('sh.podman', create=True)
     @patch('sh.gpg', create=True)
-    def test_push_container_signature_specify_podman_implementer_with_wrong_number_of_signatures(self, gpg_mock, podman_mock):
+    def test_push_container_signature_specify_podman_implementer_with_wrong_number_of_signatures(
+        self,
+        gpg_mock,
+        _podman_mock
+    ):
+        """Test for invalid signature signing"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
             TestStepImplementerSignContainerImagePodmanSign.generate_results(temp_dir)
@@ -155,17 +198,27 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
                     expected_step_results=None
                 )
 
-
     @patch('sh.podman', create=True)
     @patch('sh.gpg', create=True)
-    def test_push_container_signature_specify_podman_implementer_success(self, gpg_mock, podman_mock):
+    def test_push_container_signature_specify_podman_implementer_success(
+        self,
+        gpg_mock,
+        podman_mock
+    ):
+        """Test for signature signing success"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImagePodmanSign.generate_config()
-            key = config['tssc-config']['sign-container-image']['config']['container-image-signer-pgp-private-key']
-
+            config_dict = config['tssc-config']['sign-container-image']['config']
+            key = config_dict['container-image-signer-pgp-private-key']
             image_name = TestStepImplementerSignContainerImagePodmanSign.generate_results(temp_dir)
 
-            signature_dir = os.path.join(temp_dir.path, 'tssc-working', 'sign-container-image', 'image-signature', 'hello-node')
+            signature_dir = os.path.join(
+                temp_dir.path,
+                'tssc-working',
+                'sign-container-image',
+                'image-signature',
+                'hello-node'
+            )
             signature_file = os.path.join(signature_dir, 'signature-1')
             temp_dir.makedir(signature_dir)
             temp_dir.write(signature_file, b'signature')
@@ -185,7 +238,12 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
                 }
             }
 
-            self.run_step_test_with_result_validation(temp_dir, 'sign-container-image', config, expected_step_results)
+            self.run_step_test_with_result_validation(
+                temp_dir,
+                'sign-container-image',
+                config,
+                expected_step_results
+            )
             gpg_mock.assert_called_once_with(
                 '--import',
                 '--fingerprint',
