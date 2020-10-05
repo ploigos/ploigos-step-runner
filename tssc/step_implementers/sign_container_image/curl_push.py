@@ -187,6 +187,7 @@ class CurlPush(StepImplementer):
             # -s: Silent
             # -S: Show error
             # -f: Don't print out failure document
+            # -v: Verbose
             sh.curl(  # pylint: disable=no-member
                 '-sSfv',
                 '-X', 'PUT',

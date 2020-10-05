@@ -132,7 +132,6 @@ class PodmanSign(StepImplementer):
             image_signatures_directory=image_signatures_directory,
             container_image_tag=container_image_tag
         )
-
         signature_name = os.path.relpath(signature_file_path, image_signatures_directory)
 
         return {
