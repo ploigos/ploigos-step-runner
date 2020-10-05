@@ -57,7 +57,7 @@ class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase)
                 )
 
     def test_push_container_signature_specify_curl_implementer_missing_config_step_values(self):
-        """Test for missing result step values"""
+        """Test for missing specific result step values"""
         with TempDirectory() as temp_dir:
             config = TestStepImplementerSignContainerImageCurlPush.generate_config()
             expected_step_results = {'tssc-results': {'sign-container-image': {}}}
@@ -66,6 +66,29 @@ class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase)
                 RuntimeError,
                 r'Missing container-image-signature-file-path '
                 r'step results from sign-container-image'
+            ):
+                self.run_step_test_with_result_validation(
+                    temp_dir,
+                    'sign-container-image',
+                    config,
+                    expected_step_results
+                )
+
+    def test_push_container_signature_specify_curl_implementer_missing_config_step(self):
+        """Test for missing result step for sign-container-image"""
+        with TempDirectory() as temp_dir:
+            config = TestStepImplementerSignContainerImageCurlPush.generate_config()
+            temp_dir.write(
+                'tssc-results/tssc-results.yml',
+                bytes(
+                    '''tssc-results:
+                  sign-container-image:
+                ''', 'utf-8')
+            )
+            expected_step_results = {'tssc-results': {}}
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r'Missing step results from sign-container-image'
             ):
                 self.run_step_test_with_result_validation(
                     temp_dir,

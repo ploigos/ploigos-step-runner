@@ -71,8 +71,7 @@ REQUIRED_CONFIG_KEYS = [
 ]
 
 class CurlPush(StepImplementer):
-    """StepImplementer for the push-container-signature step using
-    """
+    """StepImplementer for the push-container-signature step using"""
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -107,6 +106,7 @@ class CurlPush(StepImplementer):
         return REQUIRED_CONFIG_KEYS
 
     def _run_step(self):
+        """Run step and perform the curl"""
         # extract configs
         signature_server_url = self.get_config_value('container-image-signature-server-url')
         signature_server_username = self.get_config_value(
@@ -147,8 +147,7 @@ class CurlPush(StepImplementer):
 
     @staticmethod
     def __verify_previous_sign_container_image_step_results(step_results, keys):
-        """Verifies that the given step results has the expected keys.
-        """
+        """Verifies that the given step results has the expected keys"""
         if step_results is None:
             raise RuntimeError(f"Missing step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}")
 
@@ -167,6 +166,7 @@ class CurlPush(StepImplementer):
             signature_server_username,
             signature_server_password
     ):
+        """Sends the signature file"""
         # remove any trailing / from url
         signature_server_url = re.sub(r'/$', '', signature_server_url)
         container_image_signature_url = f"{signature_server_url}/{container_image_signature_name}"
