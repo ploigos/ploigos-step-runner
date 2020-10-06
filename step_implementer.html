@@ -66,6 +66,8 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     RUNTIME_VULNERABILITY_SCAN = &#39;runtime-vulnerability-scan&#39;
     CANARY_TEST = &#39;canary-test&#39;
     PUBLISH_WORKFLOW_RESULTS = &#39;publish-workflow-results&#39;
+    SIGN_CONTAINER_IMAGE = &#39;sign-container-image&#39;
+
 
 class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-public-methods
@@ -620,6 +622,26 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return os.path.abspath(step_path)
 
+    def create_working_dir_sub_dir(self, sub_dir_relative_path):
+        &#34;&#34;&#34;Creates a sub directory in the working directory.
+
+        Parameters
+        ----------
+        sub_dir_relative_path : str
+            Sub directory path to create under the working directory.
+
+        Returns
+        -------
+        str
+            Absolute path to the newly created sub directory.
+        &#34;&#34;&#34;
+        working_folder = self.create_working_folder()
+
+        sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
+        os.makedirs(sub_dir_path, exist_ok=True)
+
+        return sub_dir_path
+
     def write_working_file(self, filename, contents=None):
         &#34;&#34;&#34;
         Write content to filename in working directory
@@ -764,7 +786,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     UAT = &#39;uat&#39;
     RUNTIME_VULNERABILITY_SCAN = &#39;runtime-vulnerability-scan&#39;
     CANARY_TEST = &#39;canary-test&#39;
-    PUBLISH_WORKFLOW_RESULTS = &#39;publish-workflow-results&#39;</code></pre>
+    PUBLISH_WORKFLOW_RESULTS = &#39;publish-workflow-results&#39;
+    SIGN_CONTAINER_IMAGE = &#39;sign-container-image&#39;</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -817,6 +840,10 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <div class="desc"></div>
 </dd>
 <dt id="tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN"><code class="name">var <span class="ident">RUNTIME_VULNERABILITY_SCAN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementer.DefaultSteps.SIGN_CONTAINER_IMAGE"><code class="name">var <span class="ident">SIGN_CONTAINER_IMAGE</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1422,6 +1449,26 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 
         return os.path.abspath(step_path)
 
+    def create_working_dir_sub_dir(self, sub_dir_relative_path):
+        &#34;&#34;&#34;Creates a sub directory in the working directory.
+
+        Parameters
+        ----------
+        sub_dir_relative_path : str
+            Sub directory path to create under the working directory.
+
+        Returns
+        -------
+        str
+            Absolute path to the newly created sub directory.
+        &#34;&#34;&#34;
+        working_folder = self.create_working_folder()
+
+        sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
+        os.makedirs(sub_dir_path, exist_ok=True)
+
+        return sub_dir_path
+
     def write_working_file(self, filename, contents=None):
         &#34;&#34;&#34;
         Write content to filename in working directory
@@ -1547,6 +1594,8 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <li><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="step_implementers/push_artifacts/maven.html#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></li>
 <li><a title="tssc.step_implementers.push_artifacts.npm.NPM" href="step_implementers/push_artifacts/npm.html#tssc.step_implementers.push_artifacts.npm.NPM">NPM</a></li>
 <li><a title="tssc.step_implementers.push_container_image.skopeo.Skopeo" href="step_implementers/push_container_image/skopeo.html#tssc.step_implementers.push_container_image.skopeo.Skopeo">Skopeo</a></li>
+<li><a title="tssc.step_implementers.sign_container_image.curl_push.CurlPush" href="step_implementers/sign_container_image/curl_push.html#tssc.step_implementers.sign_container_image.curl_push.CurlPush">CurlPush</a></li>
+<li><a title="tssc.step_implementers.sign_container_image.podman_sign.PodmanSign" href="step_implementers/sign_container_image/podman_sign.html#tssc.step_implementers.sign_container_image.podman_sign.PodmanSign">PodmanSign</a></li>
 <li><a title="tssc.step_implementers.static_code_analysis.sonarqube.SonarQube" href="step_implementers/static_code_analysis/sonarqube.html#tssc.step_implementers.static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
 <li><a title="tssc.step_implementers.tag_source.git.Git" href="step_implementers/tag_source/git.html#tssc.step_implementers.tag_source.git.Git">Git</a></li>
 <li><a title="tssc.step_implementers.uat.maven.Maven" href="step_implementers/uat/maven.html#tssc.step_implementers.uat.maven.Maven">Maven</a></li>
@@ -1866,6 +1915,46 @@ def sub_step_name(self):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir"><code class="name flex">
+<span>def <span class="ident">create_working_dir_sub_dir</span></span>(<span>self, sub_dir_relative_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a sub directory in the working directory.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>sub_dir_relative_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Sub directory path to create under the working directory.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Absolute path to the newly created sub directory.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_working_dir_sub_dir(self, sub_dir_relative_path):
+    &#34;&#34;&#34;Creates a sub directory in the working directory.
+
+    Parameters
+    ----------
+    sub_dir_relative_path : str
+        Sub directory path to create under the working directory.
+
+    Returns
+    -------
+    str
+        Absolute path to the newly created sub directory.
+    &#34;&#34;&#34;
+    working_folder = self.create_working_folder()
+
+    sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
+    os.makedirs(sub_dir_path, exist_ok=True)
+
+    return sub_dir_path</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.create_working_folder"><code class="name flex">
 <span>def <span class="ident">create_working_folder</span></span>(<span>self)</span>
 </code></dt>
@@ -2468,6 +2557,7 @@ element.</dd>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS" href="#tssc.step_implementer.DefaultSteps.PUSH_ARTIFACTS">PUSH_ARTIFACTS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.PUSH_CONTAINER_IMAGE">PUSH_CONTAINER_IMAGE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN" href="#tssc.step_implementer.DefaultSteps.RUNTIME_VULNERABILITY_SCAN">RUNTIME_VULNERABILITY_SCAN</a></code></li>
+<li><code><a title="tssc.step_implementer.DefaultSteps.SIGN_CONTAINER_IMAGE" href="#tssc.step_implementer.DefaultSteps.SIGN_CONTAINER_IMAGE">SIGN_CONTAINER_IMAGE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.STATIC_CODE_ANALYSIS" href="#tssc.step_implementer.DefaultSteps.STATIC_CODE_ANALYSIS">STATIC_CODE_ANALYSIS</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.TAG_SOURCE" href="#tssc.step_implementer.DefaultSteps.TAG_SOURCE">TAG_SOURCE</a></code></li>
 <li><code><a title="tssc.step_implementer.DefaultSteps.UAT" href="#tssc.step_implementer.DefaultSteps.UAT">UAT</a></code></li>
@@ -2478,6 +2568,7 @@ element.</dd>
 <h4><code><a title="tssc.step_implementer.StepImplementer" href="#tssc.step_implementer.StepImplementer">StepImplementer</a></code></h4>
 <ul class="">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>

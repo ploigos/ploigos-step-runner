@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>tssc.step_implementers.sign_container_image.curl_push API documentation</title>
+<meta name="description" content="StepImplementer for the sign-container-image step using Podman to push an image signature using …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tssc.step_implementers.sign_container_image.curl_push</code></h1>
+</header>
+<section id="section-intro">
+<p>StepImplementer for the sign-container-image step using Podman to push an image signature using</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>container-image-signature-server-url</code></td>
+<td>True</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Url of the signature server</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>container-image-signature-server-username</code></td>
+<td>True</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Username to log onto the signature server</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>container-image-signature-server-password</code></td>
+<td>True</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Password to log onto the signature server</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<table>
+<thead>
+<tr>
+<th>Step Name</th>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sign-container-image</code></td>
+<td><code>container-image-signature-file-path</code></td>
+<td>File path where signature /</td>
+</tr>
+<tr>
+<td>is located /</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>eg) /tmp/jkeam/hello-node@/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sha256=2cbdb73c9177e63/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>e85d267f738e99e368db3f/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>806eab4c541f5c6b719e69/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>f1a2b/signature-1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>sign-container-image</code></td>
+<td><code>container-image-signature-name</code></td>
+<td>Fully qualified name of the /</td>
+</tr>
+<tr>
+<td>name of the image signature, /</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>including: /</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>organization, repo, and hash /</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>eg) jkeam/hello-node@sha256=/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2cbdb73c9177e63e85d267f738e9/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>9e368db3f806eab4c541f5c6b719/</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>e69f1a2b/signature-1</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>container-image-signature-url</code></td>
+<td>URL signature was uploaded to</td>
+</tr>
+<tr>
+<td><code>container-image-signature-file-md5</code></td>
+<td>MD5 hash of signature file</td>
+</tr>
+<tr>
+<td><code>container-image-signature-file-sha1</code></td>
+<td>SHA1 Hash of signature file</td>
+</tr>
+</tbody>
+</table>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;StepImplementer for the sign-container-image step using Podman to push an image signature using
+
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key                           | Required? | Default  | Description
+|---------------------------------------------|-----------|----------|-------------
+| `container-image-signature-server-url`      | True      |          |
+    Url of the signature server
+| `container-image-signature-server-username` | True      |          |
+    Username to log onto the signature server
+| `container-image-signature-server-password` | True      |          |
+    Password to log onto the signature server
+
+
+Expected Previous Step Results
+------------------------------
+Results expected from previous steps that this step requires.
+
+| Step Name             | Result Key                           | Description
+|-----------------------|--------------------------------------|-------------------------------
+| `sign-container-image`| `container-image-signature-file-path`| File path where signature /
+                                                                 is located /
+                                                                 eg) /tmp/jkeam/hello-node@/
+                                                                     sha256=2cbdb73c9177e63/
+                                                                     e85d267f738e99e368db3f/
+                                                                     806eab4c541f5c6b719e69/
+                                                                     f1a2b/signature-1
+| `sign-container-image`| `container-image-signature-name`     | Fully qualified name of the /
+                                                                 name of the image signature, /
+                                                                 including: /
+                                                                 organization, repo, and hash /
+                                                                 eg) jkeam/hello-node@sha256=/
+                                                                 2cbdb73c9177e63e85d267f738e9/
+                                                                 9e368db3f806eab4c541f5c6b719/
+                                                                 e69f1a2b/signature-1
+
+
+Results
+-------
+Results output by this step.
+
+| Result Key                            | Description
+|---------------------------------------|------------
+| `container-image-signature-url`       | URL signature was uploaded to
+| `container-image-signature-file-md5`  | MD5 hash of signature file
+| `container-image-signature-file-sha1` | SHA1 Hash of signature file
+&#34;&#34;&#34;
+
+import hashlib
+import re
+import sys
+from io import StringIO
+from operator import itemgetter
+
+import sh
+from tssc import StepImplementer
+from tssc.step_implementer import DefaultSteps
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+
+DEFAULT_CONFIG = {
+}
+
+REQUIRED_CONFIG_KEYS = [
+    &#39;container-image-signature-server-url&#39;,
+    &#39;container-image-signature-server-username&#39;,
+    &#39;container-image-signature-server-password&#39;
+]
+
+class CurlPush(StepImplementer):
+    &#34;&#34;&#34;StepImplementer for the push-container-signature step using&#34;&#34;&#34;
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self):
+        &#34;&#34;&#34;Run step and perform the curl&#34;&#34;&#34;
+        # extract configs
+        signature_server_url = self.get_config_value(&#39;container-image-signature-server-url&#39;)
+        signature_server_username = self.get_config_value(
+            &#39;container-image-signature-server-username&#39;
+        )
+        signature_server_password = self.get_config_value(
+            &#39;container-image-signature-server-password&#39;
+        )
+
+        # extract step results
+        previous_sign_container_image_step_results = self.get_step_results(
+            DefaultSteps.SIGN_CONTAINER_IMAGE
+        )
+        CurlPush.__verify_previous_sign_container_image_step_results(
+            previous_sign_container_image_step_results,
+            [&#39;container-image-signature-file-path&#39;, &#39;container-image-signature-name&#39;]
+        )
+        container_image_signature_file_path, container_image_signature_name = itemgetter(
+            &#39;container-image-signature-file-path&#39;,
+            &#39;container-image-signature-name&#39;
+        )(previous_sign_container_image_step_results)
+
+        # upload
+        container_image_signature_url, signature_file_md5, signature_file_sha1 = \
+            CurlPush.__curl_file(
+                container_image_signature_file_path=container_image_signature_file_path,
+                container_image_signature_name=container_image_signature_name,
+                signature_server_url=signature_server_url,
+                signature_server_username=signature_server_username,
+                signature_server_password=signature_server_password
+            )
+
+        return {
+            &#39;container-image-signature-url&#39;: container_image_signature_url,
+            &#39;container-image-signature-file-md5&#39;: signature_file_md5,
+            &#39;container-image-signature-file-sha1&#39;: signature_file_sha1
+        }
+
+    @staticmethod
+    def __verify_previous_sign_container_image_step_results(step_results, keys):
+        &#34;&#34;&#34;Verifies that the given step results has the expected keys&#34;&#34;&#34;
+        if step_results is None:
+            raise RuntimeError(f&#34;Missing step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}&#34;)
+
+        for key in keys:
+            result = step_results.get(key)
+            if result is None:
+                raise RuntimeError(
+                    f&#34;Missing {key} step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}&#34;
+                )
+
+    @staticmethod
+    def __curl_file(
+            container_image_signature_file_path,
+            container_image_signature_name,
+            signature_server_url,
+            signature_server_username,
+            signature_server_password
+    ):
+        &#34;&#34;&#34;Sends the signature file&#34;&#34;&#34;
+        # remove any trailing / from url
+        signature_server_url = re.sub(r&#39;/$&#39;, &#39;&#39;, signature_server_url)
+        container_image_signature_url = f&#34;{signature_server_url}/{container_image_signature_name}&#34;
+
+        # calculate hashes
+        with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
+            container_image_signature_file_contents = container_image_signature_file.read()
+            signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
+            signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
+
+        try:
+            stdout_result = StringIO()
+            stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                stdout_result
+            ])
+
+            # -s: Silent
+            # -S: Show error
+            # -f: Don&#39;t print out failure document
+            # -v: Verbose
+            sh.curl(  # pylint: disable=no-member
+                &#39;-sSfv&#39;,
+                &#39;-X&#39;, &#39;PUT&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
+                &#39;--user&#39;, f&#34;{signature_server_username}:{signature_server_password}&#34;,
+                &#39;--data-binary&#39;, f&#34;@{container_image_signature_file_path}&#34;,
+                container_image_signature_url,
+                _out=stdout_callback,
+                _err_to_out=True,
+                _tee=&#39;out&#39;
+            )
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Unexpected error curling signature file to signature server: {error}&#34;
+            ) from error
+
+        return container_image_signature_url, signature_file_md5, signature_file_sha1</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="tssc.step_implementers.sign_container_image.curl_push.CurlPush"><code class="flex name class">
+<span>class <span class="ident">CurlPush</span></span>
+<span>(</span><span>results_dir_path, results_file_name, work_dir_path, config, environment=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>StepImplementer for the push-container-signature step using</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CurlPush(StepImplementer):
+    &#34;&#34;&#34;StepImplementer for the push-container-signature step using&#34;&#34;&#34;
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _run_step(self):
+        &#34;&#34;&#34;Run step and perform the curl&#34;&#34;&#34;
+        # extract configs
+        signature_server_url = self.get_config_value(&#39;container-image-signature-server-url&#39;)
+        signature_server_username = self.get_config_value(
+            &#39;container-image-signature-server-username&#39;
+        )
+        signature_server_password = self.get_config_value(
+            &#39;container-image-signature-server-password&#39;
+        )
+
+        # extract step results
+        previous_sign_container_image_step_results = self.get_step_results(
+            DefaultSteps.SIGN_CONTAINER_IMAGE
+        )
+        CurlPush.__verify_previous_sign_container_image_step_results(
+            previous_sign_container_image_step_results,
+            [&#39;container-image-signature-file-path&#39;, &#39;container-image-signature-name&#39;]
+        )
+        container_image_signature_file_path, container_image_signature_name = itemgetter(
+            &#39;container-image-signature-file-path&#39;,
+            &#39;container-image-signature-name&#39;
+        )(previous_sign_container_image_step_results)
+
+        # upload
+        container_image_signature_url, signature_file_md5, signature_file_sha1 = \
+            CurlPush.__curl_file(
+                container_image_signature_file_path=container_image_signature_file_path,
+                container_image_signature_name=container_image_signature_name,
+                signature_server_url=signature_server_url,
+                signature_server_username=signature_server_username,
+                signature_server_password=signature_server_password
+            )
+
+        return {
+            &#39;container-image-signature-url&#39;: container_image_signature_url,
+            &#39;container-image-signature-file-md5&#39;: signature_file_md5,
+            &#39;container-image-signature-file-sha1&#39;: signature_file_sha1
+        }
+
+    @staticmethod
+    def __verify_previous_sign_container_image_step_results(step_results, keys):
+        &#34;&#34;&#34;Verifies that the given step results has the expected keys&#34;&#34;&#34;
+        if step_results is None:
+            raise RuntimeError(f&#34;Missing step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}&#34;)
+
+        for key in keys:
+            result = step_results.get(key)
+            if result is None:
+                raise RuntimeError(
+                    f&#34;Missing {key} step results from {DefaultSteps.SIGN_CONTAINER_IMAGE}&#34;
+                )
+
+    @staticmethod
+    def __curl_file(
+            container_image_signature_file_path,
+            container_image_signature_name,
+            signature_server_url,
+            signature_server_username,
+            signature_server_password
+    ):
+        &#34;&#34;&#34;Sends the signature file&#34;&#34;&#34;
+        # remove any trailing / from url
+        signature_server_url = re.sub(r&#39;/$&#39;, &#39;&#39;, signature_server_url)
+        container_image_signature_url = f&#34;{signature_server_url}/{container_image_signature_name}&#34;
+
+        # calculate hashes
+        with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
+            container_image_signature_file_contents = container_image_signature_file.read()
+            signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
+            signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
+
+        try:
+            stdout_result = StringIO()
+            stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                stdout_result
+            ])
+
+            # -s: Silent
+            # -S: Show error
+            # -f: Don&#39;t print out failure document
+            # -v: Verbose
+            sh.curl(  # pylint: disable=no-member
+                &#39;-sSfv&#39;,
+                &#39;-X&#39;, &#39;PUT&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
+                &#39;--user&#39;, f&#34;{signature_server_username}:{signature_server_password}&#34;,
+                &#39;--data-binary&#39;, f&#34;@{container_image_signature_file_path}&#34;,
+                container_image_signature_url,
+                _out=stdout_callback,
+                _err_to_out=True,
+                _tee=&#39;out&#39;
+            )
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Unexpected error curling signature file to signature server: {error}&#34;
+            ) from error
+
+        return container_image_signature_url, signature_file_md5, signature_file_sha1</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tssc.step_implementers.sign_container_image" href="index.html">tssc.step_implementers.sign_container_image</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="tssc.step_implementers.sign_container_image.curl_push.CurlPush" href="#tssc.step_implementers.sign_container_image.curl_push.CurlPush">CurlPush</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>
