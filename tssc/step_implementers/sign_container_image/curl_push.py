@@ -10,7 +10,7 @@ from runtime configuration.
 | Configuration Key                           | Required? | Default  | Description
 |---------------------------------------------|-----------|----------|-------------
 | `container-image-signature-server-url`      | True      |          |
-    Url where the signature server is located
+    Url of the signature server
 | `container-image-signature-server-username` | True      |          |
     Username to log onto the signature server
 | `container-image-signature-server-password` | True      |          |
@@ -31,7 +31,8 @@ Results expected from previous steps that this step requires.
                                                                      806eab4c541f5c6b719e69/
                                                                      f1a2b/signature-1
 | `sign-container-image`| `container-image-signature-name`     | Fully qualified name of the /
-                                                                 name -- including /
+                                                                 name of the image signature, /
+                                                                 including: /
                                                                  organization, repo, and hash /
                                                                  eg) jkeam/hello-node@sha256=/
                                                                  2cbdb73c9177e63e85d267f738e9/

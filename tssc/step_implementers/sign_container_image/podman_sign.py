@@ -10,7 +10,8 @@ from runtime configuration.
 | Configuration Key                        | Required? | Default | Description
 |------------------------------------------|-----------|---------|-------------
 | `container-image-signer-pgp-private-key` | True      |         | PGP Private Key /
-                                                                   used to sign
+                                                                   used to sign /
+                                                                   the image
 
 
 Expected Previous Step Results
@@ -145,7 +146,7 @@ class PodmanSign(StepImplementer):
     def __import_pgp_key(
         pgp_private_key
     ):
-        print("Import pgp private key to sign container image(s) with")
+        print("Import PGP private key to sign container image(s) with")
         try:
             # import the key
 

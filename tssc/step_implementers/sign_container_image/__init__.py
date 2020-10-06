@@ -8,8 +8,8 @@ accept minimally the following configuration options.
 
 | Configuration Key                           | Required? | Default | Description
 |---------------------------------------------|-----------|---------|-------------
-| `container-image-signature-server-url`      | True      |         | Url where the signature /
-                                                                      server is located
+| `container-image-signature-server-url`      | True      |         | Url of the signature /
+                                                                      server
 | `container-image-signature-server-username` | True      |         | Username to log onto /
                                                                       the signature server
 | `container-image-signature-server-password` | True      |         | Password to log onto /
@@ -28,14 +28,14 @@ minimally produce the following step results.
 | `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for /
                                                         image signing
 | `container-image-signature-file-path`               | File path where signature is located /
-                                                        eg) /tmp/jkeam/hello-node@/
+                                                        eg) /tmp/tssc-developer/hello-node@/
                                                             sha256=2cbdb73c9177e63/
                                                             e85d267f738e99e368db3f/
                                                             806eab4c541f5c6b719e69/
                                                             f1a2b/signature-1
 | `container-image-signature-name`                    | Fully qualified name of the name /
                                                         including organization, repo, and hash /
-                                                        eg) jkeam/hello-node@sha256=/
+                                                        eg) tssc-developer/hello-node@sha256=/
                                                             2cbdb73c9177e63e85d267f738e9/
                                                             9e368db3f806eab4c541f5c6b719/
                                                             e69f1a2b/signature-1
