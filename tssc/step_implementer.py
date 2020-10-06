@@ -37,6 +37,8 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     RUNTIME_VULNERABILITY_SCAN = 'runtime-vulnerability-scan'
     CANARY_TEST = 'canary-test'
     PUBLISH_WORKFLOW_RESULTS = 'publish-workflow-results'
+    SIGN_CONTAINER_IMAGE = 'sign-container-image'
+
 
 class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-public-methods
@@ -590,6 +592,26 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
             os.makedirs(step_path)
 
         return os.path.abspath(step_path)
+
+    def create_working_dir_sub_dir(self, sub_dir_relative_path):
+        """Creates a sub directory in the working directory.
+
+        Parameters
+        ----------
+        sub_dir_relative_path : str
+            Sub directory path to create under the working directory.
+
+        Returns
+        -------
+        str
+            Absolute path to the newly created sub directory.
+        """
+        working_folder = self.create_working_folder()
+
+        sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
+        os.makedirs(sub_dir_path, exist_ok=True)
+
+        return sub_dir_path
 
     def write_working_file(self, filename, contents=None):
         """
