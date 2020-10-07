@@ -165,7 +165,7 @@ class Maven(StepImplementer):
         maven_mirrors = ConfigValue.convert_leaves_to_values(
             self.get_config_value('maven-mirrors')
         )
-        return generate_maven_settings(self.create_working_folder(),
+        return generate_maven_settings(self.get_working_dir(),
                                        maven_servers,
                                        maven_repositories,
                                        maven_mirrors)
