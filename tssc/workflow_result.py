@@ -227,7 +227,7 @@ class WorkflowResult:
             with open(pickle_filename, 'rb') as file:
                 workflow_result = pickle.load(file)
                 if not isinstance(workflow_result, WorkflowResult):
-                    raise RuntimeError(f'error {pickle_filename} has invalid data')
+                    raise TSSCException(f'error {pickle_filename} has invalid data')
                 return workflow_result
 
         except Exception as error:
@@ -253,22 +253,22 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    @staticmethod
-    def delete_file(filename):
-        """
-        Used for testing to delete a file
+    # @staticmethod
+    # def delete_file(filename):
+    #     """
+    #     Used for testing to delete a file
 
-        Parameters
-        ----------
-        filename: str
-            name of file
-        """
-        try:
-            WorkflowResult.folder_create(filename=filename)
-            if os.path.exists(filename):
-                os.remove(filename)
-        except Exception as error:
-            raise RuntimeError(f'error deleting {filename}: {error}') from error
+    #     Parameters
+    #     ----------
+    #     filename: str
+    #         name of file
+    #     """
+    #     try:
+    #         WorkflowResult.folder_create(filename=filename)
+    #         if os.path.exists(filename):
+    #             os.remove(filename)
+    #     except Exception as error:
+    #         raise RuntimeError(f'error deleting {filename}: {error}') from error
 
     # PRIVATE Helpers helpers
 
@@ -290,12 +290,12 @@ class WorkflowResult:
         }
         return tssc_results
 
-    def step_name_in_list(self, step_name, sub_step_name):
-        for current in self.workflow_list:
-            if current.step_name == step_name:
-                if current.sub_step_name == sub_step_name:
-                    return True
-        return False
+    # def step_name_in_list(self, step_name, sub_step_name):
+    #     for current in self.workflow_list:
+    #         if current.step_name == step_name:
+    #             if current.sub_step_name == sub_step_name:
+    #                 return True
+    #     return False
 
     def get_step_result_by_step_name(self, step_name, sub_step_name):
         for current in self.workflow_list:
