@@ -576,7 +576,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         """
         return self.get_step_results(self.step_name)
 
-    def create_working_folder(self):
+    def get_working_dir(self):
         """
         If it does not exist, create working folder
 
@@ -606,7 +606,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             Absolute path to the newly created sub directory.
         """
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
         os.makedirs(sub_dir_path, exist_ok=True)
@@ -629,7 +629,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         """
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         file_path = os.path.join(working_folder, filename)
 
