@@ -1,7 +1,33 @@
 import os
-import yaml
 import re
+from io import IOBase
+
+import yaml
 from tssc import TSSCFactory
+
+
+def create_sh_side_effect(
+    mock_stdout=None,
+    mock_stderr=None,
+    exception=None
+):
+    def sh_side_effect(*args, **kwargs):
+        if mock_stdout:
+            if callable(kwargs['_out']):
+                kwargs['_out'](mock_stdout)
+            elif isinstance(kwargs['_out'], IOBase):
+                kwargs['_out'].write(mock_stdout)
+
+        if mock_stderr:
+            if callable(kwargs['_err']):
+                kwargs['_err'](mock_stderr)
+            elif isinstance(kwargs['_err'], IOBase):
+                kwargs['_err'].write(mock_stderr)
+
+        if exception:
+            raise exception
+
+    return sh_side_effect
 
 def run_step_test_with_result_validation(
         temp_dir,
