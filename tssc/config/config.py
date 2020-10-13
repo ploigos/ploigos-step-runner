@@ -305,7 +305,7 @@ class Config:
         # convert all the leaves of the configuration dictionary under
         # the Config.TSSC_CONFIG_KEY to ConfigValue objects
         tssc_config_values = ConfigValue.convert_leaves_to_config_values(
-            values=config_dict[Config.TSSC_CONFIG_KEY],
+            values=copy.deepcopy(config_dict[Config.TSSC_CONFIG_KEY]),
             parent_source=parent_source,
             path_parts=[Config.TSSC_CONFIG_KEY]
         )
