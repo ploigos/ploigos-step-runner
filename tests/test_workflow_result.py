@@ -8,6 +8,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 
+from tssc.step_implementer import StepImplementer
 from tssc.step_result import StepResult
 from tssc.workflow_result import WorkflowResult
 from tssc.exceptions import TSSCException
@@ -17,15 +18,36 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     """
     :return:
     """
-
     def setup_test(self):
+        # todo: StepResult(StepImplementer)
         step_result1 = StepResult('step1', 'sub1', 'implementer1')
         step_result1.add_artifact('artifact1', 'value1', 'description1', 'type1')
         step_result1.add_artifact('artifact2', 'value2', 'description2')
         step_result1.add_artifact('artifact3', 'value3')
         step_result1.add_artifact('artifact4', False)
 
+        # todo: StepResult(StepImplementer)
         step_result2 = StepResult('step2', 'sub2', 'implementer2')
+        step_result2.add_artifact('artifact1', True)
+        step_result2.add_artifact('artifact2', False)
+        step_result2.add_artifact('artifact5', 'value5')
+
+        wfr = WorkflowResult()
+        wfr.add_step_result(step_result1)
+        wfr.add_step_result(step_result2)
+
+        return wfr
+
+    def setup_test_more(self):
+        # todo: StepResult(StepImplementer)
+        step_result1 = StepResult('step1', 'sub1', 'implementer1')
+        step_result1.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result1.add_artifact('artifact2', 'value2', 'description2')
+        step_result1.add_artifact('artifact3', 'value3')
+        step_result1.add_artifact('artifact4', False)
+
+        # todo: StepResult(StepImplementer)
+        step_result2 = StepResult('step1', 'sub2', 'implementer2')
         step_result2.add_artifact('artifact1', True)
         step_result2.add_artifact('artifact2', False)
         step_result2.add_artifact('artifact5', 'value5')
@@ -138,6 +160,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                 }
             }
         }
+        # todo: StepResult(StepImplementer)
         test_step_result = StepResult('teststep', 'testsub', 'testimplementer')
         wfr = self.setup_test()
         wfr.add_step_result(test_step_result)
@@ -162,6 +185,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                 }
             }
         }
+        # todo: StepResult(StepImplementer)
         update_step_result = StepResult('step1', 'sub1', 'implementer1')
         update_step_result.add_artifact('newartifact', 'newvalue', 'newdescription', 'newtype')
 
@@ -201,7 +225,6 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             message: ''
             sub-step-implementer-name: implementer1
             success: true
-    step2:
         sub2:
             artifacts:
                 artifact1:
@@ -220,12 +243,14 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             sub-step-implementer-name: implementer2
             success: true
 """
-        wfr = self.setup_test()
+        wfr = self.setup_test_more()
         with TempDirectory() as temp_dir:
-            yml_file = temp_dir.path + '/test-results.yml'
+            #yml_file = temp_dir.path + '/test-results.yml'
+            yml_file = '/tmp/test-results.yml'
             wfr.write_results_to_yml_file(yml_file)
 
-            expected_yml_file = temp_dir.path + '/test-expected-results.yml'
+            #expected_yml_file = temp_dir.path + '/test-expected-results.yml'
+            expected_yml_file = '/tmp/test-expected-results.yml'
             with open(expected_yml_file, 'w') as file:
                 file.write(expected_yml_result)
 

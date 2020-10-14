@@ -37,6 +37,7 @@ def workflow_previous_results(pickle_filename, tssc_results):
         for step_name, sub_steps in steps.items():
             for sub_step_name, p_info in sub_steps.items():
                 step_implementer = p_info['sub-step-implementer-name']
+                # todo: need to create a StepImplementer ... ugh
                 step_result = StepResult(step_name=step_name,
                                          sub_step_name=sub_step_name,
                                          sub_step_implementer_name=step_implementer)

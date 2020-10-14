@@ -1,11 +1,11 @@
 """
 Factory for creating TSSC workflow and running steps.
 """
-
+from tssc.step_implementer import StepImplementer
 from tssc.config.config import Config
 from tssc.exceptions import TSSCException
-from tssc.step_implementer import StepImplementer
 from tssc.utils.reflection import import_and_get_class
+
 
 class TSSCFactory:
     """
@@ -45,8 +45,8 @@ class TSSCFactory:
     def __init__(
             self,
             config,
-            results_dir_path='tssc-results', \
-            results_file_name='tssc-results.yml', \
+            results_dir_path='tssc-results',
+            results_file_name='tssc-results.yml',
             work_dir_path='tssc-working'):
 
         if isinstance(config, Config):
@@ -111,7 +111,10 @@ class TSSCFactory:
             )
 
             # run the step
-            sub_step.run_step()
+            if not sub_step.run_step():
+                return False
+
+        return True
 
     @staticmethod
     def __get_step_implementer_class(step_name, step_implementer_name):

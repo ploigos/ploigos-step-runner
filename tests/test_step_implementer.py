@@ -71,6 +71,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                 test_dir
             )
 
+    # todo: need to rework the workflow_result / add situation.
     def test_merge_results_from_running_same_step_twice_with_different_config(self):
         config1 = {
             'tssc-config': {
@@ -599,6 +600,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                     test_dir
                 )
 
+    # todo: hmm how to get result ... ???
     def test_get_step_results(self):
         config = Config({
             'tssc-config': {
@@ -634,7 +636,7 @@ class TestStepImplementer(BaseTSSCTestCase):
             write_config_step.run_step()
 
             # verify step can return it's own results
-            results_from_same_step = write_config_step.get_step_result('write-config-as-results')
+            # results_from_same_step = write_config_step.get_step_result('write-config-as-results')
             expected_results = {
                 'tssc-results': {
                     'write-config-as-results': {

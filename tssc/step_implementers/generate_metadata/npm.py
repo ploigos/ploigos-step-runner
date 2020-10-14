@@ -33,7 +33,7 @@ Results output by this step.
 import os.path
 import json
 
-from tssc import StepImplementer
+from tssc import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
@@ -89,23 +89,25 @@ class Npm(StepImplementer):  # pylint: disable=too-few-public-methods
         dict
             Results of running this step.
         """
+        step_result = StepResult(self)
         package_file = self.get_config_value('package-file')
 
         # verify runtime config
         if not os.path.exists(package_file):
-            self.step_result.success = False
-            self.step_result.message = f'Given npm package file does not exist: {package_file}'
-            return
+            step_result.success = False
+            step_result.message = f'Given npm package file does not exist: {package_file}'
+            return step_result
 
         with open(package_file) as package_file_object:
             package_file_data = json.load(package_file_object)
 
         if not "version" in package_file_data:
-            self.step_result.success = False
-            self.step_result.message = f'Given npm package file: {package_file} ' \
+            step_result.success = False
+            step_result.message = f'Given npm package file: {package_file} ' \
                                        'does not contain a \"version\" key'
-            return
+            return step_result
 
-        self.step_result.add_artifact(
+        step_result.add_artifact(
             name='app-version',
             value=package_file_data['version'])
+        return step_result

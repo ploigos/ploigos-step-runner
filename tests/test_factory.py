@@ -8,6 +8,7 @@ from tssc.config import Config
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tests.helpers.sample_step_implementers import *
 
+
 class TestFactory(BaseTSSCTestCase):
     def test_init_valid_config(self):
         config = {
@@ -89,7 +90,7 @@ class TestFactory(BaseTSSCTestCase):
         config = {
             'tssc-config': {
                 'foo': {
-                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
                 }
             }
         }
@@ -128,31 +129,30 @@ class TestFactory(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 TSSCException,
                 r"Could not dynamically load step \(foo\) step implementer \(bar\) from module \(tssc.step_implementers.foo\) with class name \(bar\)"):
-
             TSSCFactory._TSSCFactory__get_step_implementer_class('foo', 'bar')
 
     def test__get_step_implementer_name_class_does_not_exist_given_module_path(self):
         with self.assertRaisesRegex(
                 TSSCException,
                 r"Could not dynamically load step \(foo\) step implementer \(tests.helpers.sample_step_implementers.DoesNotExist\) from module \(tests.helpers.sample_step_implementers\) with class name \(DoesNotExist\)"):
-
-            TSSCFactory._TSSCFactory__get_step_implementer_class('foo', 'tests.helpers.sample_step_implementers.DoesNotExist')
+            TSSCFactory._TSSCFactory__get_step_implementer_class('foo',
+                                                                 'tests.helpers.sample_step_implementers.DoesNotExist')
 
     def test__get_step_implementer_name_class_is_not_subclass_of_StepImplementer(self):
         with self.assertRaisesRegex(
-            TSSCException,
-            re.compile(
-                "Step \(foo\) is configured to use step implementer "
-                "\(tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer\) "
-                "from module \(tests.helpers.sample_step_implementers\) with class name "
-                "\(NotSubClassOfStepImplementer\), and dynamically loads as class "
-                "\(<class 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer'>\) "
-                "which is not a subclass of required parent class "
-                "\(<class 'tssc.step_implementer.StepImplementer'>\)."
-            )
+                TSSCException,
+                re.compile(
+                    "Step \(foo\) is configured to use step implementer "
+                    "\(tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer\) "
+                    "from module \(tests.helpers.sample_step_implementers\) with class name "
+                    "\(NotSubClassOfStepImplementer\), and dynamically loads as class "
+                    "\(<class 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer'>\) "
+                    "which is not a subclass of required parent class "
+                    "\(<class 'tssc.step_implementer.StepImplementer'>\)."
+                )
         ):
-
-            TSSCFactory._TSSCFactory__get_step_implementer_class('foo', 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer')
+            TSSCFactory._TSSCFactory__get_step_implementer_class('foo',
+                                                                 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer')
 
     def test__get_step_implementer_class_exists_defaultt_steps_module(self):
         self.assertIsNotNone(

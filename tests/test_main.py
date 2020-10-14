@@ -47,6 +47,8 @@ class TestInit(BaseTSSCTestCase):
                 if expected_results:
                     with open(os.path.join(results_dir_path, "tssc-results.yml"), 'r') as step_results_file:
                         results = yaml.safe_load(step_results_file.read())
+                        print(expected_results)
+                        print(results)
                         self.assertEqual(results, expected_results)
 
     def test_init(self):
@@ -242,10 +244,17 @@ class TestInit(BaseTSSCTestCase):
             {
                 'tssc-results': {
                     'write-config-as-results': {
-                        'key1': 'value1',
-                        'key2': 'value1',
-                        'key3': 'value2',
-                        'required-config-key': 'value'
+                        'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
+                            'artifacts': {
+                                'key1': {'description': '', 'type': 'str', 'value': 'value1'},
+                                'key2': {'description': '', 'type': 'str', 'value': 'value1'},
+                                'key3': {'description': '', 'type': 'str', 'value': 'value2'},
+                                'required-config-key': {'description': '', 'type': 'str', 'value': 'value'}
+                            },
+                            'message': '',
+                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                            'success': True
+                        }
                     }
                 }
             }
@@ -363,12 +372,19 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'tssc-results': {
                         'write-config-as-results': {
-                            'keya': 'a',
-                            'keyb': 'b',
-                            'keyc': 'c',
-                            'keyc2': 'c2',
-                            'keyd': 'd',
-                            'required-config-key': 'value'
+                            'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
+                                'artifacts': {
+                                    'keya': {'description': '', 'type': 'str', 'value': 'a'},
+                                    'keyb': {'description': '', 'type': 'str', 'value': 'b'},
+                                    'keyc': {'description': '', 'type': 'str', 'value': 'c'},
+                                    'keyc2': {'description': '', 'type': 'str', 'value': 'c2'},
+                                    'keyd': {'description': '', 'type': 'str', 'value': 'd'},
+                                    'required-config-key': {'description': '', 'type': 'str', 'value': 'value'}
+                                },
+                                'message': '',
+                                'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                                'success': True
+                            }
                         }
                     }
                 }
@@ -396,9 +412,18 @@ class TestInit(BaseTSSCTestCase):
             expected_results={
                 'tssc-results': {
                     'required-step-config-test': {
-                        'environment-name': 'DEV',
-                        'kube-api-token': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
-                        'required-config-key': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
+                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                            'artifacts': {
+                                'environment-name': {'description': '', 'type': 'str', 'value': 'DEV'},
+                                'kube-api-token': {'description': '', 'type': 'str',
+                                                   'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
+                                'required-config-key': {'description': '', 'type': 'str',
+                                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
+                            },
+                            'message': '',
+                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'success': True
+                        }
                     }
                 }
             }
@@ -435,9 +460,16 @@ class TestInit(BaseTSSCTestCase):
             expected_results={
                 'tssc-results': {
                     'required-step-config-test': {
-                        'environment-name': 'DEV',
-                        'kube-api-token': mock_decrypted_value,
-                        'required-config-key': mock_decrypted_value
+                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                            'artifacts': {
+                                'environment-name': {'description': '', 'type': 'str', 'value': 'DEV'},
+                                'kube-api-token': {'description': '', 'type': 'str', 'value': 'mock decrypted value'},
+                                'required-config-key': {'description': '', 'type': 'str',
+                                                        'value': 'mock decrypted value'}
+                            },
+                            'message': '',
+                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'success': True}
                     }
                 }
             }

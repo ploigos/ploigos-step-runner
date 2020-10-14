@@ -39,7 +39,7 @@ import re
 from git import Repo
 from git import InvalidGitRepositoryError
 
-from tssc import StepImplementer
+from tssc import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
     'repo-root': './',
@@ -96,42 +96,44 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         dict
             Results of running this step.
         """
+        step_result = StepResult(self)
         repo_root = self.get_config_value('repo-root')
         build_string_length = self.get_config_value('build-string-length')
 
         try:
             repo = Repo(repo_root)
         except InvalidGitRepositoryError:
-            self.step_result.success = False
-            self.step_result.message = 'InvalidGitRepositoryError'
-            return
+            step_result.success = False
+            step_result.message = 'InvalidGitRepositoryError'
+            return step_result
 
         if repo.bare:
-            self.step_result.success = False
-            self.step_result.message = f"Given directory ({repo_root}) is a bare Git repository"
-            return
+            step_result.success = False
+            step_result.message = f"Given directory ({repo_root}) is a bare Git repository"
+            return step_result
 
         if repo.head.is_detached:
-            self.step_result.success = False
-            self.step_result.message = \
+            step_result.success = False
+            step_result.message = \
                 f'Expected a Git branch in given directory ({repo_root}) but has a detached head.'
-            return
+            return step_result
 
         git_branch = str(repo.head.reference)
 
         try:
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
         except ValueError:
-            self.step_result.success = False
-            self.step_result.message = f'Given directory ({repo_root}) is a Git branch ' \
+            step_result.success = False
+            step_result.message = f'Given directory ({repo_root}) is a Git branch ' \
                 f'({git_branch}) with no commit history'
-            return
+            return step_result
 
         # make the git branch safe
         pre_release_regex = re.compile(r"/", re.IGNORECASE)
         pre_release = re.sub(pre_release_regex, '_', git_branch)
 
         # step_result
-        self.step_result.success = True
-        self.step_result.add_artifact(name='pre-release', value=pre_release)
-        self.step_result.add_artifact(name='build', value=git_branch_last_commit_hash)
+        step_result.success = True
+        step_result.add_artifact(name='pre-release', value=pre_release)
+        step_result.add_artifact(name='build', value=git_branch_last_commit_hash)
+        return step_result

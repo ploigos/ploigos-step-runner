@@ -57,7 +57,7 @@ import sys
 from io import StringIO
 
 import sh
-from tssc import DefaultSteps, StepImplementer
+from tssc import DefaultSteps, StepImplementer, StepResult
 
 DEFAULT_CONFIG = {}
 
@@ -138,6 +138,7 @@ class Git(StepImplementer):
         dict
             Results of running this step.
         """
+        step_result = StepResult(self)
         username = None
         password = None
 
@@ -175,12 +176,13 @@ class Git(StepImplementer):
         else:
             self._git_push(None)
 
-        self.step_result.success = True
-        self.step_result.add_artifact(name='tag', value=tag)
+        step_result.success = True
+        step_result.add_artifact(name='tag', value=tag)
+        return step_result
 
     @property
     def _get_tag(self):
-        tag = self.get_artifact_value(
+        tag = self.get_result_value(
             step_name=DefaultSteps.GENERATE_METADATA,
             artifact_name='version')
         if tag is None:
