@@ -123,12 +123,12 @@ class Git(StepImplementer):
         AssertionError
             If the given `runtime_step_config` is not valid with a message as to why.
         """
-        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
+        super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
 
         assert ( \
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-        ), 'Either username or password is not set. Neither or both must be set.'
+                    all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
+                    not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
+            ), 'Either username or password is not set. Neither or both must be set.'
 
     def _run_step(self):
         """Runs the TSSC step implemented by this StepImplementer.
@@ -142,18 +142,18 @@ class Git(StepImplementer):
         password = None
 
         if self.has_config_value(AUTHENTICATION_CONFIG):
-            if(self.get_config_value('username') \
-              and self.get_config_value('password')):
+            if (self.get_config_value('username')
+                    and self.get_config_value('password')):
                 username = self.get_config_value('username')
                 password = self.get_config_value('password')
             else:
                 raise ValueError(
-                    'Both username and password must have ' \
+                    'Both username and password must have '
                     'non-empty value in the runtime step configuration'
                 )
         else:
             print('No username/password found, assuming ssh')
-        tag = self._get_tag()
+        tag = self._get_tag
         self._git_tag(tag)
         git_url = self._git_url()
         if git_url.startswith('http://'):
@@ -161,7 +161,7 @@ class Git(StepImplementer):
                 self._git_push('http://' + username + ':' + password + '@' + git_url[7:])
             else:
                 raise ValueError(
-                    'For a http:// git url, you need to also provide ' \
+                    'For a http:// git url, you need to also provide '
                     'username/password pair'
                 )
         elif git_url.startswith('https://'):
@@ -174,17 +174,17 @@ class Git(StepImplementer):
                 )
         else:
             self._git_push(None)
-        results = {
-            'tag' : tag
-        }
-        return results
 
+        self.step_result.success = True
+        self.step_result.add_artifact(name='tag', value=tag)
+
+    @property
     def _get_tag(self):
-        tag = 'latest'
-        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) \
-          and self.get_step_results(DefaultSteps.GENERATE_METADATA).get('version')):
-            tag = self.get_step_results(DefaultSteps.GENERATE_METADATA).get('version')
-        else:
+        tag = self.get_artifact_value(
+            step_name=DefaultSteps.GENERATE_METADATA,
+            artifact_name='version')
+        if tag is None:
+            tag = 'latest'
             print('No version found in metadata. Using latest')
         return tag
 

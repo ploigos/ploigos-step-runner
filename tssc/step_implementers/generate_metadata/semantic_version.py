@@ -221,4 +221,4 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             image_tag = "{0}-{1}".format(app_version, pre_release)
 
         self.step_result.add_artifact(name='version', value=version)
-        self.step_result.add_artifact(name='image-tag', value=image_tag)
+        self.step_result.add_artifact(name='container-image-version', value=image_tag)

@@ -220,7 +220,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
 
-            #{'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
             runtime_args = {'repo-root': str(temp_dir.path)}
             expected_step_results = {
                 'generate-metadata': {
@@ -247,7 +246,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': { 'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': { 'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -297,7 +296,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            #{'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
             runtime_args = {'repo-root': str(temp_dir.path)}
             expected_step_results = {
                 'generate-metadata': {
@@ -324,7 +322,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -382,7 +380,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             pre_release = 'feature_test0'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            #{'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'image-tag': image_tag}}}
 
             runtime_args={'repo-root': str(temp_dir.path)}
             expected_step_results = {
@@ -410,7 +407,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -462,7 +459,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             build = git_branch_last_commit_hash[:7]
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            #{'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
             expected_step_results = {
                 'generate-metadata': {
@@ -489,7 +485,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -543,7 +539,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             build = "1234"
             version = "{0}+{1}".format(app_version, build)
             image_tag = "{0}".format(app_version)
-            #'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'image-tag': image_tag}}}
 
             expected_step_results = {
                 'generate-metadata': {
@@ -570,7 +565,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -630,7 +625,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             pre_release = 'beta1'
             version = "{0}-{1}+{2}".format(app_version, pre_release, build)
             image_tag = "{0}-{1}".format(app_version, pre_release)
-            #{'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'image-tag': image_tag}}}
 
             expected_step_results = {
                 'generate-metadata': {
@@ -657,7 +651,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'message': '',
                             'artifacts': {
                                 'version': {'description': '', 'type': 'str', 'value': version},
-                                'image-tag': {'description': '', 'type': 'str', 'value': image_tag},
+                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }

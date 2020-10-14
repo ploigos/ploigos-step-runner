@@ -238,9 +238,9 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
         # with TempDirectory() as temp_dir:
         #     wfr.write_results_to_yml_file(f'{temp_dir.path}/NotAStepResult/dir/test.yml')
         with self.assertRaises(
-            RuntimeError):
+                RuntimeError):
             wfr.write_results_to_yml_file('/NotAStepResult/dir/test.yml')
-    
+
     def test_write_results_to_json_file(self):
         expected_json_result = """{
     "tssc-results": {
@@ -317,7 +317,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
         # with TempDirectory() as temp_dir:
         #     wfr.write_results_to_json_file(f'{temp_dir.path}/NotAStepResult/dir/test.json')
         with self.assertRaises(
-            RuntimeError):
+                RuntimeError):
             wfr.write_results_to_json_file('/NotAStepResult/dir/test.json')
 
     def test_load_from_pickle_file_no_file(self):
@@ -337,21 +337,22 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             pickle_file = temp_dir.path + '/test.pkl'
 
-            not_wfr = { "step1": "value1", "step2": "value2" }
-            pickle.dump( not_wfr, open( pickle_file, "wb" ) )
-            
+            not_wfr = {"step1": "value1", "step2": "value2"}
+            with open(pickle_file, 'wb') as file:
+                pickle.dump(not_wfr, file)
+
             with self.assertRaisesRegex(
-                TSSCException,
-                f'error {pickle_file} has invalid data'):
+                    TSSCException,
+                    f'error {pickle_file} has invalid data'):
                 WorkflowResult.load_from_pickle_file(pickle_file)
-    
+
     def test_load_from_pickle_file_yes_workflowresult(self):
         with TempDirectory() as temp_dir:
             pickle_file = temp_dir.path + '/test.pkl'
             expected_wfr = self.setup_test()
             expected_wfr.write_to_pickle_file(pickle_file)
             pickle_wfr = WorkflowResult.load_from_pickle_file(pickle_file)
-    
+
     def test_load_from_pickle_file_tssc_exception(self):
         with TempDirectory() as temp_dir:
             pickle_file = temp_dir.path + '/test.pkl'
@@ -361,13 +362,13 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             f.close()
 
             with self.assertRaises(
-                TSSCException):
+                    TSSCException):
                 WorkflowResult.load_from_pickle_file(pickle_file)
-    
+
     def test_write_to_pickle_file(self):
         wfr = self.setup_test()
         with self.assertRaises(
-            RuntimeError):
+                RuntimeError):
             wfr.write_to_pickle_file(None)
 
     # def test_delete_file(self):
@@ -375,7 +376,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     #         pickle_file = temp_dir.path + '/test.pkl'
     #         WorkflowResult.folder_create(pickle_file)
     #         WorkflowResult.delete_file(pickle_file)
-            
+
     #         self.assertFalse(os.path.exists(pickle_file))
 
     # def test_delete_file_exception(self):

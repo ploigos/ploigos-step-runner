@@ -21,6 +21,9 @@ class WorkflowResult:
 
     @property
     def workflow_list(self):
+        """
+        Return workflow_list
+        """
         return self.__workflow_list
 
     def get_artifact_value(self, artifact, step_name=None, sub_step_name=None):
@@ -253,23 +256,6 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    # @staticmethod
-    # def delete_file(filename):
-    #     """
-    #     Used for testing to delete a file
-
-    #     Parameters
-    #     ----------
-    #     filename: str
-    #         name of file
-    #     """
-    #     try:
-    #         WorkflowResult.folder_create(filename=filename)
-    #         if os.path.exists(filename):
-    #             os.remove(filename)
-    #     except Exception as error:
-    #         raise RuntimeError(f'error deleting {filename}: {error}') from error
-
     # PRIVATE Helpers helpers
 
     def get_all_step_results(self):
@@ -290,14 +276,21 @@ class WorkflowResult:
         }
         return tssc_results
 
-    # def step_name_in_list(self, step_name, sub_step_name):
-    #     for current in self.workflow_list:
-    #         if current.step_name == step_name:
-    #             if current.sub_step_name == sub_step_name:
-    #                 return True
-    #     return False
-
     def get_step_result_by_step_name(self, step_name, sub_step_name):
+        """
+        Helper method to return a step result by step_name and sub_step_name
+
+        Parameters
+        ----------
+        step_name: str
+            Name of step to search for
+        sub_step_name: str
+            Name of sub step to search for
+
+        Returns
+        -------
+        StepResult
+        """
         for current in self.workflow_list:
             if current.step_name == step_name:
                 if current.sub_step_name == sub_step_name:
@@ -305,6 +298,14 @@ class WorkflowResult:
         return None
 
     def delete_step_result_by_name(self, step_name):
+        """
+        Helper method to delete a step from the workflow list.
+
+        Parameters
+        ----------
+        step_name: str
+            Name of the step to remove from the workflow list
+        """
         for i, current in enumerate(self.workflow_list):
             if current.step_name == step_name:
                 del self.workflow_list[i]

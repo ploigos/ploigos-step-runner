@@ -95,7 +95,7 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
         self.assertEqual(step_result.get_artifact('artifact1'), step_result_expected)
-    
+
     def test_get_artifact_value(self):
         step_result_expected = 'value1'
         step_result = StepResult('step1', 'sub1', 'implementer1')
