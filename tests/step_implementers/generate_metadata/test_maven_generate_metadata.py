@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 
 from testfixtures import TempDirectory
@@ -29,7 +32,8 @@ class TestStepImplementerGenerateMetadataMaven(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'value': '42.1', 'type': 'str', 'description': ''},
+                            'app-version':
+                                {'value': '42.1', 'type': 'str', 'description': ''},
                         },
                     }
                 }
@@ -71,7 +75,8 @@ class TestStepImplementerGenerateMetadataMaven(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'value': '42.1', 'type': 'str', 'description': ''},
+                            'app-version':
+                                {'value': '42.1', 'type': 'str', 'description': ''},
                         },
                     }
                 }
@@ -278,7 +283,8 @@ class TestStepImplementerGenerateMetadataMaven(BaseStepImplementerTestCase):
             runtime_args = {}
             with self.assertRaisesRegex(
                     AssertionError,
-                    r"The runtime step configuration \(\{'pom-file': None\}\) is missing the required configuration keys \(\['pom-file'\]\)"):
+                    r"The runtime step configuration \(\{'pom-file': None\}\) "
+                    r"is missing the required configuration keys \(\['pom-file'\]\)"):
                 self.run_step_test_with_result_validation(
                     temp_dir=temp_dir,
                     step_name='generate-metadata',

@@ -173,7 +173,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         pre_release = None
         build = None
 
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
 
         release_branch = self.get_config_value('release-branch')
 

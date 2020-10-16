@@ -171,32 +171,34 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             OS path to the results file for this step.
         """
-        return os.path.join(self.__results_dir_path, self.__results_file_name)
+        return os.path.join(self.results_dir_path, self.__results_file_name)
 
     @property
     def results_dir_path(self):
         """
-        Get the OS path to the results file for this step.
-        Default from factory:  tssc-results/tssc-results.yml
+        Get the OS path to the results folder
+        Default from factory:  tssc-results
 
         Returns
         -------
         str
             OS path to the results file for this step.
         """
+        os.makedirs(self.__results_dir_path, exist_ok=True)
         return self.__results_dir_path
 
     @property
     def work_dir_path(self):
         """
-        Get the OS path to the results file for this step.
-        Default from factory:  tssc-results/tssc-results.yml
+        Get the OS path to the results folder for this step.
+        Default from factory:  tssc-results
 
         Returns
         -------
         str
             OS path to the results file for this step.
         """
+        os.makedirs(self.__work_dir_path, exist_ok=True)
         return self.__work_dir_path
 
     @property
@@ -493,15 +495,16 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         return result
 
-
     def write_working_file(self, filename, contents=None):
         """
         Write content or touch filename in working directory
+        for this step
+        eg:  tssc-working/step-name/filename
 
         Parameters
         ----------
         filename : str
-            Relative path (to working dir), including file name, to create.
+            File name to create
         contents : str, optional
             Contents to write to the file
 
@@ -510,10 +513,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             Return a string to the file path
         """
-        # eg: tssc-working/generate-metadata
+        # eg: tssc-working/step_name
         folder = os.path.join(self.work_dir_path, self.step_name)
         file_path = os.path.join(folder, filename)
-        # sub-directories might be passed, eg: tssc-working/generate-metadata/foo
+
+        # sub-directories might be passed finename, eg: foo/filename
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         if contents is None:
@@ -611,6 +615,22 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 artifact=artifact_name,
                 step_name=step_name,
                 sub_step_name=sub_step_name
+            )
+        )
+
+    def get_step_result(self, step_name=None):
+        """
+        Get the value for the named artifact.
+        If step_name is provide, search the artifacts step_name only
+        If step_name and sub_step_name,  search the artifacts step_name/sub_step only
+        Otherwise, search for the FIRST occurrence of the artifact
+        """
+        if step_name is None:
+            step_name = self.step_name
+
+        return (
+            self.workflow_result.get_step_result(
+                step_name=step_name,
             )
         )
 

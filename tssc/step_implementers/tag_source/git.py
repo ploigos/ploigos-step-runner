@@ -125,9 +125,9 @@ class Git(StepImplementer):
         """
         super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
 
-        assert ( \
-                    all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-                    not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
+        assert (
+                    all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or
+                    not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG)
             ), 'Either username or password is not set. Neither or both must be set.'
 
     def _run_step(self):
@@ -138,7 +138,7 @@ class Git(StepImplementer):
         dict
             Results of running this step.
         """
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
         username = None
         password = None
 
@@ -182,9 +182,7 @@ class Git(StepImplementer):
 
     @property
     def _get_tag(self):
-        tag = self.get_result_value(
-            step_name=DefaultSteps.GENERATE_METADATA,
-            artifact_name='version')
+        tag = self.get_result_value(artifact_name='version')
         if tag is None:
             tag = 'latest'
             print('No version found in metadata. Using latest')
@@ -229,7 +227,7 @@ class Git(StepImplementer):
             # this force is only needed locally in case of a re-reun of the same pipeline
             # without a fresh check out. You will notice there is no force on the push
             # making this an acceptable work around to the issue since on the off chance
-            # actually orverwriting a tag with a different comment, the push will fail
+            # actually overwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
             sh.git.tag(  # pylint: disable=no-member
                 git_tag_value,

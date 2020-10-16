@@ -2,6 +2,21 @@ from tssc import StepImplementer, StepResult
 from tssc.config.config_value import ConfigValue
 
 
+class FailStepImplementer(StepImplementer):
+    @staticmethod
+    def step_implementer_config_defaults():
+        return {}
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        return []
+
+    def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
+        step_result.success = False
+        return step_result
+
+
 class FooStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
@@ -36,7 +51,7 @@ class FooStepImplementer(StepImplementer):
         return []
 
     def _run_step(self):
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
         return step_result
 
 
@@ -76,7 +91,7 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         ]
 
     def _run_step(self):
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
         runtime_step_config = self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())
@@ -119,7 +134,7 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
         return []
 
     def _run_step(self):
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
         runtime_step_config = self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())

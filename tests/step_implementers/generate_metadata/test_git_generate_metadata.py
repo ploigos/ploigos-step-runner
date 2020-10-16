@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 from testfixtures import TempDirectory
 
 from git import Repo
@@ -83,7 +86,8 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                     'Git': {
                         'sub-step-implementer-name': 'Git',
                         'success': False,
-                        'message': f'Given directory ({temp_dir.path}) is a Git branch (master) with no commit history',
+                        'message': f'Given directory ({temp_dir.path}) '
+                                   f'is a Git branch (master) with no commit history',
                         'artifacts': {},
                     }
                 }
@@ -120,8 +124,11 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'value': 'master', 'type': 'str', 'description': ''},
-                            'build': {'value': git_branch_last_commit_hash[:7], 'type': 'str', 'description': ''}
+                            'pre-release':
+                                {'value': 'master', 'type': 'str', 'description': ''},
+                            'build':
+                                {'value': git_branch_last_commit_hash[:7],
+                                 'type': 'str', 'description': ''}
                         }
                     }
                 }
@@ -162,8 +169,11 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'value': 'feature_test0', 'type': 'str', 'description': ''},
-                            'build': {'value': git_branch_last_commit_hash[:7], 'type': 'str', 'description': ''}
+                            'pre-release':
+                                {'value': 'feature_test0', 'type': 'str', 'description': ''},
+                            'build':
+                                {'value': git_branch_last_commit_hash[:7],
+                                 'type': 'str', 'description': ''}
                         }
                     }
                 }
@@ -196,14 +206,15 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                 }
             }
 
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
             expected_step_results = {}
             runtime_args = {}
 
             # todo: should the assert be refactored
             with self.assertRaisesRegex(
                     AssertionError,
-                    r"The runtime step configuration \(\{'repo-root': None, 'build-string-length': 7\}\) is missing the required configuration keys \(\['repo-root'\]\)"):
+                    r"The runtime step configuration \(\{'repo-root': None, "
+                    r"'build-string-length': 7\}\) is missing "
+                    r"the required configuration keys \(\['repo-root'\]\)"):
                 self.run_step_test_with_result_validation(
                     temp_dir=temp_dir,
                     step_name='generate-metadata',
@@ -235,7 +246,8 @@ class TestStepImplementerGenerateMetadataGit(BaseStepImplementerTestCase):
                     'Git': {
                         'sub-step-implementer-name': 'Git',
                         'success': False,
-                        'message': f'Expected a Git branch in given directory ({temp_dir.path}) but has a detached head.',
+                        'message': f'Expected a Git branch in given '
+                                   f'directory ({temp_dir.path}) but has a detached head.',
                         'artifacts': {}
                     }
                 }

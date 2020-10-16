@@ -17,6 +17,7 @@ class WorkflowResult:
     """
 
     def __init__(self):
+        # todo: make this a dictionary, not a list
         self.__workflow_list = []
 
     @property
@@ -121,7 +122,7 @@ class WorkflowResult:
            - simply append, done
         Else
            - find the old step result
-           - update the old artifacts into the new artifacts
+           - merge the old artifacts into the new artifacts
            - delete the old step result
            - append the new step result
            - note: the delete/append is needed because it is a list
@@ -142,11 +143,12 @@ class WorkflowResult:
             step_name = step_result.step_name
             sub_step_name = step_result.sub_step_name
 
-            step_exists = self.get_step_result_by_step_name(
+            step_old = self.get_step_result_by_step_name(
                 step_name=step_name,
                 sub_step_name=sub_step_name)
-            if step_exists is not None:
-                step_result.artifacts.update(step_exists.artifacts)
+            if step_old:
+                merged = WorkflowResult.merge_results(step_result.artifacts, step_old.artifacts)
+                step_result.artifacts.update(merged)
                 self.delete_step_result_by_name(step_name=step_name)
 
             self.workflow_list.append(step_result)
@@ -270,7 +272,7 @@ class WorkflowResult:
         """
         all_results = {}
         for i in self.workflow_list:
-            all_results.update(i.get_step_result())
+            all_results = WorkflowResult.merge_results(all_results, i.get_step_result())
         tssc_results = {
             'tssc-results': all_results
         }
@@ -323,3 +325,30 @@ class WorkflowResult:
         path = os.path.dirname(filename)
         if path and not os.path.exists(path):
             os.makedirs(os.path.dirname(filename))
+
+    @staticmethod
+    def merge_results(dict1, dict2):
+        """
+        todo:  rework this
+        """
+        output = {}
+
+        # adds keys from `dict1` if they do not exist in `dict2` and vice-versa
+        intersection = {**dict2, **dict1}
+
+        for k_intersect, v_intersect in intersection.items():
+            if k_intersect not in dict1:
+                v_dict2 = dict2[k_intersect]
+                output[k_intersect] = v_dict2
+
+            elif k_intersect not in dict2:
+                output[k_intersect] = v_intersect
+
+            elif isinstance(v_intersect, dict):
+                v_dict2 = dict2[k_intersect]
+                output[k_intersect] = WorkflowResult.merge_results(v_intersect, v_dict2)
+
+            else:
+                output[k_intersect] = v_intersect
+
+        return output

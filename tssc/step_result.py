@@ -21,17 +21,25 @@ class StepResult:
 
     """
 
-    def __init__(self, step_implementer):
+    def __init__(self, step_name, sub_step_name, sub_step_implementer_name):
 
         """
         Step Result Init.
         """
-        self.__step_name = step_implementer.step_name
-        self.__sub_step_name = step_implementer.sub_step_name
-        self.__sub_step_implementer_name = step_implementer.sub_step_implementer_name
+        self.__step_name = step_name
+        self.__sub_step_name = sub_step_name
+        self.__sub_step_implementer_name = sub_step_implementer_name
         self.__success = True
         self.__message = ''
         self.__artifacts = {}
+
+    @classmethod
+    def from_step_implementer(cls, step_implementer):
+        return cls(
+            step_implementer.step_name,
+            step_implementer.sub_step_name,
+            step_implementer.sub_step_implementer_name
+        )
 
     def __str__(self):
         """

@@ -1,17 +1,17 @@
-import unittest
+# pylint: disable=line-too-long
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 from unittest.mock import patch
 
-import io
 import os
 import yaml
 from testfixtures import TempDirectory
-from contextlib import redirect_stdout
 
 from tssc.__main__ import main
-from tssc import TSSCFactory, StepImplementer, TSSCException
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.sample_step_implementers import *
 from tests.helpers.test_utils import create_sops_side_effect
 
 
@@ -246,13 +246,18 @@ class TestInit(BaseTSSCTestCase):
                     'write-config-as-results': {
                         'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                             'artifacts': {
-                                'key1': {'description': '', 'type': 'str', 'value': 'value1'},
-                                'key2': {'description': '', 'type': 'str', 'value': 'value1'},
-                                'key3': {'description': '', 'type': 'str', 'value': 'value2'},
-                                'required-config-key': {'description': '', 'type': 'str', 'value': 'value'}
+                                'key1':
+                                    {'description': '', 'type': 'str', 'value': 'value1'},
+                                'key2':
+                                    {'description': '', 'type': 'str', 'value': 'value1'},
+                                'key3':
+                                    {'description': '', 'type': 'str', 'value': 'value2'},
+                                'required-config-key':
+                                    {'description': '', 'type': 'str', 'value': 'value'}
                             },
                             'message': '',
-                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                             'success': True
                         }
                     }
@@ -374,15 +379,22 @@ class TestInit(BaseTSSCTestCase):
                         'write-config-as-results': {
                             'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                                 'artifacts': {
-                                    'keya': {'description': '', 'type': 'str', 'value': 'a'},
-                                    'keyb': {'description': '', 'type': 'str', 'value': 'b'},
-                                    'keyc': {'description': '', 'type': 'str', 'value': 'c'},
-                                    'keyc2': {'description': '', 'type': 'str', 'value': 'c2'},
-                                    'keyd': {'description': '', 'type': 'str', 'value': 'd'},
-                                    'required-config-key': {'description': '', 'type': 'str', 'value': 'value'}
+                                    'keya':
+                                        {'description': '', 'type': 'str', 'value': 'a'},
+                                    'keyb':
+                                        {'description': '', 'type': 'str', 'value': 'b'},
+                                    'keyc':
+                                        {'description': '', 'type': 'str', 'value': 'c'},
+                                    'keyc2':
+                                        {'description': '', 'type': 'str', 'value': 'c2'},
+                                    'keyd':
+                                        {'description': '', 'type': 'str', 'value': 'd'},
+                                    'required-config-key':
+                                        {'description': '', 'type': 'str', 'value': 'value'}
                                 },
                                 'message': '',
-                                'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                                'sub-step-implementer-name':
+                                    'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
                                 'success': True
                             }
                         }
@@ -421,7 +433,8 @@ class TestInit(BaseTSSCTestCase):
                                                         'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
                             },
                             'message': '',
-                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
                             'success': True
                         }
                     }
@@ -462,15 +475,32 @@ class TestInit(BaseTSSCTestCase):
                     'required-step-config-test': {
                         'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
                             'artifacts': {
-                                'environment-name': {'description': '', 'type': 'str', 'value': 'DEV'},
-                                'kube-api-token': {'description': '', 'type': 'str', 'value': 'mock decrypted value'},
-                                'required-config-key': {'description': '', 'type': 'str',
+                                'environment-name':
+                                    {'description': '', 'type': 'str', 'value': 'DEV'},
+                                'kube-api-token':
+                                    {'description': '', 'type': 'str', 'value': 'mock decrypted value'},
+                                'required-config-key':
+                                    {'description': '', 'type': 'str',
                                                         'value': 'mock decrypted value'}
                             },
                             'message': '',
-                            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
                             'success': True}
                     }
                 }
             }
         )
+
+    def test_fail(self):
+        self._run_main_test(['--step', 'foo'], 103, [
+            {
+                'name': 'tssc-config.yaml',
+                'contents': '''---
+                tssc-config:
+                    foo:
+                        implementer: 'tests.helpers.sample_step_implementers.FailStepImplementer'
+                '''
+            }]
+                            )
+

@@ -96,7 +96,7 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         dict
             Results of running this step.
         """
-        step_result = StepResult(self)
+        step_result = StepResult.from_step_implementer(self)
         repo_root = self.get_config_value('repo-root')
         build_string_length = self.get_config_value('build-string-length')
 

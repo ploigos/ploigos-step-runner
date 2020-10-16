@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 
 from testfixtures import TempDirectory
@@ -13,7 +16,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
               "version": "1.0.0"
             }''')
             package_file_path = os.path.join(temp_dir.path, 'package.json')
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-resutls')
             config = {
                 'tssc-config': {
                     'generate-metadata': {
@@ -31,7 +33,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'value': '1.0.0', 'type': 'str', 'description': ''},
+                            'app-version':
+                                {'value': '1.0.0', 'type': 'str', 'description': ''},
                         }
                     }
                 }
@@ -68,7 +71,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                     'Npm': {
                         'sub-step-implementer-name': 'Npm',
                         'success': False,
-                        'message': f'Given npm package file: {temp_dir.path}/package.json does not contain a "version" key',
+                        'message': f'Given npm package file: {temp_dir.path}/package.json '
+                                   f'does not contain a "version" key',
                         'artifacts': {}
                     }
                 }
@@ -137,8 +141,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                     'Npm': {
                         'sub-step-implementer-name': 'Npm',
                         'success': False,
-                        'message': "The runtime step configuration (\{'package-file': None\}) is missing"
-                                   "the required configuration keys (\['package-file'\])",
+                        'message': "The runtime step configuration ({'package-file': None}) "
+                                   "is missing the required configuration keys (['package-file'])",
                         'artifacts': {}
                     }
                 }
@@ -148,7 +152,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
             with self.assertRaisesRegex(
                     AssertionError,
-                    r"The runtime step configuration \(\{'package-file': None\}\) is missing the required configuration keys \(\['package-file'\]\)"):
+                    r"The runtime step configuration \(\{'package-file': None\}\) "
+                    r"is missing the required configuration keys \(\['package-file'\]\)"):
                 self.run_step_test_with_result_validation(
                     temp_dir=temp_dir,
                     step_name='generate-metadata',

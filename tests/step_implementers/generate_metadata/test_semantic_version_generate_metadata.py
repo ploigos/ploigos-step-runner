@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 
 from testfixtures import TempDirectory
@@ -36,7 +39,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'master'},
                             'build': {
                                 'description': '', 'type': 'str',
                                 'value': git_branch_last_commit_hash[:7]
@@ -47,7 +51,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'sub-step-implementer-name': 'SemanticVersion',
                         'success': False,
                         'message': 'No value for (app-version) provided via runtime flag '
-                                   '(app-version) or from prior step implementer (generate-metadata)',
+                                   '(app-version) or from prior step implementer '
+                                   '(generate-metadata)',
                         'artifacts': {}
                     }
                 }
@@ -99,7 +104,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'sub-step-implementer-name': 'Maven',
                         'success': True, 'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'}
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': '42.1'}
                         }
                     },
                     'SemanticVersion': {
@@ -158,14 +164,16 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'},
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': '42.1'},
                         }
                     },
                     'SemanticVersion': {
                         'sub-step-implementer-name': 'SemanticVersion',
                         'success': False,
-                        'message': 'No value for (pre-release) provided via runtime flag '
-                                   '(pre-release) or from prior step implementer (generate-metadata)',
+                        'message': 'No value for (pre-release) provided via '
+                                   'runtime flag (pre-release) '
+                                   'or from prior step implementer (generate-metadata)',
                         'artifacts': {}
                     }
                 }
@@ -228,16 +236,19 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
-                            }
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': app_version},
+                        }
                     },
                     'Git': {
                         'sub-step-implementer-name': 'Git',
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
-                            'build': {'description': '', 'type': 'str', 'value': build},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'master'},
+                            'build':
+                                {'description': '', 'type': 'str', 'value': build},
                         }
                     },
                     'SemanticVersion': {
@@ -245,8 +256,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': { 'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -304,7 +317,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': app_version},
                         }
                     },
                     'Git': {
@@ -312,8 +326,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
-                            'build': {'description': '', 'type': 'str', 'value': build},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'master'},
+                            'build':
+                                {'description': '', 'type': 'str', 'value': build},
                             }
                     },
                     'SemanticVersion': {
@@ -321,8 +337,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -389,7 +407,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': app_version },
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': app_version },
                         }
                     },
                     'Git': {
@@ -397,8 +416,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': pre_release},
-                            'build': {'description': '', 'type': 'str', 'value': build},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': pre_release},
+                            'build':
+                                {'description': '', 'type': 'str', 'value': build},
                             }
                     },
                     'SemanticVersion': {
@@ -406,8 +427,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -467,7 +490,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': '42.1'},
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': '42.1'},
                         }
                     },
                     'Git': {
@@ -475,8 +499,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
-                            'build': {'description': '', 'type': 'str', 'value': build},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'master'},
+                            'build':
+                                {'description': '', 'type': 'str', 'value': build},
                             }
                     },
                     'SemanticVersion': {
@@ -484,8 +510,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -547,7 +575,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': app_version},
                         }
                     },
                     'Git': {
@@ -555,8 +584,11 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'master'},
-                            'build': {'description': '', 'type': 'str', 'value': git_branch_last_commit_hash[:7]},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'master'},
+                            'build':
+                                {'description': '', 'type': 'str',
+                                 'value': git_branch_last_commit_hash[:7]},
                             }
                     },
                     'SemanticVersion': {
@@ -564,8 +596,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
@@ -633,7 +667,8 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'app-version': {'description': '', 'type': 'str', 'value': app_version},
+                            'app-version':
+                                {'description': '', 'type': 'str', 'value': app_version},
                         }
                     },
                     'Git': {
@@ -641,8 +676,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                         'success': True,
                         'message': '',
                         'artifacts': {
-                            'pre-release': {'description': '', 'type': 'str', 'value': 'feature_test0'},
-                            'build': {'description': '', 'type': 'str', 'value': build},
+                            'pre-release':
+                                {'description': '', 'type': 'str', 'value': 'feature_test0'},
+                            'build':
+                                {'description': '', 'type': 'str', 'value': build},
                             }
                     },
                     'SemanticVersion': {
@@ -650,8 +687,10 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                             'success': True,
                             'message': '',
                             'artifacts': {
-                                'version': {'description': '', 'type': 'str', 'value': version},
-                                'container-image-version': {'description': '', 'type': 'str', 'value': image_tag},
+                                'version':
+                                    {'description': '', 'type': 'str', 'value': version},
+                                'container-image-version':
+                                    {'description': '', 'type': 'str', 'value': image_tag},
                             }
                     }
                 }
