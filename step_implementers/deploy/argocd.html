@@ -872,7 +872,7 @@ users:
 
         return results
 
-    def __get_container_image_repository_uri(self):
+    def __get_container_image_uri(self):
         &#34;&#34;&#34;Get the container image repository uri.
 
         Returns
@@ -881,7 +881,6 @@ users:
             Container image repository URI.
         &#34;&#34;&#34;
         push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
-
         container_image_repository_uri = self.get_config_value(&#39;container-image-uri&#39;)
 
         if container_image_repository_uri is None and push_container_image_results:
@@ -918,11 +917,11 @@ users:
 
         argocd_app_name = self._get_app_name()
         version = self._get_image_version()
-        container_image_repo_uri = self.__get_container_image_repository_uri()
+        container_image_uri = self.__get_container_image_uri()
         timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
         endpoint_url = self._get_endpoint_url()
-        jinja_runtime_step_config = {&#39;container_image_repo_uri&#39; : container_image_repo_uri,
+        jinja_runtime_step_config = {&#39;container_image_uri&#39; : container_image_uri,
                                      &#39;image_version&#39; : version,
                                      &#39;timestamp&#39; : timestamp,
                                      &#39;repo_branch&#39; : repo_branch,
@@ -1396,7 +1395,7 @@ users:
 
         return results
 
-    def __get_container_image_repository_uri(self):
+    def __get_container_image_uri(self):
         &#34;&#34;&#34;Get the container image repository uri.
 
         Returns
@@ -1405,7 +1404,6 @@ users:
             Container image repository URI.
         &#34;&#34;&#34;
         push_container_image_results = self.get_step_results(DefaultSteps.PUSH_CONTAINER_IMAGE)
-
         container_image_repository_uri = self.get_config_value(&#39;container-image-uri&#39;)
 
         if container_image_repository_uri is None and push_container_image_results:
@@ -1442,11 +1440,11 @@ users:
 
         argocd_app_name = self._get_app_name()
         version = self._get_image_version()
-        container_image_repo_uri = self.__get_container_image_repository_uri()
+        container_image_uri = self.__get_container_image_uri()
         timestamp = str(datetime.now())
         repo_branch = self._get_repo_branch()
         endpoint_url = self._get_endpoint_url()
-        jinja_runtime_step_config = {&#39;container_image_repo_uri&#39; : container_image_repo_uri,
+        jinja_runtime_step_config = {&#39;container_image_uri&#39; : container_image_uri,
                                      &#39;image_version&#39; : version,
                                      &#39;timestamp&#39; : timestamp,
                                      &#39;repo_branch&#39; : repo_branch,
@@ -1629,13 +1627,13 @@ users:
 <ul class="hlist">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_working_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_working_dir">get_working_dir</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>

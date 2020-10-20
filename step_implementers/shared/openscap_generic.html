@@ -1,0 +1,1564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.1" />
+<title>tssc.step_implementers.shared.openscap_generic API documentation</title>
+<meta name="description" content="Step Implementer for the container-image-static-compliance-scan step for OpenSCAP …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>tssc.step_implementers.shared.openscap_generic</code></h1>
+</header>
+<section id="section-intro">
+<p>Step Implementer for the container-image-static-compliance-scan step for OpenSCAP.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>oscap-input-definitions-uri</code></td>
+<td>Yes</td>
+<td></td>
+<td>URI to the OpenSCAP definitions file</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>to do the evaluation with.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>Must use protocol file://</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>Must have file extension .xml</td>
+</tr>
+<tr>
+<td><code>oscap-profile</code></td>
+<td>No</td>
+<td></td>
+<td>OpenSCAP profile to evaluate.</td>
+</tr>
+<tr>
+<td><code>oscap-tailoring-uri</code></td>
+<td>No</td>
+<td></td>
+<td>URI to OpenSCAP tailoring file</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>to do the evaluation with.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>Must use protocol file://</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>Must have file extension .xml</td>
+</tr>
+<tr>
+<td><code>oscap-fetch-remote-resources</code></td>
+<td>No</td>
+<td>True</td>
+<td>For Source DataStream and XCCDF files</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>that have remote references fetch them if</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>True, else don't.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>WARNING: evaluations will not be complete</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>if input defintions require remote</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>resources and this is not True.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>For disconnected environments the remote</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>references should be brought to an internal</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>mirror.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
+<p>Results expected from previous steps that this step requires.</p>
+<table>
+<thead>
+<tr>
+<th>Step Name</th>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>create-container-image</code></td>
+<td><code>image-tar-file</code></td>
+<td>Image to scan</td>
+</tr>
+</tbody>
+</table>
+<h2 id="results">Results</h2>
+<p>Results output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>html-report</code></td>
+<td>HTML report generated by oscap eval</td>
+</tr>
+<tr>
+<td><code>xml-report</code></td>
+<td>XML report generated by oscap eval</td>
+</tr>
+<tr>
+<td><code>stdout-report</code></td>
+<td>stdout report generated by oscap eval</td>
+</tr>
+</tbody>
+</table>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Step Implementer for the container-image-static-compliance-scan step for OpenSCAP.
+
+Step Configuration
+------------------
+
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key              | Required? | Default | Description
+|--------------------------------|-----------|---------|-----------
+| `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file
+|                                |           |         | to do the evaluation with.
+|                                |           |         | Must use protocol file://|http://|https://.
+|                                |           |         | Must have file extension .xml|.bz2.
+| `oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
+| `oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file
+|                                |           |         | to do the evaluation with.
+|                                |           |         | Must use protocol file://|http://|https://.
+|                                |           |         | Must have file extension .xml|.bz2.
+| `oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files
+|                                |           |         | that have remote references fetch them if
+|                                |           |         | True, else don&#39;t.
+|                                |           |         |
+|                                |           |         | WARNING: evaluations will not be complete
+|                                |           |         | if input defintions require remote
+|                                |           |         | resources and this is not True.
+|                                |           |         | For disconnected environments the remote
+|                                |           |         | references should be brought to an internal
+|                                |           |         | mirror.
+
+Expected Previous Step Results
+------------------------------
+
+Results expected from previous steps that this step requires.
+
+| Step Name                | Result Key       | Description
+|--------------------------|------------------|--------------
+| `create-container-image` | `image-tar-file` | Image to scan
+
+Results
+-------
+
+Results output by this step.
+
+| Result Key      | Description
+|-----------------|------------
+| `html-report`   | HTML report generated by oscap eval
+| `xml-report`    | XML report generated by oscap eval
+| `stdout-report` | stdout report generated by oscap eval
+&#34;&#34;&#34;
+
+import os
+import re
+import sys
+from distutils.util import strtobool
+from io import StringIO
+
+import sh
+from tssc import DefaultSteps, StepImplementer
+from tssc.exceptions import TSSCException
+from tssc.utils.file import download_and_decompress_source_to_destination
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+
+DEFAULT_CONFIG = {
+    &#39;oscap-fetch-remote-resources&#39;: True
+}
+
+REQUIRED_CONFIG_KEYS = [
+    &#39;oscap-input-definitions-uri&#39;
+]
+
+class OpenSCAPGeneric(StepImplementer):
+    &#34;&#34;&#34;A generic OpenSCAP step implementer that can be used for more then one step.
+
+    Expected uses:
+    * container-image-static-compliance-scan
+    * container-image-static-vulnerability-scan
+    &#34;&#34;&#34;
+
+    # Example Input:
+    #    Title  RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #    Ident  RHSA-2020:4186
+    #    Ident  CVE-2020-14355
+    #    Result pass
+    #
+    #    Title  RHSA-2020:3658: librepo security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #    Ident  RHSA-2020:3658
+    #    Ident  CVE-2020-14352
+    #    Result fail
+    #
+    # Matches:
+    #    (Title RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #    Ident  RHSA-2020:4186
+    #    Ident  CVE-2020-14355
+    #    Result (pass))
+    #
+    #    (Title RHSA-2020:3658: librepo security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #    Ident  RHSA-2020:3658
+    #    Ident  CVE-2020-14352
+    #    Result (fail))
+    #
+    # Named Groups:
+    #    [0]ruleblock
+    #        Title      RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #        Ident      RHSA-2020:4186
+    #        Ident      CVE-2020-14355
+    #        Result     pass
+    #    [0]ruleresult
+    #        pass
+    #
+    #    [1]ruleblock
+    #        Title      RHSA-2020:3658: librepo security update (Important)
+    #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #        Ident      RHSA-2020:3658
+    #        Ident      CVE-2020-14352
+    #        Result     fail
+    #    [1]ruleresult
+    #        fail
+    OSCAP_XCCDF_STDOUT_PATTERN = re.compile(
+        r&#39;(?P&lt;ruleblock&gt;Title.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;,
+        re.DOTALL
+    )
+    OSCAP_XCCDF_STDOUT_FAIL_PATTERN = re.compile(r&#39;fail&#39;)
+
+    # NOTE: oval output far less useful then xccdf output but it is all but given some content
+    #       is only given in oval format and therefor supporting this is important
+    #
+    # Example Input:
+    #   Definition oval:com.redhat.rhsa:def:20202031: false
+    #   Definition oval:com.redhat.rhsa:def:20201998: true
+    #
+    # Matches:
+    #   (Definition oval:com.redhat.rhsa:def:20202031: (false))
+    #   (Definition oval:com.redhat.rhsa:def:20201998: (true))
+    #
+    # Named Groups:
+    #   [0]ruleblock
+    #       Definition oval:com.redhat.rhsa:def:20202031: false
+    #   [0]ruleresult
+    #       false
+    #
+    #   [1]ruleblock
+    #       Definition oval:com.redhat.rhsa:def:20201998: true
+    #   [1]ruleresult
+    #       true
+    OSCAP_OVAL_STDOUT_PATTERN = re.compile(
+        r&#39;(?P&lt;ruleblock&gt;^.*:\s*(?P&lt;ruleresult&gt;true|false)\s*$)$&#39;,
+        re.MULTILINE
+    )
+    OSCAP_OVAL_STDOUT_FAIL_PATTERN = re.compile(r&#39;true&#39;)
+
+    OSCAP_INFO_DOC_TYPE_PATTERN = re.compile(r&#39;Document type: (?P&lt;doctype&gt;.+)&#39;)
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        &#34;&#34;&#34;Validates required runtime step configuration is valid.
+
+        Validates that:
+        * required configuration is given
+        * oscap-input-definitions-uri
+          - starts with file://|http://|https://
+          - ends with .xml|.bz2
+
+        Raises
+        ------
+        AssertionError
+        * if runtime step configuration is invalid.
+        &#34;&#34;&#34;
+        super()._validate_runtime_step_config(runtime_step_config) # pylint: disable=protected-access
+
+        # validate that the given &#39;oscap-input-definitions-uri&#39; starts with file://|http://|https://
+        oscap_input_definitions_uri = runtime_step_config[&#39;oscap-input-definitions-uri&#39;]
+        assert (re.match(r&#39;^file://|http://|https://&#39;, oscap_input_definitions_uri)), \
+            f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
+            f&#34; must start with known protocol (file://|http://|https://).&#34;
+
+        # validate that the given &#39;oscap-input-definitions-uri&#39; is an xml or bz2 file
+        oscap_input_definitions_uri_extension = os.path.splitext(oscap_input_definitions_uri)[1]
+        assert (re.match(r&#39;\.xml|\.bz2&#39;, oscap_input_definitions_uri_extension)), \
+            f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
+            f&#34; must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}&#34;
+
+    def _run_step(self): # pylint: disable=too-many-locals
+        &#34;&#34;&#34;Runs the OpenSCAP eval for a given input file against a given container.
+        &#34;&#34;&#34;
+        image_tar_file = &#39;&#39;
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image-tar-file&#39;]
+        else:
+            raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
+
+        oscap_profile = self.get_config_value(&#39;oscap-profile&#39;)
+        oscap_fetch_remote_resources = self.get_config_value(&#39;oscap-fetch-remote-resources&#39;)
+
+        # create a container name from the tar file name, step name, and sub step name
+        container_name = os.path.splitext(os.path.basename(image_tar_file))[0]
+        container_name += f&#34;-{self.step_name}-{self.sub_step_name}&#34;
+
+        # import image tar file to vfs file system
+        print(f&#34;\nImport image: {image_tar_file}&#34;)
+        OpenSCAPGeneric.__buildah_import_image_from_tar(
+            image_tar_file=image_tar_file,
+            container_name=container_name
+        )
+        print(f&#34;Imported image: {image_tar_file}&#34;)
+
+        # baking `buildah unshare` command to wrap other buildah commands with
+        # so that container does not need to be running in a privilaged mode to be able
+        # to function
+        buildah_unshare_comand = sh.buildah.bake(&#39;unshare&#39;) # pylint: disable=no-member
+
+        # mount the container filesystem and get mount path
+        #
+        # NOTE: run in the context of `buildah unshare` so that container does not
+        #       need to be run in a privilaged mode
+        print(f&#34;\nMount container: {container_name}&#34;)
+        container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
+            buildah_unshare_comand=buildah_unshare_comand,
+            container_id=container_name
+        )
+        print(f&#34;Mounted container ({container_name}) with mount path: &#39;{container_mount_path}&#39;&#34;)
+
+        # download the open scap input file
+        oscap_input_definitions_uri = self.get_config_value(&#39;oscap-input-definitions-uri&#39;)
+        print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
+        oscap_input_file = download_and_decompress_source_to_destination(
+            source_url=oscap_input_definitions_uri,
+            destination_dir=self.get_working_dir()
+        )
+        print(f&#34;Download input definitions to: {oscap_input_file}&#34;)
+
+        # if specified download oscap tailoring file
+        oscap_tailoring_file = None
+        oscap_tailoring_file_uri = self.get_config_value(&#39;oscap-tailoring-uri&#39;)
+        if oscap_tailoring_file_uri:
+            print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
+            oscap_tailoring_file = download_and_decompress_source_to_destination(
+                source_url=oscap_tailoring_file_uri,
+                destination_dir=self.get_working_dir()
+            )
+            print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
+
+        # determine oscap eval type based on document type
+        print(f&#34;\nDetermine OpenSCAP document type of input file: {oscap_input_file}&#34;)
+        oscap_document_type = OpenSCAPGeneric.__get_oscap_document_type(
+            oscap_input_file=oscap_input_file
+        )
+        print(
+            &#34;Determined OpenSCAP document type of input file&#34;
+            f&#34; ({oscap_input_file}): {oscap_document_type}&#34;
+        )
+        print(
+            f&#34;\nDetermine OpenSCAP eval type for input file ({oscap_input_file}) &#34;
+            f&#34;of document type: {oscap_document_type}&#34;
+        )
+        oscap_eval_type = OpenSCAPGeneric.__get_oscap_eval_type_based_on_document_type(
+            oscap_document_type=oscap_document_type
+        )
+        print(
+            f&#34;Determined OpenSCAP eval type of input file ({oscap_input_file}): {oscap_eval_type}&#34;
+        )
+
+        # Execute scan in the context of buildah unshare
+        #
+        # NOTE: run in the context of `buildah unshare` so that container does not
+        #       need to be run in a privilaged mode
+        oscap_out_file_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-out&#39;)
+        oscap_xml_results_file_path = self.write_working_file(
+            f&#39;oscap-{oscap_eval_type}-results.xml&#39;
+        )
+        oscap_html_report_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-report.html&#39;)
+        print(&#34;\nRun oscap scan&#34;)
+        oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
+            buildah_unshare_comand=buildah_unshare_comand,
+            oscap_eval_type=oscap_eval_type,
+            oscap_input_file=oscap_input_file,
+            oscap_out_file_path=oscap_out_file_path,
+            oscap_xml_results_file_path=oscap_xml_results_file_path,
+            oscap_html_report_path=oscap_html_report_path,
+            container_mount_path=container_mount_path,
+            oscap_profile=oscap_profile,
+            oscap_tailoring_file=oscap_tailoring_file,
+            oscap_fetch_remote_resources=oscap_fetch_remote_resources
+        )
+        print(
+            f&#34;OpenSCAP Scan Completed.  Report: {oscap_html_report_path}\n&#34;
+        )
+
+        # NOTE: this should not raise an exception once we have new Results object
+        #       since this is an &#34;expected&#34; &#34;valid&#34; failure...
+        #       but this is the solution for now
+        if not oscap_eval_success:
+            raise TSSCException(f&#34;OSCAP eval found issues:\n{oscap_eval_fails}&#34;)
+
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True
+            },
+            &#39;report-artifacts&#39;: [
+                {
+                    &#39;name&#39;: &#39;html-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_html_report_path}&#39;
+                },
+                {
+                    &#39;name&#39;: &#39;xml-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_xml_results_file_path}&#39;
+                },
+                {
+                    &#39;name&#39;: &#39;stdout-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_out_file_path}&#39;
+                }
+            ]
+        }
+        return results
+
+    @staticmethod
+    def __buildah_import_image_from_tar(image_tar_file, container_name):
+        &#34;&#34;&#34;Import a container image using buildah form a TAR file.
+
+        Parameters
+        ----------
+        image_tar_file : str
+            Path to TAR file to import as a container image.
+        container_name : str
+            name for the working container.
+
+        Returns
+        -------
+        str
+            Name of the imported container.
+        &#34;&#34;&#34;
+        # import image tar file to vfs file system
+        try:
+            sh.buildah( # pylint: disable=no-member
+                &#39;from&#39;,
+                &#39;--storage-driver&#39;, &#39;vfs&#39;,
+                &#39;--name&#39;, container_name,
+                f&#34;docker-archive:{image_tar_file}&#34;,
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#39;Unexpected runtime error importing the image ({image_tar_file}): {error}&#39;
+            ) from error
+
+        return container_name
+
+    @staticmethod
+    def __buildah_mount_container(buildah_unshare_comand, container_id):
+        &#34;&#34;&#34;Use buildah to mount a container.
+
+        Parameters
+        ----------
+        buildah_unshare_comand : sh.buildah.unshare.bake()
+            A baked sh.buildah.unshare command to use to run this command in the context off
+            so that this can be done &#34;rootless&#34;.
+        container_id : str
+            ID of the container to mount.
+
+        Returns
+        -------
+        str
+            Absolute path to the mounted container.
+        &#34;&#34;&#34;
+        mount_path = None
+        try:
+            buildah_mount_out_buff = StringIO()
+            buildah_mount_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                buildah_mount_out_buff
+            ])
+            buildah_mount_command = buildah_unshare_comand.bake(&#34;buildah&#34;, &#34;mount&#34;)
+            buildah_mount_command(
+                &#39;--storage-driver&#39;, &#39;vfs&#39;,
+                container_id,
+                _out=buildah_mount_out_callback,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+            mount_path = buildah_mount_out_buff.getvalue().rstrip()
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#39;Unexpected runtime error mounting container ({container_id}): {error}&#39;
+            ) from error
+
+        return mount_path
+
+    @staticmethod
+    def __get_oscap_document_type(oscap_input_file):
+        &#34;&#34;&#34;Gets the OpenSCAP document type for a given input file.
+
+        Parameters
+        ----------
+        oscap_input_file : path
+            Path to OSCAP file to determine the OpenSCAP document type of.
+
+        Returns
+        -------
+        str
+            OpenSCAP document type. For example:
+            * Source Data Stream
+            * XCCDF Checklist
+            * OVAL Definitions
+
+        Raises
+        ------
+        ErrorReturnCode
+            If unexpected error occurred
+        &#34;&#34;&#34;
+
+        oscap_document_type = None
+        try:
+            oscap_info_out_buff = StringIO()
+            sh.oscap.info( # pylint: disable=no-member
+                oscap_input_file,
+                _out=oscap_info_out_buff
+            )
+            oscap_info_out = oscap_info_out_buff.getvalue().rstrip()
+            oscap_document_type_match = OpenSCAPGeneric.OSCAP_INFO_DOC_TYPE_PATTERN.search(
+                oscap_info_out
+            )
+            oscap_document_type = oscap_document_type_match.groupdict()[&#39;doctype&#39;]
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Unexpected error getting document type of oscap input file&#34;
+                f&#34; ({oscap_input_file}): {error}&#34;
+            ) from error
+
+        return oscap_document_type
+
+    @staticmethod
+    def __get_oscap_eval_type_based_on_document_type(oscap_document_type):
+        &#34;&#34;&#34;Given an OSCAP document type returns the type of oscap eval that should be used.
+
+        Parameters
+        ----------
+        oscap_document_type : str
+            OSCAP Document type to get the oscap eval type for.
+
+        Returns
+        -------
+        str
+            OSCAP eval type to perform on document with given oscap document type.
+        &#34;&#34;&#34;
+        oscap_eval_type = None
+
+        if oscap_document_type == &#39;Source Data Stream&#39;:
+            oscap_eval_type = &#39;xccdf&#39;
+        elif oscap_document_type == &#39;XCCDF Checklist&#39;:
+            oscap_eval_type = &#39;xccdf&#39;
+        elif oscap_document_type == &#39;OVAL Definitions&#39;:
+            oscap_eval_type = &#39;oval&#39;
+
+        return oscap_eval_type
+
+    @staticmethod
+    def __run_oscap_scan( # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
+        buildah_unshare_comand,
+        oscap_eval_type,
+        oscap_input_file,
+        oscap_out_file_path,
+        oscap_xml_results_file_path,
+        oscap_html_report_path,
+        container_mount_path,
+        oscap_profile=None,
+        oscap_tailoring_file=None,
+        oscap_fetch_remote_resources=True
+    ):
+        &#34;&#34;&#34;Run an oscap scan in the context of a buildah unshare to run &#34;rootless&#34;.
+
+        Parameters
+        ----------
+        buildah_unshare_comand : sh.buildah.unshare.bake()
+            A baked sh.buildah.unshare command to use to run this command in the context off
+            so that this can be done &#34;rootless&#34;.
+        oscap_eval_type : str
+            The type of oscap eval to perform. Must be a valid oscap eval type.
+            EX: xccdf, oval
+        oscap_input_file : str
+            Path to rules file passed to the oscap command.
+        oscap_out_file_path : str
+            Path to write the stdout and stderr of running the oscap command to.
+        oscap_xml_results_file_path : str
+            Write the scan results into this file.
+        oscap_html_report_path : str
+            Write the human readable (HTML) report into this file.
+        container_mount_path : str
+            Path to the mounted container to scan.
+        oscap_tailoring_file : str
+            XCCF Tailoring file.
+            See:
+            - https://www.open-scap.org/security-policies/customization/
+            - https://www.open-scap.org/resources/documentation/customizing-scap-security-guide-for-your-use-case/ # pylint: disable=line-too-long
+            - https://static.open-scap.org/openscap-1.2/oscap_user_manual.html#_how_to_tailor_source_data_stream # pylint: disable=line-too-long
+        oscap_profile : str
+            OpenSCAP profile to evaluate. Must be a valid profile in the given oscap_input_file.
+            EX: if you perform an `oscap info oscap_input_file` the profile must be listed.
+
+        Returns
+        -------
+        oscap_eval_success : bool
+            True if oscap eval passed all rules
+            False if oscap eval failed any rules
+        oscap_eval_fails : str
+            If oscap_eval_success is True then indeterminate.
+            If oscap_eval_success is False then string of all of the failed rules.
+
+        Raises
+        ------
+        RuntimeError
+            If unexpected error running oscap scan.
+        &#34;&#34;&#34;
+
+        oscap_profile_flag = None
+        if oscap_profile is not None:
+            oscap_profile_flag = f&#34;--profile={oscap_profile}&#34;
+
+        oscap_fetch_remote_resources_flag = None
+        if isinstance(oscap_fetch_remote_resources, str):
+            oscap_fetch_remote_resources = strtobool(oscap_fetch_remote_resources)
+        if oscap_fetch_remote_resources:
+            oscap_fetch_remote_resources_flag = &#34;--fetch-remote-resources&#34;
+
+        oscap_tailoring_file_flag = None
+        if oscap_tailoring_file is not None:
+            oscap_tailoring_file_flag = f&#34;--tailoring-file={oscap_tailoring_file}&#34;
+
+        oscap_eval_success = None
+        oscap_eval_out_buff = StringIO()
+        oscap_eval_out = &#34;&#34;
+        oscap_eval_fails = None
+        try:
+            oscap_chroot_command = buildah_unshare_comand.bake(&#34;oscap-chroot&#34;)
+            with open(oscap_out_file_path, &#39;w&#39;) as oscap_out_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    oscap_eval_out_buff,
+                    oscap_out_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    oscap_eval_out_buff,
+                    oscap_out_file
+                ])
+                oscap_chroot_command(
+                    container_mount_path,
+                    oscap_eval_type,
+                    &#39;eval&#39;,
+                    oscap_profile_flag,
+                    oscap_fetch_remote_resources_flag,
+                    oscap_tailoring_file_flag,
+                    f&#39;--results={oscap_xml_results_file_path}&#39;,
+                    f&#39;--report={oscap_html_report_path}&#39;,
+                    oscap_input_file,
+                    _out=out_callback,
+                    _err=err_callback,
+                    _tee=&#39;err&#39;
+                )
+                oscap_eval_success = True
+        except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
+            oscap_eval_success = error
+        except sh.ErrorReturnCode_2 as error: # pylint: disable=no-member
+            # XCCDF: If there is at least one rule with either fail or unknown result,
+            #           oscap-scan finishes with return code 2.
+            # OVAL:  Never returned
+            #
+            # Source: https://www.systutorials.com/docs/linux/man/8-oscap/
+            if oscap_eval_type == &#39;xccdf&#39;:
+                oscap_eval_success = False
+            else:
+                oscap_eval_success = error
+        except sh.ErrorReturnCode as error:
+            oscap_eval_success = error
+
+        # get the oscap output
+        oscap_eval_out = oscap_eval_out_buff.getvalue()
+
+        # parse the oscap output
+        # NOTE: oscap is puts carrage returns (\r / ^M) in their output, remove them
+        oscap_eval_out = re.sub(&#39;\r&#39;, &#39;&#39;, oscap_eval_out)
+
+        # print the oscap output no matter the results
+        print(oscap_eval_out)
+
+        # if unexpected error throw error
+        if isinstance(oscap_eval_success, Exception):
+            raise RuntimeError(
+                f&#34;Unexpected error running &#39;oscap {oscap_eval_type} eval&#39;: {oscap_eval_success} &#34;
+            ) from oscap_eval_success
+
+        # NOTE: oscap oval eval returns exit code 0 whether or not any rules failed
+        #       need to search output to determine if there were any rule failures
+        if oscap_eval_type == &#39;oval&#39; and oscap_eval_success:
+            oscap_eval_fails = &#34;&#34;
+            for match in OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN.finditer(oscap_eval_out):
+                # NOTE: need to do regex and not == because may contain xterm color chars
+                if OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN.search(
+                    match.groupdict()[&#39;ruleresult&#39;]
+                ):
+                    oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
+                    oscap_eval_fails += &#34;\n&#34;
+                    oscap_eval_success = False
+
+        # if failed xccdf eval then parse out the fails
+        if oscap_eval_type == &#39;xccdf&#39; and not oscap_eval_success:
+            oscap_eval_fails = &#34;&#34;
+            for match in OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN.finditer(oscap_eval_out):
+                # NOTE: need to do regex and not == because may contain xterm color chars
+                if re.search(r&#39;fail&#39;, match.groupdict()[&#39;ruleresult&#39;]):
+                    oscap_eval_fails += &#34;\n&#34;
+                    oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
+                    oscap_eval_fails += &#34;\n&#34;
+
+        return oscap_eval_success, oscap_eval_fails</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric"><code class="flex name class">
+<span>class <span class="ident">OpenSCAPGeneric</span></span>
+<span>(</span><span>results_dir_path, results_file_name, work_dir_path, config, environment=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A generic OpenSCAP step implementer that can be used for more then one step.</p>
+<p>Expected uses:
+* container-image-static-compliance-scan
+* container-image-static-vulnerability-scan</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OpenSCAPGeneric(StepImplementer):
+    &#34;&#34;&#34;A generic OpenSCAP step implementer that can be used for more then one step.
+
+    Expected uses:
+    * container-image-static-compliance-scan
+    * container-image-static-vulnerability-scan
+    &#34;&#34;&#34;
+
+    # Example Input:
+    #    Title  RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #    Ident  RHSA-2020:4186
+    #    Ident  CVE-2020-14355
+    #    Result pass
+    #
+    #    Title  RHSA-2020:3658: librepo security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #    Ident  RHSA-2020:3658
+    #    Ident  CVE-2020-14352
+    #    Result fail
+    #
+    # Matches:
+    #    (Title RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #    Ident  RHSA-2020:4186
+    #    Ident  CVE-2020-14355
+    #    Result (pass))
+    #
+    #    (Title RHSA-2020:3658: librepo security update (Important)
+    #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #    Ident  RHSA-2020:3658
+    #    Ident  CVE-2020-14352
+    #    Result (fail))
+    #
+    # Named Groups:
+    #    [0]ruleblock
+    #        Title      RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
+    #        Ident      RHSA-2020:4186
+    #        Ident      CVE-2020-14355
+    #        Result     pass
+    #    [0]ruleresult
+    #        pass
+    #
+    #    [1]ruleblock
+    #        Title      RHSA-2020:3658: librepo security update (Important)
+    #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
+    #        Ident      RHSA-2020:3658
+    #        Ident      CVE-2020-14352
+    #        Result     fail
+    #    [1]ruleresult
+    #        fail
+    OSCAP_XCCDF_STDOUT_PATTERN = re.compile(
+        r&#39;(?P&lt;ruleblock&gt;Title.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;,
+        re.DOTALL
+    )
+    OSCAP_XCCDF_STDOUT_FAIL_PATTERN = re.compile(r&#39;fail&#39;)
+
+    # NOTE: oval output far less useful then xccdf output but it is all but given some content
+    #       is only given in oval format and therefor supporting this is important
+    #
+    # Example Input:
+    #   Definition oval:com.redhat.rhsa:def:20202031: false
+    #   Definition oval:com.redhat.rhsa:def:20201998: true
+    #
+    # Matches:
+    #   (Definition oval:com.redhat.rhsa:def:20202031: (false))
+    #   (Definition oval:com.redhat.rhsa:def:20201998: (true))
+    #
+    # Named Groups:
+    #   [0]ruleblock
+    #       Definition oval:com.redhat.rhsa:def:20202031: false
+    #   [0]ruleresult
+    #       false
+    #
+    #   [1]ruleblock
+    #       Definition oval:com.redhat.rhsa:def:20201998: true
+    #   [1]ruleresult
+    #       true
+    OSCAP_OVAL_STDOUT_PATTERN = re.compile(
+        r&#39;(?P&lt;ruleblock&gt;^.*:\s*(?P&lt;ruleresult&gt;true|false)\s*$)$&#39;,
+        re.MULTILINE
+    )
+    OSCAP_OVAL_STDOUT_FAIL_PATTERN = re.compile(r&#39;true&#39;)
+
+    OSCAP_INFO_DOC_TYPE_PATTERN = re.compile(r&#39;Document type: (?P&lt;doctype&gt;.+)&#39;)
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;
+        Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        &#34;&#34;&#34;
+        Getter for step configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_KEYS
+
+    def _validate_runtime_step_config(self, runtime_step_config):
+        &#34;&#34;&#34;Validates required runtime step configuration is valid.
+
+        Validates that:
+        * required configuration is given
+        * oscap-input-definitions-uri
+          - starts with file://|http://|https://
+          - ends with .xml|.bz2
+
+        Raises
+        ------
+        AssertionError
+        * if runtime step configuration is invalid.
+        &#34;&#34;&#34;
+        super()._validate_runtime_step_config(runtime_step_config) # pylint: disable=protected-access
+
+        # validate that the given &#39;oscap-input-definitions-uri&#39; starts with file://|http://|https://
+        oscap_input_definitions_uri = runtime_step_config[&#39;oscap-input-definitions-uri&#39;]
+        assert (re.match(r&#39;^file://|http://|https://&#39;, oscap_input_definitions_uri)), \
+            f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
+            f&#34; must start with known protocol (file://|http://|https://).&#34;
+
+        # validate that the given &#39;oscap-input-definitions-uri&#39; is an xml or bz2 file
+        oscap_input_definitions_uri_extension = os.path.splitext(oscap_input_definitions_uri)[1]
+        assert (re.match(r&#39;\.xml|\.bz2&#39;, oscap_input_definitions_uri_extension)), \
+            f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
+            f&#34; must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}&#34;
+
+    def _run_step(self): # pylint: disable=too-many-locals
+        &#34;&#34;&#34;Runs the OpenSCAP eval for a given input file against a given container.
+        &#34;&#34;&#34;
+        image_tar_file = &#39;&#39;
+        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
+          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get(&#39;image-tar-file&#39;)):
+            image_tar_file = self.\
+            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)[&#39;image-tar-file&#39;]
+        else:
+            raise RuntimeError(&#39;Missing image tar file from &#39; + DefaultSteps.CREATE_CONTAINER_IMAGE)
+
+        oscap_profile = self.get_config_value(&#39;oscap-profile&#39;)
+        oscap_fetch_remote_resources = self.get_config_value(&#39;oscap-fetch-remote-resources&#39;)
+
+        # create a container name from the tar file name, step name, and sub step name
+        container_name = os.path.splitext(os.path.basename(image_tar_file))[0]
+        container_name += f&#34;-{self.step_name}-{self.sub_step_name}&#34;
+
+        # import image tar file to vfs file system
+        print(f&#34;\nImport image: {image_tar_file}&#34;)
+        OpenSCAPGeneric.__buildah_import_image_from_tar(
+            image_tar_file=image_tar_file,
+            container_name=container_name
+        )
+        print(f&#34;Imported image: {image_tar_file}&#34;)
+
+        # baking `buildah unshare` command to wrap other buildah commands with
+        # so that container does not need to be running in a privilaged mode to be able
+        # to function
+        buildah_unshare_comand = sh.buildah.bake(&#39;unshare&#39;) # pylint: disable=no-member
+
+        # mount the container filesystem and get mount path
+        #
+        # NOTE: run in the context of `buildah unshare` so that container does not
+        #       need to be run in a privilaged mode
+        print(f&#34;\nMount container: {container_name}&#34;)
+        container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
+            buildah_unshare_comand=buildah_unshare_comand,
+            container_id=container_name
+        )
+        print(f&#34;Mounted container ({container_name}) with mount path: &#39;{container_mount_path}&#39;&#34;)
+
+        # download the open scap input file
+        oscap_input_definitions_uri = self.get_config_value(&#39;oscap-input-definitions-uri&#39;)
+        print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
+        oscap_input_file = download_and_decompress_source_to_destination(
+            source_url=oscap_input_definitions_uri,
+            destination_dir=self.get_working_dir()
+        )
+        print(f&#34;Download input definitions to: {oscap_input_file}&#34;)
+
+        # if specified download oscap tailoring file
+        oscap_tailoring_file = None
+        oscap_tailoring_file_uri = self.get_config_value(&#39;oscap-tailoring-uri&#39;)
+        if oscap_tailoring_file_uri:
+            print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
+            oscap_tailoring_file = download_and_decompress_source_to_destination(
+                source_url=oscap_tailoring_file_uri,
+                destination_dir=self.get_working_dir()
+            )
+            print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
+
+        # determine oscap eval type based on document type
+        print(f&#34;\nDetermine OpenSCAP document type of input file: {oscap_input_file}&#34;)
+        oscap_document_type = OpenSCAPGeneric.__get_oscap_document_type(
+            oscap_input_file=oscap_input_file
+        )
+        print(
+            &#34;Determined OpenSCAP document type of input file&#34;
+            f&#34; ({oscap_input_file}): {oscap_document_type}&#34;
+        )
+        print(
+            f&#34;\nDetermine OpenSCAP eval type for input file ({oscap_input_file}) &#34;
+            f&#34;of document type: {oscap_document_type}&#34;
+        )
+        oscap_eval_type = OpenSCAPGeneric.__get_oscap_eval_type_based_on_document_type(
+            oscap_document_type=oscap_document_type
+        )
+        print(
+            f&#34;Determined OpenSCAP eval type of input file ({oscap_input_file}): {oscap_eval_type}&#34;
+        )
+
+        # Execute scan in the context of buildah unshare
+        #
+        # NOTE: run in the context of `buildah unshare` so that container does not
+        #       need to be run in a privilaged mode
+        oscap_out_file_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-out&#39;)
+        oscap_xml_results_file_path = self.write_working_file(
+            f&#39;oscap-{oscap_eval_type}-results.xml&#39;
+        )
+        oscap_html_report_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-report.html&#39;)
+        print(&#34;\nRun oscap scan&#34;)
+        oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
+            buildah_unshare_comand=buildah_unshare_comand,
+            oscap_eval_type=oscap_eval_type,
+            oscap_input_file=oscap_input_file,
+            oscap_out_file_path=oscap_out_file_path,
+            oscap_xml_results_file_path=oscap_xml_results_file_path,
+            oscap_html_report_path=oscap_html_report_path,
+            container_mount_path=container_mount_path,
+            oscap_profile=oscap_profile,
+            oscap_tailoring_file=oscap_tailoring_file,
+            oscap_fetch_remote_resources=oscap_fetch_remote_resources
+        )
+        print(
+            f&#34;OpenSCAP Scan Completed.  Report: {oscap_html_report_path}\n&#34;
+        )
+
+        # NOTE: this should not raise an exception once we have new Results object
+        #       since this is an &#34;expected&#34; &#34;valid&#34; failure...
+        #       but this is the solution for now
+        if not oscap_eval_success:
+            raise TSSCException(f&#34;OSCAP eval found issues:\n{oscap_eval_fails}&#34;)
+
+        results = {
+            &#39;result&#39;: {
+                &#39;success&#39;: True
+            },
+            &#39;report-artifacts&#39;: [
+                {
+                    &#39;name&#39;: &#39;html-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_html_report_path}&#39;
+                },
+                {
+                    &#39;name&#39;: &#39;xml-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_xml_results_file_path}&#39;
+                },
+                {
+                    &#39;name&#39;: &#39;stdout-report&#39;,
+                    &#39;path&#39;: f&#39;file://{oscap_out_file_path}&#39;
+                }
+            ]
+        }
+        return results
+
+    @staticmethod
+    def __buildah_import_image_from_tar(image_tar_file, container_name):
+        &#34;&#34;&#34;Import a container image using buildah form a TAR file.
+
+        Parameters
+        ----------
+        image_tar_file : str
+            Path to TAR file to import as a container image.
+        container_name : str
+            name for the working container.
+
+        Returns
+        -------
+        str
+            Name of the imported container.
+        &#34;&#34;&#34;
+        # import image tar file to vfs file system
+        try:
+            sh.buildah( # pylint: disable=no-member
+                &#39;from&#39;,
+                &#39;--storage-driver&#39;, &#39;vfs&#39;,
+                &#39;--name&#39;, container_name,
+                f&#34;docker-archive:{image_tar_file}&#34;,
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#39;Unexpected runtime error importing the image ({image_tar_file}): {error}&#39;
+            ) from error
+
+        return container_name
+
+    @staticmethod
+    def __buildah_mount_container(buildah_unshare_comand, container_id):
+        &#34;&#34;&#34;Use buildah to mount a container.
+
+        Parameters
+        ----------
+        buildah_unshare_comand : sh.buildah.unshare.bake()
+            A baked sh.buildah.unshare command to use to run this command in the context off
+            so that this can be done &#34;rootless&#34;.
+        container_id : str
+            ID of the container to mount.
+
+        Returns
+        -------
+        str
+            Absolute path to the mounted container.
+        &#34;&#34;&#34;
+        mount_path = None
+        try:
+            buildah_mount_out_buff = StringIO()
+            buildah_mount_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                buildah_mount_out_buff
+            ])
+            buildah_mount_command = buildah_unshare_comand.bake(&#34;buildah&#34;, &#34;mount&#34;)
+            buildah_mount_command(
+                &#39;--storage-driver&#39;, &#39;vfs&#39;,
+                container_id,
+                _out=buildah_mount_out_callback,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+            mount_path = buildah_mount_out_buff.getvalue().rstrip()
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#39;Unexpected runtime error mounting container ({container_id}): {error}&#39;
+            ) from error
+
+        return mount_path
+
+    @staticmethod
+    def __get_oscap_document_type(oscap_input_file):
+        &#34;&#34;&#34;Gets the OpenSCAP document type for a given input file.
+
+        Parameters
+        ----------
+        oscap_input_file : path
+            Path to OSCAP file to determine the OpenSCAP document type of.
+
+        Returns
+        -------
+        str
+            OpenSCAP document type. For example:
+            * Source Data Stream
+            * XCCDF Checklist
+            * OVAL Definitions
+
+        Raises
+        ------
+        ErrorReturnCode
+            If unexpected error occurred
+        &#34;&#34;&#34;
+
+        oscap_document_type = None
+        try:
+            oscap_info_out_buff = StringIO()
+            sh.oscap.info( # pylint: disable=no-member
+                oscap_input_file,
+                _out=oscap_info_out_buff
+            )
+            oscap_info_out = oscap_info_out_buff.getvalue().rstrip()
+            oscap_document_type_match = OpenSCAPGeneric.OSCAP_INFO_DOC_TYPE_PATTERN.search(
+                oscap_info_out
+            )
+            oscap_document_type = oscap_document_type_match.groupdict()[&#39;doctype&#39;]
+        except sh.ErrorReturnCode as error:
+            raise RuntimeError(
+                f&#34;Unexpected error getting document type of oscap input file&#34;
+                f&#34; ({oscap_input_file}): {error}&#34;
+            ) from error
+
+        return oscap_document_type
+
+    @staticmethod
+    def __get_oscap_eval_type_based_on_document_type(oscap_document_type):
+        &#34;&#34;&#34;Given an OSCAP document type returns the type of oscap eval that should be used.
+
+        Parameters
+        ----------
+        oscap_document_type : str
+            OSCAP Document type to get the oscap eval type for.
+
+        Returns
+        -------
+        str
+            OSCAP eval type to perform on document with given oscap document type.
+        &#34;&#34;&#34;
+        oscap_eval_type = None
+
+        if oscap_document_type == &#39;Source Data Stream&#39;:
+            oscap_eval_type = &#39;xccdf&#39;
+        elif oscap_document_type == &#39;XCCDF Checklist&#39;:
+            oscap_eval_type = &#39;xccdf&#39;
+        elif oscap_document_type == &#39;OVAL Definitions&#39;:
+            oscap_eval_type = &#39;oval&#39;
+
+        return oscap_eval_type
+
+    @staticmethod
+    def __run_oscap_scan( # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
+        buildah_unshare_comand,
+        oscap_eval_type,
+        oscap_input_file,
+        oscap_out_file_path,
+        oscap_xml_results_file_path,
+        oscap_html_report_path,
+        container_mount_path,
+        oscap_profile=None,
+        oscap_tailoring_file=None,
+        oscap_fetch_remote_resources=True
+    ):
+        &#34;&#34;&#34;Run an oscap scan in the context of a buildah unshare to run &#34;rootless&#34;.
+
+        Parameters
+        ----------
+        buildah_unshare_comand : sh.buildah.unshare.bake()
+            A baked sh.buildah.unshare command to use to run this command in the context off
+            so that this can be done &#34;rootless&#34;.
+        oscap_eval_type : str
+            The type of oscap eval to perform. Must be a valid oscap eval type.
+            EX: xccdf, oval
+        oscap_input_file : str
+            Path to rules file passed to the oscap command.
+        oscap_out_file_path : str
+            Path to write the stdout and stderr of running the oscap command to.
+        oscap_xml_results_file_path : str
+            Write the scan results into this file.
+        oscap_html_report_path : str
+            Write the human readable (HTML) report into this file.
+        container_mount_path : str
+            Path to the mounted container to scan.
+        oscap_tailoring_file : str
+            XCCF Tailoring file.
+            See:
+            - https://www.open-scap.org/security-policies/customization/
+            - https://www.open-scap.org/resources/documentation/customizing-scap-security-guide-for-your-use-case/ # pylint: disable=line-too-long
+            - https://static.open-scap.org/openscap-1.2/oscap_user_manual.html#_how_to_tailor_source_data_stream # pylint: disable=line-too-long
+        oscap_profile : str
+            OpenSCAP profile to evaluate. Must be a valid profile in the given oscap_input_file.
+            EX: if you perform an `oscap info oscap_input_file` the profile must be listed.
+
+        Returns
+        -------
+        oscap_eval_success : bool
+            True if oscap eval passed all rules
+            False if oscap eval failed any rules
+        oscap_eval_fails : str
+            If oscap_eval_success is True then indeterminate.
+            If oscap_eval_success is False then string of all of the failed rules.
+
+        Raises
+        ------
+        RuntimeError
+            If unexpected error running oscap scan.
+        &#34;&#34;&#34;
+
+        oscap_profile_flag = None
+        if oscap_profile is not None:
+            oscap_profile_flag = f&#34;--profile={oscap_profile}&#34;
+
+        oscap_fetch_remote_resources_flag = None
+        if isinstance(oscap_fetch_remote_resources, str):
+            oscap_fetch_remote_resources = strtobool(oscap_fetch_remote_resources)
+        if oscap_fetch_remote_resources:
+            oscap_fetch_remote_resources_flag = &#34;--fetch-remote-resources&#34;
+
+        oscap_tailoring_file_flag = None
+        if oscap_tailoring_file is not None:
+            oscap_tailoring_file_flag = f&#34;--tailoring-file={oscap_tailoring_file}&#34;
+
+        oscap_eval_success = None
+        oscap_eval_out_buff = StringIO()
+        oscap_eval_out = &#34;&#34;
+        oscap_eval_fails = None
+        try:
+            oscap_chroot_command = buildah_unshare_comand.bake(&#34;oscap-chroot&#34;)
+            with open(oscap_out_file_path, &#39;w&#39;) as oscap_out_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    oscap_eval_out_buff,
+                    oscap_out_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    oscap_eval_out_buff,
+                    oscap_out_file
+                ])
+                oscap_chroot_command(
+                    container_mount_path,
+                    oscap_eval_type,
+                    &#39;eval&#39;,
+                    oscap_profile_flag,
+                    oscap_fetch_remote_resources_flag,
+                    oscap_tailoring_file_flag,
+                    f&#39;--results={oscap_xml_results_file_path}&#39;,
+                    f&#39;--report={oscap_html_report_path}&#39;,
+                    oscap_input_file,
+                    _out=out_callback,
+                    _err=err_callback,
+                    _tee=&#39;err&#39;
+                )
+                oscap_eval_success = True
+        except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
+            oscap_eval_success = error
+        except sh.ErrorReturnCode_2 as error: # pylint: disable=no-member
+            # XCCDF: If there is at least one rule with either fail or unknown result,
+            #           oscap-scan finishes with return code 2.
+            # OVAL:  Never returned
+            #
+            # Source: https://www.systutorials.com/docs/linux/man/8-oscap/
+            if oscap_eval_type == &#39;xccdf&#39;:
+                oscap_eval_success = False
+            else:
+                oscap_eval_success = error
+        except sh.ErrorReturnCode as error:
+            oscap_eval_success = error
+
+        # get the oscap output
+        oscap_eval_out = oscap_eval_out_buff.getvalue()
+
+        # parse the oscap output
+        # NOTE: oscap is puts carrage returns (\r / ^M) in their output, remove them
+        oscap_eval_out = re.sub(&#39;\r&#39;, &#39;&#39;, oscap_eval_out)
+
+        # print the oscap output no matter the results
+        print(oscap_eval_out)
+
+        # if unexpected error throw error
+        if isinstance(oscap_eval_success, Exception):
+            raise RuntimeError(
+                f&#34;Unexpected error running &#39;oscap {oscap_eval_type} eval&#39;: {oscap_eval_success} &#34;
+            ) from oscap_eval_success
+
+        # NOTE: oscap oval eval returns exit code 0 whether or not any rules failed
+        #       need to search output to determine if there were any rule failures
+        if oscap_eval_type == &#39;oval&#39; and oscap_eval_success:
+            oscap_eval_fails = &#34;&#34;
+            for match in OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN.finditer(oscap_eval_out):
+                # NOTE: need to do regex and not == because may contain xterm color chars
+                if OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN.search(
+                    match.groupdict()[&#39;ruleresult&#39;]
+                ):
+                    oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
+                    oscap_eval_fails += &#34;\n&#34;
+                    oscap_eval_success = False
+
+        # if failed xccdf eval then parse out the fails
+        if oscap_eval_type == &#39;xccdf&#39; and not oscap_eval_success:
+            oscap_eval_fails = &#34;&#34;
+            for match in OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN.finditer(oscap_eval_out):
+                # NOTE: need to do regex and not == because may contain xterm color chars
+                if re.search(r&#39;fail&#39;, match.groupdict()[&#39;ruleresult&#39;]):
+                    oscap_eval_fails += &#34;\n&#34;
+                    oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
+                    oscap_eval_fails += &#34;\n&#34;
+
+        return oscap_eval_success, oscap_eval_fails</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP" href="../container_image_static_compliance_scan/openscap.html#tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP">OpenSCAP</a></li>
+<li><a title="tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP" href="../container_image_static_vulnerability_scan/openscap.html#tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP">OpenSCAP</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_INFO_DOC_TYPE_PATTERN"><code class="name">var <span class="ident">OSCAP_INFO_DOC_TYPE_PATTERN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN"><code class="name">var <span class="ident">OSCAP_OVAL_STDOUT_FAIL_PATTERN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN"><code class="name">var <span class="ident">OSCAP_OVAL_STDOUT_PATTERN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_FAIL_PATTERN"><code class="name">var <span class="ident">OSCAP_XCCDF_STDOUT_FAIL_PATTERN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN"><code class="name">var <span class="ident">OSCAP_XCCDF_STDOUT_PATTERN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_working_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_working_dir">get_working_dir</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
+<li><a href="#results">Results</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="tssc.step_implementers.shared" href="index.html">tssc.step_implementers.shared</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric">OpenSCAPGeneric</a></code></h4>
+<ul class="">
+<li><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_INFO_DOC_TYPE_PATTERN" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_INFO_DOC_TYPE_PATTERN">OSCAP_INFO_DOC_TYPE_PATTERN</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN">OSCAP_OVAL_STDOUT_FAIL_PATTERN</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN">OSCAP_OVAL_STDOUT_PATTERN</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_FAIL_PATTERN" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_FAIL_PATTERN">OSCAP_XCCDF_STDOUT_FAIL_PATTERN</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN" href="#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN">OSCAP_XCCDF_STDOUT_PATTERN</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+</footer>
+</body>
+</html>

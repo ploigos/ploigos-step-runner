@@ -474,7 +474,7 @@ class TextIOIndenter(io.TextIOBase):
 <h2 id="examples">Examples</h2>
 <p>Will write output directed at stdout to stdout and a results file and output directed
 at stderr to stderr and a results file.</p>
-<pre><code class="python-repl">&gt;&gt;&gt; with open('/tmp/results_file', 'w') as results_file:
+<pre><code class="language-python-repl">&gt;&gt;&gt; with open('/tmp/results_file', 'w') as results_file:
 ...     out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
 ...         sys.stdout,
 ...         results_file
@@ -915,60 +915,60 @@ and therefor get indented as being initially written to this stream.</p>
 <dd>String to indent every line of before writing to parent stream.</dd>
 </dl>
 <h2 id="examples">Examples</h2>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;hello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;hello world\n&quot;)
 hello world
 &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello world\n&quot;)
     hello world
     &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello world\n&quot;)
         hello world
         &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;\nhello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout).write(&quot;\nhello world\n&quot;)
 &lt;BLANKLINE&gt;
 hello world
 &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;\nhello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;\nhello world\n&quot;)
     &lt;BLANKLINE&gt;
     hello world
     &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;\nhello world\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;\nhello world\n&quot;)
         &lt;BLANKLINE&gt;
         hello world
         &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, '-').write(&quot;hello world&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 0, 2, '-').write(&quot;hello world&quot;)
 hello world
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, '-').write(&quot;hello world&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1, 2, '-').write(&quot;hello world&quot;)
 --hello world
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, '-').write(hello world&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2, 2, '-').write(hello world&quot;)
 ----hello world
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello\nworld\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 1).write(&quot;hello\nworld\n&quot;)
     hello
     world
     &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello\nworld\n&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; TextIOIndenter(sys.stdout, 2).write(&quot;hello\nworld\n&quot;)
         hello
         world
         &lt;BLANKLINE&gt;
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+<pre><code class="language-python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
 ... indenter.write(&quot;hello\nworld\n&quot;)
 ... indenter.write(&quot;foo bar\n&quot;)
     hello
     world
     foo bar
 </code></pre>
-<pre><code class="python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
+<pre><code class="language-python-repl">&gt;&gt;&gt; indenter = TextIOIndenter(sys.stdout, 1)
 ... indenter.write(&quot;hello world &quot;)
 ... indenter.write(&quot;foo bar\n&quot;)
 ... indenter.write(&quot;this is a test, &quot;)

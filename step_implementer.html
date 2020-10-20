@@ -605,7 +605,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name)
 
-    def create_working_folder(self):
+    def get_working_dir(self):
         &#34;&#34;&#34;
         If it does not exist, create working folder
 
@@ -635,7 +635,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             Absolute path to the newly created sub directory.
         &#34;&#34;&#34;
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
         os.makedirs(sub_dir_path, exist_ok=True)
@@ -658,7 +658,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         file_path = os.path.join(working_folder, filename)
 
@@ -1432,7 +1432,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         &#34;&#34;&#34;
         return self.get_step_results(self.step_name)
 
-    def create_working_folder(self):
+    def get_working_dir(self):
         &#34;&#34;&#34;
         If it does not exist, create working folder
 
@@ -1462,7 +1462,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             Absolute path to the newly created sub directory.
         &#34;&#34;&#34;
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
         os.makedirs(sub_dir_path, exist_ok=True)
@@ -1485,7 +1485,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
         str
             return a string to the absolute file path
         &#34;&#34;&#34;
-        working_folder = self.create_working_folder()
+        working_folder = self.get_working_dir()
 
         file_path = os.path.join(working_folder, filename)
 
@@ -1581,8 +1581,6 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="tssc.step_implementers.canary_test.selenium.Selenium" href="step_implementers/canary_test/selenium.html#tssc.step_implementers.canary_test.selenium.Selenium">Selenium</a></li>
-<li><a title="tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP" href="step_implementers/container_image_static_compliance_scan/openscap.html#tssc.step_implementers.container_image_static_compliance_scan.openscap.OpenSCAP">OpenSCAP</a></li>
-<li><a title="tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP" href="step_implementers/container_image_static_vulnerability_scan/openscap.html#tssc.step_implementers.container_image_static_vulnerability_scan.openscap.OpenSCAP">OpenSCAP</a></li>
 <li><a title="tssc.step_implementers.create_container_image.buildah.Buildah" href="step_implementers/create_container_image/buildah.html#tssc.step_implementers.create_container_image.buildah.Buildah">Buildah</a></li>
 <li><a title="tssc.step_implementers.deploy.argocd.ArgoCD" href="step_implementers/deploy/argocd.html#tssc.step_implementers.deploy.argocd.ArgoCD">ArgoCD</a></li>
 <li><a title="tssc.step_implementers.generate_metadata.git.Git" href="step_implementers/generate_metadata/git.html#tssc.step_implementers.generate_metadata.git.Git">Git</a></li>
@@ -1594,6 +1592,7 @@ class StepImplementer(ABC): # pylint: disable=too-many-instance-attributes
 <li><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="step_implementers/push_artifacts/maven.html#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></li>
 <li><a title="tssc.step_implementers.push_artifacts.npm.NPM" href="step_implementers/push_artifacts/npm.html#tssc.step_implementers.push_artifacts.npm.NPM">NPM</a></li>
 <li><a title="tssc.step_implementers.push_container_image.skopeo.Skopeo" href="step_implementers/push_container_image/skopeo.html#tssc.step_implementers.push_container_image.skopeo.Skopeo">Skopeo</a></li>
+<li><a title="tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric" href="step_implementers/shared/openscap_generic.html#tssc.step_implementers.shared.openscap_generic.OpenSCAPGeneric">OpenSCAPGeneric</a></li>
 <li><a title="tssc.step_implementers.sign_container_image.curl_push.CurlPush" href="step_implementers/sign_container_image/curl_push.html#tssc.step_implementers.sign_container_image.curl_push.CurlPush">CurlPush</a></li>
 <li><a title="tssc.step_implementers.sign_container_image.podman_sign.PodmanSign" href="step_implementers/sign_container_image/podman_sign.html#tssc.step_implementers.sign_container_image.podman_sign.PodmanSign">PodmanSign</a></li>
 <li><a title="tssc.step_implementers.static_code_analysis.sonarqube.SonarQube" href="step_implementers/static_code_analysis/sonarqube.html#tssc.step_implementers.static_code_analysis.sonarqube.SonarQube">SonarQube</a></li>
@@ -1947,44 +1946,12 @@ def sub_step_name(self):
     str
         Absolute path to the newly created sub directory.
     &#34;&#34;&#34;
-    working_folder = self.create_working_folder()
+    working_folder = self.get_working_dir()
 
     sub_dir_path = os.path.join(working_folder, sub_dir_relative_path)
     os.makedirs(sub_dir_path, exist_ok=True)
 
     return sub_dir_path</code></pre>
-</details>
-</dd>
-<dt id="tssc.step_implementer.StepImplementer.create_working_folder"><code class="name flex">
-<span>def <span class="ident">create_working_folder</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>If it does not exist, create working folder</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>return a string to the absolute path</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_working_folder(self):
-    &#34;&#34;&#34;
-    If it does not exist, create working folder
-
-    Returns
-    -------
-    str
-        return a string to the absolute path
-    &#34;&#34;&#34;
-    if not os.path.exists(self.__work_dir_path):
-        os.makedirs(self.__work_dir_path)
-    step_path = os.path.join(self.__work_dir_path, self.step_name)
-    if not os.path.exists(step_path):
-        os.makedirs(step_path)
-
-    return os.path.abspath(step_path)</code></pre>
 </details>
 </dd>
 <dt id="tssc.step_implementer.StepImplementer.current_results"><code class="name flex">
@@ -2252,6 +2219,38 @@ for this sub step in the given context with the given defaults.</dd>
     return self.current_results()[StepImplementer.__TSSC_RESULTS_KEY].get(step_name)</code></pre>
 </details>
 </dd>
+<dt id="tssc.step_implementer.StepImplementer.get_working_dir"><code class="name flex">
+<span>def <span class="ident">get_working_dir</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>If it does not exist, create working folder</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>return a string to the absolute path</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_working_dir(self):
+    &#34;&#34;&#34;
+    If it does not exist, create working folder
+
+    Returns
+    -------
+    str
+        return a string to the absolute path
+    &#34;&#34;&#34;
+    if not os.path.exists(self.__work_dir_path):
+        os.makedirs(self.__work_dir_path)
+    step_path = os.path.join(self.__work_dir_path, self.step_name)
+    if not os.path.exists(step_path):
+        os.makedirs(step_path)
+
+    return os.path.abspath(step_path)</code></pre>
+</details>
+</dd>
 <dt id="tssc.step_implementer.StepImplementer.has_config_value"><code class="name flex">
 <span>def <span class="ident">has_config_value</span></span>(<span>self, keys, match_any=False)</span>
 </code></dt>
@@ -2505,7 +2504,7 @@ element.</dd>
     str
         return a string to the absolute file path
     &#34;&#34;&#34;
-    working_folder = self.create_working_folder()
+    working_folder = self.get_working_dir()
 
     file_path = os.path.join(working_folder, filename)
 
@@ -2569,13 +2568,13 @@ element.</dd>
 <ul class="">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="#tssc.step_implementer.StepImplementer.config">config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.create_working_folder" href="#tssc.step_implementer.StepImplementer.create_working_folder">create_working_folder</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_working_dir" href="#tssc.step_implementer.StepImplementer.get_working_dir">get_working_dir</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
