@@ -5,6 +5,7 @@ import io
 import random
 import re
 
+
 def create_sh_redirect_to_multiple_streams_fn_callback(streams):
     """Creates and returns a function callback that will write given data to multiple given streams.
 
@@ -36,11 +37,13 @@ def create_sh_redirect_to_multiple_streams_fn_callback(streams):
     function(data)
         Function that takes one parameter, data, and writes that value to all the given streams.
     """
+
     def sh_redirect_to_multiple_streams(data):
         for stream in streams:
             stream.write(data)
 
     return sh_redirect_to_multiple_streams
+
 
 class TextIOSelectiveObfuscator(io.TextIOBase):
     """Extends the base class for text streams to allow the obfuscation of given patterns.
@@ -60,20 +63,20 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
     Attributes
     ----------
     __parent_stream : IOBase
-    __obfuscation_paterns : list
+    __obfuscation_patterns : list
     __replacement_char : char
-    __randomize_replacment_length : bool
+    __randomize_replacement_length : bool
     __random_replacement_length_min : int
-    __random_replacment_length_max : int
+    __random_replacement_length_max : int
     """
 
     def __init__(self, parent_stream, randomize_replacment_length=True, replacement_char='*'):
         self.__parent_stream = parent_stream
-        self.__obfuscation_paterns = []
+        self.__obfuscation_patterns = []
         self.__replacement_char = replacement_char
-        self.__randomize_replacment_length = randomize_replacment_length
+        self.__randomize_replacement_length = randomize_replacment_length
         self.__random_replacement_length_min = 5
-        self.__random_replacment_length_max = 40
+        self.__random_replacement_length_max = 40
         super().__init__()
 
     @property
@@ -107,7 +110,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         self.__replacement_char = replacement_char
 
     @property
-    def randomize_replacment_length(self):
+    def randomize_replacement_length(self):
         """
         Returns
         -------
@@ -115,7 +118,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
             True if this stream is randomizing the length of the text being obfuscated.
             False if this stream is using the same length replacement for any obfuscated text.
         """
-        return self.__randomize_replacment_length
+        return self.__randomize_replacement_length
 
     def add_obfuscation_targets(self, targets):
         """Adds a target pattern to be obfuscated whenever writing to this stream.
@@ -153,13 +156,13 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
             target_pattern = re.sub(r'\\ ', r'.*', target_pattern)
 
             # eat up pre and post newlines
-            #target_pattern = f"(\s*)({target_pattern})(\s*)"
+            # target_pattern = f"(\s*)({target_pattern})(\s*)"
 
             # compile the pattern for re-use and make sure that .* matches accross lines
             target_compiled_pattern = re.compile(target_pattern, re.DOTALL)
 
             # add the pattern
-            self.__obfuscation_paterns.append(target_compiled_pattern)
+            self.__obfuscation_patterns.append(target_compiled_pattern)
 
     def __obfuscator(self, match):
         """Given a regex match returns a corresponding obfuscated string.
@@ -179,15 +182,15 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         re.sub
         """
 
-        if self.randomize_replacment_length:
-            replacment_length = random.randint(
+        if self.randomize_replacement_length:
+            replacement_length = random.randint(
                 self.__random_replacement_length_min,
-                self.__random_replacment_length_max
+                self.__random_replacement_length_max
             )
         else:
-            replacment_length = len(match.group())
+            replacement_length = len(match.group())
 
-        return self.replacement_char * replacment_length
+        return self.replacement_char * replacement_length
 
     def write(self, given):
         """Writes to this streams parent stream after obfuscating all of the obfuscation targets.
@@ -212,7 +215,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         else:
             obfuscated = given
 
-        for obfuscation_pattern in self.__obfuscation_paterns:
+        for obfuscation_pattern in self.__obfuscation_patterns:
             obfuscated = obfuscation_pattern.sub(self.__obfuscator, obfuscated)
 
         return self.parent_stream.write(obfuscated)
@@ -225,6 +228,7 @@ class TextIOSelectiveObfuscator(io.TextIOBase):
         io.TextIOBase.flush
         """
         self.parent_stream.flush()
+
 
 class TextIOIndenter(io.TextIOBase):
     """Adds an indent to the first string written and after every new line written to this stream.

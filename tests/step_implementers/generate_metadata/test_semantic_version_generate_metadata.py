@@ -1,375 +1,207 @@
 import os
+from io import IOBase, StringIO
 
 from testfixtures import TempDirectory
-import yaml
-import sys
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 
-from git import Repo
-from git import InvalidGitRepositoryError
+from tssc.config.config import Config
+from tssc.step_result import StepResult
+from tssc.workflow_result import WorkflowResult
+from tssc.step_implementers.generate_metadata import SemanticVersion
 
-from tssc import TSSCFactory
-from tssc.step_implementers.generate_metadata import Git
-from tssc.step_implementers.generate_metadata import Maven
-from tssc.step_implementers.generate_metadata import Npm
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tests.helpers.test_utils import *
+class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTestCase):
+    def create_step_implementer(
+            self,
+            step_config={},
+            test_config={},
+            results_dir_path='',
+            results_file_name='',
+            work_dir_path=''
+    ):
+        return self.create_given_step_implementer(
+            step_implementer=SemanticVersion,
+            step_config=step_config,
+            test_config=test_config,
+            results_dir_path=results_dir_path,
+            results_file_name=results_file_name,
+            work_dir_path=work_dir_path
+        )
 
-class TestStepImplementerGenerateMetadataNpm(BaseTSSCTestCase):
-    def test_no_provided_app_version(self):
+    def test_step_implementer_config_defaults(self):
+        defaults = SemanticVersion.step_implementer_config_defaults()
+        expected_defaults = {
+            'release-branch': 'master'
+        }
+        self.assertEqual(defaults, expected_defaults)
+
+    def test_required_runtime_step_config_keys(self):
+        required_keys = SemanticVersion.required_runtime_step_config_keys()
+        expected_required_keys = []
+        self.assertEqual(required_keys, expected_required_keys)
+
+    def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
+            step_config = {}
+            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
             }
 
-            expected_step_results = {}
+            self.setup_previous_result(work_dir_path, artifact_config)
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                test_config=test_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+            
+            result = step_implementer._run_step()
 
-    def test_no_provided_build(self):
+            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+            expected_step_result.add_artifact(name='version', value='42.1.0+abc123')
+            expected_step_result.add_artifact(name='container-image-version', value='42.1.0')
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    def test_run_step_no_app_version(self):
         with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            step_config = {}
+            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
+            artifact_config = {
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
             }
 
-            expected_step_results = {}
+            self.setup_previous_result(work_dir_path, artifact_config)
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': 'beta0'})
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                test_config=test_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+            
+            result = step_implementer._run_step()
 
-    def test_no_provided_pre_release(self):
+            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+            expected_step_result.success = False
+            expected_step_result.message = f'No value for (app-version) provided via runtime flag' \
+                '(app-version) or from prior step implementer ({self.step_name}).'
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    def test_run_step_no_pre_release(self):
         with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            step_config = {}
+            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
             }
 
-            expected_step_results = {}
+            self.setup_previous_result(work_dir_path, artifact_config)
 
-            with self.assertRaises(ValueError):
-                run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': '1234'})
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                test_config=test_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+            
+            result = step_implementer._run_step()
 
+            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+            expected_step_result.success = False
+            expected_step_result.message = f'No value for (pre-release) provided via runtime flag' \
+                '(pre-release) or from prior step implementer ({self.step_name}).'
 
-    def test_maven_git_and_version_master_branch(self):
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    def test_run_step_no_build(self):
         with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            step_config = {}
+            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
             }
 
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "42.1"
-            build = git_branch_last_commit_hash[:7]
-            version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            self.setup_previous_result(work_dir_path, artifact_config)
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                test_config=test_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+            
+            result = step_implementer._run_step()
 
-    def test_npm_git_and_version_master_branch(self):
+            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+            expected_step_result.success = False
+            expected_step_result.message = f'No value for (build) provided via runtime flag' \
+                '(build) or from prior step implementer ({self.step_name}).'
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    def test_run_step_pass_different_pre_release(self):
         with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('package.json',b'''{
-            "name": "my-awesome-package",
-            "version": "1.0.0"
-            }''')
-            package_file_path = os.path.join(temp_dir.path, 'package.json')
+            step_config = {}
+            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Npm',
-                            'config': {
-                                'package-file': str(package_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'feature123'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
             }
 
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "1.0.0"
-            build = git_branch_last_commit_hash[:7]
-            version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
+            self.setup_previous_result(work_dir_path, artifact_config)
 
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                test_config=test_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+            
+            result = step_implementer._run_step()
 
-    def test_maven_git_and_version_feature_branch(self):
-        with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
+            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+            expected_step_result.add_artifact(name='version', value='42.1.0-feature123+abc123')
+            expected_step_result.add_artifact(name='container-image-version', value='42.1.0-feature123')
 
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-
-            # create commit
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            # checkout a feature branch
-            git_new_branch = repo.create_head('feature/test0')
-            git_new_branch.checkout()
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
-            }
-
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "42.1"
-            build = git_branch_last_commit_hash[:7]
-            pre_release = 'feature_test0'
-            version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-            image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': pre_release, 'build': build, 'version': version, 'container-image-version': image_tag}}}
-
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path)})
-
-    def test_override_app_version_at_runtime(self):
-        with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
-
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
-            }
-
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "24.5"
-            build = git_branch_last_commit_hash[:7]
-            version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': "42.1", 'pre-release': 'master', 'build': build, 'version': version, 'container-image-version': image_tag}}}
-
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'app-version': app_version})
-
-    def test_override_build_at_runtime(self):
-        with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
-
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
-            }
-
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "42.1"
-            build = "1234"
-            version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}".format(app_version)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'master', 'build': git_branch_last_commit_hash[:7], 'version': version, 'container-image-version': image_tag}}}
-
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'build': build})
-
-    def test_override_pre_release_at_runtime(self):
-        with TempDirectory() as temp_dir:
-            repo = Repo.init(str(temp_dir.path))
-
-            temp_dir.write('pom.xml',b'''<project>
-        <modelVersion>4.0.0</modelVersion>
-        <groupId>com.mycompany.app</groupId>
-        <artifactId>my-app</artifactId>
-        <version>42.1</version>
-    </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-
-            # create commit
-            create_git_commit_with_sample_file(temp_dir, repo)
-
-            # checkout a feature branch
-            git_new_branch = repo.create_head('feature/test0')
-            git_new_branch.checkout()
-
-            config = {
-                'tssc-config': {
-                    'generate-metadata': [
-                        {
-                            'implementer': 'Maven',
-                            'config': {
-                                'pom-file': str(pom_file_path)
-                            }
-                        },
-                        {
-                            'implementer': 'Git'
-                        },
-                        {
-                            'implementer': 'SemanticVersion'
-                        }
-                    ]
-                }
-            }
-
-            git_branch_last_commit_hash = str(repo.head.reference.commit)
-            app_version = "42.1"
-            build = git_branch_last_commit_hash[:7]
-            pre_release = 'beta1'
-            version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-            image_tag = "{0}-{1}".format(app_version, pre_release)
-            expected_step_results = {'tssc-results': {'generate-metadata': {'app-version': app_version, 'pre-release': 'feature_test0', 'build': build, 'version': version, 'container-image-version': image_tag}}}
-
-            run_step_test_with_result_validation(temp_dir, 'generate-metadata', config, expected_step_results, runtime_args={'repo-root': str(temp_dir.path), 'pre-release': pre_release})
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())

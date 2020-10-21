@@ -20,5 +20,5 @@ class TestReflectionUtils(BaseTSSCTestCase):
 
     def test_import_and_get_class_class_exists_in_module(self):
         self.assertIsNotNone(
-            import_and_get_class('tssc.step_implementers.package', 'Maven')
+            import_and_get_class('tssc.step_implementers.container_image_static_compliance_scan', 'OpenSCAP')
         )
