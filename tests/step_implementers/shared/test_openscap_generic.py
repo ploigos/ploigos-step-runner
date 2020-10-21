@@ -932,7 +932,8 @@ Result	pass
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
         step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'oscap-profile': 'foo'
         }
         image_tar_file_name = 'my_awesome_app'
         image_tar_file = f'/does/not/matter/{image_tar_file_name}.tar'
@@ -946,7 +947,7 @@ Result	pass
             mount_path = '/does/not/matter/container-mount'
 
             # create fake step implementer step_results
-            step_result = StepResult(step_name='test', sub_step_name='test', sub_step_implementer_name='test')
+            step_result = StepResult(step_name='pretest', sub_step_name='pretest', sub_step_implementer_name='pretest')
             step_result.add_artifact(name='image-tar-file', value=image_tar_file)
             workflow_result = WorkflowResult()
             workflow_result.add_step_result(step_result=step_result)
@@ -969,7 +970,20 @@ Result	pass
 
             stdout_buff = StringIO()
             with redirect_stdout(stdout_buff):
-                step_implementer._run_step()
+                step_result = step_implementer.run_step()
+
+            current_results = step_implementer.get_step_result()
+            expected_results = { 'tssc-results': {
+                "test": {
+                    "OpenSCAP": {
+                        "sub-step-implementer-name": "OpenSCAP",
+                        "success": True, "message": "",
+                        "artifacts": {
+                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}}
+            }
+            self.assertEqual(expected_results, current_results)
 
             stdout = stdout_buff.getvalue()
 
@@ -987,7 +1001,7 @@ Result	pass
                     rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
                     rf".*Determined OpenSCAP eval type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_eval_type}"
                     rf".*Run oscap scan"
-                    rf".*OpenSCAP scan completed successfully.  Report: /.+/working/test/oscap\-{oscap_eval_type}\-report\.html",
+                    rf".*OpenSCAP scan completed with eval success",
                     re.DOTALL
                 )
             )
@@ -1006,7 +1020,8 @@ Result	pass
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
         step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'oscap-profile': 'foo'
         }
         image_tar_file_name = 'my_awesome_app'
         image_tar_file = f'/does/not/matter/{image_tar_file_name}.tar'
@@ -1025,7 +1040,8 @@ Result	fail
             mount_path = '/does/not/matter/container-mount'
 
             # create fake step implementer step_results
-            step_result = StepResult(step_name='test', sub_step_name='test', sub_step_implementer_name='test')
+            # add to
+            step_result = StepResult(step_name='pretest', sub_step_name='pretest', sub_step_implementer_name='pretest')
             step_result.add_artifact(name='image-tar-file', value=image_tar_file)
             workflow_result = WorkflowResult()
             workflow_result.add_step_result(step_result=step_result)
@@ -1047,18 +1063,40 @@ Result	fail
             ]
             stdout_buff = StringIO()
             with redirect_stdout(stdout_buff):
-                step_implementer._run_step()
+                step_result = step_implementer.run_step()
+            # todo: design issue - the step is written in run_step()
+            current_results = step_implementer.get_step_result()
+
+            expected_results = { 'tssc-results': {
+                "test": {
+                    "OpenSCAP": {
+                        "sub-step-implementer-name": "OpenSCAP",
+                        "success": False,
+                        "message": "OSCAP eval found issues:\n\nTitle\tInstall dnf-automatic Package\nRule\txccdf_org.ssgproject.content_rule_package_dnf-automatic_installed\nIdent\tCCE-82985-3\nResult\tfail\n",
+                        "artifacts": {
+                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}}
+            }
+            self.assertEqual(expected_results, current_results)
 
             stdout = stdout_buff.getvalue()
 
             self.assertRegex(
                 stdout,
                 re.compile(
-                    r"OpenSCAP scan completed. OSCAP eval issues:"
-                    r".*Title\s+Install dnf-automatic Package"
-                    r".*Rule\s+xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed"
-                    r".*Ident\s+CCE-82985-3"
-                    r".*Result\s+fail",
+                    rf".*Import image: {image_tar_file}"
+                    rf".*Imported image: {image_tar_file}"
+                    rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
+                    rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
+                    rf".*Download input definitions: {oscap_input_definitions_uri}"
+                    rf".*Download input definitions to: /.+/working/test/rhel\-8.ds.xml"
+                    rf".*Determine OpenSCAP document type of input file: /.+/working/test/rhel\-8\.ds\.xml"
+                    rf".*Determined OpenSCAP document type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_document_type}"
+                    rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
+                    rf".*Determined OpenSCAP eval type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_eval_type}"
+                    rf".*Run oscap scan"
+                    rf".*OpenSCAP scan completed with eval success: False",
                     re.DOTALL
                 )
             )
@@ -1107,7 +1145,7 @@ Result	fail
             ):
                 stdout_buff = StringIO()
                 with redirect_stdout(stdout_buff):
-                    step_implementer._run_step()
+                    step_result = step_implementer._run_step()
 
             stdout = stdout_buff.getvalue()
 
@@ -1129,7 +1167,8 @@ Result	fail
         oscap_tailoring_uri = 'https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml'
         step_config = {
             'oscap-input-definitions-uri': oscap_input_definitions_uri,
-            'oscap-tailoring-uri': oscap_tailoring_uri
+            'oscap-tailoring-uri': oscap_tailoring_uri,
+            'oscap-profile': 'foo'
         }
         image_tar_file_name = 'my_awesome_app'
         image_tar_file = f'/does/not/matter/{image_tar_file_name}.tar'
@@ -1143,7 +1182,7 @@ Result	fail
             mount_path = '/does/not/matter/container-mount'
 
             # create fake step implementer step_results
-            step_result = StepResult(step_name='test', sub_step_name='x', sub_step_implementer_name='x')
+            step_result = StepResult(step_name='pretest', sub_step_name='pretest', sub_step_implementer_name='pretest')
             step_result.add_artifact(name='image-tar-file', value=image_tar_file)
             workflow_result = WorkflowResult()
             workflow_result.add_step_result(step_result=step_result)
@@ -1166,7 +1205,22 @@ Result	fail
 
             stdout_buff = StringIO()
             with redirect_stdout(stdout_buff):
-                step_implementer._run_step()
+                step_implementer.run_step()
+            current_results = step_implementer.get_step_result()
+
+            expected_results = {'tssc-results': {
+                "test": {
+                    "OpenSCAP": {
+                        "sub-step-implementer-name": "OpenSCAP",
+                        "success": True, "message": "",
+                        "artifacts": {
+                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}}
+            }
+            self.assertEqual(expected_results, current_results)
+
+            stdout = stdout_buff.getvalue()
 
             stdout = stdout_buff.getvalue()
 
@@ -1186,7 +1240,7 @@ Result	fail
                     rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
                     rf".*Determined OpenSCAP eval type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_eval_type}"
                     rf".*Run oscap scan"
-                    rf".*OpenSCAP scan completed successfully.  Report: /.+/working/test/oscap\-{oscap_eval_type}\-report\.html",
+                    rf".*OpenSCAP scan completed with eval success",
                     re.DOTALL
                 )
             )

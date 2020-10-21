@@ -322,14 +322,13 @@ class OpenSCAPGeneric(StepImplementer):
             oscap_fetch_remote_resources=oscap_fetch_remote_resources
         )
 
-        #  This is an "expected" "valid" failure.
-        if not oscap_eval_success:
-            print(f"OpenSCAP scan completed. OSCAP eval issues:\n{oscap_eval_fails}")
-            step_result.success = False
-            step_result.message = f"OSCAP eval found issues:\n{oscap_eval_fails}"
-            return step_result
+        print(f"OpenSCAP scan completed with eval success: {oscap_eval_success}")
 
-        print(f"OpenSCAP scan completed successfully.  Report: {oscap_html_report_path}\n")
+        #  This is an "expected" "valid" failure.
+        step_result.success = oscap_eval_success
+        if not oscap_eval_success:
+            step_result.message = f"OSCAP eval found issues:\n{oscap_eval_fails}"
+
         step_result.add_artifact(
             name='html-report',
             value=f'file://{oscap_html_report_path}'
