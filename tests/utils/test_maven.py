@@ -28,7 +28,7 @@ class TestMavenUtils(BaseTSSCTestCase):
             generate_maven_settings(temp_dir.path, maven_servers, None, None)
             with open(temp_dir.path + '/settings.xml', 'r') as tester:
                 results = tester.read()
-                self.assertEquals(results, settings)
+                self.assertEqual(results, settings)
 
     def test_generate_maven_servers_id_does_not_exist(self):
         maven_servers = [
@@ -75,7 +75,7 @@ class TestMavenUtils(BaseTSSCTestCase):
             generate_maven_settings(temp_dir.path, None, maven_repositories, None)
             with open(temp_dir.path + '/settings.xml', 'r') as tester:
                 results = tester.read()
-                self.assertEquals(results, settings)
+                self.assertEqual(results, settings)
 
     def test_generate_maven_repositories_id_does_not_exists(self):
         maven_repositories = [
@@ -108,7 +108,7 @@ class TestMavenUtils(BaseTSSCTestCase):
             generate_maven_settings(temp_dir.path, None, None, maven_mirrors)
             with open(temp_dir.path + '/settings.xml', 'r') as tester:
                 results = tester.read()
-                self.assertEquals(results, settings)
+                self.assertEqual(results, settings)
 
     def test_generate_maven_mirrors_exists_id_does_not_exists(self):
         maven_mirrors = [
@@ -132,7 +132,7 @@ class TestMavenUtils(BaseTSSCTestCase):
             generate_maven_settings(temp_dir.path, None, None, None)
             with open(temp_dir.path + '/settings.xml', 'r') as tester:
                 results = tester.read()
-                self.assertEquals(results, settings)
+                self.assertEqual(results, settings)
 
     def test_generate_maven_mirrors_empty(self):
         settings = '<settings />'
@@ -141,7 +141,7 @@ class TestMavenUtils(BaseTSSCTestCase):
             generate_maven_settings(temp_dir.path, None, None, None)
             with open(temp_dir.path + '/settings.xml', 'r') as tester:
                 results = tester.read()
-                self.assertEquals(results, settings)
+                self.assertEqual(results, settings)
 
     def test_add_maven_server_no_user_no_pass(self):
         root_element = ET.Element('settings')

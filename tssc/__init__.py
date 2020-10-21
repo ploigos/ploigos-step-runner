@@ -819,11 +819,15 @@ import __main__
 from .step_implementer import StepImplementer, DefaultSteps
 from .factory import TSSCFactory
 from .exceptions import TSSCException
+from .step_result import StepResult
+from .workflow_result import WorkflowResult
 
 __all__ = [
     'config',
     'factory',
     'exceptions',
     'step_implementer',
-    'utils'
+    'utils',
+    'step_result',
+    'workflow_result'
 ]

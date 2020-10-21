@@ -220,12 +220,8 @@ class OpenSCAPGeneric(StepImplementer):
     def _run_step(self): # pylint: disable=too-many-locals
         """Runs the OpenSCAP eval for a given input file against a given container.
         """
-        image_tar_file = ''
-        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
-          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image-tar-file')):
-            image_tar_file = self.\
-            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image-tar-file']
-        else:
+        image_tar_file = self.get_result_value('image-tar-file')
+        if image_tar_file is None:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
         oscap_profile = self.get_config_value('oscap-profile')
@@ -244,14 +240,14 @@ class OpenSCAPGeneric(StepImplementer):
         print(f"Imported image: {image_tar_file}")
 
         # baking `buildah unshare` command to wrap other buildah commands with
-        # so that container does not need to be running in a privilaged mode to be able
+        # so that container does not need to be running in a privileged mode to be able
         # to function
         buildah_unshare_comand = sh.buildah.bake('unshare') # pylint: disable=no-member
 
         # mount the container filesystem and get mount path
         #
         # NOTE: run in the context of `buildah unshare` so that container does not
-        #       need to be run in a privilaged mode
+        #       need to be run in a privileged mode
         print(f"\nMount container: {container_name}")
         container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
             buildah_unshare_comand=buildah_unshare_comand,
@@ -264,7 +260,7 @@ class OpenSCAPGeneric(StepImplementer):
         print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
         oscap_input_file = download_and_decompress_source_to_destination(
             source_url=oscap_input_definitions_uri,
-            destination_dir=self.get_working_dir()
+            destination_dir=self.work_dir_path_step
         )
         print(f"Download input definitions to: {oscap_input_file}")
 
@@ -275,7 +271,7 @@ class OpenSCAPGeneric(StepImplementer):
             print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
             oscap_tailoring_file = download_and_decompress_source_to_destination(
                 source_url=oscap_tailoring_file_uri,
-                destination_dir=self.get_working_dir()
+                destination_dir=self.work_dir_path_step
             )
             print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
 
