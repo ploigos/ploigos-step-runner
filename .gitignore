@@ -12,6 +12,7 @@ coverage.xml
 tssc/version.py
 tssc-results
 tssc-working
+results.yml/
 .venvs
 
 # Eclipse

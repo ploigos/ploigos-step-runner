@@ -119,6 +119,7 @@ Examples
 """
 
 from tssc import StepImplementer
+from tssc.step_result import StepResult
 
 DEFAULT_CONFIG = {
     'release-branch': 'master'
@@ -169,50 +170,54 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         dict
             Results of running this step.
         """
+        step_result = StepResult.from_step_implementer(self)
+
         app_version = None
         pre_release = None
         build = None
         release_branch = self.get_config_value('release-branch')
 
-        current_step_results = self.current_step_results()
-
         app_version = self.get_config_value('app-version')
-        if app_version is None and 'app-version' in current_step_results:
-            app_version = current_step_results['app-version']
         if app_version is None:
-            raise ValueError(
-                """No value for (app-version) provided via runtime flag
-                (app-version) or from prior step implementer ({0}).
-                """.format(self.step_name))
+            app_version = self.get_result_value(artifact_name='app-version')
+        if app_version is None:
+            step_result.success = False
+            step_result.message = f'No value for (app-version) provided via runtime flag' \
+            '(app-version) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         pre_release = self.get_config_value('pre-release')
-        if pre_release is None and 'pre-release' in current_step_results:
-            pre_release = current_step_results['pre-release']
         if pre_release is None:
-            raise ValueError(
-                """No value for (pre_release) provided via runtime flag
-                (pre-release) or from prior step implementer ({0})
-                """.format(self.step_name))
+            pre_release = self.get_result_value(artifact_name='pre-release')
+        if pre_release is None:
+            step_result.success = False
+            step_result.message = f'No value for (pre-release) provided via runtime flag' \
+            '(pre-release) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         build = self.get_config_value('build')
-        if build is None and 'build' in current_step_results:
-            build = current_step_results['build']
         if build is None:
-            raise ValueError(
-                """No value for (build) provided via runtime flag
-                (build) or from prior step implementer ({0})
-                """.format(self.step_name))
+            build = self.get_result_value(artifact_name='build')
+        if build is None:
+            step_result.success = False
+            step_result.message = f'No value for (build) provided via runtime flag' \
+            '(build) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         if pre_release == release_branch:
-            version = "{0}+{1}".format(app_version, build)
-            image_tag = "{0}".format(app_version)
+            version = f'{app_version}+{build}'
+            image_tag = f'{app_version}'
         else:
-            version = "{0}-{1}+{2}".format(app_version, pre_release, build)
-            image_tag = "{0}-{1}".format(app_version, pre_release)
+            version = f'{app_version}-{pre_release}+{build}'
+            image_tag = f'{app_version}-{pre_release}'
 
-        results = {
-            'version': version,
-            'container-image-version': image_tag
-        }
+        step_result.add_artifact(
+            name='version',
+            value=version
+        )
+        step_result.add_artifact(
+            name='container-image-version',
+            value=image_tag
+        )
 
-        return results
+        return step_result

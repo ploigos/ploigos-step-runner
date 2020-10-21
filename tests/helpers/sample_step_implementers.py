@@ -1,5 +1,21 @@
-from tssc import StepImplementer, TSSCException
+from tssc import StepImplementer, StepResult
 from tssc.config.config_value import ConfigValue
+
+
+class FailStepImplementer(StepImplementer):
+    @staticmethod
+    def step_implementer_config_defaults():
+        return {}
+
+    @staticmethod
+    def required_runtime_step_config_keys():
+        return []
+
+    def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
+        step_result.success = False
+        return step_result
+
 
 class FooStepImplementer(StepImplementer):
     @staticmethod
@@ -35,7 +51,9 @@ class FooStepImplementer(StepImplementer):
         return []
 
     def _run_step(self):
-        pass
+        step_result = StepResult.from_step_implementer(self)
+        return step_result
+
 
 class RequiredStepConfigStepImplementer(StepImplementer):
     @staticmethod
@@ -73,11 +91,14 @@ class RequiredStepConfigStepImplementer(StepImplementer):
         ]
 
     def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
         runtime_step_config = self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())
+        for n, v in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
+            step_result.add_artifact(name=n, value=v)
+        return step_result
 
-        return ConfigValue.convert_leaves_to_values(runtime_step_config)
 
 class WriteConfigAsResultsStepImplementer(StepImplementer):
     @staticmethod
@@ -113,12 +134,17 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
         return []
 
     def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
         runtime_step_config = self.config.get_copy_of_runtime_step_config(
             self.environment,
             self.step_implementer_config_defaults())
 
-        return ConfigValue.convert_leaves_to_values(runtime_step_config)
+        # copy the key/value pairs into the artifacts
+        for name, value in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
+            print(name, value)
+            step_result.add_artifact(name, value)
+        return step_result
+
 
 class NotSubClassOfStepImplementer():
     pass
-

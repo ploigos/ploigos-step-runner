@@ -1,13 +1,13 @@
 import re
 
 from tests.step_implementers.shared.test_openscap_generic import \
-    TestStepImplementeSharedOpenSCAPGeneric
+    TestStepImplementerSharedOpenSCAPGeneric
 from tssc.config.config import Config
 from tssc.step_implementers.container_image_static_compliance_scan import \
     OpenSCAP
 
 
-class TestStepImplementeContainerImageStaticVulnerabilityScanOpenSCAP(TestStepImplementeSharedOpenSCAPGeneric):
+class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepImplementerSharedOpenSCAPGeneric):
     def create_step_implementer(
         self,
         step_config={},

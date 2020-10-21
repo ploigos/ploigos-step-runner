@@ -32,6 +32,7 @@ Results output by this step.
 import os.path
 
 from tssc import StepImplementer
+from tssc.step_result import StepResult
 
 from tssc.utils.xml import get_xml_element
 
@@ -88,17 +89,22 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
         dict
             Results of running this step.
         """
+        step_result = StepResult.from_step_implementer(self)
+
         pom_file = self.get_config_value('pom-file')
 
         # verify runtime config
         if not os.path.exists(pom_file):
-            raise ValueError('Given pom file does not exist: ' + pom_file)
+            step_result.success = False
+            step_result.message = f'Given pom file does not exist: {pom_file}'
+            return step_result
 
         pom_version_element = get_xml_element(pom_file, 'version')
         pom_version = pom_version_element.text
 
-        results = {
-            'app-version': pom_version
-        }
+        step_result.add_artifact(
+            name='app-version',
+            value= pom_version
+        )
 
-        return results
+        return step_result

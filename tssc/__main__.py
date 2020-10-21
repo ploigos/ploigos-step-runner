@@ -10,7 +10,9 @@ Exit Codes
 102
     specified -c/--config is invalid TSSC configuration
 200
-    Error calling step
+    step completed with unsuccessful results
+300
+    step failed completion because of an exception
 """
 
 import sys
@@ -24,6 +26,7 @@ from tssc.decryption_utils import DecryptionUtils
 from tssc.config.config import Config
 from tssc.utils.io import TextIOSelectiveObfuscator
 
+
 def print_error(msg):
     """
     Prints message to STDERR.
@@ -35,10 +38,12 @@ def print_error(msg):
     """
     print(msg, file=sys.stderr)
 
-class ParseKeyValueArge(argparse.Action): # pylint: disable=too-few-public-methods
+
+class ParseKeyValueArge(argparse.Action):  # pylint: disable=too-few-public-methods
     """
     https://gist.github.com/fralau/061a4f6c13251367ef1d9a9a99fb3e8d
     """
+
     def __call__(self, parser, namespace, values, option_string=None):
         key_value_dict = {}
 
@@ -53,6 +58,7 @@ class ParseKeyValueArge(argparse.Action): # pylint: disable=too-few-public-metho
                 key_value_dict[key] = value
 
         setattr(namespace, self.dest, key_value_dict)
+
 
 def main(argv=None):
     """
@@ -115,12 +121,16 @@ def main(argv=None):
         tssc_factory = TSSCFactory(tssc_config, args.results_dir)
 
         try:
-            tssc_factory.run_step(args.step, args.environment)
-        except Exception as error: # pylint: disable=broad-except
-            print_error(f"Error calling step ({args.step}): {str(error)}")
+            if not tssc_factory.run_step(args.step, args.environment):
+                print_error(f"Step {args.step} not successful")
+                sys.exit(200)
+
+        except Exception as error:  # pylint: disable=broad-except
+            print_error(f"Fatal error calling step ({args.step}): {str(error)}")
             track = traceback.format_exc()
             print(track)
-            sys.exit(200)
+            sys.exit(300)
+
 
 def init():
     """
@@ -130,5 +140,6 @@ def init():
     """
     if __name__ == "__main__":
         sys.exit(main())
+
 
 init()

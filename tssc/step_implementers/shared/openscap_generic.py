@@ -57,8 +57,8 @@ from distutils.util import strtobool
 from io import StringIO
 
 import sh
-from tssc import DefaultSteps, StepImplementer
-from tssc.exceptions import TSSCException
+from tssc.step_implementer import DefaultSteps, StepImplementer
+from tssc.step_result import StepResult
 from tssc.utils.file import download_and_decompress_source_to_destination
 from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
@@ -69,6 +69,7 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_KEYS = [
     'oscap-input-definitions-uri'
 ]
+
 
 class OpenSCAPGeneric(StepImplementer):
     """A generic OpenSCAP step implementer that can be used for more then one step.
@@ -203,7 +204,7 @@ class OpenSCAPGeneric(StepImplementer):
         AssertionError
         * if runtime step configuration is invalid.
         """
-        super()._validate_runtime_step_config(runtime_step_config) # pylint: disable=protected-access
+        super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
 
         # validate that the given 'oscap-input-definitions-uri' starts with file://|http://|https://
         oscap_input_definitions_uri = runtime_step_config['oscap-input-definitions-uri']
@@ -217,15 +218,14 @@ class OpenSCAPGeneric(StepImplementer):
             f"Open SCAP input definitions source ({oscap_input_definitions_uri})" \
             f" must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}"
 
-    def _run_step(self): # pylint: disable=too-many-locals
+    def _run_step(self):  # pylint: disable=too-many-locals
         """Runs the OpenSCAP eval for a given input file against a given container.
         """
-        image_tar_file = ''
-        if(self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE) and \
-          self.get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE).get('image-tar-file')):
-            image_tar_file = self.\
-            get_step_results(DefaultSteps.CREATE_CONTAINER_IMAGE)['image-tar-file']
-        else:
+
+        step_result = StepResult.from_step_implementer(self)
+
+        image_tar_file = self.get_result_value('image-tar-file')
+        if image_tar_file is None:
             raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
 
         oscap_profile = self.get_config_value('oscap-profile')
@@ -244,17 +244,17 @@ class OpenSCAPGeneric(StepImplementer):
         print(f"Imported image: {image_tar_file}")
 
         # baking `buildah unshare` command to wrap other buildah commands with
-        # so that container does not need to be running in a privilaged mode to be able
+        # so that container does not need to be running in a privileged mode to be able
         # to function
-        buildah_unshare_comand = sh.buildah.bake('unshare') # pylint: disable=no-member
+        buildah_unshare_command = sh.buildah.bake('unshare')  # pylint: disable=no-member
 
         # mount the container filesystem and get mount path
         #
         # NOTE: run in the context of `buildah unshare` so that container does not
-        #       need to be run in a privilaged mode
+        #       need to be run in a privileged mode
         print(f"\nMount container: {container_name}")
         container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
-            buildah_unshare_comand=buildah_unshare_comand,
+            buildah_unshare_command=buildah_unshare_command,
             container_id=container_name
         )
         print(f"Mounted container ({container_name}) with mount path: '{container_mount_path}'")
@@ -264,7 +264,7 @@ class OpenSCAPGeneric(StepImplementer):
         print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
         oscap_input_file = download_and_decompress_source_to_destination(
             source_url=oscap_input_definitions_uri,
-            destination_dir=self.get_working_dir()
+            destination_dir=self.work_dir_path_step
         )
         print(f"Download input definitions to: {oscap_input_file}")
 
@@ -275,7 +275,7 @@ class OpenSCAPGeneric(StepImplementer):
             print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
             oscap_tailoring_file = download_and_decompress_source_to_destination(
                 source_url=oscap_tailoring_file_uri,
-                destination_dir=self.get_working_dir()
+                destination_dir=self.work_dir_path_step
             )
             print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
 
@@ -310,7 +310,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_html_report_path = self.write_working_file(f'oscap-{oscap_eval_type}-report.html')
         print("\nRun oscap scan")
         oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
-            buildah_unshare_comand=buildah_unshare_comand,
+            buildah_unshare_command=buildah_unshare_command,
             oscap_eval_type=oscap_eval_type,
             oscap_input_file=oscap_input_file,
             oscap_out_file_path=oscap_out_file_path,
@@ -321,36 +321,27 @@ class OpenSCAPGeneric(StepImplementer):
             oscap_tailoring_file=oscap_tailoring_file,
             oscap_fetch_remote_resources=oscap_fetch_remote_resources
         )
-        print(
-            f"OpenSCAP Scan Completed.  Report: {oscap_html_report_path}\n"
-        )
 
-        # NOTE: this should not raise an exception once we have new Results object
-        #       since this is an "expected" "valid" failure...
-        #       but this is the solution for now
+        print(f"OpenSCAP scan completed with eval success: {oscap_eval_success}")
+
+        #  This is an "expected" "valid" failure.
+        step_result.success = oscap_eval_success
         if not oscap_eval_success:
-            raise TSSCException(f"OSCAP eval found issues:\n{oscap_eval_fails}")
+            step_result.message = f"OSCAP eval found issues:\n{oscap_eval_fails}"
 
-        results = {
-            'result': {
-                'success': True
-            },
-            'report-artifacts': [
-                {
-                    'name': 'html-report',
-                    'path': f'file://{oscap_html_report_path}'
-                },
-                {
-                    'name': 'xml-report',
-                    'path': f'file://{oscap_xml_results_file_path}'
-                },
-                {
-                    'name': 'stdout-report',
-                    'path': f'file://{oscap_out_file_path}'
-                }
-            ]
-        }
-        return results
+        step_result.add_artifact(
+            name='html-report',
+            value=f'file://{oscap_html_report_path}'
+        )
+        step_result.add_artifact(
+            name='xml-report',
+            value=f'file://{oscap_xml_results_file_path}'
+        )
+        step_result.add_artifact(
+            name='stdout-report',
+            value=f'file://{oscap_out_file_path}'
+        )
+        return step_result
 
     @staticmethod
     def __buildah_import_image_from_tar(image_tar_file, container_name):
@@ -370,7 +361,7 @@ class OpenSCAPGeneric(StepImplementer):
         """
         # import image tar file to vfs file system
         try:
-            sh.buildah( # pylint: disable=no-member
+            sh.buildah(  # pylint: disable=no-member
                 'from',
                 '--storage-driver', 'vfs',
                 '--name', container_name,
@@ -387,12 +378,12 @@ class OpenSCAPGeneric(StepImplementer):
         return container_name
 
     @staticmethod
-    def __buildah_mount_container(buildah_unshare_comand, container_id):
+    def __buildah_mount_container(buildah_unshare_command, container_id):
         """Use buildah to mount a container.
 
         Parameters
         ----------
-        buildah_unshare_comand : sh.buildah.unshare.bake()
+        buildah_unshare_command : sh.buildah.unshare.bake()
             A baked sh.buildah.unshare command to use to run this command in the context off
             so that this can be done "rootless".
         container_id : str
@@ -410,7 +401,7 @@ class OpenSCAPGeneric(StepImplementer):
                 sys.stdout,
                 buildah_mount_out_buff
             ])
-            buildah_mount_command = buildah_unshare_comand.bake("buildah", "mount")
+            buildah_mount_command = buildah_unshare_command.bake("buildah", "mount")
             buildah_mount_command(
                 '--storage-driver', 'vfs',
                 container_id,
@@ -452,7 +443,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_document_type = None
         try:
             oscap_info_out_buff = StringIO()
-            sh.oscap.info( # pylint: disable=no-member
+            sh.oscap.info(  # pylint: disable=no-member
                 oscap_input_file,
                 _out=oscap_info_out_buff
             )
@@ -495,23 +486,23 @@ class OpenSCAPGeneric(StepImplementer):
         return oscap_eval_type
 
     @staticmethod
-    def __run_oscap_scan( # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
-        buildah_unshare_comand,
-        oscap_eval_type,
-        oscap_input_file,
-        oscap_out_file_path,
-        oscap_xml_results_file_path,
-        oscap_html_report_path,
-        container_mount_path,
-        oscap_profile=None,
-        oscap_tailoring_file=None,
-        oscap_fetch_remote_resources=True
+    def __run_oscap_scan(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
+            buildah_unshare_command,
+            oscap_eval_type,
+            oscap_input_file,
+            oscap_out_file_path,
+            oscap_xml_results_file_path,
+            oscap_html_report_path,
+            container_mount_path,
+            oscap_profile=None,
+            oscap_tailoring_file=None,
+            oscap_fetch_remote_resources=True
     ):
         """Run an oscap scan in the context of a buildah unshare to run "rootless".
 
         Parameters
         ----------
-        buildah_unshare_comand : sh.buildah.unshare.bake()
+        buildah_unshare_command : sh.buildah.unshare.bake()
             A baked sh.buildah.unshare command to use to run this command in the context off
             so that this can be done "rootless".
         oscap_eval_type : str
@@ -571,7 +562,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_out = ""
         oscap_eval_fails = None
         try:
-            oscap_chroot_command = buildah_unshare_comand.bake("oscap-chroot")
+            oscap_chroot_command = buildah_unshare_command.bake("oscap-chroot")
             with open(oscap_out_file_path, 'w') as oscap_out_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     oscap_eval_out_buff,
@@ -596,9 +587,9 @@ class OpenSCAPGeneric(StepImplementer):
                     _tee='err'
                 )
                 oscap_eval_success = True
-        except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
+        except sh.ErrorReturnCode_1 as error:  # pylint: disable=no-member
             oscap_eval_success = error
-        except sh.ErrorReturnCode_2 as error: # pylint: disable=no-member
+        except sh.ErrorReturnCode_2 as error:  # pylint: disable=no-member
             # XCCDF: If there is at least one rule with either fail or unknown result,
             #           oscap-scan finishes with return code 2.
             # OVAL:  Never returned
@@ -634,7 +625,7 @@ class OpenSCAPGeneric(StepImplementer):
             for match in OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN.finditer(oscap_eval_out):
                 # NOTE: need to do regex and not == because may contain xterm color chars
                 if OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN.search(
-                    match.groupdict()['ruleresult']
+                        match.groupdict()['ruleresult']
                 ):
                     oscap_eval_fails += match.groupdict()['ruleblock']
                     oscap_eval_fails += "\n"

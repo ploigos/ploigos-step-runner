@@ -7,9 +7,9 @@ from tssc import TSSCFactory
 
 
 def create_sh_side_effect(
-    mock_stdout=None,
-    mock_stderr=None,
-    exception=None
+        mock_stdout=None,
+        mock_stderr=None,
+        exception=None
 ):
     def sh_side_effect(*args, **kwargs):
         if mock_stdout:
@@ -29,6 +29,7 @@ def create_sh_side_effect(
 
     return sh_side_effect
 
+
 def run_step_test_with_result_validation(
         temp_dir,
         step_name,
@@ -36,7 +37,6 @@ def run_step_test_with_result_validation(
         expected_step_results,
         runtime_args=None,
         environment=None):
-
     results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
     working_dir_path = os.path.join(temp_dir.path, 'tssc-working')
 
@@ -51,11 +51,13 @@ def run_step_test_with_result_validation(
         actual_step_results = yaml.safe_load(step_results_file.read())
         assert actual_step_results == expected_step_results
 
-def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name = 'sample-file', commit_message = 'test'):
+
+def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name='sample-file', commit_message='test'):
     sample_file = os.path.join(temp_dir.path, sample_file_name)
     open(sample_file, 'wb').close()
     git_repo.index.add([sample_file])
     git_repo.index.commit(commit_message)
+
 
 def Any(cls):
     """
@@ -63,12 +65,16 @@ def Any(cls):
     ------
     https://stackoverflow.com/questions/21611559/assert-that-a-method-was-called-with-one-argument-out-of-several
     """
+
     class Any(cls):
         def __eq__(self, other):
             return True
+
         def __hash__(self):
             return hash(tuple(self))
+
     return Any()
+
 
 class StringRegexParam():
     def __init__(self, regex):
@@ -79,6 +85,7 @@ class StringRegexParam():
             return re.match(self.__regex, other)
         else:
             return False
+
 
 def create_sops_side_effect(mock_stdout):
     def sops_side_effect(*args, **kwargs):

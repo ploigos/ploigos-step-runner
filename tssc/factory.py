@@ -1,11 +1,11 @@
 """
 Factory for creating TSSC workflow and running steps.
 """
-
+from tssc.step_implementer import StepImplementer
 from tssc.config.config import Config
 from tssc.exceptions import TSSCException
-from tssc.step_implementer import StepImplementer
 from tssc.utils.reflection import import_and_get_class
+
 
 class TSSCFactory:
     """
@@ -38,6 +38,12 @@ class TSSCFactory:
         If given config is not of expected type.
     AssertionError
         If given config contains any invalid TSSC configurations.
+
+    Returns
+    -------
+    Bool
+        True if step completed successfully
+        False if step returned an error message
     """
 
     __DEFAULT_MODULE = 'tssc.step_implementers'
@@ -45,8 +51,8 @@ class TSSCFactory:
     def __init__(
             self,
             config,
-            results_dir_path='tssc-results', \
-            results_file_name='tssc-results.yml', \
+            results_dir_path='tssc-results',
+            results_file_name='tssc-results.yml',
             work_dir_path='tssc-working'):
 
         if isinstance(config, Config):
@@ -82,11 +88,17 @@ class TSSCFactory:
 
         Raises
         ------
+        # todo: doc needs to be updated
         TSSCException
             If no StepImplementers have been registered for the given step_name
             If no specific StepImplementer name specified in sub step config
                 and no default StepImplementer registered for given step_name.
             If no StepImplementer registered for given step with given implementer name.
+        Returns
+        -------
+        Bool
+           True if step completed successfully
+           False if step returned an error message
         """
 
         sub_step_configs = self.config.get_sub_step_configs(step_name)
@@ -111,7 +123,10 @@ class TSSCFactory:
             )
 
             # run the step
-            sub_step.run_step()
+            if not sub_step.run_step():
+                return False
+
+        return True
 
     @staticmethod
     def __get_step_implementer_class(step_name, step_implementer_name):
