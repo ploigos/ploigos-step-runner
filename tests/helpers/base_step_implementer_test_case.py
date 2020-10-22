@@ -14,23 +14,24 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         self,
         step_implementer,
         step_config={},
+        test_config={},
         results_dir_path='',
         results_file_name='',
         work_dir_path='',
     ):
         config = Config({
             Config.TSSC_CONFIG_KEY: {
-                'test': [
+                test_config.get('step-name'): [
                     {
-                        'implementer': 'OpenSCAP',
+                        'implementer': test_config.get('implementer'),
                         'config': step_config
                     }
                 ]
 
             }
         })
-        step_config = config.get_step_config('test')
-        sub_step_config = step_config.get_sub_step('OpenSCAP')
+        step_config = config.get_step_config(test_config.get('step-name'))
+        sub_step_config = step_config.get_sub_step(test_config.get('implementer'))
 
         step_implementer = step_implementer(
             results_dir_path=results_dir_path,
