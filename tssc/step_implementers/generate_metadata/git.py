@@ -106,18 +106,18 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
             repo = Repo(repo_root)
         except InvalidGitRepositoryError:
             step_result.success = False
-            step_result.message = f'Given directory (repo_root) is not a Git repository'
+            step_result.message = 'Given directory (repo_root) is not a Git repository'
             return step_result
 
 
         if repo.bare:
             step_result.success = False
-            step_result.message = f'Given directory (repo_root) is a bare Git repository'
+            step_result.message = 'Given directory (repo_root) is a bare Git repository'
             return step_result
 
         if repo.head.is_detached:
             step_result.success = False
-            step_result.message = f'Expected a Git branch in given directory (repo_root) but has' \
+            step_result.message = 'Expected a Git branch in given directory (repo_root) but has' \
                 ' a detached head'
             return step_result
 
@@ -127,7 +127,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
         except ValueError:
             step_result.success = False
-            step_result.message = f'Given directory (repo_root) is a git branch (git_branch) with' \
+            step_result.message = 'Given directory (repo_root) is a git branch (git_branch) with' \
                 ' no commit history'
             return step_result
 
