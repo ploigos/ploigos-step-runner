@@ -117,22 +117,24 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         if repo.head.is_detached:
             step_result.success = False
-            step_result.message = f'Expected a Git branch in given directory (repo_root) but has a detached head'
+            step_result.message = f'Expected a Git branch in given directory (repo_root) but has' \
+                ' a detached head'
             return step_result
-        
+
         git_branch = str(repo.head.reference)
 
         try:
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
         except ValueError as err:
             step_result.success = False
-            step_result.message = f'Given directory (repo_root) is a git branch (git_branch) with no commit history'
+            step_result.message = f'Given directory (repo_root) is a git branch (git_branch) with' \
+                ' no commit history'
             return step_result
 
         # make the git branch safe
         pre_release_regex = re.compile(r"/", re.IGNORECASE)
         pre_release = re.sub(pre_release_regex, '_', git_branch)
- 
+
         step_result.add_artifact(
             name = 'pre-release',
             value = pre_release
