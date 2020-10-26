@@ -104,7 +104,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         try:
             repo = Repo(repo_root)
-        except InvalidGitRepositoryError as err:
+        except InvalidGitRepositoryError:
             step_result.success = False
             step_result.message = f'Given directory (repo_root) is not a Git repository'
             return step_result
@@ -125,7 +125,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
 
         try:
             git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
-        except ValueError as err:
+        except ValueError:
             step_result.success = False
             step_result.message = f'Given directory (repo_root) is a git branch (git_branch) with' \
                 ' no commit history'
