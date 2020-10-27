@@ -5,6 +5,8 @@ from io import StringIO
 import yaml
 from tssc import TSSCFactory
 from tssc.config.config import Config
+from tssc.step_result import StepResult
+from tssc.workflow_result import WorkflowResult
 
 from .base_tssc_test_case import BaseTSSCTestCase
 
@@ -76,3 +78,28 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
             actual_step_results = yaml.safe_load(step_results_file.read())
 
             self.assertEqual(actual_step_results, expected_step_results)
+
+    def setup_previous_result(
+        self, 
+        work_dir_path, 
+        artifact_config={}
+    ):
+        step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
+        for k, v in artifact_config.items():
+            description = ''
+            value_type = ''
+            value = ''
+            for key, val in v.items():
+                if key == 'description':
+                    description = val
+                elif key == 'type':
+                    value_type = val
+                elif key == 'value':
+                    value = val
+                else:
+                    raise TSSCException('Given field is not apart of an artifact')
+            step_result.add_artifact(name=k, value=val, description=description, value_type=value_type)
+        workflow_result = WorkflowResult()
+        workflow_result.add_step_result(step_result=step_result)
+        pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
+        workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)

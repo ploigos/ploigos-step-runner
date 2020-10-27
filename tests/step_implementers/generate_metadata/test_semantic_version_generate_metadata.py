@@ -46,20 +46,17 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
 
             step_config = {}
             test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            # create fake step implementer step_results
-            step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-            step_result.add_artifact(name='app-version', value='42.1.0')
-            step_result.add_artifact(name='pre-release', value='master')
-            step_result.add_artifact(name='build', value='abc123')
-            workflow_result = WorkflowResult()
-            workflow_result.add_step_result(step_result=step_result)
-            pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
-            workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -82,19 +79,16 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
 
             step_config = {}
             test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            # create fake step implementer step_results
-            step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-            step_result.add_artifact(name='pre-release', value='master')
-            step_result.add_artifact(name='build', value='abc123')
-            workflow_result = WorkflowResult()
-            workflow_result.add_step_result(step_result=step_result)
-            pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
-            workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+            artifact_config = {
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -118,19 +112,16 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
 
             step_config = {}
             test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            # create fake step implementer step_results
-            step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-            step_result.add_artifact(name='app-version', value='42.1.0')
-            step_result.add_artifact(name='build', value='abc123')
-            workflow_result = WorkflowResult()
-            workflow_result.add_step_result(step_result=step_result)
-            pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
-            workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -154,19 +145,16 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
 
             step_config = {}
             test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            # create fake step implementer step_results
-            step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-            step_result.add_artifact(name='app-version', value='42.1.0')
-            step_result.add_artifact(name='pre-release', value='master')
-            workflow_result = WorkflowResult()
-            workflow_result.add_step_result(step_result=step_result)
-            pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
-            workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'master'},
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -190,20 +178,17 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
 
             step_config = {}
             test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
-            # create fake step implementer step_results
-            step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-            step_result.add_artifact(name='app-version', value='42.1.0')
-            step_result.add_artifact(name='pre-release', value='feature123')
-            step_result.add_artifact(name='build', value='abc123')
-            workflow_result = WorkflowResult()
-            workflow_result.add_step_result(step_result=step_result)
-            pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
-            workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+            artifact_config = {
+                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'type': '', 'value': 'feature123'},
+                'build': {'description': '', 'type': '', 'value': 'abc123'}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,

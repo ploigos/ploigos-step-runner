@@ -181,28 +181,28 @@ class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
         if app_version is None:
             app_version = self.get_result_value(artifact_name='app-version')
         if app_version is None:
-          step_result.success = False
-          step_result.message = f'No value for (app-version) provided via runtime flag' \
-                '(app-version) or from prior step implementer ({self.step_name}).'
-          return step_result
+            step_result.success = False
+            step_result.message = f'No value for (app-version) provided via runtime flag' \
+            '(app-version) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         pre_release = self.get_config_value('pre-release')
         if pre_release is None:
             pre_release = self.get_result_value(artifact_name='pre-release')
         if pre_release is None:
-          step_result.success = False
-          step_result.message = f'No value for (pre-release) provided via runtime flag' \
-                '(pre-release) or from prior step implementer ({self.step_name}).'
-          return step_result
+            step_result.success = False
+            step_result.message = f'No value for (pre-release) provided via runtime flag' \
+            '(pre-release) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         build = self.get_config_value('build')
         if build is None:
             build = self.get_result_value(artifact_name='build')
         if build is None:
-          step_result.success = False
-          step_result.message = f'No value for (build) provided via runtime flag' \
-                '(build) or from prior step implementer ({self.step_name}).'
-          return step_result
+            step_result.success = False
+            step_result.message = f'No value for (build) provided via runtime flag' \
+            '(build) or from prior step implementer ({self.step_name}).'
+            return step_result
 
         if pre_release == release_branch:
             version = f'{app_version}+{build}'
