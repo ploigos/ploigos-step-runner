@@ -3,20 +3,39 @@
 Tests signature generation for a container image.
 """
 import os
+import re
 from io import IOBase
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
+from tests.helpers.test_utils import Any, StringRegexParam
+from tssc.step_implementers.sign_container_image import PodmanSign
+
 
 class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCase):
     """Test Step Implementer Sign Container Image Using Podman
 
     Test runner for the PodmanSign.
     """
+
+    def create_step_implementer(
+        self,
+        step_config={},
+        results_dir_path='',
+        results_file_name='',
+        work_dir_path=''
+    ):
+        return self.create_given_step_implementer(
+            step_implementer=PodmanSign,
+            step_config=step_config,
+            results_dir_path=results_dir_path,
+            results_file_name=results_file_name,
+            work_dir_path=work_dir_path
+        )
 
     @staticmethod
     def gpg_side_effect(*_args, **kwargs):
@@ -74,7 +93,7 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
 
             with self.assertRaisesRegex(
                 AssertionError,
-                r"The runtime step configuration \(\{\}\) is missing the required configuration "
+                r"The runtime step configuration \({}\) is missing the required configuration "
                 r"keys \(\['container-image-signer-pgp-private-key'\]\)"
             ):
                 self.run_step_test_with_result_validation(
@@ -263,4 +282,121 @@ class TestStepImplementerSignContainerImagePodmanSign(BaseStepImplementerTestCas
                 _out=Any(IOBase),
                 _err_to_out=True,
                 _tee='out'
+            )
+
+    @staticmethod
+    def create_podman_image_sign_side_effect():
+        def podman_image_sign_side_effect(*args, **kwargs):
+            if (args[0] == 'sign'):
+                # determine the directory for the signature
+                for arg in args:
+                    match = re.match(r'^--directory=(?P<image_signature_directory>.+)$', arg)
+                    if match:
+                        image_signatures_directory =match.groupdict()['image_signature_directory']
+                        break
+
+                # touch mock signature file
+                mock_image_signature_dir_path = os.path.join(
+                    image_signatures_directory,
+                    'mock/sig/path'
+                )
+                os.makedirs(mock_image_signature_dir_path)
+                mock_image_signature_path = os.path.join(
+                    mock_image_signature_dir_path,
+                    'signature-0'
+                )
+                Path(mock_image_signature_path).touch()
+
+        return podman_image_sign_side_effect
+
+    @patch('sh.podman', create=True)
+    def test___sign_image(self, podman_mock):
+        with TempDirectory() as temp_dir:
+            pgp_private_key_fingerprint = 'abc123'
+            image_signatures_directory = os.path.join(temp_dir.path, 'signatures')
+            container_image_tag = 'does/not/matter:v0.42.0'
+
+            podman_mock.image.side_effect = TestStepImplementerSignContainerImagePodmanSign.\
+                create_podman_image_sign_side_effect()
+
+            PodmanSign._PodmanSign__sign_image(
+                pgp_private_key_fingerprint=pgp_private_key_fingerprint,
+                image_signatures_directory=image_signatures_directory,
+                container_image_tag=container_image_tag
+            )
+
+            podman_mock.image.assert_called_once_with(
+                'sign',
+                f'--sign-by={pgp_private_key_fingerprint}',
+                f'--directory={image_signatures_directory}',
+                f'docker://{container_image_tag}',
+                _out=Any(IOBase),
+                _err_to_out=True,
+                _tee='out'
+            )
+
+    @patch.object(PodmanSign, '_PodmanSign__import_pgp_key')
+    @patch.object(PodmanSign, '_PodmanSign__sign_image')
+    def test__run_step_pass(self, sign_image_mock, import_pgp_key_mock):
+        pgp_private_key_fingerprint = 'abc123'
+        step_config = {
+        }
+        container_image_tag = 'does/not/matter:v0.42.0'
+        signature_name = 'does/not/matter/signature-0'
+
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            temp_dir.write(
+                f'tssc-results/{results_file_name}',
+                bytes(
+                    f'''---
+tssc-results:
+    push-container-image:
+        container-image-tag: '{container_image_tag}'
+                    ''',
+                    'utf-8'
+                )
+            )
+
+            def import_pgp_key_side_effect(pgp_private_key):
+                return pgp_private_key_fingerprint
+            import_pgp_key_mock.side_effect = import_pgp_key_side_effect
+
+            def sign_image_side_effect(
+                pgp_private_key_fingerprint,
+                image_signatures_directory,
+                container_image_tag
+            ):
+                return os.path.join(image_signatures_directory, signature_name)
+            sign_image_mock.side_effect = sign_image_side_effect
+
+            run_step_results = step_implementer._run_step()
+
+            self.assertEqual(
+                run_step_results,
+                {
+                    'container-image-signature-private-key-fingerprint': pgp_private_key_fingerprint,
+                    'container-image-signature-file-path': os.path.join(
+                        temp_dir.path,
+                        'working/test/image-signature',
+                        signature_name
+                    ),
+                    'container-image-signature-name': signature_name
+                }
+            )
+
+            sign_image_mock.assert_called_once_with(
+                pgp_private_key_fingerprint=pgp_private_key_fingerprint,
+                image_signatures_directory=StringRegexParam(r".+"),
+                container_image_tag=container_image_tag
             )
