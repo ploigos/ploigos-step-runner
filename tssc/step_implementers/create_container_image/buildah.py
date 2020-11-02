@@ -11,7 +11,7 @@ from runtime configuration.
 |-------------------|-----------|----------------|-----------
 | `imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
 | `context`         | True      | `'.'`          | Context to build the container image in
-| `tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
+| `tls-verify`      | True      | `'true'`       | Whether to verify TLS when pulling parent images
 | `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
 | `containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
     Path to the container registry authentication file \
@@ -67,7 +67,7 @@ DEFAULT_CONFIG = {
     'context': '.',
 
     # Verify TLS Certs?
-    'tlsverify': 'true',
+    'tls-verify': 'true',
 
     # Format of the produced image
     'format': 'oci'
@@ -77,7 +77,7 @@ REQUIRED_CONFIG_KEYS = [
     'containers-config-auth-file',
     'imagespecfile',
     'context',
-    'tlsverify',
+    'tls-verify',
     'format',
     'service-name',
     'application-name'
@@ -182,7 +182,7 @@ class Buildah(StepImplementer):
             sh.buildah.bud(  # pylint: disable=no-member
                 '--storage-driver=vfs',
                 '--format=' + self.get_config_value('format'),
-                '--tls-verify=' + str(self.get_config_value('tlsverify')),
+                '--tls-verify=' + str(self.get_config_value('tls-verify')),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 '--authfile', containers_config_auth_file,

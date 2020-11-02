@@ -377,7 +377,7 @@ From least precedence to highest precedence.
           #context: '.'
 
           # Optional.
-          #tlsverify: true
+          #tls-verify: true
 
           # Optional.
           #format: 'oci'
@@ -687,7 +687,7 @@ From least precedence to highest precedence.
           #context: '.'
 
           # Optional.
-          #tlsverify: true
+          #tls-verify: true
 
           # Optional.
           #format: 'oci'

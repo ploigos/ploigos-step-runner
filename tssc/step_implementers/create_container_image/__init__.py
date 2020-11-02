@@ -9,7 +9,7 @@ accept minimally the following configuration options.
 |-----------------|------------
 | `imagespecfile` | Image specification file name
 | `context`       | Parent path to the image specification file
-| `tlsverify`     | Verify TLS certs when pulling images?
+| `tls-verify`    | Verify TLS certs when pulling images?
 
 Results
 -------

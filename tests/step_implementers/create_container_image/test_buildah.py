@@ -68,7 +68,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
                     'create-container-image': {
                         'implementer': 'Buildah',
                         'config': {
-                            'tlsverify' : None,
+                            'tls-verify' : None,
                         }
                     }
                 }
@@ -76,7 +76,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseTSSCTestCase):
 
             with self.assertRaisesRegex(
                     AssertionError,
-                    r"The runtime step configuration \(.*\) is missing the required configuration keys \(\['tlsverify'\]\)"):
+                    r"The runtime step configuration \(.*\) is missing the required configuration keys \(\['tls-verify'\]\)"):
                 run_step_test_with_result_validation(temp_dir, 'create-container-image', config, {})
 
     def test_create_container_image_specify_buildah_implementer_no_dockerfile(self):
