@@ -86,7 +86,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
 
         Returns
         -------
-        dict
+        StepResult
             Results of running this step.
         """
         step_result = StepResult.from_step_implementer(self)
