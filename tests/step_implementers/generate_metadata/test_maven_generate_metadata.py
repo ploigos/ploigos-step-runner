@@ -4,18 +4,18 @@ from io import IOBase, StringIO
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-
 from tssc.config.config import Config
+from tssc.step_implementers.generate_metadata import Maven
 from tssc.step_result import StepResult
 from tssc.workflow_result import WorkflowResult
-from tssc.step_implementers.generate_metadata import Maven
 
 
 class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            test_config={},
+            step_name='',
+            implementer='',
             results_dir_path='',
             results_file_name='',
             work_dir_path=''
@@ -23,7 +23,8 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
         return self.create_given_step_implementer(
             step_implementer=Maven,
             step_config=step_config,
-            test_config=test_config,
+            step_name=step_name,
+            implementer=implementer,
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
@@ -55,11 +56,11 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
 
             step_config = {'pom-file': pom_file_path}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'Maven'}
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='Maven',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -79,11 +80,11 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'Maven'}
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='Maven',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,

@@ -5,6 +5,7 @@ from io import StringIO
 import yaml
 from tssc import TSSCFactory
 from tssc.config.config import Config
+from tssc.exceptions import TSSCException
 from tssc.step_result import StepResult
 from tssc.workflow_result import WorkflowResult
 
@@ -16,24 +17,25 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         self,
         step_implementer,
         step_config={},
-        test_config={},
+        step_name='',
+        implementer='',
         results_dir_path='',
         results_file_name='',
         work_dir_path='',
     ):
         config = Config({
             Config.TSSC_CONFIG_KEY: {
-                test_config.get('step-name'): [
+                step_name: [
                     {
-                        'implementer': test_config.get('implementer'),
+                        'implementer': implementer,
                         'config': step_config
                     }
                 ]
 
             }
         })
-        step_config = config.get_step_config(test_config.get('step-name'))
-        sub_step_config = step_config.get_sub_step(test_config.get('implementer'))
+        step_config = config.get_step_config(step_name)
+        sub_step_config = step_config.get_sub_step(implementer)
 
         step_implementer = step_implementer(
             results_dir_path=results_dir_path,
@@ -80,8 +82,8 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
             self.assertEqual(actual_step_results, expected_step_results)
 
     def setup_previous_result(
-        self, 
-        work_dir_path, 
+        self,
+        work_dir_path,
         artifact_config={}
     ):
         step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')

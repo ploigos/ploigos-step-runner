@@ -15,7 +15,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
     def create_step_implementer(
             self,
             step_config={},
-            test_config={},
+            step_name='',
+            implementer='',
             results_dir_path='',
             results_file_name='',
             work_dir_path=''
@@ -23,7 +24,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
         return self.create_given_step_implementer(
             step_implementer=SemanticVersion,
             step_config=step_config,
-            test_config=test_config,
+            step_name=step_name,
+            implementer=implementer,
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
@@ -48,7 +50,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
             artifact_config = {
                 'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
@@ -60,7 +61,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='SemanticVersion',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -81,7 +83,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
             artifact_config = {
                 'pre-release': {'description': '', 'type': '', 'value': 'master'},
@@ -92,7 +93,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='SemanticVersion',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -102,8 +104,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
             expected_step_result.success = False
-            expected_step_result.message = f'No value for (app-version) provided via runtime flag' \
-                '(app-version) or from prior step implementer ({self.step_name}).'
+            expected_step_result.message = 'No value for (app-version) provided via runtime flag (app-version) ' \
+                                           'or from prior step implementer (generate-metadata).'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -114,7 +116,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
             artifact_config = {
                 'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
@@ -125,7 +126,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='SemanticVersion',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -135,8 +137,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
             expected_step_result.success = False
-            expected_step_result.message = f'No value for (pre-release) provided via runtime flag' \
-                '(pre-release) or from prior step implementer ({self.step_name}).'
+            expected_step_result.message = 'No value for (pre-release) provided via runtime flag (pre-release) ' \
+                                           'or from prior step implementer (generate-metadata).'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -147,7 +149,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
             artifact_config = {
                 'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
@@ -158,7 +159,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='SemanticVersion',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -168,8 +170,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
             expected_step_result.success = False
-            expected_step_result.message = f'No value for (build) provided via runtime flag' \
-                '(build) or from prior step implementer ({self.step_name}).'
+            expected_step_result.message = 'No value for (build) provided via runtime flag (build) ' \
+                                           'or from prior step implementer (generate-metadata).'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -180,7 +182,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
-            test_config = {'step-name': 'generate-metadata', 'implementer': 'SemanticVersion'}
 
             artifact_config = {
                 'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
@@ -192,7 +193,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                test_config=test_config,
+                step_name='generate-metadata',
+                implementer='SemanticVersion',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
