@@ -41,19 +41,8 @@ from runtime configuration.</p>
 <td><code>container-image-signer-pgp-private-key</code></td>
 <td>True</td>
 <td></td>
-<td>PGP Private Key /</td>
-</tr>
-<tr>
-<td>used to sign /</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>the image</td>
-<td></td>
-<td></td>
-<td></td>
+<td>PGP Private Key used to
+sign the image</td>
 </tr>
 </tbody>
 </table>
@@ -87,59 +76,26 @@ from runtime configuration.</p>
 <tbody>
 <tr>
 <td><code>container-image-signature-private-key-fingerprint</code></td>
-<td>Fingerprint for the private key for /</td>
-</tr>
-<tr>
-<td>image signing</td>
-<td></td>
+<td>Fingerprint for the private key for
+image signing</td>
 </tr>
 <tr>
 <td><code>container-image-signature-file-path</code></td>
-<td>File path where signature is located /</td>
-</tr>
-<tr>
-<td>eg) /tmp/jkeam/hello-node@/</td>
-<td></td>
-</tr>
-<tr>
-<td>sha256=2cbdb73c9177e63/</td>
-<td></td>
-</tr>
-<tr>
-<td>e85d267f738e99e368db3f/</td>
-<td></td>
-</tr>
-<tr>
-<td>806eab4c541f5c6b719e69/</td>
-<td></td>
-</tr>
-<tr>
-<td>f1a2b/signature-1</td>
-<td></td>
+<td>File path where signature is located
+eg) /tmp/jkeam/hello-node@
+sha256=2cbdb73c9177e63
+e85d267f738e99e368db3f
+806eab4c541f5c6b719e69
+f1a2b/signature-1</td>
 </tr>
 <tr>
 <td><code>container-image-signature-name</code></td>
-<td>Fully qualified name of the name /</td>
-</tr>
-<tr>
-<td>including organization, repo, and hash /</td>
-<td></td>
-</tr>
-<tr>
-<td>eg) jkeam/hello-node@sha256=/</td>
-<td></td>
-</tr>
-<tr>
-<td>2cbdb73c9177e63e85d267f738e9/</td>
-<td></td>
-</tr>
-<tr>
-<td>9e368db3f806eab4c541f5c6b719/</td>
-<td></td>
-</tr>
-<tr>
-<td>e69f1a2b/signature-1</td>
-<td></td>
+<td>Fully qualified name of the name
+including organization, repo, and hash
+eg) jkeam/hello-node@sha256=
+2cbdb73c9177e63e85d267f738e9
+9e368db3f806eab4c541f5c6b719
+e69f1a2b/signature-1</td>
 </tr>
 </tbody>
 </table>
@@ -156,11 +112,10 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key                        | Required? | Default | Description
-|------------------------------------------|-----------|---------|-------------
-| `container-image-signer-pgp-private-key` | True      |         | PGP Private Key /
-                                                                   used to sign /
-                                                                   the image
+| Configuration Key                        | Required? | Default  | Description
+|------------------------------------------|-----------|----------|-------------
+| `container-image-signer-pgp-private-key` | True      |          | PGP Private Key used to \
+                                                                    sign the image
 
 
 Expected Previous Step Results
@@ -178,19 +133,19 @@ Results output by this step.
 
 | Result Key                                          | Description
 |-----------------------------------------------------|------------
-| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for /
+| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for \
                                                         image signing
-| `container-image-signature-file-path`               | File path where signature is located /
-                                                        eg) /tmp/jkeam/hello-node@/
-                                                            sha256=2cbdb73c9177e63/
-                                                            e85d267f738e99e368db3f/
-                                                            806eab4c541f5c6b719e69/
+| `container-image-signature-file-path`               | File path where signature is located \
+                                                        eg) /tmp/jkeam/hello-node@\
+                                                            sha256=2cbdb73c9177e63\
+                                                            e85d267f738e99e368db3f\
+                                                            806eab4c541f5c6b719e69\
                                                             f1a2b/signature-1
-| `container-image-signature-name`                    | Fully qualified name of the name /
-                                                        including organization, repo, and hash /
-                                                        eg) jkeam/hello-node@sha256=/
-                                                            2cbdb73c9177e63e85d267f738e9/
-                                                            9e368db3f806eab4c541f5c6b719/
+| `container-image-signature-name`                    | Fully qualified name of the name \
+                                                        including organization, repo, and hash \
+                                                        eg) jkeam/hello-node@sha256=\
+                                                            2cbdb73c9177e63e85d267f738e9\
+                                                            9e368db3f806eab4c541f5c6b719\
                                                             e69f1a2b/signature-1
 &#34;&#34;&#34;
 
@@ -355,10 +310,10 @@ class PodmanSign(StepImplementer):
             # NOTE: for some reason the output from podman sign goes to stderr so....
             #       merge the two streams
             sh.podman.image( # pylint: disable=no-member
-                &#39;sign&#39;,
-                f&#39;--sign-by={pgp_private_key_fingerprint}&#39;,
-                f&#39;--directory={image_signatures_directory}&#39;,
-                f&#39;docker://{container_image_tag}&#39;,
+                &#34;sign&#34;,
+                f&#34;--sign-by={pgp_private_key_fingerprint}&#34;,
+                f&#34;--directory={image_signatures_directory}&#34;,
+                f&#34;docker://{container_image_tag}&#34;,
                 _out=sys.stdout,
                 _err_to_out=True,
                 _tee=&#39;out&#39;
@@ -551,10 +506,10 @@ class PodmanSign(StepImplementer):
             # NOTE: for some reason the output from podman sign goes to stderr so....
             #       merge the two streams
             sh.podman.image( # pylint: disable=no-member
-                &#39;sign&#39;,
-                f&#39;--sign-by={pgp_private_key_fingerprint}&#39;,
-                f&#39;--directory={image_signatures_directory}&#39;,
-                f&#39;docker://{container_image_tag}&#39;,
+                &#34;sign&#34;,
+                f&#34;--sign-by={pgp_private_key_fingerprint}&#34;,
+                f&#34;--directory={image_signatures_directory}&#34;,
+                f&#34;docker://{container_image_tag}&#34;,
                 _out=sys.stdout,
                 _err_to_out=True,
                 _tee=&#39;out&#39;
