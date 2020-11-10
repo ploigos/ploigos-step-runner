@@ -1,9 +1,12 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 
 import yaml
-from tssc import TSSCFactory
+from tssc.factory import TSSCFactory
 from tssc.config.config import Config
 from tssc.exceptions import TSSCException
 from tssc.step_result import StepResult
@@ -86,21 +89,30 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         work_dir_path,
         artifact_config={}
     ):
-        step_result = StepResult(step_name='generate-metadata', sub_step_name='SemanticVersion', sub_step_implementer_name='SemanticVersion')
-        for k, v in artifact_config.items():
+        step_result = StepResult(
+            step_name='test-step',
+            sub_step_name='test-sub-step-name',
+            sub_step_implementer_name='test-step-implementer-name'
+        )
+        for key1, val1 in artifact_config.items():
             description = ''
             value_type = ''
             value = ''
-            for key, val in v.items():
-                if key == 'description':
-                    description = val
-                elif key == 'type':
-                    value_type = val
-                elif key == 'value':
-                    value = val
+            for key2, val2 in val1.items():
+                if key2 == 'description':
+                    description = val2
+                elif key2 == 'type':
+                    value_type = val2
+                elif key2 == 'value':
+                    value = val2
                 else:
                     raise TSSCException('Given field is not apart of an artifact')
-            step_result.add_artifact(name=k, value=val, description=description, value_type=value_type)
+            step_result.add_artifact(
+                name=key1,
+                value=value,
+                description=description,
+                value_type=value_type
+            )
         workflow_result = WorkflowResult()
         workflow_result.add_step_result(step_result=step_result)
         pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')

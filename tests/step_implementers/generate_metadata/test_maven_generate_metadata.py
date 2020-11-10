@@ -1,13 +1,13 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
-from io import IOBase, StringIO
 
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.config.config import Config
 from tssc.step_implementers.generate_metadata import Maven
 from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
 
 
 class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
@@ -47,7 +47,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('pom.xml',b'''<project>
+            temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
                 <artifactId>my-app</artifactId>
@@ -65,10 +65,14 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
-            
+
             result = step_implementer._run_step()
 
-            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='Maven', sub_step_implementer_name='Maven')
+            expected_step_result = StepResult(
+                step_name='generate-metadata',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
             expected_step_result.add_artifact(name='app-version', value='42.1')
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
@@ -87,12 +91,16 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 implementer='Maven',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                work_dir_path=work_dir_path
             )
-            
+
             result = step_implementer._run_step()
 
-            expected_step_result = StepResult(step_name='generate-metadata', sub_step_name='Maven', sub_step_implementer_name='Maven')
+            expected_step_result = StepResult(
+                step_name='generate-metadata',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
             expected_step_result.success = False
             expected_step_result.message = 'Given pom file does not exist: pom.xml'
 

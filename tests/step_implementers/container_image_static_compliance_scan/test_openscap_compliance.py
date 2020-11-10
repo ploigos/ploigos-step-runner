@@ -2,22 +2,25 @@ import re
 
 from tests.step_implementers.shared.test_openscap_generic import \
     TestStepImplementerSharedOpenSCAPGeneric
-from tssc.config.config import Config
 from tssc.step_implementers.container_image_static_compliance_scan import \
     OpenSCAP
 
 
 class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepImplementerSharedOpenSCAPGeneric):
     def create_step_implementer(
-        self,
-        step_config={},
-        results_dir_path='',
-        results_file_name='',
-        work_dir_path=''
+            self,
+            step_config={},
+            step_name='test',
+            implementer='OpenSCAP',
+            results_dir_path='',
+            results_file_name='',
+            work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=OpenSCAP,
             step_config=step_config,
+            step_name=step_name,
+            implementer=implementer,
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
@@ -29,7 +32,9 @@ class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepI
             'oscap-profile': 'foo'
         }
         step_implementer = self.create_step_implementer(
-            step_config=step_config
+            step_config=step_config,
+            step_name='test',
+            implementer='OpenSCAP'
         )
 
         step_implementer._validate_runtime_step_config(step_config)
@@ -41,15 +46,17 @@ class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepI
             'oscap-profile': 'foo'
         }
         step_implementer = self.create_step_implementer(
-            step_config=step_config
+            step_config=step_config,
+            step_name='test',
+            implementer='OpenSCAP'
         )
 
         with self.assertRaisesRegex(
-            AssertionError,
-            re.compile(
-                r'Open SCAP input definitions source '
-                rf'\({oscap_input_definitions_uri}\) must be of known type \(xml\|bz2\), got: \.foo'
-            )
+                AssertionError,
+                re.compile(
+                    r'Open SCAP input definitions source '
+                    rf'\({oscap_input_definitions_uri}\) must be of known type \(xml\|bz2\), got: \.foo'
+                )
         ):
             step_implementer._validate_runtime_step_config(step_config)
 
@@ -60,16 +67,18 @@ class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepI
             'oscap-profile': 'foo'
         }
         step_implementer = self.create_step_implementer(
-            step_config=step_config
+            step_config=step_config,
+            step_name='test',
+            implementer='OpenSCAP'
         )
 
         with self.assertRaisesRegex(
-            AssertionError,
-            re.compile(
-                r'Open SCAP input definitions source '
-                rf'\({oscap_input_definitions_uri}\) must start with known protocol '
-                r'\(file://\|http://\|https://\)\.'
-            )
+                AssertionError,
+                re.compile(
+                    r'Open SCAP input definitions source '
+                    rf'\({oscap_input_definitions_uri}\) must start with known protocol '
+                    r'\(file://\|http://\|https://\)\.'
+                )
         ):
             step_implementer._validate_runtime_step_config(step_config)
 
@@ -79,14 +88,16 @@ class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP(TestStepI
             'oscap-input-definitions-uri': oscap_input_definitions_uri
         }
         step_implementer = self.create_step_implementer(
-            step_config=step_config
+            step_config=step_config,
+            step_name='test',
+            implementer='OpenSCAP'
         )
 
         with self.assertRaisesRegex(
-            AssertionError,
-            re.compile(
-                r"The runtime step configuration \(.*\) is missing the "
-                r"required configuration keys \(\['oscap-profile'\]\)"
-            )
+                AssertionError,
+                re.compile(
+                    r"The runtime step configuration \(.*\) is missing the "
+                    r"required configuration keys \(\['oscap-profile'\]\)"
+                )
         ):
             step_implementer._validate_runtime_step_config(step_config)

@@ -45,16 +45,16 @@ Expected Previous Step Results
 
 Results expected from previous steps that this step requires.
 
-| Step Name           | Result Key    | Description
-|---------------------|---------------|------------
-| `generate-metadata` | `app-version` | Value to use for `version` portion of semantic version \
-                                        (https://semver.org/).
-| `generate-metadata` | `pre-release` | Value to use for `pre-release` portion of semantic version \
-                                        (https://semver.org/). \
-                                        Uses the Git branch name.
-| `generate-metadata` | `build`       | Value to use for `build` portion of semantic version \
-                                        (https://semver.org/). \
-                                        Uses a portion of the latest Git commit hash.
+| Result Key    | Description
+|---------------|------------
+| `app-version` | Value to use for `version` portion of semantic version \
+                  (https://semver.org/).
+| `pre-release` | Value to use for `pre-release` portion of semantic version \
+                  (https://semver.org/). \
+                  Uses the Git branch name.
+| `build`       | Value to use for `build` portion of semantic version \
+                  (https://semver.org/). \
+                  Uses a portion of the latest Git commit hash.
 
 Results
 -------
@@ -66,56 +66,6 @@ Results artifacts output by this step.
 | `version`   | Constructed semantic version (https://semver.org/).
 | `container-image-version` | Constructed semantic version (https://semver.org/) without build #
 
-Examples
---------
-
-**Example 1**
-
-*Previous Step Results*
-
-    {'tssc-results': {
-      'generate-metadata': {
-        'app-version': '1.0.0',
-        'pre-release': 'feature_test0',
-        'build': 'abc123'
-      }
-    }
-
-*Step Results after this Step Implementer*
-
-    {'tssc-results': {
-      'generate-metadata': {
-        'app-version': '42.1.0',
-        'pre-release': 'feature_test0',
-        'build': 'abc123',
-        'version': '42.1.0-feature_foo+abc123',
-        'container-image-version': '42.1.0-feature_foo'
-      }
-    }}
-
-**Example 2**
-
-*Previous Step Results*
-
-    {'tssc-results': {
-      'generate-metadata': {
-        'app-version': '42.1.0',
-        'pre-release': 'master',
-        'build': 'abc123'
-      }
-    }
-
-*Step Results after this Step Implementer*
-
-    {'tssc-results': {
-      'generate-metadata': {
-        'app-version': '42.1.0',
-        'pre-release': 'master',
-        'build': 'abc123',
-        'version': '42.1.0+abc123',
-        'container-image-version': '42.1.0'
-      }
-    }}
 """
 
 from tssc import StepImplementer
@@ -125,7 +75,8 @@ DEFAULT_CONFIG = {
     'release-branch': 'master'
 }
 
-class SemanticVersion(StepImplementer): # pylint: disable=too-few-public-methods
+
+class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for SemanticVersion.
     """
