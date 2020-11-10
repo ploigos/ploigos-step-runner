@@ -44,7 +44,8 @@ REQUIRED_CONFIG_KEYS = [
     'pom-file'
 ]
 
-class Maven(StepImplementer): # pylint: disable=too-few-public-methods
+
+class Maven(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Maven.
     """
@@ -104,7 +105,7 @@ class Maven(StepImplementer): # pylint: disable=too-few-public-methods
 
         step_result.add_artifact(
             name='app-version',
-            value= pom_version
+            value=pom_version
         )
 
         return step_result

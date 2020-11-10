@@ -52,7 +52,8 @@ REQUIRED_CONFIG_KEYS = [
     'build-string-length'
 ]
 
-class Git(StepImplementer): # pylint: disable=too-few-public-methods
+
+class Git(StepImplementer):  # pylint: disable=too-few-public-methods
     """
     StepImplementer for the generate-metadata step for Git.
     """
@@ -109,7 +110,6 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
             step_result.message = 'Given directory (repo_root) is not a Git repository'
             return step_result
 
-
         if repo.bare:
             step_result.success = False
             step_result.message = 'Given directory (repo_root) is a bare Git repository'
@@ -118,7 +118,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         if repo.head.is_detached:
             step_result.success = False
             step_result.message = 'Expected a Git branch in given directory (repo_root) but has' \
-                ' a detached head'
+                                  ' a detached head'
             return step_result
 
         git_branch = str(repo.head.reference)
@@ -128,7 +128,7 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         except ValueError:
             step_result.success = False
             step_result.message = 'Given directory (repo_root) is a git branch (git_branch) with' \
-                ' no commit history'
+                                  ' no commit history'
             return step_result
 
         # make the git branch safe
@@ -136,13 +136,13 @@ class Git(StepImplementer): # pylint: disable=too-few-public-methods
         pre_release = re.sub(pre_release_regex, '_', git_branch)
 
         step_result.add_artifact(
-            name = 'pre-release',
-            value = pre_release
+            name='pre-release',
+            value=pre_release
         )
 
         step_result.add_artifact(
-            name = 'build',
-            value = git_branch_last_commit_hash
+            name='build',
+            value=git_branch_last_commit_hash
         )
 
         return step_result

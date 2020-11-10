@@ -28,7 +28,6 @@ minimally produce the following step results.
 """
 
 from .maven import Maven
-from .npm import NPM
 
 __all__ = [
     'maven'

@@ -1,20 +1,18 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 import re
 from contextlib import redirect_stdout
 from io import IOBase, StringIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import \
-    BaseStepImplementerTestCase
-from tests.helpers.test_utils import (Any, StringRegexParam,
-                                      create_sh_side_effect)
-from tssc import TSSCException
-from tssc.config.config import Config
+from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.test_utils import (Any, create_sh_side_effect)
+
 from tssc.step_implementers.shared.openscap_generic import OpenSCAPGeneric
-from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
 
 
 class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
@@ -1219,7 +1217,7 @@ Result	fail
                 "test": {
                     "OpenSCAP": {
                         "sub-step-implementer-name": "OpenSCAP",
-                        "success": True, 
+                        "success": True,
                         "message": "",
                         "artifacts": {
                             "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},

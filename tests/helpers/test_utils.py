@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 import re
 from io import IOBase
@@ -52,7 +55,9 @@ def run_step_test_with_result_validation(
         assert actual_step_results == expected_step_results
 
 
-def create_git_commit_with_sample_file(temp_dir, git_repo, sample_file_name='sample-file', commit_message='test'):
+def create_git_commit_with_sample_file(temp_dir, git_repo,
+                                       sample_file_name='sample-file',
+                                       commit_message='test'):
     sample_file = os.path.join(temp_dir.path, sample_file_name)
     open(sample_file, 'wb').close()
     git_repo.index.add([sample_file])
@@ -83,8 +88,7 @@ class StringRegexParam():
     def __eq__(self, other):
         if isinstance(other, str):
             return re.match(self.__regex, other)
-        else:
-            return False
+        return False
 
 
 def create_sops_side_effect(mock_stdout):

@@ -1,16 +1,17 @@
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
 import os
 import re
-from io import IOBase, StringIO
-from unittest.mock import MagicMock, patch
+from io import IOBase
+from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import \
-    BaseStepImplementerTestCase
-from tssc.config.config import Config
 from tssc.step_implementers.tag_source import Git
 from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
+
+from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
 
 
@@ -389,7 +390,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-    
+
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
     @patch.object(Git, '_Git__git_tag')
@@ -566,7 +567,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 "Error invoking git config --get remote.origin.url:"
             ):
                 step_implementer._Git__git_url()
-    
+
     @patch('sh.git', create=True)
     def test__git_url_from_step_config(self, git_mock):
         remote_origin_url = "https://does.not.matter.xyz/foo.git"
@@ -664,7 +665,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
-            
+
             git_mock.tag.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
 
             with self.assertRaisesRegex(
@@ -710,7 +711,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 _err=Any(IOBase),
                 _tee='err'
             )
-    
+
     @patch('sh.git', create=True)
     def test__git_push_no_url_success(self, git_mock):
 
@@ -770,7 +771,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
-            
+
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
 
             with self.assertRaisesRegex(
