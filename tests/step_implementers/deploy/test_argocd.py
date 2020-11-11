@@ -2310,12 +2310,12 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
-    def test__get_app_name_greater_then_63(self, argocd_mock, git_mock):
+    def test__get_app_name_greater_then_53(self, argocd_mock, git_mock):
         self.__run__get_app_name_test(
             argocd_mock=argocd_mock,
             git_mock=git_mock,
             git_branch='repository_branch_very_long',
-            expected_result='name-application_name-service_name-repository_branch_very_long',
+            expected_result='cation_name-service_name-repository_branch_very_long',
             step_config={
                 'organization' : 'organization_name',
                 'application-name' : 'application_name',
@@ -2386,12 +2386,12 @@ class TestStepImplementerDeployArgoCD(BaseStepImplementerTestCase):
 
     @patch('sh.git', create=True)
     @patch('sh.argocd', create=True)
-    def test__get_app_name_with_env_greater_then_63(self, argocd_mock, git_mock):
+    def test__get_app_name_with_env_greater_then_53(self, argocd_mock, git_mock):
         self.__run__get_app_name_test(
             argocd_mock=argocd_mock,
             git_mock=git_mock,
             git_branch='repository_branch_very_long',
-            expected_result='application_name-service_name-repository_branch_very_long-test',
+            expected_result='n_name-service_name-repository_branch_very_long-test',
             step_config={
                 'organization' : 'organization_name',
                 'application-name' : 'application_name',
