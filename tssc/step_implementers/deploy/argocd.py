@@ -108,6 +108,7 @@ Elements in `report-artifacts` dictionary:
         }
     }
 """
+import os
 import re
 import shutil
 import sys
@@ -205,7 +206,7 @@ class ArgoCD(StepImplementer):
             not any(element in runtime_step_config for element in GIT_AUTHENTICATION_CONFIG) \
         ), 'Either username or password is not set. Neither or both must be set.'
 
-    def _run_step(self):
+    def _run_step(self): #pylint: disable=too-many-locals
         """Runs the TSSC step implemented by this StepImplementer.
 
         Returns
@@ -271,7 +272,12 @@ users:
                     raise RuntimeError("Error adding cluster to ArgoCD: {cluster}".format(
                         cluster=kube_api)) from error
 
+        helm_chart_path = self.get_config_value('argocd-helm-chart-path')
         values_file_name = f'values-{self.environment}.yaml' if self.environment else 'values.yaml'
+        # NOTE:
+        #   While helm supports values files being anywhere, ArgoCD only supports values files
+        #   within the specified --path for the new applciation
+        values_file_repo_relative_path = os.path.join(helm_chart_path, values_file_name)
 
         # NOTE: In this block the reference app config repo is cloned and checked out to a temp
         #       directory so that it can update the values.yml based on values.yaml.j2 template.
@@ -309,7 +315,7 @@ users:
                         _err=sys.stderr
                     )
 
-                self._update_values_yaml(repo_directory, values_file_name)
+                self._update_values_yaml(repo_directory, values_file_repo_relative_path)
 
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' +\
                                  '{repo}'.format(repo=git_url)
@@ -331,7 +337,7 @@ users:
                 )
 
                 sh.git.add(
-                    values_file_name,
+                    values_file_repo_relative_path,
                     _cwd=repo_directory,
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -374,7 +380,7 @@ users:
                 argocd_app_name,
                 '--repo=' + git_url,
                 '--revision=' + repo_branch,
-                '--path=' + self.get_config_value('argocd-helm-chart-path'),
+                '--path=' + helm_chart_path,
                 '--dest-server=' + self.get_config_value('kube-api-uri'),
                 '--dest-namespace=' + argocd_app_name,
                 '--sync-policy=' + sync_policy,
@@ -466,7 +472,7 @@ users:
                 print('No image version found in metadata, using \"latest\"')
         return image_version
 
-    def _update_values_yaml(self, repo_directory, values_file_name): # pylint: disable=too-many-locals
+    def _update_values_yaml(self, repo_directory, values_file_repo_relative_path): # pylint: disable=too-many-locals
         env = Environment(
             loader=FileSystemLoader(self.get_config_value('values-yaml-directory')),
             trim_blocks=True,
@@ -500,10 +506,13 @@ users:
         )
 
         try:
-            shutil.copyfile(rendered_values_file, repo_directory + '/' + values_file_name)
+            shutil.copyfile(
+                rendered_values_file,
+                os.path.join(repo_directory, values_file_repo_relative_path)
+            )
         except (shutil.SameFileError, OSError, IOError) as error:
             raise RuntimeError("Error copying {values_file} file: {all}".format(
-                values_file=values_file_name, all=error)) from error
+                values_file=values_file_repo_relative_path, all=error)) from error
 
     def _get_tag(self, repo_directory):
         """TODO: doc me
