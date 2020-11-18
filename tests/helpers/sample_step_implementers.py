@@ -141,7 +141,7 @@ class WriteConfigAsResultsStepImplementer(StepImplementer):
 
         # copy the key/value pairs into the artifacts
         for name, value in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
-            print(name, value)
+            # print(name, value)
             step_result.add_artifact(name, value)
         return step_result
 

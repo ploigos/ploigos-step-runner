@@ -26,6 +26,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     PUSH_ARTIFACTS = 'push-artifacts'
     CREATE_CONTAINER_IMAGE = 'create-container-image'
     PUSH_CONTAINER_IMAGE = 'push-container-image'
+    SIGN_CONTAINER_IMAGE = 'sign-container-image'
     CONTAINER_IMAGE_UNIT_TEST = 'container-image-unit-test'
     CONTAINER_IMAGE_STATIC_COMPLIANCE_SCAN = 'container-image-static-compliance-scan'
     CONTAINER_IMAGE_STATIC_VULNERABILITY_SCAN = 'container-image-static-vulnerability-scan'
@@ -513,6 +514,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         return result
 
+    def create_working_dir_sub_dir(self, sub_dir_relative_path):
+        """
+        """
+        file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
+        os.makedirs(file_path, exist_ok=True)
+        return file_path
+
     def write_working_file(self, filename, contents=None):
         """
         Write content or touch filename in working directory
@@ -623,7 +631,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
         """
         Get the value for the named artifact.
-        If step_name is provide, search the artifacts step_name only
+        If step_name is provided, search the artifacts step_name only
         If step_name and sub_step_name,  search the artifacts step_name/sub_step only
         Otherwise, search for the FIRST occurrence of the artifact
         """
