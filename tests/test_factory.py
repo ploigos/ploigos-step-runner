@@ -4,6 +4,7 @@
 # pylint: disable=missing-function-docstring
 
 import re
+from testfixtures import TempDirectory
 
 from tssc import TSSCFactory, TSSCException
 from tssc.config import Config
@@ -17,7 +18,8 @@ class TestFactory(BaseTSSCTestCase):
             'tssc-config': {
             }
         }
-        TSSCFactory(config, 'results.yml')
+
+        TSSCFactory(config)
 
     def test_init_invalid_config(self):
         config = {
@@ -36,12 +38,13 @@ class TestFactory(BaseTSSCTestCase):
             'tssc-config': {
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
+
+        factory = TSSCFactory(config)
 
         with self.assertRaisesRegex(
-                AssertionError,
-                r"Can not run step \(foo\) because no step configuration provided."):
-            factory.run_step('foo')
+           AssertionError,
+               r"Can not run step \(foo\) because no step configuration provided."):
+               factory.run_step('foo')
 
     def test_run_step_config_specified_StepImplementer_does_not_exist(self):
         config = {
@@ -53,10 +56,11 @@ class TestFactory(BaseTSSCTestCase):
                 ]
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
+
+        factory = TSSCFactory(config)
 
         with self.assertRaisesRegex(
-                TSSCException,
+            TSSCException,
                 r"Could not dynamically load step \(foo\) step implementer \(DoesNotExist\)"
                 r" from module \(tssc.step_implementers.foo\) with class name \(DoesNotExist\)"):
             factory.run_step('foo')
@@ -72,9 +76,9 @@ class TestFactory(BaseTSSCTestCase):
                 ]
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
-
-        factory.run_step('foo')
+        with TempDirectory() as temp_dir:
+            factory = TSSCFactory(config, temp_dir.path)
+            factory.run_step('foo')
 
     def test_run_step_config_implementer_specified_and_no_sub_step_config_specified_StepImplementer(self):
         config = {
@@ -86,9 +90,9 @@ class TestFactory(BaseTSSCTestCase):
                 ]
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
-
-        factory.run_step('foo')
+        with TempDirectory() as temp_dir:
+            factory = TSSCFactory(config, temp_dir.path)
+            factory.run_step('foo')
 
     def test_run_step_config_only_sub_step_and_is_dict_rather_then_array(self):
         config = {
@@ -98,9 +102,9 @@ class TestFactory(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
-
-        factory.run_step('foo')
+        with TempDirectory() as temp_dir:
+            factory = TSSCFactory(config, temp_dir.path)
+            factory.run_step('foo')
 
     def test_init_with_config_object(self):
         config = {
@@ -111,8 +115,7 @@ class TestFactory(BaseTSSCTestCase):
             }
         }
         tssc_config = Config(config)
-        factory = TSSCFactory(tssc_config, 'results.yml')
-
+        factory = TSSCFactory(tssc_config)
         self.assertEqual(factory.config, tssc_config)
 
     def test_init_with_dict(self):
@@ -123,10 +126,9 @@ class TestFactory(BaseTSSCTestCase):
                 }
             }
         }
-        factory = TSSCFactory(config, 'results.yml')
 
+        factory = TSSCFactory(config)
         sub_step_configs = factory.config.get_sub_step_configs('step-foo')
-
         self.assertEqual(len(sub_step_configs), 1)
 
     def test__get_step_implementer_class_does_not_exist_using_default_steps_module(self):
@@ -148,13 +150,13 @@ class TestFactory(BaseTSSCTestCase):
         with self.assertRaisesRegex(
                 TSSCException,
                 re.compile(
-                    "Step \(foo\) is configured to use step implementer "
-                    "\(tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer\) "
-                    "from module \(tests.helpers.sample_step_implementers\) with class name "
-                    "\(NotSubClassOfStepImplementer\), and dynamically loads as class "
-                    "\(<class 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer'>\) "
-                    "which is not a subclass of required parent class "
-                    "\(<class 'tssc.step_implementer.StepImplementer'>\)."
+                    r"Step \(foo\) is configured to use step implementer "
+                    r"\(tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer\) "
+                    r"from module \(tests.helpers.sample_step_implementers\) with class name "
+                    r"\(NotSubClassOfStepImplementer\), and dynamically loads as class "
+                    r"\(<class 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer'>\) "
+                    r"which is not a subclass of required parent class "
+                    r"\(<class 'tssc.step_implementer.StepImplementer'>\)."
                 )
         ):
             TSSCFactory._TSSCFactory__get_step_implementer_class('foo',

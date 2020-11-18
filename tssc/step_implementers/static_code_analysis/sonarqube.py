@@ -107,23 +107,6 @@ Example: Existing Sonar Properties File (minimal)
     #sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco
     #sonar.core.codeCoveragePlugin=jacoco
 
-Example: Results
-
-    'tssc-results': {
-        'static_code_analysis': {
-            'result': {
-                'success': True,
-                'message': 'sonarqube step completed - see report-artifacts'
-            },
-            'report-artifacts': [
-                {
-                  'name': 'sonarqube result set',
-                  'path': 'file:///folder/tssc-working/static_code_analysis/report-task.txt'
-                }
-             ]
-         }
-    }
-
 """
 
 import os

@@ -977,3 +977,33 @@ class TestStepImplementer(BaseTSSCTestCase):
             result = step.run_step()
 
         self.assertEqual(False, result)
+
+    def test_create_working_dir_sub_dir(self):
+        config = Config({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step(
+            'tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='tssc-results.yml',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
+            self.assertEqual(
+                True,
+                os.path.isdir(
+                    step.create_working_dir_sub_dir('tester')
+                )
+            )

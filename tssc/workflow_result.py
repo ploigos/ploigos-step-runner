@@ -13,7 +13,7 @@ from tssc.exceptions import TSSCException
 class WorkflowResult:
     """
     Class to manage a list of StepResults.
-    The WorkflowResult represents ALL results, including the current step.
+    The WorkflowResult represents ALL previous results.
     """
 
     def __init__(self):
