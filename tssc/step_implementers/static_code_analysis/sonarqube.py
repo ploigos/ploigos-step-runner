@@ -186,8 +186,8 @@ class SonarQube(StepImplementer):
         super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
 
         assert (
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or not any(
-                element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
+                all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or not any(
+            element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
             ), 'Either username or password is not set. Neither or both must be set.'
 
     def _run_step(self):
@@ -234,9 +234,9 @@ class SonarQube(StepImplementer):
                     '-Dsonar.host.url=' + self.get_config_value('url'),
                     '-Dsonar.projectVersion=' + version,
                     '-Dsonar.projectKey=' + \
-                        self.get_config_value('application-name') + \
-                        ':' + \
-                        self.get_config_value('service-name'),
+                    self.get_config_value('application-name') + \
+                    ':' + \
+                    self.get_config_value('service-name'),
                     '-Dsonar.working.directory=' + working_directory,
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -248,9 +248,9 @@ class SonarQube(StepImplementer):
                     '-Dsonar.host.url=' + self.get_config_value('url'),
                     '-Dsonar.projectVersion=' + version,
                     '-Dsonar.projectKey=' + \
-                        self.get_config_value('application-name') + \
-                        ':' + \
-                        self.get_config_value('service-name'),
+                    self.get_config_value('application-name') + \
+                    ':' + \
+                    self.get_config_value('service-name'),
                     '-Dsonar.login=' + username,
                     '-Dsonar.password=' + password,
                     '-Dsonar.working.directory=' + working_directory,
@@ -262,8 +262,8 @@ class SonarQube(StepImplementer):
             raise RuntimeError('Error invoking sonarscanner: {all}'.format(all=error)) from error
 
         step_result.add_artifact(
-            name = 'sonarqube_result_set',
-            value = f'file://{working_directory}/report-task.txt',
-            value_type = 'file'
+            name='sonarqube-result-set',
+            value=f'file://{working_directory}/report-task.txt',
+            value_type='file'
         )
         return step_result

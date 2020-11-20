@@ -1,38 +1,46 @@
 """StepImplementer for the sign-container-image step using Podman to sign an image.
+
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
+
 | Configuration Key                        | Required? | Default  | Description
 |------------------------------------------|-----------|----------|-------------
-| `container-image-signer-pgp-private-key` | True      |          | PGP Private Key used to \
-                                                                    sign the image
+| `container-image-signer-pgp-private-key` | True      |          | PGP Private Key used to
+|                                          |           |          | sign the image
+
 Expected Previous Step Results
 ------------------------------
 Results expected from previous steps that this step requires.
+
 | Step Name             | Result Key             | Description
 |-----------------------|------------------------|-------------------------------
 | `container-image-tag` | `push-container-image` | Tag of the container image
+
 Results
 -------
 Results output by this step.
+
 | Result Key                                          | Description
 |-----------------------------------------------------|------------
-| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for \
-                                                        image signing
-| `container-image-signature-file-path`               | File path where signature is located \
-                                                        eg) /tmp/jkeam/hello-node@\
-                                                            sha256=2cbdb73c9177e63\
-                                                            e85d267f738e99e368db3f\
-                                                            806eab4c541f5c6b719e69\
-                                                            f1a2b/signature-1
-| `container-image-signature-name`                    | Fully qualified name of the name \
-                                                        including organization, repo, and hash \
-                                                        eg) jkeam/hello-node@sha256=\
-                                                            2cbdb73c9177e63e85d267f738e9\
-                                                            9e368db3f806eab4c541f5c6b719\
-                                                            e69f1a2b/signature-1
+| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for
+|                                                     |  image signing
+| `container-image-signature-file-path`               | File path where signature is located
+|                                                     |  eg)
+|                                                     |  /tmp/user/hello-node@
+|                                                     |  sha256=2cbdb73c9177e63
+|                                                     |  e85d267f738e99e368db3f
+|                                                     |  806eab4c541f5c6b719e69
+|                                                     |  f1a2b/signature-1
+| `container-image-signature-name`                    | Fully qualified name of the name
+|                                                     |  including organization, repo, and hash
+|                                                     |  eg)
+|                                                     |  user/hello-node@sha256=
+|                                                     |  2cbdb73c9177e63e85d267f738e9
+|                                                     |  9e368db3f806eab4c541f5c6b719
+                                                      |  e69f1a2b/signature-1
 """
 import glob
 import os
@@ -67,13 +75,15 @@ class PodmanSign(StepImplementer):
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.
-        Notes
-        -----
-        These are the lowest precedence configuration values.
+
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         """
         return DEFAULT_CONFIG
 
@@ -81,13 +91,15 @@ class PodmanSign(StepImplementer):
     def required_runtime_step_config_keys():
         """
         Getter for step configuration keys that are required before running the step.
-        See Also
-        --------
-        _validate_runtime_step_config
+
         Returns
         -------
         array_list
             Array of configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
         """
         return REQUIRED_CONFIG_KEYS
 
@@ -105,6 +117,7 @@ class PodmanSign(StepImplementer):
         if container_image_tag is None:
             step_result.success = False
             step_result.message = "Missing container-image-tag"
+            return step_result
 
         image_signatures_directory = self.create_working_dir_sub_dir(
             sub_dir_relative_path='image-signature'

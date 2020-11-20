@@ -164,26 +164,27 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     @property
     def results_file_path(self):
         """
-        Get the OS path to the results file for this step.
-        Default from factory:  tssc-results/tssc-results.yml
+        Get the OS path to the results file.
+        EG:  /tmp/tmpno_qi7np/tssc-results/tssc-results.yml
 
         Returns
         -------
         str
-            OS path to the results file for this step.
+            OS path to the results file.
         """
         return os.path.join(self.results_dir_path, self.__results_file_name)
 
     @property
     def results_dir_path(self):
         """
-        Get the OS path to the results folder
-        Default from factory:  tssc-results
+        Get the OS path to the results folder.
+        If the results folder does not exist, create it.
+        EG:  /tmp/tmpno_qi7np/tssc-results
 
         Returns
         -------
         str
-            OS path to the results file for this step.
+            OS path to the results folder.
         """
         os.makedirs(self.__results_dir_path, exist_ok=True)
         return self.__results_dir_path
@@ -191,27 +192,28 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     @property
     def work_dir_path(self):
         """
-        Get the OS path to the results folder for this step.
-        Default from factory:  tssc-results
+        Get the OS path to the working folder.
+        EG:  /tmp/tmpno_qi7np/tssc-working
 
         Returns
         -------
         str
-            OS path to the results file for this step.
+            OS path to the working folder.
         """
         os.makedirs(self.__work_dir_path, exist_ok=True)
-        return self.__work_dir_path
+        return os.path.abspath(self.__work_dir_path)
 
     @property
     def work_dir_path_step(self):
         """
-        Get the OS path to the results folder for this step.
-        Default from factory:  tssc-results
+        Get the OS path to the working folder for this step.
+        If the folder does not exist, create it.
+        EG:  /tmp/tmpno_qi7np/tssc-working/stepname
 
         Returns
         -------
         str
-            OS path to the results file for this step.
+            OS path to the working folder plus step name.
         """
         work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
         os.makedirs(work_dir_path_step, exist_ok=True)
@@ -221,33 +223,33 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     @property
     def step_name(self):
         """
-        Getter for the TSSC Step name implemented by this step.
+        Getter for the step name implemented by this step.
         Returns
         -------
         str
-            TSSC step name implemented by this step.
+            Step name implemented by this step.
         """
         return self.config.step_name
 
     @property
     def sub_step_name(self):
         """
-        Getter for the TSSC Sub Step name implemented by this step.
+        Getter for the sub step name implemented by this step.
         Returns
         -------
         str
-            TSSC step name implemented by this step.
+            Sub step name.
         """
         return self.config.sub_step_name
 
     @property
     def sub_step_implementer_name(self):
         """
-        Getter for the TSSC Sub Step implementer name implemented by this step.
+        Getter for the sub step implementer name implemented by this step.
         Returns
         -------
         str
-            TSSC step name implemented by this step.
+            Sub step implementer name.
         """
         return self.config.sub_step_implementer_name
 
@@ -483,9 +485,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             self.step_implementer_config_defaults())
 
     def has_config_value(self, keys, match_any=False):
-        """Determins if step has values for any of the given keys.
+        """Determines if step has values for any of the given keys.
 
-        Parmaeters
+        Parameters
         ----------
         keys : str or list of str
             Keys to check to see if there are values for any or all of these key(s).
@@ -516,6 +518,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     def create_working_dir_sub_dir(self, sub_dir_relative_path):
         """
+        Create a folder under the working/stepname folder.
+        EG:  /tmp/tmpno_qi7np/tssc-working/stepname/sub
         """
         file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
@@ -524,8 +528,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     def write_working_file(self, filename, contents=None):
         """
         Write content or touch filename in working directory
-        for this step
-        eg:  tssc-working/step-name/filename
+        for this step.
+        EG:  /tmp/tmpno_qi7np/tssc-working/stepname/filename
 
         Parameters
         ----------
@@ -542,7 +546,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         # eg: tssc-working/step_name
         file_path = os.path.join(self.work_dir_path_step, filename)
 
-        # sub-directories might be passed finename, eg: foo/filename
+        # sub-directories might be passed filename, eg: foo/filename
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         if contents is None:
@@ -625,15 +629,33 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             prefix=" " * (4 * indent)
         ))
 
-    # todo:  Need NEW method to look in (1) config (2) step results
+    # todo:  Need NEW method to look in (1) config THEN (2) step results
 
     # WORKFLOW helpers
     def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
         """
         Get the value for the named artifact.
-        If step_name is provided, search the artifacts step_name only
-        If step_name and sub_step_name,  search the artifacts step_name/sub_step only
-        Otherwise, search for the FIRST occurrence of the artifact
+        If step_name is provided,
+            search for artifact_name in step_name only
+        If step_name and sub_step_name is provided,
+            search for artifact_name in step_name/sub_step only
+        Otherwise,
+             search for the FIRST occurrence of the artifact_name
+
+        EG:  Artifacts are a dictionary; return the contents of the value key.
+          In this example, 'foo' is the artifact name, return 'bar'
+          'foo' : {'description': '', 'type': 'str', 'value': 'bar'}
+
+        Parameters
+        ----------
+        artifact_name : str
+           Key name of the dictionary.
+
+        Returns
+        -------
+        str
+           Contents of the value for the specified result artifact_name.
+
         """
         return (
             self.workflow_result.get_artifact_value(
@@ -645,6 +667,26 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     def get_step_result(self, step_name=None):
         """
+        Get the step result.
+        EG:{
+            'tssc-results': {
+                'step-name': {
+                    'StepImplementer': {
+                        'sub-step-implementer-name': 'ssin',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'foo': {'description': '', 'type': 'str', 'value': 'bar'},
+                        }
+                    }
+                }
+            }
+        }
+
+        Returns
+        -------
+        dict
+           Result step
         """
         if step_name is None:
             step_name = self.step_name
@@ -658,9 +700,18 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     @property
     def workflow_result_pickle_file_path(self):
         """
+        Get the OS path to the workflow result pickle file.
+        (The 'pickle' file contains the serialized list of step results.)
+        The name of the pickle file is the basename of the results_file_name.
+        EG:
+        If the name of the results_file_name is tssc-results.yml,
+        then the name of the pickle file is tssc-results.pkl
+        /tmp/tmp9sau_2j5/tssc-working/tssc-results.pkl
+
         Returns
         -------
-        str:
-           eg: tssc-working/tssc-results.pkl
+        str
+           OS path to the workflow pickle (serialized) file.
         """
-        return os.path.join(self.work_dir_path, 'tssc-results.pkl')
+        pickle_filename = os.path.splitext(self.__results_file_name)[0] + '.pkl'
+        return os.path.join(self.work_dir_path, pickle_filename)

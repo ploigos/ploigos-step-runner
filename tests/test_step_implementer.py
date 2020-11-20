@@ -706,7 +706,7 @@ class TestStepImplementer(BaseTSSCTestCase):
                     test_dir
                 )
 
-    def test_get_step_results(self):
+    def test_get_step_result(self):
         config = Config({
             'tssc-config': {
                 'write-config-as-results': {
@@ -776,6 +776,9 @@ class TestStepImplementer(BaseTSSCTestCase):
 
             results_from_diff_step = foo_step.get_step_result('write-config-as-results')
             self.assertEqual(results_from_diff_step, expected_results)
+
+            expected_results = foo_step.get_result_value(artifact_name='foo')
+            self.assertEqual('bar', expected_results)
 
     def test_write_working_file(self):
         config = Config({
@@ -1001,9 +1004,59 @@ class TestStepImplementer(BaseTSSCTestCase):
                 config=sub_step
             )
 
+            sub = step.create_working_dir_sub_dir('folder1')
+            self.assertEqual(sub, f'{working_dir_path}/foo/folder1')
+            self.assertEqual(True, os.path.isdir(sub))
+
+            sub = step.create_working_dir_sub_dir('folder1/folder2/folder3')
+            self.assertEqual(sub, f'{working_dir_path}/foo/folder1/folder2/folder3')
+            self.assertEqual(True, os.path.isdir(sub))
+
+    def test_result_files_and_paths(self):
+        # overkill on tests here
+        config = Config({
+            'tssc-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step(
+            'tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'myresults')
+            working_dir_path = os.path.join(test_dir.path, 'mytesting')
+            step = FooStepImplementer(
+                results_dir_path=results_dir_path,
+                results_file_name='myfile',
+                work_dir_path=working_dir_path,
+                config=sub_step
+            )
+
             self.assertEqual(
-                True,
-                os.path.isdir(
-                    step.create_working_dir_sub_dir('tester')
-                )
+                f'{results_dir_path}/myfile',
+                step.results_file_path
+            )
+
+            self.assertEqual(
+                f'{results_dir_path}',
+                step.results_dir_path
+            )
+
+            self.assertEqual(
+                f'{working_dir_path}',
+                step.work_dir_path
+            )
+
+            self.assertEqual(
+                f'{working_dir_path}/foo',
+                step.work_dir_path_step
+            )
+
+            self.assertEqual(
+                f'{working_dir_path}/myfile.pkl',
+                step.workflow_result_pickle_file_path
             )

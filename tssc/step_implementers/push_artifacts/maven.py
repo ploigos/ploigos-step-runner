@@ -1,52 +1,61 @@
 """Step Implementer for the push-artifacts step for Maven.
+
 Step Configuration
 ------------------
-Step configuration key(s) for this step:
-| Key                 | Required | Default | Description
-|---------------------|----------|---------|------------
-| `maven-push-        | True     | N/A     | id for the maven servers and mirrors
+Step configuration expected as input to this step.
+Could come from either configuration file or
+from runtime configuration.
+
+| Configuration Key   | Required | Default | Description
+|---------------------|----------|---------|------------------------------------------
+| `maven-push-`       | True     | N/A     | id for the maven servers and mirrors
 | `artifact-repo-id`  |          |         |
-| `maven-push-        | True     | N/A     | url for the maven servers and mirrors
+| `maven-push-`       | True     | N/A     | url for the maven servers and mirrors
 | `artifact-repo-url` |          |         |
+
 Expected Previous Step Results
 ------------------------------
-Results expected from previous steps:
-|  Key                | Description
-|---------------------|------------
-| `package-artifact`  | Artifacts is dictionary
-|                     | Each element of an `artifact` will be used
-|                     | as a parameter to deploy to repository:
-|                     | * artifact.group-id
-|                     | * artifact.artifact-id
-|                     | * artifact.path
-|                     | * artifact.package-type
+Results expected from previous steps that this step requires.
+
+| Step Name           | Result Key          | Description
+|---------------------|---------------------|-------------------------------------------
+| package             | `package-artifact`  | Artifacts is dictionary
+|                     |                     | Each element of an `artifact` will be used
+|                     |                     | as a parameter to deploy to repository:
+|                     |                     |  * artifact.group-id
+|                     |                     |  * artifact.artifact-id
+|                     |                     |  * artifact.path
+|                     |                     |  * artifact.package-type
+
 Results
 -------
 Results output by this step:
-| Key                | Description
-|--------------------|------------
-| `result`           | Dictionary of results
-| `report-artifacts` | An array of dictionaries describing the push results
-Elements in the `result` dictionary:
-| `success`          | True or False
-| `message`          | Overall status
-Elements in the `report-artifacts` dictionary:
-| Elements           | Description
+
+| Result Key          | Description
+|---------------------|------------
+| `push-artifacts`    | An array of dictionaries with information on the built artifacts.
+
+| Results Key        | Description
 |--------------------|------------
 | `path`             | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`      | Maven artifact ID pushed to the artifact repository
 | `group-id`         | Maven group ID pushed to the artifact repository
-| `package-type`     | Package type of the artifact
 | `version`          | Version pushed to the artifact repository
+| `packaging`        | Type of package (eg: jar, war)
+
 Examples
 --------
-Example: Step Configuration (minimal)
+
+**Example: Step Configuration (minimal)**
+
     push-artifacts:
     - implementer: Maven
       config:
         maven-push-artifact-repo-id: internal-id-name
         maven-push-artifact-repo-url: url-to server
-Example: Generated Maven Deploy (uses both step configuration and previous results)
+
+**Example: Generated Maven Deploy (uses both step configuration and previous results)**
+
     mvn
       deploy:deploy-file'
       -Durl=maven-push-artifact-repo-url
@@ -86,13 +95,15 @@ class Maven(StepImplementer):
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.
-        Notes
-        -----
-        These are the lowest precedence configuration values.
+
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         """
         return DEFAULT_CONFIG
 
@@ -100,13 +111,15 @@ class Maven(StepImplementer):
     def required_runtime_step_config_keys():
         """
         Getter for step configuration keys that are required before running the step.
-        See Also
-        --------
-        _validate_runtime_step_config
+
         Returns
         -------
         array_list
             Array of configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
         """
         return REQUIRED_CONFIG_KEYS
 
@@ -190,6 +203,7 @@ class Maven(StepImplementer):
                 'group-id': group_id,
                 'version': version,
                 'path': artifact_path,
+                'packaging': package_type,
             })
 
         step_result.add_artifact(name='push-artifacts', value=push_artifacts)

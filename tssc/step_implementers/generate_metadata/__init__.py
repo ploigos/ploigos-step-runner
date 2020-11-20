@@ -23,12 +23,10 @@ minimally produce the following step results.
 
 from .maven import Maven
 from .git import Git
-from .npm import Npm
 from .semantic_version import SemanticVersion
 
 __all__ = [
     'maven',
     'git',
-    'npm',
     'semantic_version'
 ]

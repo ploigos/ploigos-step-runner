@@ -127,7 +127,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 sub_step_name='SonarQube',
                 sub_step_implementer_name='SonarQube'
             )
-            expected_step_result.add_artifact(name='sonarqube_result_set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
+            expected_step_result.add_artifact(name='sonarqube-result-set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
@@ -182,7 +182,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 sub_step_name='SonarQube',
                 sub_step_implementer_name='SonarQube'
             )
-            expected_step_result.add_artifact(name='sonarqube_result_set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
+            expected_step_result.add_artifact(name='sonarqube-result-set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,

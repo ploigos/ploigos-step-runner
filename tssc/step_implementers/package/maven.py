@@ -24,11 +24,11 @@ from runtime configuration.
 |-----------------------|-----------|-------------------------|-----------
 | `pom-file`            | True      | `'pom.xml'`             | Maven pom file to build
 | `artifact-extensions` | True      | `["jar", "war", "ear"]` | Extensions to look for in the
-                                                                `artifact-parent-dir` for built
-                                                                artifacts.
+|                       |           |                         | `artifact-parent-dir` for built
+|                       |           |                         | artifacts.
 | `artifact-parent-dir` | True      | `'target'`              | Parent directory to look for built
-                                                                artifacts in ending in
-                                                                `artifact-extensions`.
+|                       |           |                         | artifacts in ending in
+|                       |           |                         | `artifact-extensions`.
 
 Expected Previous Step Results
 ------------------------------
@@ -42,12 +42,12 @@ Results
 
 Results output by this step.
 
-| Result Key  | Description
-|-------------|------------
-| `artifacts` | An array of dictionaries with information on the built artifacts.
+| Result Key          | Description
+|---------------------|------------
+| `package-artifacts` | An array of dictionaries with information on the built artifacts.
 
 
-**artifacts**
+**package-artifacts**
 Keys in the dictionary elements in the `artifacts` array in the step results.
 
 | `artifacts` Key | Description
@@ -75,20 +75,6 @@ Examples
             <maven.compiler.target>1.8</maven.compiler.target>
         </properties>
     </project>
-
-*Step Results after this Step Implementer*
-
-    {'tssc-results': {
-        'package': [
-            {
-                'path': '{FULL_PATH_TO_GENERATED_ARTIFACT}',
-                'artifact-id': 'my-app',
-                'group-id': 'com.mycompany.app'
-                'package-type': 'jar',
-                'pom-path': '{FULL_PATH_TO_POM}'
-            }
-        ]
-    }}
 
 **Example 2**
 
@@ -141,14 +127,15 @@ class Maven(StepImplementer):
         """
         Getter for the StepImplementer's configuration defaults.
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
         """
         return DEFAULT_CONFIG
 
@@ -157,14 +144,15 @@ class Maven(StepImplementer):
         """
         Getter for step configuration keys that are required before running the step.
 
-        See Also
-        --------
-        _validate_runtime_step_config
-
         Returns
         -------
         array_list
             Array of configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
         """
         return REQUIRED_CONFIG_KEYS
 

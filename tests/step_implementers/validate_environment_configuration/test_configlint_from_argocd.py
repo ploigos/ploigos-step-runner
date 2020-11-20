@@ -53,7 +53,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
             step_config = {}
             artifact_config = {
-                'path': {
+                'argocd-result-set': {
                     'value': f'file://{test_file_path}'
                 }
             }
@@ -76,8 +76,10 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                 sub_step_implementer_name='ConfiglintArgocd'
             )
 
-            # expected_step_result.add_artifact(name='yml-path', value=f'file://{test_file_path}')
-            expected_step_result.add_artifact(name='yml-path', value=f'{test_file_path}')
+            expected_step_result.add_artifact(
+                name='configlint-yml-path',
+                value=f'file://{test_file_path}',
+                value_type='file')
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     def test_run_step_fail_missing_path_from_deploy(self):
@@ -108,7 +110,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                 sub_step_implementer_name='ConfiglintArgocd'
             )
             expected_step_result.success = False
-            expected_step_result.message = 'Step results missing path from deploy step'
+            expected_step_result.message = 'Missing argocd-result-set from previous step results'
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     def test_run_step_fail_missing_path_file_from_deploy(self):
@@ -122,7 +124,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
             step_config = {}
             artifact_config = {
-                'path': {
+                'argocd-result-set': {
                     'value': f'file://{test_file_path}.bad'
                 }
             }
@@ -145,6 +147,6 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                 sub_step_implementer_name='ConfiglintArgocd'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'File not found {test_file_path}.bad'
+            expected_step_result.message = f'File specified in argocd-result-set {test_file_path}.bad not found'
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 

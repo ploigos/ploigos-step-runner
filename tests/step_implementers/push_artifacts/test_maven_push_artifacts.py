@@ -86,7 +86,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'group-id': 'test-group-id',
                 'version': 'test-version',
                 'path': 'test-path',
-
+                'packaging': 'test-package-type',
             }]
             expected_step_result = StepResult(step_name='push-artifacts', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)

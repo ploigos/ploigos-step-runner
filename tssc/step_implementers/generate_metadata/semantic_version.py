@@ -86,14 +86,15 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         """
         Getter for the StepImplementer's configuration defaults.
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
         """
         return DEFAULT_CONFIG
 
@@ -102,14 +103,15 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         """
         Getter for step configuration keys that are required before running the step.
 
-        See Also
-        --------
-        _validate_runtime_step_config
-
         Returns
         -------
         array_list
             Array of configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
+
         """
         return []
 
