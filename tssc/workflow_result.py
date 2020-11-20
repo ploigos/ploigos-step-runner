@@ -17,7 +17,6 @@ class WorkflowResult:
     """
 
     def __init__(self):
-        # todo: make this a dictionary, not a list
         self.__workflow_list = []
 
     @property
@@ -355,7 +354,6 @@ class WorkflowResult:
         dict
           returns merged dictionary
         """
-        # todo:  dict.py/deep_merge() fails with the above example
         output = {}
         intersection = {**dict2, **dict1}
 

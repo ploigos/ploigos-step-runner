@@ -1,40 +1,48 @@
 """StepImplementer for the sign-container-image step using Podman to push an image signature using
+
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
+
 | Configuration Key                           | Required? | Default  | Description
 |---------------------------------------------|-----------|----------|-------------
-| `container-image-signature-server-url`      | True      |          |
+| `container-image-signature-server-url`      | True      |          | \
     Url of the signature server
-| `container-image-signature-server-username` | True      |          |
+| `container-image-signature-server-username` | True      |          | \
     Username to log onto the signature server
-| `container-image-signature-server-password` | True      |          |
+| `container-image-signature-server-password` | True      |          | \
     Password to log onto the signature server
+
 Expected Previous Step Results
 ------------------------------
 Results expected from previous steps that this step requires.
+
 | Step Name             | Result Key                           | Description
 |-----------------------|--------------------------------------|-------------------------------
 | `sign-container-image`| `container-image-signature-file-path`| File path where signature /
-                                                                 is located /
-                                                                 eg) /tmp/jkeam/hello-node@/
-                                                                     sha256=2cbdb73c9177e63/
-                                                                     e85d267f738e99e368db3f/
-                                                                     806eab4c541f5c6b719e69/
-                                                                     f1a2b/signature-1
-| `sign-container-image`| `container-image-signature-name`     | Fully qualified name of the /
-                                                                 name of the image signature, /
-                                                                 including: /
-                                                                 organization, repo, and hash /
-                                                                 eg) jkeam/hello-node@sha256=/
-                                                                 2cbdb73c9177e63e85d267f738e9/
-                                                                 9e368db3f806eab4c541f5c6b719/
-                                                                 e69f1a2b/signature-1
+|                       |                                      | is located
+|                       |                                      | eg)
+|                       |                                      | /tmp/user/hello-node@
+|                       |                                      | sha256=2cbdb73c9177e63
+|                       |                                      | e85d267f738e99e368db3f
+|                       |                                      | 806eab4c541f5c6b719e69
+|                       |                                      | f1a2b/signature-1
+| `sign-container-image`| `container-image-signature-name`     | Fully qualified name of the
+|                       |                                      | name of the image signature,
+|                       |                                      | including:
+|                       |                                      | organization, repo, and hash
+|                       |                                      | eg)
+|                       |                                      | user/hello-node@sha256=
+|                       |                                      | 2cbdb73c9177e63e85d267f738e9
+|                       |                                      | 9e368db3f806eab4c541f5c6b719
+|                       |                                      | e69f1a2b/signature-1
+
 Results
 -------
 Results output by this step.
+
 | Result Key                            | Description
 |---------------------------------------|------------
 | `container-image-signature-url`       | URL signature was uploaded to
@@ -68,13 +76,15 @@ class CurlPush(StepImplementer):
     def step_implementer_config_defaults():
         """
         Getter for the StepImplementer's configuration defaults.
-        Notes
-        -----
-        These are the lowest precedence configuration values.
+
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         """
         return DEFAULT_CONFIG
 
@@ -82,13 +92,15 @@ class CurlPush(StepImplementer):
     def required_runtime_step_config_keys():
         """
         Getter for step configuration keys that are required before running the step.
-        See Also
-        --------
-        _validate_runtime_step_config
+
         Returns
         -------
         array_list
             Array of configuration keys that are required before running the step.
+
+        See Also
+        --------
+        _validate_runtime_step_config
         """
         return REQUIRED_CONFIG_KEYS
 
@@ -181,7 +193,7 @@ class CurlPush(StepImplementer):
                 '--header', f'X-Checksum-Sha1:{signature_file_sha1}',
                 '--header', f'X-Checksum-MD5:{signature_file_md5}',
                 '--user', f"{signature_server_username}:{signature_server_password}",
-                '--data-binary', f"@{container_image_signature_file_path}",
+                '--upload-file', container_image_signature_file_path,
                 container_image_signature_url,
                 _out=stdout_callback,
                 _err_to_out=True,

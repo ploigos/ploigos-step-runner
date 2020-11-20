@@ -1,4 +1,4 @@
-"""tssc.StepImplementers for the 'uat' TSSC step.
+"""tssc.StepImplementers for the 'canary-test' TSSC step.
 
 Step Configuration
 ------------------
@@ -19,8 +19,8 @@ minimally produce the following step results.
 | `TODO`           | TODO
 """
 
-from .maven import Maven
+from .selenium import Selenium
 
 __all__ = [
-    'maven'
+    'selenium'
 ]

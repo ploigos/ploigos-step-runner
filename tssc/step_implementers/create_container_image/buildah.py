@@ -36,17 +36,6 @@ Results output by this step.
 | `container-image-version` | Container version to tag built image with
 | `image-tar-file`          | Path to the built container image as a tar file
 
-** Example **
-
-`image_tar_file` step configuration specified.
-
-    'tssc-results': {
-        'create-container-image': {
-            'image_tag': '',
-            'image_tar_file' : ''
-        }
-    }
-
 """
 import os
 from pathlib import Path
@@ -82,6 +71,7 @@ REQUIRED_CONFIG_KEYS = [
     'service-name',
     'application-name'
 ]
+
 
 class Buildah(StepImplementer):
     """
@@ -210,7 +200,7 @@ class Buildah(StepImplementer):
             #       but such is the price we pay for security.
             if os.path.exists(image_tar_path):
                 os.remove(image_tar_path)
-            sh.buildah.push( #pylint: disable=no-member
+            sh.buildah.push(  # pylint: disable=no-member
                 '--storage-driver=vfs',
                 tag,
                 "docker-archive:" + image_tar_path,
@@ -223,14 +213,14 @@ class Buildah(StepImplementer):
                 'Issue invoking buildah push to tar file ' + image_tar_path) from error
 
         step_result.add_artifact(
-            name = 'container-image-version',
-            value = tag
+            name='container-image-version',
+            value=tag
         )
 
         step_result.add_artifact(
-            name = 'image-tar-file',
-            value = image_tar_path,
-            value_type= 'file'
+            name='image-tar-file',
+            value=image_tar_path,
+            value_type='file'
         )
 
         return step_result
