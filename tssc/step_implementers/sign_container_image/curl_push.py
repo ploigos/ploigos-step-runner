@@ -195,7 +195,7 @@ class CurlPush(StepImplementer):
                 '--header', f'X-Checksum-Sha1:{signature_file_sha1}',
                 '--header', f'X-Checksum-MD5:{signature_file_md5}',
                 '--user', f"{signature_server_username}:{signature_server_password}",
-                '--data-binary', f"@{container_image_signature_file_path}",
+                '--upload-file', container_image_signature_file_path,
                 container_image_signature_url,
                 _out=stdout_callback,
                 _err_to_out=True,
