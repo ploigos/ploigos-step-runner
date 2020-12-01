@@ -145,7 +145,7 @@ class TestStepImplementerSignContainerImageCurlPush(BaseStepImplementerTestCase)
                 '--header', StringRegexParam(r'X-Checksum-Sha1:.+'),
                 '--header', StringRegexParam(r'X-Checksum-MD5:.+'),
                 '--user', "admin:adminPassword",
-                '--data-binary', f"@{container_image_signature_file_path}",
+                '--upload-file', container_image_signature_file_path,
                 f"https://sigserver/signatures/{container_image_signature_name}",
                 _out=Any(IOBase),
                 _err_to_out=True,
