@@ -150,7 +150,7 @@ class TestInit(BaseTSSCTestCase):
                 '--step', 'required-runtime-step-config-test',
                 '--step-config', 'wrong-config="hello world"'
             ],
-            300,
+            200,
             [
                 {
                     'name': 'tssc-config.yaml',
@@ -247,13 +247,13 @@ class TestInit(BaseTSSCTestCase):
                         'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                             'artifacts': {
                                 'key1':
-                                    {'description': '', 'type': 'str', 'value': 'value1'},
+                                    {'description': '', 'value': 'value1'},
                                 'key2':
-                                    {'description': '', 'type': 'str', 'value': 'value1'},
+                                    {'description': '', 'value': 'value1'},
                                 'key3':
-                                    {'description': '', 'type': 'str', 'value': 'value2'},
+                                    {'description': '', 'value': 'value2'},
                                 'required-config-key':
-                                    {'description': '', 'type': 'str', 'value': 'value'}
+                                    {'description': '', 'value': 'value'}
                             },
                             'message': '',
                             'sub-step-implementer-name':
@@ -380,17 +380,17 @@ class TestInit(BaseTSSCTestCase):
                             'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                                 'artifacts': {
                                     'keya':
-                                        {'description': '', 'type': 'str', 'value': 'a'},
+                                        {'description': '', 'value': 'a'},
                                     'keyb':
-                                        {'description': '', 'type': 'str', 'value': 'b'},
+                                        {'description': '', 'value': 'b'},
                                     'keyc':
-                                        {'description': '', 'type': 'str', 'value': 'c'},
+                                        {'description': '', 'value': 'c'},
                                     'keyc2':
-                                        {'description': '', 'type': 'str', 'value': 'c2'},
+                                        {'description': '', 'value': 'c2'},
                                     'keyd':
-                                        {'description': '', 'type': 'str', 'value': 'd'},
+                                        {'description': '', 'value': 'd'},
                                     'required-config-key':
-                                        {'description': '', 'type': 'str', 'value': 'value'}
+                                        {'description': '', 'value': 'value'}
                                 },
                                 'message': '',
                                 'sub-step-implementer-name':
@@ -426,11 +426,13 @@ class TestInit(BaseTSSCTestCase):
                     'required-step-config-test': {
                         'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
                             'artifacts': {
-                                'environment-name': {'description': '', 'type': 'str', 'value': 'DEV'},
-                                'kube-api-token': {'description': '', 'type': 'str',
-                                                   'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
-                                'required-config-key': {'description': '', 'type': 'str',
-                                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
+                                'environment-name': {'description': '', 'value': 'DEV'},
+                                'kube-api-token': {
+                                    'description': '',
+                                    'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
+                                'required-config-key': {
+                                    'description': '',
+                                    'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
                             },
                             'message': '',
                             'sub-step-implementer-name':
@@ -476,12 +478,12 @@ class TestInit(BaseTSSCTestCase):
                         'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
                             'artifacts': {
                                 'environment-name':
-                                    {'description': '', 'type': 'str', 'value': 'DEV'},
+                                    {'description': '', 'value': 'DEV'},
                                 'kube-api-token':
-                                    {'description': '', 'type': 'str', 'value': 'mock decrypted value'},
-                                'required-config-key':
-                                    {'description': '', 'type': 'str',
-                                                        'value': 'mock decrypted value'}
+                                    {'description': '', 'value': 'mock decrypted value'},
+                                'required-config-key': {
+                                    'description': '',
+                                    'value': 'mock decrypted value'}
                             },
                             'message': '',
                             'sub-step-implementer-name':

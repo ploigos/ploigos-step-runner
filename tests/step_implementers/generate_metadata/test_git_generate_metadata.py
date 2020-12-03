@@ -5,10 +5,10 @@ import os
 
 from git import Repo
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 from tests.helpers.test_utils import create_git_commit_with_sample_file
-
-from tssc.step_result import StepResult
+from tssc import StepResult
 from tssc.step_implementers.generate_metadata import Git
 
 
@@ -40,8 +40,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Git.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = Git._required_config_or_result_keys()
         expected_required_keys = ['repo-root', 'build-string-length']
         self.assertEqual(required_keys, expected_required_keys)
 
@@ -107,7 +107,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            repo = Repo.init(str(temp_dir.path), bare=True)
+            Repo.init(str(temp_dir.path), bare=True)
 
             step_config = {
                 'repo-root': str(temp_dir.path)
@@ -139,7 +139,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-            repo = Repo.init(str(temp_dir.path))
+            Repo.init(str(temp_dir.path))
 
             step_config = {
                 'repo-root': str(temp_dir.path)
@@ -160,6 +160,10 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_name='generate-metadata',
                 sub_step_name='Git',
                 sub_step_implementer_name='Git'
+            )
+            expected_step_result.add_artifact(
+                name='pre-release',
+                value='master'
             )
             expected_step_result.success = False
             expected_step_result.message = 'Given directory (repo_root) is a ' \

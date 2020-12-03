@@ -1,8 +1,6 @@
-"""
-Custom TSSC Exceptions.
+"""Custom Step Runner Exceptions.
 """
 
-class TSSCException(Exception):
-    """
-    Generic TSSCException
+class StepRunnerException(Exception):
+    """Generic StepRunnerException
     """

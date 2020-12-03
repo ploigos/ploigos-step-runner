@@ -1,57 +1,50 @@
-"""Step Implementer for the generate-metadata step for npm.
+"""`StepImplementer` for the `generate-metadata` step using NPM.
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key | Required? | Default          | Description
-|-------------------|-----------|------------------|-----------
-| `package-file     | True      | `'package.json'` | node.js package file to
-|                   |            |                 | ead the app version out of
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
+Configuration Key | Required? | Default          | Description
+------------------|-----------|------------------|-----------
+`package-file`    | True      | `'package.json'` | node.js package file to read \
+                                                   the app version out of
 
-Results expected from previous steps that this step requires.
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-.. Note:: This step implementer does not expect results from any previous steps.
-
-Results
--------
-
-Results output by this step.
-
-| Result Key    | Description
-|---------------|------------
-| `app-version` | Value to use for `version` portion of semantic version (https://semver.org/). \
-                    Uses the version read out of the given pom file.
+Result Artifact Key | Description
+--------------------|------------
+`app-version`       | Value to use for `version` portion of semantic version \
+                      (https://semver.org/). Uses the version read out of the given pom file.
 """
 
-import os.path
 import json
+import os.path
 
 from tssc import StepImplementer
+from tssc.step_result import StepResult
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'package-file'
 ]
 
 class Npm(StepImplementer): # pylint: disable=too-few-public-methods
-    """
-    StepImplementer for the generate-metadata step for npm.
+    """`StepImplementer` for the `generate-metadata` step using NPM.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Notes
         -----
@@ -65,44 +58,65 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given 'package-file' exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        """
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        package_file = self.get_value('package-file')
+        assert os.path.exists(package_file), \
+            f'Given npm package file (package-file) does not exist: {package_file}'
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
-        package_file = self.get_config_value('package-file')
+        step_result = StepResult.from_step_implementer(self)
 
-        # verify runtime config
-        if not os.path.exists(package_file):
-            raise ValueError('Given npm package file does not exist: ' + package_file)
+        package_file = self.get_value('package-file')
 
         with open(package_file) as package_file_object:
             package_file_data = json.load(package_file_object)
 
         if not "version" in package_file_data:
-            raise ValueError('Given npm package file: ' + package_file + \
-              ' does not contain a \"version\" key')
+            step_result.success = False
+            step_result.message = f'Given npm package file ({package_file})' + \
+              ' does not contain a \"version\" key.'
+            return step_result
 
-        results = {
-            'app-version': package_file_data["version"]
-        }
+        step_result.add_artifact(
+            name='app-version',
+            value=package_file_data["version"]
+        )
 
-        return results
+        return step_result

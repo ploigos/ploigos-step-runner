@@ -8,19 +8,18 @@ from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tests.helpers.test_utils import Any
+from tssc.exceptions import StepRunnerException
 from tssc.step_implementers.tag_source import Git
 from tssc.step_result import StepResult
-
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
 
 
 class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            step_name='',
-            implementer='',
             results_dir_path='',
             results_file_name='',
             work_dir_path=''
@@ -28,8 +27,8 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
         return self.create_given_step_implementer(
             step_implementer=Git,
             step_config=step_config,
-            step_name=step_name,
-            implementer=implementer,
+            step_name='tag-source',
+            implementer='Git',
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
@@ -41,40 +40,74 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
         expected_defaults = {}
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Git.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = Git._required_config_or_result_keys()
         expected_required_keys = []
         self.assertEqual(required_keys, expected_required_keys)
 
-    def test__validate_runtime_step_config_valid(self):
-        step_config = {
-            'username': 'username',
-            'password': 'password'
-        }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='tag-source',
-            implementer='Git'
-        )
+    def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
+         with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(test_dir.path, 'working')
 
-        step_implementer._validate_runtime_step_config(step_config)
+            step_config = {
+                'git-username': 'git-username',
+                'git-password': 'git-password'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
 
-    def test__validate_runtime_step_config_invalid(self):
-        step_config = {
-            'username': 'username'
-        }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='tag-source',
-            implementer='Git'
-        )
-        with self.assertRaisesRegex(
-                AssertionError,
-                re.compile(
-                    'Either username or password is not set. Neither or both must be set.'
-                )
-        ):
-            step_implementer._validate_runtime_step_config(step_config)
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_username(self):
+         with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(test_dir.path, 'working')
+
+            step_config = {
+                'git-password': 'git-password'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_password(self):
+         with TempDirectory() as test_dir:
+            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(test_dir.path, 'working')
+
+            step_config = {
+                'git-username': 'git-username'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
 
 # TESTS FOR _run_step
 
@@ -92,21 +125,19 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'url': url,
-                'username': 'username',
-                'password': 'password'
+                'git-username': 'git-username',
+                'git-password': 'git-password'
             }
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -148,20 +179,18 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'url': url,
-                'username': 'username',
-                'password': 'password'
+                'git-username': 'git-username',
+                'git-password': 'git-password'
             }
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -185,7 +214,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             get_tag_mock.assert_called_once_with()
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
-            git_push_mock.assert_called_once_with('http://username:password@' + url[7:])
+            git_push_mock.assert_called_once_with('http://git-username:git-password@' + url[7:])
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -203,21 +232,19 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'url': url,
-                'username': 'username',
-                'password': 'password'
+                'git-username': 'git-username',
+                'git-password': 'git-password'
             }
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -241,7 +268,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             get_tag_mock.assert_called_once_with()
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
-            git_push_mock.assert_called_once_with('https://username:password@' + url[8:])
+            git_push_mock.assert_called_once_with('https://git-username:git-password@' + url[8:])
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -262,16 +289,14 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             }
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -299,44 +324,6 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
-    def test_run_step_fail_empty_username_password(self):
-        with TempDirectory() as temp_dir:
-            tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_config = {
-                'url': url,
-                'username': '',
-                'password': ''
-            }
-
-            artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(step_name='tag-source', sub_step_name='Git', sub_step_implementer_name='Git')
-            expected_step_result.success = False
-            expected_step_result.message = 'Both username and password must have non-empty value in the runtime step configuration'
-
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
     @patch.object(Git, '_Git__git_tag')
@@ -354,16 +341,14 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             }
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -408,16 +393,14 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             }
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': tag},
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -463,15 +446,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             }
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': tag}
+                'container-image-version': {'description': '', 'value': tag}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -515,15 +496,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -546,15 +525,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -582,15 +559,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             }
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -616,15 +591,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -652,15 +625,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -688,15 +659,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -723,15 +692,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -758,15 +725,13 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             step_config = {}
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-69442c8'}
+                'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='tag-source',
-                implementer='Git',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,

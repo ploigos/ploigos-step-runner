@@ -2,15 +2,16 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
-from unittest.mock import patch
 import re
 import sys
+from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tssc import StepResult, StepRunnerException
 from tssc.step_implementers.static_code_analysis import SonarQube
-from tssc.step_result import StepResult
 
 
 class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
@@ -41,50 +42,95 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = SonarQube.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = SonarQube._required_config_or_result_keys()
         expected_required_keys = [
             'url',
             'application-name',
-            'service-name'
+            'service-name',
+            'version'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-    def test__validate_runtime_step_config_valid(self):
+    def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         step_config = {
             'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'username': 'username',
-            'password': 'password'
+            'password': 'password',
+            'version': 'notused'
         }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='static-code-analysis',
-            implementer='SonarQube'
-        )
 
-        step_implementer._validate_runtime_step_config(step_config)
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-    def test__validate_runtime_step_config_invalid(self):
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_password(self):
         step_config = {
             'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
-            'username': 'username'
+            'username': 'username',
+            'version': 'notused'
         }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='static-code-analysis',
-            implementer='SonarQube'
-        )
-        with self.assertRaisesRegex(
-                AssertionError,
-                re.compile(
-                    'Either username or password is not set. Neither or both must be set.'
-                )
-        ):
-            step_implementer._validate_runtime_step_config(step_config)
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Either 'username' or 'password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_username(self):
+        step_config = {
+            'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+            'application-name': 'app-name',
+            'service-name': 'service-name',
+            'password': 'password',
+            'version': 'notused'
+        }
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Either 'username' or 'password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass(self, sonar_mock):
@@ -115,7 +161,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -127,7 +173,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 sub_step_name='SonarQube',
                 sub_step_implementer_name='SonarQube'
             )
-            expected_step_result.add_artifact(name='sonarqube-result-set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/report-task.txt'
+            )
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
@@ -170,7 +219,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -182,7 +231,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 sub_step_name='SonarQube',
                 sub_step_implementer_name='SonarQube'
             )
-            expected_step_result.add_artifact(name='sonarqube-result-set', value=f'file://{temp_dir.path}/working/report-task.txt', value_type='file')
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/report-task.txt'
+            )
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
@@ -193,44 +245,6 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     _out=sys.stdout,
                     _err=sys.stderr
             )
-
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_no_version(self, sonar_mock):
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('sonar-project.properties',b'''testing''')
-            properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
-
-            step_config = {
-                'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
-                'application-name': 'app-name',
-                'service-name': 'service-name'
-
-            }
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='static-code-analysis',
-                implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='static-code-analysis',
-                sub_step_name='SonarQube',
-                sub_step_implementer_name='SonarQube'
-            )
-            expected_step_result.success = False
-            expected_step_result.message = 'Severe error: Generate-metadata results is missing a version tag'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -258,7 +272,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -271,7 +285,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 sub_step_implementer_name='SonarQube'
             )
             expected_step_result.success = False
-            expected_step_result.message = 'Properties file in tssc config not found: ./sonar-project.properties'
+            expected_step_result.message = 'Properties file not found: ./sonar-project.properties'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -304,7 +318,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)

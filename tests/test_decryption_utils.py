@@ -3,7 +3,7 @@
 from tssc.config.config_value import ConfigValue
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
 from tssc.decryption_utils import DecryptionUtils
-from tssc.exceptions import TSSCException
+from tssc.exceptions import StepRunnerException
 from tssc.utils.io import TextIOSelectiveObfuscator
 from tssc.config.decryptors.sops import SOPS
 
@@ -140,7 +140,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test__get_decryption_class_does_not_exist_short_name(self):
         with self.assertRaisesRegex(
-            TSSCException,
+            StepRunnerException,
             r"Could not dynamically load decryptor implementer \(DoesNotExist\) " \
             r"from module \(tssc.config.decryptors\) with class name \(DoesNotExist\)"
         ):
@@ -148,7 +148,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test__get_decryption_class_does_not_exist_with_module_name(self):
         with self.assertRaisesRegex(
-            TSSCException,
+            StepRunnerException,
             r"Could not dynamically load decryptor implementer \(foo.bar.hello.DoesNotExist\) " \
             r"from module \(foo.bar.hello\) with class name \(DoesNotExist\)"
         ):
@@ -156,7 +156,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test__get_decryption_class_not_correct_type(self):
         with self.assertRaisesRegex(
-            TSSCException,
+            StepRunnerException,
             r"For decryptor implementer \(tests.test_decryption_utils.BadConfigValueDecryptor\) " \
             r"dynamically loaded class \(<class 'tests.test_decryption_utils." \
             r"BadConfigValueDecryptor'>\) which is not sub class of " \

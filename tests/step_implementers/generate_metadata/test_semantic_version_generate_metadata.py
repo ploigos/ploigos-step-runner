@@ -38,9 +38,14 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = SemanticVersion.required_runtime_step_config_keys()
-        expected_required_keys = []
+    def test__required_config_or_result_keys(self):
+        required_keys = SemanticVersion._required_config_or_result_keys()
+        expected_required_keys = [
+            'app-version',
+            'pre-release',
+            'release-branch',
+            'build'
+        ]
         self.assertEqual(required_keys, expected_required_keys)
 
     def test_run_step_pass(self):
@@ -52,9 +57,9 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             step_config = {}
 
             artifact_config = {
-                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
-                'pre-release': {'description': '', 'type': '', 'value': 'master'},
-                'build': {'description': '', 'type': '', 'value': 'abc123'}
+                'app-version': {'description': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'value': 'master'},
+                'build': {'description': '', 'value': 'abc123'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -80,120 +85,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
-    def test_run_step_no_app_version(self):
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_config = {}
-
-            artifact_config = {
-                'pre-release': {'description': '', 'type': '', 'value': 'master'},
-                'build': {'description': '', 'type': '', 'value': 'abc123'}
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='generate-metadata',
-                implementer='SemanticVersion',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='generate-metadata',
-                sub_step_name='SemanticVersion',
-                sub_step_implementer_name='SemanticVersion'
-            )
-            expected_step_result.success = False
-            expected_step_result.message = 'No value for (app-version) provided via runtime flag ' \
-                                           '(app-version) or from prior step implementer ' \
-                                           '(generate-metadata).'
-
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-
-    def test_run_step_no_pre_release(self):
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_config = {}
-
-            artifact_config = {
-                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
-                'build': {'description': '', 'type': '', 'value': 'abc123'}
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='generate-metadata',
-                implementer='SemanticVersion',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='generate-metadata',
-                sub_step_name='SemanticVersion',
-                sub_step_implementer_name='SemanticVersion'
-            )
-            expected_step_result.success = False
-            expected_step_result.message = 'No value for (pre-release) provided via runtime flag ' \
-                                           '(pre-release) or from prior step implementer ' \
-                                           '(generate-metadata).'
-
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-
-    def test_run_step_no_build(self):
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_config = {}
-
-            artifact_config = {
-                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
-                'pre-release': {'description': '', 'type': '', 'value': 'master'},
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='generate-metadata',
-                implementer='SemanticVersion',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='generate-metadata',
-                sub_step_name='SemanticVersion',
-                sub_step_implementer_name='SemanticVersion'
-            )
-            expected_step_result.success = False
-            expected_step_result.message = 'No value for (build) provided via runtime flag ' \
-                                           '(build) or from prior step implementer ' \
-                                           '(generate-metadata).'
-
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-
     def test_run_step_pass_different_pre_release(self):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
@@ -203,9 +94,9 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             step_config = {}
 
             artifact_config = {
-                'app-version': {'description': '', 'type': '', 'value': '42.1.0'},
-                'pre-release': {'description': '', 'type': '', 'value': 'feature123'},
-                'build': {'description': '', 'type': '', 'value': 'abc123'}
+                'app-version': {'description': '', 'value': '42.1.0'},
+                'pre-release': {'description': '', 'value': 'feature123'},
+                'build': {'description': '', 'value': 'abc123'}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)

@@ -119,7 +119,7 @@ def download_and_decompress_source_to_destination(
         except urllib.error.HTTPError as error:
             raise RuntimeError(f"Error downloading file ({source_url}): {error}") from error
     else:
-        # NOTE: this should NEVER happen because of the logic in _validate_runtime_step_config
+        # NOTE: this should NEVER happen because of the logic in _validate_required_config_or_previous_step_result_artifact_keys
         #       but rather then failing silently need to do something.
         raise AssertionError(
             "Unexpected error, should have been caught by step validation."
@@ -141,3 +141,15 @@ def download_and_decompress_source_to_destination(
             destination_path = file_path
 
     return destination_path
+
+def create_parent_dir(file_path):
+    """Helper method to create parent folder of given file if it does not exist.
+
+    Parameters
+    ----------
+    file_path: str
+        Absolute name of a file to create the parent folders for
+    """
+    parent_dir_path = os.path.dirname(file_path)
+    if parent_dir_path:
+        os.makedirs(parent_dir_path, exist_ok=True)

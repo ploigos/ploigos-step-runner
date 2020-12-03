@@ -1,13 +1,17 @@
 """
 Abstract class and helper constants for WorkflowResult
 """
-import pickle
-import os
+import copy
 import json
+import os
+import pickle
+
 import yaml
 
+from tssc.exceptions import StepRunnerException
 from tssc.step_result import StepResult
-from tssc.exceptions import TSSCException
+from tssc.utils.dict import deep_merge
+from tssc.utils.file import create_parent_dir
 
 
 class WorkflowResult:
@@ -94,12 +98,10 @@ class WorkflowResult:
                         'artifacts': {
                             'a': {
                                 'description': 'aA',
-                                'type': 'str',
                                 'value': 'A'
                             },
                             'b': {
                                 'description': 'bB',
-                                'type': 'file',
                                 'value': 'B'
                             }
                         }
@@ -133,7 +135,7 @@ class WorkflowResult:
 
         Raises
         ------
-        Raises a TSSCException if an instance other than
+        Raises a StepRunnerException if an instance other than
         StepResult is passed as a parameter
         """
 
@@ -142,18 +144,22 @@ class WorkflowResult:
             step_name = step_result.step_name
             sub_step_name = step_result.sub_step_name
 
-            step_old = self.get_step_result_by_step_name(
+            step_old = self.__get_step_result_by_step_name(
                 step_name=step_name,
                 sub_step_name=sub_step_name)
             if step_old:
-                merged = WorkflowResult.merge_results(step_result.artifacts, step_old.artifacts)
+                merged = deep_merge(
+                    dest=copy.deepcopy(step_old.artifacts),
+                    source=step_result.artifacts,
+                    overwrite_duplicate_keys=True
+                )
                 step_result.artifacts.update(merged)
-                self.delete_step_result_by_name(step_name=step_name)
+                self.__delete_step_result_by_name(step_name=step_name)
 
             self.workflow_list.append(step_result)
 
         else:
-            raise TSSCException('expect StepResult instance type')
+            raise StepRunnerException('expect StepResult instance type')
 
     # ARTIFACT helpers:
     def write_results_to_yml_file(self, yml_filename):
@@ -170,9 +176,9 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.folder_create(yml_filename)
+            create_parent_dir(yml_filename)
             with open(yml_filename, 'w') as file:
-                results = self.get_all_step_results()
+                results = self.__get_all_step_results()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
@@ -191,9 +197,9 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.folder_create(json_filename)
+            create_parent_dir(json_filename)
             with open(json_filename, 'w') as file:
-                results = self.get_all_step_results()
+                results = self.__get_all_step_results()
                 json.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
@@ -213,11 +219,11 @@ class WorkflowResult:
 
         Raises
         ------
-        Raises a TSSCException if the file cannot be loaded
-        Raises a TSSCException if the file contains non WorkflowResult instances
+        Raises a StepRunnerException if the file cannot be loaded
+        Raises a StepRunnerException if the file contains non WorkflowResult instances
         """
         try:
-            WorkflowResult.folder_create(filename=pickle_filename)
+            create_parent_dir(pickle_filename)
 
             # if the file does not exist return empty object
             if not os.path.isfile(pickle_filename):
@@ -231,11 +237,11 @@ class WorkflowResult:
             with open(pickle_filename, 'rb') as file:
                 workflow_result = pickle.load(file)
                 if not isinstance(workflow_result, WorkflowResult):
-                    raise TSSCException(f'error {pickle_filename} has invalid data')
+                    raise StepRunnerException(f'error {pickle_filename} has invalid data')
                 return workflow_result
 
         except Exception as error:
-            raise TSSCException(f'error loading {pickle_filename}: {error}') from error
+            raise StepRunnerException(f'error loading {pickle_filename}: {error}') from error
 
     def write_to_pickle_file(self, pickle_filename):
         """
@@ -251,15 +257,13 @@ class WorkflowResult:
         Raises a RuntimeError if the file cannot be dumped
         """
         try:
-            WorkflowResult.folder_create(pickle_filename)
+            create_parent_dir(pickle_filename)
             with open(pickle_filename, 'wb') as file:
                 pickle.dump(self, file)
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    # PRIVATE Helpers helpers
-
-    def get_all_step_results(self):
+    def __get_all_step_results(self):
         """
         Return a dictionary named tssc-results of all the step results in memory
         Specifically using 'tssc-results'.
@@ -271,13 +275,17 @@ class WorkflowResult:
         """
         all_results = {}
         for i in self.workflow_list:
-            all_results = WorkflowResult.merge_results(all_results, i.get_step_result())
+            all_results = deep_merge(
+                dest=all_results,
+                source=i.get_step_result(),
+                overwrite_duplicate_keys=True
+            )
         tssc_results = {
             'tssc-results': all_results
         }
         return tssc_results
 
-    def get_step_result_by_step_name(self, step_name, sub_step_name):
+    def __get_step_result_by_step_name(self, step_name, sub_step_name):
         """
         Helper method to return a step result by step_name and sub_step_name
 
@@ -298,7 +306,7 @@ class WorkflowResult:
                     return current
         return None
 
-    def delete_step_result_by_name(self, step_name):
+    def __delete_step_result_by_name(self, step_name):
         """
         Helper method to delete a step from the workflow list.
 
@@ -310,66 +318,3 @@ class WorkflowResult:
         for i, current in enumerate(self.workflow_list):
             if current.step_name == step_name:
                 del self.workflow_list[i]
-
-    @staticmethod
-    def folder_create(filename):
-        """
-        Helper method to create folder if it does not exist.
-
-        Parameters
-        ----------
-        filename: str
-            Absolute name of a file.ext
-        """
-        path = os.path.dirname(filename)
-        if path and not os.path.exists(path):
-            os.makedirs(os.path.dirname(filename))
-
-    @staticmethod
-    def merge_results(dict1, dict2):
-        """
-        Merge dictionary of dictionaries.
-        Example:
-            dict1 = {
-              'A': {'value': 'A'},
-              'C': {'value': 'overwriteme'}
-            }
-            dict2 = {
-              'B': {'value': 'B'},
-              'C': {'value': 'C'}
-            }
-            expected_answer = {
-              'A': {'value': 'A'},
-              'C': {'value': 'C'},
-              'B': {'value': 'B'}
-            }
-        Parameters
-        ----------
-        dict1: dict
-           original dictionary
-        dict2: dict
-           new dictionary to update and merge into original dictionary
-        Returns
-        -------
-        dict
-          returns merged dictionary
-        """
-        output = {}
-        intersection = {**dict2, **dict1}
-
-        for k_intersect, v_intersect in intersection.items():
-            if k_intersect not in dict1:
-                v_dict2 = dict2[k_intersect]
-                output[k_intersect] = v_dict2
-
-            elif k_intersect not in dict2:
-                output[k_intersect] = v_intersect
-
-            elif isinstance(v_intersect, dict):
-                v_dict2 = dict2[k_intersect]
-                output[k_intersect] = WorkflowResult.merge_results(v_intersect, v_dict2)
-
-            else:
-                output[k_intersect] = v_intersect
-
-        return output

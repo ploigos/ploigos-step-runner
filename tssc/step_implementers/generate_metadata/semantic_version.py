@@ -1,6 +1,4 @@
-"""
-Step Implementer for the generate-metadata step for generating a
-semantic version from other metadata.
+"""`StepImplementer` for the `generate-metadata` to generate a semantic version from given input.
 
 Supports the following semantic versions (https://semver.org/) :
 
@@ -32,40 +30,30 @@ Source for version sections:
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-.. Note::
-    This step implementer has not step configuration.
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
+Configuration Key | Required? | Default | Description
+------------------|-----------|---------|-----------
+`app-version`     | Yes       |         | Value to use for `version` portion of \
+                                          semantic version (https://semver.org/).
+`pre-release`     | No        |         | Value to use for `pre-release` portion \
+                                          of semantic version (https://semver.org/). \
+`build`           | Yes       |         | Value to use for `build` portion \
+                                          of semantic version (https://semver.org/).
 
-Results expected from previous steps that this step requires.
-
-| Result Key    | Description
-|---------------|------------
-| `app-version` | Value to use for `version` portion of semantic version \
-                  (https://semver.org/).
-| `pre-release` | Value to use for `pre-release` portion of semantic version \
-                  (https://semver.org/). \
-                  Uses the Git branch name.
-| `build`       | Value to use for `build` portion of semantic version \
-                  (https://semver.org/). \
-                  Uses a portion of the latest Git commit hash.
-
-Results
--------
-
+Result Artifacts
+----------------
 Results artifacts output by this step.
 
-| Result Key  | Description
-|-------------|------------
-| `version`   | Constructed semantic version (https://semver.org/).
-| `container-image-version` | Constructed semantic version (https://semver.org/) without build #
-
+Result Artifact Key       | Description
+--------------------------|------------
+`version`                 | Constructed semantic version (https://semver.org/).
+`container-image-version` | Constructed semantic version (https://semver.org/) without build number
 """
 
 from tssc import StepImplementer
@@ -75,16 +63,21 @@ DEFAULT_CONFIG = {
     'release-branch': 'master'
 }
 
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'app-version',
+    'pre-release',
+    'release-branch',
+    'build'
+]
 
 class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
-    """
-    StepImplementer for the generate-metadata step for SemanticVersion.
+    """`StepImplementer` for the `generate-metadata` to generate a
+    semantic version from given input.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -99,65 +92,39 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return []
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
         StepResult
-            Results of running this step.
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 
         app_version = None
         pre_release = None
         build = None
-        release_branch = self.get_config_value('release-branch')
-
-        app_version = self.get_config_value('app-version')
-        if app_version is None:
-            app_version = self.get_result_value(artifact_name='app-version')
-        if app_version is None:
-            step_result.success = False
-            step_result.message = 'No value for (app-version) provided via runtime flag ' \
-                                  '(app-version) or from prior step implementer ' \
-                                  f'({self.step_name}).'
-            return step_result
-
-        pre_release = self.get_config_value('pre-release')
-        if pre_release is None:
-            pre_release = self.get_result_value(artifact_name='pre-release')
-        if pre_release is None:
-            step_result.success = False
-            step_result.message = 'No value for (pre-release) provided via runtime flag ' \
-                                  '(pre-release) or from prior step implementer ' \
-                                  f'({self.step_name}).'
-            return step_result
-
-        build = self.get_config_value('build')
-        if build is None:
-            build = self.get_result_value(artifact_name='build')
-        if build is None:
-            step_result.success = False
-            step_result.message = 'No value for (build) provided via runtime flag ' \
-                                  f'(build) or from prior step implementer ({self.step_name}).'
-            return step_result
+        release_branch = self.get_value('release-branch')
+        app_version = self.get_value('app-version')
+        pre_release = self.get_value('pre-release')
+        build = self.get_value('build')
 
         if pre_release == release_branch:
             version = f'{app_version}+{build}'

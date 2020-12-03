@@ -6,10 +6,11 @@ from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tssc.step_implementers.validate_environment_configuration import Configlint
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tssc.step_implementers.validate_environment_configuration import \
+    Configlint
 from tssc.step_result import StepResult
-
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
 
 
 class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
@@ -59,44 +60,12 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
         }
         self.assertEqual(expected_defaults, defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Configlint.required_runtime_step_config_keys()
-        expected_required_keys = []
+    def test__required_config_or_result_keys(self):
+        required_keys = Configlint._required_config_or_result_keys()
+        expected_required_keys = [
+            'configlint-yml-path'
+        ]
         self.assertEqual(required_keys, expected_required_keys)
-
-    @patch('sh.config_lint', create=True)
-    def test_run_step_fail_missing_yml_path(self, config_lint_mock):
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-            test_file_name = 'rules'
-            test_file_path = os.path.join(temp_dir.path, test_file_name)
-            temp_dir.write(test_file_path, b'ignored')
-            step_config = {
-                'rules': test_file_path,
-            }
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='validate-environment-configuration',
-                implementer='Configlint',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='validate-environment-configuration',
-                sub_step_name='Configlint',
-                sub_step_implementer_name='Configlint'
-            )
-
-            expected_step_result.success = False
-            expected_step_result.message = 'configlint-yml-path not specified in runtime args or in previous results'
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_yml_path(self, config_lint_mock):
@@ -203,12 +172,14 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Configlint'
             )
 
-            expected_step_result.add_artifact(name='configlint-result-set',
-                                              value=f'file://{work_dir_path}/validate-environment-configuration/configlint_results_file.txt',
-                                              value_type='file')
-            expected_step_result.add_artifact(name='configlint-yml-path',
-                                              value=f'file://{test_file_path}',
-                                              value_type='file')
+            expected_step_result.add_artifact(
+                name='configlint-result-set',
+                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
+            )
+            expected_step_result.add_artifact(
+                name='configlint-yml-path',
+                value=test_file_path
+            )
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     @patch('sh.config_lint', create=True)
@@ -258,13 +229,12 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             expected_step_result.message = 'Failed config-lint scan.'
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'file://{work_dir_path}/validate-environment-configuration/configlint_results_file.txt',
-                value_type='file'
+                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',
-                value=f'file://{file_to_validate_file_path}',
-                value_type='file')
+                value=file_to_validate_file_path
+            )
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     @patch('sh.config_lint', create=True)

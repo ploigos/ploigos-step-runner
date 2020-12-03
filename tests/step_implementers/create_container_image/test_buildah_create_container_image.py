@@ -1,17 +1,18 @@
 import os
-from pathlib import Path
+import re
 import sys
-
+from pathlib import Path
 from unittest.mock import patch
+
 import sh
-
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-
-from tssc.step_result import StepResult
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 from tssc.step_implementers.create_container_image import Buildah
+from tssc.step_result import StepResult
 
-class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
+
+class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -43,8 +44,8 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Buildah.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = Buildah._required_config_or_result_keys()
         expected_required_keys = [
             'containers-config-auth-file',
             'imagespecfile',
@@ -55,9 +56,9 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             'application-name'
         ]
         self.assertEqual(required_keys, expected_required_keys)
-    
+
     @patch('sh.buildah', create=True)
-    def test_run_step_pass(self, buildah_mock):
+    def test__run_step_pass(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
@@ -70,10 +71,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'context': temp_dir.path,
                 'tlsverify': 'true',
                 'format': 'oci',
-                'service-name': 'service-name', 
+                'service-name': 'service-name',
                 'application-name': 'app-name'
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -84,22 +85,28 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
-            
+
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
-                step_name='create-container-image', 
-                sub_step_name='Buildah', 
+                step_name='create-container-image',
+                sub_step_name='Buildah',
                 sub_step_implementer_name='Buildah'
             )
-            expected_step_result.add_artifact(name='container-image-version', value='localhost/app-name/service-name:1.0-123abc')
-            expected_step_result.add_artifact(name='image-tar-file', value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar', value_type='file')
+            expected_step_result.add_artifact(
+                name='container-image-version',
+                value='localhost/app-name/service-name:1.0-123abc'
+            )
+            expected_step_result.add_artifact(
+                name='image-tar-file',
+                value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar'
+            )
 
-            
+
             buildah_mock.bud.assert_called_once_with(
                 '--storage-driver=vfs',
                 '--format=oci',
@@ -122,9 +129,9 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 _tee='err'
             )
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
-    
+
     @patch('sh.buildah', create=True)
-    def test_run_step_pass_no_container_image_version(self, buildah_mock):
+    def test__run_step_pass_no_container_image_version(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
@@ -137,10 +144,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'context': temp_dir.path,
                 'tlsverify': 'true',
                 'format': 'oci',
-                'service-name': 'service-name', 
+                'service-name': 'service-name',
                 'application-name': 'app-name'
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -149,16 +156,22 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
-            
+
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
-                step_name='create-container-image', 
-                sub_step_name='Buildah', 
+                step_name='create-container-image',
+                sub_step_name='Buildah',
                 sub_step_implementer_name='Buildah'
             )
-            expected_step_result.add_artifact(name='container-image-version', value='localhost/app-name/service-name:latest')
-            expected_step_result.add_artifact(name='image-tar-file', value=work_dir_path + '/create-container-image/image-app-name-service-name-latest.tar', value_type='file')
+            expected_step_result.add_artifact(
+                name='container-image-version',
+                value='localhost/app-name/service-name:latest'
+            )
+            expected_step_result.add_artifact(
+                name='image-tar-file',
+                value=work_dir_path + '/create-container-image/image-app-name-service-name-latest.tar'
+            )
 
             buildah_mock.bud.assert_called_once_with(
                 '--storage-driver=vfs',
@@ -184,7 +197,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
     @patch('sh.buildah', create=True)
-    def test_run_step_pass_image_tar_file_exists(self, buildah_mock):
+    def test__run_step_pass_image_tar_file_exists(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
@@ -197,10 +210,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'context': temp_dir.path,
                 'tlsverify': 'true',
                 'format': 'oci',
-                'service-name': 'service-name', 
+                'service-name': 'service-name',
                 'application-name': 'app-name'
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -213,22 +226,28 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             step_implementer.write_working_file('image-app-name-service-name-1.0-123abc.tar')
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
-            
+
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
-                step_name='create-container-image', 
-                sub_step_name='Buildah', 
+                step_name='create-container-image',
+                sub_step_name='Buildah',
                 sub_step_implementer_name='Buildah'
             )
-            expected_step_result.add_artifact(name='container-image-version', value='localhost/app-name/service-name:1.0-123abc')
-            expected_step_result.add_artifact(name='image-tar-file', value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar', value_type='file')
+            expected_step_result.add_artifact(
+                name='container-image-version',
+                value='localhost/app-name/service-name:1.0-123abc'
+            )
+            expected_step_result.add_artifact(
+                name='image-tar-file',
+                value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar'
+            )
 
-            
+
             buildah_mock.bud.assert_called_once_with(
                 '--storage-driver=vfs',
                 '--format=oci',
@@ -253,17 +272,17 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
     @patch('sh.buildah', create=True)
-    def test_run_step_fail_no_image_spec_file(self, buildah_mock):
+    def test__run_step_fail_no_image_spec_file(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
-                'service-name': 'service-name', 
+                'service-name': 'service-name',
                 'application-name': 'app-name'
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -274,16 +293,16 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
-            
+
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
-                step_name='create-container-image', 
-                sub_step_name='Buildah', 
+                step_name='create-container-image',
+                sub_step_name='Buildah',
                 sub_step_implementer_name='Buildah'
             )
             expected_step_result.success = False
@@ -292,23 +311,24 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
     @patch('sh.buildah', create=True)
-    def test_run_step_fail_buildah_bud_error(self, buildah_mock):
+    def test__run_step_fail_buildah_bud_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
+            image_spec_file = 'Dockerfile'
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
-                'imagespecfile': 'Dockerfile',
+                'imagespecfile': image_spec_file,
                 'context': temp_dir.path,
                 'tlsverify': 'true',
                 'format': 'oci',
-                'service-name': 'service-name', 
+                'service-name': 'service-name',
                 'application-name': 'app-name'
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -319,37 +339,51 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
-            
+
             buildah_mock.bud.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
-            
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Issue invoking buildah bud with given image"
-            ):
-                step_implementer._run_step()
+
+            result = step_implementer._run_step()
+
+            self.assertFalse(result.success)
+            self.assertRegex(
+                result.message,
+                re.compile(
+                    r'Issue invoking buildah bud with given image '
+                    rf'specification file \({image_spec_file}\):'
+                    r'.*RAN: buildah'
+                    r'.*STDOUT:'
+                    r'.*mock out'
+                    r'.*STDERR:'
+                    r'.*mock error',
+                    re.DOTALL
+                )
+            )
 
     @patch('sh.buildah', create=True)
-    def test_run_step_fail_buildah_push_error(self, buildah_mock):
+    def test__run_step_fail_buildah_push_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
+            application_name = 'app-name'
+            service_name = 'service-name'
+            image_tag_version = '1.0-123abc'
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': 'Dockerfile',
                 'context': temp_dir.path,
                 'tlsverify': 'true',
                 'format': 'oci',
-                'service-name': 'service-name', 
-                'application-name': 'app-name'
+                'service-name': service_name,
+                'application-name': application_name
             }
-            
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='create-container-image',
@@ -360,15 +394,29 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
 
             artifact_config = {
-                'container-image-version': {'description': '', 'type': '', 'value': '1.0-123abc'},
+                'container-image-version': {'description': '', 'value': image_tag_version},
             }
-
             self.setup_previous_result(work_dir_path, artifact_config)
-            
+
             buildah_mock.push.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
-            
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Issue invoking buildah push to tar file"
-            ):
-                step_implementer._run_step()
+
+            result = step_implementer._run_step()
+
+            image_tar_path = os.path.join(
+                work_dir_path,
+                'create-container-image',
+                f'image-{application_name}-{service_name}-{image_tag_version}.tar'
+            )
+            self.assertFalse(result.success)
+            self.assertRegex(
+                result.message,
+                re.compile(
+                    rf'Issue invoking buildah push to tar file \({image_tar_path}\):'
+                    r'.*RAN: buildah'
+                    r'.*STDOUT:'
+                    r'.*mock out'
+                    r'.*STDERR:'
+                    r'.*mock error',
+                    re.DOTALL
+                )
+            )

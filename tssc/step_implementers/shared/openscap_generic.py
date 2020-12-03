@@ -66,8 +66,9 @@ DEFAULT_CONFIG = {
     'oscap-fetch-remote-resources': True
 }
 
-REQUIRED_CONFIG_KEYS = [
-    'oscap-input-definitions-uri'
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'oscap-input-definitions-uri',
+    'image-tar-file'
 ]
 
 
@@ -175,23 +176,25 @@ class OpenSCAPGeneric(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        """Validates required runtime step configuration is valid.
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
 
         Validates that:
         * required configuration is given
@@ -202,12 +205,12 @@ class OpenSCAPGeneric(StepImplementer):
         Raises
         ------
         AssertionError
-        * if runtime step configuration is invalid.
+            If step configuration or previous step result artifacts have invalid required values
         """
-        super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
+        super()._validate_required_config_or_previous_step_result_artifact_keys()  # pylint: disable=protected-access
 
         # validate that the given 'oscap-input-definitions-uri' starts with file://|http://|https://
-        oscap_input_definitions_uri = runtime_step_config['oscap-input-definitions-uri']
+        oscap_input_definitions_uri = self.get_value('oscap-input-definitions-uri')
         assert (re.match(r'^file://|http://|https://', oscap_input_definitions_uri)), \
             f"Open SCAP input definitions source ({oscap_input_definitions_uri})" \
             f" must start with known protocol (file://|http://|https://)."
@@ -221,15 +224,12 @@ class OpenSCAPGeneric(StepImplementer):
     def _run_step(self):  # pylint: disable=too-many-locals
         """Runs the OpenSCAP eval for a given input file against a given container.
         """
-
         step_result = StepResult.from_step_implementer(self)
 
-        image_tar_file = self.get_result_value('image-tar-file')
-        if image_tar_file is None:
-            raise RuntimeError('Missing image tar file from ' + DefaultSteps.CREATE_CONTAINER_IMAGE)
+        image_tar_file = self.get_value('image-tar-file')
 
-        oscap_profile = self.get_config_value('oscap-profile')
-        oscap_fetch_remote_resources = self.get_config_value('oscap-fetch-remote-resources')
+        oscap_profile = self.get_value('oscap-profile')
+        oscap_fetch_remote_resources = self.get_value('oscap-fetch-remote-resources')
 
         # create a container name from the tar file name, step name, and sub step name
         container_name = os.path.splitext(os.path.basename(image_tar_file))[0]
@@ -260,7 +260,7 @@ class OpenSCAPGeneric(StepImplementer):
         print(f"Mounted container ({container_name}) with mount path: '{container_mount_path}'")
 
         # download the open scap input file
-        oscap_input_definitions_uri = self.get_config_value('oscap-input-definitions-uri')
+        oscap_input_definitions_uri = self.get_value('oscap-input-definitions-uri')
         print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
         oscap_input_file = download_and_decompress_source_to_destination(
             source_url=oscap_input_definitions_uri,
@@ -270,7 +270,7 @@ class OpenSCAPGeneric(StepImplementer):
 
         # if specified download oscap tailoring file
         oscap_tailoring_file = None
-        oscap_tailoring_file_uri = self.get_config_value('oscap-tailoring-uri')
+        oscap_tailoring_file_uri = self.get_value('oscap-tailoring-uri')
         if oscap_tailoring_file_uri:
             print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
             oscap_tailoring_file = download_and_decompress_source_to_destination(
@@ -331,15 +331,15 @@ class OpenSCAPGeneric(StepImplementer):
 
         step_result.add_artifact(
             name='html-report',
-            value=f'file://{oscap_html_report_path}'
+            value=oscap_html_report_path
         )
         step_result.add_artifact(
             name='xml-report',
-            value=f'file://{oscap_xml_results_file_path}'
+            value=oscap_xml_results_file_path
         )
         step_result.add_artifact(
             name='stdout-report',
-            value=f'file://{oscap_out_file_path}'
+            value=oscap_out_file_path
         )
         return step_result
 
