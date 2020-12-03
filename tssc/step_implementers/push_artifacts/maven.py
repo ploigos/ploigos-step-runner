@@ -76,15 +76,12 @@ from tssc.step_result import StepResult
 from tssc.utils.maven import generate_maven_settings
 
 DEFAULT_CONFIG = {}
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'maven-push-artifact-repo-url',
-    'maven-push-artifact-repo-id'
-]
-REQUIRED_PREVIOUS_STEP_CONFIG_KEYS = [
+    'maven-push-artifact-repo-id',
     'version',
     'package-artifacts'
 ]
-
 
 class Maven(StepImplementer):
     """
@@ -108,43 +105,37 @@ class Maven(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _generate_maven_settings(self):
         # ----- build settings.xml
         maven_servers = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-servers')
+            self.get_value('maven-servers')
         )
         maven_repositories = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-repositories')
+            self.get_value('maven-repositories')
         )
         maven_mirrors = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-mirrors')
+            self.get_value('maven-mirrors')
         )
         return generate_maven_settings(self.work_dir_path,
                                        maven_servers,
                                        maven_repositories,
                                        maven_mirrors)
-
-    def _validate_previous_step_results(self):
-        for key in REQUIRED_PREVIOUS_STEP_CONFIG_KEYS:
-            value = self.get_result_value(key)
-            if value is None:
-                return f'previous step results missing {key}'
-        return None
 
     def _run_step(self):
         """Runs the TSSC step implemented by this StepImplementer.
@@ -156,24 +147,17 @@ class Maven(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        # Validate previous step results values exist
-        message = self._validate_previous_step_results()
-        if message:
-            step_result.success = False
-            step_result.message = message
-            return step_result
-
         # Get config items
-        maven_push_artifact_repo_id = self.get_config_value('maven-push-artifact-repo-id')
-        maven_push_artifact_repo_url = self.get_config_value('maven-push-artifact-repo-url')
+        maven_push_artifact_repo_id = self.get_value('maven-push-artifact-repo-id')
+        maven_push_artifact_repo_url = self.get_value('maven-push-artifact-repo-url')
 
         # Create settings.xml
         settings_file = self._generate_maven_settings()
 
         # Get previous step values
         push_artifacts = []
-        version = self.get_result_value('version')
-        package_artifacts = self.get_result_value('package-artifacts')
+        version = self.get_value('version')
+        package_artifacts = self.get_value('package-artifacts')
         for package in package_artifacts:
             artifact_path = package['path']
             group_id = package['group-id']

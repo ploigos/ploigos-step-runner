@@ -3,7 +3,8 @@ import os
 
 from testfixtures import TempDirectory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.utils.file import (download_and_decompress_source_to_destination,
+from tssc.utils.file import (create_parent_dir,
+                             download_and_decompress_source_to_destination,
                              parse_yaml_or_json_file)
 
 
@@ -117,3 +118,14 @@ class TestDownloadAndDecompressSourceToDestination(BaseTSSCTestCase):
                     source_url="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/does-not-exist.ds.xml.bz2",
                     destination_dir=test_dir.path
                 )
+
+    def test_create_parent_dir(self):
+        with TempDirectory() as test_dir:
+            file_path = os.path.join(test_dir.path, 'hello/world/does/not/exit/foo.yml')
+
+            self.assertFalse(os.path.exists(file_path))
+            self.assertFalse(os.path.exists(os.path.dirname(file_path)))
+
+            create_parent_dir(file_path)
+            self.assertFalse(os.path.exists(file_path))
+            self.assertTrue(os.path.exists(os.path.dirname(file_path)))

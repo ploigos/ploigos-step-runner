@@ -2,11 +2,15 @@
 
 Test for the utility for maven operations.
 """
+import re
 import xml.etree.ElementTree as ET
 from io import BytesIO
+from unittest.mock import patch
 
+import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tssc.exceptions import StepRunnerException
 from tssc.utils.maven import *
 
 
@@ -962,4 +966,49 @@ class TestMavenUtils(BaseTSSCTestCase):
             add_maven_mirrors(
                 parent_element=root_element,
                 maven_mirrors=maven_mirrors
+            )
+
+    @patch('sh.mvn', create=True)
+    def test_write_effective_pom_success(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = 'output/effective-pom.xml'
+
+        actual_effective_pom_path = write_effective_pom(
+            pom_file_path=pom_file_path,
+            output_path=effective_pom_path
+        )
+        self.assertEqual(actual_effective_pom_path, effective_pom_path)
+        mvn_mock.assert_any_call(
+            'help:effective-pom',
+            f'-f={pom_file_path}',
+            f'-Doutput={effective_pom_path}'
+        )
+
+    @patch('sh.mvn', create=True)
+    def test_write_effective_pom_fail(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = 'output/effective-pom.xml'
+
+        mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock stdout', b'mock error')
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error generating effective pom for '{pom_file_path}' to '{effective_pom_path}'"
+                r".*RAN: mvn"
+                r".*STDOUT:"
+                r".*mock stdout"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            )
+        ):
+            write_effective_pom(
+                pom_file_path=pom_file_path,
+                output_path=effective_pom_path
+            )
+            mvn_mock.assert_any_call(
+                'help:effective-pom',
+                f'-f={pom_file_path}',
+                f'-Doutput={effective_pom_path}'
             )

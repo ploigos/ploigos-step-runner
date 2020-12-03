@@ -1,18 +1,17 @@
+"""Abstract class and helper constants for StepImplementer.
 """
-Abstract class and helper constants for StepImplementer.
-"""
-from abc import ABC, abstractmethod
-from contextlib import redirect_stdout, redirect_stderr
 import os
-from pathlib import Path
 import pprint
-import textwrap
 import sys
+import textwrap
+from abc import ABC, abstractmethod
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
 
 from tssc.config.config_value import ConfigValue
+from tssc.step_result import StepResult
 from tssc.utils.io import TextIOIndenter
 from tssc.workflow_result import WorkflowResult
-
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     """
@@ -264,7 +263,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         if not self.__workflow_result:
             self.__workflow_result = WorkflowResult.load_from_pickle_file(
-                pickle_filename=self.workflow_result_pickle_file_path
+                pickle_filename=self.__workflow_result_pickle_file_path
             )
         return self.__workflow_result
 
@@ -286,23 +285,24 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     @abstractmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
 
     @abstractmethod
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
@@ -310,39 +310,34 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Object containing the dictionary results of this step.
         """
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        """
-        Validates the given `runtime_step_config` against the required step configuration keys.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
 
         Raises
         ------
         AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
+            If step configuration or previous step result artifacts have invalid required values.
         """
-        missing_required_config_keys = []
-        for required_config_key in self.required_runtime_step_config_keys():
-            if ((required_config_key not in runtime_step_config) or
-                    ((not runtime_step_config[required_config_key]) and
-                     (not isinstance(runtime_step_config[required_config_key], bool)))):
-                missing_required_config_keys.append(required_config_key)
+        invalid_required_keys = []
+        for required_key in self._required_config_or_result_keys():
+            required_value = self.get_value(required_key)
 
-        assert (not missing_required_config_keys), \
-            "The runtime step configuration (" + \
-            f"{ConfigValue.convert_leaves_to_values(runtime_step_config)}) is missing " + \
-            f"the required configuration keys ({missing_required_config_keys})"
+            if required_value is None:
+                invalid_required_keys.append(required_key)
+
+        assert (not invalid_required_keys), \
+            'Missing required step configuration or previous step result artifact keys: ' + \
+            f'{invalid_required_keys}'
 
     def run_step(self):
-        """
-        Wrapper for running the implemented step.
+        """Wrapper for running the implemented step.
+
         Returns
         -------
-        Bool
+        bool
+            True on step run success.
+            False on step run failure.
         """
 
         StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
@@ -385,36 +380,44 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             ConfigValue.convert_leaves_to_values(copy_of_runtime_step_config)
         )
 
-        # validate the runtime step configuration
-        StepImplementer.__print_section_title(
-            f"Standard Out - {self.step_name}",
-            div_char="-",
-            indent=1
-        )
-        self._validate_runtime_step_config(copy_of_runtime_step_config)
+        step_result = None
+        try:
+            # validate the runtime step configuration
+            self._validate_required_config_or_previous_step_result_artifact_keys()
 
-        # run the step and save the results
-        indented_stdout = TextIOIndenter(
-            parent_stream=sys.stdout,
-            indent_level=2
-        )
-        indented_stderr = TextIOIndenter(
-            parent_stream=sys.stderr,
-            indent_level=2
-        )
+            # run the step
+            StepImplementer.__print_section_title(
+                f"Standard Out - {self.step_name}",
+                div_char="-",
+                indent=1
+            )
 
-        with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
-            # Step Results = capture them, add to the workflow, and file
-            step_result = self._run_step()
-            self.workflow_result.add_step_result(
-                step_result=step_result
+            indented_stdout = TextIOIndenter(
+                parent_stream=sys.stdout,
+                indent_level=2
             )
-            self.workflow_result.write_to_pickle_file(
-                pickle_filename=self.workflow_result_pickle_file_path
+            indented_stderr = TextIOIndenter(
+                parent_stream=sys.stderr,
+                indent_level=2
             )
-            self.workflow_result.write_results_to_yml_file(
-                yml_filename=self.results_file_path
-            )
+
+            with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
+                step_result = self._run_step()
+        except AssertionError as invalid_error:
+            step_result = StepResult.from_step_implementer(self)
+            step_result.success = False
+            step_result.message = str(invalid_error)
+
+        # save the step results
+        self.workflow_result.add_step_result(
+            step_result=step_result
+        )
+        self.workflow_result.write_to_pickle_file(
+            pickle_filename=self.__workflow_result_pickle_file_path
+        )
+        self.workflow_result.write_results_to_yml_file(
+            yml_filename=self.results_file_path
+        )
 
         # print the step run results
         StepImplementer.__print_section_title(
@@ -430,6 +433,31 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
         return step_result.success
+
+    def get_value(self, key):
+        """Get the value for a given key, either from given configuration or from the result
+        of any previous step.
+
+        Parameters
+        ----------
+        key : str
+            Key to get the configuration value or result value for.
+
+        Returns
+        -------
+        str, int, dict, list, or bool or None
+            Configuration value, or if not set, result value from any previous step for the given
+            key. Or None if not found.
+        """
+        config_value = self.get_config_value(key)
+        if config_value:
+            return config_value
+
+        result_value = self.get_result_value(key)
+        if result_value:
+            return result_value
+
+        return None
 
     def get_config_value(self, key):
         """Convenience function for self.config.get_config_value.
@@ -506,15 +534,99 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         result = not match_any
         for key in keys:
-            if match_any and self.get_config_value(key) is not None:
+            if match_any and self.get_value(key) is not None:
                 result = True
                 break
 
-            if not match_any and self.get_config_value(key) is None:
+            if not match_any and self.get_value(key) is None:
                 result = False
                 break
 
         return result
+
+    def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
+        """
+        Get the value for the named artifact.
+        If step_name is provided,
+            search for artifact_name in step_name only
+        If step_name and sub_step_name is provided,
+            search for artifact_name in step_name/sub_step only
+        Otherwise,
+             search for the FIRST occurrence of the artifact_name
+
+        EG:  Artifacts are a dictionary; return the contents of the value key.
+          In this example, 'foo' is the artifact name, return 'bar'
+          'foo' : {'description': '', 'value': 'bar'}
+
+        Parameters
+        ----------
+        artifact_name : str
+           Key name of the dictionary.
+
+        Returns
+        -------
+        str
+           Contents of the value for the specified result artifact_name.
+
+        """
+        return (
+            self.workflow_result.get_artifact_value(
+                artifact=artifact_name,
+                step_name=step_name,
+                sub_step_name=sub_step_name
+            )
+        )
+
+    def get_step_result(self, step_name=None):
+        """
+        Get the step result.
+        EG:{
+            'tssc-results': {
+                'step-name': {
+                    'StepImplementer': {
+                        'sub-step-implementer-name': 'ssin',
+                        'success': True,
+                        'message': '',
+                        'artifacts': {
+                            'foo': {'description': '', 'value': 'bar'},
+                        }
+                    }
+                }
+            }
+        }
+
+        Returns
+        -------
+        dict
+           Result step
+        """
+        if step_name is None:
+            step_name = self.step_name
+
+        return (
+            self.workflow_result.get_step_result(
+                step_name=step_name,
+            )
+        )
+
+    @property
+    def __workflow_result_pickle_file_path(self):
+        """
+        Get the OS path to the workflow result pickle file.
+        (The 'pickle' file contains the serialized list of step results.)
+        The name of the pickle file is the basename of the results_file_name.
+        EG:
+        If the name of the results_file_name is tssc-results.yml,
+        then the name of the pickle file is tssc-results.pkl
+        /tmp/tmp9sau_2j5/tssc-working/tssc-results.pkl
+
+        Returns
+        -------
+        str
+           OS path to the workflow pickle (serialized) file.
+        """
+        pickle_filename = os.path.splitext(self.__results_file_name)[0] + '.pkl'
+        return os.path.join(self.work_dir_path, pickle_filename)
 
     def create_working_dir_sub_dir(self, sub_dir_relative_path):
         """
@@ -628,90 +740,3 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             text=text,
             prefix=" " * (4 * indent)
         ))
-
-    # todo:  Need NEW method to look in (1) config THEN (2) step results
-
-    # WORKFLOW helpers
-    def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
-        """
-        Get the value for the named artifact.
-        If step_name is provided,
-            search for artifact_name in step_name only
-        If step_name and sub_step_name is provided,
-            search for artifact_name in step_name/sub_step only
-        Otherwise,
-             search for the FIRST occurrence of the artifact_name
-
-        EG:  Artifacts are a dictionary; return the contents of the value key.
-          In this example, 'foo' is the artifact name, return 'bar'
-          'foo' : {'description': '', 'type': 'str', 'value': 'bar'}
-
-        Parameters
-        ----------
-        artifact_name : str
-           Key name of the dictionary.
-
-        Returns
-        -------
-        str
-           Contents of the value for the specified result artifact_name.
-
-        """
-        return (
-            self.workflow_result.get_artifact_value(
-                artifact=artifact_name,
-                step_name=step_name,
-                sub_step_name=sub_step_name
-            )
-        )
-
-    def get_step_result(self, step_name=None):
-        """
-        Get the step result.
-        EG:{
-            'tssc-results': {
-                'step-name': {
-                    'StepImplementer': {
-                        'sub-step-implementer-name': 'ssin',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'foo': {'description': '', 'type': 'str', 'value': 'bar'},
-                        }
-                    }
-                }
-            }
-        }
-
-        Returns
-        -------
-        dict
-           Result step
-        """
-        if step_name is None:
-            step_name = self.step_name
-
-        return (
-            self.workflow_result.get_step_result(
-                step_name=step_name,
-            )
-        )
-
-    @property
-    def workflow_result_pickle_file_path(self):
-        """
-        Get the OS path to the workflow result pickle file.
-        (The 'pickle' file contains the serialized list of step results.)
-        The name of the pickle file is the basename of the results_file_name.
-        EG:
-        If the name of the results_file_name is tssc-results.yml,
-        then the name of the pickle file is tssc-results.pkl
-        /tmp/tmp9sau_2j5/tssc-working/tssc-results.pkl
-
-        Returns
-        -------
-        str
-           OS path to the workflow pickle (serialized) file.
-        """
-        pickle_filename = os.path.splitext(self.__results_file_name)[0] + '.pkl'
-        return os.path.join(self.work_dir_path, pickle_filename)

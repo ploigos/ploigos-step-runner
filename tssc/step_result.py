@@ -1,9 +1,10 @@
-"""
-Class and helper constants for StepResult
+"""Class and helper constants for StepResult
 """
 import json
+
 import yaml
-from tssc.exceptions import TSSCException
+
+from tssc.exceptions import StepRunnerException
 
 
 class StepResult:
@@ -22,7 +23,6 @@ class StepResult:
     """
 
     def __init__(self, step_name, sub_step_name, sub_step_implementer_name):
-
         """
         Step Result Init
         """
@@ -94,8 +94,8 @@ class StepResult:
             All artifacts of the step
             For Example:
             {
-                'artifact1': {'description': 'description1', 'type': 'type1', 'value': 'value1'},
-                'artifact2': {'description': '', 'type': 'str', 'value': 'value2'}
+                'artifact1': {'description': 'description1', 'value': 'value1'},
+                'artifact2': {'description': '', 'value': 'value2'}
             }
 
         """
@@ -115,7 +115,7 @@ class StepResult:
         dict
             Dictionary for a specified artifact.
             For example:
-            {'description': 'artifact1', 'type': 'type1', 'value': 'value1'}
+            {'description': 'artifact1', 'value': 'value1'}
 
         """
         return self.artifacts.get(name)
@@ -140,14 +140,13 @@ class StepResult:
 
         return value
 
-    def add_artifact(self, name, value, description='', value_type=None):
-        """
-        Insert/Update an artifact with the given pattern:
-            "name": {
-                "description": "file description",
-                "type": "file",
-                "value": "file://step-result.txt"
-            }
+    def add_artifact(self, name, value, description=''):
+        """Insert/Update an artifact with the given pattern:
+
+        "name": {
+            "description": "file description",
+            "value": "step-result.txt"
+        }
 
         Parameters
         ----------
@@ -157,23 +156,17 @@ class StepResult:
             Required content
         description : str, optional
             Optional description (defaults to empty)
-        value_type : str, optional
-            Optional type of the value (defaults to str)
 
         """
         if not name:
-            raise TSSCException('Name is required to add artifact')
+            raise StepRunnerException('Name is required to add artifact')
 
         # False can be the value
         if value == '' or value is None:
-            raise TSSCException('Value is required to add artifact')
-
-        if not value_type:
-            value_type = type(value).__name__
+            raise StepRunnerException('Value is required to add artifact')
 
         self.__artifacts[name] = {
             'description': description,
-            'type': value_type,
             'value': value
         }
 
@@ -250,8 +243,7 @@ class StepResult:
                     "artifacts": {
                         "name": {
                             "description": "file description",
-                            "type": "file",
-                            "value": "file://step-result.txt"
+                            "value": "step-result.txt"
                         }
                     }
                 }

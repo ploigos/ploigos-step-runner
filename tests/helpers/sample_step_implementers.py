@@ -8,7 +8,7 @@ class FailStepImplementer(StepImplementer):
         return {}
 
     @staticmethod
-    def required_runtime_step_config_keys():
+    def _required_config_or_result_keys():
         return []
 
     def _run_step(self):
@@ -20,34 +20,10 @@ class FailStepImplementer(StepImplementer):
 class FooStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
         return {}
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
+    def _required_config_or_result_keys():
         return []
 
     def _run_step(self):
@@ -58,34 +34,10 @@ class FooStepImplementer(StepImplementer):
 class RequiredStepConfigStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
         return {}
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
+    def _required_config_or_result_keys():
         return [
             'required-config-key'
         ]
@@ -103,34 +55,10 @@ class RequiredStepConfigStepImplementer(StepImplementer):
 class WriteConfigAsResultsStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
         return {}
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-        """
+    def _required_config_or_result_keys():
         return []
 
     def _run_step(self):

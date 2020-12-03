@@ -50,16 +50,16 @@ from io import StringIO
 
 import sh
 from tssc import StepImplementer
-from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 from tssc.step_result import StepResult
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
 }
 
-REQUIRED_CONFIG_KEYS = [
-    'container-image-signer-pgp-private-key'
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'container-image-signer-pgp-private-key',
+    'container-image-tag'
 ]
-
 
 class PodmanSign(StepImplementer):
     """StepImplementer for the sign-container-image step using Podman.
@@ -88,66 +88,66 @@ class PodmanSign(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-
         step_result = StepResult.from_step_implementer(self)
 
         # get the pgp private key to sign the image with
-        image_signer_pgp_private_key = self.get_config_value(
+        image_signer_pgp_private_key = self.get_value(
             'container-image-signer-pgp-private-key'
         )
 
         # get the uri to the image to sign
-        container_image_tag = self.get_result_value(artifact_name='container-image-tag')
-        if container_image_tag is None:
-            step_result.success = False
-            step_result.message = "Missing container-image-tag"
-            return step_result
+        container_image_tag = self.get_value('container-image-tag')
 
         image_signatures_directory = self.create_working_dir_sub_dir(
             sub_dir_relative_path='image-signature'
         )
 
         # import the PGP key and get the finger print
-        image_signer_pgp_private_key_fingerprint = PodmanSign.__import_pgp_key(
-            pgp_private_key=image_signer_pgp_private_key
-        )
+        try:
+            image_signer_pgp_private_key_fingerprint = PodmanSign.__import_pgp_key(
+                pgp_private_key=image_signer_pgp_private_key
+            )
+            step_result.add_artifact(
+                name='container-image-signature-private-key-fingerprint',
+                value=image_signer_pgp_private_key_fingerprint
+            )
 
-        # sign the image
-        signature_file_path = PodmanSign.__sign_image(
-            pgp_private_key_fingerprint=image_signer_pgp_private_key_fingerprint,
-            image_signatures_directory=image_signatures_directory,
-            container_image_tag=container_image_tag
-        )
-        signature_name = os.path.relpath(signature_file_path, image_signatures_directory)
+            # sign the image
+            signature_file_path = PodmanSign.__sign_image(
+                pgp_private_key_fingerprint=image_signer_pgp_private_key_fingerprint,
+                image_signatures_directory=image_signatures_directory,
+                container_image_tag=container_image_tag
+            )
+            step_result.add_artifact(
+                name='container-image-signature-file-path',
+                value=signature_file_path,
+            )
+            signature_name = os.path.relpath(signature_file_path, image_signatures_directory)
+            step_result.add_artifact(
+                name='container-image-signature-name',
+                value=signature_name
+            )
+        except RuntimeError as error:
+            step_result.success = False
+            step_result.message = str(error)
 
-        step_result.add_artifact(
-            name='container-image-signature-private-key-fingerprint',
-            value=image_signer_pgp_private_key_fingerprint
-        )
-        step_result.add_artifact(
-            name='container-image-signature-file-path',
-            value=signature_file_path,
-        )
-        step_result.add_artifact(
-            name='container-image-signature-name',
-            value=signature_name
-        )
         return step_result
 
     @staticmethod

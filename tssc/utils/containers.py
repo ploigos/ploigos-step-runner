@@ -2,9 +2,10 @@
 """
 
 import sys
-import sh
 
+import sh
 from tssc.config.config_value import ConfigValue
+
 
 def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
     """Logs into one or more container registries.
@@ -17,6 +18,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
     Notes
     -----
     registries example 1 (dict of dicts where child dict keys are registry uri):
+
         {
             'registry.redhat.io': {
                 'username': 'hello@world.xyz',
@@ -29,6 +31,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
         }
 
     registries example 2 (dict of dicts where uri is key in child dicts):
+
         {
             'redhat': {
                 'uri': registry.redhat.io
@@ -43,6 +46,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
         }
 
     registries example 3 (list of dicts where uri is key in child dicts):
+
         [
             {
                 'uri': registry.redhat.io
@@ -152,8 +156,8 @@ def container_registry_login(
     * podman
     * skopeo
 
-    Parametes
-    ---------
+    Parameters
+    ----------
     container_registry_uri : str or ConfigValue
         URI to the container registry to log into.
     container_registry_username : str or ConfigValue

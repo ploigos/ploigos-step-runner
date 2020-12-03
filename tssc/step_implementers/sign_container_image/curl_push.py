@@ -63,10 +63,12 @@ from tssc.step_result import StepResult
 DEFAULT_CONFIG = {
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'container-image-signature-server-url',
     'container-image-signature-server-username',
-    'container-image-signature-server-password'
+    'container-image-signature-server-password',
+    'container-image-signature-file-path',
+    'container-image-signature-name'
 ]
 
 class CurlPush(StepImplementer):
@@ -89,20 +91,21 @@ class CurlPush(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         """Run step and perform the curl"""
@@ -110,32 +113,19 @@ class CurlPush(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # extract configs
-        signature_server_url = self.get_config_value(
+        signature_server_url = self.get_value(
             'container-image-signature-server-url'
         )
-        signature_server_username = self.get_config_value(
+        signature_server_username = self.get_value(
             'container-image-signature-server-username'
         )
-        signature_server_password = self.get_config_value(
+        signature_server_password = self.get_value(
             'container-image-signature-server-password'
         )
 
         # extract step results
-        container_image_signature_file_path = self.get_result_value(
-            artifact_name='container-image-signature-file-path'
-        )
-        if container_image_signature_file_path is None:
-            step_result.success = False
-            step_result.message = 'Missing container-image-signature-file-path'
-            return step_result
-
-        container_image_signature_name = self.get_result_value(
-            artifact_name='container-image-signature-name'
-        )
-        if container_image_signature_name is None:
-            step_result.success = False
-            step_result.message = 'Missing container-image-signature-name'
-            return step_result
+        container_image_signature_file_path = self.get_value('container-image-signature-file-path')
+        container_image_signature_name = self.get_value('container-image-signature-name')
 
         container_image_signature_url, signature_file_md5, signature_file_sha1 = \
             CurlPush.__curl_file(

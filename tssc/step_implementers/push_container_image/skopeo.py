@@ -51,14 +51,16 @@ DEFAULT_CONFIG = {
     'containers-config-auth-file': os.path.join(Path.home(), '.skopeo-auth.json')
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'containers-config-auth-file',
     'destination-url',
     'src-tls-verify',
     'dest-tls-verify',
     'service-name',
     'application-name',
-    'organization'
+    'organization',
+    'container-image-version',
+    'image-tar-file'
 ]
 
 class Skopeo(StepImplementer):
@@ -83,20 +85,21 @@ class Skopeo(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         """Runs the TSSC step implemented by this StepImplementer.
@@ -107,24 +110,12 @@ class Skopeo(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        image_version = self.get_result_value(artifact_name='container-image-version')
-        if image_version is None:
-            image_version = "latest"
-            print('No version found in metadata. Using latest')
-        image_version = image_version.lower()
-
-        application_name = self.get_config_value('application-name')
-        service_name = self.get_config_value('service-name')
-        organization = self.get_config_value('organization')
-
-        image_tar_file = self.get_result_value(artifact_name='image-tar-file')
-        if image_tar_file is None:
-            step_result.success = False
-            step_result.message = 'Missing image tar file from ' + \
-                                  DefaultSteps.CREATE_CONTAINER_IMAGE
-            return step_result
-
-        destination_url = self.get_config_value('destination-url')
+        image_version = self.get_value('container-image-version').lower()
+        application_name = self.get_value('application-name')
+        service_name = self.get_value('service-name')
+        organization = self.get_value('organization')
+        image_tar_file = self.get_value('image-tar-file')
+        destination_url = self.get_value('destination-url')
         image_repository_uri = f"{destination_url}/{organization}/{application_name}-{service_name}"
         image_tag = f"{image_repository_uri}:{image_version}"
 
@@ -132,25 +123,27 @@ class Skopeo(StepImplementer):
             # login to any provider container registries
             # NOTE: important to specify the auth file because depending on the context this is
             #       being run in python process may not have permissions to default location
-            containers_config_auth_file = self.get_config_value('containers-config-auth-file')
+            containers_config_auth_file = self.get_value('containers-config-auth-file')
             container_registries_login(
-                registries=self.get_config_value('container-registries'),
+                registries=self.get_value('container-registries'),
                 containers_config_auth_file=containers_config_auth_file
             )
 
             # push image
             sh.skopeo.copy( # pylint: disable=no-member
-                f"--src-tls-verify={str(self.get_config_value('src-tls-verify'))}",
-                f"--dest-tls-verify={str(self.get_config_value('dest-tls-verify'))}",
+                f"--src-tls-verify={str(self.get_value('src-tls-verify'))}",
+                f"--dest-tls-verify={str(self.get_value('dest-tls-verify'))}",
                 f"--authfile={containers_config_auth_file}",
-                'docker-archive:' + image_tar_file,
-                'docker://' + image_tag,
+                f'docker-archive:{image_tar_file}',
+                f'docker://{image_tag}',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
             )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Error invoking skopeo: {error}'.format(error=error)) from error
+        except sh.ErrorReturnCode as error:
+            step_result.success = False
+            step_result.message = f'Error pushing container image ({image_tar_file}) ' + \
+                f' to tag ({image_tag}) using skopeo: {error}'
 
         step_result.add_artifact(name='container-image-version', value=image_version)
         step_result.add_artifact(name='container-image-uri', value=image_repository_uri)

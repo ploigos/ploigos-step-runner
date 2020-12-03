@@ -3,7 +3,7 @@
 """
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
 from tssc.step_result import StepResult
-from tssc.exceptions import TSSCException
+from tssc.exceptions import StepRunnerException
 
 
 class TestStepResultTest(BaseTSSCTestCase):
@@ -46,17 +46,14 @@ class TestStepResultTest(BaseTSSCTestCase):
                     'artifacts': {
                         'artifact1': {
                             'description': 'description1',
-                            'type': 'type1',
                             'value': 'value1'
                         },
                         'artifact2': {
                             'description': 'description2',
-                            'type': 'type2',
                             'value': 'value2'
                         },
                         'artifact3': {
                             'description': '',
-                            'type': 'str',
                             'value': 'value3'
                         }
                     }
@@ -65,8 +62,8 @@ class TestStepResultTest(BaseTSSCTestCase):
             }
         }
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
-        step_result.add_artifact('artifact2', 'value2', 'description2', 'type2')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
+        step_result.add_artifact('artifact2', 'value2', 'description2')
         step_result.add_artifact('artifact3', 'value3')
         self.assertEqual(step_result.get_step_result(), step_result_expected)
 
@@ -74,49 +71,46 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result = StepResult('step1', 'sub1', 'implementer1')
 
         with self.assertRaisesRegex(
-                TSSCException,
+                StepRunnerException,
                 r"Name is required to add artifact"):
-            step_result.add_artifact('', 'value1', 'description1', 'type1')
+            step_result.add_artifact('', 'value1', 'description1')
 
     def test_add_artifact_missing_value(self):
         step_result = StepResult('step1', 'sub1', 'implementer1')
 
         with self.assertRaisesRegex(
-                TSSCException,
+                StepRunnerException,
                 r"Value is required to add artifact"):
-            step_result.add_artifact('name1', '', 'description1', 'type1')
+            step_result.add_artifact('name1', '', 'description1')
 
     def test_get_artifact(self):
         step_result_expected = {
             'description': 'description1',
-            'type': 'type1',
             'value': 'value1'
         }
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         self.assertEqual(step_result.get_artifact('artifact1'), step_result_expected)
 
     def test_get_artifact_value(self):
         step_result_expected = 'value1'
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         self.assertEqual(step_result.get_artifact_value('artifact1'), step_result_expected)
 
     def test_get_artifacts_property(self):
         step_result_expected = {
             'artifact1': {
                 'description': 'description1',
-                'type': 'type1',
                 'value': 'value1'
             },
             'artifact2': {
                 'description': '',
-                'type': 'str',
                 'value': 'value2'
             }
         }
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'value2')
         self.assertEqual(step_result.artifacts, step_result_expected)
 
@@ -124,26 +118,24 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result_expected = {
             'artifact1': {
                 'description': 'description1',
-                'type': 'type1',
                 'value': 'value1'
             },
             'artifact2': {
                 'description': '',
-                'type': 'str',
                 'value': 'lastonewins'
             }
         }
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'here')
         step_result.add_artifact('artifact2', 'andhere')
         step_result.add_artifact('artifact2', 'lastonewins')
         self.assertEqual(step_result.artifacts, step_result_expected)
 
     def test_get_step_result_json(self):
-        step_result_expected = '{"step1": {"sub1": {"sub-step-implementer-name": "implementer1", "success": true, "message": "", "artifacts": {"artifact1": {"description": "description1", "type": "type1", "value": "value1"}}}}}'
+        step_result_expected = '{"step1": {"sub1": {"sub-step-implementer-name": "implementer1", "success": true, "message": "", "artifacts": {"artifact1": {"description": "description1", "value": "value1"}}}}}'
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         print(step_result)
         self.assertEqual(step_result.get_step_result_json(), step_result_expected)
 
@@ -153,13 +145,12 @@ class TestStepResultTest(BaseTSSCTestCase):
     artifacts:
       artifact1:
         description: description1
-        type: type1
         value: value1
     message: ''
     sub-step-implementer-name: implementer1
     success: true
 '''
         step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1', 'type1')
+        step_result.add_artifact('artifact1', 'value1', 'description1')
         print(step_result.get_step_result_yaml())
         self.assertEqual(step_result.get_step_result_yaml(), step_result_expected)

@@ -1,16 +1,13 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
 import os
 
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.generate_metadata import Maven
+from tssc.step_implementers.generate_metadata import Npm
 from tssc.step_result import StepResult
 
 
-class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
+class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -21,7 +18,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=Maven,
+            step_implementer=Npm,
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
@@ -31,15 +28,17 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
         )
 
     def test_step_implementer_config_defaults(self):
-        defaults = Maven.step_implementer_config_defaults()
+        defaults = Npm.step_implementer_config_defaults()
         expected_defaults = {
-            'pom-file': 'pom.xml'
+            'package-file': 'package.json'
         }
         self.assertEqual(defaults, expected_defaults)
 
     def test__required_config_or_result_keys(self):
-        required_keys = Maven._required_config_or_result_keys()
-        expected_required_keys = ['pom-file']
+        required_keys = Npm._required_config_or_result_keys()
+        expected_required_keys = [
+            'package-file'
+        ]
         self.assertEqual(required_keys, expected_required_keys)
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
@@ -48,24 +47,23 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml', b'''<project>
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>com.mycompany.app</groupId>
-                <artifactId>my-app</artifactId>
-                <version>42.1</version>
-            </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            temp_dir.write('package.json', b'''{
+              "name": "my-awesome-package",
+              "version": "42.1"
+            }''')
+            package_file_path = os.path.join(temp_dir.path, 'package.json')
 
             step_config = {
-                'pom-file': pom_file_path
+                'package-file': package_file_path
             }
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='generate-metadata',
-                implementer='Maven',
+                step_name='test',
+                implementer='Npm',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                work_dir_path=work_dir_path
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
@@ -75,24 +73,23 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
-
+            package_file_path = os.path.join(temp_dir.path, 'package.json')
             step_config = {
-                'pom-file': pom_file_path
+                'package-file': package_file_path
             }
+
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='generate-metadata',
-                implementer='Maven',
+                step_name='test',
+                implementer='Npm',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                work_dir_path=work_dir_path
             )
 
             with self.assertRaisesRegex(
                 AssertionError,
-                rf"Given pom file \(pom-file\) does not exist: {pom_file_path}"
+                rf"Given npm package file \(package-file\) does not exist: {package_file_path}"
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
@@ -101,22 +98,18 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('package.json', b'''{
+              "name": "my-awesome-package",
+              "version": "42.1"
+            }''')
+            package_file_path = os.path.join(temp_dir.path, 'package.json')
 
-            temp_dir.write('pom.xml', b'''<project>
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>com.mycompany.app</groupId>
-                <artifactId>my-app</artifactId>
-                <version>42.1</version>
-            </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            step_config = {'package-file': package_file_path}
 
-            step_config = {
-                'pom-file': pom_file_path
-            }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
-                implementer='Maven',
+                implementer='Npm',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -126,33 +119,30 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
             expected_step_result = StepResult(
                 step_name='generate-metadata',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='Npm',
+                sub_step_implementer_name='Npm'
             )
             expected_step_result.add_artifact(name='app-version', value='42.1')
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
-    def test_run_step_fail_missing_version_in_pom_file(self):
+
+    def test_run_step_fail_missing_version_in_package_file(self):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('package.json', b'''{
+              "name": "my-awesome-package"
+            }''')
+            package_file_path = os.path.join(temp_dir.path, 'package.json')
 
-            temp_dir.write('pom.xml', b'''<project>
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>com.mycompany.app</groupId>
-                <artifactId>my-app</artifactId>
-            </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            step_config = {'package-file': package_file_path}
 
-            step_config = {
-                'pom-file': pom_file_path
-            }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
-                implementer='Maven',
+                implementer='Npm',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
@@ -162,11 +152,11 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
             expected_step_result = StepResult(
                 step_name='generate-metadata',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='Npm',
+                sub_step_implementer_name='Npm',
             )
             expected_step_result.success = False
-            expected_step_result.message = f"Given pom file ({pom_file_path}) does not contain " + \
-                "a \"version\" key."
+            expected_step_result.message = f"Given npm package file ({package_file_path})" + \
+                ' does not contain a \"version\" key.'
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())

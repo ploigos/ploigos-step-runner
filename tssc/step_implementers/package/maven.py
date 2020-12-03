@@ -1,4 +1,4 @@
-"""Step Implementer for the package step for Maven.
+"""`StepImplementer` for the `package` step using Maven.
 
 Notes
 -----
@@ -6,7 +6,7 @@ Notes
 .. WARNING::
 
     This can currently only handle POMs that generate a single artifact.
-    See https://projects.engineering.redhat.com/browse/NAPSSPO-546 for RFE
+    See https://github.com/rhtconsulting/tssc-python-package/issues/99 for RFE
     to handle multiple artifacts.
 
 .. Important::
@@ -15,36 +15,30 @@ Notes
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key     | Required? | Default                 | Description
-|-----------------------|-----------|-------------------------|-----------
-| `pom-file`            | True      | `'pom.xml'`             | Maven pom file to build
-| `artifact-extensions` | True      | `["jar", "war", "ear"]` | Extensions to look for in the
-|                       |           |                         | `artifact-parent-dir` for built
-|                       |           |                         | artifacts.
-| `artifact-parent-dir` | True      | `'target'`              | Parent directory to look for built
-|                       |           |                         | artifacts in ending in
-|                       |           |                         | `artifact-extensions`.
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
+Configuration Key     | Required? | Default                 | Description
+----------------------|-----------|-------------------------|-----------
+`pom-file`            | True      | `'pom.xml'`             | Maven pom file to build
+`artifact-extensions` | True      | `["jar", "war", "ear"]` | Extensions to look for in the \
+                                                              `artifact-parent-dir` for built \
+                                                               artifacts.
+`artifact-parent-dir` | True      | `'target'`              | Parent directory to look for built \
+                                                              artifacts in ending in \
+                                                              `artifact-extensions`.
 
-Results expected from previous steps that this step requires.
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-None.
-
-Results
--------
-
-Results output by this step.
-
-| Result Key          | Description
-|---------------------|------------
-| `package-artifacts` | An array of dictionaries with information on the built artifacts.
+Result Artifact Key | Description
+--------------------|------------
+`package-artifacts` | An array of dictionaries with information on the built artifacts.
 
 
 **package-artifacts**
@@ -93,16 +87,15 @@ Examples
     </project>
 
 """
-import sys
 import os
+import sys
+
 import sh
-
-from tssc import StepImplementer
-from tssc.step_result import StepResult
-from tssc.utils.xml import get_xml_element
-
-from tssc.utils.maven import generate_maven_settings
+from tssc import StepResult
 from tssc.config import ConfigValue
+from tssc.step_implementers.shared.maven_generic import MavenGeneric
+from tssc.utils import (create_sh_redirect_to_multiple_streams_fn_callback,
+                        generate_maven_settings, get_xml_element)
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml',
@@ -110,16 +103,13 @@ DEFAULT_CONFIG = {
     'artifact-parent-dir': 'target'
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'pom-file'
 ]
 
 
-class Maven(StepImplementer):
-    """
-    StepImplementer for the package step for Maven. It is assumed thought that there will
-    only be a single jar, ear, or war output for running mvn clean install against the given
-    pom.xml file.
+class Maven(MavenGeneric):
+    """`StepImplementer` for the `package` step using Maven.
     """
 
     @staticmethod
@@ -140,51 +130,35 @@ class Maven(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
-
-    def _generate_maven_settings(self):
-        # ----- build settings.xml
-        maven_servers = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-servers')
-        )
-        maven_repositories = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-repositories')
-        )
-        maven_mirrors = ConfigValue.convert_leaves_to_values(
-            self.get_config_value('maven-mirrors')
-        )
-        return generate_maven_settings(self.work_dir_path,
-                                       maven_servers,
-                                       maven_repositories,
-                                       maven_mirrors)
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
         StepResult
-            Results of running this step.
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 
-        pom_file = self.get_config_value('pom-file')
-        artifact_extensions = self.get_config_value('artifact-extensions')
-        artifact_parent_dir = self.get_config_value('artifact-parent-dir')
+        pom_file = self.get_value('pom-file')
+        artifact_extensions = self.get_value('artifact-extensions')
+        artifact_parent_dir = self.get_value('artifact-parent-dir')
 
         if not os.path.exists(pom_file):
             step_result.success = False
@@ -192,18 +166,37 @@ class Maven(StepImplementer):
             return step_result
 
         settings_file = self._generate_maven_settings()
-
+        mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
         try:
-            sh.mvn(  # pylint: disable=no-member,
-                'clean',
-                'install',
-                '-f', pom_file,
-                '-s', settings_file,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
+            with open(mvn_output_file_path, 'w') as mvn_output_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    mvn_output_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    mvn_output_file
+                ])
+
+                sh.mvn(  # pylint: disable=no-member,
+                    'clean',
+                    'install',
+                    '-f', pom_file,
+                    '-s', settings_file,
+                    _out=out_callback,
+                    _err=err_callback
+                )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(f'Error invoking mvn: {error}') from error
+            step_result.success = False
+            step_result.message = "Package failures. See 'maven-output' report artifacts " \
+                f"for details: {error}"
+            return step_result
+        finally:
+            step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
 
         # find the artifacts
         artifact_file_names = []

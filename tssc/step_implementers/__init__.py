@@ -2,7 +2,6 @@
 com.redhat.tssc.step_implementers
 """
 
-from .canary_test import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
 from .create_container_image import *
@@ -32,6 +31,5 @@ __all__ = [
     'container_image_static_vulnerability_scan',
     'deploy',
     'validate_environment_configuration',
-    'uat',
-    'canary_test'
+    'uat'
 ]

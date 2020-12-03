@@ -111,8 +111,10 @@ Example: Existing Sonar Properties File (minimal)
 
 import os
 import sys
+
 import sh
 from tssc import StepImplementer
+from tssc.exceptions import StepRunnerException
 from tssc.step_result import StepResult
 
 DEFAULT_CONFIG = {
@@ -124,10 +126,11 @@ AUTHENTICATION_CONFIG = {
     'password': None
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'url',
     'application-name',
-    'service-name'
+    'service-name',
+    'version'
 ]
 
 
@@ -153,42 +156,50 @@ class SonarQube(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        """
-        Validates the given `runtime_step_config` against the required step configuration keys.
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
 
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+        Validates that:
+        * required configuration is given
+        * either both username and password are set or neither.
 
         Raises
         ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
+        StepRunnerException
+            If step configuration or previous step result artifacts have invalid required values
         """
-        super()._validate_runtime_step_config(runtime_step_config)  # pylint: disable=protected-access
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        assert (
-                all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or not any(
-            element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-            ), 'Either username or password is not set. Neither or both must be set.'
+        # ensure either both git-username and git-password are set or neither
+        runtime_auth_config = {}
+        for auth_config_key in AUTHENTICATION_CONFIG:
+            runtime_auth_config_value = self.get_value(auth_config_key)
+
+            if runtime_auth_config_value is not None:
+                runtime_auth_config[auth_config_key] = runtime_auth_config_value
+
+        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
+                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
+            raise StepRunnerException(
+                "Either 'username' or 'password 'is not set. Neither or both must be set."
+            )
 
     def _run_step(self):
         """Runs the TSSC step implemented by this StepImplementer.
@@ -198,72 +209,59 @@ class SonarQube(StepImplementer):
         StepResult
             Results of running this step.
         """
-
         step_result = StepResult.from_step_implementer(self)
 
         # Optional: username and password
-        username = ''
-        password = ''
+        username = None
+        password = None
         if self.has_config_value(AUTHENTICATION_CONFIG):
-            if (self.get_config_value('username')
-                    and self.get_config_value('password')):
-                username = self.get_config_value('username')
-                password = self.get_config_value('password')
+            if (self.get_value('username')
+                    and self.get_value('password')):
+                username = self.get_value('username')
+                password = self.get_value('password')
 
-        # Required: Get the generate-metadata.version
-        version = self.get_result_value(artifact_name='version')
-        if version is None:
+        application_name = self.get_value('application-name')
+        service_name = self.get_value('service-name')
+        project_key = f'{application_name}:{service_name}'
+        url = self.get_value('url')
+        version = self.get_value('version')
+        properties_file = self.get_value('properties')
+        if not os.path.exists(properties_file):
             step_result.success = False
-            step_result.message = 'Severe error: Generate-metadata results is missing a version tag'
-            return step_result
-
-        # Required: properties and exists
-        properties_file = self.get_config_value('properties')
-        if not properties_file or not os.path.exists(properties_file):
-            step_result.success = False
-            step_result.message = f'Properties file in tssc config not found: {properties_file}'
+            step_result.message = f'Properties file not found: {properties_file}'
             return step_result
 
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
             working_directory = self.work_dir_path
-            if username == '':
+            if username:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    '-Dproject.settings=' + self.get_config_value('properties'),
-                    '-Dsonar.host.url=' + self.get_config_value('url'),
-                    '-Dsonar.projectVersion=' + version,
-                    '-Dsonar.projectKey=' + \
-                    self.get_config_value('application-name') + \
-                    ':' + \
-                    self.get_config_value('service-name'),
-                    '-Dsonar.working.directory=' + working_directory,
+                    f'-Dproject.settings={properties_file}',
+                    f'-Dsonar.host.url={url}',
+                    f'-Dsonar.projectVersion={version}',
+                    f'-Dsonar.projectKey={project_key}',
+                    f'-Dsonar.login={username}',
+                    f'-Dsonar.password={password}',
+                    f'-Dsonar.working.directory={working_directory}',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
-
             else:
                 sh.sonar_scanner(  # pylint: disable=no-member
-                    '-Dproject.settings=' + self.get_config_value('properties'),
-                    '-Dsonar.host.url=' + self.get_config_value('url'),
-                    '-Dsonar.projectVersion=' + version,
-                    '-Dsonar.projectKey=' + \
-                    self.get_config_value('application-name') + \
-                    ':' + \
-                    self.get_config_value('service-name'),
-                    '-Dsonar.login=' + username,
-                    '-Dsonar.password=' + password,
-                    '-Dsonar.working.directory=' + working_directory,
+                    f'-Dproject.settings={properties_file}',
+                    f'-Dsonar.host.url={url}',
+                    f'-Dsonar.projectVersion={version}',
+                    f'-Dsonar.projectKey={project_key}',
+                    f'-Dsonar.working.directory={working_directory}',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
-
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             raise RuntimeError('Error invoking sonarscanner: {all}'.format(all=error)) from error
 
         step_result.add_artifact(
             name='sonarqube-result-set',
-            value=f'file://{working_directory}/report-task.txt',
-            value_type='file'
+            value=f'{working_directory}/report-task.txt'
         )
         return step_result

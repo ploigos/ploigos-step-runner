@@ -1,8 +1,11 @@
-"""
-Shared utils for maven deeds
+"""Shared utils for maven operations.
 """
 
 import xml.etree.ElementTree as ET
+
+import sh
+from tssc.exceptions import StepRunnerException
+
 
 def generate_maven_settings(working_dir, maven_servers, maven_repositories, maven_mirrors):
     """
@@ -364,7 +367,7 @@ def add_maven_mirror(
 
     Parameters
     ----------
-    parent_element : ET.Element
+    parent_element : ElementTree.Element
         Parent element to add new <mirror> element to
 
     maven_mirror_id : str
@@ -388,3 +391,44 @@ def add_maven_mirror(
 
     mirror_mirror_of = ET.SubElement(mirror_element, 'mirrorOf')
     mirror_mirror_of.text = maven_mirror_mirror_of
+
+def write_effective_pom(
+    pom_file_path,
+    output_path
+):
+    """Generates the effective pom for a given pom and writes it to a given directory
+
+    Parameters
+    ----------
+    pom_file_path : str
+        Path to pom file to render the effective pom for.
+    output_path : str
+        Path to write the effective pom to.
+
+    See
+    ---
+    * https://maven.apache.org/plugins/maven-help-plugin/effective-pom-mojo.html
+
+    Returns
+    -------
+    str
+        Absolute path to the written effective pom generated from the given pom file path.
+
+    Raises
+    ------
+    StepRunnerException
+        If issue generating effective pom.
+    """
+
+    try:
+        sh.mvn( # pylint: disable=no-member
+            'help:effective-pom',
+            f'-f={pom_file_path}',
+            f'-Doutput={output_path}'
+        )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f"Error generating effective pom for '{pom_file_path}' to '{output_path}': {error}"
+        ) from error
+
+    return output_path

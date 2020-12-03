@@ -1,47 +1,39 @@
-"""Step Implementer for the create-container-image step for Buildah.
+"""`StepImplementer` for the `create-container-image step` using Buildah.
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key | Required? | Default        | Description
-|-------------------|-----------|----------------|-----------
-| `imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
-| `context`         | True      | `'.'`          | Context to build the container image in
-| `tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
-| `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
-| `containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
-    Path to the container registry authentication file \
-    to use for container registry authentication.
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
+Configuration Key | Required? | Default        | Description
+------------------|-----------|----------------|-----------
+`imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
+`context`         | True      | `'.'`          | Context to build the container image in
+`tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
+`format`          | True      | `'oci'`        | format of the built image's manifest and metadata
+`containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
+                                                 Path to the container registry authentication \
+                                                 file to use for container registry authentication.
+`container-image-version`     | True |         | Version to use when building the container image
 
-Results expected from previous steps that this step requires.
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-| Step Name           | Result Key                    | Description
-|---------------------|-------------------------------|------------
-| `generate-metadata` | `container-image-version`     | Version to use when building the image
-
-Results
--------
-
-Results output by this step.
-
-| Result Key                | Description
-|---------------------------|------------
-| `container-image-version` | Container version to tag built image with
-| `image-tar-file`          | Path to the built container image as a tar file
-
+Result Artifact Key | Description
+--------------------------|------------
+`container-image-version` | Container version to tag built image with
+`image-tar-file`          | Path to the built container image as a tar file
 """
 import os
-from pathlib import Path
 import sys
-import sh
+from pathlib import Path
 
+import sh
 from tssc import StepImplementer, StepResult
 from tssc.utils.containers import container_registries_login
 
@@ -62,7 +54,7 @@ DEFAULT_CONFIG = {
     'format': 'oci'
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'containers-config-auth-file',
     'imagespecfile',
     'context',
@@ -72,24 +64,13 @@ REQUIRED_CONFIG_KEYS = [
     'application-name'
 ]
 
-
 class Buildah(StepImplementer):
-    """
-    StepImplementer for the create-container-image step for Buildah.
-
-    Raises
-    ------
-    ValueError
-        If image specification file does not exist
-        If destination is not specified (not defaulted)
-    RuntimeError
-        buildah command fails for any reason
+    """`StepImplementer` for the `create-container-image step` using Buildah.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Notes
         -----
@@ -103,45 +84,45 @@ class Buildah(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
         StepResult
-            Results of running this step.
+            Object containing the dictionary results of this step.
         """
-
         step_result = StepResult.from_step_implementer(self)
 
-        context = self.get_config_value('context')
-        image_spec_file = self.get_config_value('imagespecfile')
+        context = self.get_value('context')
+        image_spec_file = self.get_value('imagespecfile')
         image_spec_file_location = context + '/' + image_spec_file
-        application_name = self.get_config_value('application-name')
-        service_name = self.get_config_value('service-name')
+        application_name = self.get_value('application-name')
+        service_name = self.get_value('service-name')
 
         if not os.path.exists(image_spec_file_location):
             step_result.success = False
             step_result.message = 'Image specification file does not exist in location: ' \
-                                  f'{image_spec_file_location}'
+                f'{image_spec_file_location}'
             return step_result
 
-        image_tag_version = self.get_result_value(artifact_name='container-image-version')
+        image_tag_version = self.get_value('container-image-version')
         if image_tag_version is None:
             image_tag_version = 'latest'
             print('No image tag version found in metadata. Using latest')
@@ -159,9 +140,9 @@ class Buildah(StepImplementer):
             # login to any provider container registries
             # NOTE: important to specify the auth file because depending on the context this is
             #       being run in python process may not have permissions to default location
-            containers_config_auth_file = self.get_config_value('containers-config-auth-file')
+            containers_config_auth_file = self.get_value('containers-config-auth-file')
             container_registries_login(
-                registries=self.get_config_value('container-registries'),
+                registries=self.get_value('container-registries'),
                 containers_config_auth_file=containers_config_auth_file
             )
 
@@ -172,8 +153,8 @@ class Buildah(StepImplementer):
             #       but such is the price we pay for security.
             sh.buildah.bud(  # pylint: disable=no-member
                 '--storage-driver=vfs',
-                '--format=' + self.get_config_value('format'),
-                '--tls-verify=' + str(self.get_config_value('tlsverify')),
+                '--format=' + self.get_value('format'),
+                '--tls-verify=' + str(self.get_value('tlsverify')),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 '--authfile', containers_config_auth_file,
@@ -182,14 +163,19 @@ class Buildah(StepImplementer):
                 _err=sys.stderr,
                 _tee='err'
             )
+
+            step_result.add_artifact(
+                name='container-image-version',
+                value=tag
+            )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError('Issue invoking buildah bud with given image '
-                               'specification file (' + image_spec_file + ')') from error
+            step_result.success = False
+            step_result.message = 'Issue invoking buildah bud with given image ' \
+                f'specification file ({image_spec_file}): {error}'
+            return step_result
 
         image_tar_file = f'image-{application_name}-{service_name}-{image_tag_version}.tar'
-
         image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
-
         try:
             # Check to see if the tar docker-archive file already exists
             #   this needs to be run as buildah does not support overwritting
@@ -208,19 +194,15 @@ class Buildah(StepImplementer):
                 _err=sys.stderr,
                 _tee='err'
             )
+
+            step_result.add_artifact(
+                name='image-tar-file',
+                value=image_tar_path
+            )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(
-                'Issue invoking buildah push to tar file ' + image_tar_path) from error
-
-        step_result.add_artifact(
-            name='container-image-version',
-            value=tag
-        )
-
-        step_result.add_artifact(
-            name='image-tar-file',
-            value=image_tar_path,
-            value_type='file'
-        )
+            step_result.success = False
+            step_result.message = f'Issue invoking buildah push to tar file ' \
+                f'({image_tar_path}): {error}'
+            return step_result
 
         return step_result

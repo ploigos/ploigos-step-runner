@@ -39,12 +39,9 @@ from tssc import StepImplementer
 DEFAULT_CONFIG = {
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'argocd-result-set'
 ]
-
-AUTHENTICATION_CONFIG = {
-}
-
 
 class ConfiglintFromArgocd(StepImplementer):
     """
@@ -68,7 +65,7 @@ class ConfiglintFromArgocd(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
+    def _required_config_or_result_keys():
         """
         Getter for step configuration keys that are required before running the step.
 
@@ -79,9 +76,9 @@ class ConfiglintFromArgocd(StepImplementer):
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         """
@@ -98,11 +95,7 @@ class ConfiglintFromArgocd(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        argocd_result_set = self.get_result_value(artifact_name='argocd-result-set')
-        if argocd_result_set is None:
-            step_result.success = False
-            step_result.message = 'Missing argocd-result-set from previous step results'
-            return step_result
+        argocd_result_set = self.get_value('argocd-result-set')
 
         # The yml_path expected format:  file:///folder/file.yml
         yml_path = urlparse(argocd_result_set).path
@@ -113,6 +106,6 @@ class ConfiglintFromArgocd(StepImplementer):
 
         step_result.add_artifact(
             name='configlint-yml-path',
-            value=f'file://{yml_path}',
-            value_type='file')
+            value=yml_path
+        )
         return step_result

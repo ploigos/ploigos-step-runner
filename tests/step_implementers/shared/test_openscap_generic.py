@@ -42,65 +42,120 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = OpenSCAPGeneric.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = OpenSCAPGeneric._required_config_or_result_keys()
         expected_required_keys = [
-            'oscap-input-definitions-uri'
+            'oscap-input-definitions-uri',
+            'image-tar-file'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-    def test__validate_runtime_step_config_valid(self):
+    def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         step_config = {
-            'oscap-input-definitions-uri': 'https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2'
+            'oscap-input-definitions-uri': 'https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2',
+            'image-tar-file': 'does-not-matter'
         }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='test',
-            implementer='OpenSCAP'
-        )
 
-        step_implementer._validate_runtime_step_config(step_config)
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-    def test__validate_runtime_step_config_invalid_protocal(self):
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_protocal(self):
         oscap_input_definitions_uri = 'foo://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2'
         step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'image-tar-file': 'does-not-matter'
         }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='test',
-            implementer='OpenSCAP',
-        )
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-        with self.assertRaisesRegex(
-                AssertionError,
-                re.compile(
-                    r'Open SCAP input definitions source '
-                    rf'\({oscap_input_definitions_uri}\) must start with known protocol '
-                    r'\(file://\|http://\|https://\)\.'
-                )
-        ):
-            step_implementer._validate_runtime_step_config(step_config)
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
 
-    def test__validate_runtime_step_config_invalid_extension(self):
+            with self.assertRaisesRegex(
+                    AssertionError,
+                    re.compile(
+                        r'Open SCAP input definitions source '
+                        rf'\({oscap_input_definitions_uri}\) must start with known protocol '
+                        r'\(file://\|http://\|https://\)\.'
+                    )
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_extension(self):
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.foo'
         step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'image-tar-file': 'does-not-matter'
         }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='test',
-            implementer='OpenSCAP'
-        )
 
-        with self.assertRaisesRegex(
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
                 AssertionError,
                 re.compile(
                     r'Open SCAP input definitions source '
                     rf'\({oscap_input_definitions_uri}\) must be of known type \(xml\|bz2\), got: \.foo'
                 )
-        ):
-            step_implementer._validate_runtime_step_config(step_config)
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
+        step_config = {}
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path
+            )
+
+            with self.assertRaisesRegex(
+                    AssertionError,
+                    re.compile(
+                        r"Missing required step configuration or previous step result"
+                        r" artifact keys: \['oscap-input-definitions-uri', 'image-tar-file'\]"
+                    )
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     @patch('sh.buildah', create=True)
     def test___buildah_import_image_from_tar_success(self, buildah_mock):
@@ -930,12 +985,13 @@ Result	pass
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
     @patch('sh.buildah', create=True)
-    def test_run_step_pass(self,
-                           buildah_mock,
-                           get_oscap_document_type_mock,
-                           buildah_mount_container_mock,
-                           run_oscap_scan_mock
-                           ):
+    def test_run_step_pass(
+        self,
+        buildah_mock,
+        get_oscap_document_type_mock,
+        buildah_mount_container_mock,
+        run_oscap_scan_mock
+    ):
         oscap_document_type = 'Source Data Stream'
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
@@ -955,7 +1011,7 @@ Result	pass
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
-                'image-tar-file': {'description': '', 'type': '', 'value': image_tar_file}
+                'image-tar-file': {'description': '', 'value': image_tar_file}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -986,9 +1042,9 @@ Result	pass
                         "sub-step-implementer-name": "OpenSCAP",
                         "success": True, "message": "",
                         "artifacts": {
-                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}
+                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "",  "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
             self.assertEqual(expected_results, step_result.get_step_result())
 
@@ -1047,7 +1103,7 @@ Result	fail
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
-                'image-tar-file': {'description': '', 'type': '', 'value': image_tar_file}
+                'image-tar-file': {'description': '', 'value': image_tar_file}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -1078,9 +1134,9 @@ Result	fail
                         "success": False,
                         "message": "OSCAP eval found issues:\n\nTitle\tInstall dnf-automatic Package\nRule\txccdf_org.ssgproject.content_rule_package_dnf-automatic_installed\nIdent\tCCE-82985-3\nResult\tfail\n",
                         "artifacts": {
-                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}
+                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
             self.assertEqual(expected_results, step_result.get_step_result())
 
@@ -1109,64 +1165,13 @@ Result	fail
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
     @patch('sh.buildah', create=True)
-    def test_run_step_missing_image_tar_file(self,
-                                             buildah_mock,
-                                             get_oscap_document_type_mock,
-                                             buildah_mount_container_mock,
-                                             run_oscap_scan_mock
-                                             ):
-        oscap_document_type = 'Source Data Stream'
-        oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
-        step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri
-        }
-        oscap_eval_success = True
-        oscap_eval_fails = None
-
-        with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
-            mount_path = '/does/not/matter/container-mount'
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
-            )
-
-            get_oscap_document_type_mock.return_value = oscap_document_type
-            buildah_mount_container_mock.return_value = mount_path
-            run_oscap_scan_mock.return_value = [
-                oscap_eval_success,
-                oscap_eval_fails
-            ]
-
-            with self.assertRaisesRegex(
-                    RuntimeError,
-                    r'Missing image tar file from create-container-image'
-            ):
-                stdout_buff = StringIO()
-                with redirect_stdout(stdout_buff):
-                    step_result = step_implementer._run_step()
-
-            stdout = stdout_buff.getvalue()
-
-            self.assertEqual(stdout, '')
-
-    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
-    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
-    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
-    @patch('sh.buildah', create=True)
-    def test_run_step_pass_with_tailoring_file(self,
-                                               buildah_mock,
-                                               get_oscap_document_type_mock,
-                                               buildah_mount_container_mock,
-                                               run_oscap_scan_mock
-                                               ):
+    def test_run_step_pass_with_tailoring_file(
+        self,
+        buildah_mock,
+        get_oscap_document_type_mock,
+        buildah_mount_container_mock,
+        run_oscap_scan_mock
+    ):
         oscap_document_type = 'Source Data Stream'
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
@@ -1188,7 +1193,7 @@ Result	fail
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
-                'image-tar-file': {'description': '', 'type': '', 'value': image_tar_file}
+                'image-tar-file': {'description': '', 'value': image_tar_file}
             }
 
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -1220,9 +1225,9 @@ Result	fail
                         "success": True,
                         "message": "",
                         "artifacts": {
-                            "html-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "type": "str", "value": f"file://{work_dir_path}/test/oscap-xccdf-out"}}}}
+                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
+                            "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
+                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
             self.assertEqual(expected_results, result.get_step_result())
 

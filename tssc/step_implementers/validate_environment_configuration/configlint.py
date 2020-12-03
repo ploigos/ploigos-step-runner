@@ -87,7 +87,8 @@ DEFAULT_CONFIG = {
     'rules': './config-lint.rules'
 }
 
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'configlint-yml-path'
 ]
 
 
@@ -113,21 +114,21 @@ class Configlint(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        """Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_runtime_step_config
-
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         """
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         """
@@ -147,14 +148,7 @@ class Configlint(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # configlint-yml-path is required
-        configlint_yml_path = self.get_config_value('configlint-yml-path')
-        if configlint_yml_path is None:
-            configlint_yml_path = self.get_result_value('configlint-yml-path')
-        if configlint_yml_path is None:
-            step_result.success = False
-            step_result.message = 'configlint-yml-path not specified in runtime args ' \
-                                  'or in previous results'
-            return step_result
+        configlint_yml_path = self.get_value('configlint-yml-path')
 
         # configlint_yml_path expected format:  file:///folder/file.yml
         yml_path = urlparse(configlint_yml_path).path
@@ -164,7 +158,7 @@ class Configlint(StepImplementer):
             return step_result
 
         # Required: rules and exists
-        rules_file = self.get_config_value('rules')
+        rules_file = self.get_value('rules')
         rules_file = urlparse(rules_file).path
         if not os.path.exists(rules_file):
             step_result.success = False
@@ -208,12 +202,10 @@ class Configlint(StepImplementer):
 
         step_result.add_artifact(
             name='configlint-result-set',
-            value=f'file://{configlint_results_file_path}',
-            value_type='file'
+            value=configlint_results_file_path
         )
         step_result.add_artifact(
             name='configlint-yml-path',
-            value=f'file://{yml_path}',
-            value_type='file'
+            value=yml_path
         )
         return step_result

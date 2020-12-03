@@ -2,14 +2,16 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
+import re
+from pathlib import Path
 from unittest.mock import patch
 
-from pathlib import Path
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tssc import StepResult
 from tssc.step_implementers.package import Maven
-from tssc.step_result import StepResult
 
 
 class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
@@ -42,8 +44,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Maven.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = Maven._required_config_or_result_keys()
         expected_required_keys = [
             'pom-file'
         ]
@@ -129,6 +131,16 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Maven'
             )
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
 
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
@@ -178,6 +190,16 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             }
             expected_step_result = StepResult(step_name='package', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -233,13 +255,39 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 work_dir_path=work_dir_path,
             )
 
-            mvn_mock.side_effect = sh.ErrorReturnCode('maven', b'mock out', b'mock error')
+            mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
 
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Error invoking mvn:"
-            ):
-                step_implementer._run_step()
+
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='package',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
+            expected_step_result.success = False
+
+            self.assertEqual(result.success, expected_step_result.success)
+            self.assertRegex(result.message, re.compile(
+                r"Package failures. See 'maven-output' report artifacts for details:"
+                r".*RAN: mvn"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            ))
+            self.assertEqual(result.artifacts, expected_step_result.artifacts)
 
     @patch('sh.mvn', create=True)
     def test_run_step_fail_multiple_artifacts(self, mvn_mock):
@@ -285,6 +333,16 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result = StepResult(step_name='package', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in multiple artifacts with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
             print(result.get_step_result())
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -329,5 +387,16 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result = StepResult(step_name='package', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in 0 with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
+
             print(result.get_step_result())
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())

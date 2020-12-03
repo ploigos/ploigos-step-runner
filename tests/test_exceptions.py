@@ -1,10 +1,10 @@
 import pytest
 
-from tssc import TSSCException
+from tssc import StepRunnerException
 
-def raise_TSSCException():
-    raise TSSCException('test')
+def raise_StepRunnerException():
+    raise StepRunnerException('test')
 
-def test_TSSCException():
-    with pytest.raises(TSSCException):
-        raise_TSSCException()
+def test_StepRunnerException():
+    with pytest.raises(StepRunnerException):
+        raise_StepRunnerException()

@@ -4,16 +4,16 @@
 import os
 import re
 from io import IOBase
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tests.helpers.test_utils import Any, create_sh_side_effect
 from tssc.step_implementers.push_container_image import Skopeo
 from tssc.step_result import StepResult
-
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
 
 
 class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
@@ -36,7 +36,6 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             work_dir_path=work_dir_path
         )
 
-    # TESTS FOR configuration checks
     def test_step_implementer_config_defaults(self):
         defaults = Skopeo.step_implementer_config_defaults()
         expected_defaults = {
@@ -46,8 +45,8 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
         }
         self.assertEqual(defaults, expected_defaults)
 
-    def test_required_runtime_step_config_keys(self):
-        required_keys = Skopeo.required_runtime_step_config_keys()
+    def test__required_config_or_result_keys(self):
+        required_keys = Skopeo._required_config_or_result_keys()
         expected_required_keys = [
             'containers-config-auth-file',
             'destination-url',
@@ -55,38 +54,136 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             'dest-tls-verify',
             'service-name',
             'application-name',
-            'organization'
+            'organization',
+            'container-image-version',
+            'image-tar-file'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-    def test__validate_runtime_step_config_valid(self):
-        step_config = {
-            'containers-config-auth-file':'notused',
-            'destination-url':'notused',
-            'src-tls-verify':'notused',
-            'dest-tls-verify':'notused',
-            'service-name':'notused',
-            'application-name':'notused',
-            'organization':'notused'
-        }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='push-container-image',
-            implementer='Skopeo'
-        )
+    @patch.object(sh, 'skopeo')
+    def test_run_step_pass(self, skopeo_mock):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
 
-        step_implementer._validate_runtime_step_config(step_config)
+            image_tar_file = 'fake-image.tar'
+            image_version = '1.0-69442c8'
+            image_tag = f'fake-registry.xyz/fake-org/fake-app-fake-service:{image_version}'
+            step_config = {
+                'destination-url': 'fake-registry.xyz',
+                'service-name': 'fake-service',
+                'application-name': 'fake-app',
+                'organization': 'fake-org',
+                'container-image-version': image_version,
+                'image-tar-file': image_tar_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='push-container-image',
+                implementer='Skopeo',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
 
-    def test__validate_runtime_step_config_invalid(self):
-        step_config = {
-        }
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            step_name='push-container-image',
-            implementer='Skopeo'
-        )
-        with self.assertRaisesRegex(
-                AssertionError,
-                "The runtime step configuration .*"
-        ):
-            step_implementer._validate_runtime_step_config(step_config)
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='push-container-image',
+                sub_step_name='Skopeo',
+                sub_step_implementer_name='Skopeo'
+            )
+            expected_step_result.add_artifact(name='container-image-version', value=image_version)
+            expected_step_result.add_artifact(
+                name='container-image-uri',
+                value='fake-registry.xyz/fake-org/fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-tag',
+                value=image_tag
+            )
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+            containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
+            skopeo_mock.copy.assert_called_once_with(
+                "--src-tls-verify=true",
+                "--dest-tls-verify=true",
+                f"--authfile={containers_config_auth_file}",
+                f'docker-archive:{image_tar_file}',
+                f'docker://{image_tag}',
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee='err'
+            )
+
+    @patch.object(sh, 'skopeo')
+    def test_run_step_fail_run_skopeo(self, skopeo_mock):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            image_tar_file = 'fake-image.tar'
+            image_version = '1.0-69442c8'
+            image_tag = f'fake-registry.xyz/fake-org/fake-app-fake-service:{image_version}'
+            step_config = {
+                'destination-url': 'fake-registry.xyz',
+                'service-name': 'fake-service',
+                'application-name': 'fake-app',
+                'organization': 'fake-org',
+                'container-image-version': image_version,
+                'image-tar-file': image_tar_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='push-container-image',
+                implementer='Skopeo',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            skopeo_mock.copy.side_effect = sh.ErrorReturnCode('skopeo', b'mock stdout', b'mock error')
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='push-container-image',
+                sub_step_name='Skopeo',
+                sub_step_implementer_name='Skopeo'
+            )
+            expected_step_result.add_artifact(name='container-image-version', value=image_version)
+            expected_step_result.add_artifact(
+                name='container-image-uri',
+                value='fake-registry.xyz/fake-org/fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-tag',
+                value=image_tag
+            )
+            expected_step_result.success = False
+            expected_step_result.message = f"Error pushing container image ({image_tar_file}) " +\
+                f" to tag ({image_tag}) using skopeo: \n" +\
+                f"\n" +\
+                f"  RAN: skopeo\n" +\
+                f"\n" +\
+                f"  STDOUT:\n" +\
+                f"mock stdout\n" +\
+                f"\n" +\
+                f"  STDERR:\n" +\
+                f"mock error"
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+            containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
+            skopeo_mock.copy.assert_called_once_with(
+                "--src-tls-verify=true",
+                "--dest-tls-verify=true",
+                f"--authfile={containers_config_auth_file}",
+                f'docker-archive:{image_tar_file}',
+                f'docker://{image_tag}',
+                _out=Any(IOBase),
+                _err=Any(IOBase),
+                _tee='err'
+            )

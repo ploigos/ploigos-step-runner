@@ -8,7 +8,7 @@ from io import StringIO
 import yaml
 from tssc.factory import TSSCFactory
 from tssc.config.config import Config
-from tssc.exceptions import TSSCException
+from tssc.exceptions import StepRunnerException
 from tssc.step_result import StepResult
 from tssc.workflow_result import WorkflowResult
 
@@ -49,41 +49,6 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
 
         return step_implementer
 
-    def run_step_test_with_result_validation(
-        self,
-        temp_dir,
-        step_name,
-        config,
-        expected_step_results,
-        runtime_args=None,
-        environment=None,
-        expected_stdout=None,
-        expected_stderr=None
-    ):
-        results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-        working_dir_path = os.path.join(temp_dir.path, 'tssc-working')
-
-        factory = TSSCFactory(config, results_dir_path, work_dir_path=working_dir_path)
-        if runtime_args:
-            factory.config.set_step_config_overrides(step_name, runtime_args)
-
-        out = StringIO()
-        err = StringIO()
-        with redirect_stdout(out), redirect_stderr(err):
-            factory.run_step(step_name, environment)
-
-        if expected_stdout is not None:
-            self.assertRegex(out.getvalue(), expected_stdout)
-
-        if expected_stderr is not None:
-            self.assertRegex(err.getvalue(), expected_stderr)
-
-        results_file_name = "tssc-results.yml"
-        with open(os.path.join(results_dir_path, results_file_name), 'r') as step_results_file:
-            actual_step_results = yaml.safe_load(step_results_file.read())
-
-            self.assertEqual(actual_step_results, expected_step_results)
-
     def setup_previous_result(
         self,
         work_dir_path,
@@ -96,22 +61,18 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         )
         for key1, val1 in artifact_config.items():
             description = ''
-            value_type = ''
             value = ''
             for key2, val2 in val1.items():
                 if key2 == 'description':
                     description = val2
-                elif key2 == 'type':
-                    value_type = val2
                 elif key2 == 'value':
                     value = val2
                 else:
-                    raise TSSCException('Given field is not apart of an artifact')
+                    raise StepRunnerException(f'Given field is not apart of an artifact: {key2}')
             step_result.add_artifact(
                 name=key1,
                 value=value,
                 description=description,
-                value_type=value_type
             )
         workflow_result = WorkflowResult()
         workflow_result.add_step_result(step_result=step_result)

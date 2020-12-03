@@ -1,7 +1,7 @@
 """Shared utilities for doing decryption.
 """
 
-from tssc.exceptions import TSSCException
+from tssc.exceptions import StepRunnerException
 from tssc.utils.io import TextIOSelectiveObfuscator
 from tssc.utils.reflection import import_and_get_class
 from tssc.config.config_value_decryptor import ConfigValueDecryptor
@@ -78,7 +78,7 @@ class DecryptionUtils:
 
         Raises
         ------
-        TSSCException
+        StepRunnerException
             If could not find class to load
             If loaded class is not a subclass of ConfigValueDecryptor
 
@@ -154,7 +154,7 @@ class DecryptionUtils:
 
         Raises
         ------
-        TSSCException
+        StepRunnerException
             If could not find class to load
             If loaded class is not a subclass of ConfigValueDecryptor
         """
@@ -167,13 +167,13 @@ class DecryptionUtils:
 
         clazz = import_and_get_class(module_name, class_name)
         if not clazz:
-            raise TSSCException(
+            raise StepRunnerException(
                 "Could not dynamically load decryptor implementer" +
                 f" ({decryptor_implementer_name}) from module ({module_name})" +
                 f" with class name ({class_name})"
             )
         if not issubclass(clazz, ConfigValueDecryptor):
-            raise TSSCException(
+            raise StepRunnerException(
                 f"For decryptor implementer ({decryptor_implementer_name})" +
                 f" dynamically loaded class ({clazz}) which is not sub class of" +
                 f" ({ConfigValueDecryptor}) and should be."

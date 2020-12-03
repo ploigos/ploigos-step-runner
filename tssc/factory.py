@@ -3,7 +3,7 @@ Factory for creating TSSC workflow and running steps.
 """
 from tssc.step_implementer import StepImplementer
 from tssc.config.config import Config
-from tssc.exceptions import TSSCException
+from tssc.exceptions import StepRunnerException
 from tssc.utils.reflection import import_and_get_class
 
 
@@ -89,7 +89,7 @@ class TSSCFactory:
         Raises
         ------
         # todo: doc needs to be updated
-        TSSCException
+        StepRunnerException
             If no StepImplementers have been registered for the given step_name
             If no specific StepImplementer name specified in sub step config
                 and no default StepImplementer registered for given step_name.
@@ -151,7 +151,7 @@ class TSSCFactory:
 
         Raises
         ------
-        TSSCException
+        StepRunnerException
             If could not find class to load
             If loaded class is not a subclass of StepImplementer
         """
@@ -165,13 +165,13 @@ class TSSCFactory:
 
         clazz = import_and_get_class(module_name, class_name)
         if not clazz:
-            raise TSSCException(
+            raise StepRunnerException(
                 f"Could not dynamically load step ({step_name}) step implementer" +
                 f" ({step_implementer_name}) from module ({module_name})" +
                 f" with class name ({class_name})"
             )
         if not issubclass(clazz, StepImplementer):
-            raise TSSCException(
+            raise StepRunnerException(
                 f"Step ({step_name}) is configured to use step implementer" +
                 f" ({step_implementer_name}) from module ({module_name}) with" +
                 f" class name ({class_name}), and dynamically loads as class ({clazz})" +

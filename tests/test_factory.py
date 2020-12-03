@@ -6,7 +6,7 @@
 import re
 from testfixtures import TempDirectory
 
-from tssc import TSSCFactory, TSSCException
+from tssc import TSSCFactory, StepRunnerException
 from tssc.config import Config
 
 from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
@@ -60,7 +60,7 @@ class TestFactory(BaseTSSCTestCase):
         factory = TSSCFactory(config)
 
         with self.assertRaisesRegex(
-            TSSCException,
+            StepRunnerException,
                 r"Could not dynamically load step \(foo\) step implementer \(DoesNotExist\)"
                 r" from module \(tssc.step_implementers.foo\) with class name \(DoesNotExist\)"):
             factory.run_step('foo')
@@ -133,14 +133,14 @@ class TestFactory(BaseTSSCTestCase):
 
     def test__get_step_implementer_class_does_not_exist_using_default_steps_module(self):
         with self.assertRaisesRegex(
-                TSSCException,
+                StepRunnerException,
                 r"Could not dynamically load step \(foo\) step implementer \(bar\) "
                 r"from module \(tssc.step_implementers.foo\) with class name \(bar\)"):
             TSSCFactory._TSSCFactory__get_step_implementer_class('foo', 'bar')
 
     def test__get_step_implementer_name_class_does_not_exist_given_module_path(self):
         with self.assertRaisesRegex(
-                TSSCException,
+                StepRunnerException,
                 r"Could not dynamically load step \(foo\) step implementer"
                 r" \(tests.helpers.sample_step_implementers.DoesNotExist\) from module \(tests.helpers.sample_step_implementers\) with class name \(DoesNotExist\)"):
             TSSCFactory._TSSCFactory__get_step_implementer_class('foo',
@@ -148,7 +148,7 @@ class TestFactory(BaseTSSCTestCase):
 
     def test__get_step_implementer_name_class_is_not_subclass_of_StepImplementer(self):
         with self.assertRaisesRegex(
-                TSSCException,
+                StepRunnerException,
                 re.compile(
                     r"Step \(foo\) is configured to use step implementer "
                     r"\(tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer\) "
