@@ -1,4 +1,4 @@
-"""Step Implementer for the tag-source step using Git.
+"""`StepImplementer` for the `tag-source` step using Git.
 
 Step Configuration
 ------------------
@@ -34,9 +34,9 @@ Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-| Result Artifact Key | Description
-|---------------------|------------
-| `tag`               | This is the value that was used to tag the source.
+Result Artifact Key | Description
+--------------------|------------
+`tag`               | This is the value that was used to tag the source.
 """
 import re
 import sys
@@ -128,12 +128,12 @@ class Git(StepImplementer):
             )
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
         StepResult
-            Results of running this step.
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 
@@ -147,26 +147,31 @@ class Git(StepImplementer):
             print('No username/password found, assuming ssh')
 
         tag = self.__get_tag()
-        self.__git_tag(tag)
-        git_url = self.__git_url()
-        if git_url.startswith('http://'):
-            if username and password:
-                self.__git_push('http://' + username + ':' + password + '@' + git_url[7:])
+
+        try:
+            self.__git_tag(tag)
+            git_url = self.__git_url()
+            if git_url.startswith('http://'):
+                if username and password:
+                    self.__git_push('http://' + username + ':' + password + '@' + git_url[7:])
+                else:
+                    step_result.success = False
+                    step_result.message = 'For a http:// git url, you need to also provide ' \
+                                        'username/password pair'
+                    return step_result
+            elif git_url.startswith('https://'):
+                if username and password:
+                    self.__git_push('https://' + username + ':' + password + '@' + git_url[8:])
+                else:
+                    step_result.success = False
+                    step_result.message = 'For a https:// git url, you need to also provide ' \
+                                        'username/password pair'
+                    return step_result
             else:
-                step_result.success = False
-                step_result.message = 'For a http:// git url, you need to also provide ' \
-                                      'username/password pair'
-                return step_result
-        elif git_url.startswith('https://'):
-            if username and password:
-                self.__git_push('https://' + username + ':' + password + '@' + git_url[8:])
-            else:
-                step_result.success = False
-                step_result.message = 'For a https:// git url, you need to also provide ' \
-                                      'username/password pair'
-                return step_result
-        else:
-            self.__git_push(None)
+                self.__git_push(None)
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
 
         step_result.add_artifact(
             name='tag',
@@ -212,7 +217,7 @@ class Git(StepImplementer):
                 git_url = re.sub(r"^(http://|https://)[^@]+@(.*)", r"\1\2", git_url)
 
             except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-                raise RuntimeError(
+                raise StepRunnerException(
                     f"Error invoking git config --get remote.origin.url: {error}"
                 ) from error
         return git_url
@@ -234,7 +239,9 @@ class Git(StepImplementer):
                 _tee='err'
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f"Error pushing git tag ({git_tag_value}): {error}") from error
+            raise StepRunnerException(
+                f"Error pushing git tag ({git_tag_value}): {error}"
+            ) from error
 
     @staticmethod
     def __git_push(url=None):
@@ -255,4 +262,4 @@ class Git(StepImplementer):
                     _tee='err'
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f"Error invoking git push: {error}") from error
+            raise StepRunnerException(f"Error invoking git push: {error}") from error

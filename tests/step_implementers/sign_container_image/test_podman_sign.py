@@ -12,6 +12,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, StringRegexParam
+from tssc.exceptions import StepRunnerException
 from tssc.step_implementers.sign_container_image import PodmanSign
 from tssc.step_result import StepResult
 
@@ -196,7 +197,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             }
             self.setup_previous_result(work_dir_path, artifact_config)
 
-            import_pgp_key_mock.side_effect = RuntimeError('mock error importing pgp key')
+            import_pgp_key_mock.side_effect = StepRunnerException('mock error importing pgp key')
 
             def sign_image_side_effect(
                     pgp_private_key_fingerprint,
@@ -253,7 +254,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 return pgp_private_key_fingerprint
             import_pgp_key_mock.side_effect = import_pgp_key_side_effect
 
-            sign_image_mock.side_effect = RuntimeError('mock error signing image')
+            sign_image_mock.side_effect = StepRunnerException('mock error signing image')
 
             # Actual results
             step_implementer = self.create_step_implementer(
@@ -318,9 +319,9 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         pgp_private_key=TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
 
         with self.assertRaisesRegex(
-            RuntimeError,
+            StepRunnerException,
             re.compile(
-                r"Unexpected error importing pgp private key:"
+                r"Error importing pgp private key:"
                 r".*RAN: gpg"
                 r".*STDOUT:"
                 r".*mock stdout"
@@ -349,9 +350,9 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         pgp_private_key=TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
 
         with self.assertRaisesRegex(
-            RuntimeError,
+            StepRunnerException,
             re.compile(
-                r"Unexpected error getting PGP fingerprint for PGP key"
+                r"Error getting PGP fingerprint for PGP key"
                 r" to sign container image\(s\) with. See stdout and stderr for more info.",
                 re.DOTALL
             )
@@ -407,9 +408,9 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             podman_mock.image.side_effect = sh.ErrorReturnCode('podman', b'mock stdout', b'mock error signing image')
 
             with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    rf"Unexpected error signing image \({container_image_tag}\):"
+                    rf"Error signing image \({container_image_tag}\):"
                     r".*RAN: podman"
                     r".*STDOUT:"
                     r".*mock stdout"
@@ -445,7 +446,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 create_podman_image_sign_side_effect(num_signatures=2)
 
             with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
                     r"Unexpected number of signature files, expected 1: \['.*', '.*'\]",
                     re.DOTALL

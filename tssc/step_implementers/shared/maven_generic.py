@@ -34,9 +34,12 @@ class MavenGeneric(StepImplementer):
         """
         super()._validate_required_config_or_previous_step_result_artifact_keys()
 
+        # if pom-file has value verify file exists
+        # If it doesn't have value and is required function will have already failed
         pom_file = self.get_value('pom-file')
-        assert os.path.exists(pom_file), \
-            f'Given maven pom file (pom-file) does not exist: {pom_file}'
+        if pom_file is not None:
+            assert os.path.exists(pom_file), \
+                f'Given maven pom file (pom-file) does not exist: {pom_file}'
 
     def _generate_maven_settings(self):
         maven_servers = ConfigValue.convert_leaves_to_values(

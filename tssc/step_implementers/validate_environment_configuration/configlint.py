@@ -1,6 +1,7 @@
-"""Step Implementer for the 'validate-environment-config' step for configlint.
-The Configlint step executes the config-lint against yml files for user-defined
-rules.   The inputs to this step include:
+"""`StepImplementer` for the `validate-environment-configuration` step using config-lint against
+a given yaml file to lint.
+
+Executes the config-lint against yml files for user-defined rules. The inputs to this step include:
 
   - Rules defined by the user in a specified file:
     * Reference:  https://stelligent.github.io/config-lint/#/
@@ -10,22 +11,25 @@ rules.   The inputs to this step include:
 
 Step Configuration
 ------------------
-Step configuration expected as input to this step.  Could come from
-configuration file, runtime configuration or previous step.
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
 
-| Configuration Key       | Required | Default               | Description
-|-------------------------|----------|-----------------------|-----------------------------------
-| `rules`                 | False    | ./config_lint.rules   | File containing user-defined rules
-| `configlint-yml-file`   | True     | None                  | File to be linted
+Configuration Key       | Required | Default               | Description
+------------------------|----------|-----------------------|-----------------------------------
+`rules`                 | Yes      | ./config_lint.rules   | File containing user-defined rules
+`configlint-yml-file`   | Yes      | None                  | File to be linted
 
-Results
--------
-Results output by this step.
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-| Result Key              | Description
-|-------------------------|------------
-| `configlint-yml-file`   | File that was linted
-| `configlint-result-set` | Result of configlint in a text file
+Result Artifact Key     | Description
+------------------------|------------
+`configlint-yml-file`   | File that was linted
+`configlint-result-set` | Result of configlint in a text file
 
 
 Examples
@@ -68,9 +72,9 @@ import os
 import sys
 
 import sh
-from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 from tssc import StepImplementer
 from tssc.step_result import StepResult
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
     'rules': './config-lint.rules'
@@ -82,14 +86,13 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 
 
 class Configlint(StepImplementer):
-    """
-    StepImplementer for the validate-environment-configuration sub-step ConfiglintFromArgocd
+    """`StepImplementer` for the validate-environment-configuration step using config-lint against
+    a given yaml file to lint.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -120,19 +123,12 @@ class Configlint(StepImplementer):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 

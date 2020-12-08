@@ -1,44 +1,36 @@
-"""Step Implementer for the unit-test step for Maven generating JUnit reports.
+"""`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
 
-| Configuration Key  | Required? | Default     | Description
-|--------------------|-----------|-------------|-----------
-| `fail-on-no-tests` | True      | True        | Value to specify whether unit-test
-                                                 step can succeed when no tests are defined
-| `pom-file`         | True      | `'pom.xml'` | pom used to run tests and check
-                                                 for existence of custom reportsDirectory
+Configuration Key  | Required? | Default     | Description
+-------------------|-----------|-------------|-----------
+`fail-on-no-tests` | True      | True        | Value to specify whether unit-test \
+                                               step can succeed when no tests are defined
+`pom-file`         | True      | `'pom.xml'` | pom used to run tests and check \
+                                               for existence of custom reportsDirectory
 
-Expected Previous Step Results
-------------------------------
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results expected from previous steps that this step requires.
-
-None.
-
-Results
--------
-
-Results output by this step.
-
-| Result Key          | Description
-|---------------------|------------
-| `pom-path`          | Absolute path to the pom used to run tests
-| `surefile-reports`  |
-
+Result Artifact Key | Description
+--------------------|------------
+`maven-output`      | Path to Stdout and Stderr from invoking Maven.
+`surefile-reports`  | Path to Surefire reports generated from invoking Maven.
 """
 import os
 import sys
 
 import sh
-from tssc import StepImplementer, StepResult
+from tssc import StepResult
 from tssc.step_implementers.shared.maven_generic import MavenGeneric
-from tssc.utils import create_sh_redirect_to_multiple_streams_fn_callback
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
     'fail-on-no-tests': True,
@@ -52,13 +44,12 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 
 
 class Maven(MavenGeneric):
-    """StepImplementer for the unit-test step for Maven generating JUnit reports.
+    """`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -90,12 +81,12 @@ class Maven(MavenGeneric):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        step_result
-            Object with results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 

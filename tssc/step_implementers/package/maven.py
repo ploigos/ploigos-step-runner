@@ -41,10 +41,10 @@ Result Artifact Key | Description
 `package-artifacts` | An array of dictionaries with information on the built artifacts.
 
 
-**package-artifacts**
-Keys in the dictionary elements in the `artifacts` array in the step results.
+## package-artifacts
+Keys in the dictionary elements in the `package-artifacts` array in the step results.
 
-| `artifacts` Key | Description
+| Key             | Description
 |-----------------|------------
 | `path`          | Absolute path to the built artifact.
 | `artifact-id`   | Maven artifact ID.
@@ -92,10 +92,9 @@ import sys
 
 import sh
 from tssc import StepResult
-from tssc.config import ConfigValue
 from tssc.step_implementers.shared.maven_generic import MavenGeneric
-from tssc.utils import (create_sh_redirect_to_multiple_streams_fn_callback,
-                        generate_maven_settings, get_xml_element)
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from tssc.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
     'pom-file': 'pom.xml',
@@ -114,8 +113,7 @@ class Maven(MavenGeneric):
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -146,7 +144,7 @@ class Maven(MavenGeneric):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _run_step(self):
+    def _run_step(self): # pylint: disable=too-many-locals
         """Runs the step implemented by this StepImplementer.
 
         Returns
@@ -178,7 +176,7 @@ class Maven(MavenGeneric):
                     mvn_output_file
                 ])
 
-                sh.mvn(  # pylint: disable=no-member,
+                sh.mvn(  # pylint: disable=no-member
                     'clean',
                     'install',
                     '-f', pom_file,

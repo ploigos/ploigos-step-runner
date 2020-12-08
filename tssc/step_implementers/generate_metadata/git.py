@@ -30,9 +30,9 @@ Result Artifact Key | Description
 
 import re
 
-from tssc import StepImplementer, StepResult
-
 from git import InvalidGitRepositoryError, Repo
+
+from tssc import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
     'repo-root': './',

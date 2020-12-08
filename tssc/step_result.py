@@ -7,7 +7,7 @@ import yaml
 from tssc.exceptions import StepRunnerException
 
 
-class StepResult:
+class StepResult: # pylint: disable=too-many-instance-attributes
     """
     Step result object.
 

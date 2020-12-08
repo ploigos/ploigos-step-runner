@@ -9,9 +9,11 @@ from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-from tests.helpers.test_utils import (Any, create_sh_side_effect)
-
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tests.helpers.test_utils import Any, create_sh_side_effect
+from tssc import StepResult
+from tssc.exceptions import StepRunnerException
 from tssc.step_implementers.shared.openscap_generic import OpenSCAPGeneric
 
 
@@ -185,9 +187,9 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         buildah_mock.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
 
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    rf"Unexpected runtime error importing the image \({image_tar_file}\):"
+                    rf"Error importing the image \({image_tar_file}\):"
                     r".*RAN: buildah"
                     r".*STDOUT:"
                     r".*mock out"
@@ -248,9 +250,9 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         )
 
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    rf"Unexpected runtime error mounting container \({container_name}\):"
+                    rf"Error mounting container \({container_name}\):"
                     r".*RAN: buildah"
                     r".*STDOUT:"
                     r".*mock out"
@@ -382,9 +384,9 @@ Referenced check files:
         )
 
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    r"Unexpected error getting document type of oscap"
+                    r"Error getting document type of oscap"
                     rf" input file \({oscap_input_file}\):"
                     r".*RAN: oscap info"
                     r".*STDOUT:"
@@ -770,9 +772,9 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     @patch('sh.buildah', create=True)
     def test___run_oscap_scan_xccdf_exit_code_1(self, buildah_mock):
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    r"Unexpected error running 'oscap xccdf eval':"
+                    r"Error running 'oscap xccdf eval':"
                     r".*RAN: oscap-chroot eval"
                     r".*STDOUT:"
                     r".*Title\s*Enable Kernel Page-Table Isolation \(KPTI\)"
@@ -837,9 +839,9 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     @patch('sh.buildah', create=True)
     def test___run_oscap_scan_oval_exit_code_1(self, buildah_mock):
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    r"Unexpected error running 'oscap oval eval': "
+                    r"Error running 'oscap oval eval': "
                     r".*RAN: oscap-chroot eval"
                     r".*STDOUT:"
                     r".*Definition oval:com.redhat.rhsa:def:20203699: false"
@@ -875,9 +877,9 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     @patch('sh.buildah', create=True)
     def test___run_oscap_scan_oval_exit_code_2(self, buildah_mock):
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    r"Unexpected error running 'oscap oval eval': "
+                    r"Error running 'oscap oval eval': "
                     r".*RAN: oscap-chroot eval"
                     r".*STDOUT:"
                     r".*Definition oval:com.redhat.rhsa:def:20203699: false"
@@ -913,9 +915,9 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     @patch('sh.buildah', create=True)
     def test___run_oscap_scan_oval_exit_code_unknown(self, buildah_mock):
         with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 re.compile(
-                    r"Unexpected error running 'oscap oval eval': "
+                    r"Error running 'oscap oval eval': "
                     r".*RAN: oscap-chroot eval"
                     r".*STDOUT:"
                     r".*Definition oval:com.redhat.rhsa:def:20203699: false"
@@ -1058,7 +1060,7 @@ Result	pass
                     rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
                     rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
                     rf".*Download input definitions: {oscap_input_definitions_uri}"
-                    rf".*Download input definitions to: /.+/working/test/rhel\-8.ds.xml"
+                    rf".*Downloaded input definitions to: /.+/working/test/rhel\-8.ds.xml"
                     rf".*Determine OpenSCAP document type of input file: /.+/working/test/rhel\-8\.ds\.xml"
                     rf".*Determined OpenSCAP document type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_document_type}"
                     rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
@@ -1150,7 +1152,7 @@ Result	fail
                     rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
                     rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
                     rf".*Download input definitions: {oscap_input_definitions_uri}"
-                    rf".*Download input definitions to: /.+/working/test/rhel\-8.ds.xml"
+                    rf".*Downloaded input definitions to: /.+/working/test/rhel\-8.ds.xml"
                     rf".*Determine OpenSCAP document type of input file: /.+/working/test/rhel\-8\.ds\.xml"
                     rf".*Determined OpenSCAP document type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_document_type}"
                     rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
@@ -1242,7 +1244,7 @@ Result	fail
                     rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
                     rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
                     rf".*Download input definitions: {oscap_input_definitions_uri}"
-                    rf".*Download input definitions to: /.+/working/test/rhel\-8.ds.xml"
+                    rf".*Downloaded input definitions to: /.+/working/test/rhel\-8.ds.xml"
                     rf".*Download oscap tailoring file: {oscap_tailoring_uri}"
                     rf".*Download oscap tailoring file to: /.+/working/test/xccdf_com.redhat\.tssc_profile_example_ubi8\-tailoring\-xccdf\.xml"
                     rf".*Determine OpenSCAP document type of input file: /.+/working/test/rhel\-8\.ds\.xml"
@@ -1251,6 +1253,181 @@ Result	fail
                     rf".*Determined OpenSCAP eval type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_eval_type}"
                     rf".*Run oscap scan"
                     rf".*OpenSCAP scan completed with eval success",
+                    re.DOTALL
+                )
+            )
+
+    @patch('tssc.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
+    @patch('sh.buildah', create=True)
+    def test_run_step_fail_downloading_open_scap_input_file(
+        self,
+        buildah_mock,
+        get_oscap_document_type_mock,
+        buildah_mount_container_mock,
+        run_oscap_scan_mock,
+        download_and_decompress_source_to_destination_mock
+    ):
+        oscap_document_type = 'Source Data Stream'
+        oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
+        step_config = {
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'oscap-profile': 'foo'
+        }
+        image_tar_file_name = 'my_awesome_app'
+        image_tar_file = f'/does/not/matter/{image_tar_file_name}.tar'
+        oscap_eval_success = True
+        oscap_eval_fails = None
+
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            mount_path = '/does/not/matter/container-mount'
+
+            artifact_config = {
+                'image-tar-file': {'description': '', 'value': image_tar_file}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            get_oscap_document_type_mock.return_value = oscap_document_type
+            buildah_mount_container_mock.return_value = mount_path
+            run_oscap_scan_mock.return_value = [
+                oscap_eval_success,
+                oscap_eval_fails
+            ]
+
+            mock_error_msg = 'mock error downloading open scap file'
+            download_and_decompress_source_to_destination_mock.side_effect = RuntimeError(
+                mock_error_msg
+            )
+
+            stdout_buff = StringIO()
+            with redirect_stdout(stdout_buff):
+                step_result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='test',
+                sub_step_name='OpenSCAP',
+                sub_step_implementer_name='OpenSCAP'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'Error downloading OpenSCAP input file: ' \
+                f'{mock_error_msg}'
+
+            self.assertEqual(step_result.get_step_result(), expected_step_result.get_step_result())
+
+            stdout = stdout_buff.getvalue()
+
+            self.assertRegex(
+                stdout,
+                re.compile(
+                    rf".*Import image: {image_tar_file}"
+                    rf".*Imported image: {image_tar_file}"
+                    rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
+                    rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
+                    rf".*Download input definitions: {oscap_input_definitions_uri}",
+                    re.DOTALL
+                )
+            )
+
+    @patch('tssc.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
+    @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
+    @patch('sh.buildah', create=True)
+    def test_run_step_fail_downloading_open_scap_tailoring_file(
+        self,
+        buildah_mock,
+        get_oscap_document_type_mock,
+        buildah_mount_container_mock,
+        run_oscap_scan_mock,
+        download_and_decompress_source_to_destination_mock
+    ):
+        oscap_document_type = 'Source Data Stream'
+        oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
+        oscap_tailoring_uri = 'https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml'
+        step_config = {
+            'oscap-input-definitions-uri': oscap_input_definitions_uri,
+            'oscap-tailoring-uri': oscap_tailoring_uri,
+            'oscap-profile': 'foo'
+        }
+        image_tar_file_name = 'my_awesome_app'
+        image_tar_file = f'/does/not/matter/{image_tar_file_name}.tar'
+        oscap_eval_success = True
+        oscap_eval_fails = None
+
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            mount_path = '/does/not/matter/container-mount'
+
+            artifact_config = {
+                'image-tar-file': {'description': '', 'value': image_tar_file}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            get_oscap_document_type_mock.return_value = oscap_document_type
+            buildah_mount_container_mock.return_value = mount_path
+            run_oscap_scan_mock.return_value = [
+                oscap_eval_success,
+                oscap_eval_fails
+            ]
+
+            mock_error_msg = 'mock error downloading open scap file'
+            download_and_decompress_source_to_destination_mock.side_effect = [
+                "foo",
+                RuntimeError(mock_error_msg)
+            ]
+
+            stdout_buff = StringIO()
+            with redirect_stdout(stdout_buff):
+                step_result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='test',
+                sub_step_name='OpenSCAP',
+                sub_step_implementer_name='OpenSCAP'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'Error downloading OpenSCAP tailoring file: ' \
+                f'{mock_error_msg}'
+
+            self.assertEqual(step_result.get_step_result(), expected_step_result.get_step_result())
+
+            stdout = stdout_buff.getvalue()
+
+            self.assertRegex(
+                stdout,
+                re.compile(
+                    rf".*Import image: {image_tar_file}"
+                    rf".*Imported image: {image_tar_file}"
+                    rf".*Mount container: {image_tar_file_name}\-test\-OpenSCAP.*"
+                    rf".*Mounted container \({image_tar_file_name}\-test\-OpenSCAP.*\) with mount path: '{mount_path}'"
+                    rf".*Download input definitions: {oscap_input_definitions_uri}",
                     re.DOTALL
                 )
             )

@@ -2,15 +2,17 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
-from unittest.mock import patch
-import sh
+import re
 from io import IOBase
+from unittest.mock import patch
 
+import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tests.helpers.test_utils import Any, StringRegexParam
 from tssc.step_implementers.sign_container_image import CurlPush
 from tssc.step_result import StepResult
-from tests.helpers.test_utils import Any, StringRegexParam
 
 
 class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
@@ -119,6 +121,9 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             temp_dir.write(signature_file_path, b'bogus signature')
             container_image_signature_file_path = os.path.join(temp_dir.path, signature_file_path)
 
+            container_image_signature_name = 'jkeam/hello-node@sha256=2cbdb73c9177e63e85d267f738e' \
+                '99e368db3f806eab4c541f5c6b719e69f1a2b/signature-1'
+
             step_config = {
                 'container-image-signature-server-url': 'https://sigserver/signatures',
                 'container-image-signature-server-username': 'admin',
@@ -128,7 +133,7 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             # Previous (fake) results
             artifact_config = {
                 'container-image-signature-file-path': {'value': container_image_signature_file_path},
-                'container-image-signature-name': {'value': 'myname'},
+                'container-image-signature-name': {'value': container_image_signature_name},
             }
             self.setup_previous_result(work_dir_path, artifact_config)
 
@@ -142,7 +147,41 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
                 work_dir_path=work_dir_path,
             )
             sh.curl.side_effect = sh.ErrorReturnCode('curl', b'mock stdout', b'mock error')
-            with self.assertRaisesRegex(
-                    RuntimeError,
-                    'Unexpected error curling signature file to signature server: .*'):
-                step_implementer._run_step()
+
+            result = step_implementer._run_step()
+
+            # # Expected results
+            expected_step_result = StepResult(
+                step_name='sign-container-image',
+                sub_step_name='CurlPush',
+                sub_step_implementer_name='CurlPush'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = "foo"
+
+            self.assertEqual(result.success, expected_step_result.success)
+            self.assertEqual(result.artifacts, expected_step_result.artifacts)
+            self.assertRegex(
+                result.message,
+                re.compile(
+                    r"Error pushing signature file to signature server using curl: "
+                    r".*RAN: curl"
+                    r".*STDOUT:"
+                    r".*mock stdout"
+                    r".*STDERR:"
+                    r".*mock error",
+                    re.DOTALL
+                )
+            )
+            curl_mock.assert_called_once_with(
+                '-sSfv',
+                '-X', 'PUT',
+                '--header', StringRegexParam(r'X-Checksum-Sha1:.+'),
+                '--header', StringRegexParam(r'X-Checksum-MD5:.+'),
+                '--user', "admin:adminPassword",
+                '--upload-file', container_image_signature_file_path,
+                f"https://sigserver/signatures/{container_image_signature_name}",
+                _out=Any(IOBase),
+                _err_to_out=True,
+                _tee='out'
+            )
