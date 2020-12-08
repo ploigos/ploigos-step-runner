@@ -289,8 +289,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_sonar_error(self, sonar_mock):
+    def __run__run_step_fail_sonar_scanner_error_test(
+        self,
+        sonar_scanner_error,
+        expected_result_message_regex,
+        sonar_mock
+    ):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
             results_file_name = 'tssc-results.yml'
@@ -323,10 +327,77 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.setup_previous_result(work_dir_path, artifact_config)
 
-            sonar_mock.side_effect = sh.ErrorReturnCode('sonar', b'mock out', b'mock error')
+            sonar_mock.side_effect = sonar_scanner_error
 
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Error invoking sonarscanner:"
-            ):
-                step_implementer._run_step()
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='static-code-analysis',
+                sub_step_name='SonarQube',
+                sub_step_implementer_name='SonarQube'
+            )
+            expected_step_result.success = False
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/report-task.txt'
+            )
+
+            self.assertEqual(result.success, expected_step_result.success)
+            self.assertEqual(result.artifacts, expected_step_result.artifacts)
+            self.assertRegex(result.message, expected_result_message_regex)
+
+    @patch('sh.sonar_scanner', create=True)
+    def test_run_step_fail_sonar_scanner_internal_error(self, sonar_mock):
+        self.__run__run_step_fail_sonar_scanner_error_test(
+            sonar_scanner_error=sh.ErrorReturnCode_1(
+                'sonar-scanner',
+                b'mock out',
+                b'mock internal error'
+            ),
+            expected_result_message_regex=re.compile(
+                r"Error running static code analysis using sonar-scanner:"
+                r".*RAN: sonar-scanner"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock internal error",
+                re.DOTALL
+            ),
+            sonar_mock=sonar_mock
+        )
+
+    @patch('sh.sonar_scanner', create=True)
+    def test_run_step_fail_sonar_scanner_tests_failed(self, sonar_mock):
+        self.__run__run_step_fail_sonar_scanner_error_test(
+           sonar_scanner_error=sh.ErrorReturnCode_2(
+                'sonar-scanner',
+                b'mock out',
+                b'mock user error'
+            ),
+            expected_result_message_regex=re.compile(
+                r"Static code analysis failed."
+                r" See 'sonarqube-result-set' result artifact for details.",
+                re.DOTALL
+            ),
+            sonar_mock=sonar_mock
+        )
+
+    @patch('sh.sonar_scanner', create=True)
+    def test_run_step_fail_sonar_scanner_unexpected_error(self, sonar_mock):
+        self.__run__run_step_fail_sonar_scanner_error_test(
+           sonar_scanner_error=sh.ErrorReturnCode_42(
+                'sonar-scanner',
+                b'mock out',
+                b'mock unexpected error'
+            ),
+            expected_result_message_regex=re.compile(
+                r"Unexpected error running static code analysis using sonar-scanner:"
+                r".*RAN: sonar-scanner"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock unexpected error",
+                re.DOTALL
+            ),
+            sonar_mock=sonar_mock
+        )

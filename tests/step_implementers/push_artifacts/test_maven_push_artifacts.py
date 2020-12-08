@@ -2,14 +2,14 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
-
+import re
 from unittest.mock import patch
+
 import sh
-
 from testfixtures import TempDirectory
-from tests.helpers.base_step_implementer_test_case import BaseStepImplementerTestCase
-
-from tssc.step_result import StepResult
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tssc import StepResult
 from tssc.step_implementers.push_artifacts import Maven
 
 
@@ -93,8 +93,22 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'path': 'test-path',
                 'packaging': 'test-package-type',
             }]
-            expected_step_result = StepResult(step_name='push-artifacts', sub_step_name='Maven', sub_step_implementer_name='Maven')
+            expected_step_result = StepResult(
+                step_name='push-artifacts',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'push-artifacts',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
             self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
     @patch('sh.mvn', create=True)
@@ -132,8 +146,39 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
-            sh.mvn.side_effect = sh.ErrorReturnCode('mvn', b'mock stdout', b'mock error')
-            with self.assertRaisesRegex(
-                     RuntimeError,
-                     'Error invoking mvn'):
-                step_implementer._run_step()
+            sh.mvn.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
+
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='push-artifacts',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.add_artifact(
+                name='push-artifacts',
+                value=[]
+            )
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'push-artifacts',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
+            expected_step_result.success = False
+
+            self.assertEqual(result.success, expected_step_result.success)
+            self.assertRegex(result.message, re.compile(
+                r"Push artifacts failures. See 'maven-output' report artifacts for details:"
+                r".*RAN: mvn"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            ))
+            self.assertEqual(result.artifacts, expected_step_result.artifacts)

@@ -16,7 +16,7 @@ from tssc.step_implementers.tag_source import Git
 from tssc.step_result import StepResult
 
 
-class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
+class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -414,7 +414,6 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 return url
             git_url_mock.side_effect = git_url_side_effect
 
-
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(step_name='tag-source', sub_step_name='Git', sub_step_implementer_name='Git')
@@ -425,6 +424,183 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             get_tag_mock.assert_called_once_with()
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    @patch.object(Git, '_Git__get_tag')
+    @patch.object(Git, '_Git__git_url')
+    @patch.object(Git, '_Git__git_tag')
+    @patch.object(Git, '_Git__git_push')
+    def test_run_step_error_git_tag(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
+        with TempDirectory() as temp_dir:
+            tag = '1.0+69442c8'
+            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_config = {
+                'url': url,
+                'git-username': 'git-username',
+                'git-password': 'git-password'
+            }
+
+            artifact_config = {
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            def get_tag_side_effect():
+                return tag
+            get_tag_mock.side_effect = get_tag_side_effect
+
+            def git_url_side_effect():
+                return url
+            git_url_mock.side_effect = git_url_side_effect
+
+            # this is the test
+            git_tag_mock.side_effect = StepRunnerException('mock error')
+            result = step_implementer._run_step()
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='tag-source',
+                sub_step_name='Git',
+                sub_step_implementer_name='Git'
+            )
+            expected_step_result.add_artifact(name='tag', value=tag)
+            expected_step_result.success = False
+            expected_step_result.message = "mock error"
+
+            # verifying correct mocks were called
+            git_tag_mock.assert_called_once_with(tag)
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    @patch.object(Git, '_Git__get_tag')
+    @patch.object(Git, '_Git__git_url')
+    @patch.object(Git, '_Git__git_tag')
+    @patch.object(Git, '_Git__git_push')
+    def test_run_step_error_git_url(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
+        with TempDirectory() as temp_dir:
+            tag = '1.0+69442c8'
+            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_config = {
+                'url': url,
+                'git-username': 'git-username',
+                'git-password': 'git-password'
+            }
+
+            artifact_config = {
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            def get_tag_side_effect():
+                return tag
+            get_tag_mock.side_effect = get_tag_side_effect
+
+            # this is the test here
+            git_url_mock.side_effect = StepRunnerException('mock error')
+            result = step_implementer._run_step()
+
+            # verify test results
+            expected_step_result = StepResult(
+                step_name='tag-source',
+                sub_step_name='Git',
+                sub_step_implementer_name='Git'
+            )
+            expected_step_result.add_artifact(name='tag', value=tag)
+            expected_step_result.success = False
+            expected_step_result.message = "mock error"
+
+            # verifying correct mocks were called
+            git_tag_mock.assert_called_once_with(tag)
+            git_url_mock.assert_called_once_with()
+
+            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+
+    @patch.object(Git, '_Git__get_tag')
+    @patch.object(Git, '_Git__git_url')
+    @patch.object(Git, '_Git__git_tag')
+    @patch.object(Git, '_Git__git_push')
+    def test_run_step_error_git_push(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
+        with TempDirectory() as temp_dir:
+            tag = '1.0+69442c8'
+            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_config = {
+                'url': url,
+                'git-username': 'git-username',
+                'git-password': 'git-password'
+            }
+
+            artifact_config = {
+                'version': {'description': '', 'value': tag},
+                'container-image-version': {'description': '', 'value': tag}
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            def get_tag_side_effect():
+                return tag
+            get_tag_mock.side_effect = get_tag_side_effect
+
+            def git_url_side_effect():
+                return url
+            git_url_mock.side_effect = git_url_side_effect
+
+            # this is the test here
+            git_push_mock.side_effect = StepRunnerException('mock error')
+            result = step_implementer._run_step()
+
+            # verify the test results
+            expected_step_result = StepResult(
+                step_name='tag-source',
+                sub_step_name='Git',
+                sub_step_implementer_name='Git'
+            )
+            expected_step_result.add_artifact(name='tag', value=tag)
+            expected_step_result.success = False
+            expected_step_result.message = "mock error"
+
+            # verifying all mocks were called
+            get_tag_mock.assert_called_once_with()
+            git_tag_mock.assert_called_once_with(tag)
+            git_url_mock.assert_called_once_with()
+            git_push_mock.assert_called_once_with(None)
 
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
@@ -508,7 +684,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
                 work_dir_path=work_dir_path,
             )
 
-            git_mock.config.side_effect = TestStepImplementerGitTagSourceBase.\
+            git_mock.config.side_effect = TestStepImplementerTagSourceGit.\
                 create_git_config_side_effect(self, remote_origin_url)
 
             url = step_implementer._Git__git_url()
@@ -540,7 +716,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             git_mock.config.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
 
             with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 "Error invoking git config --get remote.origin.url:"
             ):
                 step_implementer._Git__git_url()
@@ -640,7 +816,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             git_mock.tag.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
 
             with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 "Error pushing git tag"
             ):
                 step_implementer._Git__git_tag(git_tag_value)
@@ -740,7 +916,7 @@ class TestStepImplementerGitTagSourceBase(BaseStepImplementerTestCase):
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
 
             with self.assertRaisesRegex(
-                RuntimeError,
+                StepRunnerException,
                 "Error invoking git push"
             ):
                 step_implementer._Git__git_push(url)

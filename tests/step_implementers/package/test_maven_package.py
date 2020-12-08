@@ -343,7 +343,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 name='maven-output',
                 value=mvn_output_file_path
             )
-            print(result.get_step_result())
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
 
     @patch('sh.mvn', create=True)
@@ -398,5 +397,4 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 value=mvn_output_file_path
             )
 
-            print(result.get_step_result())
             self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())

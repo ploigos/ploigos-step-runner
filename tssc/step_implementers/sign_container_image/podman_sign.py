@@ -1,46 +1,37 @@
-"""StepImplementer for the sign-container-image step using Podman to sign an image.
+"""`StepImplementer` for the `sign-container-image` step using Podman to create an image signature.
 
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key                        | Required? | Default  | Description
-|------------------------------------------|-----------|----------|-------------
-| `container-image-signer-pgp-private-key` | True      |          | PGP Private Key used to
-|                                          |           |          | sign the image
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
-Results expected from previous steps that this step requires.
+Configuration Key                        | Required? | Default  | Description
+-----------------------------------------|-----------|----------|-------------
+`container-image-signer-pgp-private-key` | Yes       |          | PGP Private Key used to \
+                                                                  sign the image
+`container-image-tag`                    | Yes       |          | Tag of the container image to sign
 
-| Step Name             | Result Key             | Description
-|-----------------------|------------------------|-------------------------------
-| `container-image-tag` | `push-container-image` | Tag of the container image
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results
--------
-Results output by this step.
-
-| Result Key                                          | Description
-|-----------------------------------------------------|------------
-| `container-image-signature-private-key-fingerprint` | Fingerprint for the private key for
-|                                                     |  image signing
-| `container-image-signature-file-path`               | File path where signature is located
-|                                                     |  eg)
-|                                                     |  /tmp/user/hello-node@
-|                                                     |  sha256=2cbdb73c9177e63
-|                                                     |  e85d267f738e99e368db3f
-|                                                     |  806eab4c541f5c6b719e69
-|                                                     |  f1a2b/signature-1
-| `container-image-signature-name`                    | Fully qualified name of the name
-|                                                     |  including organization, repo, and hash
-|                                                     |  eg)
-|                                                     |  user/hello-node@sha256=
-|                                                     |  2cbdb73c9177e63e85d267f738e9
-|                                                     |  9e368db3f806eab4c541f5c6b719
-                                                      |  e69f1a2b/signature-1
+Result Artifact Key                   | Description
+--------------------------------------|------------
+`container-image-signature-private-key-fingerprint` | Fingerprint for the private key used to sign \
+                                                      the container image.
+`container-image-signature-file-path`               | File path to create image signature.
+`container-image-signature-name`                    | Fully qualified name of the \
+                                                      name of the image signature, \
+                                                      including: organization, repo, \
+                                                      and hash. <br/>\
+                                                      ex: user/hello-node@sha256=\
+                                                      2cbdb73c9177e63e85d267f738e9\
+                                                      9e368db3f806eab4c541f5c6b719\
+                                                      e69f1a2b/signature-1
 """
 import glob
 import os
@@ -52,6 +43,7 @@ import sh
 from tssc import StepImplementer
 from tssc.step_result import StepResult
 from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from tssc.exceptions import StepRunnerException
 
 DEFAULT_CONFIG = {
 }
@@ -62,7 +54,8 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
 class PodmanSign(StepImplementer):
-    """StepImplementer for the sign-container-image step using Podman.
+    """`StepImplementer` for the `sign-container-image` step using Podman to create
+    an image signature.
     """
 
     # Example input to match on:
@@ -73,8 +66,7 @@ class PodmanSign(StepImplementer):
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -105,6 +97,13 @@ class PodmanSign(StepImplementer):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
+        """Runs the step implemented by this StepImplementer.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        """
         step_result = StepResult.from_step_implementer(self)
 
         # get the pgp private key to sign the image with
@@ -144,7 +143,7 @@ class PodmanSign(StepImplementer):
                 name='container-image-signature-name',
                 value=signature_name
             )
-        except RuntimeError as error:
+        except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
 
@@ -184,8 +183,8 @@ class PodmanSign(StepImplementer):
                 gpg_import_stdout_result.getvalue()
             )
             if len(gpg_imported_pgp_private_key_fingerprints) < 1:
-                raise RuntimeError(
-                    "Unexpected error getting PGP fingerprint for PGP key"
+                raise StepRunnerException(
+                    "Error getting PGP fingerprint for PGP key"
                     " to sign container image(s) with. See stdout and stderr for more info."
                 )
             pgp_private_key_fingerprint = gpg_imported_pgp_private_key_fingerprints[0]
@@ -195,7 +194,9 @@ class PodmanSign(StepImplementer):
                 f"fingerprint='{pgp_private_key_fingerprint}'"
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(f"Unexpected error importing pgp private key: {error}") from error
+            raise StepRunnerException(
+                f"Error importing pgp private key: {error}"
+            ) from error
 
         return pgp_private_key_fingerprint
 
@@ -223,8 +224,8 @@ class PodmanSign(StepImplementer):
                 _tee='out'
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(
-                f"Unexpected error signing image ({container_image_tag}): {error}"
+            raise StepRunnerException(
+                f"Error signing image ({container_image_tag}): {error}"
             ) from error
 
         # get image signature file path
@@ -234,7 +235,7 @@ class PodmanSign(StepImplementer):
         )
 
         if len(signature_file_paths) != 1:
-            raise RuntimeError(
+            raise StepRunnerException(
                 f"Unexpected number of signature files, expected 1: {signature_file_paths}"
             )
 

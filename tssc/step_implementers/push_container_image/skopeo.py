@@ -1,49 +1,44 @@
-"""Step Implementer for the create-container-image step for Skopeo.
+"""`StepImplementer` for the `push-container-image` step using Skopeo.
 
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key | Required? | Default  | Description
-|-------------------|-----------|----------|-----------
-| `destination-url` | True      |          | Container image repository destination to push image
-|                   |           |          | to. o not include the `docker://` prefix as it will
-|                   |           |          | automatically be applied
-| `src-tls-verify`  | True      | `'true'` | Whether to very TLS for source of image
-| `dest-tls-verify` | True      | `'true'` | Whether to verify TLS for destination of image
-| `containers-config-auth-file` | True | `'~/.skopeo-auth.json'` | \
-|   Path to the container registry authentication file \
-|   to use for container registry authentication.
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
-Results expected from previous steps that this step requires.
+Configuration Key | Required? | Default  | Description
+------------------|-----------|----------|-----------
+`destination-url` | Yes       |          | Container image repository destination to push image \
+                                           to. o not include the `docker://` prefix as it will \
+                                           automatically be applied
+`src-tls-verify`  | Yes       | `'true'` | Whether to very TLS for source of image
+`dest-tls-verify` | Yes       | `'true'` | Whether to verify TLS for destination of image
+`containers-config-auth-file` | Yes | `'~/.skopeo-auth.json'` | \
+                                           Path to the container registry authentication file \
+                                           to use for container registry authentication.
+`container-image-version`     | Yes |    | Tag to push container image with
+`image-tar-file`  | Yes       |          | Local tar file of container image to push
 
-| Step Name                | Result Key       | Description
-|--------------------------|------------------|------------
-| `generate-metadata`      | `container-image-version`      | Tag to push image with
-| `create-container-image` | `image-tar-file` | Local tar file of image to push
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results
--------
-
-Results output by this step.
-
-| Result Key                | Description
-|---------------------------|------------
-| `container-image-version` |
-| `container-image-uri`     |
-| `container-image-tag`     |
+Result Artifact Key       | Description
+--------------------------|------------
+`container-image-version` |
+`container-image-uri`     |
+`container-image-tag`     |
 """
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
+
 import sh
-from tssc import StepImplementer, DefaultSteps
+from tssc import StepImplementer, StepResult
 from tssc.utils.containers import container_registries_login
-from tssc.step_result import StepResult
 
 DEFAULT_CONFIG = {
     'src-tls-verify': 'true',
@@ -64,14 +59,12 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
 class Skopeo(StepImplementer):
-    """
-    StepImplementer for the push-container-image step for Skopeo.
+    """`StepImplementer` for the `push-container-image` step using Skopeo.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -102,11 +95,12 @@ class Skopeo(StepImplementer):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+        """Runs the step implemented by this StepImplementer.
+
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 
@@ -142,7 +136,7 @@ class Skopeo(StepImplementer):
             )
         except sh.ErrorReturnCode as error:
             step_result.success = False
-            step_result.message = f'Error pushing container image ({image_tar_file}) ' + \
+            step_result.message = f'Error pushing container image ({image_tar_file}) ' \
                 f' to tag ({image_tag}) using skopeo: {error}'
 
         step_result.add_artifact(name='container-image-version', value=image_version)

@@ -8,12 +8,12 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from tssc.step_implementers.uat import MavenCucumberSelenium
+from tssc.step_implementers.uat import MavenSeleniumCucumber
 from tssc.step_result import StepResult
 from tssc.utils.file import create_parent_dir
 
 
-class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
+class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -22,17 +22,17 @@ class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=MavenCucumberSelenium,
+            step_implementer=MavenSeleniumCucumber,
             step_config=step_config,
             step_name='uat',
-            implementer='MavenCucumberSelenium',
+            implementer='MavenSeleniumCucumber',
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
-        actual_defaults = MavenCucumberSelenium.step_implementer_config_defaults()
+        actual_defaults = MavenSeleniumCucumber.step_implementer_config_defaults()
         expected_defaults = {
             'fail-on-no-tests': True,
             'pom-file': 'pom.xml',
@@ -41,12 +41,13 @@ class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
         self.assertEqual(expected_defaults, actual_defaults)
 
     def test__required_config_or_result_keys(self):
-        actual_required_keys = MavenCucumberSelenium._required_config_or_result_keys()
+        actual_required_keys = MavenSeleniumCucumber._required_config_or_result_keys()
         expected_required_keys = [
             'fail-on-no-tests',
             'pom-file',
             'selenium-hub-url',
-            'uat-maven-profile'
+            'uat-maven-profile',
+            'deployment-endpoint-url'
         ]
         self.assertEqual(expected_required_keys, actual_required_keys)
 
@@ -85,7 +86,7 @@ class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
         step_config = {
             'pom-file': pom_file_path,
             'selenium-hub-url': selenium_hub_url,
-            'target-base-url': target_base_url
+            'deployment-endpoint-url': target_base_url
         }
         if fail_on_no_tests is not None:
             step_config['fail-on-no-tests'] = fail_on_no_tests
@@ -143,8 +144,8 @@ class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
 
         expected_step_result = StepResult(
             step_name='uat',
-            sub_step_name='MavenCucumberSelenium',
-            sub_step_implementer_name='MavenCucumberSelenium'
+            sub_step_name='MavenSeleniumCucumber',
+            sub_step_implementer_name='MavenSeleniumCucumber'
         )
         expected_step_result.success = expected_result_success
         expected_step_result.message = expected_result_message
@@ -178,7 +179,7 @@ class TestStepImplementerMavenCucumberSelenium(MaveStepImplementerTestCase):
 
         self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_defaults(
@@ -231,7 +232,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 surefire_reports_dir=surefire_reports_dir
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_profile_override(
@@ -285,7 +286,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 uat_maven_profile='custom-uat-profile'
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_pom_file_override(
@@ -339,7 +340,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 pom_file_name='custom-pom.xml'
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_fail_on_no_tests_false_with_tests(
@@ -395,7 +396,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 expected_result_success=True
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_fail_on_no_tests_false_with_no_tests(
@@ -454,7 +455,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     " but 'fail-on-no-tests' is False."
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_provided_fail_on_no_tests_true_with_no_tests(
@@ -512,7 +513,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     " using maven profile (integration-test)."
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_no_surefire_plugin(
@@ -571,7 +572,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 assert_report_artifact=False
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_pom_specified_reports_dir(
@@ -628,7 +629,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 surefire_reports_dir=surefire_reports_dir
             )
 
-    @patch.object(MavenCucumberSelenium, '_generate_maven_settings')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_mvn_test_failure(

@@ -57,8 +57,8 @@ from distutils.util import strtobool
 from io import StringIO
 
 import sh
-from tssc.step_implementer import DefaultSteps, StepImplementer
-from tssc.step_result import StepResult
+from tssc import StepResult, StepRunnerException
+from tssc.step_implementer import StepImplementer
 from tssc.utils.file import download_and_decompress_source_to_destination
 from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
@@ -221,7 +221,7 @@ class OpenSCAPGeneric(StepImplementer):
             f"Open SCAP input definitions source ({oscap_input_definitions_uri})" \
             f" must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}"
 
-    def _run_step(self):  # pylint: disable=too-many-locals
+    def _run_step(self):  # pylint: disable=too-many-locals,too-many-statements
         """Runs the OpenSCAP eval for a given input file against a given container.
         """
         step_result = StepResult.from_step_implementer(self)
@@ -235,112 +235,127 @@ class OpenSCAPGeneric(StepImplementer):
         container_name = os.path.splitext(os.path.basename(image_tar_file))[0]
         container_name += f"-{self.step_name}-{self.sub_step_name}"
 
-        # import image tar file to vfs file system
-        print(f"\nImport image: {image_tar_file}")
-        OpenSCAPGeneric.__buildah_import_image_from_tar(
-            image_tar_file=image_tar_file,
-            container_name=container_name
-        )
-        print(f"Imported image: {image_tar_file}")
-
-        # baking `buildah unshare` command to wrap other buildah commands with
-        # so that container does not need to be running in a privileged mode to be able
-        # to function
-        buildah_unshare_command = sh.buildah.bake('unshare')  # pylint: disable=no-member
-
-        # mount the container filesystem and get mount path
-        #
-        # NOTE: run in the context of `buildah unshare` so that container does not
-        #       need to be run in a privileged mode
-        print(f"\nMount container: {container_name}")
-        container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
-            buildah_unshare_command=buildah_unshare_command,
-            container_id=container_name
-        )
-        print(f"Mounted container ({container_name}) with mount path: '{container_mount_path}'")
-
-        # download the open scap input file
-        oscap_input_definitions_uri = self.get_value('oscap-input-definitions-uri')
-        print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
-        oscap_input_file = download_and_decompress_source_to_destination(
-            source_url=oscap_input_definitions_uri,
-            destination_dir=self.work_dir_path_step
-        )
-        print(f"Download input definitions to: {oscap_input_file}")
-
-        # if specified download oscap tailoring file
-        oscap_tailoring_file = None
-        oscap_tailoring_file_uri = self.get_value('oscap-tailoring-uri')
-        if oscap_tailoring_file_uri:
-            print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
-            oscap_tailoring_file = download_and_decompress_source_to_destination(
-                source_url=oscap_tailoring_file_uri,
-                destination_dir=self.work_dir_path_step
+        try:
+            # import image tar file to vfs file system
+            print(f"\nImport image: {image_tar_file}")
+            OpenSCAPGeneric.__buildah_import_image_from_tar(
+                image_tar_file=image_tar_file,
+                container_name=container_name
             )
-            print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
+            print(f"Imported image: {image_tar_file}")
 
-        # determine oscap eval type based on document type
-        print(f"\nDetermine OpenSCAP document type of input file: {oscap_input_file}")
-        oscap_document_type = OpenSCAPGeneric.__get_oscap_document_type(
-            oscap_input_file=oscap_input_file
-        )
-        print(
-            "Determined OpenSCAP document type of input file"
-            f" ({oscap_input_file}): {oscap_document_type}"
-        )
-        print(
-            f"\nDetermine OpenSCAP eval type for input file ({oscap_input_file}) "
-            f"of document type: {oscap_document_type}"
-        )
-        oscap_eval_type = OpenSCAPGeneric.__get_oscap_eval_type_based_on_document_type(
-            oscap_document_type=oscap_document_type
-        )
-        print(
-            f"Determined OpenSCAP eval type of input file ({oscap_input_file}): {oscap_eval_type}"
-        )
+            # baking `buildah unshare` command to wrap other buildah commands with
+            # so that container does not need to be running in a privileged mode to be able
+            # to function
+            buildah_unshare_command = sh.buildah.bake('unshare')  # pylint: disable=no-member
 
-        # Execute scan in the context of buildah unshare
-        #
-        # NOTE: run in the context of `buildah unshare` so that container does not
-        #       need to be run in a privilaged mode
-        oscap_out_file_path = self.write_working_file(f'oscap-{oscap_eval_type}-out')
-        oscap_xml_results_file_path = self.write_working_file(
-            f'oscap-{oscap_eval_type}-results.xml'
-        )
-        oscap_html_report_path = self.write_working_file(f'oscap-{oscap_eval_type}-report.html')
-        print("\nRun oscap scan")
-        oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
-            buildah_unshare_command=buildah_unshare_command,
-            oscap_eval_type=oscap_eval_type,
-            oscap_input_file=oscap_input_file,
-            oscap_out_file_path=oscap_out_file_path,
-            oscap_xml_results_file_path=oscap_xml_results_file_path,
-            oscap_html_report_path=oscap_html_report_path,
-            container_mount_path=container_mount_path,
-            oscap_profile=oscap_profile,
-            oscap_tailoring_file=oscap_tailoring_file,
-            oscap_fetch_remote_resources=oscap_fetch_remote_resources
-        )
+            # mount the container filesystem and get mount path
+            #
+            # NOTE: run in the context of `buildah unshare` so that container does not
+            #       need to be run in a privileged mode
+            print(f"\nMount container: {container_name}")
+            container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
+                buildah_unshare_command=buildah_unshare_command,
+                container_id=container_name
+            )
+            print(f"Mounted container ({container_name}) with mount path: '{container_mount_path}'")
 
-        print(f"OpenSCAP scan completed with eval success: {oscap_eval_success}")
+            try:
+                # download the open scap input file
+                oscap_input_definitions_uri = self.get_value('oscap-input-definitions-uri')
+                print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
+                oscap_input_file = download_and_decompress_source_to_destination(
+                    source_url=oscap_input_definitions_uri,
+                    destination_dir=self.work_dir_path_step
+                )
+                print(f"Downloaded input definitions to: {oscap_input_file}")
+            except (RuntimeError, AssertionError) as error:
+                raise StepRunnerException(
+                    f"Error downloading OpenSCAP input file: {error}"
+                ) from error
 
-        #  This is an "expected" "valid" failure.
-        step_result.success = oscap_eval_success
-        if not oscap_eval_success:
-            step_result.message = f"OSCAP eval found issues:\n{oscap_eval_fails}"
+            try:
+                # if specified download oscap tailoring file
+                oscap_tailoring_file = None
+                oscap_tailoring_file_uri = self.get_value('oscap-tailoring-uri')
+                if oscap_tailoring_file_uri:
+                    print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
+                    oscap_tailoring_file = download_and_decompress_source_to_destination(
+                        source_url=oscap_tailoring_file_uri,
+                        destination_dir=self.work_dir_path_step
+                    )
+                    print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
+            except (RuntimeError, AssertionError) as error:
+                raise StepRunnerException(
+                    f"Error downloading OpenSCAP tailoring file: {error}"
+                ) from error
 
-        step_result.add_artifact(
-            name='html-report',
-            value=oscap_html_report_path
-        )
-        step_result.add_artifact(
-            name='xml-report',
-            value=oscap_xml_results_file_path
-        )
-        step_result.add_artifact(
-            name='stdout-report',
-            value=oscap_out_file_path
-        )
+            # determine oscap eval type based on document type
+            print(f"\nDetermine OpenSCAP document type of input file: {oscap_input_file}")
+            oscap_document_type = OpenSCAPGeneric.__get_oscap_document_type(
+                oscap_input_file=oscap_input_file
+            )
+            print(
+                "Determined OpenSCAP document type of input file"
+                f" ({oscap_input_file}): {oscap_document_type}"
+            )
+            print(
+                f"\nDetermine OpenSCAP eval type for input file ({oscap_input_file}) "
+                f"of document type: {oscap_document_type}"
+            )
+            oscap_eval_type = OpenSCAPGeneric.__get_oscap_eval_type_based_on_document_type(
+                oscap_document_type=oscap_document_type
+            )
+            print(
+                "Determined OpenSCAP eval type of input file"
+                f" ({oscap_input_file}): {oscap_eval_type}"
+            )
+
+            # Execute scan in the context of buildah unshare
+            #
+            # NOTE: run in the context of `buildah unshare` so that container does not
+            #       need to be run in a privilaged mode
+            oscap_out_file_path = self.write_working_file(f'oscap-{oscap_eval_type}-out')
+            oscap_xml_results_file_path = self.write_working_file(
+                f'oscap-{oscap_eval_type}-results.xml'
+            )
+            oscap_html_report_path = self.write_working_file(f'oscap-{oscap_eval_type}-report.html')
+            print("\nRun oscap scan")
+            oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
+                buildah_unshare_command=buildah_unshare_command,
+                oscap_eval_type=oscap_eval_type,
+                oscap_input_file=oscap_input_file,
+                oscap_out_file_path=oscap_out_file_path,
+                oscap_xml_results_file_path=oscap_xml_results_file_path,
+                oscap_html_report_path=oscap_html_report_path,
+                container_mount_path=container_mount_path,
+                oscap_profile=oscap_profile,
+                oscap_tailoring_file=oscap_tailoring_file,
+                oscap_fetch_remote_resources=oscap_fetch_remote_resources
+            )
+            print(f"OpenSCAP scan completed with eval success: {oscap_eval_success}")
+
+            # save scan results
+            step_result.success = oscap_eval_success
+            if not oscap_eval_success:
+                step_result.message = f"OSCAP eval found issues:\n{oscap_eval_fails}"
+
+            step_result.add_artifact(
+                name='html-report',
+                value=oscap_html_report_path
+            )
+            step_result.add_artifact(
+                name='xml-report',
+                value=oscap_xml_results_file_path
+            )
+            step_result.add_artifact(
+                name='stdout-report',
+                value=oscap_out_file_path
+            )
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+
         return step_result
 
     @staticmethod
@@ -358,6 +373,11 @@ class OpenSCAPGeneric(StepImplementer):
         -------
         str
             Name of the imported container.
+
+        Raises
+        ------
+        StepRunnerException
+            If error importing image.
         """
         # import image tar file to vfs file system
         try:
@@ -371,8 +391,8 @@ class OpenSCAPGeneric(StepImplementer):
                 _tee='err'
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(
-                f'Unexpected runtime error importing the image ({image_tar_file}): {error}'
+            raise StepRunnerException(
+                f'Error importing the image ({image_tar_file}): {error}'
             ) from error
 
         return container_name
@@ -393,6 +413,11 @@ class OpenSCAPGeneric(StepImplementer):
         -------
         str
             Absolute path to the mounted container.
+
+        Raises
+        ------
+        StepRunnerException
+            If error mounting the container.
         """
         mount_path = None
         try:
@@ -411,8 +436,8 @@ class OpenSCAPGeneric(StepImplementer):
             )
             mount_path = buildah_mount_out_buff.getvalue().rstrip()
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(
-                f'Unexpected runtime error mounting container ({container_id}): {error}'
+            raise StepRunnerException(
+                f'Error mounting container ({container_id}): {error}'
             ) from error
 
         return mount_path
@@ -436,8 +461,8 @@ class OpenSCAPGeneric(StepImplementer):
 
         Raises
         ------
-        ErrorReturnCode
-            If unexpected error occurred
+        StepRunnerException
+            If error getting document type of oscap input file.
         """
 
         oscap_document_type = None
@@ -453,8 +478,8 @@ class OpenSCAPGeneric(StepImplementer):
             )
             oscap_document_type = oscap_document_type_match.groupdict()['doctype']
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(
-                f"Unexpected error getting document type of oscap input file"
+            raise StepRunnerException(
+                f"Error getting document type of oscap input file"
                 f" ({oscap_input_file}): {error}"
             ) from error
 
@@ -539,7 +564,7 @@ class OpenSCAPGeneric(StepImplementer):
 
         Raises
         ------
-        RuntimeError
+        StepRunnerException
             If unexpected error running oscap scan.
         """
 
@@ -614,8 +639,8 @@ class OpenSCAPGeneric(StepImplementer):
 
         # if unexpected error throw error
         if isinstance(oscap_eval_success, Exception):
-            raise RuntimeError(
-                f"Unexpected error running 'oscap {oscap_eval_type} eval': {oscap_eval_success} "
+            raise StepRunnerException(
+                f"Error running 'oscap {oscap_eval_type} eval': {oscap_eval_success} "
             ) from oscap_eval_success
 
         # NOTE: oscap oval eval returns exit code 0 whether or not any rules failed

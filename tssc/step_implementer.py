@@ -545,8 +545,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         return result
 
     def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
-        """
-        Get the value for the named artifact.
+        """Get the value for the named artifact from a previous step result.
+
         If step_name is provided,
             search for artifact_name in step_name only
         If step_name and sub_step_name is provided,
@@ -567,7 +567,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         -------
         str
            Contents of the value for the specified result artifact_name.
-
         """
         return (
             self.workflow_result.get_artifact_value(

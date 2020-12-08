@@ -10,7 +10,6 @@ import urllib.request
 
 import yaml
 
-
 def parse_yaml_or_json_file(yaml_or_json_file):
     """
     Parse YAML or JSON config files.
@@ -81,15 +80,17 @@ def download_and_decompress_source_to_destination(
     destination_dir : path
         Path to directory to download and decompress if necessary the source url to.
 
-    Raises
-    ------
-    AssertionError
-        * if source_url does not start with file://|http://|https://
-
     Returns
     -------
     str
         Path to the downloaded and decompressed (if needed) file from given source.
+
+    Raises
+    ------
+    RuntimeError
+        If error downloading file.
+    AssertionError
+        If source_url does not start with file://|http://|https://
     """
 
     # depending on the protocol type get the source_file into the working dir
@@ -119,8 +120,10 @@ def download_and_decompress_source_to_destination(
         except urllib.error.HTTPError as error:
             raise RuntimeError(f"Error downloading file ({source_url}): {error}") from error
     else:
-        # NOTE: this should NEVER happen because of the logic in _validate_required_config_or_previous_step_result_artifact_keys
-        #       but rather then failing silently need to do something.
+        # NOTE:
+        #   this should NEVER happen because of the logic in
+        #   _validate_required_config_or_previous_step_result_artifact_keys
+        #   but rather then failing silently need to do something.
         raise AssertionError(
             "Unexpected error, should have been caught by step validation."
             f" Source ({source_url}) must start with known protocol (file://|http://|https://)."

@@ -481,7 +481,7 @@ From least precedence to highest precedence.
         }
 
       uat:
-      - implementer: Maven
+      - implementer: MavenSeleniumCucumber
         config: {}
 
       # WARNING: not yet implemented
@@ -784,7 +784,7 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       uat:
-      - implementer: Maven
+      - implementer: MavenSeleniumCucumber
         config: {}
 
       # WARNING: not yet implemented

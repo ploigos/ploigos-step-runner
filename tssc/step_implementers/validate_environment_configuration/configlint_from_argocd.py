@@ -1,22 +1,26 @@
-"""Step Implementer for the 'validate-environment-config' step for ConfiglintFromArgocd.
-The ConfiglintFromArogcd step takes the output of the Deploy (argocd) step and prepares
-it as input for the Configlint step.
+"""`StepImplementer` for the `validate-environment-configuration` step to take the output from
+the `deploy` ArgoCD step implementer and turn it into input for the ConnfigLint implementer
+for this step.
 
 Step Configuration
 ------------------
-Step configuration expected as input to this step.  Could come from either
-configuration file or from runtime configuration.
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
 
 | Configuration Key     | Required | Default                   | Description
 |-----------------------|----------|---------------------------|---------------------------
-| `argocd-result-set`   | True     | N/A                       | Yml file to be linted
+| `argocd-result-set`   | Yes      | N/A                       | Yml file to be linted
 
-Results
--------
-Results output by this step.
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-| Result Key            | Description
-|-----------------------|------------
+Result Artifact Key     | Description
+------------------------|------------
 | `configlint-yml-file` | Yml file to be linted
 
 """
@@ -34,8 +38,9 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
 class ConfiglintFromArgocd(StepImplementer):
-    """
-    StepImplementer for the validate-environment-configuration sub-step ConfiglintFromArgocd
+    """`StepImplementer` for the `validate-environment-configuration` step to take the output from
+    the `deploy` ArgoCD step implementer and turn it into input for the ConnfigLint implementer
+    for this step.
     """
 
     @staticmethod
@@ -56,8 +61,7 @@ class ConfiglintFromArgocd(StepImplementer):
 
     @staticmethod
     def _required_config_or_result_keys():
-        """
-        Getter for step configuration keys that are required before running the step.
+        """Getter for step configuration keys that are required before running the step.
 
         Returns
         -------
@@ -71,17 +75,12 @@ class ConfiglintFromArgocd(StepImplementer):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """
-        Runs the TSSC step implemented by this StepImplementer.
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+        """Runs the step implemented by this StepImplementer.
+
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 

@@ -1,53 +1,42 @@
-"""StepImplementer for the sign-container-image step using Podman to push an image signature using
+"""`StepImplementer` for the `sign-container-image` step using Curl to push an image signature
+to a destination.
 
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key                           | Required? | Default  | Description
-|---------------------------------------------|-----------|----------|-------------
-| `container-image-signature-server-url`      | True      |          | \
-    Url of the signature server
-| `container-image-signature-server-username` | True      |          | \
-    Username to log onto the signature server
-| `container-image-signature-server-password` | True      |          | \
-    Password to log onto the signature server
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
-Results expected from previous steps that this step requires.
+Configuration Key                           | Required? | Default | Description
+--------------------------------------------|-----------|---------|-------------
+`container-image-signature-server-url`      | Yes       |         | Url of the signature server
+`container-image-signature-server-username` | Yes       |         | Username to log onto the \
+                                                                   signature server
+`container-image-signature-server-password` | Yes       |         | Password to log onto the \
+                                                                   signature server
+`container-image-signature-file-path`       | Yes       |         | Local file path to container \
+                                                                    image signature to push.
+`container-image-signature-name`            | Yes       |         | Fully qualified name of the \
+                                                                    name of the image signature, \
+                                                                    including: organization, repo, \
+                                                                    and hash. <br/>\
+                                                                    ex: user/hello-node@sha256=\
+                                                                    2cbdb73c9177e63e85d267f738e9\
+                                                                    9e368db3f806eab4c541f5c6b719\
+                                                                    e69f1a2b/signature-1
 
-| Step Name             | Result Key                           | Description
-|-----------------------|--------------------------------------|-------------------------------
-| `sign-container-image`| `container-image-signature-file-path`| File path where signature /
-|                       |                                      | is located
-|                       |                                      | eg)
-|                       |                                      | /tmp/user/hello-node@
-|                       |                                      | sha256=2cbdb73c9177e63
-|                       |                                      | e85d267f738e99e368db3f
-|                       |                                      | 806eab4c541f5c6b719e69
-|                       |                                      | f1a2b/signature-1
-| `sign-container-image`| `container-image-signature-name`     | Fully qualified name of the
-|                       |                                      | name of the image signature,
-|                       |                                      | including:
-|                       |                                      | organization, repo, and hash
-|                       |                                      | eg)
-|                       |                                      | user/hello-node@sha256=
-|                       |                                      | 2cbdb73c9177e63e85d267f738e9
-|                       |                                      | 9e368db3f806eab4c541f5c6b719
-|                       |                                      | e69f1a2b/signature-1
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results
--------
-Results output by this step.
-
-| Result Key                            | Description
-|---------------------------------------|------------
-| `container-image-signature-url`       | URL signature was uploaded to
-| `container-image-signature-file-md5`  | MD5 hash of signature file
-| `container-image-signature-file-sha1` | SHA1 Hash of signature file
+Result Artifact Key                   | Description
+--------------------------------------|------------
+`container-image-signature-url`       | URL signature was uploaded to
+`container-image-signature-file-md5`  | MD5 hash of signature file
+`container-image-signature-file-sha1` | SHA1 Hash of signature file
 """
 
 import hashlib
@@ -57,8 +46,9 @@ from io import StringIO
 
 import sh
 from tssc import StepImplementer
-from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from tssc.exceptions import StepRunnerException
 from tssc.step_result import StepResult
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
 }
@@ -72,12 +62,13 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
 class CurlPush(StepImplementer):
-    """StepImplementer for the push-container-signature step using"""
+    """`StepImplementer` for the `sign-container-image` step using Curl to push an image signature
+    to a destination.
+    """
 
     @staticmethod
     def step_implementer_config_defaults():
-        """
-        Getter for the StepImplementer's configuration defaults.
+        """Getter for the StepImplementer's configuration defaults.
 
         Returns
         -------
@@ -108,8 +99,13 @@ class CurlPush(StepImplementer):
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
-        """Run step and perform the curl"""
+        """Runs the step implemented by this StepImplementer.
 
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        """
         step_result = StepResult.from_step_implementer(self)
 
         # extract configs
@@ -127,24 +123,29 @@ class CurlPush(StepImplementer):
         container_image_signature_file_path = self.get_value('container-image-signature-file-path')
         container_image_signature_name = self.get_value('container-image-signature-name')
 
-        container_image_signature_url, signature_file_md5, signature_file_sha1 = \
-            CurlPush.__curl_file(
-                container_image_signature_file_path=container_image_signature_file_path,
-                container_image_signature_name=container_image_signature_name,
-                signature_server_url=signature_server_url,
-                signature_server_username=signature_server_username,
-                signature_server_password=signature_server_password
-            )
+        try:
+            container_image_signature_url, signature_file_md5, signature_file_sha1 = \
+                CurlPush.__curl_file(
+                    container_image_signature_file_path=container_image_signature_file_path,
+                    container_image_signature_name=container_image_signature_name,
+                    signature_server_url=signature_server_url,
+                    signature_server_username=signature_server_username,
+                    signature_server_password=signature_server_password
+                )
 
-        step_result.add_artifact(
-            name='container-image-signature-url', value=container_image_signature_url,
-        )
-        step_result.add_artifact(
-            name='container-image-signature-file-md5', value=signature_file_md5,
-        )
-        step_result.add_artifact(
-            name='container-image-signature-file-sha1', value=signature_file_sha1
-        )
+            step_result.add_artifact(
+                name='container-image-signature-url', value=container_image_signature_url,
+            )
+            step_result.add_artifact(
+                name='container-image-signature-file-md5', value=signature_file_md5,
+            )
+            step_result.add_artifact(
+                name='container-image-signature-file-sha1', value=signature_file_sha1
+            )
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+
         return step_result
 
     @staticmethod
@@ -155,7 +156,13 @@ class CurlPush(StepImplementer):
             signature_server_username,
             signature_server_password
     ):
-        """Sends the signature file"""
+        """Sends the signature file
+
+        Raises
+        ------
+        StepRunnerException
+            If error pushing image signature.
+        """
         # remove any trailing / from url
         signature_server_url = re.sub(r'/$', '', signature_server_url)
         container_image_signature_url = f"{signature_server_url}/{container_image_signature_name}"
@@ -190,8 +197,8 @@ class CurlPush(StepImplementer):
                 _tee='out'
             )
         except sh.ErrorReturnCode as error:
-            raise RuntimeError(
-                f"Unexpected error curling signature file to signature server: {error}"
+            raise StepRunnerException(
+                f"Error pushing signature file to signature server using curl: {error}"
             ) from error
 
         return container_image_signature_url, signature_file_md5, signature_file_sha1

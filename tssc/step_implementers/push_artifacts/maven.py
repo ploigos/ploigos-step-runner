@@ -1,42 +1,40 @@
-"""Step Implementer for the push-artifacts step for Maven.
+"""`StepImplementer` for the `package` step using Maven.
 
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
 
-| Configuration Key   | Required | Default | Description
-|---------------------|----------|---------|------------------------------------------
-| `maven-push-`       | True     | N/A     | id for the maven servers and mirrors
-| `artifact-repo-id`  |          |         |
-| `maven-push-`       | True     | N/A     | url for the maven servers and mirrors
-| `artifact-repo-url` |          |         |
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-Expected Previous Step Results
-------------------------------
-Results expected from previous steps that this step requires.
+Configuration Key              | Required | Default | Description
+-------------------------------|----------|---------|------------------------------------------
+`maven-push-artifact-repo-url` | yes      |         | id for the maven servers and mirrors
+`maven-push-artifact-repo-id`  | Yes      |         | url for the maven servers and mirrors
+`version`                      | Yes      |         | version to push
+`package-artifacts`            | Yes      |         | Artifacts is dictionary \
+                                                      Each element of an `artifact` will be used \
+                                                      as a parameter to deploy to repository: <br/>\
+                                                        * artifact.group-id <br/>\
+                                                        * artifact.artifact-id <br/>\
+                                                        * artifact.path <br/>\
+                                                        * artifact.package-type
 
-| Step Name           | Result Key          | Description
-|---------------------|---------------------|-------------------------------------------
-| package             | `package-artifact`  | Artifacts is dictionary
-|                     |                     | Each element of an `artifact` will be used
-|                     |                     | as a parameter to deploy to repository:
-|                     |                     |  * artifact.group-id
-|                     |                     |  * artifact.artifact-id
-|                     |                     |  * artifact.path
-|                     |                     |  * artifact.package-type
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results
--------
-Results output by this step:
+Result Artifact Key | Description
+--------------------|------------
+`push-artifacts`    | An array of dictionaries with information on the built artifacts.
 
-| Result Key          | Description
-|---------------------|------------
-| `push-artifacts`    | An array of dictionaries with information on the built artifacts.
+## push-artifacts
+Keys in the dictionary elements in the `push-artifacts` array in the step results.
 
-| Results Key        | Description
-|--------------------|------------
+| Key             | Description
+|-----------------|------------
 | `path`             | Absolute path to the artifact pushed to the artifact repository
 | `artifact-id`      | Maven artifact ID pushed to the artifact repository
 | `group-id`         | Maven group ID pushed to the artifact repository
@@ -70,10 +68,9 @@ Examples
 import sys
 
 import sh
-from tssc import StepImplementer
-from tssc.config import ConfigValue
-from tssc.step_result import StepResult
-from tssc.utils.maven import generate_maven_settings
+from tssc import StepResult
+from tssc.step_implementers.shared.maven_generic import MavenGeneric
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {}
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -83,9 +80,8 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'package-artifacts'
 ]
 
-class Maven(StepImplementer):
-    """
-    StepImplementer for the push-artifacts step for Maven.
+class Maven(MavenGeneric):
+    """`StepImplementer` for the `package` step using Maven.
     """
 
     @staticmethod
@@ -121,74 +117,79 @@ class Maven(StepImplementer):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _generate_maven_settings(self):
-        # ----- build settings.xml
-        maven_servers = ConfigValue.convert_leaves_to_values(
-            self.get_value('maven-servers')
-        )
-        maven_repositories = ConfigValue.convert_leaves_to_values(
-            self.get_value('maven-repositories')
-        )
-        maven_mirrors = ConfigValue.convert_leaves_to_values(
-            self.get_value('maven-mirrors')
-        )
-        return generate_maven_settings(self.work_dir_path,
-                                       maven_servers,
-                                       maven_repositories,
-                                       maven_mirrors)
-
-    def _run_step(self):
-        """Runs the TSSC step implemented by this StepImplementer.
+    def _run_step(self): # pylint: disable=too-many-locals
+        """Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        step_result
-            Object with results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
 
         # Get config items
         maven_push_artifact_repo_id = self.get_value('maven-push-artifact-repo-id')
         maven_push_artifact_repo_url = self.get_value('maven-push-artifact-repo-url')
+        version = self.get_value('version')
+        package_artifacts = self.get_value('package-artifacts')
 
         # Create settings.xml
         settings_file = self._generate_maven_settings()
 
-        # Get previous step values
+        # push the artifacts
         push_artifacts = []
-        version = self.get_value('version')
-        package_artifacts = self.get_value('package-artifacts')
-        for package in package_artifacts:
-            artifact_path = package['path']
-            group_id = package['group-id']
-            artifact_id = package['artifact-id']
-            package_type = package['package-type']
+        mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
+        try:
+            for package in package_artifacts:
+                artifact_path = package['path']
+                group_id = package['group-id']
+                artifact_id = package['artifact-id']
+                package_type = package['package-type']
 
-            try:
-                sh.mvn(  # pylint: disable=no-member
-                    'deploy:deploy-file',
-                    '-Dversion=' + version,
-                    '-Dfile=' + artifact_path,
-                    '-DgroupId=' + group_id,
-                    '-DartifactId=' + artifact_id,
-                    '-Dpackaging=' + package_type,
-                    '-Durl=' + maven_push_artifact_repo_url,
-                    '-DrepositoryId=' + maven_push_artifact_repo_id,
-                    '-s' + settings_file,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee='err'
-                )
-            except sh.ErrorReturnCode as error:
-                raise RuntimeError(f'Error invoking mvn: {error}') from error
+                # push the artifact
+                with open(mvn_output_file_path, 'a') as mvn_output_file:
+                    out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stdout,
+                        mvn_output_file
+                    ])
+                    err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stderr,
+                        mvn_output_file
+                    ])
+                    sh.mvn(  # pylint: disable=no-member
+                        'deploy:deploy-file',
+                        '-Dversion=' + version,
+                        '-Dfile=' + artifact_path,
+                        '-DgroupId=' + group_id,
+                        '-DartifactId=' + artifact_id,
+                        '-Dpackaging=' + package_type,
+                        '-Durl=' + maven_push_artifact_repo_url,
+                        '-DrepositoryId=' + maven_push_artifact_repo_id,
+                        '-s' + settings_file,
+                        _out=out_callback,
+                        _err=err_callback
+                    )
 
-            push_artifacts.append({
-                'artifact-id': artifact_id,
-                'group-id': group_id,
-                'version': version,
-                'path': artifact_path,
-                'packaging': package_type,
-            })
+                # record the pushed artifact
+                push_artifacts.append({
+                    'artifact-id': artifact_id,
+                    'group-id': group_id,
+                    'version': version,
+                    'path': artifact_path,
+                    'packaging': package_type,
+                })
+        except sh.ErrorReturnCode as error:
+            step_result.success = False
+            step_result.message = "Push artifacts failures. See 'maven-output' report artifacts " \
+                f"for details: {error}"
 
-        step_result.add_artifact(name='push-artifacts', value=push_artifacts)
+        step_result.add_artifact(
+            description="Standard out and standard error from 'mvn install'.",
+            name='maven-output',
+            value=mvn_output_file_path
+        )
+        step_result.add_artifact(
+            name='push-artifacts',
+            value=push_artifacts
+        )
         return step_result

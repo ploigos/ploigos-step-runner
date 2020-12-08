@@ -75,7 +75,7 @@ Results output by this step.
 | Result Key            | Description
 |-----------------------|------------
 | `argocd-app-name`     | The argocd app name that was created or updated
-| `deploy-endpoint-url` | The endpoint url for the deployed app
+| `deployment-endpoint-url` | The endpoint url for the deployed app
 | `config-repo-git-tag` | The git tag applied to the configuration repo for deployment
 | `argocd-result-set`   | The generated yml file used for deployment.
 
@@ -274,7 +274,7 @@ users:
             repo_branch = self._get_repo_branch()
 
             try:
-                sh.git.clone(
+                sh.git.clone( # pylint: disable=no-member
                     git_url,
                     repo_directory,
                     _out=sys.stdout,
@@ -282,7 +282,7 @@ users:
                 )
 
                 try:
-                    sh.git.checkout(
+                    sh.git.checkout(  # pylint: disable=no-member
                         repo_branch,
                         _cwd=repo_directory,
                         _out=sys.stdout,
@@ -303,7 +303,7 @@ users:
                 git_commit_msg = 'Configuration Change from TSSC Pipeline. Repository: ' + \
                                  '{repo}'.format(repo=git_url)
 
-                sh.git.config(
+                sh.git.config( # pylint: disable=no-member
                     '--global',
                     'user.email',
                     self.get_value('git-email'),
@@ -311,7 +311,7 @@ users:
                     _err=sys.stderr
                 )
 
-                sh.git.config(
+                sh.git.config( # pylint: disable=no-member
                     '--global',
                     'user.name',
                     self.get_value('git-friendly-name'),
@@ -319,14 +319,14 @@ users:
                     _err=sys.stderr
                 )
 
-                sh.git.add(
+                sh.git.add( # pylint: disable=no-member
                     values_file_repo_relative_path,
                     _cwd=repo_directory,
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
 
-                sh.git.commit(
+                sh.git.commit( # pylint: disable=no-member
                     '-am',
                     git_commit_msg,
                     _cwd=repo_directory,
@@ -334,7 +334,7 @@ users:
                     _err=sys.stderr
                 )
 
-                sh.git.status(
+                sh.git.status( # pylint: disable=no-member
                     _cwd=repo_directory,
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -406,7 +406,7 @@ users:
                 value=argocd_app_name
             )
             step_result.add_artifact(
-                name='deploy-endpoint-url',
+                name='deployment-endpoint-url',
                 value=f'http://{self._get_endpoint_url()}'
             )
             step_result.add_artifact(
@@ -477,7 +477,7 @@ users:
             tag = 'latest'
             print('No version found in metadata. Using latest.')
 
-        commit_tag = sh.git( # pylint: unexpected-keyword-arg
+        commit_tag = sh.git( # pylint: disable=no-member
             'rev-parse',
             '--short',
             'HEAD',
