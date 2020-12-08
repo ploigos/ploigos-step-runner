@@ -260,6 +260,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 work_dir_path=work_dir_path,
             )
 
+            config_lint_mock.side_effect = sh.ErrorReturnCode('config_lint', b'mock out', b'mock error')
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
@@ -268,9 +269,14 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Configlint'
             )
 
-            config_lint_mock.side_effect = sh.ErrorReturnCode('config_lint', b'mock out', b'mock error')
-            with self.assertRaisesRegex(
-                    RuntimeError,
-                    "Unexpected Error invoking config-lint: .*"
-            ):
-                step_implementer._run_step()
+            expected_step_result.success = False
+            expected_step_result.message = 'Unexpected Error invoking config-lint.'
+            expected_step_result.add_artifact(
+                name='configlint-result-set',
+                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
+            )
+            expected_step_result.add_artifact(
+                name='configlint-yml-path',
+                value=test_file_path
+            )
+            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
