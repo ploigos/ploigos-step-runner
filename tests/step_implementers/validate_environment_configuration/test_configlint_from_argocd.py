@@ -57,7 +57,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
             step_config = {}
             artifact_config = {
                 'argocd-result-set': {
-                    'value': f'file://{test_file_path}'
+                    'value': test_file_path
                 }
             }
             self.setup_previous_result(work_dir_path, artifact_config)
@@ -97,7 +97,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
             step_config = {}
             artifact_config = {
                 'argocd-result-set': {
-                    'value': f'file://{test_file_path}.bad'
+                    'value': f'{test_file_path}.bad'
                 }
             }
             self.setup_previous_result(work_dir_path, artifact_config)

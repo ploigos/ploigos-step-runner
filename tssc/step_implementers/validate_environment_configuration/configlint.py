@@ -5,28 +5,18 @@ rules.   The inputs to this step include:
   - Rules defined by the user in a specified file:
     * Reference:  https://stelligent.github.io/config-lint/#/
   - File path of yml files to lint
-    * Specify as a runtime argument, OR
+    * Specify as a config value, OR
     * Use results from previous step such as ConfilintFromArgocd
 
 Step Configuration
 ------------------
-Step configuration expected as input to this step.  Could come from either
-configuration file or from runtime configuration.
+Step configuration expected as input to this step.  Could come from
+configuration file, runtime configuration or previous step.
 
 | Configuration Key       | Required | Default               | Description
 |-------------------------|----------|-----------------------|-----------------------------------
 | `rules`                 | False    | ./config_lint.rules   | File containing user-defined rules
-| `configlint-yml-file`   | False    | None                  | File to be linted
-
-Expected Previous Step Results
-------------------------------
-Results expected from previous steps that this step requires.
-
-| Step Name     | Key                     | Required | Description
-|---------------|-------------------------|----------|------------
-| validate-     | `configlint-yml-file`   | False    | File to be linted
-| environment-  |                         |          |
-| configuration |                         |          |
+| `configlint-yml-file`   | True     | None                  | File to be linted
 
 Results
 -------
@@ -76,7 +66,6 @@ provide the configlint-yml-path.
 
 import os
 import sys
-from urllib.parse import urlparse
 
 import sh
 from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
@@ -150,16 +139,14 @@ class Configlint(StepImplementer):
         # configlint-yml-path is required
         configlint_yml_path = self.get_value('configlint-yml-path')
 
-        # configlint_yml_path expected format:  file:///folder/file.yml
-        yml_path = urlparse(configlint_yml_path).path
-        if not os.path.exists(yml_path):
+        if not os.path.exists(configlint_yml_path):
             step_result.success = False
-            step_result.message = f'File specified in configlint-yml-path not found: {yml_path}'
+            step_result.message = 'File specified in ' \
+                                  f'configlint-yml-path not found: {configlint_yml_path}'
             return step_result
 
         # Required: rules and exists
         rules_file = self.get_value('rules')
-        rules_file = urlparse(rules_file).path
         if not os.path.exists(rules_file):
             step_result.success = False
             step_result.message = f'File specified in rules not found: {rules_file}'
@@ -184,21 +171,24 @@ class Configlint(StepImplementer):
                     "-debug",
                     "-rules",
                     rules_file,
-                    yml_path,
+                    configlint_yml_path,
                     _encoding='UTF-8',
                     _out=out_callback,
                     _err=err_callback,
                     _tee='err'
                 )
-        except sh.ErrorReturnCode_255 as error:  # pylint: disable=no-member
+        except sh.ErrorReturnCode_255:  # pylint: disable=no-member
             # NOTE: expected failure condition,
             #       aka, the config lint run, but found an issue
+            #       stderr/stdout is captured in configlint_results_file_path
             step_result.success = False
             step_result.message = 'Failed config-lint scan.'
-        except sh.ErrorReturnCode as error:
+        except sh.ErrorReturnCode:
             # NOTE: un-expected failure condition
             #       aka, the config lint failed to run for some reason
-            raise RuntimeError(f'Unexpected Error invoking config-lint: {error}') from error
+            #       stderr/stdout is captured in configlint_results_file_path
+            step_result.success = False
+            step_result.message = 'Unexpected Error invoking config-lint.'
 
         step_result.add_artifact(
             name='configlint-result-set',
@@ -206,6 +196,6 @@ class Configlint(StepImplementer):
         )
         step_result.add_artifact(
             name='configlint-yml-path',
-            value=yml_path
+            value=configlint_yml_path
         )
         return step_result
