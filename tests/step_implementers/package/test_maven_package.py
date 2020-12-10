@@ -142,7 +142,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 value=mvn_output_file_path
             )
 
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch('sh.mvn', create=True)
     def test_run_step_pass_no_package_in_pom(self, mvn_mock):
@@ -201,7 +201,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 value=mvn_output_file_path
             )
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
 
     @patch('sh.mvn', create=True)
@@ -228,7 +228,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'Given pom file does not exist: pom.xml'
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
     @patch('sh.mvn', create=True)
     def test_run_step_fail_mvn_error(self, mvn_mock):
@@ -343,7 +343,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 name='maven-output',
                 value=mvn_output_file_path
             )
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
     @patch('sh.mvn', create=True)
     def test_run_step_fail_no_artifacts(self, mvn_mock):
@@ -397,4 +397,4 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 value=mvn_output_file_path
             )
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())

@@ -1,7 +1,5 @@
+"""Abstract class and helper constants for WorkflowResult
 """
-Abstract class and helper constants for WorkflowResult
-"""
-import copy
 import json
 import os
 import pickle
@@ -25,14 +23,22 @@ class WorkflowResult:
 
     @property
     def workflow_list(self):
-        """
-        Return workflow_list
+        """Return workflow_list
         """
         return self.__workflow_list
 
-    def get_artifact_value(self, artifact, step_name=None, sub_step_name=None):
-        """
-        Search for an artifact.
+    def get_artifact_value(
+        self,
+        artifact,
+        step_name=None,
+        sub_step_name=None,
+        environment=None
+    ): # pylint: disable=too-many-boolean-expressions
+        """Search for an artifact.
+
+        If step_name, sub_step_name, or environment are provided ensure the artifact comes
+        from the first
+
         1.  if step_name is provided, look for the artifact in the step
         2.  elif step_name and sub_step_name is provided, look for the artifact in the step/sub_step
         3.  else, search ALL steps for the FIRST match of the artifact.
@@ -45,80 +51,31 @@ class WorkflowResult:
            Optionally search only in one step
         sub_step_name: str optional
             Optionally search only in one step
+        environment : str
+            Optional. Environment to get the step result for.
 
         Returns
         -------
         Str
            'v1.0.2'
         """
+
         value = None
-        if step_name is not None:
-            #  Look for step and sub_step
-            if sub_step_name is not None:
-                for step_result in self.workflow_list:
-                    if step_result.step_name == step_name:
-                        if step_result.sub_step_name == sub_step_name:
-                            value = step_result.get_artifact_value(name=artifact)
-                            break
-            #  Look for step
-            else:
-                for step_result in self.workflow_list:
-                    if step_result.step_name == step_name:
-                        value = step_result.get_artifact_value(name=artifact)
-                        if value is not None:
-                            break
-        #  Look for first occurrence
-        else:
-            for step_result in self.workflow_list:
+        for step_result in self.workflow_list:
+            if ( \
+                (not step_name or step_result.step_name == step_name) and \
+                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+                (not environment or step_result.environment == environment)
+            ):
                 value = step_result.get_artifact_value(name=artifact)
                 if value is not None:
                     break
+
         return value
 
-    def get_step_result(self, step_name):
-        """
-        Search for a step by name step_result.
-
-        Parameters
-        ----------
-        step_name : str
-             Name of step to search
-
-        Returns
-        -------
-        dict
-             StepResult dictionary, eg:
-            'tssc-results': {
-                'step-name': {
-                    'sub-step-name': {
-                        'step-implementer-name': 'one',
-                        'sub-step-name': '',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'a': {
-                                'description': 'aA',
-                                'value': 'A'
-                            },
-                            'b': {
-                                'description': 'bB',
-                                'value': 'B'
-                            }
-                        }
-                    }
-                }
-            }
-        """
-        result = {}
-        for step_result in self.workflow_list:
-            if step_result.step_name == step_name:
-                result[step_result.sub_step_name] = step_result.get_sub_step_result()
-
-        return {'tssc-results': {step_name: result}}
-
     def add_step_result(self, step_result):
-        """
-        Add a single step_result to the workflow list.
+        """Add a single step_result to the workflow list.
+
         If the new result step is not already in the list
            - simply append, done
         Else
@@ -140,21 +97,17 @@ class WorkflowResult:
         """
 
         if isinstance(step_result, StepResult):
-
-            step_name = step_result.step_name
-            sub_step_name = step_result.sub_step_name
-
-            step_old = self.__get_step_result_by_step_name(
-                step_name=step_name,
-                sub_step_name=sub_step_name)
-            if step_old:
-                merged = deep_merge(
-                    dest=copy.deepcopy(step_old.artifacts),
-                    source=step_result.artifacts,
-                    overwrite_duplicate_keys=True
+            existing_step_result = self.get_step_result(
+                step_name=step_result.step_name,
+                sub_step_name=step_result.sub_step_name,
+                environment=step_result.environment
+            )
+            if existing_step_result:
+                raise StepRunnerException(
+                    f'Can not add duplicate StepResult for step ({step_result.step_name}),'
+                    f' sub step ({step_result.sub_step_name}),'
+                    f' and environment ({step_result.environment}).'
                 )
-                step_result.artifacts.update(merged)
-                self.__delete_step_result_by_name(step_name=step_name)
 
             self.workflow_list.append(step_result)
 
@@ -163,8 +116,7 @@ class WorkflowResult:
 
     # ARTIFACT helpers:
     def write_results_to_yml_file(self, yml_filename):
-        """
-        Write the workflow list in a yaml format to file
+        """Write the workflow list in a yaml format to file
 
         Parameters
         ----------
@@ -178,14 +130,13 @@ class WorkflowResult:
         try:
             create_parent_dir(yml_filename)
             with open(yml_filename, 'w') as file:
-                results = self.__get_all_step_results()
+                results = self.__get_all_step_results_dict()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {yml_filename}: {error}') from error
 
     def write_results_to_json_file(self, json_filename):
-        """
-        Write the workflow list in a json format to file
+        """Write the workflow list in a json format to file.
 
         Parameters
         ----------
@@ -199,7 +150,7 @@ class WorkflowResult:
         try:
             create_parent_dir(json_filename)
             with open(json_filename, 'w') as file:
-                results = self.__get_all_step_results()
+                results = self.__get_all_step_results_dict()
                 json.dump(results, file, indent=4)
         except Exception as error:
             raise RuntimeError(f'error dumping {json_filename}: {error}') from error
@@ -208,8 +159,8 @@ class WorkflowResult:
 
     @staticmethod
     def load_from_pickle_file(pickle_filename):
-        """
-        Return the contents of a pickled file
+        """Return the contents of a pickled file.
+
         The file is expected to contain WorkflowResult instances
 
         Parameters
@@ -244,8 +195,7 @@ class WorkflowResult:
             raise StepRunnerException(f'error loading {pickle_filename}: {error}') from error
 
     def write_to_pickle_file(self, pickle_filename):
-        """
-        Write the workflow list in a pickle format to file
+        """Write the workflow list in a pickle format to file
 
         Parameters
         ----------
@@ -263,10 +213,8 @@ class WorkflowResult:
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
 
-    def __get_all_step_results(self):
-        """
-        Return a dictionary named tssc-results of all the step results in memory
-        Specifically using 'tssc-results'.
+    def __get_all_step_results_dict(self):
+        """Get a dictionary of all of the recorded StepResults.
 
         Returns
         -------
@@ -274,10 +222,10 @@ class WorkflowResult:
             results of all steps from list
         """
         all_results = {}
-        for i in self.workflow_list:
+        for step_result in self.workflow_list:
             all_results = deep_merge(
                 dest=all_results,
-                source=i.get_step_result(),
+                source=step_result.get_step_result_dict(),
                 overwrite_duplicate_keys=True
             )
         tssc_results = {
@@ -285,9 +233,13 @@ class WorkflowResult:
         }
         return tssc_results
 
-    def __get_step_result_by_step_name(self, step_name, sub_step_name):
-        """
-        Helper method to return a step result by step_name and sub_step_name
+    def get_step_result(
+        self,
+        step_name,
+        sub_step_name=None,
+        environment=None
+    ): # pylint: disable=too-many-boolean-expressions
+        """Helper method to return a step result.
 
         Parameters
         ----------
@@ -295,26 +247,20 @@ class WorkflowResult:
             Name of step to search for
         sub_step_name: str
             Name of sub step to search for
+        environment : str
+            Optional. Environment to get the step result for.
 
         Returns
         -------
         StepResult
         """
-        for current in self.workflow_list:
-            if current.step_name == step_name:
-                if current.sub_step_name == sub_step_name:
-                    return current
+
+        for step_result in self.workflow_list:
+            if ( \
+                (not step_name or step_result.step_name == step_name) and \
+                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+                (not environment or step_result.environment == environment)
+            ):
+                return step_result
+
         return None
-
-    def __delete_step_result_by_name(self, step_name):
-        """
-        Helper method to delete a step from the workflow list.
-
-        Parameters
-        ----------
-        step_name: str
-            Name of the step to remove from the workflow list
-        """
-        for i, current in enumerate(self.workflow_list):
-            if current.step_name == step_name:
-                del self.workflow_list[i]

@@ -97,7 +97,7 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(name='container-image-signature-file-sha1', value='d9ba1fc747829392883c48adfe4bb688239dc8b2')
             expected_step_result.add_artifact(name='container-image-signature-file-md5', value='b66c5c3d4ab37a50e69a05d72ba302fa')
 
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
             curl_mock.assert_called_once_with(
                 '-sSfv',
                 '-X', 'PUT',

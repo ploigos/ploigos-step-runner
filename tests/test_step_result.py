@@ -65,7 +65,7 @@ class TestStepResultTest(BaseTSSCTestCase):
         step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'value2', 'description2')
         step_result.add_artifact('artifact3', 'value3')
-        self.assertEqual(step_result.get_step_result(), step_result_expected)
+        self.assertEqual(step_result.get_step_result_dict(), step_result_expected)
 
     def test_add_artifact_missing_name(self):
         step_result = StepResult('step1', 'sub1', 'implementer1')

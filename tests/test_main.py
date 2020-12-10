@@ -423,21 +423,23 @@ class TestInit(BaseTSSCTestCase):
             config_files=[encrypted_config_file_path, config_file_path],
             expected_results={
                 'tssc-results': {
-                    'required-step-config-test': {
-                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                            'artifacts': {
-                                'environment-name': {'description': '', 'value': 'DEV'},
-                                'kube-api-token': {
-                                    'description': '',
-                                    'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
-                                'required-config-key': {
-                                    'description': '',
-                                    'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
-                            },
-                            'message': '',
-                            'sub-step-implementer-name':
-                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
-                            'success': True
+                    'DEV': {
+                        'required-step-config-test': {
+                            'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                                'artifacts': {
+                                    'environment-name': {'description': '', 'value': 'DEV'},
+                                    'kube-api-token': {
+                                        'description': '',
+                                        'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
+                                    'required-config-key': {
+                                        'description': '',
+                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
+                                },
+                                'message': '',
+                                'sub-step-implementer-name':
+                                    'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                                'success': True
+                            }
                         }
                     }
                 }
@@ -474,21 +476,23 @@ class TestInit(BaseTSSCTestCase):
             config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
             expected_results={
                 'tssc-results': {
-                    'required-step-config-test': {
-                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                            'artifacts': {
-                                'environment-name':
-                                    {'description': '', 'value': 'DEV'},
-                                'kube-api-token':
-                                    {'description': '', 'value': 'mock decrypted value'},
-                                'required-config-key': {
-                                    'description': '',
-                                    'value': 'mock decrypted value'}
-                            },
-                            'message': '',
-                            'sub-step-implementer-name':
-                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
-                            'success': True}
+                    'DEV': {
+                        'required-step-config-test': {
+                            'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                                'artifacts': {
+                                    'environment-name':
+                                        {'description': '', 'value': 'DEV'},
+                                    'kube-api-token':
+                                        {'description': '', 'value': 'mock decrypted value'},
+                                    'required-config-key': {
+                                        'description': '',
+                                        'value': 'mock decrypted value'}
+                                },
+                                'message': '',
+                                'sub-step-implementer-name':
+                                    'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                                'success': True}
+                        }
                     }
                 }
             }

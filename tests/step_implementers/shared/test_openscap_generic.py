@@ -1048,7 +1048,7 @@ Result	pass
                             "xml-report": {"description": "",  "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
                             "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
-            self.assertEqual(expected_results, step_result.get_step_result())
+            self.assertEqual(expected_results, step_result.get_step_result_dict())
 
             stdout = stdout_buff.getvalue()
 
@@ -1140,7 +1140,7 @@ Result	fail
                             "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
                             "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
-            self.assertEqual(expected_results, step_result.get_step_result())
+            self.assertEqual(expected_results, step_result.get_step_result_dict())
 
             stdout = stdout_buff.getvalue()
 
@@ -1231,7 +1231,7 @@ Result	fail
                             "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
                             "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
             }
-            self.assertEqual(expected_results, result.get_step_result())
+            self.assertEqual(expected_results, result.get_step_result_dict())
 
 
             stdout = stdout_buff.getvalue()
@@ -1327,7 +1327,7 @@ Result	fail
             expected_step_result.message = 'Error downloading OpenSCAP input file: ' \
                 f'{mock_error_msg}'
 
-            self.assertEqual(step_result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(step_result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
             stdout = stdout_buff.getvalue()
 
@@ -1416,7 +1416,7 @@ Result	fail
             expected_step_result.message = 'Error downloading OpenSCAP tailoring file: ' \
                 f'{mock_error_msg}'
 
-            self.assertEqual(step_result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(step_result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
             stdout = stdout_buff.getvalue()
 

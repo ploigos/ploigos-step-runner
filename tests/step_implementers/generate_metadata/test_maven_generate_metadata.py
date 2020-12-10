@@ -131,7 +131,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='app-version', value='42.1')
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
     def test_run_step_fail_missing_version_in_pom_file(self):
         with TempDirectory() as temp_dir:
@@ -169,4 +169,4 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.message = f"Given pom file ({pom_file_path}) does not contain " + \
                 "a \"version\" key."
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())

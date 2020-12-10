@@ -35,11 +35,11 @@ Keys in the dictionary elements in the `push-artifacts` array in the step result
 
 | Key             | Description
 |-----------------|------------
-| `path`             | Absolute path to the artifact pushed to the artifact repository
-| `artifact-id`      | Maven artifact ID pushed to the artifact repository
-| `group-id`         | Maven group ID pushed to the artifact repository
-| `version`          | Version pushed to the artifact repository
-| `packaging`        | Type of package (eg: jar, war)
+| `path`          | Absolute path to the artifact pushed to the artifact repository
+| `artifact-id`   | Maven artifact ID pushed to the artifact repository
+| `group-id`      | Maven group ID pushed to the artifact repository
+| `version`       | Version pushed to the artifact repository
+| `packaging`     | Type of package (eg: jar, war)
 
 Examples
 --------
