@@ -428,7 +428,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         StepImplementer.__print_data('Results File Path', self.results_file_path)
 
-        StepImplementer.__print_data('Results', step_result.get_step_result())
+        StepImplementer.__print_data('Results', step_result.get_step_result_dict())
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
@@ -449,15 +449,26 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Configuration value, or if not set, result value from any previous step for the given
             key. Or None if not found.
         """
+
+        # first try to get config value
         config_value = self.get_config_value(key)
         if config_value:
             return config_value
 
-        result_value = self.get_result_value(key)
-        if result_value:
-            return result_value
+        # if not found config value try to get result value specific to current environment
+        if self.environment:
+            result_value = self.get_result_value(
+                artifact_name=key,
+                environment=self.environment
+            )
+            if result_value is not None:
+                return result_value
 
-        return None
+        # last try getting result value from no specific environment
+        result_value = self.get_result_value(
+            artifact_name=key
+        )
+        return result_value
 
     def get_config_value(self, key):
         """Convenience function for self.config.get_config_value.
@@ -544,7 +555,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         return result
 
-    def get_result_value(self, artifact_name, step_name=None, sub_step_name=None):
+    def get_result_value(
+        self,
+        artifact_name,
+        step_name=None,
+        sub_step_name=None,
+        environment=None
+    ):
         """Get the value for the named artifact from a previous step result.
 
         If step_name is provided,
@@ -572,39 +589,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             self.workflow_result.get_artifact_value(
                 artifact=artifact_name,
                 step_name=step_name,
-                sub_step_name=sub_step_name
-            )
-        )
-
-    def get_step_result(self, step_name=None):
-        """
-        Get the step result.
-        EG:{
-            'tssc-results': {
-                'step-name': {
-                    'StepImplementer': {
-                        'sub-step-implementer-name': 'ssin',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'foo': {'description': '', 'value': 'bar'},
-                        }
-                    }
-                }
-            }
-        }
-
-        Returns
-        -------
-        dict
-           Result step
-        """
-        if step_name is None:
-            step_name = self.step_name
-
-        return (
-            self.workflow_result.get_step_result(
-                step_name=step_name,
+                sub_step_name=sub_step_name,
+                environment=environment
             )
         )
 

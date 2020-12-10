@@ -100,7 +100,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
 
             expected_step_result.success = False
             expected_step_result.message = 'File specified in configlint-yml-path not found: invalid_file'
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_rule_path(self, config_lint_mock):
@@ -135,7 +135,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
 
             expected_step_result.success = False
             expected_step_result.message = 'File specified in rules not found: invalid_file'
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch('sh.config_lint', create=True)
     def test_run_step_pass_prev_step(self, config_lint_mock):
@@ -180,7 +180,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 name='configlint-yml-path',
                 value=test_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_scan(self, configlint_mock):
@@ -235,7 +235,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 name='configlint-yml-path',
                 value=file_to_validate_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch('sh.config_lint', create=True)
     def test_run_step_pass(self, config_lint_mock):
@@ -279,4 +279,4 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 name='configlint-yml-path',
                 value=test_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())

@@ -21,6 +21,7 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         step_implementer,
         step_config={},
         step_name='',
+        environment=None,
         implementer='',
         results_dir_path='',
         results_file_name='',
@@ -44,7 +45,8 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path,
-            config=sub_step_config
+            config=sub_step_config,
+            environment=environment
         )
 
         return step_implementer

@@ -83,7 +83,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             expected_step_result.add_artifact(name='version', value='42.1.0+abc123')
             expected_step_result.add_artifact(name='container-image-version', value='42.1.0')
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
     def test_run_step_pass_different_pre_release(self):
         with TempDirectory() as temp_dir:
@@ -120,4 +120,4 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             expected_step_result.add_artifact(name='version', value='42.1.0-feature123+abc123')
             expected_step_result.add_artifact(name='container-image-version', value='42.1.0-feature123')
 
-            self.assertEqual(result.get_step_result(), expected_step_result.get_step_result())
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())

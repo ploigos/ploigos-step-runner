@@ -18,15 +18,31 @@ def setup_test():
     step_result1.add_artifact('artifact2', 'value2', 'description2')
     step_result1.add_artifact('artifact3', 'value3')
     step_result1.add_artifact('artifact4', False)
+    step_result1.add_artifact('same-artifact-all-env-and-no-env', 'result1')
 
     step_result2 = StepResult('step2', 'sub2', 'implementer2')
     step_result2.add_artifact('artifact1', True)
     step_result2.add_artifact('artifact2', False)
     step_result2.add_artifact('artifact5', 'value5')
 
+    step_result3 = StepResult('deploy', 'deploy-sub', 'helm', 'dev')
+    step_result3.add_artifact('same-artifact-diff-env', 'value-dev-env')
+    step_result3.add_artifact('unique-artifact-to-step-and-environment-1', 'value1-dev-env')
+    step_result3.add_artifact('same-artifact-all-env-and-no-env', 'result3-dev-env')
+
+    step_result4 = StepResult('deploy', 'deploy-sub', 'helm', 'test')
+    step_result4.add_artifact('artifact1', True)
+    step_result4.add_artifact('artifact2', False)
+    step_result4.add_artifact('artifact5', 'value5')
+    step_result4.add_artifact('same-artifact-diff-env', 'value-test-env')
+    step_result4.add_artifact('unique-artifact-to-step-and-environment-2', 'value2-test-env')
+    step_result4.add_artifact('same-artifact-all-env-and-no-env', 'result4-test-env')
+
     wfr = WorkflowResult()
     wfr.add_step_result(step_result1)
     wfr.add_step_result(step_result2)
+    wfr.add_step_result(step_result3)
+    wfr.add_step_result(step_result4)
 
     return wfr
 
@@ -120,84 +136,132 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             wfr.get_artifact_value(artifact='artifact2', step_name='step2', sub_step_name='bad')
         )
 
-    def test_get_step_result(self):
+    def test_get_artifact_value_in_step_executed_in_different_environments_and_no_environment(self):
         wfr = setup_test()
-        expected_step_result = {
-            'tssc-results': {
-                'step1': {
-                    'sub1': {
-                        'sub-step-implementer-name': 'implementer1',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'artifact1':
-                                {'description': 'description1', 'value': 'value1'},
-                            'artifact2':
-                                {'description': 'description2', 'value': 'value2'},
-                            'artifact3':
-                                {'description': '', 'value': 'value3'},
-                            'artifact4':
-                                {'description': '', 'value': False}
-                        }
-                    }
-                }
-            }
-        }
+
         self.assertEqual(
-            expected_step_result,
-            wfr.get_step_result('step1')
+            wfr.get_artifact_value(
+                artifact='same-artifact-all-env-and-no-env'
+            ),
+            'result1'
         )
 
-    def test_add_step_result_new(self):
-        expected_step_result = {
-            'tssc-results': {
-                'teststep': {
-                    'testsub': {
-                        'sub-step-implementer-name': 'testimplementer',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {}
-                    }
-                }
-            }
-        }
-        test_step_result = StepResult('teststep', 'testsub', 'testimplementer')
-        wfr = setup_test()
-        wfr.add_step_result(test_step_result)
-        self.assertEqual(wfr.get_step_result('teststep'), expected_step_result)
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='same-artifact-all-env-and-no-env',
+                environment='dev'
+            ),
+            'result3-dev-env'
+        )
 
-    def test_add_step_result_update(self):
-        expected_step_result = {
-            'tssc-results': {
-                'step1': {
-                    'sub1': {
-                        'sub-step-implementer-name': 'implementer1',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'artifact1':
-                                {'description': 'description1', 'value': 'value1'},
-                            'artifact2':
-                                {'description': 'description2', 'value': 'value2'},
-                            'artifact3':
-                                {'description': '', 'value': 'value3'},
-                            'artifact4':
-                                {'description': '', 'value': False},
-                            'newartifact': {
-                                'description': 'newdescription',
-                                 'value': 'newvalue'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        update_step_result = StepResult('step1', 'sub1', 'implementer1')
-        update_step_result.add_artifact('newartifact', 'newvalue', 'newdescription')
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='same-artifact-all-env-and-no-env',
+                environment='test'
+            ),
+            'result4-test-env'
+        )
+
+    def test_get_artifact_value_in_step_executed_in_different_environments(self):
+        wfr = setup_test()
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='same-artifact-diff-env'
+            ),
+            'value-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='same-artifact-diff-env',
+                environment='dev'
+            ),
+            'value-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='same-artifact-diff-env',
+                environment='test'
+            ),
+            'value-test-env'
+        )
+
+    def test_get_artifact_value_unique_to_environment(self):
+        wfr = setup_test()
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-1'
+            ),
+            'value1-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-1',
+                environment='dev'
+            ),
+            'value1-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-1',
+                environment='test'
+            ),
+            None
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-2'
+            ),
+            'value2-test-env'
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-2',
+                environment='dev'
+            ),
+            None
+        )
+
+        self.assertEqual(
+            wfr.get_artifact_value(
+                artifact='unique-artifact-to-step-and-environment-2',
+                environment='test'
+            ),
+            'value2-test-env'
+        )
+
+    def test_add_step_result_duplicate_no_env(self):
+        duplicate_step_result = StepResult('step1', 'sub1', 'implementer1')
+        duplicate_step_result.add_artifact('newartifact', 'newvalue', 'newdescription')
 
         wfr = setup_test()
-        wfr.add_step_result(update_step_result)
-        self.assertEqual(wfr.get_step_result('step1'), expected_step_result)
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            r"Can not add duplicate StepResult for step \(step1\),"
+            r" sub step \(sub1\), and environment \(None\)."
+        ):
+            wfr.add_step_result(duplicate_step_result)
+
+    def test_add_step_result_duplicate_with_env(self):
+        duplicate_step_result = StepResult('deploy', 'deploy-sub', 'helm', 'dev')
+        duplicate_step_result.add_artifact('newartifact', 'newvalue', 'newdescription')
+
+        wfr = setup_test()
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            r"Can not add duplicate StepResult for step \(deploy\),"
+            r" sub step \(deploy-sub\), and environment \(dev\)."
+        ):
+            wfr.add_step_result(duplicate_step_result)
 
     def test_add_step_result_exception(self):
         wfr = setup_test()
@@ -287,6 +351,10 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     "artifact4": {
                         "description": "",
                         "value": false
+                    },
+                    "same-artifact-all-env-and-no-env": {
+                        "description": "",
+                        "value": "result1"
                     }
                 }
             }
@@ -308,6 +376,64 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
                     "artifact5": {
                         "description": "",
                         "value": "value5"
+                    }
+                }
+            }
+        },
+        "dev": {
+            "deploy": {
+                "deploy-sub": {
+                    "sub-step-implementer-name": "helm",
+                    "success": true,
+                    "message": "",
+                    "artifacts": {
+                        "same-artifact-diff-env": {
+                            "description": "",
+                            "value": "value-dev-env"
+                        },
+                        "unique-artifact-to-step-and-environment-1": {
+                            "description": "",
+                            "value": "value1-dev-env"
+                        },
+                        "same-artifact-all-env-and-no-env": {
+                            "description": "",
+                            "value": "result3-dev-env"
+                        }
+                    }
+                }
+            }
+        },
+        "test": {
+            "deploy": {
+                "deploy-sub": {
+                    "sub-step-implementer-name": "helm",
+                    "success": true,
+                    "message": "",
+                    "artifacts": {
+                        "artifact1": {
+                            "description": "",
+                            "value": true
+                        },
+                        "artifact2": {
+                            "description": "",
+                            "value": false
+                        },
+                        "artifact5": {
+                            "description": "",
+                            "value": "value5"
+                        },
+                        "same-artifact-diff-env": {
+                            "description": "",
+                            "value": "value-test-env"
+                        },
+                        "unique-artifact-to-step-and-environment-2": {
+                            "description": "",
+                            "value": "value2-test-env"
+                        },
+                        "same-artifact-all-env-and-no-env": {
+                            "description": "",
+                            "value": "result4-test-env"
+                        }
                     }
                 }
             }
@@ -337,7 +463,10 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
     def test_load_from_pickle_file_no_file(self):
         pickle_wfr = WorkflowResult.load_from_pickle_file('test.pkl')
         expected_wfr = WorkflowResult()
-        self.assertEqual(pickle_wfr._WorkflowResult__get_all_step_results(), expected_wfr._WorkflowResult__get_all_step_results())
+        self.assertEqual(
+            pickle_wfr._WorkflowResult__get_all_step_results_dict(),
+            expected_wfr._WorkflowResult__get_all_step_results_dict()
+        )
 
     def test_load_from_pickle_file_empty_file(self):
         with TempDirectory() as temp_dir:
@@ -345,7 +474,10 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             open(pickle_file, 'a').close()
             pickle_wfr = WorkflowResult.load_from_pickle_file(pickle_file)
             expected_wfr = WorkflowResult()
-            self.assertEqual(pickle_wfr._WorkflowResult__get_all_step_results(), expected_wfr._WorkflowResult__get_all_step_results())
+            self.assertEqual(
+                pickle_wfr._WorkflowResult__get_all_step_results_dict(),
+                expected_wfr._WorkflowResult__get_all_step_results_dict()
+            )
 
     def test_load_from_pickle_file_no_workflowresult(self):
         with TempDirectory() as temp_dir:

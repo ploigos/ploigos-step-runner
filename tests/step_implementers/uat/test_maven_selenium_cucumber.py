@@ -177,7 +177,7 @@ class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
                 value=cucumber_json_report_path
             )
 
-        self.assertEqual(expected_step_result.get_step_result(), result.get_step_result())
+        self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)

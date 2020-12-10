@@ -19,16 +19,16 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         Name of the sub step
     sub_step_implementer_name : str
         Name of the sub step implementer
-
+    environment : str
+        Optional. Environment that this step result is for
+        if step was run against a specific environment.
     """
 
-    def __init__(self, step_name, sub_step_name, sub_step_implementer_name):
-        """
-        Step Result Init
-        """
+    def __init__(self, step_name, sub_step_name, sub_step_implementer_name, environment=None):
         self.__step_name = step_name
         self.__sub_step_name = sub_step_name
         self.__sub_step_implementer_name = sub_step_implementer_name
+        self.__environment = environment
         self.__success = True
         self.__message = ''
         self.__artifacts = {}
@@ -41,9 +41,10 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         ResultStep
         """
         return cls(
-            step_implementer.step_name,
-            step_implementer.sub_step_name,
-            step_implementer.sub_step_implementer_name
+            step_name=step_implementer.step_name,
+            sub_step_name=step_implementer.sub_step_name,
+            sub_step_implementer_name=step_implementer.sub_step_implementer_name,
+            environment=step_implementer.environment
         )
 
     def __str__(self):
@@ -86,6 +87,17 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         return self.__sub_step_implementer_name
 
     @property
+    def environment(self):
+        """
+        Returns
+        -------
+        str
+            Environment name if this StepResult is specific to an environment,
+            else None.
+        """
+        return self.__environment
+
+    @property
     def artifacts(self):
         """
         Returns
@@ -102,8 +114,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         return self.__artifacts
 
     def get_artifact(self, name):
-        """
-        Get the dictionary of a specified artifact.
+        """Get the dictionary of a specified artifact.
 
         Parameters
         ----------
@@ -121,8 +132,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         return self.artifacts.get(name)
 
     def get_artifact_value(self, name):
-        """
-        Get the value for a specified artifact.
+        """Get the value for a specified artifact.
 
         Parameters
         ----------
@@ -226,9 +236,8 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         }
         return result
 
-    def get_step_result(self):
-        """
-        Get the step result dictionary
+    def get_step_result_dict(self):
+        """Get the step result dictionary
 
         Returns
         -------
@@ -249,11 +258,20 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                 }
             }
         """
-        result = {
-            self.step_name: {
-                self.sub_step_name: self.get_sub_step_result()
+        if self.environment:
+            result = {
+                self.environment: {
+                    self.step_name: {
+                        self.sub_step_name: self.get_sub_step_result()
+                    }
+                }
             }
-        }
+        else:
+            result = {
+                self.step_name: {
+                    self.sub_step_name: self.get_sub_step_result()
+                }
+            }
         return result
 
     def get_step_result_json(self):
@@ -263,7 +281,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         str
             JSON formatted step result
         """
-        return json.dumps(self.get_step_result())
+        return json.dumps(self.get_step_result_dict())
 
     def get_step_result_yaml(self):
         """
@@ -272,4 +290,4 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         str
             YAML formatted step result
         """
-        return yaml.dump(self.get_step_result())
+        return yaml.dump(self.get_step_result_dict())
