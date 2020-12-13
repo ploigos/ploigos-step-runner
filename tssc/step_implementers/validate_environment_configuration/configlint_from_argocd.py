@@ -13,7 +13,7 @@ Could come from:
 
 | Configuration Key     | Required | Default                   | Description
 |-----------------------|----------|---------------------------|---------------------------
-| `argocd-result-set`   | Yes      | N/A                       | Yml file to be linted
+| `argocd-deployed-manifest`   | Yes      | N/A                       | Yml file to be linted
 
 Result Artifacts
 ----------------
@@ -34,7 +34,7 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'argocd-result-set'
+    'argocd-deployed-manifest'
 ]
 
 class ConfiglintFromArgocd(StepImplementer):
@@ -84,12 +84,12 @@ class ConfiglintFromArgocd(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        argocd_result_set = self.get_value('argocd-result-set')
+        argocd_result_set = self.get_value('argocd-deployed-manifest')
 
         if not os.path.exists(argocd_result_set):
             step_result.success = False
             step_result.message = 'File specified in ' \
-                                  f'argocd-result-set {argocd_result_set} not found'
+                                  f'argocd-deployed-manifest {argocd_result_set} not found'
             return step_result
 
         step_result.add_artifact(

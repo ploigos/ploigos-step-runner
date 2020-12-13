@@ -34,13 +34,13 @@
     },
     "global-environment-defaults": {
       "DEV": {
-        "kube-app-domain": "dev.example.xyz"
+        "kube-api-uri": "kubernetes.default.svc"
       },
       "TEST": {
-        "kube-app-domain": "test.example.xyz"
+        "kube-api-uri": "kubernetes.default.svc"
       },
       "PROD": {
-        "kube-app-domain": "example.xyz"
+        "kube-api-uri": "api.openshift.prod.ploigos.xyz"
       }
     },
     "generate-metadata": [

@@ -23,11 +23,11 @@ tssc-config:
             username: tssc-team+tssc_reference_app_quarkus_rest_json
   global-environment-defaults:
     DEV:
-      kube-app-domain: dev.example.xyz
+      kube-api-uri: kubernetes.default.svc
     TEST:
-      kube-app-domain: test.example.xyz
+      kube-api-uri: kubernetes.default.svc
     PROD:
-      kube-app-domain: example.xyz
+      kube-api-uri: api.openshift.prod.ploigos.xyz
   generate-metadata:
   - implementer: Maven
   - implementer: Git
