@@ -66,13 +66,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     __TITLE_LENGTH = 80
 
     def __init__(  # pylint: disable=too-many-arguments
-            self,
-            results_dir_path,
-            results_file_name,
-            work_dir_path,
-            config,
-            environment=None):
-
+        self,
+        results_dir_path,
+        results_file_name,
+        work_dir_path,
+        config,
+        environment=None
+    ):
         self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
@@ -215,6 +215,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             OS path to the working folder plus step name.
         """
         work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
+        if self.environment:
+            work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
         os.makedirs(work_dir_path_step, exist_ok=True)
         return work_dir_path_step
 
@@ -452,7 +454,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # first try to get config value
         config_value = self.get_config_value(key)
-        if config_value:
+        if config_value is not None:
             return config_value
 
         # if not found config value try to get result value specific to current environment

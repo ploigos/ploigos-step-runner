@@ -16,10 +16,13 @@ def create_sh_side_effect(
 ):
     def sh_side_effect(*args, **kwargs):
         if mock_stdout:
-            if callable(kwargs['_out']):
-                kwargs['_out'](mock_stdout)
-            elif isinstance(kwargs['_out'], IOBase):
-                kwargs['_out'].write(mock_stdout)
+            if '_out' in kwargs:
+                if callable(kwargs['_out']):
+                    kwargs['_out'](mock_stdout)
+                elif isinstance(kwargs['_out'], IOBase):
+                    kwargs['_out'].write(mock_stdout)
+            else:
+                return mock_stdout
 
         if mock_stderr:
             if callable(kwargs['_err']):

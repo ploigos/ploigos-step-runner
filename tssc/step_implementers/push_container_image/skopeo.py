@@ -26,11 +26,23 @@ Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key       | Description
---------------------------|------------
-`container-image-version` |
-`container-image-uri`     |
-`container-image-tag`     |
+Result Artifact Key                     | Description
+----------------------------------------|------------
+`container-image-registry-uri`          | URI to the image registry service.
+`container-image-registry-organization` | Organization in the image registry to push the image to.
+`container-image-repository`            | Repository in the Organization in the image registry to \
+                                          push the image to.
+`container-image-name`                  | Name of the image to push to the Image Repository. \
+                                          This is the same value as `container-image-repository` as\
+                                          these are always the same, but people refer to them \
+                                          differently in different cases, so providing both.
+`container-image-version`               | Version of the image to push.
+`container-image-tag`                   | Tag container image was pushed with. <br/>\
+                                          Takes the form of: \
+                                            "`container-image-registry-uri`\
+                                                /`container-image-registry-organization`\
+                                                /`container-image-repository`\
+                                                :`container-image-version`"
 """
 import os
 import sys
@@ -110,8 +122,12 @@ class Skopeo(StepImplementer):
         organization = self.get_value('organization')
         image_tar_file = self.get_value('image-tar-file')
         destination_url = self.get_value('destination-url')
-        image_repository_uri = f"{destination_url}/{organization}/{application_name}-{service_name}"
-        image_tag = f"{image_repository_uri}:{image_version}"
+
+        image_registry_uri = destination_url
+        image_registry_organization = organization
+        image_repository = f"{application_name}-{service_name}"
+        image_tag = f"{image_registry_uri}/{image_registry_organization}" \
+                    f"/{image_repository}:{image_version}"
 
         try:
             # login to any provider container registries
@@ -139,8 +155,14 @@ class Skopeo(StepImplementer):
             step_result.message = f'Error pushing container image ({image_tar_file}) ' \
                 f' to tag ({image_tag}) using skopeo: {error}'
 
+        step_result.add_artifact(name='container-image-registry-uri', value=image_registry_uri)
+        step_result.add_artifact(
+            name='container-image-registry-organization',
+            value=image_registry_organization
+        )
+        step_result.add_artifact(name='container-image-repository', value=image_repository)
+        step_result.add_artifact(name='container-image-name', value=image_repository)
         step_result.add_artifact(name='container-image-version', value=image_version)
-        step_result.add_artifact(name='container-image-uri', value=image_repository_uri)
         step_result.add_artifact(name='container-image-tag', value=image_tag)
 
         return step_result

@@ -11,7 +11,7 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any, create_sh_side_effect
+from tests.helpers.test_utils import Any
 from tssc.step_implementers.push_container_image import Skopeo
 from tssc.step_result import StepResult
 
@@ -94,17 +94,34 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 sub_step_name='Skopeo',
                 sub_step_implementer_name='Skopeo'
             )
-            expected_step_result.add_artifact(name='container-image-version', value=image_version)
             expected_step_result.add_artifact(
-                name='container-image-uri',
-                value='fake-registry.xyz/fake-org/fake-app-fake-service'
+                name='container-image-registry-uri',
+                value='fake-registry.xyz'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-registry-organization',
+                value='fake-org'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-repository',
+                value='fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-name',
+                value='fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-version',
+                value=image_version
             )
             expected_step_result.add_artifact(
                 name='container-image-tag',
-                value=image_tag
+                value='fake-registry.xyz/fake-org/fake-app-fake-service:1.0-69442c8'
             )
-
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(
+                result.get_step_result_dict(),
+                expected_step_result.get_step_result_dict()
+            )
 
             containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
             skopeo_mock.copy.assert_called_once_with(
@@ -153,14 +170,29 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 sub_step_name='Skopeo',
                 sub_step_implementer_name='Skopeo'
             )
-            expected_step_result.add_artifact(name='container-image-version', value=image_version)
             expected_step_result.add_artifact(
-                name='container-image-uri',
-                value='fake-registry.xyz/fake-org/fake-app-fake-service'
+                name='container-image-registry-uri',
+                value='fake-registry.xyz'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-registry-organization',
+                value='fake-org'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-repository',
+                value='fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-name',
+                value='fake-app-fake-service'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-version',
+                value=image_version
             )
             expected_step_result.add_artifact(
                 name='container-image-tag',
-                value=image_tag
+                value='fake-registry.xyz/fake-org/fake-app-fake-service:1.0-69442c8'
             )
             expected_step_result.success = False
             expected_step_result.message = f"Error pushing container image ({image_tar_file}) " +\

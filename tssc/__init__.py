@@ -217,14 +217,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         DEV:
-          # Required
-          kube-app-domain: ''
-
           #Optional
           #kube-api-token: ''
-
-          #Optional
-          #insecure-skip-tls-verify: 'true'
 
           # Required
           argocd-username: ''
@@ -239,7 +233,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: '60'
 
           # Optional
-          #argocd-helm-chart-path: './'
+          #deployment-config-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
@@ -247,14 +241,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         TEST:
-          # Required
-          kube-app-domain: ''
-
           #Optional
           #kube-api-token: ''
-
-          #Optional
-          #insecure-skip-tls-verify: 'true'
 
           # Required
           argocd-username: ''
@@ -269,7 +257,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: '60'
 
           # Optional
-          #argocd-helm-chart-path: './'
+          #deployment-config-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -457,7 +445,7 @@ From least precedence to highest precedence.
           git-email: ''
 
           # Optional
-          #git-friendly-name: 'TSSC'
+          #git-name: 'TSSC'
 
           # Optional
           #git-username: None
@@ -550,14 +538,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         DEV:
-          # Required
-          kube-app-domain: ''
-
           #Optional
           #kube-api-token: ''
-
-          #Optional
-          #insecure-skip-tls-verify: 'true'
 
           # Required
           argocd-username: ''
@@ -572,7 +554,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: '60'
 
           # Optional
-          #argocd-helm-chart-path: './'
+          #deployment-config-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'TEST'
@@ -580,14 +562,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         TEST:
-          # Required
-          kube-app-domain: ''
-
           #Optional
           #kube-api-token:
-
-          #Optional
-          #insecure-skip-tls-verify: 'true'
 
           # Required
           argocd-username: ''
@@ -602,7 +578,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: '60'
 
           # Optional
-          #argocd-helm-chart-path: './'
+          #deployment-config-helm-chart-path: './'
 
         # Sample
         # Sample configuration for an environment named 'PROD'
@@ -764,13 +740,13 @@ From least precedence to highest precedence.
           #value-yaml-template: 'values.yaml.j2'
 
           # Optional
-          #argocd-helm-chart-path: './'
+          #deployment-config-helm-chart-path: './'
 
           # Required
           git-email: ''
 
           # Optional
-          #git-friendly-name: 'TSSC'
+          #git-name: 'TSSC'
 
           # Optional
           #git-username: None

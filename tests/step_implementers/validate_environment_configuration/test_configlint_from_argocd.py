@@ -41,7 +41,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
     def test__required_config_or_result_keys(self):
         required_keys = ConfiglintFromArgocd._required_config_or_result_keys()
         expected_required_keys = [
-            'argocd-result-set'
+            'argocd-deployed-manifest'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
@@ -56,7 +56,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
             step_config = {}
             artifact_config = {
-                'argocd-result-set': {
+                'argocd-deployed-manifest': {
                     'value': test_file_path
                 }
             }
@@ -96,7 +96,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
             step_config = {}
             artifact_config = {
-                'argocd-result-set': {
+                'argocd-deployed-manifest': {
                     'value': f'{test_file_path}.bad'
                 }
             }
@@ -119,5 +119,5 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                 sub_step_implementer_name='ConfiglintArgocd'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'File specified in argocd-result-set {test_file_path}.bad not found'
+            expected_step_result.message = f'File specified in argocd-deployed-manifest {test_file_path}.bad not found'
             self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())

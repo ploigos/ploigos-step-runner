@@ -888,7 +888,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             environment='TEST'
         )
         step_result_deploy_test.add_artifact(
-            name='deployment-endpoint-url',
+            name='deployed-host-urls',
             value='https://awesome-app.test.ploigos.xyz'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_test)
@@ -900,7 +900,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             environment='PROD'
         )
         step_result_deploy_prod.add_artifact(
-            name='deployment-endpoint-url',
+            name='deployed-host-urls',
             value='https://awesome-app.prod.ploigos.xyz'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_prod)
@@ -922,7 +922,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         with TempDirectory() as test_dir:
             step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment=None)
             self.assertEqual(
-                step.get_value('deployment-endpoint-url'),
+                step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
             )
 
@@ -930,7 +930,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         with TempDirectory() as test_dir:
             step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='TEST')
             self.assertEqual(
-                step.get_value('deployment-endpoint-url'),
+                step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
             )
 
@@ -938,7 +938,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         with TempDirectory() as test_dir:
             step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='PROD')
             self.assertEqual(
-                step.get_value('deployment-endpoint-url'),
+                step.get_value('deployed-host-urls'),
                 'https://awesome-app.prod.ploigos.xyz'
             )
 
@@ -946,6 +946,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         with TempDirectory() as test_dir:
             step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
             self.assertEqual(
-                step.get_value('deployment-endpoint-url'),
+                step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
             )

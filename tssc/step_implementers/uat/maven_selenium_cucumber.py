@@ -8,16 +8,23 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key   | Required? | Default            | Description
---------------------|-----------|--------------------|------------
-`fail-on-no-tests`  | Yes       | True               | Value to specify whether unit-test \
-                                                      step can succeed when no tests are defined
-`pom-file`          | Yes       | `pom.xml`          | pom used to run tests and check \
-                                                      for existence of custom reportsDirectory
-`selenium-hub-url`  | Yes       |                    | URL where the Selenium Hub is running
-`deployment-endpoint-url` | Yes |                    | URL where the UAT application is running
-`uat-maven-profile` | Yes       | `integration-test` | Maven profile to use to invoke \
-                                                       Selenium tests.
+Configuration Key    | Required? | Default            | Description
+---------------------|-----------|--------------------|------------
+`fail-on-no-tests`   | Yes       | True               | Value to specify whether unit-test \
+                                                        step can succeed when no tests are defined
+`pom-file`           | Yes       | `pom.xml`          | pom used to run tests and check \
+                                                        for existence of custom reportsDirectory
+`selenium-hub-url`   | Yes       |                    | URL where the Selenium Hub is running
+`target-host-url`    | Maybe     |                    | Target host URL for UAT. \
+                                                        <br/> \
+                                                        If not given then use first host url from \
+                                                        `deployed-host-urls`.
+`deployed-host-urls` | Maybe     |                    | Deployed host URLs. If `target-host-url` \
+                                                        is not given then use first URL from this \
+                                                        list. If `target-host-url` is given then \
+                                                        ignore this value.
+`uat-maven-profile`  | Yes       | `integration-test` | Maven profile to use to invoke \
+                                                        Selenium tests.
 
 Result Artifacts
 ----------------
@@ -34,6 +41,8 @@ import os
 import sys
 
 import sh
+from tssc.config import ConfigValue
+from tssc.exceptions import StepRunnerException
 from tssc.step_implementers.shared.maven_generic import MavenGeneric
 from tssc.step_result import StepResult
 from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
@@ -48,8 +57,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'fail-on-no-tests',
     'pom-file',
     'selenium-hub-url',
-    'uat-maven-profile',
-    'deployment-endpoint-url'
+    'uat-maven-profile'
 ]
 
 
@@ -90,6 +98,30 @@ class MavenSeleniumCucumber(MavenGeneric):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * either target-host-url or deployed-host-urls is given
+
+        Raises
+        ------
+        StepRunnerException
+            If step configuration or previous step result artifacts have invalid required values
+        """
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # target-host-url or deployed-host-urls must be supplied
+        target_host_url = self.get_value('target-host-url')
+        deployed_host_urls = self.get_value('deployed-host-urls')
+        if (not target_host_url) and (not deployed_host_urls):
+            raise StepRunnerException(
+                "Either 'target-host-url' or 'deployed-host-urls' needs to be supplied but"
+                " neither were."
+            )
+
     def _run_step(self): # pylint: disable=too-many-locals
         """Runs the step implemented by this StepImplementer.
 
@@ -104,8 +136,26 @@ class MavenSeleniumCucumber(MavenGeneric):
         pom_file = self.get_value('pom-file')
         fail_on_no_tests = self.get_value('fail-on-no-tests')
         selenium_hub_url = self.get_value('selenium-hub-url')
-        target_base_url = self.get_value('deployment-endpoint-url')
+        deployed_host_urls = ConfigValue.convert_leaves_to_values(
+            self.get_value('deployed-host-urls')
+        )
         uat_maven_profile = self.get_value('uat-maven-profile')
+
+        # NOTE:
+        #   at some point may need to do smarter logic if a deployable has more then one deployed
+        #   host URL to do UAT against all of them, but for now, use first one as target of UAT
+        if isinstance(deployed_host_urls, list):
+            target_base_url = deployed_host_urls[0]
+            if len(deployed_host_urls) > 1:
+                step_result.message = \
+                    f"Given more then one deployed host URL ({deployed_host_urls})," \
+                    f" targeting first one ({target_base_url}) for user acceptance test (UAT)."
+                print(step_result.message)
+        elif deployed_host_urls:
+            target_base_url = deployed_host_urls
+        else:
+            target_base_url = self.get_value('target-host-url')
+
 
         # ensure surefire plugin enabled
         maven_surefire_plugin = self._get_effective_pom_element(
