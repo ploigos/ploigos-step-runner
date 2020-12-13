@@ -1,5 +1,6 @@
 import os
 from io import IOBase
+from pathlib import Path
 from shutil import copyfile
 from unittest.mock import patch
 
@@ -8,12 +9,13 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
+from tssc.exceptions import StepRunnerException
 from tssc.step_implementers.uat import MavenSeleniumCucumber
 from tssc.step_result import StepResult
 from tssc.utils.file import create_parent_dir
 
 
-class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
+class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -31,6 +33,102 @@ class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
             work_dir_path=work_dir_path
         )
 
+class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys(
+    TestStepImplementerMavenSeleniumCucumberBase
+):
+    def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            Path(pom_file_path).touch()
+            step_config = {
+                'selenium-hub-url': 'https://selenium.ploigos.xyz',
+                'pom-file': pom_file_path,
+                'target-host-url': 'https://foo.test.ploigos.xyz'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            Path(pom_file_path).touch()
+            step_config = {
+                'selenium-hub-url': 'https://selenium.ploigos.xyz',
+                'pom-file': pom_file_path,
+                'deployed-host-urls': ['https://foo.test.ploigos.xyz']
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            Path(pom_file_path).touch()
+            step_config = {
+                'selenium-hub-url': 'https://selenium.ploigos.xyz',
+                'pom-file': pom_file_path,
+                'deployed-host-urls': ['https://foo.test.ploigos.xyz', 'https://bar.test.ploigos.xyz']
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_file_name = 'tssc-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            Path(pom_file_path).touch()
+            step_config = {
+                'selenium-hub-url': 'https://selenium.ploigos.xyz',
+                'pom-file': pom_file_path
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                rf"Either 'target-host-url' or 'deployed-host-urls' needs to be supplied but"
+                " neither were."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSeleniumCucumberBase):
     def test_step_implementer_config_defaults(self):
         actual_defaults = MavenSeleniumCucumber.step_implementer_config_defaults()
         expected_defaults = {
@@ -46,8 +144,7 @@ class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
             'fail-on-no-tests',
             'pom-file',
             'selenium-hub-url',
-            'uat-maven-profile',
-            'deployment-endpoint-url'
+            'uat-maven-profile'
         ]
         self.assertEqual(expected_required_keys, actual_required_keys)
 
@@ -62,7 +159,8 @@ class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
         artifact_id,
         surefire_reports_dir,
         selenium_hub_url,
-        target_base_url=None,
+        target_host_url=None,
+        deployed_host_urls=None,
         write_mock_test_results=True,
         assert_mvn_called=True,
         assert_report_artifact=True,
@@ -85,9 +183,19 @@ class TestStepImplementerMavenSeleniumCucumber(MaveStepImplementerTestCase):
         pom_file_path = os.path.join(test_dir.path, pom_file_name)
         step_config = {
             'pom-file': pom_file_path,
-            'selenium-hub-url': selenium_hub_url,
-            'deployment-endpoint-url': target_base_url
+            'selenium-hub-url': selenium_hub_url
         }
+        target_base_url = None
+        if deployed_host_urls:
+            step_config['deployed-host-urls'] = deployed_host_urls
+            if isinstance(deployed_host_urls, list):
+                target_base_url = deployed_host_urls[0]
+            else:
+               target_base_url = deployed_host_urls
+        if target_host_url:
+            step_config['target-host-url'] = target_host_url
+            target_base_url = target_host_url
+
         if fail_on_no_tests is not None:
             step_config['fail-on-no-tests'] = fail_on_no_tests
         if uat_maven_profile is not None:
@@ -230,6 +338,173 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 group_id=group_id,
                 artifact_id=artifact_id,
                 surefire_reports_dir=surefire_reports_dir
+            )
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+    @patch('sh.mvn', create=True)
+    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    def test__run_step_success__deployed_host_urls_str(
+        self,
+        write_effective_pom_mock,
+        mvn_mock,
+        generate_maven_settings_mock
+    ):
+        with TempDirectory() as test_dir:
+            group_id = 'com.mycompany.app'
+            artifact_id = 'my-app'
+            version = '1.0'
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            pom_content = bytes(
+'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(
+                    group_id=group_id,
+                    artifact_id=artifact_id,
+                    version=version
+                ), 'utf-8'
+            )
+
+            deployed_host_urls = 'https://foo.ploigos.xyz'
+            self.__run__run_step_test(
+                test_dir=test_dir,
+                mvn_mock=mvn_mock,
+                selenium_hub_url='https://test.xyz:4444',
+                write_effective_pom_mock=write_effective_pom_mock,
+                generate_maven_settings_mock=generate_maven_settings_mock,
+                pom_content=pom_content,
+                group_id=group_id,
+                artifact_id=artifact_id,
+                surefire_reports_dir=surefire_reports_dir,
+                deployed_host_urls=deployed_host_urls
+            )
+
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+    @patch('sh.mvn', create=True)
+    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    def test__run_step_success__deployed_host_urls_array_1(
+        self,
+        write_effective_pom_mock,
+        mvn_mock,
+        generate_maven_settings_mock
+    ):
+        with TempDirectory() as test_dir:
+            group_id = 'com.mycompany.app'
+            artifact_id = 'my-app'
+            version = '1.0'
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            pom_content = bytes(
+'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(
+                    group_id=group_id,
+                    artifact_id=artifact_id,
+                    version=version
+                ), 'utf-8'
+            )
+
+            deployed_host_urls = ['https://foo.ploigos.xyz']
+            self.__run__run_step_test(
+                test_dir=test_dir,
+                mvn_mock=mvn_mock,
+                selenium_hub_url='https://test.xyz:4444',
+                write_effective_pom_mock=write_effective_pom_mock,
+                generate_maven_settings_mock=generate_maven_settings_mock,
+                pom_content=pom_content,
+                group_id=group_id,
+                artifact_id=artifact_id,
+                surefire_reports_dir=surefire_reports_dir,
+                deployed_host_urls=deployed_host_urls
+            )
+
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+    @patch('sh.mvn', create=True)
+    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    def test__run_step_success__deployed_host_urls_array_2(
+        self,
+        write_effective_pom_mock,
+        mvn_mock,
+        generate_maven_settings_mock
+    ):
+        with TempDirectory() as test_dir:
+            group_id = 'com.mycompany.app'
+            artifact_id = 'my-app'
+            version = '1.0'
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            pom_content = bytes(
+'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(
+                    group_id=group_id,
+                    artifact_id=artifact_id,
+                    version=version
+                ), 'utf-8'
+            )
+
+            deployed_host_urls = ['https://foo.ploigos.xyz', 'https://foo.ploigos.xyz']
+            self.__run__run_step_test(
+                test_dir=test_dir,
+                mvn_mock=mvn_mock,
+                selenium_hub_url='https://test.xyz:4444',
+                write_effective_pom_mock=write_effective_pom_mock,
+                generate_maven_settings_mock=generate_maven_settings_mock,
+                pom_content=pom_content,
+                group_id=group_id,
+                artifact_id=artifact_id,
+                surefire_reports_dir=surefire_reports_dir,
+                deployed_host_urls=deployed_host_urls,
+                expected_result_message=\
+                    f"Given more then one deployed host URL ({deployed_host_urls})," \
+                    f" targeting first one (https://foo.ploigos.xyz) for user acceptance test (UAT)."
             )
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')

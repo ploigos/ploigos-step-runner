@@ -9,7 +9,7 @@ accept minimally the following configuration options.
 |---------------------|------------
 | `kube-api-uri`      | k8s API endpoint
 | `git-email`         | Git email for commit
-| `git-friendly-name` | Git name for commit
+| `git-name` | Git name for commit
 | `git-username`      | If the config repo is accessed via http(s) this must be supplied
 | `git-password`      | If the config repo is accessed via http(s) this must be supplied
 
