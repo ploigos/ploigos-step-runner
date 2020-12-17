@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc.step_implementers.validate_environment_configuration.configlint_from_argocd API documentation</title>
-<meta name="description" content="`StepImplementer` for the `validate-environment-configuration` step to take the output from
-the `deploy` ArgoCD step implementer and turn it into …" />
+<title>tssc.step_implementers.shared.maven_generic API documentation</title>
+<meta name="description" content="Abstract parent class for StepImplementers that use Maven." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,155 +19,99 @@ the `deploy` ArgoCD step implementer and turn it into …" />
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.step_implementers.validate_environment_configuration.configlint_from_argocd</code></h1>
+<h1 class="title">Module <code>tssc.step_implementers.shared.maven_generic</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>validate-environment-configuration</code> step to take the output from
-the <code>deploy</code> ArgoCD step implementer and turn it into input for the ConnfigLint implementer
-for this step.</p>
-<h2 id="step-configuration">Step Configuration</h2>
-<p>Step configuration expected as input to this step.
-Could come from:
-* static configuration
-* runtime configuration
-* previous step results</p>
-<table>
-<thead>
-<tr>
-<th>Configuration Key</th>
-<th>Required</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>argocd-deployed-manifest</code></td>
-<td>Yes</td>
-<td>N/A</td>
-<td>Yml file to be linted</td>
-</tr>
-</tbody>
-</table>
-<h2 id="result-artifacts">Result Artifacts</h2>
-<p>Results artifacts output by this step.</p>
-<table>
-<thead>
-<tr>
-<th>Result Artifact Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td></td>
-<td><code>configlint-yml-file</code></td>
-</tr>
-</tbody>
-</table>
+<p>Abstract parent class for StepImplementers that use Maven.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `validate-environment-configuration` step to take the output from
-the `deploy` ArgoCD step implementer and turn it into input for the ConnfigLint implementer
-for this step.
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-* static configuration
-* runtime configuration
-* previous step results
-
-
-| Configuration Key     | Required | Default                   | Description
-|-----------------------|----------|---------------------------|---------------------------
-| `argocd-deployed-manifest`   | Yes      | N/A                       | Yml file to be linted
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key     | Description
-------------------------|------------
-| `configlint-yml-file` | Yml file to be linted
-
+<pre><code class="python">&#34;&#34;&#34;Abstract parent class for StepImplementers that use Maven.
 &#34;&#34;&#34;
 
 import os
-from tssc.step_result import StepResult
 
-from tssc import StepImplementer
+from tssc.config import ConfigValue
+from tssc.step_implementer import StepImplementer
+from tssc.utils.maven import generate_maven_settings, write_effective_pom
+from tssc.utils.xml import get_xml_element_by_path
 
-DEFAULT_CONFIG = {
-}
 
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;argocd-deployed-manifest&#39;
-]
-
-class ConfiglintFromArgocd(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the `validate-environment-configuration` step to take the output from
-    the `deploy` ArgoCD step implementer and turn it into input for the ConnfigLint implementer
-    for this step.
+class MavenGeneric(StepImplementer):
+    &#34;&#34;&#34;Abstract parent class for StepImplementers that use Maven.
     &#34;&#34;&#34;
 
-    @staticmethod
-    def step_implementer_config_defaults():
+    SUREFIRE_PLUGIN_XML_ELEMENT_PATH = \
+        &#39;mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId=&#34;maven-surefire-plugin&#34;]&#39;
+    SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH = \
+        f&#39;{SUREFIRE_PLUGIN_XML_ELEMENT_PATH}/mvn:configuration/mvn:reportsDirectory&#39;
+    DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR = &#39;target/surefire-reports&#39;
+
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;pom-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
         &#34;&#34;&#34;
-        Getter for the StepImplementer&#39;s configuration defaults.
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
+        # if pom-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        pom_file = self.get_value(&#39;pom-file&#39;)
+        if pom_file is not None:
+            assert os.path.exists(pom_file), \
+                f&#39;Given maven pom file (pom-file) does not exist: {pom_file}&#39;
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration keys that are required before running the step.
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        argocd_result_set = self.get_value(&#39;argocd-deployed-manifest&#39;)
-
-        if not os.path.exists(argocd_result_set):
-            step_result.success = False
-            step_result.message = &#39;File specified in &#39; \
-                                  f&#39;argocd-deployed-manifest {argocd_result_set} not found&#39;
-            return step_result
-
-        step_result.add_artifact(
-            name=&#39;configlint-yml-path&#39;,
-            value=argocd_result_set
+    def _generate_maven_settings(self):
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-servers&#39;)
         )
-        return step_result</code></pre>
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-mirrors&#39;)
+        )
+
+        return generate_maven_settings(
+            working_dir=self.work_dir_path,
+            maven_servers=maven_servers,
+            maven_repositories=maven_repositories,
+            maven_mirrors=maven_mirrors
+        )
+
+    def _get_effective_pom(self):
+        &#34;&#34;&#34;Writes the effective pom to a file and returns the path.
+
+        Returns
+        -------
+        str
+            Path to the written effective pom generated from the &#39;pom-file&#39; value.
+        &#34;&#34;&#34;
+        effective_pom_path = os.path.join(self.work_dir_path, &#39;effective-pom.xml&#39;)
+
+        if not os.path.exists(effective_pom_path):
+            write_effective_pom(
+                pom_file_path=self.get_value(&#39;pom-file&#39;),
+                output_path=effective_pom_path
+            )
+
+        return effective_pom_path
+
+    def _get_effective_pom_element(self, element_path):
+        return get_xml_element_by_path(
+            self._get_effective_pom(),
+            element_path,
+            default_namespace=&#39;mvn&#39;
+        )</code></pre>
 </details>
 </section>
 <section>
@@ -180,118 +123,116 @@ class ConfiglintFromArgocd(StepImplementer):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd"><code class="flex name class">
-<span>class <span class="ident">ConfiglintFromArgocd</span></span>
+<dt id="tssc.step_implementers.shared.maven_generic.MavenGeneric"><code class="flex name class">
+<span>class <span class="ident">MavenGeneric</span></span>
 <span>(</span><span>results_dir_path, results_file_name, work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>validate-environment-configuration</code> step to take the output from
-the <code>deploy</code> ArgoCD step implementer and turn it into input for the ConnfigLint implementer
-for this step.</p></div>
+<div class="desc"><p>Abstract parent class for StepImplementers that use Maven.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ConfiglintFromArgocd(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the `validate-environment-configuration` step to take the output from
-    the `deploy` ArgoCD step implementer and turn it into input for the ConnfigLint implementer
-    for this step.
+<pre><code class="python">class MavenGeneric(StepImplementer):
+    &#34;&#34;&#34;Abstract parent class for StepImplementers that use Maven.
     &#34;&#34;&#34;
 
-    @staticmethod
-    def step_implementer_config_defaults():
+    SUREFIRE_PLUGIN_XML_ELEMENT_PATH = \
+        &#39;mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId=&#34;maven-surefire-plugin&#34;]&#39;
+    SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH = \
+        f&#39;{SUREFIRE_PLUGIN_XML_ELEMENT_PATH}/mvn:configuration/mvn:reportsDirectory&#39;
+    DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR = &#39;target/surefire-reports&#39;
+
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;pom-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
         &#34;&#34;&#34;
-        Getter for the StepImplementer&#39;s configuration defaults.
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
+        # if pom-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        pom_file = self.get_value(&#39;pom-file&#39;)
+        if pom_file is not None:
+            assert os.path.exists(pom_file), \
+                f&#39;Given maven pom file (pom-file) does not exist: {pom_file}&#39;
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration keys that are required before running the step.
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys that are required before running the step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        argocd_result_set = self.get_value(&#39;argocd-deployed-manifest&#39;)
-
-        if not os.path.exists(argocd_result_set):
-            step_result.success = False
-            step_result.message = &#39;File specified in &#39; \
-                                  f&#39;argocd-deployed-manifest {argocd_result_set} not found&#39;
-            return step_result
-
-        step_result.add_artifact(
-            name=&#39;configlint-yml-path&#39;,
-            value=argocd_result_set
+    def _generate_maven_settings(self):
+        maven_servers = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-servers&#39;)
         )
-        return step_result</code></pre>
+        maven_repositories = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-repositories&#39;)
+        )
+        maven_mirrors = ConfigValue.convert_leaves_to_values(
+            self.get_value(&#39;maven-mirrors&#39;)
+        )
+
+        return generate_maven_settings(
+            working_dir=self.work_dir_path,
+            maven_servers=maven_servers,
+            maven_repositories=maven_repositories,
+            maven_mirrors=maven_mirrors
+        )
+
+    def _get_effective_pom(self):
+        &#34;&#34;&#34;Writes the effective pom to a file and returns the path.
+
+        Returns
+        -------
+        str
+            Path to the written effective pom generated from the &#39;pom-file&#39; value.
+        &#34;&#34;&#34;
+        effective_pom_path = os.path.join(self.work_dir_path, &#39;effective-pom.xml&#39;)
+
+        if not os.path.exists(effective_pom_path):
+            write_effective_pom(
+                pom_file_path=self.get_value(&#39;pom-file&#39;),
+                output_path=effective_pom_path
+            )
+
+        return effective_pom_path
+
+    def _get_effective_pom_element(self, element_path):
+        return get_xml_element_by_path(
+            self._get_effective_pom(),
+            element_path,
+            default_namespace=&#39;mvn&#39;
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Static methods</h3>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="tssc.step_implementers.package.maven.Maven" href="../package/maven.html#tssc.step_implementers.package.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="../push_artifacts/maven.html#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></li>
+<li><a title="tssc.step_implementers.uat.maven_selenium_cucumber.MavenSeleniumCucumber" href="../uat/maven_selenium_cucumber.html#tssc.step_implementers.uat.maven_selenium_cucumber.MavenSeleniumCucumber">MavenSeleniumCucumber</a></li>
+<li><a title="tssc.step_implementers.unit_test.maven.Maven" href="../unit_test/maven.html#tssc.step_implementers.unit_test.maven.Maven">Maven</a></li>
+</ul>
+<h3>Class variables</h3>
 <dl>
-<dt id="tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd.step_implementer_config_defaults"><code class="name flex">
-<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
-</code></dt>
+<dt id="tssc.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR"><code class="name">var <span class="ident">DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR</span></code></dt>
 <dd>
-<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>Default values to use for step configuration values.</dd>
-</dl>
-<h2 id="notes">Notes</h2>
-<p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;
-    Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH"><code class="name">var <span class="ident">SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH"><code class="name">var <span class="ident">SUREFIRE_PLUGIN_XML_ELEMENT_PATH</span></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -314,6 +255,7 @@ def step_implementer_config_defaults():
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
@@ -331,23 +273,22 @@ def step_implementer_config_defaults():
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#result-artifacts">Result Artifacts</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.step_implementers.validate_environment_configuration" href="index.html">tssc.step_implementers.validate_environment_configuration</a></code></li>
+<li><code><a title="tssc.step_implementers.shared" href="index.html">tssc.step_implementers.shared</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd" href="#tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd">ConfiglintFromArgocd</a></code></h4>
+<h4><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric" href="#tssc.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd.step_implementer_config_defaults" href="#tssc.step_implementers.validate_environment_configuration.configlint_from_argocd.ConfiglintFromArgocd.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR" href="#tssc.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR">DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH" href="#tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH">SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH" href="#tssc.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH">SUREFIRE_PLUGIN_XML_ELEMENT_PATH</a></code></li>
 </ul>
 </li>
 </ul>

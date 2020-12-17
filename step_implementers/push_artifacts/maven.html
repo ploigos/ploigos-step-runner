@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc.step_implementers.push_artifacts.maven API documentation</title>
-<meta name="description" content="Step Implementer for the push-artifacts step for Maven …" />
+<meta name="description" content="`StepImplementer` for the `package` step using Maven …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,13 +22,19 @@
 <h1 class="title">Module <code>tssc.step_implementers.push_artifacts.maven</code></h1>
 </header>
 <section id="section-intro">
-<p>Step Implementer for the push-artifacts step for Maven.</p>
+<p><code>StepImplementer</code> for the <code>package</code> step using Maven.</p>
 <h2 id="step-configuration">Step Configuration</h2>
-<p>Step configuration key(s) for this step:</p>
+<p>Step configuration expected as input to this step.
+Could come from:</p>
+<ul>
+<li>static configuration</li>
+<li>runtime configuration</li>
+<li>previous step results</li>
+</ul>
 <table>
 <thead>
 <tr>
-<th>Key</th>
+<th>Configuration Key</th>
 <th>Required</th>
 <th>Default</th>
 <th>Description</th>
@@ -36,114 +42,59 @@
 </thead>
 <tbody>
 <tr>
-<td>`maven-push-</td>
-<td>True</td>
-<td>N/A</td>
+<td><code>maven-push-artifact-repo-url</code></td>
+<td>yes</td>
+<td></td>
 <td>id for the maven servers and mirrors</td>
 </tr>
 <tr>
-<td><code>artifact-repo-id</code></td>
+<td><code>maven-push-artifact-repo-id</code></td>
+<td>Yes</td>
 <td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>`maven-push-</td>
-<td>True</td>
-<td>N/A</td>
 <td>url for the maven servers and mirrors</td>
 </tr>
 <tr>
-<td><code>artifact-repo-url</code></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
-<p>Results expected from previous steps:</p>
-<table>
-<thead>
-<tr>
-<th>Step Name</th>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>generate-metadata</code></td>
 <td><code>version</code></td>
-<td>The version to be used to deploy to the repository.</td>
+<td>Yes</td>
+<td></td>
+<td>version to push</td>
 </tr>
 <tr>
-<td><code>package</code></td>
-<td><code>artifacts</code></td>
-<td>Artifacts is an array of <code>artifact</code>.</td>
-</tr>
-<tr>
+<td><code>package-artifacts</code></td>
+<td>Yes</td>
 <td></td>
-<td></td>
-<td>Each element of an <code>artifact</code> will be used</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>as a parameter to deploy to repository:</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>* artifact.group-id</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>* artifact.artifact-id</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>* artifact.path</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>* artifact.package-type</td>
+<td>Artifacts is dictionary
+Each element of an <code>artifact</code> will be used
+as a parameter to deploy to repository: <br/>
+* artifact.group-id <br/>
+* artifact.artifact-id <br/>
+* artifact.path <br/>
+* artifact.package-type</td>
 </tr>
 </tbody>
 </table>
-<h2 id="results">Results</h2>
-<p>Results output by this step:</p>
+<h2 id="result-artifacts">Result Artifacts</h2>
+<p>Results artifacts output by this step.</p>
 <table>
 <thead>
 <tr>
-<th>Key</th>
+<th>Result Artifact Key</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>result</code></td>
-<td>Dictionary of results</td>
-</tr>
-<tr>
-<td><code>report-artifacts</code></td>
-<td>An array of dictionaries describing the push results</td>
+<td><code>push-artifacts</code></td>
+<td>An array of dictionaries with information on the built artifacts.</td>
 </tr>
 </tbody>
 </table>
-<p>Elements in the <code>result</code> dictionary:
-| <code>success</code>
-| True or False
-| <code>message</code>
-| Overall status</p>
-<p>Elements in the <code>report-artifacts</code> dictionary:</p>
+<h2 id="push-artifacts">push-artifacts</h2>
+<p>Keys in the dictionary elements in the <code>push-artifacts</code> array in the step results.</p>
 <table>
 <thead>
 <tr>
-<th>Elements</th>
+<th>Key</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -161,28 +112,28 @@
 <td>Maven group ID pushed to the artifact repository</td>
 </tr>
 <tr>
-<td><code>package-type</code></td>
-<td>Package type of the artifact</td>
-</tr>
-<tr>
 <td><code>version</code></td>
 <td>Version pushed to the artifact repository</td>
+</tr>
+<tr>
+<td><code>packaging</code></td>
+<td>Type of package (eg: jar, war)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="examples">Examples</h2>
-<p>Example: Step Configuration (minimal)</p>
+<p><strong>Example: Step Configuration (minimal)</strong></p>
 <pre><code>push-artifacts:
 - implementer: Maven
   config:
     maven-push-artifact-repo-id: internal-id-name
     maven-push-artifact-repo-url: url-to server
 </code></pre>
-<p>Example: Generated Maven Deploy (uses both step configuration and previous results)</p>
+<p><strong>Example: Generated Maven Deploy (uses both step configuration and previous results)</strong></p>
 <pre><code>mvn
   deploy:deploy-file'
   -Durl=maven-push-artifact-repo-url
-  -Dversion=generate-metadata.version
+  -Dversion=package.artifact.version
   -DgroupId=package.artifact.group-id
   -DartifactId=package.artifact.artifact-id
   -Dfile=package.artifact.path
@@ -190,85 +141,57 @@
   -DrepositoryId=maven-push-artifact-repo-id
   -s settings.xml
 </code></pre>
-<p>Example: Results</p>
-<pre><code>'tssc-results': {
-    'result: {
-        'success': True
-        'message': 'push artifacts step completed - see report-artifacts',
-    }
-    'report-artifacts': [
-         {
-         'path':''
-         'artifact-id': ''
-         'group-id': ''
-         'package-type': ''
-         'version': ''
-         }
-    ]
-}
-</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Step Implementer for the push-artifacts step for Maven.
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
 
 Step Configuration
 ------------------
+Step configuration expected as input to this step.
+Could come from:
 
-Step configuration key(s) for this step:
+  * static configuration
+  * runtime configuration
+  * previous step results
 
-| Key                 | Required | Default | Description
-|---------------------|----------|---------|------------
-| `maven-push-        | True     | N/A     | id for the maven servers and mirrors
-| `artifact-repo-id`  |          |         |
-| `maven-push-        | True     | N/A     | url for the maven servers and mirrors
-| `artifact-repo-url` |          |         |
+Configuration Key              | Required | Default | Description
+-------------------------------|----------|---------|------------------------------------------
+`maven-push-artifact-repo-url` | yes      |         | id for the maven servers and mirrors
+`maven-push-artifact-repo-id`  | Yes      |         | url for the maven servers and mirrors
+`version`                      | Yes      |         | version to push
+`package-artifacts`            | Yes      |         | Artifacts is dictionary \
+                                                      Each element of an `artifact` will be used \
+                                                      as a parameter to deploy to repository: &lt;br/&gt;\
+                                                        * artifact.group-id &lt;br/&gt;\
+                                                        * artifact.artifact-id &lt;br/&gt;\
+                                                        * artifact.path &lt;br/&gt;\
+                                                        * artifact.package-type
 
-Expected Previous Step Results
-------------------------------
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results expected from previous steps:
+Result Artifact Key | Description
+--------------------|------------
+`push-artifacts`    | An array of dictionaries with information on the built artifacts.
 
-| Step Name           |  Key               | Description
-|---------------------|--------------------|------------
-| `generate-metadata` | `version`          | The version to be used to deploy to the repository.
-| `package`           | `artifacts`        | Artifacts is an array of `artifact`.
-|                     |                    | Each element of an `artifact` will be used
-|                     |                    | as a parameter to deploy to repository:
-|                     |                    | * artifact.group-id
-|                     |                    | * artifact.artifact-id
-|                     |                    | * artifact.path
-|                     |                    | * artifact.package-type
+## push-artifacts
+Keys in the dictionary elements in the `push-artifacts` array in the step results.
 
-Results
--------
-
-Results output by this step:
-
-| Key                | Description
-|--------------------|------------
-| `result`           | Dictionary of results
-| `report-artifacts` | An array of dictionaries describing the push results
-
-Elements in the `result` dictionary:
-| `success`          | True or False
-| `message`          | Overall status
-
-Elements in the `report-artifacts` dictionary:
-
-| Elements           | Description
-|--------------------|------------
-| `path`             | Absolute path to the artifact pushed to the artifact repository
-| `artifact-id`      | Maven artifact ID pushed to the artifact repository
-| `group-id`         | Maven group ID pushed to the artifact repository
-| `package-type`     | Package type of the artifact
-| `version`          | Version pushed to the artifact repository
+| Key             | Description
+|-----------------|------------
+| `path`          | Absolute path to the artifact pushed to the artifact repository
+| `artifact-id`   | Maven artifact ID pushed to the artifact repository
+| `group-id`      | Maven group ID pushed to the artifact repository
+| `version`       | Version pushed to the artifact repository
+| `packaging`     | Type of package (eg: jar, war)
 
 Examples
 --------
 
-Example: Step Configuration (minimal)
+**Example: Step Configuration (minimal)**
 
     push-artifacts:
     - implementer: Maven
@@ -276,55 +199,36 @@ Example: Step Configuration (minimal)
         maven-push-artifact-repo-id: internal-id-name
         maven-push-artifact-repo-url: url-to server
 
-Example: Generated Maven Deploy (uses both step configuration and previous results)
+**Example: Generated Maven Deploy (uses both step configuration and previous results)**
 
     mvn
       deploy:deploy-file&#39;
       -Durl=maven-push-artifact-repo-url
-      -Dversion=generate-metadata.version
+      -Dversion=package.artifact.version
       -DgroupId=package.artifact.group-id
       -DartifactId=package.artifact.artifact-id
       -Dfile=package.artifact.path
       -Dpackaging=package.artifact.package-type
       -DrepositoryId=maven-push-artifact-repo-id
       -s settings.xml
-
-Example: Results
-
-    &#39;tssc-results&#39;: {
-        &#39;result: {
-            &#39;success&#39;: True
-            &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
-        }
-        &#39;report-artifacts&#39;: [
-             {
-             &#39;path&#39;:&#39;&#39;
-             &#39;artifact-id&#39;: &#39;&#39;
-             &#39;group-id&#39;: &#39;&#39;
-             &#39;package-type&#39;: &#39;&#39;
-             &#39;version&#39;: &#39;&#39;
-             }
-        ]
-    }
-
 &#34;&#34;&#34;
 import sys
 
 import sh
-from tssc import StepImplementer
-from tssc.config import ConfigValue
-from tssc.utils.maven import generate_maven_settings
+from tssc import StepResult
+from tssc.step_implementers.shared.maven_generic import MavenGeneric
+from tssc.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {}
-REQUIRED_CONFIG_KEYS = [
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;maven-push-artifact-repo-url&#39;,
-    &#39;maven-push-artifact-repo-id&#39;
+    &#39;maven-push-artifact-repo-id&#39;,
+    &#39;version&#39;,
+    &#39;package-artifacts&#39;
 ]
 
-
-class Maven(StepImplementer):
-    &#34;&#34;&#34;
-    StepImplementer for the push-artifacts step for Maven.
+class Maven(MavenGeneric):
+    &#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
     &#34;&#34;&#34;
 
     @staticmethod
@@ -332,122 +236,110 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         Getter for the StepImplementer&#39;s configuration defaults.
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         &#34;&#34;&#34;
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        &#34;&#34;&#34;
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _get_version(self):
-        # Required: Get the generate-metadata.version
-        if (self.get_step_results(&#39;generate-metadata&#39;) and
-                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
-            return self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
-        raise ValueError(&#39;generate-metadata results missing version&#39;)
-
-    def _get_artifacts(self):
-        # Required: Get the package.artifacts
-        if (self.get_step_results(&#39;package&#39;) and
-                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
-            return self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
-        raise ValueError(&#39;package results missing artifacts&#39;)
-
-    def _generate_maven_settings(self):
-        # ----- build settings.xml
-        maven_servers = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-servers&#39;)
-        )
-        maven_repositories = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-repositories&#39;)
-        )
-        maven_mirrors = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-mirrors&#39;)
-        )
-        return generate_maven_settings(self.get_working_dir(),
-                                       maven_servers,
-                                       maven_repositories,
-                                       maven_mirrors)
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+    def _run_step(self): # pylint: disable=too-many-locals
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
 
-        # ----- get generate-metadata items
-        version = self._get_version()
+        # Get config items
+        maven_push_artifact_repo_id = self.get_value(&#39;maven-push-artifact-repo-id&#39;)
+        maven_push_artifact_repo_url = self.get_value(&#39;maven-push-artifact-repo-url&#39;)
+        version = self.get_value(&#39;version&#39;)
+        package_artifacts = self.get_value(&#39;package-artifacts&#39;)
 
-        # ----- get package items
-        artifacts = self._get_artifacts()
-
-        maven_push_artifact_repo_id = self.get_config_value(&#39;maven-push-artifact-repo-id&#39;)
-        maven_push_artifact_repo_url = self.get_config_value(&#39;maven-push-artifact-repo-url&#39;)
+        # Create settings.xml
         settings_file = self._generate_maven_settings()
 
-        report_artifacts = []
+        # push the artifacts
+        push_artifacts = []
+        mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
+        try:
+            for package in package_artifacts:
+                artifact_path = package[&#39;path&#39;]
+                group_id = package[&#39;group-id&#39;]
+                artifact_id = package[&#39;artifact-id&#39;]
+                package_type = package[&#39;package-type&#39;]
 
-        for artifact in artifacts:
-            artifact_path = artifact[&#39;path&#39;]
-            group_id = artifact[&#39;group-id&#39;]
-            artifact_id = artifact[&#39;artifact-id&#39;]
-            package_type = artifact[&#39;package-type&#39;]
+                # push the artifact
+                with open(mvn_output_file_path, &#39;a&#39;) as mvn_output_file:
+                    out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stdout,
+                        mvn_output_file
+                    ])
+                    err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stderr,
+                        mvn_output_file
+                    ])
+                    sh.mvn(  # pylint: disable=no-member
+                        &#39;deploy:deploy-file&#39;,
+                        &#39;-Dversion=&#39; + version,
+                        &#39;-Dfile=&#39; + artifact_path,
+                        &#39;-DgroupId=&#39; + group_id,
+                        &#39;-DartifactId=&#39; + artifact_id,
+                        &#39;-Dpackaging=&#39; + package_type,
+                        &#39;-Durl=&#39; + maven_push_artifact_repo_url,
+                        &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
+                        &#39;-s&#39; + settings_file,
+                        _out=out_callback,
+                        _err=err_callback
+                    )
 
-            try:
-                sh.mvn(  # pylint: disable=no-member
-                    &#39;deploy:deploy-file&#39;,
-                    &#39;-Dversion=&#39; + version,
-                    &#39;-Dfile=&#39; + artifact_path,
-                    &#39;-DgroupId=&#39; + group_id,
-                    &#39;-DartifactId=&#39; + artifact_id,
-                    &#39;-Dpackaging=&#39; + package_type,
-                    &#39;-Durl=&#39; + maven_push_artifact_repo_url,
-                    &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
-                    &#39;-s&#39; + settings_file,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-            except sh.ErrorReturnCode as error:
-                raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
+                # record the pushed artifact
+                push_artifacts.append({
+                    &#39;artifact-id&#39;: artifact_id,
+                    &#39;group-id&#39;: group_id,
+                    &#39;version&#39;: version,
+                    &#39;path&#39;: artifact_path,
+                    &#39;packaging&#39;: package_type,
+                })
+        except sh.ErrorReturnCode as error:
+            step_result.success = False
+            step_result.message = &#34;Push artifacts failures. See &#39;maven-output&#39; report artifacts &#34; \
+                f&#34;for details: {error}&#34;
 
-            report_artifacts.append({
-                &#39;artifact-id&#39;: artifact_id,
-                &#39;group-id&#39;: group_id,
-                &#39;version&#39;: version,
-                &#39;path&#39;: artifact_path,
-            })
-        results = {
-            &#39;result&#39;: {
-                &#39;success&#39;: True,
-                &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
-            },
-            &#39;report-artifacts&#39;: report_artifacts
-        }
-        return results</code></pre>
+        step_result.add_artifact(
+            description=&#34;Standard out and standard error from &#39;mvn install&#39;.&#34;,
+            name=&#39;maven-output&#39;,
+            value=mvn_output_file_path
+        )
+        step_result.add_artifact(
+            name=&#39;push-artifacts&#39;,
+            value=push_artifacts
+        )
+        return step_result</code></pre>
 </details>
 </section>
 <section>
@@ -464,14 +356,13 @@ class Maven(StepImplementer):
 <span>(</span><span>results_dir_path, results_file_name, work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>StepImplementer for the push-artifacts step for Maven.</p></div>
+<div class="desc"><p><code>StepImplementer</code> for the <code>package</code> step using Maven.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Maven(StepImplementer):
-    &#34;&#34;&#34;
-    StepImplementer for the push-artifacts step for Maven.
+<pre><code class="python">class Maven(MavenGeneric):
+    &#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
     &#34;&#34;&#34;
 
     @staticmethod
@@ -479,155 +370,180 @@ class Maven(StepImplementer):
         &#34;&#34;&#34;
         Getter for the StepImplementer&#39;s configuration defaults.
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         &#34;&#34;&#34;
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        &#34;&#34;&#34;
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _get_version(self):
-        # Required: Get the generate-metadata.version
-        if (self.get_step_results(&#39;generate-metadata&#39;) and
-                self.get_step_results(&#39;generate-metadata&#39;).get(&#39;version&#39;)):
-            return self.get_step_results(&#39;generate-metadata&#39;)[&#39;version&#39;]
-        raise ValueError(&#39;generate-metadata results missing version&#39;)
-
-    def _get_artifacts(self):
-        # Required: Get the package.artifacts
-        if (self.get_step_results(&#39;package&#39;) and
-                self.get_step_results(&#39;package&#39;).get(&#39;artifacts&#39;)):
-            return self.get_step_results(&#39;package&#39;)[&#39;artifacts&#39;]
-        raise ValueError(&#39;package results missing artifacts&#39;)
-
-    def _generate_maven_settings(self):
-        # ----- build settings.xml
-        maven_servers = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-servers&#39;)
-        )
-        maven_repositories = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-repositories&#39;)
-        )
-        maven_mirrors = ConfigValue.convert_leaves_to_values(
-            self.get_config_value(&#39;maven-mirrors&#39;)
-        )
-        return generate_maven_settings(self.get_working_dir(),
-                                       maven_servers,
-                                       maven_repositories,
-                                       maven_mirrors)
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+    def _run_step(self): # pylint: disable=too-many-locals
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
 
-        # ----- get generate-metadata items
-        version = self._get_version()
+        # Get config items
+        maven_push_artifact_repo_id = self.get_value(&#39;maven-push-artifact-repo-id&#39;)
+        maven_push_artifact_repo_url = self.get_value(&#39;maven-push-artifact-repo-url&#39;)
+        version = self.get_value(&#39;version&#39;)
+        package_artifacts = self.get_value(&#39;package-artifacts&#39;)
 
-        # ----- get package items
-        artifacts = self._get_artifacts()
-
-        maven_push_artifact_repo_id = self.get_config_value(&#39;maven-push-artifact-repo-id&#39;)
-        maven_push_artifact_repo_url = self.get_config_value(&#39;maven-push-artifact-repo-url&#39;)
+        # Create settings.xml
         settings_file = self._generate_maven_settings()
 
-        report_artifacts = []
+        # push the artifacts
+        push_artifacts = []
+        mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
+        try:
+            for package in package_artifacts:
+                artifact_path = package[&#39;path&#39;]
+                group_id = package[&#39;group-id&#39;]
+                artifact_id = package[&#39;artifact-id&#39;]
+                package_type = package[&#39;package-type&#39;]
 
-        for artifact in artifacts:
-            artifact_path = artifact[&#39;path&#39;]
-            group_id = artifact[&#39;group-id&#39;]
-            artifact_id = artifact[&#39;artifact-id&#39;]
-            package_type = artifact[&#39;package-type&#39;]
+                # push the artifact
+                with open(mvn_output_file_path, &#39;a&#39;) as mvn_output_file:
+                    out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stdout,
+                        mvn_output_file
+                    ])
+                    err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                        sys.stderr,
+                        mvn_output_file
+                    ])
+                    sh.mvn(  # pylint: disable=no-member
+                        &#39;deploy:deploy-file&#39;,
+                        &#39;-Dversion=&#39; + version,
+                        &#39;-Dfile=&#39; + artifact_path,
+                        &#39;-DgroupId=&#39; + group_id,
+                        &#39;-DartifactId=&#39; + artifact_id,
+                        &#39;-Dpackaging=&#39; + package_type,
+                        &#39;-Durl=&#39; + maven_push_artifact_repo_url,
+                        &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
+                        &#39;-s&#39; + settings_file,
+                        _out=out_callback,
+                        _err=err_callback
+                    )
 
-            try:
-                sh.mvn(  # pylint: disable=no-member
-                    &#39;deploy:deploy-file&#39;,
-                    &#39;-Dversion=&#39; + version,
-                    &#39;-Dfile=&#39; + artifact_path,
-                    &#39;-DgroupId=&#39; + group_id,
-                    &#39;-DartifactId=&#39; + artifact_id,
-                    &#39;-Dpackaging=&#39; + package_type,
-                    &#39;-Durl=&#39; + maven_push_artifact_repo_url,
-                    &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
-                    &#39;-s&#39; + settings_file,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-            except sh.ErrorReturnCode as error:
-                raise RuntimeError(f&#39;Error invoking mvn: {error}&#39;) from error
+                # record the pushed artifact
+                push_artifacts.append({
+                    &#39;artifact-id&#39;: artifact_id,
+                    &#39;group-id&#39;: group_id,
+                    &#39;version&#39;: version,
+                    &#39;path&#39;: artifact_path,
+                    &#39;packaging&#39;: package_type,
+                })
+        except sh.ErrorReturnCode as error:
+            step_result.success = False
+            step_result.message = &#34;Push artifacts failures. See &#39;maven-output&#39; report artifacts &#34; \
+                f&#34;for details: {error}&#34;
 
-            report_artifacts.append({
-                &#39;artifact-id&#39;: artifact_id,
-                &#39;group-id&#39;: group_id,
-                &#39;version&#39;: version,
-                &#39;path&#39;: artifact_path,
-            })
-        results = {
-            &#39;result&#39;: {
-                &#39;success&#39;: True,
-                &#39;message&#39;: &#39;push artifacts step completed - see report-artifacts&#39;,
-            },
-            &#39;report-artifacts&#39;: report_artifacts
-        }
-        return results</code></pre>
+        step_result.add_artifact(
+            description=&#34;Standard out and standard error from &#39;mvn install&#39;.&#34;,
+            name=&#39;maven-output&#39;,
+            value=mvn_output_file_path
+        )
+        step_result.add_artifact(
+            name=&#39;push-artifacts&#39;,
+            value=push_artifacts
+        )
+        return step_result</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric" href="../shared/maven_generic.html#tssc.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></li>
 <li><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="tssc.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults"><code class="name flex">
+<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Default values to use for step configuration values.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>These are the lowest precedence configuration values.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def step_implementer_config_defaults():
+    &#34;&#34;&#34;
+    Getter for the StepImplementer&#39;s configuration defaults.
+
+    Returns
+    -------
+    dict
+        Default values to use for step configuration values.
+
+    Notes
+    -----
+    These are the lowest precedence configuration values.
+    &#34;&#34;&#34;
+    return DEFAULT_CONFIG</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="tssc.step_implementer.StepImplementer" href="../../step_implementer.html#tssc.step_implementer.StepImplementer">StepImplementer</a></b></code>:
+<li><code><b><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric" href="../shared/maven_generic.html#tssc.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></b></code>:
 <ul class="hlist">
-<li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_working_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_working_dir">get_working_dir</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.get_result_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_result_value">get_result_value</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.get_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_value">get_value</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.results_dir_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_dir_path">results_dir_path</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.step_config_overrides" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.sub_step_implementer_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.work_dir_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.work_dir_path_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.workflow_result" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
+<li><code><a title="tssc.step_implementers.shared.maven_generic.MavenGeneric.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
 </ul>
@@ -640,8 +556,8 @@ class Maven(StepImplementer):
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
-<li><a href="#results">Results</a></li>
+<li><a href="#result-artifacts">Result Artifacts</a></li>
+<li><a href="#push-artifacts">push-artifacts</a></li>
 <li><a href="#examples">Examples</a></li>
 </ul>
 </div>
@@ -655,6 +571,9 @@ class Maven(StepImplementer):
 <ul>
 <li>
 <h4><code><a title="tssc.step_implementers.push_artifacts.maven.Maven" href="#tssc.step_implementers.push_artifacts.maven.Maven">Maven</a></code></h4>
+<ul class="">
+<li><code><a title="tssc.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults" href="#tssc.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+</ul>
 </li>
 </ul>
 </li>
@@ -662,7 +581,7 @@ class Maven(StepImplementer):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>

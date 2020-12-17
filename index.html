@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc API documentation</title>
 <meta name="description" content="Trusted Software Supply Chain Library (tssc) main entry point …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -231,14 +231,8 @@ tssc-config:
     # NOTE: Environment names can be anything so long as they line up with the environment value
     # given to the `--environment` flag of the main tssc entry point.
     DEV:
-      # Required
-      kube-app-domain: ''
-
       #Optional
       #kube-api-token: ''
-
-      #Optional
-      #insecure-skip-tls-verify: 'true'
 
       # Required
       argocd-username: ''
@@ -253,7 +247,7 @@ tssc-config:
       #argocd-sync-timeout-seconds: '60'
 
       # Optional
-      #argocd-helm-chart-path: './'
+      #deployment-config-helm-chart-path: './'
 
     # Sample
     # Sample configuration for an environment named 'TEST'
@@ -261,14 +255,8 @@ tssc-config:
     # NOTE: Environment names can be anything so long as they line up with the environment value
     # given to the `--environment` flag of the main tssc entry point.
     TEST:
-      # Required
-      kube-app-domain: ''
-
       #Optional
       #kube-api-token: ''
-
-      #Optional
-      #insecure-skip-tls-verify: 'true'
 
       # Required
       argocd-username: ''
@@ -283,7 +271,7 @@ tssc-config:
       #argocd-sync-timeout-seconds: '60'
 
       # Optional
-      #argocd-helm-chart-path: './'
+      #deployment-config-helm-chart-path: './'
 
     # Sample
     # Sample configuration for an environment named 'PROD'
@@ -471,7 +459,7 @@ tssc-config:
       git-email: ''
 
       # Optional
-      #git-friendly-name: 'TSSC'
+      #git-name: 'TSSC'
 
       # Optional
       #git-username: None
@@ -495,7 +483,7 @@ tssc-config:
     }
 
   uat:
-  - implementer: Maven
+  - implementer: MavenSeleniumCucumber
     config: {}
 
   # WARNING: not yet implemented
@@ -563,14 +551,8 @@ tssc-config:
     # NOTE: Environment names can be anything so long as they line up with the environment value
     # given to the `--environment` flag of the main tssc entry point.
     DEV:
-      # Required
-      kube-app-domain: ''
-
       #Optional
       #kube-api-token: ''
-
-      #Optional
-      #insecure-skip-tls-verify: 'true'
 
       # Required
       argocd-username: ''
@@ -585,7 +567,7 @@ tssc-config:
       #argocd-sync-timeout-seconds: '60'
 
       # Optional
-      #argocd-helm-chart-path: './'
+      #deployment-config-helm-chart-path: './'
 
     # Sample
     # Sample configuration for an environment named 'TEST'
@@ -593,14 +575,8 @@ tssc-config:
     # NOTE: Environment names can be anything so long as they line up with the environment value
     # given to the `--environment` flag of the main tssc entry point.
     TEST:
-      # Required
-      kube-app-domain: ''
-
       #Optional
       #kube-api-token:
-
-      #Optional
-      #insecure-skip-tls-verify: 'true'
 
       # Required
       argocd-username: ''
@@ -615,7 +591,7 @@ tssc-config:
       #argocd-sync-timeout-seconds: '60'
 
       # Optional
-      #argocd-helm-chart-path: './'
+      #deployment-config-helm-chart-path: './'
 
     # Sample
     # Sample configuration for an environment named 'PROD'
@@ -777,13 +753,13 @@ tssc-config:
       #value-yaml-template: 'values.yaml.j2'
 
       # Optional
-      #argocd-helm-chart-path: './'
+      #deployment-config-helm-chart-path: './'
 
       # Required
       git-email: ''
 
       # Optional
-      #git-friendly-name: 'TSSC'
+      #git-name: 'TSSC'
 
       # Optional
       #git-username: None
@@ -797,7 +773,7 @@ tssc-config:
       readiness-probe-path: ''
 
   uat:
-  - implementer: Maven
+  - implementer: MavenSeleniumCucumber
     config: {}
 
   # WARNING: not yet implemented
@@ -1044,14 +1020,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         DEV:
-          # Required
-          kube-app-domain: &#39;&#39;
-
           #Optional
           #kube-api-token: &#39;&#39;
-
-          #Optional
-          #insecure-skip-tls-verify: &#39;true&#39;
 
           # Required
           argocd-username: &#39;&#39;
@@ -1066,7 +1036,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: &#39;60&#39;
 
           # Optional
-          #argocd-helm-chart-path: &#39;./&#39;
+          #deployment-config-helm-chart-path: &#39;./&#39;
 
         # Sample
         # Sample configuration for an environment named &#39;TEST&#39;
@@ -1074,14 +1044,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         TEST:
-          # Required
-          kube-app-domain: &#39;&#39;
-
           #Optional
           #kube-api-token: &#39;&#39;
-
-          #Optional
-          #insecure-skip-tls-verify: &#39;true&#39;
 
           # Required
           argocd-username: &#39;&#39;
@@ -1096,7 +1060,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: &#39;60&#39;
 
           # Optional
-          #argocd-helm-chart-path: &#39;./&#39;
+          #deployment-config-helm-chart-path: &#39;./&#39;
 
         # Sample
         # Sample configuration for an environment named &#39;PROD&#39;
@@ -1284,7 +1248,7 @@ From least precedence to highest precedence.
           git-email: &#39;&#39;
 
           # Optional
-          #git-friendly-name: &#39;TSSC&#39;
+          #git-name: &#39;TSSC&#39;
 
           # Optional
           #git-username: None
@@ -1308,7 +1272,7 @@ From least precedence to highest precedence.
         }
 
       uat:
-      - implementer: Maven
+      - implementer: MavenSeleniumCucumber
         config: {}
 
       # WARNING: not yet implemented
@@ -1377,14 +1341,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         DEV:
-          # Required
-          kube-app-domain: &#39;&#39;
-
           #Optional
           #kube-api-token: &#39;&#39;
-
-          #Optional
-          #insecure-skip-tls-verify: &#39;true&#39;
 
           # Required
           argocd-username: &#39;&#39;
@@ -1399,7 +1357,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: &#39;60&#39;
 
           # Optional
-          #argocd-helm-chart-path: &#39;./&#39;
+          #deployment-config-helm-chart-path: &#39;./&#39;
 
         # Sample
         # Sample configuration for an environment named &#39;TEST&#39;
@@ -1407,14 +1365,8 @@ From least precedence to highest precedence.
         # NOTE: Environment names can be anything so long as they line up with the environment value
         # given to the `--environment` flag of the main tssc entry point.
         TEST:
-          # Required
-          kube-app-domain: &#39;&#39;
-
           #Optional
           #kube-api-token:
-
-          #Optional
-          #insecure-skip-tls-verify: &#39;true&#39;
 
           # Required
           argocd-username: &#39;&#39;
@@ -1429,7 +1381,7 @@ From least precedence to highest precedence.
           #argocd-sync-timeout-seconds: &#39;60&#39;
 
           # Optional
-          #argocd-helm-chart-path: &#39;./&#39;
+          #deployment-config-helm-chart-path: &#39;./&#39;
 
         # Sample
         # Sample configuration for an environment named &#39;PROD&#39;
@@ -1591,13 +1543,13 @@ From least precedence to highest precedence.
           #value-yaml-template: &#39;values.yaml.j2&#39;
 
           # Optional
-          #argocd-helm-chart-path: &#39;./&#39;
+          #deployment-config-helm-chart-path: &#39;./&#39;
 
           # Required
           git-email: &#39;&#39;
 
           # Optional
-          #git-friendly-name: &#39;TSSC&#39;
+          #git-name: &#39;TSSC&#39;
 
           # Optional
           #git-username: None
@@ -1611,7 +1563,7 @@ From least precedence to highest precedence.
           readiness-probe-path: &#39;&#39;
 
       uat:
-      - implementer: Maven
+      - implementer: MavenSeleniumCucumber
         config: {}
 
       # WARNING: not yet implemented
@@ -1645,14 +1597,18 @@ Example Running the &#39;generate-metadata&#39; step
 import __main__
 from .step_implementer import StepImplementer, DefaultSteps
 from .factory import TSSCFactory
-from .exceptions import TSSCException
+from .exceptions import StepRunnerException
+from .step_result import StepResult
+from .workflow_result import WorkflowResult
 
 __all__ = [
     &#39;config&#39;,
     &#39;factory&#39;,
     &#39;exceptions&#39;,
     &#39;step_implementer&#39;,
-    &#39;utils&#39;
+    &#39;utils&#39;,
+    &#39;step_result&#39;,
+    &#39;workflow_result&#39;
 ]</code></pre>
 </details>
 </section>
@@ -1669,7 +1625,7 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></dt>
 <dd>
-<div class="desc"><p>Custom TSSC Exceptions.</p></div>
+<div class="desc"><p>Custom Step Runner Exceptions.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.factory" href="factory.html">tssc.factory</a></code></dt>
 <dd>
@@ -1683,6 +1639,10 @@ __all__ = [
 <dd>
 <div class="desc"><p>com.redhat.tssc.step_implementers</p></div>
 </dd>
+<dt><code class="name"><a title="tssc.step_result" href="step_result.html">tssc.step_result</a></code></dt>
+<dd>
+<div class="desc"><p>Class and helper constants for StepResult</p></div>
+</dd>
 <dt><code class="name"><a title="tssc.utils" href="utils/index.html">tssc.utils</a></code></dt>
 <dd>
 <div class="desc"><p>Useful utilities.</p></div>
@@ -1690,6 +1650,10 @@ __all__ = [
 <dt><code class="name"><a title="tssc.version" href="version.html">tssc.version</a></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="tssc.workflow_result" href="workflow_result.html">tssc.workflow_result</a></code></dt>
+<dd>
+<div class="desc"><p>Abstract class and helper constants for WorkflowResult</p></div>
 </dd>
 </dl>
 </section>
@@ -1723,15 +1687,17 @@ __all__ = [
 <li><code><a title="tssc.factory" href="factory.html">tssc.factory</a></code></li>
 <li><code><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></li>
 <li><code><a title="tssc.step_implementers" href="step_implementers/index.html">tssc.step_implementers</a></code></li>
+<li><code><a title="tssc.step_result" href="step_result.html">tssc.step_result</a></code></li>
 <li><code><a title="tssc.utils" href="utils/index.html">tssc.utils</a></code></li>
 <li><code><a title="tssc.version" href="version.html">tssc.version</a></code></li>
+<li><code><a title="tssc.workflow_result" href="workflow_result.html">tssc.workflow_result</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc.factory API documentation</title>
 <meta name="description" content="Factory for creating TSSC workflow and running steps." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -30,11 +30,11 @@
 <pre><code class="python">&#34;&#34;&#34;
 Factory for creating TSSC workflow and running steps.
 &#34;&#34;&#34;
-
-from tssc.config.config import Config
-from tssc.exceptions import TSSCException
 from tssc.step_implementer import StepImplementer
+from tssc.config.config import Config
+from tssc.exceptions import StepRunnerException
 from tssc.utils.reflection import import_and_get_class
+
 
 class TSSCFactory:
     &#34;&#34;&#34;
@@ -67,6 +67,12 @@ class TSSCFactory:
         If given config is not of expected type.
     AssertionError
         If given config contains any invalid TSSC configurations.
+
+    Returns
+    -------
+    Bool
+        True if step completed successfully
+        False if step returned an error message
     &#34;&#34;&#34;
 
     __DEFAULT_MODULE = &#39;tssc.step_implementers&#39;
@@ -74,8 +80,8 @@ class TSSCFactory:
     def __init__(
             self,
             config,
-            results_dir_path=&#39;tssc-results&#39;, \
-            results_file_name=&#39;tssc-results.yml&#39;, \
+            results_dir_path=&#39;tssc-results&#39;,
+            results_file_name=&#39;tssc-results.yml&#39;,
             work_dir_path=&#39;tssc-working&#39;):
 
         if isinstance(config, Config):
@@ -111,11 +117,17 @@ class TSSCFactory:
 
         Raises
         ------
-        TSSCException
+        # todo: doc needs to be updated
+        StepRunnerException
             If no StepImplementers have been registered for the given step_name
             If no specific StepImplementer name specified in sub step config
                 and no default StepImplementer registered for given step_name.
             If no StepImplementer registered for given step with given implementer name.
+        Returns
+        -------
+        Bool
+           True if step completed successfully
+           False if step returned an error message
         &#34;&#34;&#34;
 
         sub_step_configs = self.config.get_sub_step_configs(step_name)
@@ -140,7 +152,10 @@ class TSSCFactory:
             )
 
             # run the step
-            sub_step.run_step()
+            if not sub_step.run_step():
+                return False
+
+        return True
 
     @staticmethod
     def __get_step_implementer_class(step_name, step_implementer_name):
@@ -165,7 +180,7 @@ class TSSCFactory:
 
         Raises
         ------
-        TSSCException
+        StepRunnerException
             If could not find class to load
             If loaded class is not a subclass of StepImplementer
         &#34;&#34;&#34;
@@ -179,13 +194,13 @@ class TSSCFactory:
 
         clazz = import_and_get_class(module_name, class_name)
         if not clazz:
-            raise TSSCException(
+            raise StepRunnerException(
                 f&#34;Could not dynamically load step ({step_name}) step implementer&#34; +
                 f&#34; ({step_implementer_name}) from module ({module_name})&#34; +
                 f&#34; with class name ({class_name})&#34;
             )
         if not issubclass(clazz, StepImplementer):
-            raise TSSCException(
+            raise StepRunnerException(
                 f&#34;Step ({step_name}) is configured to use step implementer&#34; +
                 f&#34; ({step_implementer_name}) from module ({module_name}) with&#34; +
                 f&#34; class name ({class_name}), and dynamically loads as class ({clazz})&#34; +
@@ -236,6 +251,12 @@ Default: tssc-working</dd>
 <dd>If given config is not of expected type.</dd>
 <dt><code>AssertionError</code></dt>
 <dd>If given config contains any invalid TSSC configurations.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Bool</code></dt>
+<dd>True if step completed successfully
+False if step returned an error message</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -272,6 +293,12 @@ Default: tssc-working</dd>
         If given config is not of expected type.
     AssertionError
         If given config contains any invalid TSSC configurations.
+
+    Returns
+    -------
+    Bool
+        True if step completed successfully
+        False if step returned an error message
     &#34;&#34;&#34;
 
     __DEFAULT_MODULE = &#39;tssc.step_implementers&#39;
@@ -279,8 +306,8 @@ Default: tssc-working</dd>
     def __init__(
             self,
             config,
-            results_dir_path=&#39;tssc-results&#39;, \
-            results_file_name=&#39;tssc-results.yml&#39;, \
+            results_dir_path=&#39;tssc-results&#39;,
+            results_file_name=&#39;tssc-results.yml&#39;,
             work_dir_path=&#39;tssc-working&#39;):
 
         if isinstance(config, Config):
@@ -316,11 +343,17 @@ Default: tssc-working</dd>
 
         Raises
         ------
-        TSSCException
+        # todo: doc needs to be updated
+        StepRunnerException
             If no StepImplementers have been registered for the given step_name
             If no specific StepImplementer name specified in sub step config
                 and no default StepImplementer registered for given step_name.
             If no StepImplementer registered for given step with given implementer name.
+        Returns
+        -------
+        Bool
+           True if step completed successfully
+           False if step returned an error message
         &#34;&#34;&#34;
 
         sub_step_configs = self.config.get_sub_step_configs(step_name)
@@ -345,7 +378,10 @@ Default: tssc-working</dd>
             )
 
             # run the step
-            sub_step.run_step()
+            if not sub_step.run_step():
+                return False
+
+        return True
 
     @staticmethod
     def __get_step_implementer_class(step_name, step_implementer_name):
@@ -370,7 +406,7 @@ Default: tssc-working</dd>
 
         Raises
         ------
-        TSSCException
+        StepRunnerException
             If could not find class to load
             If loaded class is not a subclass of StepImplementer
         &#34;&#34;&#34;
@@ -384,13 +420,13 @@ Default: tssc-working</dd>
 
         clazz = import_and_get_class(module_name, class_name)
         if not clazz:
-            raise TSSCException(
+            raise StepRunnerException(
                 f&#34;Could not dynamically load step ({step_name}) step implementer&#34; +
                 f&#34; ({step_implementer_name}) from module ({module_name})&#34; +
                 f&#34; with class name ({class_name})&#34;
             )
         if not issubclass(clazz, StepImplementer):
-            raise TSSCException(
+            raise StepRunnerException(
                 f&#34;Step ({step_name}) is configured to use step implementer&#34; +
                 f&#34; ({step_implementer_name}) from module ({module_name}) with&#34; +
                 f&#34; class name ({class_name}), and dynamically loads as class ({clazz})&#34; +
@@ -439,13 +475,21 @@ def config(self):
 specific global defaults and step configuration.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
+<h1 id="todo-doc-needs-to-be-updated">todo: doc needs to be updated</h1>
 <dl>
-<dt><code>TSSCException</code></dt>
+<dt><code>StepRunnerException</code></dt>
 <dd>If no StepImplementers have been registered for the given step_name
 If no specific StepImplementer name specified in sub step config
 and no default StepImplementer registered for given step_name.
 If no StepImplementer registered for given step with given implementer name.</dd>
-</dl></div>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Bool</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>True if step completed successfully
+False if step returned an error message</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -464,11 +508,17 @@ If no StepImplementer registered for given step with given implementer name.</dd
 
     Raises
     ------
-    TSSCException
+    # todo: doc needs to be updated
+    StepRunnerException
         If no StepImplementers have been registered for the given step_name
         If no specific StepImplementer name specified in sub step config
             and no default StepImplementer registered for given step_name.
         If no StepImplementer registered for given step with given implementer name.
+    Returns
+    -------
+    Bool
+       True if step completed successfully
+       False if step returned an error message
     &#34;&#34;&#34;
 
     sub_step_configs = self.config.get_sub_step_configs(step_name)
@@ -493,7 +543,10 @@ If no StepImplementer registered for given step with given implementer name.</dd
         )
 
         # run the step
-        sub_step.run_step()</code></pre>
+        if not sub_step.run_step():
+            return False
+
+    return True</code></pre>
 </details>
 </dd>
 </dl>
@@ -527,7 +580,7 @@ If no StepImplementer registered for given step with given implementer name.</dd
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>

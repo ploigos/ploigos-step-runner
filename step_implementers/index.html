@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc.step_implementers API documentation</title>
 <meta name="description" content="com.redhat.tssc.step_implementers" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -31,7 +31,6 @@
 com.redhat.tssc.step_implementers
 &#34;&#34;&#34;
 
-from .canary_test import *
 from .container_image_static_compliance_scan import *
 from .container_image_static_vulnerability_scan import *
 from .create_container_image import *
@@ -61,29 +60,24 @@ __all__ = [
     &#39;container_image_static_vulnerability_scan&#39;,
     &#39;deploy&#39;,
     &#39;validate_environment_configuration&#39;,
-    &#39;uat&#39;,
-    &#39;canary_test&#39;
+    &#39;uat&#39;
 ]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="tssc.step_implementers.canary_test" href="canary_test/index.html">tssc.step_implementers.canary_test</a></code></dt>
-<dd>
-<div class="desc"><p>tssc.StepImplementers for the 'canary-test' TSSC step …</p></div>
-</dd>
 <dt><code class="name"><a title="tssc.step_implementers.container_image_static_compliance_scan" href="container_image_static_compliance_scan/index.html">tssc.step_implementers.container_image_static_compliance_scan</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'container-image-static-compliance-scan' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>container-image-static-compliance-scan</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.container_image_static_vulnerability_scan" href="container_image_static_vulnerability_scan/index.html">tssc.step_implementers.container_image_static_vulnerability_scan</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'container-image-static-vulnerability-scan' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>container-image-static-vulnerability-scan</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.create_container_image" href="create_container_image/index.html">tssc.step_implementers.create_container_image</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'create-container-image' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>create-container-image</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.deploy" href="deploy/index.html">tssc.step_implementers.deploy</a></code></dt>
 <dd>
@@ -91,47 +85,47 @@ __all__ = [
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.generate_metadata" href="generate_metadata/index.html">tssc.step_implementers.generate_metadata</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'generate-metadata' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>generate-metadata</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.package" href="package/index.html">tssc.step_implementers.package</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'package' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code><a title="tssc.step_implementers.package" href="package/index.html">tssc.step_implementers.package</a></code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.push_artifacts" href="push_artifacts/index.html">tssc.step_implementers.push_artifacts</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'push-artifacts' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>push-artifacts</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.push_container_image" href="push_container_image/index.html">tssc.step_implementers.push_container_image</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'create_container_image' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>push-container-image</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.shared" href="shared/index.html">tssc.step_implementers.shared</a></code></dt>
 <dd>
-<div class="desc"><p>Step implementers that are shared accross multiple steps.</p></div>
+<div class="desc"><p>StepImplementer parent classes that are shared accross multiple steps.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.sign_container_image" href="sign_container_image/index.html">tssc.step_implementers.sign_container_image</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'sign-container-image' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>sign-container-image</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.static_code_analysis" href="static_code_analysis/index.html">tssc.step_implementers.static_code_analysis</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'security-static-code-analysis' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>static-code-analysis</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.tag_source" href="tag_source/index.html">tssc.step_implementers.tag_source</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'tag-source' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>tag-source</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.uat" href="uat/index.html">tssc.step_implementers.uat</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'uat' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code><a title="tssc.step_implementers.uat" href="uat/index.html">tssc.step_implementers.uat</a></code> (User Acceptance Tests) step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.unit_test" href="unit_test/index.html">tssc.step_implementers.unit_test</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'unit-test' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>unit-test</code> step.</p></div>
 </dd>
 <dt><code class="name"><a title="tssc.step_implementers.validate_environment_configuration" href="validate_environment_configuration/index.html">tssc.step_implementers.validate_environment_configuration</a></code></dt>
 <dd>
-<div class="desc"><p>tssc.StepImplementers for the 'validate-environment-configuration' TSSC step …</p></div>
+<div class="desc"><p><code>StepImplementers</code> for the <code>validate-environment-configuration</code> step.</p></div>
 </dd>
 </dl>
 </section>
@@ -155,7 +149,6 @@ __all__ = [
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="tssc.step_implementers.canary_test" href="canary_test/index.html">tssc.step_implementers.canary_test</a></code></li>
 <li><code><a title="tssc.step_implementers.container_image_static_compliance_scan" href="container_image_static_compliance_scan/index.html">tssc.step_implementers.container_image_static_compliance_scan</a></code></li>
 <li><code><a title="tssc.step_implementers.container_image_static_vulnerability_scan" href="container_image_static_vulnerability_scan/index.html">tssc.step_implementers.container_image_static_vulnerability_scan</a></code></li>
 <li><code><a title="tssc.step_implementers.create_container_image" href="create_container_image/index.html">tssc.step_implementers.create_container_image</a></code></li>
@@ -177,7 +170,7 @@ __all__ = [
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>

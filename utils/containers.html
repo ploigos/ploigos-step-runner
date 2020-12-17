@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc.utils.containers API documentation</title>
 <meta name="description" content="Shared utils for dealing with containers." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -31,9 +31,10 @@
 &#34;&#34;&#34;
 
 import sys
-import sh
 
+import sh
 from tssc.config.config_value import ConfigValue
+
 
 def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
     &#34;&#34;&#34;Logs into one or more container registries.
@@ -46,6 +47,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
     Notes
     -----
     registries example 1 (dict of dicts where child dict keys are registry uri):
+
         {
             &#39;registry.redhat.io&#39;: {
                 &#39;username&#39;: &#39;hello@world.xyz&#39;,
@@ -58,6 +60,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
         }
 
     registries example 2 (dict of dicts where uri is key in child dicts):
+
         {
             &#39;redhat&#39;: {
                 &#39;uri&#39;: registry.redhat.io
@@ -72,6 +75,7 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
         }
 
     registries example 3 (list of dicts where uri is key in child dicts):
+
         [
             {
                 &#39;uri&#39;: registry.redhat.io
@@ -181,8 +185,8 @@ def container_registry_login(
     * podman
     * skopeo
 
-    Parametes
-    ---------
+    Parameters
+    ----------
     container_registry_uri : str or ConfigValue
         URI to the container registry to log into.
     container_registry_username : str or ConfigValue
@@ -289,43 +293,46 @@ def container_registry_login(
 * podman
 * skopeo</p>
 <h2 id="notes">Notes</h2>
-<p>registries example 1 (dict of dicts where child dict keys are registry uri):
-{
-'registry.redhat.io': {
-'username': 'hello@world.xyz',
-'password': 'nope'
-},
-'registry.internal.example.xyz': {
-'username': 'hello@example.xyz',
-'password': 'nope'
+<p>registries example 1 (dict of dicts where child dict keys are registry uri):</p>
+<pre><code>{
+    'registry.redhat.io': {
+        'username': 'hello@world.xyz',
+        'password': 'nope'
+    },
+    'registry.internal.example.xyz': {
+        'username': 'hello@example.xyz',
+        'password': 'nope'
+    }
 }
-}</p>
-<p>registries example 2 (dict of dicts where uri is key in child dicts):
-{
-'redhat': {
-'uri': registry.redhat.io
-'username': 'hello@world.xyz',
-'password': 'nope'
-},
-'internal': {
-'uri': 'registry.internal.example.xyz'
-'username': 'hello@example.xyz',
-'password': 'nope'
+</code></pre>
+<p>registries example 2 (dict of dicts where uri is key in child dicts):</p>
+<pre><code>{
+    'redhat': {
+        'uri': registry.redhat.io
+        'username': 'hello@world.xyz',
+        'password': 'nope'
+    },
+    'internal': {
+        'uri': 'registry.internal.example.xyz'
+        'username': 'hello@example.xyz',
+        'password': 'nope'
+    }
 }
-}</p>
-<p>registries example 3 (list of dicts where uri is key in child dicts):
-[
-{
-'uri': registry.redhat.io
-'username': 'hello@world.xyz',
-'password': 'nope'
-},
-{
-'uri': 'registry.internal.example.xyz'
-'username': 'hello@example.xyz',
-'password': 'nope'
-}
-]</p>
+</code></pre>
+<p>registries example 3 (list of dicts where uri is key in child dicts):</p>
+<pre><code>[
+    {
+        'uri': registry.redhat.io
+        'username': 'hello@world.xyz',
+        'password': 'nope'
+    },
+    {
+        'uri': 'registry.internal.example.xyz'
+        'username': 'hello@example.xyz',
+        'password': 'nope'
+    }
+]
+</code></pre>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>registries</code></strong> :&ensp;<code>dict</code> or <code>list</code> or <code>None</code></dt>
@@ -362,6 +369,7 @@ If not specified default of the underlying authentication system will be used.</
     Notes
     -----
     registries example 1 (dict of dicts where child dict keys are registry uri):
+
         {
             &#39;registry.redhat.io&#39;: {
                 &#39;username&#39;: &#39;hello@world.xyz&#39;,
@@ -374,6 +382,7 @@ If not specified default of the underlying authentication system will be used.</
         }
 
     registries example 2 (dict of dicts where uri is key in child dicts):
+
         {
             &#39;redhat&#39;: {
                 &#39;uri&#39;: registry.redhat.io
@@ -388,6 +397,7 @@ If not specified default of the underlying authentication system will be used.</
         }
 
     registries example 3 (list of dicts where uri is key in child dicts):
+
         [
             {
                 &#39;uri&#39;: registry.redhat.io
@@ -493,20 +503,22 @@ If not specified default of the underlying authentication system will be used.</
 * buidlah
 * podman
 * skopeo</p>
-<h2 id="parametes">Parametes</h2>
-<p>container_registry_uri : str or ConfigValue
-URI to the container registry to log into.
-container_registry_username : str or ConfigValue
-Username to log into the container registry with.
-container_registry_password : str or ConfigValue
-Password to log into the container registry with.
-container_registry_tls_verify : bool or str or ConfigValue
-True to verify container registry certificates as part of authenticating.
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>container_registry_uri</code></strong> :&ensp;<code>str</code> or <code>ConfigValue</code></dt>
+<dd>URI to the container registry to log into.</dd>
+<dt><strong><code>container_registry_username</code></strong> :&ensp;<code>str</code> or <code>ConfigValue</code></dt>
+<dd>Username to log into the container registry with.</dd>
+<dt><strong><code>container_registry_password</code></strong> :&ensp;<code>str</code> or <code>ConfigValue</code></dt>
+<dd>Password to log into the container registry with.</dd>
+<dt><strong><code>container_registry_tls_verify</code></strong> :&ensp;<code>bool</code> or <code>str</code> or <code>ConfigValue</code></dt>
+<dd>True to verify container registry certificates as part of authenticating.
 False to ignore certificate chain.
-NOTE: no matter what SSL is used to authenticate with container registry
-containers_config_auth_file : str or ConfigValue, optional
-Path of the authentication file.
-If not specified default of the underlying authentication system will be used.</p>
+NOTE: no matter what SSL is used to authenticate with container registry</dd>
+<dt><strong><code>containers_config_auth_file</code></strong> :&ensp;<code>str</code> or <code>ConfigValue</code>, optional</dt>
+<dd>Path of the authentication file.
+If not specified default of the underlying authentication system will be used.</dd>
+</dl>
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>RuntimeError</code></dt>
@@ -542,8 +554,8 @@ When error loging into container registry.</dd>
     * podman
     * skopeo
 
-    Parametes
-    ---------
+    Parameters
+    ----------
     container_registry_uri : str or ConfigValue
         URI to the container registry to log into.
     container_registry_username : str or ConfigValue
@@ -659,7 +671,7 @@ When error loging into container registry.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>

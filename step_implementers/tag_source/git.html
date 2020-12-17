@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.1" />
+<meta name="generator" content="pdoc 0.9.2" />
 <title>tssc.step_implementers.tag_source.git API documentation</title>
-<meta name="description" content="Step Implementer for the tag-source step for Git …" />
+<meta name="description" content="`StepImplementer` for the `tag-source` step using Git …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,13 @@
 <h1 class="title">Module <code>tssc.step_implementers.tag_source.git</code></h1>
 </header>
 <section id="section-intro">
-<p>Step Implementer for the tag-source step for Git.</p>
+<p><code>StepImplementer</code> for the <code>tag-source</code> step using Git.</p>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.</p>
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results</p>
 <table>
 <thead>
 <tr>
@@ -39,116 +41,51 @@ from runtime configuration.</p>
 <tbody>
 <tr>
 <td><code>url</code></td>
-<td>False</td>
-<td>git url returned by</td>
-<td>This is the url for the git</td>
+<td>Yes</td>
+<td>git url returned by
+<code>git config --get
+remote.origin.url</code>
+in container</td>
+<td>This is the url for the
+git server.</td>
 </tr>
 <tr>
-<td>`git config &ndash;get
-server.</td>
+<td><code>git-username</code></td>
+<td>Yes (if url
+is http or https)</td>
 <td></td>
-<td></td>
-<td></td>
+<td>This is the username to use.
+Due to security concerns this
+should only be only provided by
+the runtime configuration</td>
 </tr>
 <tr>
-<td>remote.origin.url`</td>
+<td><code>git-password</code></td>
+<td>Yes (if url
+is http or https)</td>
 <td></td>
-<td></td>
-<td></td>
+<td>This is the password to use.
+Due to security concerns this
+should only be only provided by
+the runtime configuration</td>
 </tr>
 <tr>
-<td>in container</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>username</code></td>
-<td>True (if url</td>
-<td>n/a</td>
-<td>This is the username to use.</td>
-</tr>
-<tr>
-<td>is http or https)
-Due to security concerns this</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>should only be only provided by</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>the runtime configuration</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>password</code></td>
-<td>True (if url</td>
-<td>n/a</td>
-<td>This is the password to use.</td>
-</tr>
-<tr>
-<td>is http or https)
-Due to security concerns this</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>should only be only provided by</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>the runtime configuration</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h2 id="expected-previous-step-results">Expected Previous Step Results</h2>
-<p>Results expected from previous steps that this step may require. If not found, it
-will attempt to tag the source with <code>latest</code></p>
-<table>
-<thead>
-<tr>
-<th>Step Name</th>
-<th>Result Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>generate-metadata</code></td>
 <td><code>version</code></td>
-<td>Semantic version, if not found this step</td>
-</tr>
-<tr>
-<td>will use <code>latest</code> as the version to perform</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>the git tag with</td>
-<td></td>
-<td></td>
+<td>No</td>
+<td><code>latest</code></td>
+<td>Semantic version,
+if not found this step
+will use <code>latest</code> as the version
+to perform the git tag with</td>
 </tr>
 </tbody>
 </table>
-<h2 id="results">Results</h2>
-<p>Results output by this step.</p>
+<h2 id="result-artifacts">Result Artifacts</h2>
+<p>Results artifacts output by this step.</p>
 <table>
 <thead>
 <tr>
-<th>Result Key</th>
+<th>Result Artifact Key</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -159,90 +96,72 @@ will attempt to tag the source with <code>latest</code></p>
 </tr>
 </tbody>
 </table>
-<p><strong>Example</strong></p>
-<pre><code>'tssc-results': {
-    'tag-source': {
-        'git-tag': 'latest'
-    }
-}
-</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Step Implementer for the tag-source step for Git.
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `tag-source` step using Git.
 
 Step Configuration
 ------------------
-
 Step configuration expected as input to this step.
-Could come from either configuration file or
-from runtime configuration.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
 
-| Configuration Key | Required?          | Default              | Description
-|-------------------|--------------------|----------------------|-----------
-| `url`             | False              | git url returned by  | This is the url for the git
-                                           `git config --get      server.
-                                           remote.origin.url`
-                                           in container
-| `username`        | True (if url       | n/a                  | This is the username to use.
-                      is http or https)                           Due to security concerns this
-                                                                  should only be only provided by
-                                                                  the runtime configuration
-| `password`        | True (if url       | n/a                  | This is the password to use.
-                      is http or https)                           Due to security concerns this
-                                                                  should only be only provided by
-                                                                  the runtime configuration
+Configuration Key | Required?          | Default              | Description
+------------------|--------------------|----------------------|-----------
+`url`             | Yes                | git url returned by \
+                                         `git config --get \
+                                         remote.origin.url` \
+                                         in container         | This is the url for the \
+                                                                git server.
+`git-username`    | Yes (if url \
+                    is http or https)  |                      | This is the username to use. \
+                                                                Due to security concerns this \
+                                                                should only be only provided by \
+                                                                the runtime configuration
+`git-password`    | Yes (if url \
+                    is http or https)  |                      | This is the password to use. \
+                                                                Due to security concerns this \
+                                                                should only be only provided by \
+                                                                the runtime configuration
+`version`         | No                 | `latest`             | Semantic version, \
+                                                                if not found this step \
+                                                                will use `latest` as the version \
+                                                                to perform the git tag with
 
-Expected Previous Step Results
-------------------------------
+Result Artifacts
+----------------
+Results artifacts output by this step.
 
-Results expected from previous steps that this step may require. If not found, it
-will attempt to tag the source with `latest`
-
-| Step Name           | Result Key | Description
-|---------------------|------------|------------
-| `generate-metadata` | `version`  | Semantic version, if not found this step
-                                     will use `latest` as the version to perform
-                                     the git tag with
-
-Results
--------
-
-Results output by this step.
-
-| Result Key | Description
-|------------|------------
-| `tag`      | This is the value that was used to tag the source.
-
-
-**Example**
-
-    &#39;tssc-results&#39;: {
-        &#39;tag-source&#39;: {
-            &#39;git-tag&#39;: &#39;latest&#39;
-        }
-    }
+Result Artifact Key | Description
+--------------------|------------
+`tag`               | This is the value that was used to tag the source.
 &#34;&#34;&#34;
 import re
 import sys
 from io import StringIO
 
 import sh
-from tssc import DefaultSteps, StepImplementer
+from tssc import StepImplementer
+from tssc.exceptions import StepRunnerException
+from tssc.step_result import StepResult
 
 DEFAULT_CONFIG = {}
 
 AUTHENTICATION_CONFIG = {
-    &#39;username&#39;: None,
-    &#39;password&#39;: None
+    &#39;git-username&#39;: None,
+    &#39;git-password&#39;: None
 }
 
 
 class Git(StepImplementer):
-    &#34;&#34;&#34;
-    StepImplementer for the tag-source step for Git.
+    &#34;&#34;&#34;StepImplementer for the tag-source step for Git.
 
+    Note
+    ----
     This makes extensive use of the python sh library. This was a deliberate choice,
     as the gitpython library doesn&#39;t appear to easily support username/password auth
     for http and https git repos, and that is a desired use case.
@@ -265,105 +184,115 @@ class Git(StepImplementer):
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        &#34;&#34;&#34;
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         &#34;&#34;&#34;
         return []
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Validates the given `runtime_step_config` against the required step configuration keys.
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
 
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+        Validates that:
+        * required configuration is given
+        * either both git-username and git-password are set or neither.
 
         Raises
         ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
+        StepRunnerException
+            If step configuration or previous step result artifacts have invalid required values
         &#34;&#34;&#34;
-        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        assert ( \
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-        ), &#39;Either username or password is not set. Neither or both must be set.&#39;
+        # ensure either both git-username and git-password are set or neither
+        runtime_auth_config = {}
+        for auth_config_key in AUTHENTICATION_CONFIG:
+            runtime_auth_config_value = self.get_value(auth_config_key)
+
+            if runtime_auth_config_value is not None:
+                runtime_auth_config[auth_config_key] = runtime_auth_config_value
+
+        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
+                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
+            raise StepRunnerException(
+                &#34;Either &#39;git-username&#39; or &#39;git-password &#39;is not set. Neither or both must be set.&#34;
+            )
 
     def _run_step(self):
-        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
+
         username = None
         password = None
 
         if self.has_config_value(AUTHENTICATION_CONFIG):
-            if(self.get_config_value(&#39;username&#39;) \
-              and self.get_config_value(&#39;password&#39;)):
-                username = self.get_config_value(&#39;username&#39;)
-                password = self.get_config_value(&#39;password&#39;)
-            else:
-                raise ValueError(
-                    &#39;Both username and password must have &#39; \
-                    &#39;non-empty value in the runtime step configuration&#39;
-                )
+            username = self.get_value(&#39;git-username&#39;)
+            password = self.get_value(&#39;git-password&#39;)
         else:
             print(&#39;No username/password found, assuming ssh&#39;)
-        tag = self._get_tag()
-        self._git_tag(tag)
-        git_url = self._git_url()
-        if git_url.startswith(&#39;http://&#39;):
-            if username and password:
-                self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
-            else:
-                raise ValueError(
-                    &#39;For a http:// git url, you need to also provide &#39; \
-                    &#39;username/password pair&#39;
-                )
-        elif git_url.startswith(&#39;https://&#39;):
-            if username and password:
-                self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
-            else:
-                raise ValueError(
-                    &#39;For a https:// git url, you need to also provide &#39; \
-                    &#39;username/password pair&#39;
-                )
-        else:
-            self._git_push(None)
-        results = {
-            &#39;tag&#39; : tag
-        }
-        return results
 
-    def _get_tag(self):
-        tag = &#39;latest&#39;
-        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) \
-          and self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;version&#39;)):
-            tag = self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;version&#39;)
-        else:
+        tag = self.__get_tag()
+
+        try:
+            self.__git_tag(tag)
+            git_url = self.__git_url()
+            if git_url.startswith(&#39;http://&#39;):
+                if username and password:
+                    self.__git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
+                else:
+                    step_result.success = False
+                    step_result.message = &#39;For a http:// git url, you need to also provide &#39; \
+                                        &#39;username/password pair&#39;
+                    return step_result
+            elif git_url.startswith(&#39;https://&#39;):
+                if username and password:
+                    self.__git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
+                else:
+                    step_result.success = False
+                    step_result.message = &#39;For a https:// git url, you need to also provide &#39; \
+                                        &#39;username/password pair&#39;
+                    return step_result
+            else:
+                self.__git_push(None)
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+
+        step_result.add_artifact(
+            name=&#39;tag&#39;,
+            value=tag
+        )
+
+        return step_result
+
+    def __get_tag(self):
+        tag = self.get_value(&#39;version&#39;)
+        if tag is None:
+            tag = &#39;latest&#39;
             print(&#39;No version found in metadata. Using latest&#39;)
         return tag
 
-    def _git_url(self):
+    def __git_url(self):
         git_url = None
-        if self.get_config_value(&#39;url&#39;):
-            git_url = self.get_config_value(&#39;url&#39;)
+        if self.get_value(&#39;url&#39;):
+            git_url = self.get_value(&#39;url&#39;)
         else:
             try:
                 out = StringIO()
@@ -378,28 +307,31 @@ class Git(StepImplementer):
                 )
                 git_url = out.getvalue().rstrip()
 
-                # remove ANYTHING@ from begining of git_url since step will pass in its own
+                # remove ANYTHING@ from beginning of git_url since step will pass in its own
                 # username and password
                 #
                 # Regex:
-                #   ^[^@]+@ - match from begining of line any charcter up until an @ and then the @
+                #   ^[^@]+@ - match from beginning of line any character up until
+                #             an @ and then the @
                 #   (.*) - match any character and capture to capture group 1
                 #   \1 - capture group 1 which is the http or https if there was one
                 #   \2 - capture group 2 which is anything after the first @ if there was one
                 git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
 
-            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
-                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
+            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+                raise StepRunnerException(
+                    f&#34;Error invoking git config --get remote.origin.url: {error}&#34;
+                ) from error
         return git_url
 
     @staticmethod
-    def _git_tag(git_tag_value):  # pragma: no cover
+    def __git_tag(git_tag_value):
         try:
             # NOTE:
-            # this force is only needed locally in case of a re-reun of the same pipeline
+            # this force is only needed locally in case of a re-run of the same pipeline
             # without a fresh check out. You will notice there is no force on the push
             # making this an acceptable work around to the issue since on the off chance
-            # actually orverwriting a tag with a different comment, the push will fail
+            # actually overwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
             sh.git.tag(  # pylint: disable=no-member
                 git_tag_value,
@@ -409,10 +341,12 @@ class Git(StepImplementer):
                 _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;) from error
+            raise StepRunnerException(
+                f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;
+            ) from error
 
     @staticmethod
-    def _git_push(url=None):  # pragma: no cover
+    def __git_push(url=None):
         try:
             if url:
                 sh.git.push(
@@ -430,7 +364,7 @@ class Git(StepImplementer):
                     _tee=&#39;err&#39;
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git push&#39;) from error</code></pre>
+            raise StepRunnerException(f&#34;Error invoking git push: {error}&#34;) from error</code></pre>
 </details>
 </section>
 <section>
@@ -448,6 +382,7 @@ class Git(StepImplementer):
 </code></dt>
 <dd>
 <div class="desc"><p>StepImplementer for the tag-source step for Git.</p>
+<h2 id="note">Note</h2>
 <p>This makes extensive use of the python sh library. This was a deliberate choice,
 as the gitpython library doesn't appear to easily support username/password auth
 for http and https git repos, and that is a desired use case.</p></div>
@@ -456,9 +391,10 @@ for http and https git repos, and that is a desired use case.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Git(StepImplementer):
-    &#34;&#34;&#34;
-    StepImplementer for the tag-source step for Git.
+    &#34;&#34;&#34;StepImplementer for the tag-source step for Git.
 
+    Note
+    ----
     This makes extensive use of the python sh library. This was a deliberate choice,
     as the gitpython library doesn&#39;t appear to easily support username/password auth
     for http and https git repos, and that is a desired use case.
@@ -481,105 +417,115 @@ for http and https git repos, and that is a desired use case.</p></div>
         return DEFAULT_CONFIG
 
     @staticmethod
-    def required_runtime_step_config_keys():
-        &#34;&#34;&#34;
-        Getter for step configuration keys that are required before running the step.
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
 
         See Also
         --------
-        _validate_runtime_step_config
+        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
         array_list
-            Array of configuration keys that are required before running the step.
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
         &#34;&#34;&#34;
         return []
 
-    def _validate_runtime_step_config(self, runtime_step_config):
-        &#34;&#34;&#34;
-        Validates the given `runtime_step_config` against the required step configuration keys.
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
 
-        Parameters
-        ----------
-        runtime_step_config : dict
-            Step configuration to use when the StepImplementer runs the step with all of the
-            various static, runtime, defaults, and environment configuration munged together.
+        Validates that:
+        * required configuration is given
+        * either both git-username and git-password are set or neither.
 
         Raises
         ------
-        AssertionError
-            If the given `runtime_step_config` is not valid with a message as to why.
+        StepRunnerException
+            If step configuration or previous step result artifacts have invalid required values
         &#34;&#34;&#34;
-        super()._validate_runtime_step_config(runtime_step_config) #pylint: disable=protected-access
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        assert ( \
-            all(element in runtime_step_config for element in AUTHENTICATION_CONFIG) or \
-            not any(element in runtime_step_config for element in AUTHENTICATION_CONFIG) \
-        ), &#39;Either username or password is not set. Neither or both must be set.&#39;
+        # ensure either both git-username and git-password are set or neither
+        runtime_auth_config = {}
+        for auth_config_key in AUTHENTICATION_CONFIG:
+            runtime_auth_config_value = self.get_value(auth_config_key)
+
+            if runtime_auth_config_value is not None:
+                runtime_auth_config[auth_config_key] = runtime_auth_config_value
+
+        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
+                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
+            raise StepRunnerException(
+                &#34;Either &#39;git-username&#39; or &#39;git-password &#39;is not set. Neither or both must be set.&#34;
+            )
 
     def _run_step(self):
-        &#34;&#34;&#34;Runs the TSSC step implemented by this StepImplementer.
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
         Returns
         -------
-        dict
-            Results of running this step.
+        StepResult
+            Object containing the dictionary results of this step.
         &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
+
         username = None
         password = None
 
         if self.has_config_value(AUTHENTICATION_CONFIG):
-            if(self.get_config_value(&#39;username&#39;) \
-              and self.get_config_value(&#39;password&#39;)):
-                username = self.get_config_value(&#39;username&#39;)
-                password = self.get_config_value(&#39;password&#39;)
-            else:
-                raise ValueError(
-                    &#39;Both username and password must have &#39; \
-                    &#39;non-empty value in the runtime step configuration&#39;
-                )
+            username = self.get_value(&#39;git-username&#39;)
+            password = self.get_value(&#39;git-password&#39;)
         else:
             print(&#39;No username/password found, assuming ssh&#39;)
-        tag = self._get_tag()
-        self._git_tag(tag)
-        git_url = self._git_url()
-        if git_url.startswith(&#39;http://&#39;):
-            if username and password:
-                self._git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
-            else:
-                raise ValueError(
-                    &#39;For a http:// git url, you need to also provide &#39; \
-                    &#39;username/password pair&#39;
-                )
-        elif git_url.startswith(&#39;https://&#39;):
-            if username and password:
-                self._git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
-            else:
-                raise ValueError(
-                    &#39;For a https:// git url, you need to also provide &#39; \
-                    &#39;username/password pair&#39;
-                )
-        else:
-            self._git_push(None)
-        results = {
-            &#39;tag&#39; : tag
-        }
-        return results
 
-    def _get_tag(self):
-        tag = &#39;latest&#39;
-        if(self.get_step_results(DefaultSteps.GENERATE_METADATA) \
-          and self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;version&#39;)):
-            tag = self.get_step_results(DefaultSteps.GENERATE_METADATA).get(&#39;version&#39;)
-        else:
+        tag = self.__get_tag()
+
+        try:
+            self.__git_tag(tag)
+            git_url = self.__git_url()
+            if git_url.startswith(&#39;http://&#39;):
+                if username and password:
+                    self.__git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
+                else:
+                    step_result.success = False
+                    step_result.message = &#39;For a http:// git url, you need to also provide &#39; \
+                                        &#39;username/password pair&#39;
+                    return step_result
+            elif git_url.startswith(&#39;https://&#39;):
+                if username and password:
+                    self.__git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
+                else:
+                    step_result.success = False
+                    step_result.message = &#39;For a https:// git url, you need to also provide &#39; \
+                                        &#39;username/password pair&#39;
+                    return step_result
+            else:
+                self.__git_push(None)
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+
+        step_result.add_artifact(
+            name=&#39;tag&#39;,
+            value=tag
+        )
+
+        return step_result
+
+    def __get_tag(self):
+        tag = self.get_value(&#39;version&#39;)
+        if tag is None:
+            tag = &#39;latest&#39;
             print(&#39;No version found in metadata. Using latest&#39;)
         return tag
 
-    def _git_url(self):
+    def __git_url(self):
         git_url = None
-        if self.get_config_value(&#39;url&#39;):
-            git_url = self.get_config_value(&#39;url&#39;)
+        if self.get_value(&#39;url&#39;):
+            git_url = self.get_value(&#39;url&#39;)
         else:
             try:
                 out = StringIO()
@@ -594,28 +540,31 @@ for http and https git repos, and that is a desired use case.</p></div>
                 )
                 git_url = out.getvalue().rstrip()
 
-                # remove ANYTHING@ from begining of git_url since step will pass in its own
+                # remove ANYTHING@ from beginning of git_url since step will pass in its own
                 # username and password
                 #
                 # Regex:
-                #   ^[^@]+@ - match from begining of line any charcter up until an @ and then the @
+                #   ^[^@]+@ - match from beginning of line any character up until
+                #             an @ and then the @
                 #   (.*) - match any character and capture to capture group 1
                 #   \1 - capture group 1 which is the http or https if there was one
                 #   \2 - capture group 2 which is anything after the first @ if there was one
                 git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
 
-            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable # pragma: no cover
-                raise RuntimeError(&#39;Error invoking git config --get remote.origin.url&#39;) from error
+            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+                raise StepRunnerException(
+                    f&#34;Error invoking git config --get remote.origin.url: {error}&#34;
+                ) from error
         return git_url
 
     @staticmethod
-    def _git_tag(git_tag_value):  # pragma: no cover
+    def __git_tag(git_tag_value):
         try:
             # NOTE:
-            # this force is only needed locally in case of a re-reun of the same pipeline
+            # this force is only needed locally in case of a re-run of the same pipeline
             # without a fresh check out. You will notice there is no force on the push
             # making this an acceptable work around to the issue since on the off chance
-            # actually orverwriting a tag with a different comment, the push will fail
+            # actually overwriting a tag with a different comment, the push will fail
             # because the tag will be attached to a different git hash.
             sh.git.tag(  # pylint: disable=no-member
                 git_tag_value,
@@ -625,10 +574,12 @@ for http and https git repos, and that is a desired use case.</p></div>
                 _tee=&#39;err&#39;
             )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;) from error
+            raise StepRunnerException(
+                f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;
+            ) from error
 
     @staticmethod
-    def _git_push(url=None):  # pragma: no cover
+    def __git_push(url=None):
         try:
             if url:
                 sh.git.push(
@@ -646,7 +597,7 @@ for http and https git repos, and that is a desired use case.</p></div>
                     _tee=&#39;err&#39;
                 )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise RuntimeError(&#39;Error invoking git push&#39;) from error</code></pre>
+            raise StepRunnerException(f&#34;Error invoking git push: {error}&#34;) from error</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -659,17 +610,15 @@ for http and https git repos, and that is a desired use case.</p></div>
 <ul class="hlist">
 <li><code><a title="tssc.step_implementer.StepImplementer.config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.config">config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.current_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_results">current_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.current_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.current_step_results">current_step_results</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.environment" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.environment">environment</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_step_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_step_results">get_step_results</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.get_working_dir" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_working_dir">get_working_dir</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_result_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_result_value">get_result_value</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.get_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.get_value">get_value</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.required_runtime_step_config_keys" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.required_runtime_step_config_keys">required_runtime_step_config_keys</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.results_dir_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_dir_path">results_dir_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.results_file_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.results_file_path">results_file_path</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_config">step_config</a></code></li>
@@ -677,8 +626,11 @@ for http and https git repos, and that is a desired use case.</p></div>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
-<li><code><a title="tssc.step_implementer.StepImplementer.write_results" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_results">write_results</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.work_dir_path" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.work_dir_path_step" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
+<li><code><a title="tssc.step_implementer.StepImplementer.workflow_result" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
 <li><code><a title="tssc.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#tssc.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
@@ -692,8 +644,7 @@ for http and https git repos, and that is a desired use case.</p></div>
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#expected-previous-step-results">Expected Previous Step Results</a></li>
-<li><a href="#results">Results</a></li>
+<li><a href="#result-artifacts">Result Artifacts</a></li>
 </ul>
 </div>
 <ul id="index">
@@ -713,7 +664,7 @@ for http and https git repos, and that is a desired use case.</p></div>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
 </footer>
 </body>
 </html>
