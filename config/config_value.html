@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc.config.config_value API documentation</title>
-<meta name="description" content="Representation of a TSSC configuration value." />
+<title>psr.config.config_value API documentation</title>
+<meta name="description" content="Representation of a configuration value." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,22 +19,22 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.config.config_value</code></h1>
+<h1 class="title">Module <code>psr.config.config_value</code></h1>
 </header>
 <section id="section-intro">
-<p>Representation of a TSSC configuration value.</p>
+<p>Representation of a configuration value.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Representation of a TSSC configuration value.
+<pre><code class="python">&#34;&#34;&#34;Representation of a configuration value.
 &#34;&#34;&#34;
 
 import copy
-from tssc.decryption_utils import DecryptionUtils
+from psr.decryption_utils import DecryptionUtils
 
 class ConfigValue:
-    &#34;&#34;&#34;Representation of a TSSC configuration value.
+    &#34;&#34;&#34;Representation of a configuration value.
 
     Parameters
     ----------
@@ -276,12 +276,12 @@ class ConfigValue:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.config.config_value.ConfigValue"><code class="flex name class">
+<dt id="psr.config.config_value.ConfigValue"><code class="flex name class">
 <span>class <span class="ident">ConfigValue</span></span>
 <span>(</span><span>value, parent_source=None, path_parts=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Representation of a TSSC configuration value.</p>
+<div class="desc"><p>Representation of a configuration value.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>value</code></strong> :&ensp;<code>any</code></dt>
@@ -307,7 +307,7 @@ the dict that this value is found in.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ConfigValue:
-    &#34;&#34;&#34;Representation of a TSSC configuration value.
+    &#34;&#34;&#34;Representation of a configuration value.
 
     Parameters
     ----------
@@ -541,7 +541,7 @@ the dict that this value is found in.</dd>
 </details>
 <h3>Static methods</h3>
 <dl>
-<dt id="tssc.config.config_value.ConfigValue.convert_leaves_to_config_values"><code class="name flex">
+<dt id="psr.config.config_value.ConfigValue.convert_leaves_to_config_values"><code class="name flex">
 <span>def <span class="ident">convert_leaves_to_config_values</span></span>(<span>values, parent_source=None, path_parts=None)</span>
 </code></dt>
 <dd>
@@ -549,7 +549,7 @@ the dict that this value is found in.</dd>
 object to a ConfigValue objects.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>values</code></strong> :&ensp;<code>dict, list, tuple, <a title="tssc.config.config_value.ConfigValue" href="#tssc.config.config_value.ConfigValue">ConfigValue</a>, None, obj</code></dt>
+<dt><strong><code>values</code></strong> :&ensp;<code>dict, list, tuple, <a title="psr.config.config_value.ConfigValue" href="#psr.config.config_value.ConfigValue">ConfigValue</a>, None, obj</code></dt>
 <dd>Change all the leaves of the given object to ConfigValue objects.</dd>
 <dt><strong><code>parent_source</code></strong> :&ensp;<code>str file path</code> or <code>dict</code></dt>
 <dd>Path to the YML or JSON file that this value is found in or
@@ -559,7 +559,7 @@ the dict that this value is found in.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict, list, None,</code> or <code><a title="tssc.config.config_value.ConfigValue" href="#tssc.config.config_value.ConfigValue">ConfigValue</a></code></dt>
+<dt><code>dict, list, None,</code> or <code><a title="psr.config.config_value.ConfigValue" href="#psr.config.config_value.ConfigValue">ConfigValue</a></code></dt>
 <dd>If given values is a a dict then returns the same dict with all of the leaf values
 changed to ConfigValue or None if already None.
 If given values is list then returns the same list with all of the leaf values
@@ -568,7 +568,7 @@ If given values is None, return None.
 If given values is already a ConfigValue return the same ConfigValue</dd>
 </dl>
 <h2 id="see-also">See Also</h2>
-<p><code><a title="tssc.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#tssc.config.config_value.ConfigValue.convert_leaves_to_config_values">ConfigValue.convert_leaves_to_config_values()</a></code></p></div>
+<p><code><a title="psr.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#psr.config.config_value.ConfigValue.convert_leaves_to_config_values">ConfigValue.convert_leaves_to_config_values()</a></code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -635,14 +635,14 @@ def convert_leaves_to_config_values(values, parent_source=None, path_parts=None)
         )</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config_value.ConfigValue.convert_leaves_to_values"><code class="name flex">
+<dt id="psr.config.config_value.ConfigValue.convert_leaves_to_values"><code class="name flex">
 <span>def <span class="ident">convert_leaves_to_values</span></span>(<span>values)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Recursively transforms all leaves of type ConfigValue to ConfigValue.value</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>values</code></strong> :&ensp;<code>dict, list, <a title="tssc.config.config_value.ConfigValue" href="#tssc.config.config_value.ConfigValue">ConfigValue</a>,</code> or <code>obj</code></dt>
+<dt><strong><code>values</code></strong> :&ensp;<code>dict, list, <a title="psr.config.config_value.ConfigValue" href="#psr.config.config_value.ConfigValue">ConfigValue</a>,</code> or <code>obj</code></dt>
 <dd>A collection where the leaves contain ConfigValue to transform back to
 ConfigValue.value</dd>
 </dl>
@@ -657,7 +657,7 @@ If given a ConfigValue returns ConfigValue.value
 If any other object returns that object</dd>
 </dl>
 <h2 id="see-also">See Also</h2>
-<p><code><a title="tssc.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#tssc.config.config_value.ConfigValue.convert_leaves_to_config_values">ConfigValue.convert_leaves_to_config_values()</a></code></p></div>
+<p><code><a title="psr.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#psr.config.config_value.ConfigValue.convert_leaves_to_config_values">ConfigValue.convert_leaves_to_config_values()</a></code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -705,7 +705,7 @@ def convert_leaves_to_values(values):
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.config.config_value.ConfigValue.parent_source"><code class="name">var <span class="ident">parent_source</span></code></dt>
+<dt id="psr.config.config_value.ConfigValue.parent_source"><code class="name">var <span class="ident">parent_source</span></code></dt>
 <dd>
 <div class="desc"><p>Get a copy of the source that this configuration value came from.</p>
 <h2 id="returns">Returns</h2>
@@ -731,7 +731,7 @@ def parent_source(self):
     return copy.deepcopy(self.__parent_source)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config_value.ConfigValue.path_parts"><code class="name">var <span class="ident">path_parts</span></code></dt>
+<dt id="psr.config.config_value.ConfigValue.path_parts"><code class="name">var <span class="ident">path_parts</span></code></dt>
 <dd>
 <div class="desc"><p>Gets copy of the list of path to the element that this is the value for.</p>
 <h2 id="returns">Returns</h2>
@@ -755,7 +755,7 @@ def path_parts(self):
     return copy.deepcopy(self.__path_parts)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config_value.ConfigValue.raw_value"><code class="name">var <span class="ident">raw_value</span></code></dt>
+<dt id="psr.config.config_value.ConfigValue.raw_value"><code class="name">var <span class="ident">raw_value</span></code></dt>
 <dd>
 <div class="desc"><p>Get the value of this configuration value as originally given.</p>
 <p>If the value happens to be encrypted this will return that raw encrypted value as it was
@@ -790,7 +790,7 @@ def raw_value(self):
     return copy.deepcopy(self.__value)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config_value.ConfigValue.value"><code class="name">var <span class="ident">value</span></code></dt>
+<dt id="psr.config.config_value.ConfigValue.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
 <div class="desc"><p>Get the value of this configuration value (decrypted if applicable).</p>
 <p>If the value happens to be decrypted then will decrypt and then return the decrypted value.</p>
@@ -846,20 +846,20 @@ def value(self):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.config" href="index.html">tssc.config</a></code></li>
+<li><code><a title="psr.config" href="index.html">psr.config</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.config.config_value.ConfigValue" href="#tssc.config.config_value.ConfigValue">ConfigValue</a></code></h4>
+<h4><code><a title="psr.config.config_value.ConfigValue" href="#psr.config.config_value.ConfigValue">ConfigValue</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#tssc.config.config_value.ConfigValue.convert_leaves_to_config_values">convert_leaves_to_config_values</a></code></li>
-<li><code><a title="tssc.config.config_value.ConfigValue.convert_leaves_to_values" href="#tssc.config.config_value.ConfigValue.convert_leaves_to_values">convert_leaves_to_values</a></code></li>
-<li><code><a title="tssc.config.config_value.ConfigValue.parent_source" href="#tssc.config.config_value.ConfigValue.parent_source">parent_source</a></code></li>
-<li><code><a title="tssc.config.config_value.ConfigValue.path_parts" href="#tssc.config.config_value.ConfigValue.path_parts">path_parts</a></code></li>
-<li><code><a title="tssc.config.config_value.ConfigValue.raw_value" href="#tssc.config.config_value.ConfigValue.raw_value">raw_value</a></code></li>
-<li><code><a title="tssc.config.config_value.ConfigValue.value" href="#tssc.config.config_value.ConfigValue.value">value</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.convert_leaves_to_config_values" href="#psr.config.config_value.ConfigValue.convert_leaves_to_config_values">convert_leaves_to_config_values</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.convert_leaves_to_values" href="#psr.config.config_value.ConfigValue.convert_leaves_to_values">convert_leaves_to_values</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.parent_source" href="#psr.config.config_value.ConfigValue.parent_source">parent_source</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.path_parts" href="#psr.config.config_value.ConfigValue.path_parts">path_parts</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.raw_value" href="#psr.config.config_value.ConfigValue.raw_value">raw_value</a></code></li>
+<li><code><a title="psr.config.config_value.ConfigValue.value" href="#psr.config.config_value.ConfigValue.value">value</a></code></li>
 </ul>
 </li>
 </ul>

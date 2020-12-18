@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc API documentation</title>
-<meta name="description" content="Trusted Software Supply Chain Library (tssc) main entry point …" />
+<title>psr API documentation</title>
+<meta name="description" content="Ploigos Step Runner (psr) main entry point …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,28 +19,28 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>tssc</code></h1>
+<h1 class="title">Package <code>psr</code></h1>
 </header>
 <section id="section-intro">
-<p>Trusted Software Supply Chain Library (tssc) main entry point.</p>
+<p>Ploigos Step Runner (psr) main entry point.</p>
 <h2 id="command-line-options">Command-Line Options</h2>
 <pre><code>-h, --help
     show this help message and exit
 
 -s STEP, --step STEP
-    TSSC workflow step to run
+    Ploigos workflow step to run
 
 -e ENVIRONMENT, --environment  ENVIRONMENT
     The environment to run this step against.
 
 -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
-    TSSC workflow configuration files, or directories containing files, in yml or json
+    Ploigos workflow configuration files, or directories containing files, in yml or json
 
 -r RESULTS_DIR, --results-dir RESULTS_DIR
-    TSSC workflow results file in yml or json
+    Ploigos workflow results file in yml or json
 
 --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
-    Override step config provided by the given TSSC
+    Override step config provided by the given Ploigos
     config-file with these arguments.
 </code></pre>
 <h2 id="step-configuration">Step Configuration</h2>
@@ -68,16 +68,16 @@
 <h3 id="variable-precedence">Variable Precedence</h3>
 <p>From least precedence to highest precedence.</p>
 <pre><code>1. StepImplementer implementation provided configuration defaults
-2. Global Configuration Defaults (tssc-config.global-defaults)
-3. Global Environment Configuration Defaults (tssc-config.global-environment-defaults)
-4. Step Configuration (tssc-config.{STEP_NAME}.config)
+2. Global Configuration Defaults (step-runner-config.global-defaults)
+3. Global Environment Configuration Defaults (step-runner-config.global-environment-defaults)
+4. Step Configuration (step-runner-config.{STEP_NAME}.config)
 5. Step Environment Configuration
-     (tssc-config.{STEP_NAME}.environment-config.{ENVIRONMENT_NAME})
-6. Step Configuration Runtime Overrides (--environment arugment to tssc main entry point)
+     (step-runner-config.{STEP_NAME}.environment-config.{ENVIRONMENT_NAME})
+6. Step Configuration Runtime Overrides (--environment arugment to main entry point)
 </code></pre>
 <p><strong> Example 1 </strong></p>
 <pre><code>---
-tssc-config:
+step-runner-config:
   # List of decryptors to use to decrypt any encrypted configuration.
   config-decryptors:
   - implementer: SOPS
@@ -106,12 +106,12 @@ tssc-config:
   # of that environment.
   #
   # NOTE: Environment names can be anything so long as they line up with the environment value
-  # given to the `--environment` flag of the main tssc entry point.
+  # given to the `--environment` flag of the main entry point.
   #global-environment-defaults:
     # Sample configuration for an environment named 'SAMPLE-ENV-1'.
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     #SAMPLE-ENV-1:
       # Sample config option that may differ from environment to environment.
       #sample-config-option-2: 'default for use in the SAMPLE-ENV-1 env"
@@ -119,7 +119,7 @@ tssc-config:
     # Sample configuration for an environment named 'SAMPLE-ENV-2'.
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     #SAMPLE-ENV-2:
       # Sample config option that may differ from environment to environment.
       #sample-config-option-2: 'default for use in the SAMPLE-ENV-2 env"
@@ -140,9 +140,9 @@ tssc-config:
 <p class="admonition-title">Note</p>
 <p>Optional step configurations are listed commented out and with their default values.</p>
 </div>
-<p><strong> Example TSSC Config file for a Maven built Application </strong></p>
+<p><strong> Example Config file for a Maven built Application </strong></p>
 <pre><code>---
-tssc-config:
+step-runner-config:
   # Optional
   # List of decryptors to use to decrypt any encrypted configuration.
   config-decryptors:
@@ -159,11 +159,11 @@ tssc-config:
   # given by global-environment-defaults.
   global-defaults:
     # Required.
-    # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+    # Name of the application the artifact built and deployed by this workflow is part of.
     application-name: ''
 
     # Required.
-    # Name of the service this artifact built and deployed by this TSSC workflow implements as
+    # Name of the service this artifact built and deployed by this workflow implements as
     # part of the application it is a part of.
     service-name: ''
 
@@ -223,13 +223,13 @@ tssc-config:
   # of that environment.
   #
   # NOTE: Environment names can be anything so long as they line up with the environment value
-  # given to the `--environment` flag of the main tssc entry point.
+  # given to the `--environment` flag of the main entry point.
   global-environment-defaults:
     # Sample
     # Sample configuration for an environment named 'DEV'.
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     DEV:
       #Optional
       #kube-api-token: ''
@@ -253,7 +253,7 @@ tssc-config:
     # Sample configuration for an environment named 'TEST'
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     TEST:
       #Optional
       #kube-api-token: ''
@@ -277,7 +277,7 @@ tssc-config:
     # Sample configuration for an environment named 'PROD'
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     #PROD:
     # Sample
     # Sample parameter that may differ from environment to environment.
@@ -402,8 +402,8 @@ tssc-config:
     implementer: OpenSCAP
     config:
       oscap-input-definitions-uri: &lt;https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml&gt;
-      oscap-tailoring-uri: &lt;https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml&gt;
-      oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+      oscap-tailoring-uri: &lt;https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml&gt;
+      oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
   #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
   #  implementer: OpenSCAP
   #  config:
@@ -459,7 +459,7 @@ tssc-config:
       git-email: ''
 
       # Optional
-      #git-name: 'TSSC'
+      #git-name: 'ploigos'
 
       # Optional
       #git-username: None
@@ -497,9 +497,9 @@ tssc-config:
   # WARNING: not yet implemented
   publish-workflow-results: []
 </code></pre>
-<p><strong> Example TSSC Config file for a NPM built Application </strong></p>
+<p><strong> Example Config file for a NPM built Application </strong></p>
 <pre><code>---
-tssc-config:
+step-runner-config:
   # Optional
   # List of decryptors to use to decrypt any encrypted configuration.
   config-decryptors:
@@ -516,11 +516,11 @@ tssc-config:
   # given by global-environment-defaults.
   global-defaults:
     # Required.
-    # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+    # Name of the application the artifact built and deployed by this workflow is part of.
     application-name: ''
 
     # Required.
-    # Name of the service this artifact built and deployed by this TSSC workflow implements as
+    # Name of the service this artifact built and deployed by this workflow implements as
     # part of the application it is a part of.
     service-name: ''
 
@@ -543,13 +543,13 @@ tssc-config:
   # of that environment.
   #
   # NOTE: Environment names can be anything so long as they line up with the environment value
-  # given to the `--environment` flag of the main tssc entry point.
+  # given to the `--environment` flag of the main entry point.
   global-environment-defaults:
     # Optional Sample
     # Sample configuration for an environment named 'DEV'.
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     DEV:
       #Optional
       #kube-api-token: ''
@@ -573,7 +573,7 @@ tssc-config:
     # Sample configuration for an environment named 'TEST'
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     TEST:
       #Optional
       #kube-api-token:
@@ -597,7 +597,7 @@ tssc-config:
     # Sample configuration for an environment named 'PROD'
     #
     # NOTE: Environment names can be anything so long as they line up with the environment value
-    # given to the `--environment` flag of the main tssc entry point.
+    # given to the `--environment` flag of the main entry point.
     #PROD:
     # Sample
     # Sample parameter that may differ from environment to environment.
@@ -699,8 +699,8 @@ tssc-config:
     implementer: OpenSCAP
     config:
       oscap-input-definitions-uri: &lt;https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml&gt;
-      oscap-tailoring-uri: &lt;https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml&gt;
-      oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+      oscap-tailoring-uri: &lt;https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml&gt;
+      oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
   #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
   #  implementer: OpenSCAP
   #  config:
@@ -759,7 +759,7 @@ tssc-config:
       git-email: ''
 
       # Optional
-      #git-name: 'TSSC'
+      #git-name: 'ploigos'
 
       # Optional
       #git-username: None
@@ -789,12 +789,12 @@ tssc-config:
 </code></pre>
 <h2 id="examples">Examples</h2>
 <p>Getting Help</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; python -m tssc --help
+<pre><code class="language-python-repl">&gt;&gt;&gt; python -m psr --help
 </code></pre>
 <p>Example Running the 'generate-metadata' step</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; python -m tssc
-...     --config=my-app-tssc-config.yml
-...     --results-file=my-app-tssc-results.yml
+<pre><code class="language-python-repl">&gt;&gt;&gt; python -m psr
+...     --config=my-app-step-runner-config.yml
+...     --results-file=my-app-step-runner-results.yml
 ...     --step=generate-metadata
 </code></pre>
 <details class="source">
@@ -802,7 +802,7 @@ tssc-config:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># pylint: disable=line-too-long
-&#34;&#34;&#34;Trusted Software Supply Chain Library (tssc) main entry point.
+&#34;&#34;&#34;Ploigos Step Runner (psr) main entry point.
 
 Command-Line Options
 --------------------
@@ -811,19 +811,19 @@ Command-Line Options
         show this help message and exit
 
     -s STEP, --step STEP
-        TSSC workflow step to run
+        Ploigos workflow step to run
 
     -e ENVIRONMENT, --environment  ENVIRONMENT
         The environment to run this step against.
 
     -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
-        TSSC workflow configuration files, or directories containing files, in yml or json
+        Ploigos workflow configuration files, or directories containing files, in yml or json
 
     -r RESULTS_DIR, --results-dir RESULTS_DIR
-        TSSC workflow results file in yml or json
+        Ploigos workflow results file in yml or json
 
     --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
-        Override step config provided by the given TSSC
+        Override step config provided by the given Ploigos
         config-file with these arguments.
 
 Step Configuration
@@ -855,17 +855,17 @@ Step Configuration
 From least precedence to highest precedence.
 
     1. StepImplementer implementation provided configuration defaults
-    2. Global Configuration Defaults (tssc-config.global-defaults)
-    3. Global Environment Configuration Defaults (tssc-config.global-environment-defaults)
-    4. Step Configuration (tssc-config.{STEP_NAME}.config)
+    2. Global Configuration Defaults (step-runner-config.global-defaults)
+    3. Global Environment Configuration Defaults (step-runner-config.global-environment-defaults)
+    4. Step Configuration (step-runner-config.{STEP_NAME}.config)
     5. Step Environment Configuration
-         (tssc-config.{STEP_NAME}.environment-config.{ENVIRONMENT_NAME})
-    6. Step Configuration Runtime Overrides (--environment arugment to tssc main entry point)
+         (step-runner-config.{STEP_NAME}.environment-config.{ENVIRONMENT_NAME})
+    6. Step Configuration Runtime Overrides (--environment arugment to main entry point)
 
 ** Example 1 **
 
     ---
-    tssc-config:
+    step-runner-config:
       # List of decryptors to use to decrypt any encrypted configuration.
       config-decryptors:
       - implementer: SOPS
@@ -894,12 +894,12 @@ From least precedence to highest precedence.
       # of that environment.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
-      # given to the `--environment` flag of the main tssc entry point.
+      # given to the `--environment` flag of the main entry point.
       #global-environment-defaults:
         # Sample configuration for an environment named &#39;SAMPLE-ENV-1&#39;.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         #SAMPLE-ENV-1:
           # Sample config option that may differ from environment to environment.
           #sample-config-option-2: &#39;default for use in the SAMPLE-ENV-1 env&#34;
@@ -907,7 +907,7 @@ From least precedence to highest precedence.
         # Sample configuration for an environment named &#39;SAMPLE-ENV-2&#39;.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         #SAMPLE-ENV-2:
           # Sample config option that may differ from environment to environment.
           #sample-config-option-2: &#39;default for use in the SAMPLE-ENV-2 env&#34;
@@ -928,10 +928,10 @@ From least precedence to highest precedence.
 .. Note::
     Optional step configurations are listed commented out and with their default values.
 
-** Example TSSC Config file for a Maven built Application **
+** Example Config file for a Maven built Application **
 
     ---
-    tssc-config:
+    step-runner-config:
       # Optional
       # List of decryptors to use to decrypt any encrypted configuration.
       config-decryptors:
@@ -948,11 +948,11 @@ From least precedence to highest precedence.
       # given by global-environment-defaults.
       global-defaults:
         # Required.
-        # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+        # Name of the application the artifact built and deployed by this workflow is part of.
         application-name: &#39;&#39;
 
         # Required.
-        # Name of the service this artifact built and deployed by this TSSC workflow implements as
+        # Name of the service this artifact built and deployed by this workflow implements as
         # part of the application it is a part of.
         service-name: &#39;&#39;
 
@@ -1012,13 +1012,13 @@ From least precedence to highest precedence.
       # of that environment.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
-      # given to the `--environment` flag of the main tssc entry point.
+      # given to the `--environment` flag of the main entry point.
       global-environment-defaults:
         # Sample
         # Sample configuration for an environment named &#39;DEV&#39;.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         DEV:
           #Optional
           #kube-api-token: &#39;&#39;
@@ -1042,7 +1042,7 @@ From least precedence to highest precedence.
         # Sample configuration for an environment named &#39;TEST&#39;
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         TEST:
           #Optional
           #kube-api-token: &#39;&#39;
@@ -1066,7 +1066,7 @@ From least precedence to highest precedence.
         # Sample configuration for an environment named &#39;PROD&#39;
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         #PROD:
         # Sample
         # Sample parameter that may differ from environment to environment.
@@ -1191,8 +1191,8 @@ From least precedence to highest precedence.
         implementer: OpenSCAP
         config:
           oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
-          oscap-tailoring-uri: https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml
-          oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
       #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
       #  implementer: OpenSCAP
       #  config:
@@ -1248,7 +1248,7 @@ From least precedence to highest precedence.
           git-email: &#39;&#39;
 
           # Optional
-          #git-name: &#39;TSSC&#39;
+          #git-name: &#39;ploigos&#39;
 
           # Optional
           #git-username: None
@@ -1286,10 +1286,10 @@ From least precedence to highest precedence.
       # WARNING: not yet implemented
       publish-workflow-results: []
 
-** Example TSSC Config file for a NPM built Application **
+** Example Config file for a NPM built Application **
 
     ---
-    tssc-config:
+    step-runner-config:
       # Optional
       # List of decryptors to use to decrypt any encrypted configuration.
       config-decryptors:
@@ -1306,11 +1306,11 @@ From least precedence to highest precedence.
       # given by global-environment-defaults.
       global-defaults:
         # Required.
-        # Name of the application the artifact built and deployed by this TSSC workflow is part of.
+        # Name of the application the artifact built and deployed by this workflow is part of.
         application-name: &#39;&#39;
 
         # Required.
-        # Name of the service this artifact built and deployed by this TSSC workflow implements as
+        # Name of the service this artifact built and deployed by this workflow implements as
         # part of the application it is a part of.
         service-name: &#39;&#39;
 
@@ -1333,13 +1333,13 @@ From least precedence to highest precedence.
       # of that environment.
       #
       # NOTE: Environment names can be anything so long as they line up with the environment value
-      # given to the `--environment` flag of the main tssc entry point.
+      # given to the `--environment` flag of the main entry point.
       global-environment-defaults:
         # Optional Sample
         # Sample configuration for an environment named &#39;DEV&#39;.
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         DEV:
           #Optional
           #kube-api-token: &#39;&#39;
@@ -1363,7 +1363,7 @@ From least precedence to highest precedence.
         # Sample configuration for an environment named &#39;TEST&#39;
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         TEST:
           #Optional
           #kube-api-token:
@@ -1387,7 +1387,7 @@ From least precedence to highest precedence.
         # Sample configuration for an environment named &#39;PROD&#39;
         #
         # NOTE: Environment names can be anything so long as they line up with the environment value
-        # given to the `--environment` flag of the main tssc entry point.
+        # given to the `--environment` flag of the main entry point.
         #PROD:
         # Sample
         # Sample parameter that may differ from environment to environment.
@@ -1489,8 +1489,8 @@ From least precedence to highest precedence.
         implementer: OpenSCAP
         config:
           oscap-input-definitions-uri: https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml
-          oscap-tailoring-uri: https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml
-          oscap-profile: xccdf_com.redhat.tssc_profile_example_ubi8
+          oscap-tailoring-uri: https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml
+          oscap-profile: xccdf_com.redhat.ploigos_profile_example_ubi8
       #- name: OpenSCAP - Compliance (Protection Profile for General Purpose Operating Systems) - DataStream
       #  implementer: OpenSCAP
       #  config:
@@ -1549,7 +1549,7 @@ From least precedence to highest precedence.
           git-email: &#39;&#39;
 
           # Optional
-          #git-name: &#39;TSSC&#39;
+          #git-name: &#39;ploigos&#39;
 
           # Optional
           #git-username: None
@@ -1582,32 +1582,33 @@ Examples
 
 Getting Help
 
-&gt;&gt;&gt; python -m tssc --help
+&gt;&gt;&gt; python -m psr --help
 
 
 Example Running the &#39;generate-metadata&#39; step
 
-&gt;&gt;&gt; python -m tssc
-...     --config=my-app-tssc-config.yml
-...     --results-file=my-app-tssc-results.yml
+&gt;&gt;&gt; python -m psr
+...     --config=my-app-step-runner-config.yml
+...     --results-file=my-app-step-runner-results.yml
 ...     --step=generate-metadata
 
 &#34;&#34;&#34;
 
 import __main__
-from .step_implementer import StepImplementer, DefaultSteps
-from .factory import TSSCFactory
+
 from .exceptions import StepRunnerException
+from .step_implementer import DefaultSteps, StepImplementer
 from .step_result import StepResult
+from .step_runner import StepRunner
 from .workflow_result import WorkflowResult
 
 __all__ = [
     &#39;config&#39;,
-    &#39;factory&#39;,
     &#39;exceptions&#39;,
     &#39;step_implementer&#39;,
-    &#39;utils&#39;,
     &#39;step_result&#39;,
+    &#39;step_runner&#39;,
+    &#39;utils&#39;,
     &#39;workflow_result&#39;
 ]</code></pre>
 </details>
@@ -1615,43 +1616,43 @@ __all__ = [
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="tssc.config" href="config/index.html">tssc.config</a></code></dt>
+<dt><code class="name"><a title="psr.config" href="config/index.html">psr.config</a></code></dt>
 <dd>
-<div class="desc"><p>Configuration for TSSC workflow.</p></div>
+<div class="desc"><p>Configuration for Ploigos workflow.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.decryption_utils" href="decryption_utils.html">tssc.decryption_utils</a></code></dt>
+<dt><code class="name"><a title="psr.decryption_utils" href="decryption_utils.html">psr.decryption_utils</a></code></dt>
 <dd>
 <div class="desc"><p>Shared utilities for doing decryption.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></dt>
+<dt><code class="name"><a title="psr.exceptions" href="exceptions.html">psr.exceptions</a></code></dt>
 <dd>
 <div class="desc"><p>Custom Step Runner Exceptions.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.factory" href="factory.html">tssc.factory</a></code></dt>
-<dd>
-<div class="desc"><p>Factory for creating TSSC workflow and running steps.</p></div>
-</dd>
-<dt><code class="name"><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></dt>
+<dt><code class="name"><a title="psr.step_implementer" href="step_implementer.html">psr.step_implementer</a></code></dt>
 <dd>
 <div class="desc"><p>Abstract class and helper constants for StepImplementer.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.step_implementers" href="step_implementers/index.html">tssc.step_implementers</a></code></dt>
+<dt><code class="name"><a title="psr.step_implementers" href="step_implementers/index.html">psr.step_implementers</a></code></dt>
 <dd>
-<div class="desc"><p>com.redhat.tssc.step_implementers</p></div>
+<div class="desc"><p>com.redhat.psr.step_implementers</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.step_result" href="step_result.html">tssc.step_result</a></code></dt>
+<dt><code class="name"><a title="psr.step_result" href="step_result.html">psr.step_result</a></code></dt>
 <dd>
 <div class="desc"><p>Class and helper constants for StepResult</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.utils" href="utils/index.html">tssc.utils</a></code></dt>
+<dt><code class="name"><a title="psr.step_runner" href="step_runner.html">psr.step_runner</a></code></dt>
+<dd>
+<div class="desc"><p>Constructs a given named StepImplementer using a given configuration, and runs it.</p></div>
+</dd>
+<dt><code class="name"><a title="psr.utils" href="utils/index.html">psr.utils</a></code></dt>
 <dd>
 <div class="desc"><p>Useful utilities.</p></div>
 </dd>
-<dt><code class="name"><a title="tssc.version" href="version.html">tssc.version</a></code></dt>
+<dt><code class="name"><a title="psr.version" href="version.html">psr.version</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="tssc.workflow_result" href="workflow_result.html">tssc.workflow_result</a></code></dt>
+<dt><code class="name"><a title="psr.workflow_result" href="workflow_result.html">psr.workflow_result</a></code></dt>
 <dd>
 <div class="desc"><p>Abstract class and helper constants for WorkflowResult</p></div>
 </dd>
@@ -1681,16 +1682,16 @@ __all__ = [
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="tssc.config" href="config/index.html">tssc.config</a></code></li>
-<li><code><a title="tssc.decryption_utils" href="decryption_utils.html">tssc.decryption_utils</a></code></li>
-<li><code><a title="tssc.exceptions" href="exceptions.html">tssc.exceptions</a></code></li>
-<li><code><a title="tssc.factory" href="factory.html">tssc.factory</a></code></li>
-<li><code><a title="tssc.step_implementer" href="step_implementer.html">tssc.step_implementer</a></code></li>
-<li><code><a title="tssc.step_implementers" href="step_implementers/index.html">tssc.step_implementers</a></code></li>
-<li><code><a title="tssc.step_result" href="step_result.html">tssc.step_result</a></code></li>
-<li><code><a title="tssc.utils" href="utils/index.html">tssc.utils</a></code></li>
-<li><code><a title="tssc.version" href="version.html">tssc.version</a></code></li>
-<li><code><a title="tssc.workflow_result" href="workflow_result.html">tssc.workflow_result</a></code></li>
+<li><code><a title="psr.config" href="config/index.html">psr.config</a></code></li>
+<li><code><a title="psr.decryption_utils" href="decryption_utils.html">psr.decryption_utils</a></code></li>
+<li><code><a title="psr.exceptions" href="exceptions.html">psr.exceptions</a></code></li>
+<li><code><a title="psr.step_implementer" href="step_implementer.html">psr.step_implementer</a></code></li>
+<li><code><a title="psr.step_implementers" href="step_implementers/index.html">psr.step_implementers</a></code></li>
+<li><code><a title="psr.step_result" href="step_result.html">psr.step_result</a></code></li>
+<li><code><a title="psr.step_runner" href="step_runner.html">psr.step_runner</a></code></li>
+<li><code><a title="psr.utils" href="utils/index.html">psr.utils</a></code></li>
+<li><code><a title="psr.version" href="version.html">psr.version</a></code></li>
+<li><code><a title="psr.workflow_result" href="workflow_result.html">psr.workflow_result</a></code></li>
 </ul>
 </li>
 </ul>

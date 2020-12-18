@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc.utils.io API documentation</title>
+<title>psr.utils.io API documentation</title>
 <meta name="description" content="Shared utilities for dealing with IO" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.utils.io</code></h1>
+<h1 class="title">Module <code>psr.utils.io</code></h1>
 </header>
 <section id="section-intro">
 <p>Shared utilities for dealing with IO</p>
@@ -464,7 +464,7 @@ class TextIOIndenter(io.TextIOBase):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback"><code class="name flex">
+<dt id="psr.utils.io.create_sh_redirect_to_multiple_streams_fn_callback"><code class="name flex">
 <span>def <span class="ident">create_sh_redirect_to_multiple_streams_fn_callback</span></span>(<span>streams)</span>
 </code></dt>
 <dd>
@@ -543,7 +543,7 @@ hello world
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.utils.io.TextIOIndenter"><code class="flex name class">
+<dt id="psr.utils.io.TextIOIndenter"><code class="flex name class">
 <span>class <span class="ident">TextIOIndenter</span></span>
 <span>(</span><span>parent_stream, indent_level=0, indent_size=4, indent_char=' ')</span>
 </code></dt>
@@ -779,7 +779,7 @@ each line written to this stream.</dd>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.utils.io.TextIOIndenter.indent_char"><code class="name">var <span class="ident">indent_char</span></code></dt>
+<dt id="psr.utils.io.TextIOIndenter.indent_char"><code class="name">var <span class="ident">indent_char</span></code></dt>
 <dd>
 <div class="desc"><p>Character to use for indent.</p>
 <p>Will be multiplied by the indent_size and the ident_level and prepended before
@@ -808,7 +808,7 @@ def indent_char(self):
     return self.__indent_char</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOIndenter.indent_level"><code class="name">var <span class="ident">indent_level</span></code></dt>
+<dt id="psr.utils.io.TextIOIndenter.indent_level"><code class="name">var <span class="ident">indent_level</span></code></dt>
 <dd>
 <div class="desc"><p>Level to indent to.</p>
 <h2 id="returns">Returns</h2>
@@ -832,7 +832,7 @@ def indent_level(self):
     return self.__indent_level</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOIndenter.indent_size"><code class="name">var <span class="ident">indent_size</span></code></dt>
+<dt id="psr.utils.io.TextIOIndenter.indent_size"><code class="name">var <span class="ident">indent_size</span></code></dt>
 <dd>
 <div class="desc"><p>Size of each indent.</p>
 <h2 id="returns">Returns</h2>
@@ -856,7 +856,7 @@ def indent_size(self):
     return self.__indent_size</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOIndenter.parent_stream"><code class="name">var <span class="ident">parent_stream</span></code></dt>
+<dt id="psr.utils.io.TextIOIndenter.parent_stream"><code class="name">var <span class="ident">parent_stream</span></code></dt>
 <dd>
 <div class="desc"><p>Returns parent stream that this stream wraps</p>
 <h2 id="returns">Returns</h2>
@@ -883,7 +883,7 @@ def parent_stream(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="tssc.utils.io.TextIOIndenter.flush"><code class="name flex">
+<dt id="psr.utils.io.TextIOIndenter.flush"><code class="name flex">
 <span>def <span class="ident">flush</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -904,7 +904,7 @@ def parent_stream(self):
     self.parent_stream.flush()</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOIndenter.write"><code class="name flex">
+<dt id="psr.utils.io.TextIOIndenter.write"><code class="name flex">
 <span>def <span class="ident">write</span></span>(<span>self, given)</span>
 </code></dt>
 <dd>
@@ -1105,7 +1105,7 @@ hello world
 </dd>
 </dl>
 </dd>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator"><code class="flex name class">
+<dt id="psr.utils.io.TextIOSelectiveObfuscator"><code class="flex name class">
 <span>class <span class="ident">TextIOSelectiveObfuscator</span></span>
 <span>(</span><span>parent_stream, randomize_replacment_length=True, replacement_char='*')</span>
 </code></dt>
@@ -1334,7 +1334,7 @@ False to use the same length replacement for any obfuscated text in the stream.<
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.parent_stream"><code class="name">var <span class="ident">parent_stream</span></code></dt>
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.parent_stream"><code class="name">var <span class="ident">parent_stream</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1356,7 +1356,7 @@ def parent_stream(self):
     return self.__parent_stream</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length"><code class="name">var <span class="ident">randomize_replacement_length</span></code></dt>
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length"><code class="name">var <span class="ident">randomize_replacement_length</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1380,7 +1380,7 @@ def randomize_replacement_length(self):
     return self.__randomize_replacement_length</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.replacement_char"><code class="name">var <span class="ident">replacement_char</span></code></dt>
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.replacement_char"><code class="name">var <span class="ident">replacement_char</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1405,7 +1405,7 @@ def replacement_char(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets"><code class="name flex">
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets"><code class="name flex">
 <span>def <span class="ident">add_obfuscation_targets</span></span>(<span>self, targets)</span>
 </code></dt>
 <dd>
@@ -1470,7 +1470,7 @@ here be sure you don't break any of the existing unit tests.</p>
         self.__obfuscation_patterns.append(target_compiled_pattern)</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.flush"><code class="name flex">
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.flush"><code class="name flex">
 <span>def <span class="ident">flush</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -1491,7 +1491,7 @@ here be sure you don't break any of the existing unit tests.</p>
     self.parent_stream.flush()</code></pre>
 </details>
 </dd>
-<dt id="tssc.utils.io.TextIOSelectiveObfuscator.write"><code class="name flex">
+<dt id="psr.utils.io.TextIOSelectiveObfuscator.write"><code class="name flex">
 <span>def <span class="ident">write</span></span>(<span>self, given)</span>
 </code></dt>
 <dd>
@@ -1554,36 +1554,36 @@ here be sure you don't break any of the existing unit tests.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.utils" href="index.html">tssc.utils</a></code></li>
+<li><code><a title="psr.utils" href="index.html">psr.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback" href="#tssc.utils.io.create_sh_redirect_to_multiple_streams_fn_callback">create_sh_redirect_to_multiple_streams_fn_callback</a></code></li>
+<li><code><a title="psr.utils.io.create_sh_redirect_to_multiple_streams_fn_callback" href="#psr.utils.io.create_sh_redirect_to_multiple_streams_fn_callback">create_sh_redirect_to_multiple_streams_fn_callback</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.utils.io.TextIOIndenter" href="#tssc.utils.io.TextIOIndenter">TextIOIndenter</a></code></h4>
+<h4><code><a title="psr.utils.io.TextIOIndenter" href="#psr.utils.io.TextIOIndenter">TextIOIndenter</a></code></h4>
 <ul class="two-column">
-<li><code><a title="tssc.utils.io.TextIOIndenter.flush" href="#tssc.utils.io.TextIOIndenter.flush">flush</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOIndenter.indent_char" href="#tssc.utils.io.TextIOIndenter.indent_char">indent_char</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOIndenter.indent_level" href="#tssc.utils.io.TextIOIndenter.indent_level">indent_level</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOIndenter.indent_size" href="#tssc.utils.io.TextIOIndenter.indent_size">indent_size</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOIndenter.parent_stream" href="#tssc.utils.io.TextIOIndenter.parent_stream">parent_stream</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOIndenter.write" href="#tssc.utils.io.TextIOIndenter.write">write</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.flush" href="#psr.utils.io.TextIOIndenter.flush">flush</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.indent_char" href="#psr.utils.io.TextIOIndenter.indent_char">indent_char</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.indent_level" href="#psr.utils.io.TextIOIndenter.indent_level">indent_level</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.indent_size" href="#psr.utils.io.TextIOIndenter.indent_size">indent_size</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.parent_stream" href="#psr.utils.io.TextIOIndenter.parent_stream">parent_stream</a></code></li>
+<li><code><a title="psr.utils.io.TextIOIndenter.write" href="#psr.utils.io.TextIOIndenter.write">write</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="tssc.utils.io.TextIOSelectiveObfuscator" href="#tssc.utils.io.TextIOSelectiveObfuscator">TextIOSelectiveObfuscator</a></code></h4>
+<h4><code><a title="psr.utils.io.TextIOSelectiveObfuscator" href="#psr.utils.io.TextIOSelectiveObfuscator">TextIOSelectiveObfuscator</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets" href="#tssc.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets">add_obfuscation_targets</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.flush" href="#tssc.utils.io.TextIOSelectiveObfuscator.flush">flush</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.parent_stream" href="#tssc.utils.io.TextIOSelectiveObfuscator.parent_stream">parent_stream</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length" href="#tssc.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length">randomize_replacement_length</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.replacement_char" href="#tssc.utils.io.TextIOSelectiveObfuscator.replacement_char">replacement_char</a></code></li>
-<li><code><a title="tssc.utils.io.TextIOSelectiveObfuscator.write" href="#tssc.utils.io.TextIOSelectiveObfuscator.write">write</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets" href="#psr.utils.io.TextIOSelectiveObfuscator.add_obfuscation_targets">add_obfuscation_targets</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.flush" href="#psr.utils.io.TextIOSelectiveObfuscator.flush">flush</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.parent_stream" href="#psr.utils.io.TextIOSelectiveObfuscator.parent_stream">parent_stream</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length" href="#psr.utils.io.TextIOSelectiveObfuscator.randomize_replacement_length">randomize_replacement_length</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.replacement_char" href="#psr.utils.io.TextIOSelectiveObfuscator.replacement_char">replacement_char</a></code></li>
+<li><code><a title="psr.utils.io.TextIOSelectiveObfuscator.write" href="#psr.utils.io.TextIOSelectiveObfuscator.write">write</a></code></li>
 </ul>
 </li>
 </ul>

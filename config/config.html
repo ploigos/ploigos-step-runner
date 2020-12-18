@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc.config.config API documentation</title>
-<meta name="description" content="Representation of configuration for TSSC workflow." />
+<title>psr.config.config API documentation</title>
+<meta name="description" content="Representation of configuration for workflow." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,37 +19,37 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.config.config</code></h1>
+<h1 class="title">Module <code>psr.config.config</code></h1>
 </header>
 <section id="section-intro">
-<p>Representation of configuration for TSSC workflow.</p>
+<p>Representation of configuration for workflow.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Representation of configuration for TSSC workflow.
+<pre><code class="python">&#34;&#34;&#34;Representation of configuration for workflow.
 &#34;&#34;&#34;
 
 import copy
 import glob
 import os.path
 
-from tssc.decryption_utils import DecryptionUtils
-from tssc.config.step_config import StepConfig
-from tssc.config.config_value import ConfigValue
-from tssc.utils.file import parse_yaml_or_json_file
-from tssc.utils.dict import deep_merge
+from psr.decryption_utils import DecryptionUtils
+from psr.config.step_config import StepConfig
+from psr.config.config_value import ConfigValue
+from psr.utils.file import parse_yaml_or_json_file
+from psr.utils.dict import deep_merge
 
 class Config:
-    &#34;&#34;&#34;Representation of configuration for TSSC workflow.
+    &#34;&#34;&#34;Representation of configuration for Ploigos workflow.
 
     Parameters
     ----------
     config : dict, list, str (file or directory), optional
-        A dictionary that is a valid TSSC configuration,
-        a string that is a path to a YAML or JSON file that is
-        a valid TSSC configuration,
-        a string that is a path to a directory containing one or more
+        A dictionary that is a valid configuration,
+        or a string that is a path to a YAML or JSON file that is
+        a valid configuration,
+        or a string that is a path to a directory containing one or more
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
@@ -58,31 +58,31 @@ class Config:
     ----------
     __global_defaults : dict
     __global_environment_defaults : dict
-    __tssc_step_configs : dict of str (step names) to TSSCStepConfig
+    __step_configs : dict of str (step names) to StepConfig
 
     Raises
     ------
     ValueError
         If given config is not of expected type.
     AssertionError
-        If given config contains any invalid TSSC configurations.
+        If given config contains any invalid configurations.
     &#34;&#34;&#34;
-    TSSC_CONFIG_KEY = &#39;tssc-config&#39;
-    TSSC_CONFIG_KEY_GLOBAL_DEFAULTS = &#39;global-defaults&#39;
-    TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS = &#39;global-environment-defaults&#39;
-    TSSC_CONFIG_KEY_ENVIRONMENT_NAME = &#39;environment-name&#39;
-    TSSC_CONFIG_KEY_STEP_IMPLEMENTER = &#39;implementer&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_NAME = &#39;name&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_CONFIG = &#39;config&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = &#39;environment-config&#39;
-    TSSC_CONFIG_KEY_DECRYPTORS = &#39;config-decryptors&#39;
-    TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER = &#39;implementer&#39;
-    TSSC_CONFIG_KEY_DECRYPTOR_CONFIG = &#39;config&#39;
+    CONFIG_KEY = &#39;step-runner-config&#39;
+    CONFIG_KEY_GLOBAL_DEFAULTS = &#39;global-defaults&#39;
+    CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS = &#39;global-environment-defaults&#39;
+    CONFIG_KEY_ENVIRONMENT_NAME = &#39;environment-name&#39;
+    CONFIG_KEY_STEP_IMPLEMENTER = &#39;implementer&#39;
+    CONFIG_KEY_SUB_STEP_NAME = &#39;name&#39;
+    CONFIG_KEY_SUB_STEP_CONFIG = &#39;config&#39;
+    CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = &#39;environment-config&#39;
+    CONFIG_KEY_DECRYPTORS = &#39;config-decryptors&#39;
+    CONFIG_KEY_DECRYPTOR_IMPLEMENTER = &#39;implementer&#39;
+    CONFIG_KEY_DECRYPTOR_CONFIG = &#39;config&#39;
 
     def __init__(self, config=None):
         self.__global_defaults = {}
         self.__global_environment_defaults = {}
-        self.__tssc_step_configs = {}
+        self.__step_configs = {}
 
         if config is not None:
             self.add_config(config)
@@ -114,9 +114,9 @@ class Config:
         &#34;&#34;&#34;
         Returns
         -------
-        list of TSSCStepConfig
+        list of StepConfig
         &#34;&#34;&#34;
-        return self.__tssc_step_configs
+        return self.__step_configs
 
     def get_global_environment_defaults_for_environment(self, env):
         &#34;&#34;&#34;Get a deep copy of all of the global environment defaults or for a given an environment.
@@ -153,7 +153,7 @@ class Config:
 
         Returns
         -------
-        TSSCStepConfig
+        StepConfig
             Step configuration for the given step name or None if does not exist
         &#34;&#34;&#34;
         if step_name in self.step_configs:
@@ -164,17 +164,17 @@ class Config:
         return step_config
 
     def get_sub_step_configs(self, step_name):
-        &#34;&#34;&#34;Gets lit of configured TSSC sub step configurations for a TSSC step with the given name.
+        &#34;&#34;&#34;Gets lit of configured sub step configurations for a step with the given name.
 
         Parameters
         ----------
         step_name : str
-            Name of TSSC step to get configured sub steps for.
+            Name of step to get configured sub steps for.
 
         Returns
         -------
-        list of TSSCSubStepConfig
-            List of configured TSSC sub step configurations for the TSSC step with the given name.
+        list of SubStepConfig
+            List of configured sub step configurations for the step with the given name.
         &#34;&#34;&#34;
 
         if step_name in self.step_configs:
@@ -190,10 +190,10 @@ class Config:
         Parameters
         ----------
         config : dict, list, str (file or directory)
-            A dictionary that is a valid TSSC configuration,
-            a string that is a path to a YAML or JSON file that is
-            a valid TSSC configuration,
-            a string that is a path to a directory containing one or more
+            A dictionary that is a valid configuration,
+            or aa string that is a path to a YAML or JSON file that is
+            a valid configuration,
+            or a string that is a path to a directory containing one or more
             files that are valid YAML or JSON files that are valid
             configurations,
             or a list of any of the former.
@@ -203,7 +203,7 @@ class Config:
         ValueError
             If given config is not of expected type.
         AssertionError
-            If given config contains any invalid TSSC configurations.
+            If given config contains any invalid configurations.
         &#34;&#34;&#34;
         if isinstance(config, dict):
             # add the config
@@ -267,14 +267,14 @@ class Config:
         ----------
         config_file : str (file path)
             A string that is a path to an existing YAML or JSON file to
-            parse and validate as a TSSC configuration to add to this Config.
+            parse and validate as a configuration to add to this Config.
 
         Raises
         ------
         ValueError
             If can not parse given file as YAML or JSON
         AssertionError
-            If dictionary parsed from given YAML or JSON file is not a valid TSSC config.
+            If dictionary parsed from given YAML or JSON file is not a valid config.
         &#34;&#34;&#34;
         # parse the configuration file
         try:
@@ -293,19 +293,19 @@ class Config:
             ) from error
 
     def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches
-        &#34;&#34;&#34;Add a TSSC configuration dictionary to the list of TSSC configuration dictionaries.
+        &#34;&#34;&#34;Add a configuration dictionary to the list of configuration dictionaries.
 
         Parameters
         ----------
         config_dict : dict
-            A dictionary to validate as a TSSC configuration and to add to this Config.
+            A dictionary to validate as a configuration and to add to this Config.
         source_file_path : str, optional
             File path to the file from which the given config_dict came from.
 
         Raises
         ------
         AssertionError
-            If the given config_dict is not a valid TSSC configuration dictionary.
+            If the given config_dict is not a valid configuration dictionary.
             If attempt to update an existing sub step and new and existing sub step implementers
                 do not match.
             If sub step does not define a step implementer.
@@ -319,9 +319,9 @@ class Config:
                 existing sub step environment configuration.
         &#34;&#34;&#34;
 
-        assert Config.TSSC_CONFIG_KEY in config_dict, \
-            &#34;Failed to add invalid TSSC config. &#34; + \
-            f&#34;Missing expected top level key ({Config.TSSC_CONFIG_KEY}): &#34; + \
+        assert Config.CONFIG_KEY in config_dict, \
+            &#34;Failed to add invalid config. &#34; + \
+            f&#34;Missing expected top level key ({Config.CONFIG_KEY}): &#34; + \
             f&#34;{config_dict}&#34;
 
         # if file path given use that as the source when creating ConfigValue objects
@@ -332,18 +332,18 @@ class Config:
             parent_source = copy.deepcopy(config_dict)
 
         # convert all the leaves of the configuration dictionary under
-        # the Config.TSSC_CONFIG_KEY to ConfigValue objects
-        tssc_config_values = ConfigValue.convert_leaves_to_config_values(
-            values=copy.deepcopy(config_dict[Config.TSSC_CONFIG_KEY]),
+        # the Config.CONFIG_KEY to ConfigValue objects
+        config_values = ConfigValue.convert_leaves_to_config_values(
+            values=copy.deepcopy(config_dict[Config.CONFIG_KEY]),
             parent_source=parent_source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
-        for key, value in tssc_config_values.items():
+        for key, value in config_values.items():
             # if global default key
             # else if global env defaults key
             # else assume step config
-            if key == Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS:
+            if key == Config.CONFIG_KEY_GLOBAL_DEFAULTS:
                 try:
                     self.__global_defaults = deep_merge(
                         copy.deepcopy(self.__global_defaults),
@@ -353,11 +353,11 @@ class Config:
                     raise ValueError(
                         f&#34;Error merging global defaults: {error}&#34;
                     ) from error
-            elif key == Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
+            elif key == Config.CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
                 for env, env_config in value.items():
                     if env not in self.__global_environment_defaults:
                         self.__global_environment_defaults[env] = {
-                            Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME: env
+                            Config.CONFIG_KEY_ENVIRONMENT_NAME: env
                         }
 
                     try:
@@ -369,7 +369,7 @@ class Config:
                         raise ValueError(
                             f&#34;Error merging global environment ({env}) defaults: {error}&#34;
                         ) from error
-            elif key == Config.TSSC_CONFIG_KEY_DECRYPTORS:
+            elif key == Config.CONFIG_KEY_DECRYPTORS:
                 config_decryptor_definitions = ConfigValue.convert_leaves_to_values(value)
                 Config.parse_and_register_decryptors_definitions(config_decryptor_definitions)
             else:
@@ -388,30 +388,30 @@ class Config:
                     )
 
                 for sub_step in sub_steps:
-                    assert Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
+                    assert Config.CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
                         f&#34;Step ({step_name}) defines a single sub step with values &#34; + \
                         f&#34;({sub_step}) but is missing value for key: &#34; + \
-                        f&#34;{Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER}&#34;
+                        f&#34;{Config.CONFIG_KEY_STEP_IMPLEMENTER}&#34;
 
                     sub_step_implementer_name = \
-                        sub_step[Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER].value
+                        sub_step[Config.CONFIG_KEY_STEP_IMPLEMENTER].value
 
                     # if sub step name given
                     # else if no sub step name given use step implementer as sub step name
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_NAME in sub_step:
-                        sub_step_name = sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_NAME].value
+                    if Config.CONFIG_KEY_SUB_STEP_NAME in sub_step:
+                        sub_step_name = sub_step[Config.CONFIG_KEY_SUB_STEP_NAME].value
                     else:
                         sub_step_name = sub_step_implementer_name
 
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
-                        sub_step_config = copy.deepcopy(
-                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG])
+                    if Config.CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
+                        sub_step_config_dict = copy.deepcopy(
+                            sub_step[Config.CONFIG_KEY_SUB_STEP_CONFIG])
                     else:
-                        sub_step_config = {}
+                        sub_step_config_dict = {}
 
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
+                    if Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
                         sub_step_env_config = copy.deepcopy(
-                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
+                            sub_step[Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
                     else:
                         sub_step_env_config = {}
 
@@ -419,7 +419,7 @@ class Config:
                         step_name=step_name,
                         sub_step_name=sub_step_name,
                         sub_step_implementer_name=sub_step_implementer_name,
-                        sub_step_config=sub_step_config,
+                        sub_step_config_dict=sub_step_config_dict,
                         sub_step_env_config=sub_step_env_config
                     )
 
@@ -438,22 +438,22 @@ class Config:
         AssertionError
             If decryptors_definitions is not a list.
             If a decryptor definition does not have a
-                Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
+                Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
         &#34;&#34;&#34;
         assert isinstance(decryptors_definitions, list), \
             f&#34;Decryptors configuration ({decryptors_definitions}) must be of type &#34; + \
             f&#34;(list) got: {type(decryptors_definitions)}&#34;
 
         for decryptor_definition in decryptors_definitions:
-            assert Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
+            assert Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
                 &#34;Decryptor configuration is missing key &#34; + \
-                f&#34;({Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
+                f&#34;({Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
 
             decryptor_implementer_name = \
-                decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
+                decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
 
-            if Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
-                decryptor_config = decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG]
+            if Config.CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
+                decryptor_config = decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_CONFIG]
             else:
                 decryptor_config = {}
 
@@ -467,7 +467,7 @@ class Config:
             step_name,
             sub_step_name,
             sub_step_implementer_name,
-            sub_step_config,
+            sub_step_config_dict,
             sub_step_env_config):
         &#34;&#34;&#34;Adds a new step configuration with a single new sub step or
         updates an existing step with new or updated sub step.
@@ -481,7 +481,7 @@ class Config:
         sub_step_implementer_name : str
             Name of the sub step implementer for the sub step being added or updated.
             If updating this can not be different then existing sub step with the same name.
-        sub_step_config : dict, optional
+        sub_step_config_dict : dict, optional
             Sub step configuration to add or update for named sub step on the new or updated step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step configuration.
@@ -506,11 +506,11 @@ class Config:
         if step_name not in self.step_configs:
             self.step_configs[step_name] = StepConfig(self, step_name)
 
-        tssc_step_config = self.step_configs[step_name]
-        tssc_step_config.add_or_update_sub_step_config(
+        step_config = self.step_configs[step_name]
+        step_config.add_or_update_sub_step_config(
             sub_step_name=sub_step_name,
             sub_step_implementer_name=sub_step_implementer_name,
-            sub_step_config=sub_step_config,
+            sub_step_config_dict=sub_step_config_dict,
             sub_step_env_config=sub_step_env_config
         )</code></pre>
 </details>
@@ -524,19 +524,19 @@ class Config:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.config.config.Config"><code class="flex name class">
+<dt id="psr.config.config.Config"><code class="flex name class">
 <span>class <span class="ident">Config</span></span>
 <span>(</span><span>config=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Representation of configuration for TSSC workflow.</p>
+<div class="desc"><p>Representation of configuration for Ploigos workflow.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>config</code></strong> :&ensp;<code>dict, list, str (file</code> or <code>directory)</code>, optional</dt>
-<dd>A dictionary that is a valid TSSC configuration,
-a string that is a path to a YAML or JSON file that is
-a valid TSSC configuration,
-a string that is a path to a directory containing one or more
+<dd>A dictionary that is a valid configuration,
+or a string that is a path to a YAML or JSON file that is
+a valid configuration,
+or a string that is a path to a directory containing one or more
 files that are valid YAML or JSON files that are valid
 configurations,
 or a list of any of the former.</dd>
@@ -547,7 +547,7 @@ or a list of any of the former.</dd>
 <dd>&nbsp;</dd>
 <dt><strong><code>__global_environment_defaults</code></strong> :&ensp;<code>dict</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>__tssc_step_configs</code></strong> :&ensp;<code>dict</code> of <code>str (step names) to TSSCStepConfig</code></dt>
+<dt><strong><code>__step_configs</code></strong> :&ensp;<code>dict</code> of <code>str (step names) to StepConfig</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="raises">Raises</h2>
@@ -555,22 +555,22 @@ or a list of any of the former.</dd>
 <dt><code>ValueError</code></dt>
 <dd>If given config is not of expected type.</dd>
 <dt><code>AssertionError</code></dt>
-<dd>If given config contains any invalid TSSC configurations.</dd>
+<dd>If given config contains any invalid configurations.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Config:
-    &#34;&#34;&#34;Representation of configuration for TSSC workflow.
+    &#34;&#34;&#34;Representation of configuration for Ploigos workflow.
 
     Parameters
     ----------
     config : dict, list, str (file or directory), optional
-        A dictionary that is a valid TSSC configuration,
-        a string that is a path to a YAML or JSON file that is
-        a valid TSSC configuration,
-        a string that is a path to a directory containing one or more
+        A dictionary that is a valid configuration,
+        or a string that is a path to a YAML or JSON file that is
+        a valid configuration,
+        or a string that is a path to a directory containing one or more
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
@@ -579,31 +579,31 @@ or a list of any of the former.</dd>
     ----------
     __global_defaults : dict
     __global_environment_defaults : dict
-    __tssc_step_configs : dict of str (step names) to TSSCStepConfig
+    __step_configs : dict of str (step names) to StepConfig
 
     Raises
     ------
     ValueError
         If given config is not of expected type.
     AssertionError
-        If given config contains any invalid TSSC configurations.
+        If given config contains any invalid configurations.
     &#34;&#34;&#34;
-    TSSC_CONFIG_KEY = &#39;tssc-config&#39;
-    TSSC_CONFIG_KEY_GLOBAL_DEFAULTS = &#39;global-defaults&#39;
-    TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS = &#39;global-environment-defaults&#39;
-    TSSC_CONFIG_KEY_ENVIRONMENT_NAME = &#39;environment-name&#39;
-    TSSC_CONFIG_KEY_STEP_IMPLEMENTER = &#39;implementer&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_NAME = &#39;name&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_CONFIG = &#39;config&#39;
-    TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = &#39;environment-config&#39;
-    TSSC_CONFIG_KEY_DECRYPTORS = &#39;config-decryptors&#39;
-    TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER = &#39;implementer&#39;
-    TSSC_CONFIG_KEY_DECRYPTOR_CONFIG = &#39;config&#39;
+    CONFIG_KEY = &#39;step-runner-config&#39;
+    CONFIG_KEY_GLOBAL_DEFAULTS = &#39;global-defaults&#39;
+    CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS = &#39;global-environment-defaults&#39;
+    CONFIG_KEY_ENVIRONMENT_NAME = &#39;environment-name&#39;
+    CONFIG_KEY_STEP_IMPLEMENTER = &#39;implementer&#39;
+    CONFIG_KEY_SUB_STEP_NAME = &#39;name&#39;
+    CONFIG_KEY_SUB_STEP_CONFIG = &#39;config&#39;
+    CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG = &#39;environment-config&#39;
+    CONFIG_KEY_DECRYPTORS = &#39;config-decryptors&#39;
+    CONFIG_KEY_DECRYPTOR_IMPLEMENTER = &#39;implementer&#39;
+    CONFIG_KEY_DECRYPTOR_CONFIG = &#39;config&#39;
 
     def __init__(self, config=None):
         self.__global_defaults = {}
         self.__global_environment_defaults = {}
-        self.__tssc_step_configs = {}
+        self.__step_configs = {}
 
         if config is not None:
             self.add_config(config)
@@ -635,9 +635,9 @@ or a list of any of the former.</dd>
         &#34;&#34;&#34;
         Returns
         -------
-        list of TSSCStepConfig
+        list of StepConfig
         &#34;&#34;&#34;
-        return self.__tssc_step_configs
+        return self.__step_configs
 
     def get_global_environment_defaults_for_environment(self, env):
         &#34;&#34;&#34;Get a deep copy of all of the global environment defaults or for a given an environment.
@@ -674,7 +674,7 @@ or a list of any of the former.</dd>
 
         Returns
         -------
-        TSSCStepConfig
+        StepConfig
             Step configuration for the given step name or None if does not exist
         &#34;&#34;&#34;
         if step_name in self.step_configs:
@@ -685,17 +685,17 @@ or a list of any of the former.</dd>
         return step_config
 
     def get_sub_step_configs(self, step_name):
-        &#34;&#34;&#34;Gets lit of configured TSSC sub step configurations for a TSSC step with the given name.
+        &#34;&#34;&#34;Gets lit of configured sub step configurations for a step with the given name.
 
         Parameters
         ----------
         step_name : str
-            Name of TSSC step to get configured sub steps for.
+            Name of step to get configured sub steps for.
 
         Returns
         -------
-        list of TSSCSubStepConfig
-            List of configured TSSC sub step configurations for the TSSC step with the given name.
+        list of SubStepConfig
+            List of configured sub step configurations for the step with the given name.
         &#34;&#34;&#34;
 
         if step_name in self.step_configs:
@@ -711,10 +711,10 @@ or a list of any of the former.</dd>
         Parameters
         ----------
         config : dict, list, str (file or directory)
-            A dictionary that is a valid TSSC configuration,
-            a string that is a path to a YAML or JSON file that is
-            a valid TSSC configuration,
-            a string that is a path to a directory containing one or more
+            A dictionary that is a valid configuration,
+            or aa string that is a path to a YAML or JSON file that is
+            a valid configuration,
+            or a string that is a path to a directory containing one or more
             files that are valid YAML or JSON files that are valid
             configurations,
             or a list of any of the former.
@@ -724,7 +724,7 @@ or a list of any of the former.</dd>
         ValueError
             If given config is not of expected type.
         AssertionError
-            If given config contains any invalid TSSC configurations.
+            If given config contains any invalid configurations.
         &#34;&#34;&#34;
         if isinstance(config, dict):
             # add the config
@@ -788,14 +788,14 @@ or a list of any of the former.</dd>
         ----------
         config_file : str (file path)
             A string that is a path to an existing YAML or JSON file to
-            parse and validate as a TSSC configuration to add to this Config.
+            parse and validate as a configuration to add to this Config.
 
         Raises
         ------
         ValueError
             If can not parse given file as YAML or JSON
         AssertionError
-            If dictionary parsed from given YAML or JSON file is not a valid TSSC config.
+            If dictionary parsed from given YAML or JSON file is not a valid config.
         &#34;&#34;&#34;
         # parse the configuration file
         try:
@@ -814,19 +814,19 @@ or a list of any of the former.</dd>
             ) from error
 
     def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches
-        &#34;&#34;&#34;Add a TSSC configuration dictionary to the list of TSSC configuration dictionaries.
+        &#34;&#34;&#34;Add a configuration dictionary to the list of configuration dictionaries.
 
         Parameters
         ----------
         config_dict : dict
-            A dictionary to validate as a TSSC configuration and to add to this Config.
+            A dictionary to validate as a configuration and to add to this Config.
         source_file_path : str, optional
             File path to the file from which the given config_dict came from.
 
         Raises
         ------
         AssertionError
-            If the given config_dict is not a valid TSSC configuration dictionary.
+            If the given config_dict is not a valid configuration dictionary.
             If attempt to update an existing sub step and new and existing sub step implementers
                 do not match.
             If sub step does not define a step implementer.
@@ -840,9 +840,9 @@ or a list of any of the former.</dd>
                 existing sub step environment configuration.
         &#34;&#34;&#34;
 
-        assert Config.TSSC_CONFIG_KEY in config_dict, \
-            &#34;Failed to add invalid TSSC config. &#34; + \
-            f&#34;Missing expected top level key ({Config.TSSC_CONFIG_KEY}): &#34; + \
+        assert Config.CONFIG_KEY in config_dict, \
+            &#34;Failed to add invalid config. &#34; + \
+            f&#34;Missing expected top level key ({Config.CONFIG_KEY}): &#34; + \
             f&#34;{config_dict}&#34;
 
         # if file path given use that as the source when creating ConfigValue objects
@@ -853,18 +853,18 @@ or a list of any of the former.</dd>
             parent_source = copy.deepcopy(config_dict)
 
         # convert all the leaves of the configuration dictionary under
-        # the Config.TSSC_CONFIG_KEY to ConfigValue objects
-        tssc_config_values = ConfigValue.convert_leaves_to_config_values(
-            values=copy.deepcopy(config_dict[Config.TSSC_CONFIG_KEY]),
+        # the Config.CONFIG_KEY to ConfigValue objects
+        config_values = ConfigValue.convert_leaves_to_config_values(
+            values=copy.deepcopy(config_dict[Config.CONFIG_KEY]),
             parent_source=parent_source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
-        for key, value in tssc_config_values.items():
+        for key, value in config_values.items():
             # if global default key
             # else if global env defaults key
             # else assume step config
-            if key == Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS:
+            if key == Config.CONFIG_KEY_GLOBAL_DEFAULTS:
                 try:
                     self.__global_defaults = deep_merge(
                         copy.deepcopy(self.__global_defaults),
@@ -874,11 +874,11 @@ or a list of any of the former.</dd>
                     raise ValueError(
                         f&#34;Error merging global defaults: {error}&#34;
                     ) from error
-            elif key == Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
+            elif key == Config.CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS:
                 for env, env_config in value.items():
                     if env not in self.__global_environment_defaults:
                         self.__global_environment_defaults[env] = {
-                            Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME: env
+                            Config.CONFIG_KEY_ENVIRONMENT_NAME: env
                         }
 
                     try:
@@ -890,7 +890,7 @@ or a list of any of the former.</dd>
                         raise ValueError(
                             f&#34;Error merging global environment ({env}) defaults: {error}&#34;
                         ) from error
-            elif key == Config.TSSC_CONFIG_KEY_DECRYPTORS:
+            elif key == Config.CONFIG_KEY_DECRYPTORS:
                 config_decryptor_definitions = ConfigValue.convert_leaves_to_values(value)
                 Config.parse_and_register_decryptors_definitions(config_decryptor_definitions)
             else:
@@ -909,30 +909,30 @@ or a list of any of the former.</dd>
                     )
 
                 for sub_step in sub_steps:
-                    assert Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
+                    assert Config.CONFIG_KEY_STEP_IMPLEMENTER in sub_step, \
                         f&#34;Step ({step_name}) defines a single sub step with values &#34; + \
                         f&#34;({sub_step}) but is missing value for key: &#34; + \
-                        f&#34;{Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER}&#34;
+                        f&#34;{Config.CONFIG_KEY_STEP_IMPLEMENTER}&#34;
 
                     sub_step_implementer_name = \
-                        sub_step[Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER].value
+                        sub_step[Config.CONFIG_KEY_STEP_IMPLEMENTER].value
 
                     # if sub step name given
                     # else if no sub step name given use step implementer as sub step name
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_NAME in sub_step:
-                        sub_step_name = sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_NAME].value
+                    if Config.CONFIG_KEY_SUB_STEP_NAME in sub_step:
+                        sub_step_name = sub_step[Config.CONFIG_KEY_SUB_STEP_NAME].value
                     else:
                         sub_step_name = sub_step_implementer_name
 
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
-                        sub_step_config = copy.deepcopy(
-                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG])
+                    if Config.CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
+                        sub_step_config_dict = copy.deepcopy(
+                            sub_step[Config.CONFIG_KEY_SUB_STEP_CONFIG])
                     else:
-                        sub_step_config = {}
+                        sub_step_config_dict = {}
 
-                    if Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
+                    if Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
                         sub_step_env_config = copy.deepcopy(
-                            sub_step[Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
+                            sub_step[Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
                     else:
                         sub_step_env_config = {}
 
@@ -940,7 +940,7 @@ or a list of any of the former.</dd>
                         step_name=step_name,
                         sub_step_name=sub_step_name,
                         sub_step_implementer_name=sub_step_implementer_name,
-                        sub_step_config=sub_step_config,
+                        sub_step_config_dict=sub_step_config_dict,
                         sub_step_env_config=sub_step_env_config
                     )
 
@@ -959,22 +959,22 @@ or a list of any of the former.</dd>
         AssertionError
             If decryptors_definitions is not a list.
             If a decryptor definition does not have a
-                Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
+                Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
         &#34;&#34;&#34;
         assert isinstance(decryptors_definitions, list), \
             f&#34;Decryptors configuration ({decryptors_definitions}) must be of type &#34; + \
             f&#34;(list) got: {type(decryptors_definitions)}&#34;
 
         for decryptor_definition in decryptors_definitions:
-            assert Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
+            assert Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
                 &#34;Decryptor configuration is missing key &#34; + \
-                f&#34;({Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
+                f&#34;({Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
 
             decryptor_implementer_name = \
-                decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
+                decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
 
-            if Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
-                decryptor_config = decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG]
+            if Config.CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
+                decryptor_config = decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_CONFIG]
             else:
                 decryptor_config = {}
 
@@ -988,7 +988,7 @@ or a list of any of the former.</dd>
             step_name,
             sub_step_name,
             sub_step_implementer_name,
-            sub_step_config,
+            sub_step_config_dict,
             sub_step_env_config):
         &#34;&#34;&#34;Adds a new step configuration with a single new sub step or
         updates an existing step with new or updated sub step.
@@ -1002,7 +1002,7 @@ or a list of any of the former.</dd>
         sub_step_implementer_name : str
             Name of the sub step implementer for the sub step being added or updated.
             If updating this can not be different then existing sub step with the same name.
-        sub_step_config : dict, optional
+        sub_step_config_dict : dict, optional
             Sub step configuration to add or update for named sub step on the new or updated step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step configuration.
@@ -1027,64 +1027,64 @@ or a list of any of the former.</dd>
         if step_name not in self.step_configs:
             self.step_configs[step_name] = StepConfig(self, step_name)
 
-        tssc_step_config = self.step_configs[step_name]
-        tssc_step_config.add_or_update_sub_step_config(
+        step_config = self.step_configs[step_name]
+        step_config.add_or_update_sub_step_config(
             sub_step_name=sub_step_name,
             sub_step_implementer_name=sub_step_implementer_name,
-            sub_step_config=sub_step_config,
+            sub_step_config_dict=sub_step_config_dict,
             sub_step_env_config=sub_step_env_config
         )</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY"><code class="name">var <span class="ident">TSSC_CONFIG_KEY</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY"><code class="name">var <span class="ident">CONFIG_KEY</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTORS"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_DECRYPTORS</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_DECRYPTORS"><code class="name">var <span class="ident">CONFIG_KEY_DECRYPTORS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_DECRYPTOR_CONFIG</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_DECRYPTOR_CONFIG"><code class="name">var <span class="ident">CONFIG_KEY_DECRYPTOR_CONFIG</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER"><code class="name">var <span class="ident">CONFIG_KEY_DECRYPTOR_IMPLEMENTER</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_ENVIRONMENT_NAME</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_ENVIRONMENT_NAME"><code class="name">var <span class="ident">CONFIG_KEY_ENVIRONMENT_NAME</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_GLOBAL_DEFAULTS</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_GLOBAL_DEFAULTS"><code class="name">var <span class="ident">CONFIG_KEY_GLOBAL_DEFAULTS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS"><code class="name">var <span class="ident">CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_STEP_IMPLEMENTER</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_STEP_IMPLEMENTER"><code class="name">var <span class="ident">CONFIG_KEY_STEP_IMPLEMENTER</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_SUB_STEP_CONFIG</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_SUB_STEP_CONFIG"><code class="name">var <span class="ident">CONFIG_KEY_SUB_STEP_CONFIG</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG"><code class="name">var <span class="ident">CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_NAME"><code class="name">var <span class="ident">TSSC_CONFIG_KEY_SUB_STEP_NAME</span></code></dt>
+<dt id="psr.config.config.Config.CONFIG_KEY_SUB_STEP_NAME"><code class="name">var <span class="ident">CONFIG_KEY_SUB_STEP_NAME</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="tssc.config.config.Config.parse_and_register_decryptors_definitions"><code class="name flex">
+<dt id="psr.config.config.Config.parse_and_register_decryptors_definitions"><code class="name flex">
 <span>def <span class="ident">parse_and_register_decryptors_definitions</span></span>(<span>decryptors_definitions)</span>
 </code></dt>
 <dd>
@@ -1100,7 +1100,7 @@ or a list of any of the former.</dd>
 <dt><code>AssertionError</code></dt>
 <dd>If decryptors_definitions is not a list.
 If a decryptor definition does not have a
-Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.</dd>
+Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1121,22 +1121,22 @@ def parse_and_register_decryptors_definitions(decryptors_definitions):
     AssertionError
         If decryptors_definitions is not a list.
         If a decryptor definition does not have a
-            Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
+            Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER key.
     &#34;&#34;&#34;
     assert isinstance(decryptors_definitions, list), \
         f&#34;Decryptors configuration ({decryptors_definitions}) must be of type &#34; + \
         f&#34;(list) got: {type(decryptors_definitions)}&#34;
 
     for decryptor_definition in decryptors_definitions:
-        assert Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
+        assert Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER in decryptor_definition, \
             &#34;Decryptor configuration is missing key &#34; + \
-            f&#34;({Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
+            f&#34;({Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER}): {decryptor_definition}&#34;
 
         decryptor_implementer_name = \
-            decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
+            decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER]
 
-        if Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
-            decryptor_config = decryptor_definition[Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG]
+        if Config.CONFIG_KEY_DECRYPTOR_CONFIG in decryptor_definition:
+            decryptor_config = decryptor_definition[Config.CONFIG_KEY_DECRYPTOR_CONFIG]
         else:
             decryptor_config = {}
 
@@ -1149,7 +1149,7 @@ def parse_and_register_decryptors_definitions(decryptors_definitions):
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.config.config.Config.global_defaults"><code class="name">var <span class="ident">global_defaults</span></code></dt>
+<dt id="psr.config.config.Config.global_defaults"><code class="name">var <span class="ident">global_defaults</span></code></dt>
 <dd>
 <div class="desc"><p>Get a deep copy of the global defaults.</p>
 <h2 id="returns">Returns</h2>
@@ -1173,7 +1173,7 @@ def global_defaults(self):
     return copy.deepcopy(self.__global_defaults)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.global_environment_defaults"><code class="name">var <span class="ident">global_environment_defaults</span></code></dt>
+<dt id="psr.config.config.Config.global_environment_defaults"><code class="name">var <span class="ident">global_environment_defaults</span></code></dt>
 <dd>
 <div class="desc"><p>Deep copy of all global environment defaults for all environments.</p>
 <h2 id="returns">Returns</h2>
@@ -1197,11 +1197,11 @@ def global_environment_defaults(self):
     return copy.deepcopy(self.__global_environment_defaults)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.step_configs"><code class="name">var <span class="ident">step_configs</span></code></dt>
+<dt id="psr.config.config.Config.step_configs"><code class="name">var <span class="ident">step_configs</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list</code> of <code>TSSCStepConfig</code></dt>
+<dt><code>list</code> of <code>StepConfig</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
@@ -1213,15 +1213,15 @@ def step_configs(self):
     &#34;&#34;&#34;
     Returns
     -------
-    list of TSSCStepConfig
+    list of StepConfig
     &#34;&#34;&#34;
-    return self.__tssc_step_configs</code></pre>
+    return self.__step_configs</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="tssc.config.config.Config.add_config"><code class="name flex">
+<dt id="psr.config.config.Config.add_config"><code class="name flex">
 <span>def <span class="ident">add_config</span></span>(<span>self, config)</span>
 </code></dt>
 <dd>
@@ -1229,10 +1229,10 @@ def step_configs(self):
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>config</code></strong> :&ensp;<code>dict, list, str (file</code> or <code>directory)</code></dt>
-<dd>A dictionary that is a valid TSSC configuration,
-a string that is a path to a YAML or JSON file that is
-a valid TSSC configuration,
-a string that is a path to a directory containing one or more
+<dd>A dictionary that is a valid configuration,
+or aa string that is a path to a YAML or JSON file that is
+a valid configuration,
+or a string that is a path to a directory containing one or more
 files that are valid YAML or JSON files that are valid
 configurations,
 or a list of any of the former.</dd>
@@ -1242,7 +1242,7 @@ or a list of any of the former.</dd>
 <dt><code>ValueError</code></dt>
 <dd>If given config is not of expected type.</dd>
 <dt><code>AssertionError</code></dt>
-<dd>If given config contains any invalid TSSC configurations.</dd>
+<dd>If given config contains any invalid configurations.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1254,10 +1254,10 @@ or a list of any of the former.</dd>
     Parameters
     ----------
     config : dict, list, str (file or directory)
-        A dictionary that is a valid TSSC configuration,
-        a string that is a path to a YAML or JSON file that is
-        a valid TSSC configuration,
-        a string that is a path to a directory containing one or more
+        A dictionary that is a valid configuration,
+        or aa string that is a path to a YAML or JSON file that is
+        a valid configuration,
+        or a string that is a path to a directory containing one or more
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
@@ -1267,7 +1267,7 @@ or a list of any of the former.</dd>
     ValueError
         If given config is not of expected type.
     AssertionError
-        If given config contains any invalid TSSC configurations.
+        If given config contains any invalid configurations.
     &#34;&#34;&#34;
     if isinstance(config, dict):
         # add the config
@@ -1304,8 +1304,8 @@ or a list of any of the former.</dd>
         )</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.add_or_update_step_config"><code class="name flex">
-<span>def <span class="ident">add_or_update_step_config</span></span>(<span>self, step_name, sub_step_name, sub_step_implementer_name, sub_step_config, sub_step_env_config)</span>
+<dt id="psr.config.config.Config.add_or_update_step_config"><code class="name flex">
+<span>def <span class="ident">add_or_update_step_config</span></span>(<span>self, step_name, sub_step_name, sub_step_implementer_name, sub_step_config_dict, sub_step_env_config)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds a new step configuration with a single new sub step or
@@ -1319,7 +1319,7 @@ updates an existing step with new or updated sub step.</p>
 <dt><strong><code>sub_step_implementer_name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Name of the sub step implementer for the sub step being added or updated.
 If updating this can not be different then existing sub step with the same name.</dd>
-<dt><strong><code>sub_step_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dt><strong><code>sub_step_config_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
 <dd>Sub step configuration to add or update for named sub step on the new or updated step.
 If updating this can not have any duplicative leaf keys to the existing
 sub step configuration.</dd>
@@ -1349,7 +1349,7 @@ existing sub step environment configuration.</dd>
         step_name,
         sub_step_name,
         sub_step_implementer_name,
-        sub_step_config,
+        sub_step_config_dict,
         sub_step_env_config):
     &#34;&#34;&#34;Adds a new step configuration with a single new sub step or
     updates an existing step with new or updated sub step.
@@ -1363,7 +1363,7 @@ existing sub step environment configuration.</dd>
     sub_step_implementer_name : str
         Name of the sub step implementer for the sub step being added or updated.
         If updating this can not be different then existing sub step with the same name.
-    sub_step_config : dict, optional
+    sub_step_config_dict : dict, optional
         Sub step configuration to add or update for named sub step on the new or updated step.
         If updating this can not have any duplicative leaf keys to the existing
             sub step configuration.
@@ -1388,16 +1388,16 @@ existing sub step environment configuration.</dd>
     if step_name not in self.step_configs:
         self.step_configs[step_name] = StepConfig(self, step_name)
 
-    tssc_step_config = self.step_configs[step_name]
-    tssc_step_config.add_or_update_sub_step_config(
+    step_config = self.step_configs[step_name]
+    step_config.add_or_update_sub_step_config(
         sub_step_name=sub_step_name,
         sub_step_implementer_name=sub_step_implementer_name,
-        sub_step_config=sub_step_config,
+        sub_step_config_dict=sub_step_config_dict,
         sub_step_env_config=sub_step_env_config
     )</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.get_global_environment_defaults_for_environment"><code class="name flex">
+<dt id="psr.config.config.Config.get_global_environment_defaults_for_environment"><code class="name flex">
 <span>def <span class="ident">get_global_environment_defaults_for_environment</span></span>(<span>self, env)</span>
 </code></dt>
 <dd>
@@ -1444,7 +1444,7 @@ or empty dict if no environment given or environment does not exist in the defau
     return global_environment_defaults</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.get_step_config"><code class="name flex">
+<dt id="psr.config.config.Config.get_step_config"><code class="name flex">
 <span>def <span class="ident">get_step_config</span></span>(<span>self, step_name)</span>
 </code></dt>
 <dd>
@@ -1456,7 +1456,7 @@ or empty dict if no environment given or environment does not exist in the defau
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>TSSCStepConfig</code></dt>
+<dt><code>StepConfig</code></dt>
 <dd>Step configuration for the given step name or None if does not exist</dd>
 </dl></div>
 <details class="source">
@@ -1473,7 +1473,7 @@ or empty dict if no environment given or environment does not exist in the defau
 
     Returns
     -------
-    TSSCStepConfig
+    StepConfig
         Step configuration for the given step name or None if does not exist
     &#34;&#34;&#34;
     if step_name in self.step_configs:
@@ -1484,37 +1484,37 @@ or empty dict if no environment given or environment does not exist in the defau
     return step_config</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.get_sub_step_configs"><code class="name flex">
+<dt id="psr.config.config.Config.get_sub_step_configs"><code class="name flex">
 <span>def <span class="ident">get_sub_step_configs</span></span>(<span>self, step_name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Gets lit of configured TSSC sub step configurations for a TSSC step with the given name.</p>
+<div class="desc"><p>Gets lit of configured sub step configurations for a step with the given name.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>step_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>Name of TSSC step to get configured sub steps for.</dd>
+<dd>Name of step to get configured sub steps for.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list</code> of <code>TSSCSubStepConfig</code></dt>
-<dd>List of configured TSSC sub step configurations for the TSSC step with the given name.</dd>
+<dt><code>list</code> of <code>SubStepConfig</code></dt>
+<dd>List of configured sub step configurations for the step with the given name.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_sub_step_configs(self, step_name):
-    &#34;&#34;&#34;Gets lit of configured TSSC sub step configurations for a TSSC step with the given name.
+    &#34;&#34;&#34;Gets lit of configured sub step configurations for a step with the given name.
 
     Parameters
     ----------
     step_name : str
-        Name of TSSC step to get configured sub steps for.
+        Name of step to get configured sub steps for.
 
     Returns
     -------
-    list of TSSCSubStepConfig
-        List of configured TSSC sub step configurations for the TSSC step with the given name.
+    list of SubStepConfig
+        List of configured sub step configurations for the step with the given name.
     &#34;&#34;&#34;
 
     if step_name in self.step_configs:
@@ -1525,7 +1525,7 @@ or empty dict if no environment given or environment does not exist in the defau
     return sub_step_configs</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.config.Config.set_step_config_overrides"><code class="name flex">
+<dt id="psr.config.config.Config.set_step_config_overrides"><code class="name flex">
 <span>def <span class="ident">set_step_config_overrides</span></span>(<span>self, step_name, step_config_overrides)</span>
 </code></dt>
 <dd>
@@ -1580,35 +1580,35 @@ overrides.</p>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.config" href="index.html">tssc.config</a></code></li>
+<li><code><a title="psr.config" href="index.html">psr.config</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.config.config.Config" href="#tssc.config.config.Config">Config</a></code></h4>
+<h4><code><a title="psr.config.config.Config" href="#psr.config.config.Config">Config</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY" href="#tssc.config.config.Config.TSSC_CONFIG_KEY">TSSC_CONFIG_KEY</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTORS" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTORS">TSSC_CONFIG_KEY_DECRYPTORS</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_CONFIG">TSSC_CONFIG_KEY_DECRYPTOR_CONFIG</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER">TSSC_CONFIG_KEY_DECRYPTOR_IMPLEMENTER</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_ENVIRONMENT_NAME">TSSC_CONFIG_KEY_ENVIRONMENT_NAME</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_DEFAULTS">TSSC_CONFIG_KEY_GLOBAL_DEFAULTS</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS">TSSC_CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_STEP_IMPLEMENTER">TSSC_CONFIG_KEY_STEP_IMPLEMENTER</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_CONFIG">TSSC_CONFIG_KEY_SUB_STEP_CONFIG</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG">TSSC_CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG</a></code></li>
-<li><code><a title="tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_NAME" href="#tssc.config.config.Config.TSSC_CONFIG_KEY_SUB_STEP_NAME">TSSC_CONFIG_KEY_SUB_STEP_NAME</a></code></li>
-<li><code><a title="tssc.config.config.Config.add_config" href="#tssc.config.config.Config.add_config">add_config</a></code></li>
-<li><code><a title="tssc.config.config.Config.add_or_update_step_config" href="#tssc.config.config.Config.add_or_update_step_config">add_or_update_step_config</a></code></li>
-<li><code><a title="tssc.config.config.Config.get_global_environment_defaults_for_environment" href="#tssc.config.config.Config.get_global_environment_defaults_for_environment">get_global_environment_defaults_for_environment</a></code></li>
-<li><code><a title="tssc.config.config.Config.get_step_config" href="#tssc.config.config.Config.get_step_config">get_step_config</a></code></li>
-<li><code><a title="tssc.config.config.Config.get_sub_step_configs" href="#tssc.config.config.Config.get_sub_step_configs">get_sub_step_configs</a></code></li>
-<li><code><a title="tssc.config.config.Config.global_defaults" href="#tssc.config.config.Config.global_defaults">global_defaults</a></code></li>
-<li><code><a title="tssc.config.config.Config.global_environment_defaults" href="#tssc.config.config.Config.global_environment_defaults">global_environment_defaults</a></code></li>
-<li><code><a title="tssc.config.config.Config.parse_and_register_decryptors_definitions" href="#tssc.config.config.Config.parse_and_register_decryptors_definitions">parse_and_register_decryptors_definitions</a></code></li>
-<li><code><a title="tssc.config.config.Config.set_step_config_overrides" href="#tssc.config.config.Config.set_step_config_overrides">set_step_config_overrides</a></code></li>
-<li><code><a title="tssc.config.config.Config.step_configs" href="#tssc.config.config.Config.step_configs">step_configs</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY" href="#psr.config.config.Config.CONFIG_KEY">CONFIG_KEY</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_DECRYPTORS" href="#psr.config.config.Config.CONFIG_KEY_DECRYPTORS">CONFIG_KEY_DECRYPTORS</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_DECRYPTOR_CONFIG" href="#psr.config.config.Config.CONFIG_KEY_DECRYPTOR_CONFIG">CONFIG_KEY_DECRYPTOR_CONFIG</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER" href="#psr.config.config.Config.CONFIG_KEY_DECRYPTOR_IMPLEMENTER">CONFIG_KEY_DECRYPTOR_IMPLEMENTER</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_ENVIRONMENT_NAME" href="#psr.config.config.Config.CONFIG_KEY_ENVIRONMENT_NAME">CONFIG_KEY_ENVIRONMENT_NAME</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_GLOBAL_DEFAULTS" href="#psr.config.config.Config.CONFIG_KEY_GLOBAL_DEFAULTS">CONFIG_KEY_GLOBAL_DEFAULTS</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS" href="#psr.config.config.Config.CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS">CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_STEP_IMPLEMENTER" href="#psr.config.config.Config.CONFIG_KEY_STEP_IMPLEMENTER">CONFIG_KEY_STEP_IMPLEMENTER</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_SUB_STEP_CONFIG" href="#psr.config.config.Config.CONFIG_KEY_SUB_STEP_CONFIG">CONFIG_KEY_SUB_STEP_CONFIG</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG" href="#psr.config.config.Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG">CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG</a></code></li>
+<li><code><a title="psr.config.config.Config.CONFIG_KEY_SUB_STEP_NAME" href="#psr.config.config.Config.CONFIG_KEY_SUB_STEP_NAME">CONFIG_KEY_SUB_STEP_NAME</a></code></li>
+<li><code><a title="psr.config.config.Config.add_config" href="#psr.config.config.Config.add_config">add_config</a></code></li>
+<li><code><a title="psr.config.config.Config.add_or_update_step_config" href="#psr.config.config.Config.add_or_update_step_config">add_or_update_step_config</a></code></li>
+<li><code><a title="psr.config.config.Config.get_global_environment_defaults_for_environment" href="#psr.config.config.Config.get_global_environment_defaults_for_environment">get_global_environment_defaults_for_environment</a></code></li>
+<li><code><a title="psr.config.config.Config.get_step_config" href="#psr.config.config.Config.get_step_config">get_step_config</a></code></li>
+<li><code><a title="psr.config.config.Config.get_sub_step_configs" href="#psr.config.config.Config.get_sub_step_configs">get_sub_step_configs</a></code></li>
+<li><code><a title="psr.config.config.Config.global_defaults" href="#psr.config.config.Config.global_defaults">global_defaults</a></code></li>
+<li><code><a title="psr.config.config.Config.global_environment_defaults" href="#psr.config.config.Config.global_environment_defaults">global_environment_defaults</a></code></li>
+<li><code><a title="psr.config.config.Config.parse_and_register_decryptors_definitions" href="#psr.config.config.Config.parse_and_register_decryptors_definitions">parse_and_register_decryptors_definitions</a></code></li>
+<li><code><a title="psr.config.config.Config.set_step_config_overrides" href="#psr.config.config.Config.set_step_config_overrides">set_step_config_overrides</a></code></li>
+<li><code><a title="psr.config.config.Config.step_configs" href="#psr.config.config.Config.step_configs">step_configs</a></code></li>
 </ul>
 </li>
 </ul>

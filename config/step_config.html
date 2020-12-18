@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>tssc.config.step_config API documentation</title>
-<meta name="description" content="Representation of a TSSC step configuration." />
+<title>psr.config.step_config API documentation</title>
+<meta name="description" content="Representation of an individual step&#39;s step configuration." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,36 +19,37 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>tssc.config.step_config</code></h1>
+<h1 class="title">Module <code>psr.config.step_config</code></h1>
 </header>
 <section id="section-intro">
-<p>Representation of a TSSC step configuration.</p>
+<p>Representation of an individual step's step configuration.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Representation of a TSSC step configuration.
+<pre><code class="python">&#34;&#34;&#34;Representation of an individual step&#39;s step configuration.
 &#34;&#34;&#34;
 
 import copy
 
-from tssc.config.sub_step_config import SubStepConfig
+from psr.config.sub_step_config import SubStepConfig
+
 
 class StepConfig:
-    &#34;&#34;&#34;Representation of a TSSC step configuration.
+    &#34;&#34;&#34;Representation of an individual step&#39;s step configuration.
 
     Parameters
     ----------
     parent_config : Config
-        Parent TSSC configuration containing this step configuration.
+        Parent configuration containing this step configuration.
     step_name : str
-        Name of the TSSC step.
+        Name of the step.
 
     Attributes
     ----------
     __parent_config : Config
     __step_name : str
-    __sub_steps : list of TSSCSubStepConfig
+    __sub_steps : list of SubStepConfig
     __sub_step_config_overrides : dict
     &#34;&#34;&#34;
 
@@ -82,7 +83,7 @@ class StepConfig:
         &#34;&#34;&#34;
         Returns
         -------
-        list of TSSCSubStepConfig
+        list of SubStepConfig
             Sub steps of this step.
         &#34;&#34;&#34;
         return self.__sub_steps
@@ -97,7 +98,7 @@ class StepConfig:
 
         Returns
         -------
-        TSSCSubStepConfig
+        SubStepConfig
             Sub step of this step with the given name or
             None if no sub step with given name exists as part of this step.
         &#34;&#34;&#34;
@@ -133,7 +134,7 @@ class StepConfig:
             self,
             sub_step_name,
             sub_step_implementer_name,
-            sub_step_config=None,
+            sub_step_config_dict=None,
             sub_step_env_config=None):
         &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
@@ -144,7 +145,7 @@ class StepConfig:
         sub_step_implementer_name : str
             Name of the sub step implementer for the sub step being added or updated.
             If updating this can not be different then existing sub step with the same name.
-        sub_step_config : dict, optional
+        sub_step_config_dict : dict, optional
             Sub step configuration to add or update for named sub step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step configuration.
@@ -165,30 +166,30 @@ class StepConfig:
                 existing sub step environment configuration.
         &#34;&#34;&#34;
 
-        existing_tssc_sub_step_config = None
-        for tssc_sub_step_config in self.sub_steps:
-            if tssc_sub_step_config.sub_step_name == sub_step_name:
-                existing_tssc_sub_step_config = tssc_sub_step_config
+        existing_sub_step_config = None
+        for sub_step_config in self.sub_steps:
+            if sub_step_config.sub_step_name == sub_step_name:
+                existing_sub_step_config = sub_step_config
                 break
 
-        if existing_tssc_sub_step_config is None:
-            tssc_sub_step_config = SubStepConfig(
+        if existing_sub_step_config is None:
+            sub_step_config = SubStepConfig(
                 parent_step_config=self,
                 sub_step_name=sub_step_name,
                 sub_step_implementer_name=sub_step_implementer_name,
-                sub_step_config=sub_step_config,
+                sub_step_config_dict=sub_step_config_dict,
                 sub_step_env_config=sub_step_env_config
             )
-            self.sub_steps.append(tssc_sub_step_config)
+            self.sub_steps.append(sub_step_config)
         else:
-            assert sub_step_implementer_name == tssc_sub_step_config.sub_step_implementer_name, \
+            assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
                 f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
                 &#34; with new config due to new sub step implementer&#34; + \
                 f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-                f&#34; ({tssc_sub_step_config.sub_step_implementer_name}).&#34;
+                f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
 
-            tssc_sub_step_config.merge_sub_step_config(sub_step_config)
-            tssc_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+            sub_step_config.merge_sub_step_config(sub_step_config_dict)
+            sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 </section>
 <section>
@@ -200,18 +201,18 @@ class StepConfig:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="tssc.config.step_config.StepConfig"><code class="flex name class">
+<dt id="psr.config.step_config.StepConfig"><code class="flex name class">
 <span>class <span class="ident">StepConfig</span></span>
 <span>(</span><span>parent_config, step_name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Representation of a TSSC step configuration.</p>
+<div class="desc"><p>Representation of an individual step's step configuration.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>parent_config</code></strong> :&ensp;<code>Config</code></dt>
-<dd>Parent TSSC configuration containing this step configuration.</dd>
+<dd>Parent configuration containing this step configuration.</dd>
 <dt><strong><code>step_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>Name of the TSSC step.</dd>
+<dd>Name of the step.</dd>
 </dl>
 <h2 id="attributes">Attributes</h2>
 <dl>
@@ -219,7 +220,7 @@ class StepConfig:
 <dd>&nbsp;</dd>
 <dt><strong><code>__step_name</code></strong> :&ensp;<code>str</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>__sub_steps</code></strong> :&ensp;<code>list</code> of <code>TSSCSubStepConfig</code></dt>
+<dt><strong><code>__sub_steps</code></strong> :&ensp;<code>list</code> of <code>SubStepConfig</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>__sub_step_config_overrides</code></strong> :&ensp;<code>dict</code></dt>
 <dd>&nbsp;</dd>
@@ -229,20 +230,20 @@ class StepConfig:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StepConfig:
-    &#34;&#34;&#34;Representation of a TSSC step configuration.
+    &#34;&#34;&#34;Representation of an individual step&#39;s step configuration.
 
     Parameters
     ----------
     parent_config : Config
-        Parent TSSC configuration containing this step configuration.
+        Parent configuration containing this step configuration.
     step_name : str
-        Name of the TSSC step.
+        Name of the step.
 
     Attributes
     ----------
     __parent_config : Config
     __step_name : str
-    __sub_steps : list of TSSCSubStepConfig
+    __sub_steps : list of SubStepConfig
     __sub_step_config_overrides : dict
     &#34;&#34;&#34;
 
@@ -276,7 +277,7 @@ class StepConfig:
         &#34;&#34;&#34;
         Returns
         -------
-        list of TSSCSubStepConfig
+        list of SubStepConfig
             Sub steps of this step.
         &#34;&#34;&#34;
         return self.__sub_steps
@@ -291,7 +292,7 @@ class StepConfig:
 
         Returns
         -------
-        TSSCSubStepConfig
+        SubStepConfig
             Sub step of this step with the given name or
             None if no sub step with given name exists as part of this step.
         &#34;&#34;&#34;
@@ -327,7 +328,7 @@ class StepConfig:
             self,
             sub_step_name,
             sub_step_implementer_name,
-            sub_step_config=None,
+            sub_step_config_dict=None,
             sub_step_env_config=None):
         &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
@@ -338,7 +339,7 @@ class StepConfig:
         sub_step_implementer_name : str
             Name of the sub step implementer for the sub step being added or updated.
             If updating this can not be different then existing sub step with the same name.
-        sub_step_config : dict, optional
+        sub_step_config_dict : dict, optional
             Sub step configuration to add or update for named sub step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step configuration.
@@ -359,34 +360,34 @@ class StepConfig:
                 existing sub step environment configuration.
         &#34;&#34;&#34;
 
-        existing_tssc_sub_step_config = None
-        for tssc_sub_step_config in self.sub_steps:
-            if tssc_sub_step_config.sub_step_name == sub_step_name:
-                existing_tssc_sub_step_config = tssc_sub_step_config
+        existing_sub_step_config = None
+        for sub_step_config in self.sub_steps:
+            if sub_step_config.sub_step_name == sub_step_name:
+                existing_sub_step_config = sub_step_config
                 break
 
-        if existing_tssc_sub_step_config is None:
-            tssc_sub_step_config = SubStepConfig(
+        if existing_sub_step_config is None:
+            sub_step_config = SubStepConfig(
                 parent_step_config=self,
                 sub_step_name=sub_step_name,
                 sub_step_implementer_name=sub_step_implementer_name,
-                sub_step_config=sub_step_config,
+                sub_step_config_dict=sub_step_config_dict,
                 sub_step_env_config=sub_step_env_config
             )
-            self.sub_steps.append(tssc_sub_step_config)
+            self.sub_steps.append(sub_step_config)
         else:
-            assert sub_step_implementer_name == tssc_sub_step_config.sub_step_implementer_name, \
+            assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
                 f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
                 &#34; with new config due to new sub step implementer&#34; + \
                 f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-                f&#34; ({tssc_sub_step_config.sub_step_implementer_name}).&#34;
+                f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
 
-            tssc_sub_step_config.merge_sub_step_config(sub_step_config)
-            tssc_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+            sub_step_config.merge_sub_step_config(sub_step_config_dict)
+            sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="tssc.config.step_config.StepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
+<dt id="psr.config.step_config.StepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -407,7 +408,7 @@ def parent_config(self):
     return self.__parent_config</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.step_config.StepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
+<dt id="psr.config.step_config.StepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
 <dd>
 <div class="desc"><p>Gets a deep copy of the step configuration overrides.</p>
 <h2 id="returns">Returns</h2>
@@ -431,7 +432,7 @@ def step_config_overrides(self):
     return copy.deepcopy(self.__step_config_overrides)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.step_config.StepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dt id="psr.config.step_config.StepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -453,11 +454,11 @@ def step_name(self):
     return self.__step_name</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.step_config.StepConfig.sub_steps"><code class="name">var <span class="ident">sub_steps</span></code></dt>
+<dt id="psr.config.step_config.StepConfig.sub_steps"><code class="name">var <span class="ident">sub_steps</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list</code> of <code>TSSCSubStepConfig</code></dt>
+<dt><code>list</code> of <code>SubStepConfig</code></dt>
 <dd>Sub steps of this step.</dd>
 </dl></div>
 <details class="source">
@@ -469,7 +470,7 @@ def sub_steps(self):
     &#34;&#34;&#34;
     Returns
     -------
-    list of TSSCSubStepConfig
+    list of SubStepConfig
         Sub steps of this step.
     &#34;&#34;&#34;
     return self.__sub_steps</code></pre>
@@ -478,8 +479,8 @@ def sub_steps(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="tssc.config.step_config.StepConfig.add_or_update_sub_step_config"><code class="name flex">
-<span>def <span class="ident">add_or_update_sub_step_config</span></span>(<span>self, sub_step_name, sub_step_implementer_name, sub_step_config=None, sub_step_env_config=None)</span>
+<dt id="psr.config.step_config.StepConfig.add_or_update_sub_step_config"><code class="name flex">
+<span>def <span class="ident">add_or_update_sub_step_config</span></span>(<span>self, sub_step_name, sub_step_implementer_name, sub_step_config_dict=None, sub_step_env_config=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new or update an existing sub step configuration for this step.</p>
@@ -490,7 +491,7 @@ def sub_steps(self):
 <dt><strong><code>sub_step_implementer_name</code></strong> :&ensp;<code>str</code></dt>
 <dd>Name of the sub step implementer for the sub step being added or updated.
 If updating this can not be different then existing sub step with the same name.</dd>
-<dt><strong><code>sub_step_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dt><strong><code>sub_step_config_dict</code></strong> :&ensp;<code>dict</code>, optional</dt>
 <dd>Sub step configuration to add or update for named sub step.
 If updating this can not have any duplicative leaf keys to the existing
 sub step configuration.</dd>
@@ -518,7 +519,7 @@ existing sub step environment configuration.</dd>
         self,
         sub_step_name,
         sub_step_implementer_name,
-        sub_step_config=None,
+        sub_step_config_dict=None,
         sub_step_env_config=None):
     &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
@@ -529,7 +530,7 @@ existing sub step environment configuration.</dd>
     sub_step_implementer_name : str
         Name of the sub step implementer for the sub step being added or updated.
         If updating this can not be different then existing sub step with the same name.
-    sub_step_config : dict, optional
+    sub_step_config_dict : dict, optional
         Sub step configuration to add or update for named sub step.
         If updating this can not have any duplicative leaf keys to the existing
             sub step configuration.
@@ -550,33 +551,33 @@ existing sub step environment configuration.</dd>
             existing sub step environment configuration.
     &#34;&#34;&#34;
 
-    existing_tssc_sub_step_config = None
-    for tssc_sub_step_config in self.sub_steps:
-        if tssc_sub_step_config.sub_step_name == sub_step_name:
-            existing_tssc_sub_step_config = tssc_sub_step_config
+    existing_sub_step_config = None
+    for sub_step_config in self.sub_steps:
+        if sub_step_config.sub_step_name == sub_step_name:
+            existing_sub_step_config = sub_step_config
             break
 
-    if existing_tssc_sub_step_config is None:
-        tssc_sub_step_config = SubStepConfig(
+    if existing_sub_step_config is None:
+        sub_step_config = SubStepConfig(
             parent_step_config=self,
             sub_step_name=sub_step_name,
             sub_step_implementer_name=sub_step_implementer_name,
-            sub_step_config=sub_step_config,
+            sub_step_config_dict=sub_step_config_dict,
             sub_step_env_config=sub_step_env_config
         )
-        self.sub_steps.append(tssc_sub_step_config)
+        self.sub_steps.append(sub_step_config)
     else:
-        assert sub_step_implementer_name == tssc_sub_step_config.sub_step_implementer_name, \
+        assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
             f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
             &#34; with new config due to new sub step implementer&#34; + \
             f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-            f&#34; ({tssc_sub_step_config.sub_step_implementer_name}).&#34;
+            f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
 
-        tssc_sub_step_config.merge_sub_step_config(sub_step_config)
-        tssc_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+        sub_step_config.merge_sub_step_config(sub_step_config_dict)
+        sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 </dd>
-<dt id="tssc.config.step_config.StepConfig.get_sub_step"><code class="name flex">
+<dt id="psr.config.step_config.StepConfig.get_sub_step"><code class="name flex">
 <span>def <span class="ident">get_sub_step</span></span>(<span>self, sub_step_name)</span>
 </code></dt>
 <dd>
@@ -588,7 +589,7 @@ existing sub step environment configuration.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>TSSCSubStepConfig</code></dt>
+<dt><code>SubStepConfig</code></dt>
 <dd>Sub step of this step with the given name or
 None if no sub step with given name exists as part of this step.</dd>
 </dl></div>
@@ -606,7 +607,7 @@ None if no sub step with given name exists as part of this step.</dd>
 
     Returns
     -------
-    TSSCSubStepConfig
+    SubStepConfig
         Sub step of this step with the given name or
         None if no sub step with given name exists as part of this step.
     &#34;&#34;&#34;
@@ -630,20 +631,20 @@ None if no sub step with given name exists as part of this step.</dd>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="tssc.config" href="index.html">tssc.config</a></code></li>
+<li><code><a title="psr.config" href="index.html">psr.config</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="tssc.config.step_config.StepConfig" href="#tssc.config.step_config.StepConfig">StepConfig</a></code></h4>
+<h4><code><a title="psr.config.step_config.StepConfig" href="#psr.config.step_config.StepConfig">StepConfig</a></code></h4>
 <ul class="">
-<li><code><a title="tssc.config.step_config.StepConfig.add_or_update_sub_step_config" href="#tssc.config.step_config.StepConfig.add_or_update_sub_step_config">add_or_update_sub_step_config</a></code></li>
-<li><code><a title="tssc.config.step_config.StepConfig.get_sub_step" href="#tssc.config.step_config.StepConfig.get_sub_step">get_sub_step</a></code></li>
-<li><code><a title="tssc.config.step_config.StepConfig.parent_config" href="#tssc.config.step_config.StepConfig.parent_config">parent_config</a></code></li>
-<li><code><a title="tssc.config.step_config.StepConfig.step_config_overrides" href="#tssc.config.step_config.StepConfig.step_config_overrides">step_config_overrides</a></code></li>
-<li><code><a title="tssc.config.step_config.StepConfig.step_name" href="#tssc.config.step_config.StepConfig.step_name">step_name</a></code></li>
-<li><code><a title="tssc.config.step_config.StepConfig.sub_steps" href="#tssc.config.step_config.StepConfig.sub_steps">sub_steps</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.add_or_update_sub_step_config" href="#psr.config.step_config.StepConfig.add_or_update_sub_step_config">add_or_update_sub_step_config</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.get_sub_step" href="#psr.config.step_config.StepConfig.get_sub_step">get_sub_step</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.parent_config" href="#psr.config.step_config.StepConfig.parent_config">parent_config</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.step_config_overrides" href="#psr.config.step_config.StepConfig.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.step_name" href="#psr.config.step_config.StepConfig.step_name">step_name</a></code></li>
+<li><code><a title="psr.config.step_config.StepConfig.sub_steps" href="#psr.config.step_config.StepConfig.sub_steps">sub_steps</a></code></li>
 </ul>
 </li>
 </ul>
