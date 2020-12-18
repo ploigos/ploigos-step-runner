@@ -57,6 +57,11 @@ python3 -m pytest --cov=psr --cov-report term-missing tests/step_implementers/pa
 tox -e lint
 ```
 
+### Run linter and all tests (a good idea before a commit)
+```bash
+tox
+```
+
 ### Generate the Documentation Locally
 If you are updating the python documentation and want to generate locally this is how you do it.
 
