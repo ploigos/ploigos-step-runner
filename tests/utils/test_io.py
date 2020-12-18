@@ -162,7 +162,7 @@ class TestTextIOSelectiveObfuscator(BaseTestCase):
         input = (
             '"service-name": "fruit",\n'
             '"application-name": "reference-quarkus-mvn-jenkins",\n'
-            '"organization": "tssc-team"\n'
+            '"organization": "ploigos-team"\n'
             '"argocd-api": "argocd-server-argocd.apps.psr.rht-set.com",\n'
             '"maven-mirrors": {\n'
             '    "internal-mirror": {\n'

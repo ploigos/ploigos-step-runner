@@ -5,12 +5,12 @@ step-runner-config:
   global-defaults:
     service-name: fruit
     application-name: reference-quarkus-mvn-jenkins
-    organization: tssc-team
+    organization: ploigos-team
     argocd-api: argocd-server-argocd.example.xyz
     maven-servers:
       internal-mirror:
         id: internal-server
-        username: tssc
+        username: ploigos
     maven-mirrors:
       internal-mirror:
         id: internal-mirror
@@ -18,9 +18,9 @@ step-runner-config:
         mirror-of: '*'
     container-registries:
         registry.redhat.io:
-            username: 6340056|tssc-integration-infra
+            username: 6340056|ploigos-integration-infra
         quay-quay-enterprise.example.xyz:
-            username: tssc-team+tssc_reference_app_quarkus_rest_json
+            username: ploigos-team+ploigos_reference_app_quarkus_rest_json
   global-environment-defaults:
     DEV:
       kube-api-uri: kubernetes.default.svc
@@ -53,7 +53,7 @@ step-runner-config:
   - implementer: Maven
     config:
       maven-push-artifact-repo-id: internal-server
-      maven-push-artifact-repo-url: http://artifactory.example.xyz/artifactory/tssc/
+      maven-push-artifact-repo-url: http://artifactory.example.xyz/artifactory/ploigos/
   create-container-image:
   - implementer: Buildah
     config:
@@ -69,7 +69,7 @@ step-runner-config:
   deploy:
   - implementer: ArgoCD
     config:
-      git-email: 'napsspo+tssc@redhat.com'
+      git-email: 'napsspo+ploigos@redhat.com'
       helm-config-repo: http://gitea.gitea.svc.cluster.local:3000/ploigos-references/reference-app.git
       num-replicas: 1
       route-enabled: true
