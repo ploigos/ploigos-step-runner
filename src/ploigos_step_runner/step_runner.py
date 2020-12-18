@@ -44,7 +44,7 @@ class StepRunner:
         False if step returned an error message
     """
 
-    __DEFAULT_MODULE = 'psr.step_implementers'
+    __DEFAULT_MODULE = 'ploigos_step_runner.step_implementers'
 
     def __init__(
             self,
@@ -138,7 +138,7 @@ class StepRunner:
             a module path.
         step_implementer_name : str
             Either the short name of a StepImplementer class which will be dynamically
-            loaded from the 'psr.step_implementers.{step_name}' module or
+            loaded from the 'ploigos_step_runner.step_implementers.{step_name}' module or
             A class name that includes a dot seperated module name to load the Class from.
 
         Returns
