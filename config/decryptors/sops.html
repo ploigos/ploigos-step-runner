@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>psr.config.decryptors.sops API documentation</title>
+<title>ploigos_step_runner.config.decryptors.sops API documentation</title>
 <meta name="description" content="ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>psr.config.decryptors.sops</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.config.decryptors.sops</code></h1>
 </header>
 <section id="section-intro">
 <p>ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues</p>
@@ -43,7 +43,7 @@ import re
 import sys
 import sh
 
-from psr.config.config_value_decryptor import ConfigValueDecryptor
+from ploigos_step_runner.config.config_value_decryptor import ConfigValueDecryptor
 
 class SOPS(ConfigValueDecryptor):
     &#34;&#34;&#34;ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues
@@ -194,7 +194,7 @@ class SOPS(ConfigValueDecryptor):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="psr.config.decryptors.sops.SOPS"><code class="flex name class">
+<dt id="ploigos_step_runner.config.decryptors.sops.SOPS"><code class="flex name class">
 <span>class <span class="ident">SOPS</span></span>
 <span>(</span><span>additional_sops_args=None)</span>
 </code></dt>
@@ -352,19 +352,19 @@ class SOPS(ConfigValueDecryptor):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="psr.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#psr.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></li>
+<li><a title="ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></li>
 <li>abc.ABC</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="psr.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX"><code class="name">var <span class="ident">SOPS_ENCRYPTED_VALUE_REGEX</span></code></dt>
+<dt id="ploigos_step_runner.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX"><code class="name">var <span class="ident">SOPS_ENCRYPTED_VALUE_REGEX</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
-<dt id="psr.config.decryptors.sops.SOPS.get_sops_value_path"><code class="name flex">
+<dt id="ploigos_step_runner.config.decryptors.sops.SOPS.get_sops_value_path"><code class="name flex">
 <span>def <span class="ident">get_sops_value_path</span></span>(<span>config_value)</span>
 </code></dt>
 <dd>
@@ -410,7 +410,7 @@ def get_sops_value_path(config_value):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="psr.config.decryptors.sops.SOPS.decrypt"><code class="name flex">
+<dt id="ploigos_step_runner.config.decryptors.sops.SOPS.decrypt"><code class="name flex">
 <span>def <span class="ident">decrypt</span></span>(<span>self, config_value)</span>
 </code></dt>
 <dd>
@@ -516,9 +516,9 @@ If config_value#parent_source is not of type dict or str</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="psr.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#psr.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></b></code>:
+<li><code><b><a title="ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor" href="../config_value_decryptor.html#ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor">ConfigValueDecryptor</a></b></code>:
 <ul class="hlist">
-<li><code><a title="psr.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt" href="../config_value_decryptor.html#psr.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt">can_decrypt</a></code></li>
+<li><code><a title="ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt" href="../config_value_decryptor.html#ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor.can_decrypt">can_decrypt</a></code></li>
 </ul>
 </li>
 </ul>
@@ -536,17 +536,17 @@ If config_value#parent_source is not of type dict or str</dd>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="psr.config.decryptors" href="index.html">psr.config.decryptors</a></code></li>
+<li><code><a title="ploigos_step_runner.config.decryptors" href="index.html">ploigos_step_runner.config.decryptors</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="psr.config.decryptors.sops.SOPS" href="#psr.config.decryptors.sops.SOPS">SOPS</a></code></h4>
+<h4><code><a title="ploigos_step_runner.config.decryptors.sops.SOPS" href="#ploigos_step_runner.config.decryptors.sops.SOPS">SOPS</a></code></h4>
 <ul class="">
-<li><code><a title="psr.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX" href="#psr.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX">SOPS_ENCRYPTED_VALUE_REGEX</a></code></li>
-<li><code><a title="psr.config.decryptors.sops.SOPS.decrypt" href="#psr.config.decryptors.sops.SOPS.decrypt">decrypt</a></code></li>
-<li><code><a title="psr.config.decryptors.sops.SOPS.get_sops_value_path" href="#psr.config.decryptors.sops.SOPS.get_sops_value_path">get_sops_value_path</a></code></li>
+<li><code><a title="ploigos_step_runner.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX" href="#ploigos_step_runner.config.decryptors.sops.SOPS.SOPS_ENCRYPTED_VALUE_REGEX">SOPS_ENCRYPTED_VALUE_REGEX</a></code></li>
+<li><code><a title="ploigos_step_runner.config.decryptors.sops.SOPS.decrypt" href="#ploigos_step_runner.config.decryptors.sops.SOPS.decrypt">decrypt</a></code></li>
+<li><code><a title="ploigos_step_runner.config.decryptors.sops.SOPS.get_sops_value_path" href="#ploigos_step_runner.config.decryptors.sops.SOPS.get_sops_value_path">get_sops_value_path</a></code></li>
 </ul>
 </li>
 </ul>

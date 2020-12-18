@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>psr.config.step_config API documentation</title>
+<title>ploigos_step_runner.config.step_config API documentation</title>
 <meta name="description" content="Representation of an individual step&#39;s step configuration." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>psr.config.step_config</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.config.step_config</code></h1>
 </header>
 <section id="section-intro">
 <p>Representation of an individual step's step configuration.</p>
@@ -32,7 +32,7 @@
 
 import copy
 
-from psr.config.sub_step_config import SubStepConfig
+from ploigos_step_runner.config.sub_step_config import SubStepConfig
 
 
 class StepConfig:
@@ -201,7 +201,7 @@ class StepConfig:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="psr.config.step_config.StepConfig"><code class="flex name class">
+<dt id="ploigos_step_runner.config.step_config.StepConfig"><code class="flex name class">
 <span>class <span class="ident">StepConfig</span></span>
 <span>(</span><span>parent_config, step_name)</span>
 </code></dt>
@@ -387,7 +387,7 @@ class StepConfig:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="psr.config.step_config.StepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
+<dt id="ploigos_step_runner.config.step_config.StepConfig.parent_config"><code class="name">var <span class="ident">parent_config</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -408,7 +408,7 @@ def parent_config(self):
     return self.__parent_config</code></pre>
 </details>
 </dd>
-<dt id="psr.config.step_config.StepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
+<dt id="ploigos_step_runner.config.step_config.StepConfig.step_config_overrides"><code class="name">var <span class="ident">step_config_overrides</span></code></dt>
 <dd>
 <div class="desc"><p>Gets a deep copy of the step configuration overrides.</p>
 <h2 id="returns">Returns</h2>
@@ -432,7 +432,7 @@ def step_config_overrides(self):
     return copy.deepcopy(self.__step_config_overrides)</code></pre>
 </details>
 </dd>
-<dt id="psr.config.step_config.StepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dt id="ploigos_step_runner.config.step_config.StepConfig.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -454,7 +454,7 @@ def step_name(self):
     return self.__step_name</code></pre>
 </details>
 </dd>
-<dt id="psr.config.step_config.StepConfig.sub_steps"><code class="name">var <span class="ident">sub_steps</span></code></dt>
+<dt id="ploigos_step_runner.config.step_config.StepConfig.sub_steps"><code class="name">var <span class="ident">sub_steps</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -479,7 +479,7 @@ def sub_steps(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="psr.config.step_config.StepConfig.add_or_update_sub_step_config"><code class="name flex">
+<dt id="ploigos_step_runner.config.step_config.StepConfig.add_or_update_sub_step_config"><code class="name flex">
 <span>def <span class="ident">add_or_update_sub_step_config</span></span>(<span>self, sub_step_name, sub_step_implementer_name, sub_step_config_dict=None, sub_step_env_config=None)</span>
 </code></dt>
 <dd>
@@ -577,7 +577,7 @@ existing sub step environment configuration.</dd>
         sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 </dd>
-<dt id="psr.config.step_config.StepConfig.get_sub_step"><code class="name flex">
+<dt id="ploigos_step_runner.config.step_config.StepConfig.get_sub_step"><code class="name flex">
 <span>def <span class="ident">get_sub_step</span></span>(<span>self, sub_step_name)</span>
 </code></dt>
 <dd>
@@ -631,20 +631,20 @@ None if no sub step with given name exists as part of this step.</dd>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="psr.config" href="index.html">psr.config</a></code></li>
+<li><code><a title="ploigos_step_runner.config" href="index.html">ploigos_step_runner.config</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="psr.config.step_config.StepConfig" href="#psr.config.step_config.StepConfig">StepConfig</a></code></h4>
+<h4><code><a title="ploigos_step_runner.config.step_config.StepConfig" href="#ploigos_step_runner.config.step_config.StepConfig">StepConfig</a></code></h4>
 <ul class="">
-<li><code><a title="psr.config.step_config.StepConfig.add_or_update_sub_step_config" href="#psr.config.step_config.StepConfig.add_or_update_sub_step_config">add_or_update_sub_step_config</a></code></li>
-<li><code><a title="psr.config.step_config.StepConfig.get_sub_step" href="#psr.config.step_config.StepConfig.get_sub_step">get_sub_step</a></code></li>
-<li><code><a title="psr.config.step_config.StepConfig.parent_config" href="#psr.config.step_config.StepConfig.parent_config">parent_config</a></code></li>
-<li><code><a title="psr.config.step_config.StepConfig.step_config_overrides" href="#psr.config.step_config.StepConfig.step_config_overrides">step_config_overrides</a></code></li>
-<li><code><a title="psr.config.step_config.StepConfig.step_name" href="#psr.config.step_config.StepConfig.step_name">step_name</a></code></li>
-<li><code><a title="psr.config.step_config.StepConfig.sub_steps" href="#psr.config.step_config.StepConfig.sub_steps">sub_steps</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.add_or_update_sub_step_config" href="#ploigos_step_runner.config.step_config.StepConfig.add_or_update_sub_step_config">add_or_update_sub_step_config</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.get_sub_step" href="#ploigos_step_runner.config.step_config.StepConfig.get_sub_step">get_sub_step</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.parent_config" href="#ploigos_step_runner.config.step_config.StepConfig.parent_config">parent_config</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.step_config_overrides" href="#ploigos_step_runner.config.step_config.StepConfig.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.step_name" href="#ploigos_step_runner.config.step_config.StepConfig.step_name">step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.config.step_config.StepConfig.sub_steps" href="#ploigos_step_runner.config.step_config.StepConfig.sub_steps">sub_steps</a></code></li>
 </ul>
 </li>
 </ul>
