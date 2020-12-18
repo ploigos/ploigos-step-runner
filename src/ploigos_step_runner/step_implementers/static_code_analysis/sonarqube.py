@@ -50,7 +50,7 @@ Example: Existing Sonar Properties File (minimal)
 
     #----- Default SonarQube server
     # Config requires the url; this will NOT be used
-    #   sonar.host.url=https://sonarqube-sonarqube.apps.psr.rht-set.com/
+    #   sonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com/
     # Will override:
     #   sonar.projectKey
     #   sonar.projectVersion

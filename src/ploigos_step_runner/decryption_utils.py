@@ -21,7 +21,7 @@ class DecryptionUtils:
         ConfigValueDecryptors that can be used to decrypt given ConfigValue.
     """
 
-    __DEFAULT_DECRYPTORS_MODULE = 'psr.config.decryptors'
+    __DEFAULT_DECRYPTORS_MODULE = 'ploigos_step_runner.config.decryptors'
 
     __obfuscation_streams = []
     __config_value_decryptors = []
@@ -144,7 +144,7 @@ class DecryptionUtils:
         ----------
         decryptor_implementer_name : str
             Either the short name of a ConfigValueDecryptor class which will be dynamically
-            loaded from the 'psr.config.decryptors' module or
+            loaded from the 'ploigos_step_runner.config.decryptors' module or
             A class name that includes a dot seperated module name to load the Class from.
 
         Returns
