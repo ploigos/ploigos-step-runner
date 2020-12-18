@@ -10,7 +10,7 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from psr import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.step_implementers.package import Maven
 
 

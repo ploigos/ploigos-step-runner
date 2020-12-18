@@ -32,7 +32,7 @@ import re
 
 from git import InvalidGitRepositoryError, Repo
 
-from psr import StepImplementer, StepResult
+from ploigos_step_runner import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
     'repo-root': './',

@@ -1,6 +1,6 @@
 import pytest
 
-from psr import StepRunnerException
+from ploigos_step_runner import StepRunnerException
 
 def raise_StepRunnerException():
     raise StepRunnerException('test')

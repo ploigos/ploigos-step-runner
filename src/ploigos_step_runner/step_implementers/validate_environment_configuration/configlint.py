@@ -72,7 +72,7 @@ import os
 import sys
 
 import sh
-from psr import StepImplementer
+from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.step_result import StepResult
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 

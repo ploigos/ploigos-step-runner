@@ -6,7 +6,7 @@
 import re
 
 from testfixtures import TempDirectory
-from psr import StepRunner, StepRunnerException
+from ploigos_step_runner import StepRunner, StepRunnerException
 from ploigos_step_runner.config import Config
 
 from tests.helpers.base_test_case import BaseTestCase

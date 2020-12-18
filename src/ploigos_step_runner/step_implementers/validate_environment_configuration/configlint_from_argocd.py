@@ -28,7 +28,7 @@ Result Artifact Key     | Description
 import os
 from ploigos_step_runner.step_result import StepResult
 
-from psr import StepImplementer
+from ploigos_step_runner import StepImplementer
 
 DEFAULT_CONFIG = {
 }
