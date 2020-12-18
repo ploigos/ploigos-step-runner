@@ -2,7 +2,3 @@
 """
 
 from .sonarqube import SonarQube
-
-__all__ = [
-    'sonarqube'
-]

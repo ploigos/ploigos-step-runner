@@ -2,7 +2,3 @@
 """
 
 from .maven_selenium_cucumber import MavenSeleniumCucumber
-
-__all__ = [
-    'maven_selenium_cucumber'
-]

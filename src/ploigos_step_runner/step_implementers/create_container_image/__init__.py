@@ -2,7 +2,3 @@
 """
 
 from .buildah import Buildah
-
-__all__ = [
-    'buildah'
-]
