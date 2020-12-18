@@ -2,7 +2,3 @@
 """
 
 from .skopeo import Skopeo
-
-__all__ = [
-    'skopeo'
-]

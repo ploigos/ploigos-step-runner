@@ -2,7 +2,3 @@
 """
 
 from .maven import Maven
-
-__all__ = [
-    'maven'
-]

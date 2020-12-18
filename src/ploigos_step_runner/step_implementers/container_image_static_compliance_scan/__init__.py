@@ -2,7 +2,3 @@
 """
 
 from .openscap import OpenSCAP
-
-__all__ = [
-    'openscap'
-]

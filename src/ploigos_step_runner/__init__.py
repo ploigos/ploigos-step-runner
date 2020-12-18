@@ -779,12 +779,12 @@ Examples
 
 Getting Help
 
->>> python -m psr --help
+>>> psr --help
 
 
 Example Running the 'generate-metadata' step
 
->>> python -m psr
+>>> psr
 ...     --config=my-app-step-runner-config.yml
 ...     --results-file=my-app-step-runner-results.yml
 ...     --step=generate-metadata
@@ -798,13 +798,3 @@ from .step_implementer import DefaultSteps, StepImplementer
 from .step_result import StepResult
 from .step_runner import StepRunner
 from .workflow_result import WorkflowResult
-
-__all__ = [
-    'config',
-    'exceptions',
-    'step_implementer',
-    'step_result',
-    'step_runner',
-    'utils',
-    'workflow_result'
-]
