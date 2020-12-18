@@ -19,25 +19,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies 🧰
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .[tests]
-
-    - name: Lint Synatx with pylnit 🧪🖋
-      run: python -m pylint --rcfile=setup.cfg psr
-
-    - name: Lint Synatx with flake8 🧪🖋
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 psr/ --count --select=E9,F63,F7,F82 --show-source --statistics
-
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 psr/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-    - name: Lint Security with bandit 🧪🔏
-      run: |
-        bandit .
+    - name: Lint Syntax 🧪🖋
+      run: tox -e lint
 
   test:
     runs-on: ubuntu-latest
@@ -53,14 +36,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies 🧰
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .[tests]
-
     - name: Test & Coverage 🧪
-      run: |
-        python -m pytest --cov=psr --cov-report=xml tests/
+      run: tox -e test
 
     - name: Upload Coverage Report 🔺📊
       uses: codecov/codecov-action@v1
