@@ -57,7 +57,7 @@ from distutils.util import strtobool
 from io import StringIO
 
 import sh
-from psr import StepResult, StepRunnerException
+from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.file import download_and_decompress_source_to_destination
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback

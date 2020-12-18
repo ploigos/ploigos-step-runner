@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 import sh
-from psr import StepImplementer, StepResult
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.utils.containers import container_registries_login
 
 DEFAULT_CONFIG = {

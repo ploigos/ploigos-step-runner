@@ -8,7 +8,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import create_git_commit_with_sample_file
-from psr import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.step_implementers.generate_metadata import Git
 
 

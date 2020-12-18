@@ -107,7 +107,7 @@ import sys
 
 import sh
 import yaml
-from psr import StepImplementer
+from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_result import StepResult
 

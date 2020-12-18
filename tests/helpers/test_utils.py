@@ -6,7 +6,7 @@ import re
 from io import IOBase
 
 import yaml
-from psr import StepRunner
+from ploigos_step_runner import StepRunner
 
 
 def create_sh_side_effect(

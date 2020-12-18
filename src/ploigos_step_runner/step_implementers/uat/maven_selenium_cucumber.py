@@ -41,7 +41,7 @@ import os
 import sys
 
 import sh
-from ploigos_step_runner.config import ConfigValue
+from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
 from ploigos_step_runner.step_result import StepResult

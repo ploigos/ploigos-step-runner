@@ -56,7 +56,7 @@ Result Artifact Key       | Description
 `container-image-version` | Constructed semantic version (https://semver.org/) without build number
 """
 
-from psr import StepImplementer
+from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.step_result import StepResult
 
 DEFAULT_CONFIG = {

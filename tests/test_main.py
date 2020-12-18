@@ -57,7 +57,7 @@ class TestInit(BaseTestCase):
         -----
         See https://medium.com/opsops/how-to-test-if-name-main-1928367290cb
         """
-        from psr import __main__
+        from ploigos_step_runner import __main__
         with patch.object(__main__, "main", return_value=42):
             with patch.object(__main__, "__name__", "__main__"):
                 with patch.object(__main__.sys, 'exit') as mock_exit:

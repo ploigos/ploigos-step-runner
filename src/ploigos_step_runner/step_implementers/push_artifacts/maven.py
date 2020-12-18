@@ -68,7 +68,7 @@ Examples
 import sys
 
 import sh
-from psr import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
