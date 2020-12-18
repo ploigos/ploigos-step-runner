@@ -4,7 +4,7 @@
 import os
 
 from testfixtures import TempDirectory
-from psr import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_runner import StepRunner

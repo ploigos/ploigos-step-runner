@@ -1,4 +1,4 @@
-from psr import StepImplementer, StepResult
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.config.config_value import ConfigValue
 
 

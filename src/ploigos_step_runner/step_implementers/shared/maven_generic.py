@@ -3,7 +3,7 @@
 
 import os
 
-from ploigos_step_runner.config import ConfigValue
+from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.maven import generate_maven_settings, write_effective_pom
 from ploigos_step_runner.utils.xml import get_xml_element_by_path
