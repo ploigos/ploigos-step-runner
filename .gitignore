@@ -8,6 +8,7 @@ build/
 coverage.xml
 .pytest_cache
 .tox
+*.py,cover
 
 # step runner build & runtime
 src/ploigos_step_runner/version.py
