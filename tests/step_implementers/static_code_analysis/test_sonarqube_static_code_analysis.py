@@ -10,8 +10,8 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc import StepResult, StepRunnerException
-from tssc.step_implementers.static_code_analysis import SonarQube
+from psr import StepResult, StepRunnerException
+from psr.step_implementers.static_code_analysis import SonarQube
 
 
 class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
@@ -54,7 +54,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'username': 'username',
@@ -63,8 +63,8 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -80,15 +80,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_password(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'username': 'username',
             'version': 'notused'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -107,15 +107,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_username(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'password': 'password',
             'version': 'notused'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -135,15 +135,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name',
                 'username': 'username',
@@ -180,7 +180,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
-                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.psr.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
@@ -195,15 +195,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass_no_username_and_password(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name'
 
@@ -238,7 +238,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
-                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.psr.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.working.directory=' + work_dir_path,
@@ -251,12 +251,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_fail_no_properties(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
-                'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name'
 
@@ -296,15 +296,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         sonar_mock
     ):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.tssc.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name',
                 'username': 'username',

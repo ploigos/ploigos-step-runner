@@ -7,11 +7,11 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 import yaml
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.utils.io import (TextIOIndenter, TextIOSelectiveObfuscator,
+from tests.helpers.base_test_case import BaseTestCase
+from psr.utils.io import (TextIOIndenter, TextIOSelectiveObfuscator,
                            create_sh_redirect_to_multiple_streams_fn_callback)
 
-class TestCreateSHRedirectToMultipleStreamsFNCallback(BaseTSSCTestCase):
+class TestCreateSHRedirectToMultipleStreamsFNCallback(BaseTestCase):
     def test_one_stream(self):
         stream_one = StringIO()
         sh_redirect_to_multiple_streams_fn_callback = \
@@ -37,7 +37,7 @@ class TestCreateSHRedirectToMultipleStreamsFNCallback(BaseTSSCTestCase):
         self.assertEqual('data1', stream_one.getvalue())
         self.assertEqual('data1', stream_two.getvalue())
 
-class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
+class TestTextIOSelectiveObfuscator(BaseTestCase):
     def run_test(self, input, expected, randomize_replacment_length=False, obfuscation_targets=None, replacment_char=None):
         out = io.StringIO()
         with redirect_stdout(out):
@@ -163,11 +163,11 @@ class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
             '"service-name": "fruit",\n'
             '"application-name": "reference-quarkus-mvn-jenkins",\n'
             '"organization": "tssc-team"\n'
-            '"argocd-api": "argocd-server-argocd.apps.tssc.rht-set.com",\n'
+            '"argocd-api": "argocd-server-argocd.apps.psr.rht-set.com",\n'
             '"maven-mirrors": {\n'
             '    "internal-mirror": {\n'
             '        "id": "internal-mirror",\n'
-            '        "url": "http://artifactory.apps.tssc.rht-set.com/artifactory/release/",\n'
+            '        "url": "http://artifactory.apps.psr.rht-set.com/artifactory/release/",\n'
             '        "mirror-of": "*"\n'
             '    }\n'
             '},\n'
@@ -181,7 +181,7 @@ class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
 
     def test_yaml_with_blocktext_secret(self):
         yaml_with_blocktext_secret = """---
-            tssc-config:
+            step-runner-config:
                 sign-container-image:
                 -   implementer: PodmanSign
                     config:
@@ -248,7 +248,7 @@ class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
         dict_with_blocktext_secret = yaml.safe_load(yaml_with_blocktext_secret)
 
         private_key_block = dict_with_blocktext_secret \
-            ['tssc-config']['sign-container-image'][0]['config'] \
+            ['step-runner-config']['sign-container-image'][0]['config'] \
                 ['container-image-signer-pgp-private-key']
 
         self.run_test(
@@ -257,7 +257,7 @@ class TestTextIOSelectiveObfuscator(BaseTSSCTestCase):
             obfuscation_targets=private_key_block
         )
 
-class TestTextIOIndenter(BaseTSSCTestCase):
+class TestTextIOIndenter(BaseTestCase):
     def __run_test(self, inputs, expected, indent_level=0, indent_size=4, indent_char=' '):
         out = io.StringIO()
         with redirect_stdout(out):

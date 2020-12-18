@@ -1,6 +1,6 @@
 import pytest
 
-from tssc import StepRunnerException
+from psr import StepRunnerException
 
 def raise_StepRunnerException():
     raise StepRunnerException('test')

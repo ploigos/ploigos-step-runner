@@ -10,8 +10,8 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc import StepResult
-from tssc.step_implementers.package import Maven
+from psr import StepResult
+from psr.step_implementers.package import Maven
 
 
 class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
@@ -86,8 +86,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'war'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -150,8 +150,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -207,8 +207,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_no_pom(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -233,8 +233,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_mvn_error(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -295,8 +295,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -351,8 +351,8 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = ''
             version = ''
             package = ''
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>

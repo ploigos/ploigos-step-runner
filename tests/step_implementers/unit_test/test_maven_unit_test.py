@@ -8,11 +8,11 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from tssc.config.config import Config
-from tssc.step_implementers.unit_test import Maven
-from tssc.step_result import StepResult
-from tssc.utils.file import create_parent_dir
-from tssc.workflow_result import WorkflowResult
+from psr.config.config import Config
+from psr.step_implementers.unit_test import Maven
+from psr.step_result import StepResult
+from psr.utils.file import create_parent_dir
+from psr.workflow_result import WorkflowResult
 
 
 class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
@@ -68,8 +68,8 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
         fail_on_no_tests=None,
         raise_error_on_tests=False
     ):
-        results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-        results_file_name = 'tssc-results.yml'
+        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         test_dir.write('pom.xml', pom_content)
@@ -156,7 +156,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_default_reports_dir(
         self,
         write_effective_pom_mock,
@@ -208,7 +208,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_pom_specified_reports_dir(
         self,
         write_effective_pom_mock,
@@ -264,7 +264,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_missing_surefire_plugin(
         self,
         write_effective_pom_mock,
@@ -322,7 +322,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_no_unit_tests_defined(
         self,
         write_effective_pom_mock,
@@ -377,7 +377,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_fail_on_no_tests_false_and_no_tests(
         self,
         write_effective_pom_mock,
@@ -432,7 +432,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_mvn_test_failure(
         self,
         write_effective_pom_mock,

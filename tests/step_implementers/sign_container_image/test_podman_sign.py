@@ -12,9 +12,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, StringRegexParam
-from tssc.exceptions import StepRunnerException
-from tssc.step_implementers.sign_container_image import PodmanSign
-from tssc.step_result import StepResult
+from psr.exceptions import StepRunnerException
+from psr.step_implementers.sign_container_image import PodmanSign
+from psr.step_result import StepResult
 
 
 class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
@@ -108,8 +108,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_pass(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
@@ -184,8 +184,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_import_pgp_key(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             container_image_tag = 'does/not/matter:v0.42.0'
@@ -237,8 +237,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_sign_image(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()

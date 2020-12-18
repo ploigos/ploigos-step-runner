@@ -5,11 +5,11 @@ import pickle
 import filecmp
 from testfixtures import TempDirectory
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 
-from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
-from tssc.exceptions import StepRunnerException
+from psr.step_result import StepResult
+from psr.workflow_result import WorkflowResult
+from psr.exceptions import StepRunnerException
 
 
 def setup_test():
@@ -66,7 +66,7 @@ def setup_test_sub_steps():
     return wfr
 
 
-class TestStepWorkflowResultTest(BaseTSSCTestCase):
+class TestStepWorkflowResultTest(BaseTestCase):
     """
     :return:
     """
@@ -272,7 +272,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             wfr.add_step_result(step_result="bad")
 
     def test_write_results_to_yml_file(self):
-        expected_yml_result = """tssc-results:
+        expected_yml_result = """step-runner-results:
     step1:
         sub1:
             artifacts:
@@ -329,7 +329,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
 
     def test_write_results_to_json_file(self):
         expected_json_result = """{
-    "tssc-results": {
+    "step-runner-results": {
         "step1": {
             "sub1": {
                 "sub-step-implementer-name": "implementer1",
@@ -499,7 +499,7 @@ class TestStepWorkflowResultTest(BaseTSSCTestCase):
             expected_wfr.write_to_pickle_file(pickle_file)
             pickle_wfr = WorkflowResult.load_from_pickle_file(pickle_file)
 
-    def test_load_from_pickle_file_tssc_exception(self):
+    def test_load_from_pickle_file_exception(self):
         with TempDirectory() as temp_dir:
             pickle_file_name = temp_dir.path + '/test.pkl'
 

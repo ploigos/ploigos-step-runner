@@ -25,16 +25,16 @@ jobs:
         pip install -e .[tests]
 
     - name: Lint Synatx with pylnit 🧪🖋
-      run: python -m pylint --rcfile=setup.cfg tssc
+      run: python -m pylint --rcfile=setup.cfg psr
 
     - name: Lint Synatx with flake8 🧪🖋
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 tssc/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        
+        flake8 psr/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 tssc/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
- 
+        flake8 psr/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
     - name: Lint Security with bandit 🧪🔏
       run: |
         bandit .
@@ -60,8 +60,8 @@ jobs:
 
     - name: Test & Coverage 🧪
       run: |
-        python -m pytest --cov=tssc --cov-report=xml tests/
- 
+        python -m pytest --cov=psr --cov-report=xml tests/
+
     - name: Upload Coverage Report 🔺📊
       uses: codecov/codecov-action@v1
       with:

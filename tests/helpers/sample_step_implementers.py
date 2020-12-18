@@ -1,5 +1,5 @@
-from tssc import StepImplementer, StepResult
-from tssc.config.config_value import ConfigValue
+from psr import StepImplementer, StepResult
+from psr.config.config_value import ConfigValue
 
 
 class FailStepImplementer(StepImplementer):

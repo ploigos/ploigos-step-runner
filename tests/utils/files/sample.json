@@ -1,5 +1,5 @@
 {
-  "tssc-config": {
+  "step-runner-config": {
     "config-decryptors": [
       {
         "implementer": "SOPS"
@@ -58,7 +58,7 @@
       {
         "implementer": "Git",
         "config": {
-          "username": "sa-tssc-reference-apps"
+          "username": "sa-ploigos-reference-apps"
         }
       }
     ],
@@ -96,7 +96,7 @@
       {
         "implementer": "Buildah",
         "config": {
-          "destination": "localhost/tssc-reference-app-quarkus-rest-json"
+          "destination": "localhost/ploigos-reference-app-quarkus-rest-json"
         }
       }
     ],
@@ -121,14 +121,14 @@
         "implementer": "ArgoCD",
         "config": {
           "git-email": "napsspo+tssc@redhat.com",
-          "helm-config-repo": "http://gitea.gitea.svc.cluster.local:3000/tssc-references/reference-app.git",
+          "helm-config-repo": "http://gitea.gitea.svc.cluster.local:3000/ploigos-references/reference-app.git",
           "num-replicas": 1,
           "route-enabled": true,
           "readiness-probe-path": "/fruits",
           "liveness-probe-path": "/fruits",
           "destination-url": "docker://quay-quay-enterprise.example.xyz",
           "argocd-username": "admin",
-          "git-username": "sa-tssc-reference-apps"
+          "git-username": "sa-ploigos-reference-apps"
         }
       }
     ],

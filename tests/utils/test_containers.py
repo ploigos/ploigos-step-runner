@@ -4,11 +4,11 @@ import re
 from io import IOBase
 from unittest.mock import patch, call
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import *
 
-from tssc.config import ConfigValue
-from tssc.utils.containers import container_registry_login, container_registries_login
+from psr.config import ConfigValue
+from psr.utils.containers import container_registry_login, container_registries_login
 
 def create_which_side_effect(cmd, cmd_path):
     def which_side_effect(*args, **kwargs):
@@ -19,7 +19,7 @@ def create_which_side_effect(cmd, cmd_path):
 
     return which_side_effect
 
-class TestContainerRegistryLogin(BaseTSSCTestCase):
+class TestContainerRegistryLogin(BaseTestCase):
     @patch('sh.buildah', create=True)
     @patch('sh.which', create=True)
     def test_buildah(self, which_mock, container_command_mock):
@@ -332,8 +332,8 @@ class TestContainerRegistryLogin(BaseTSSCTestCase):
                 container_registry_password='nope'
             )
 
-class TestContainerRegistriesLogin(BaseTSSCTestCase):
-    @patch('tssc.utils.containers.container_registry_login')
+class TestContainerRegistriesLogin(BaseTestCase):
+    @patch('psr.utils.containers.container_registry_login')
     def test_dict_of_dicts(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -366,7 +366,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_dict_of_dicts_with_tls_verify_value(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -401,7 +401,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_list_of_dicts_with_containers_config_auth_file(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -436,7 +436,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_dict_of_config_values(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': ConfigValue({
@@ -469,7 +469,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_dict_of_dicts_with_uri_keys(self, container_registry_login_mock):
         registries = {
             'redhat': {
@@ -504,7 +504,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_list_of_dicts(self, container_registry_login_mock):
         registries = [
             {
@@ -539,7 +539,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_list_of_dicts_with_tls_verify_value(self, container_registry_login_mock):
         registries = [
             {
@@ -576,7 +576,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_list_of_dicts_with_containers_config_auth_file(self, container_registry_login_mock):
         registries = [
             {
@@ -611,7 +611,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_list_of_config_value(self, container_registry_login_mock):
         registries = [
             ConfigValue({
@@ -733,7 +733,7 @@ class TestContainerRegistriesLogin(BaseTSSCTestCase):
         ):
             container_registries_login(registries)
 
-    @patch('tssc.utils.containers.container_registry_login')
+    @patch('psr.utils.containers.container_registry_login')
     def test_registries_none(self, container_registry_login):
         registries = None
 

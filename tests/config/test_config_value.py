@@ -5,14 +5,14 @@ import unittest
 from testfixtures import TempDirectory
 from unittest.mock import patch
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import Any, create_sops_side_effect
 
-from tssc.config import Config, ConfigValue
-from tssc.decryption_utils import DecryptionUtils
-from tssc.config.decryptors.sops import SOPS
+from psr.config import Config, ConfigValue
+from psr.decryption_utils import DecryptionUtils
+from psr.config.decryptors.sops import SOPS
 
-class TestConfigValue(BaseTSSCTestCase):
+class TestConfigValue(BaseTestCase):
     def test__eq__is_equal_basic(self):
         test1 = ConfigValue('foo1', None, None)
         test2 = ConfigValue('foo1', None, None)
@@ -37,7 +37,7 @@ class TestConfigValue(BaseTSSCTestCase):
 
         self.assertEqual(test1, test2)
 
-    def test__eq__is_not_equal_both_tssc_config_value_objects(self):
+    def test__eq__is_not_equal_both_config_value_objects(self):
         test1 = ConfigValue('foo1', None, None)
         test2 = ConfigValue('foo2', None, None)
 
@@ -51,7 +51,7 @@ class TestConfigValue(BaseTSSCTestCase):
 
     def test__repr__(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -64,19 +64,19 @@ class TestConfigValue(BaseTSSCTestCase):
         }
 
         ConfigValue.convert_leaves_to_config_values(
-            values=source[Config.TSSC_CONFIG_KEY],
+            values=source[Config.CONFIG_KEY],
             parent_source=source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
         self.assertEqual(
-            str(source[Config.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1']),
-            "ConfigValue(value=foo, value_path='['tssc-config', 'step-foo', 0, 'config', 'test1']')"
+            str(source[Config.CONFIG_KEY]['step-foo'][0]['config']['test1']),
+            "ConfigValue(value=foo, value_path='['step-runner-config', 'step-foo', 0, 'config', 'test1']')"
         )
 
     def test_convert_leaves_to_config_values_0(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -89,13 +89,13 @@ class TestConfigValue(BaseTSSCTestCase):
         }
 
         ConfigValue.convert_leaves_to_config_values(
-            values=source[Config.TSSC_CONFIG_KEY],
+            values=source[Config.CONFIG_KEY],
             parent_source=source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
         expected = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': ConfigValue('foo1', None, None),
@@ -111,7 +111,7 @@ class TestConfigValue(BaseTSSCTestCase):
 
     def test_convert_leaves_to_config_values_existing_ConfigValue_leaf(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -125,13 +125,13 @@ class TestConfigValue(BaseTSSCTestCase):
         }
 
         ConfigValue.convert_leaves_to_config_values(
-            values=source[Config.TSSC_CONFIG_KEY],
+            values=source[Config.CONFIG_KEY],
             parent_source=source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
         expected = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': ConfigValue('foo1', None, None),
@@ -148,7 +148,7 @@ class TestConfigValue(BaseTSSCTestCase):
 
     def test_convert_leaves_to_config_values_none_value_leaf(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -161,13 +161,13 @@ class TestConfigValue(BaseTSSCTestCase):
         }
 
         ConfigValue.convert_leaves_to_config_values(
-            values=source[Config.TSSC_CONFIG_KEY],
+            values=source[Config.CONFIG_KEY],
             parent_source=source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
         expected = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': ConfigValue('foo1', None, None),
@@ -183,7 +183,7 @@ class TestConfigValue(BaseTSSCTestCase):
 
     def test_value_path_given_inital_value_path_parts(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -196,18 +196,18 @@ class TestConfigValue(BaseTSSCTestCase):
         }
 
         ConfigValue.convert_leaves_to_config_values(
-            values=source[Config.TSSC_CONFIG_KEY],
+            values=source[Config.CONFIG_KEY],
             parent_source=source,
-            path_parts=[Config.TSSC_CONFIG_KEY]
+            path_parts=[Config.CONFIG_KEY]
         )
 
         self.assertEqual(
-            source[Config.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
-            ['tssc-config', 'step-foo', 0, 'config', 'test1'])
+            source[Config.CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
+            ['step-runner-config', 'step-foo', 0, 'config', 'test1'])
 
     def test_value_path_given_no_inital_value_path_parts(self):
         source = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': 'foo1',
@@ -225,12 +225,12 @@ class TestConfigValue(BaseTSSCTestCase):
         )
 
         self.assertEqual(
-            source[Config.TSSC_CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
-            ['tssc-config', 'step-foo', 0, 'config', 'test1'])
+            source[Config.CONFIG_KEY]['step-foo'][0]['config']['test1'].path_parts,
+            ['step-runner-config', 'step-foo', 0, 'config', 'test1'])
 
     def test_convert_leaves_to_values_all_config_value_leaves(self):
         source_values = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': ConfigValue('foo1', None, None),
@@ -247,7 +247,7 @@ class TestConfigValue(BaseTSSCTestCase):
         self.assertEqual(
             converted,
             {
-                Config.TSSC_CONFIG_KEY: {
+                Config.CONFIG_KEY: {
                     'step-foo': [
                         {
                             'implementer': 'foo1',
@@ -262,13 +262,13 @@ class TestConfigValue(BaseTSSCTestCase):
 
     def test_convert_leaves_to_values_mixed_leaves(self):
         source_values = {
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 'step-foo': [
                     {
                         'implementer': ConfigValue('foo1', None, None),
                         'config': {
                             'test1': ConfigValue('foo', None, None),
-                            'test': 'not a tssc config value object'
+                            'test': 'not a config value object'
                         }
                     }
                 ]
@@ -280,13 +280,13 @@ class TestConfigValue(BaseTSSCTestCase):
         self.assertEqual(
             converted,
             {
-                Config.TSSC_CONFIG_KEY: {
+                Config.CONFIG_KEY: {
                     'step-foo': [
                         {
                             'implementer': 'foo1',
                             'config': {
                                 'test1': 'foo',
-                                'test': 'not a tssc config value object'
+                                'test': 'not a config value object'
                             }
                         }
                     ]
@@ -300,13 +300,13 @@ class TestConfigValue(BaseTSSCTestCase):
             os.path.dirname(__file__),
             'decryptors',
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         DecryptionUtils.register_config_value_decryptor(SOPS())
@@ -315,7 +315,7 @@ class TestConfigValue(BaseTSSCTestCase):
         decrypted_value = config_value.value
         sops_mock.assert_called_once_with(
             '--decrypt',
-            '--extract=["tssc-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
+            '--extract=["step-runner-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
             None,
             encrypted_config_file_path,
             _in=None,

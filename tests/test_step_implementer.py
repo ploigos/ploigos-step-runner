@@ -4,11 +4,11 @@
 import os
 
 from testfixtures import TempDirectory
-from tssc import StepResult
-from tssc.config import Config
-from tssc.exceptions import StepRunnerException
-from tssc.factory import TSSCFactory
-from tssc.workflow_result import WorkflowResult
+from psr import StepResult
+from psr.config import Config
+from psr.exceptions import StepRunnerException
+from psr.step_runner import StepRunner
+from psr.workflow_result import WorkflowResult
 
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -25,15 +25,15 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             expected_step_results,
             test_dir,
             environment=None):
-        working_dir_path = os.path.join(test_dir.path, 'tssc-working')
-        results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-        factory = TSSCFactory(config, results_dir_path, 'tssc-results.yml', working_dir_path)
+        working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
+        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+        factory = StepRunner(config, results_dir_path, 'step-runner-results.yml', working_dir_path)
         factory.run_step(
             step_name=step,
             environment=environment
         )
 
-        pickle = f'{working_dir_path}/tssc-results.pkl'
+        pickle = f'{working_dir_path}/step-runner-results.pkl'
         workflow_results = WorkflowResult.load_from_pickle_file(pickle)
 
         step_result = workflow_results.get_step_result(
@@ -43,7 +43,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_one_step_writes_to_empty_results_file(self):
         config1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer':
                         'tests.helpers.sample_step_implementers.'
@@ -87,7 +87,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_one_step_existing_results_file_bad_pickle(self):
         config = {
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.'
                                    'WriteConfigAsResultsStepImplementer',
@@ -101,8 +101,8 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-working')
-            results_file_path = os.path.join(results_dir_path, 'tssc-results.pkl')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-working')
+            results_file_path = os.path.join(results_dir_path, 'step-runner-results.pkl')
             test_dir.write(results_file_path, b'''{}bad[yaml}''')
 
             with self.assertRaisesRegex(
@@ -117,7 +117,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_boolean_false_config_variable(self):
         config = {
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.'
                                    'WriteConfigAsResultsStepImplementer',
@@ -154,7 +154,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_one_step_existing_results_file_empty(self):
         config = {
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.'
                                    'WriteConfigAsResultsStepImplementer',
@@ -189,8 +189,8 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-working')
-            results_file_path = os.path.join(results_dir_path, 'tssc-results.pkl')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-working')
+            results_file_path = os.path.join(results_dir_path, 'step-runner-results.pkl')
             test_dir.write(results_file_path, b'''''')
             self._run_step_implementer_test(
                 config,
@@ -201,7 +201,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_global_environment_default_config(self):
         config1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'global-environment-defaults': {
                     'SAMPLE-ENV-1': {
                         'sample-config-option-1': 'sample env 1 value'
@@ -295,7 +295,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_step_environment_config(self):
         config1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.'
                                    'WriteConfigAsResultsStepImplementer',
@@ -388,7 +388,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_global_environment_default_and_step_environment_config(self):
         config1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'global-environment-defaults': {
                     'SAMPLE-ENV-1': {
                         'sample-config-option-1': 'global env config - env 1 value - 1',
@@ -503,7 +503,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_empty_constructor_params(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'write-config-as-results': {
                     'implementer': 'tests.helpers.sample_step_implementers.'
                                    'WriteConfigAsResultsStepImplementer'
@@ -529,7 +529,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_missing_required_config_key(self):
         config = {
-            'tssc-config': {
+            'step-runner-config': {
                 'required-step-config-test': {
                     'implementer':
                         'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
@@ -563,7 +563,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_write_working_file(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {}
@@ -575,11 +575,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -592,7 +592,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_write_working_file_touch(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {}
@@ -604,11 +604,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -627,8 +627,8 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             step = self.create_given_step_implementer(
@@ -646,7 +646,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_get_config_value_with_env(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {
@@ -669,11 +669,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
@@ -687,7 +687,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_has_config_value(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {
@@ -712,11 +712,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
@@ -733,7 +733,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_fail(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FailStepImplementer',
                     'config': {}
@@ -745,11 +745,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FailStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FailStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -759,7 +759,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_create_working_dir_sub_dir(self):
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {}
@@ -771,11 +771,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            working_dir_path = os.path.join(test_dir.path, 'tssc-working')
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 results_dir_path=results_dir_path,
-                results_file_name='tssc-results.yml',
+                results_file_name='step-runner-results.yml',
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -791,7 +791,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
     def test_result_files_and_paths(self):
         # overkill on tests here
         config = Config({
-            'tssc-config': {
+            'step-runner-config': {
                 'foo': {
                     'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
                     'config': {}
@@ -843,8 +843,8 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             artifact_config = {
@@ -875,8 +875,8 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'test': 'hello world'
         }
 
-        results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-        results_file_name = 'tssc-results.yml'
+        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         workflow_result = WorkflowResult()
@@ -904,7 +904,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             value='https://awesome-app.prod.ploigos.xyz'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_prod)
-        pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
+        pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
         workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
 
         return self.create_given_step_implementer(

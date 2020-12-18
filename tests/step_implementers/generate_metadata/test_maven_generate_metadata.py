@@ -6,8 +6,8 @@ import os
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.generate_metadata import Maven
-from tssc.step_result import StepResult
+from psr.step_implementers.generate_metadata import Maven
+from psr.step_result import StepResult
 
 
 class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
@@ -44,8 +44,8 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>
@@ -72,8 +72,8 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_package_file_does_not_exist(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -98,8 +98,8 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>
@@ -135,8 +135,8 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_version_in_pom_file(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>

@@ -6,7 +6,7 @@ import re
 from io import IOBase
 
 import yaml
-from tssc import TSSCFactory
+from psr import StepRunner
 
 
 def create_sh_side_effect(

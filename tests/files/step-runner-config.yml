@@ -1,0 +1,5 @@
+---
+step-runner-config:
+  required-step-config-test:
+    implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+    config: {}

@@ -11,8 +11,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, StringRegexParam
-from tssc.step_implementers.sign_container_image import CurlPush
-from tssc.step_result import StepResult
+from psr.step_implementers.sign_container_image import CurlPush
+from psr.step_result import StepResult
 
 
 class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
@@ -55,8 +55,8 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     @patch('sh.curl', create=True)
     def test_run_step_pass(self, curl_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             signature_file_path = 'signature-1'
             temp_dir.write(signature_file_path, b'bogus signature')
@@ -114,8 +114,8 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     @patch('sh.curl', create=True)
     def test_run_step_fail(self, curl_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             signature_file_path = 'signature-1'
             temp_dir.write(signature_file_path, b'bogus signature')

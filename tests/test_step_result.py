@@ -1,12 +1,12 @@
 """
   Test ResultStep
 """
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.step_result import StepResult
-from tssc.exceptions import StepRunnerException
+from tests.helpers.base_test_case import BaseTestCase
+from psr.step_result import StepResult
+from psr.exceptions import StepRunnerException
 
 
-class TestStepResultTest(BaseTSSCTestCase):
+class TestStepResultTest(BaseTestCase):
     """
     Test StepResult
     """

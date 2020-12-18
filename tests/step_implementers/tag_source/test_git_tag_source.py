@@ -11,9 +11,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from tssc.exceptions import StepRunnerException
-from tssc.step_implementers.tag_source import Git
-from tssc.step_result import StepResult
+from psr.exceptions import StepRunnerException
+from psr.step_implementers.tag_source import Git
+from psr.step_result import StepResult
 
 
 class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
@@ -47,8 +47,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
          with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
@@ -66,8 +66,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_username(self):
          with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
@@ -88,8 +88,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_password(self):
          with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
@@ -118,9 +118,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_pass(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -172,9 +172,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_pass_http(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'http://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'http://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -225,9 +225,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_pass_https(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'https://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'https://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -279,9 +279,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_pass_no_username_password(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -331,9 +331,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_fail_http_no_username_password(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'http://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'http://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -383,9 +383,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_fail_https_no_username_password(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'https://gitea.apps.tssc.rht-set.com/tssc-references/tssc-reference-app-quarkus-rest-json.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'https://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -434,9 +434,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_error_git_tag(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -493,9 +493,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_error_git_url(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -549,9 +549,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test_run_step_error_git_push(self, git_push_mock, git_tag_mock, git_url_mock, get_tag_mock):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -612,9 +612,9 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test__get_tag_no_version(self, git_push_mock, git_tag_mock, git_url_mock):
         with TempDirectory() as temp_dir:
             tag = 'latest'
-            url = 'git@github.com:rhtconsulting/tssc-python-package.git'
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            url = 'git@github.com:ploigos/ploigos-step-runner.git'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -665,8 +665,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         remote_origin_url = "https://does.not.matter.xyz/foo.git"
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -694,8 +694,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     @patch('sh.git', create=True)
     def test__git_url_url_from_git_config_error(self, git_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -726,8 +726,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         remote_origin_url = "https://does.not.matter.xyz/foo.git"
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -760,8 +760,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         git_tag_value = "1.0+69442c8"
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -794,8 +794,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         git_tag_value = "1.0+69442c8"
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -828,8 +828,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         url = 'www.xyz.com'
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -861,8 +861,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test__git_push_no_url_success(self, git_mock):
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -894,8 +894,8 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         url = 'www.xyz.com'
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
