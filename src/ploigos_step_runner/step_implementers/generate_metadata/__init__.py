@@ -1,7 +1,7 @@
 """`StepImplementers` for the `generate-metadata` step.
 """
 
-from .git import Git
-from .maven import Maven
-from .npm import Npm
-from .semantic_version import SemanticVersion
+from ploigos_step_runner.step_implementers.generate_metadata.git import Git
+from ploigos_step_runner.step_implementers.generate_metadata.maven import Maven
+from ploigos_step_runner.step_implementers.generate_metadata.npm import Npm
+from ploigos_step_runner.step_implementers.generate_metadata.semantic_version import SemanticVersion

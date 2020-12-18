@@ -1,4 +1,4 @@
 """`StepImplementers` for the `deploy` step.
 """
 
-from .argocd import ArgoCD
+from ploigos_step_runner.step_implementers.deploy.argocd import ArgoCD
