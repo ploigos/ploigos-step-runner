@@ -25,7 +25,7 @@ not yet released
 
 Latest Development Release
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple psr
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple ploigos-step-runner
 ```
 
 ## Development
@@ -43,7 +43,7 @@ python -m pip install -e '.[tests]'
 
 ### Run Tests
 ```bash
-python -m pytest --cov=psr --cov-report term-missing tests
+tox -e test
 ```
 
 Or to run for just a particular implementer, and include the sections of code that you didn't cover
@@ -54,13 +54,12 @@ python3 -m pytest --cov=psr --cov-report term-missing tests/step_implementers/pa
 
 ### Run linter
 ```bash
-python -m pylint --rcfile=setup.cfg psr
+tox -e lint
 ```
 
 ### Generate the Documentation Locally
 If you are updating the python documentation and want to generate locally this is how you do it.
 
 ```bash
-pip install pdoc3
-pdoc3 --html --output-dir pdoc3-html psr/
+tox -e docs
 ```
