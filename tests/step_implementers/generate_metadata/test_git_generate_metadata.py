@@ -8,8 +8,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import create_git_commit_with_sample_file
-from tssc import StepResult
-from tssc.step_implementers.generate_metadata import Git
+from psr import StepResult
+from psr.step_implementers.generate_metadata import Git
 
 
 class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
@@ -47,8 +47,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
@@ -74,8 +74,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_root_dir_is_not_git_repo(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'repo-root': '/'
@@ -104,8 +104,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_root_dir_is_bare_git_repo(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             Repo.init(str(temp_dir.path), bare=True)
 
@@ -136,8 +136,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_no_commit_history(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             Repo.init(str(temp_dir.path))
 
@@ -173,8 +173,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_git_repo_with_single_commit_on_master(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
@@ -200,8 +200,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_git_repo_with_single_commit_on_feature(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
@@ -232,8 +232,8 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_directory_is_detached(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 

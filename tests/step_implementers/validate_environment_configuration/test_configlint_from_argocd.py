@@ -6,9 +6,9 @@ import os
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.validate_environment_configuration import \
+from psr.step_implementers.validate_environment_configuration import \
     ConfiglintFromArgocd
-from tssc.step_result import StepResult
+from psr.step_result import StepResult
 
 
 class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
@@ -47,8 +47,8 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'yamlnotused'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -87,8 +87,8 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_path_file_from_deploy(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'yamlnotused'
             test_file_path = os.path.join(temp_dir.path, test_file_name)

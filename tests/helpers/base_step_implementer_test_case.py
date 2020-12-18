@@ -6,16 +6,16 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 
 import yaml
-from tssc.factory import TSSCFactory
-from tssc.config.config import Config
-from tssc.exceptions import StepRunnerException
-from tssc.step_result import StepResult
-from tssc.workflow_result import WorkflowResult
+from psr.step_runner import StepRunner
+from psr.config.config import Config
+from psr.exceptions import StepRunnerException
+from psr.step_result import StepResult
+from psr.workflow_result import WorkflowResult
 
-from .base_tssc_test_case import BaseTSSCTestCase
+from .base_test_case import BaseTestCase
 
 
-class BaseStepImplementerTestCase(BaseTSSCTestCase):
+class BaseStepImplementerTestCase(BaseTestCase):
     def create_given_step_implementer(
         self,
         step_implementer,
@@ -28,7 +28,7 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
         work_dir_path='',
     ):
         config = Config({
-            Config.TSSC_CONFIG_KEY: {
+            Config.CONFIG_KEY: {
                 step_name: [
                     {
                         'implementer': implementer,
@@ -78,5 +78,5 @@ class BaseStepImplementerTestCase(BaseTSSCTestCase):
             )
         workflow_result = WorkflowResult()
         workflow_result.add_step_result(step_result=step_result)
-        pickle_filename = os.path.join(work_dir_path, 'tssc-results.pkl')
+        pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
         workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)

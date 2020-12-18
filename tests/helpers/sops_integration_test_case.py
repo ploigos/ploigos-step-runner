@@ -2,9 +2,9 @@ import unittest
 import sh
 import os
 
-from .base_tssc_test_case import BaseTSSCTestCase
+from .base_test_case import BaseTestCase
 
-class SOPSIntegrationTestCase(BaseTSSCTestCase):
+class SOPSIntegrationTestCase(BaseTestCase):
     TESTS_GPG_KEY_FINGERPRINT = '6F70E1656E932EFEE8AD898A98871DAE82786C09'
 
     def setUp(self):
@@ -32,7 +32,7 @@ class SOPSIntegrationTestCase(BaseTSSCTestCase):
         gpg_private_key_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-python-package-tests-private.asc'
+            'ploigos-step-runner-tests-private.asc'
         )
         sh.gpg( # pylint: disable=no-member
             '--import',

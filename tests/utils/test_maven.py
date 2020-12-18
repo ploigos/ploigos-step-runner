@@ -9,12 +9,12 @@ from unittest.mock import patch
 
 import sh
 from testfixtures import TempDirectory
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.exceptions import StepRunnerException
-from tssc.utils.maven import *
+from tests.helpers.base_test_case import BaseTestCase
+from psr.exceptions import StepRunnerException
+from psr.utils.maven import *
 
 
-class TestMavenUtils(BaseTSSCTestCase):
+class TestMavenUtils(BaseTestCase):
     # def test_generate_maven_settings_maven_servers_is_none(self):
 
     def test_generate_maven_servers_exist(self):

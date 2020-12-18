@@ -1,11 +1,11 @@
 
 
-from tssc.config.config_value import ConfigValue
-from tssc.config.config_value_decryptor import ConfigValueDecryptor
-from tssc.decryption_utils import DecryptionUtils
-from tssc.exceptions import StepRunnerException
-from tssc.utils.io import TextIOSelectiveObfuscator
-from tssc.config.decryptors.sops import SOPS
+from psr.config.config_value import ConfigValue
+from psr.config.config_value_decryptor import ConfigValueDecryptor
+from psr.decryption_utils import DecryptionUtils
+from psr.exceptions import StepRunnerException
+from psr.utils.io import TextIOSelectiveObfuscator
+from psr.config.decryptors.sops import SOPS
 
 from contextlib import redirect_stdout
 import io
@@ -13,7 +13,7 @@ import unittest
 import re
 import sys
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 
 class SampleConfigValueDecryptor(ConfigValueDecryptor):
     ENCRYPTED_VALUE_REGEX = r'^TEST_ENC\[(.*)\]$'
@@ -51,7 +51,7 @@ class RequiredConstructorParamsConfigValueDecryptor(ConfigValueDecryptor):
 class BadConfigValueDecryptor:
     pass
 
-class TestDecryptionUtils(BaseTSSCTestCase):
+class TestDecryptionUtils(BaseTestCase):
     def test_decrypt_no_decryptors(self):
         config_value = ConfigValue(
             'attempt to decrypt me'
@@ -131,7 +131,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
 
     def test__get_decryption_class_sops_full_name(self):
         decryptor_class = DecryptionUtils._DecryptionUtils__get_decryption_class(
-            'tssc.config.decryptors.sops.SOPS'
+            'psr.config.decryptors.sops.SOPS'
         )
         self.assertEqual(
             decryptor_class,
@@ -142,7 +142,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
         with self.assertRaisesRegex(
             StepRunnerException,
             r"Could not dynamically load decryptor implementer \(DoesNotExist\) " \
-            r"from module \(tssc.config.decryptors\) with class name \(DoesNotExist\)"
+            r"from module \(psr.config.decryptors\) with class name \(DoesNotExist\)"
         ):
             DecryptionUtils._DecryptionUtils__get_decryption_class('DoesNotExist')
 
@@ -160,7 +160,7 @@ class TestDecryptionUtils(BaseTSSCTestCase):
             r"For decryptor implementer \(tests.test_decryption_utils.BadConfigValueDecryptor\) " \
             r"dynamically loaded class \(<class 'tests.test_decryption_utils." \
             r"BadConfigValueDecryptor'>\) which is not sub class of " \
-            r"\(<class 'tssc.config.config_value_decryptor.ConfigValueDecryptor'>\) and should be."
+            r"\(<class 'psr.config.config_value_decryptor.ConfigValueDecryptor'>\) and should be."
         ):
             DecryptionUtils._DecryptionUtils__get_decryption_class(
                 'tests.test_decryption_utils.BadConfigValueDecryptor'

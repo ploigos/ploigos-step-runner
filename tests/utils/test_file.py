@@ -2,13 +2,13 @@
 import os
 
 from testfixtures import TempDirectory
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.utils.file import (create_parent_dir,
+from tests.helpers.base_test_case import BaseTestCase
+from psr.utils.file import (create_parent_dir,
                              download_and_decompress_source_to_destination,
                              parse_yaml_or_json_file)
 
 
-class TestParseYAMLOrJASONFile(BaseTSSCTestCase):
+class TestParseYAMLOrJASONFile(BaseTestCase):
     def test_import_yaml(self):
         sample_file_path = os.path.join(
             os.path.dirname(__file__),
@@ -18,9 +18,9 @@ class TestParseYAMLOrJASONFile(BaseTSSCTestCase):
         sample_dict = parse_yaml_or_json_file(sample_file_path)
 
         self.assertTrue(isinstance(sample_dict, dict))
-        self.assertIsNotNone(sample_dict['tssc-config'])
-        self.assertEqual(sample_dict['tssc-config']['global-defaults']['service-name'], 'fruit')
-        self.assertEqual(sample_dict['tssc-config']['package'][0]['implementer'], 'Maven')
+        self.assertIsNotNone(sample_dict['step-runner-config'])
+        self.assertEqual(sample_dict['step-runner-config']['global-defaults']['service-name'], 'fruit')
+        self.assertEqual(sample_dict['step-runner-config']['package'][0]['implementer'], 'Maven')
 
     def test_import_json(self):
         sample_file_path = os.path.join(
@@ -31,9 +31,9 @@ class TestParseYAMLOrJASONFile(BaseTSSCTestCase):
         sample_dict = parse_yaml_or_json_file(sample_file_path)
 
         self.assertTrue(isinstance(sample_dict, dict))
-        self.assertIsNotNone(sample_dict['tssc-config'])
-        self.assertEqual(sample_dict['tssc-config']['global-defaults']['service-name'], 'fruit')
-        self.assertEqual(sample_dict['tssc-config']['package'][0]['implementer'], 'Maven')
+        self.assertIsNotNone(sample_dict['step-runner-config'])
+        self.assertEqual(sample_dict['step-runner-config']['global-defaults']['service-name'], 'fruit')
+        self.assertEqual(sample_dict['step-runner-config']['package'][0]['implementer'], 'Maven')
 
     def test_import_bad(self):
         sample_file_path = os.path.join(
@@ -48,7 +48,7 @@ class TestParseYAMLOrJASONFile(BaseTSSCTestCase):
         ):
             parse_yaml_or_json_file(sample_file_path)
 
-class TestDownloadAndDecompressSourceToDestination(BaseTSSCTestCase):
+class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
     def test_https_bz2(self):
         with TempDirectory() as test_dir:
 

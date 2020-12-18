@@ -1,5 +1,5 @@
 ---
-tssc-config:
+step-runner-config:
   config-decryptors:
   - implementer: SOPS
   global-defaults:
@@ -35,7 +35,7 @@ tssc-config:
   tag-source:
   - implementer: Git
     config:
-      username: sa-tssc-reference-apps
+      username: sa-ploigos-reference-apps
   unit-test:
   - implementer: Maven
     config: {
@@ -57,7 +57,7 @@ tssc-config:
   create-container-image:
   - implementer: Buildah
     config:
-      destination: localhost/tssc-reference-app-quarkus-rest-json
+      destination: localhost/ploigos-reference-app-quarkus-rest-json
   push-container-image:
   - implementer: Skopeo
     config:
@@ -70,14 +70,14 @@ tssc-config:
   - implementer: ArgoCD
     config:
       git-email: 'napsspo+tssc@redhat.com'
-      helm-config-repo: http://gitea.gitea.svc.cluster.local:3000/tssc-references/reference-app.git
+      helm-config-repo: http://gitea.gitea.svc.cluster.local:3000/ploigos-references/reference-app.git
       num-replicas: 1
       route-enabled: true
       readiness-probe-path: /fruits
       liveness-probe-path: /fruits
       destination-url: docker://quay-quay-enterprise.example.xyz
       argocd-username: admin
-      git-username: sa-tssc-reference-apps
+      git-username: sa-ploigos-reference-apps
   validate-environment-configuration:
   - implementer: ConfiglintFromArgocd
   - implementer: Configlint

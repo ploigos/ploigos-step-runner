@@ -12,8 +12,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from tssc.step_implementers.push_container_image import Skopeo
-from tssc.step_result import StepResult
+from psr.step_implementers.push_container_image import Skopeo
+from psr.step_result import StepResult
 
 
 class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
@@ -63,8 +63,8 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo')
     def test_run_step_pass(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'
@@ -138,8 +138,8 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo')
     def test_run_step_fail_run_skopeo(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'

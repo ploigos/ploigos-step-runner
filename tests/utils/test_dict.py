@@ -3,14 +3,14 @@ import os
 import unittest
 from testfixtures import TempDirectory
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 
-from tssc.utils.dict import deep_merge
+from psr.utils.dict import deep_merge
 
-class TestDictUtils(BaseTSSCTestCase):
+class TestDictUtils(BaseTestCase):
     def test_deep_merge_no_conflict(self):
         dict1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -22,7 +22,7 @@ class TestDictUtils(BaseTSSCTestCase):
         }
 
         dict2 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -39,7 +39,7 @@ class TestDictUtils(BaseTSSCTestCase):
 
         # assert expected merge result
         self.assertEqual(result, {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -53,7 +53,7 @@ class TestDictUtils(BaseTSSCTestCase):
 
     def test_deep_merge_conflict_no_overwrite(self):
         dict1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -65,7 +65,7 @@ class TestDictUtils(BaseTSSCTestCase):
         }
 
         dict2 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -78,13 +78,13 @@ class TestDictUtils(BaseTSSCTestCase):
 
         with self.assertRaisesRegex(
                 ValueError,
-                r"Conflict at tssc-config.step-foo.config.test1"):
+                r"Conflict at step-runner-config.step-foo.config.test1"):
 
             deep_merge(dict1, dict2)
 
     def test_deep_merge_conflict_overwrite_duplicate_keys(self):
         dict1 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -96,7 +96,7 @@ class TestDictUtils(BaseTSSCTestCase):
         }
 
         dict2 = {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {
@@ -115,7 +115,7 @@ class TestDictUtils(BaseTSSCTestCase):
 
         # assert expected merge result
         self.assertEqual(result, {
-            'tssc-config': {
+            'step-runner-config': {
                 'step-foo': {
                     'implementer': 'foo1',
                     'config': {

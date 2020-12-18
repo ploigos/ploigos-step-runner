@@ -4,11 +4,11 @@ Test for the utility for xml operations.
 """
 from os import path
 from testfixtures import TempDirectory
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
-from tssc.utils.xml import get_xml_element, get_xml_element_by_path
+from tests.helpers.base_test_case import BaseTestCase
+from psr.utils.xml import get_xml_element, get_xml_element_by_path
 
 # pylint: disable=no-self-use
-class TestXMLUtils(BaseTSSCTestCase):
+class TestXMLUtils(BaseTestCase):
     """Test for XML Utilities"""
     def test_get_xml_element_from_pom_file(self):
         """Test getting an xml element from the pom file."""

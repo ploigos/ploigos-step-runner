@@ -9,10 +9,10 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from tssc.exceptions import StepRunnerException
-from tssc.step_implementers.uat import MavenSeleniumCucumber
-from tssc.step_result import StepResult
-from tssc.utils.file import create_parent_dir
+from psr.exceptions import StepRunnerException
+from psr.step_implementers.uat import MavenSeleniumCucumber
+from psr.step_result import StepResult
+from psr.utils.file import create_parent_dir
 
 
 class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
@@ -38,8 +38,8 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 ):
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -60,8 +60,8 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -82,8 +82,8 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -104,8 +104,8 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -171,8 +171,8 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         pom_file_name='pom.xml',
         raise_error_on_tests=False
     ):
-        results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-        results_file_name = 'tssc-results.yml'
+        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         cucumber_html_report_path = os.path.join(work_dir_path, 'cucumber.html')
@@ -289,7 +289,7 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_defaults(
         self,
         write_effective_pom_mock,
@@ -341,7 +341,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             )
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success__deployed_host_urls_str(
         self,
         write_effective_pom_mock,
@@ -396,7 +396,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success__deployed_host_urls_array_1(
         self,
         write_effective_pom_mock,
@@ -451,7 +451,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success__deployed_host_urls_array_2(
         self,
         write_effective_pom_mock,
@@ -509,7 +509,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_profile_override(
         self,
         write_effective_pom_mock,
@@ -563,7 +563,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_pom_file_override(
         self,
         write_effective_pom_mock,
@@ -617,7 +617,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_fail_on_no_tests_false_with_tests(
         self,
         write_effective_pom_mock,
@@ -673,7 +673,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_provided_fail_on_no_tests_false_with_no_tests(
         self,
         write_effective_pom_mock,
@@ -732,7 +732,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_provided_fail_on_no_tests_true_with_no_tests(
         self,
         write_effective_pom_mock,
@@ -790,7 +790,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_no_surefire_plugin(
         self,
         write_effective_pom_mock,
@@ -849,7 +849,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_pom_specified_reports_dir(
         self,
         write_effective_pom_mock,
@@ -906,7 +906,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_mvn_test_failure(
         self,
         write_effective_pom_mock,

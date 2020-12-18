@@ -9,13 +9,13 @@ import os
 import yaml
 from testfixtures import TempDirectory
 
-from tssc.__main__ import main
+from psr.__main__ import main
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import create_sops_side_effect
 
 
-class TestInit(BaseTSSCTestCase):
+class TestInit(BaseTestCase):
     def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
         if argv is None:
             argv = []
@@ -34,7 +34,7 @@ class TestInit(BaseTSSCTestCase):
                     else:
                         argv.append(config_file)
 
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
             argv.append('--results-dir')
             argv.append(results_dir_path)
 
@@ -45,7 +45,7 @@ class TestInit(BaseTSSCTestCase):
                 main(argv)
 
                 if expected_results:
-                    with open(os.path.join(results_dir_path, "tssc-results.yml"), 'r') as step_results_file:
+                    with open(os.path.join(results_dir_path, "step-runner-results.yml"), 'r') as step_results_file:
                         results = yaml.safe_load(step_results_file.read())
                         print(expected_results)
                         print(results)
@@ -57,7 +57,7 @@ class TestInit(BaseTSSCTestCase):
         -----
         See https://medium.com/opsops/how-to-test-if-name-main-1928367290cb
         """
-        from tssc import __main__
+        from psr import __main__
         with patch.object(__main__, "main", return_value=42):
             with patch.object(__main__, "__name__", "__main__"):
                 with patch.object(__main__.sys, 'exit') as mock_exit:
@@ -79,15 +79,15 @@ class TestInit(BaseTSSCTestCase):
     def test_config_file_not_json_or_yaml(self):
         self._run_main_test(['--step', 'generate-metadata'], 102, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': ": blarg this: is {} bad syntax"
             }]
                             )
 
-    def test_config_file_no_root_tssc_config_key(self):
+    def test_config_file_no_root_config_key(self):
         self._run_main_test(['--step', 'generate-metadata'], 102, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': '{}'
             }]
                             )
@@ -95,9 +95,9 @@ class TestInit(BaseTSSCTestCase):
     def test_config_file_valid_yaml(self):
         self._run_main_test(['--step', 'foo'], None, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': '''---
-                tssc-config:
+                step-runner-config:
                     foo:
                         implementer: 'tests.helpers.sample_step_implementers.FooStepImplementer'
                 '''
@@ -107,10 +107,10 @@ class TestInit(BaseTSSCTestCase):
     def test_config_file_valid_json(self):
         self._run_main_test(['--step', 'foo'], None, [
             {
-                'name': 'tssc-config.json',
+                'name': 'step-runner-config.json',
                 'contents': '''
                 {
-                    "tssc-config": {
+                    "step-runner-config": {
                         "foo": {
                         "implementer": 'tests.helpers.sample_step_implementers.FooStepImplementer'
                         }
@@ -123,9 +123,9 @@ class TestInit(BaseTSSCTestCase):
     def test_required_step_config_missing(self):
         self._run_main_test(['--step', 'required-step-config-test'], 300, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': '''---
-                tssc-config: {}
+                step-runner-config: {}
                 '''
             }]
                             )
@@ -133,9 +133,9 @@ class TestInit(BaseTSSCTestCase):
     def test_required_step_config_pass_via_config_file(self):
         self._run_main_test(['--step', 'required-step-config-test'], None, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': '''---
-                    tssc-config:
+                    step-runner-config:
                         required-step-config-test:
                             implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                             config:
@@ -153,9 +153,9 @@ class TestInit(BaseTSSCTestCase):
             200,
             [
                 {
-                    'name': 'tssc-config.yaml',
+                    'name': 'step-runner-config.yaml',
                     'contents': '''---
-                    tssc-config:
+                    step-runner-config:
                         'required-runtime-step-config-test':
                              implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                              config: {}
@@ -173,9 +173,9 @@ class TestInit(BaseTSSCTestCase):
             None,
             [
                 {
-                    'name': 'tssc-config.yaml',
+                    'name': 'step-runner-config.yaml',
                     'contents': '''---
-                    tssc-config:
+                    step-runner-config:
                         'required-step-config-test':
                              implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                              config: {}
@@ -190,9 +190,9 @@ class TestInit(BaseTSSCTestCase):
             None,
             [
                 {
-                    'name': 'tssc-config1.yaml',
+                    'name': 'step-runner-config1.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             required-step-config-test:
                                 implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
@@ -201,9 +201,9 @@ class TestInit(BaseTSSCTestCase):
                     '''
                 },
                 {
-                    'name': 'tssc-config2.yaml',
+                    'name': 'step-runner-config2.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             required-step-config-test:
                                 implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
@@ -219,9 +219,9 @@ class TestInit(BaseTSSCTestCase):
             None,
             [
                 {
-                    'name': 'tssc-config1.yaml',
+                    'name': 'step-runner-config1.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -230,9 +230,9 @@ class TestInit(BaseTSSCTestCase):
                     '''
                 },
                 {
-                    'name': 'tssc-config2.yaml',
+                    'name': 'step-runner-config2.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -242,7 +242,7 @@ class TestInit(BaseTSSCTestCase):
                 }
             ],
             {
-                'tssc-results': {
+                'step-runner-results': {
                     'write-config-as-results': {
                         'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                             'artifacts': {
@@ -271,9 +271,9 @@ class TestInit(BaseTSSCTestCase):
             102,
             [
                 {
-                    'name': 'tssc-config1.yaml',
+                    'name': 'step-runner-config1.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             required-step-config-test:
                                 implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
@@ -282,9 +282,9 @@ class TestInit(BaseTSSCTestCase):
                     '''
                 },
                 {
-                    'name': 'tssc-config2.yaml',
+                    'name': 'step-runner-config2.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             required-step-config-test:
                                 implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
                                 config:
@@ -300,9 +300,9 @@ class TestInit(BaseTSSCTestCase):
         with TempDirectory() as temp_dir:
             config_files = [
                 {
-                    'name': 'tssc-config1.yaml',
+                    'name': 'step-runner-config1.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -312,7 +312,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'foo/a.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -323,7 +323,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'foo/b.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -333,7 +333,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'foo/bar/c.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -343,7 +343,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'foo/bar2/c2.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -353,7 +353,7 @@ class TestInit(BaseTSSCTestCase):
                 {
                     'name': 'foo/bar/meh/d.yaml',
                     'contents': '''---
-                        tssc-config:
+                        step-runner-config:
                             write-config-as-results:
                                 implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
                                 config:
@@ -369,13 +369,13 @@ class TestInit(BaseTSSCTestCase):
 
             args.append('--config')
             args.append(os.path.join(temp_dir.path, 'foo'))
-            args.append(os.path.join(temp_dir.path, 'tssc-config1.yaml'))
+            args.append(os.path.join(temp_dir.path, 'step-runner-config1.yaml'))
             self._run_main_test(
                 args,
                 None,
                 None,
                 {
-                    'tssc-results': {
+                    'step-runner-results': {
                         'write-config-as-results': {
                             'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
                                 'artifacts': {
@@ -406,13 +406,13 @@ class TestInit(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config.yml'
+            'step-runner-config.yml'
         )
 
         self._run_main_test(
@@ -422,7 +422,7 @@ class TestInit(BaseTSSCTestCase):
             ],
             config_files=[encrypted_config_file_path, config_file_path],
             expected_results={
-                'tssc-results': {
+                'step-runner-results': {
                     'DEV': {
                         'required-step-config-test': {
                             'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
@@ -451,19 +451,19 @@ class TestInit(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config.yml'
+            'step-runner-config.yml'
         )
 
         decryptors_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-decryptors.yml'
+            'step-runner-config-decryptors.yml'
         )
 
         mock_decrypted_value = 'mock decrypted value'
@@ -475,7 +475,7 @@ class TestInit(BaseTSSCTestCase):
             ],
             config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
             expected_results={
-                'tssc-results': {
+                'step-runner-results': {
                     'DEV': {
                         'required-step-config-test': {
                             'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
@@ -501,9 +501,9 @@ class TestInit(BaseTSSCTestCase):
     def test_fail(self):
         self._run_main_test(['--step', 'foo'], 200, [
             {
-                'name': 'tssc-config.yaml',
+                'name': 'step-runner-config.yaml',
                 'contents': '''---
-                tssc-config:
+                step-runner-config:
                     foo:
                         implementer: 'tests.helpers.sample_step_implementers.FailStepImplementer'
                 '''

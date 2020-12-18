@@ -12,9 +12,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, create_sh_side_effect
-from tssc import StepResult
-from tssc.exceptions import StepRunnerException
-from tssc.step_implementers.shared.openscap_generic import OpenSCAPGeneric
+from psr import StepResult
+from psr.exceptions import StepRunnerException
+from psr.step_implementers.shared.openscap_generic import OpenSCAPGeneric
 
 
 class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
@@ -59,8 +59,8 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -81,8 +81,8 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             'image-tar-file': 'does-not-matter'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -112,8 +112,8 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -137,8 +137,8 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
     def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
         step_config = {}
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -1007,8 +1007,8 @@ Result	pass
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
@@ -1099,8 +1099,8 @@ Result	fail
 """
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
@@ -1177,7 +1177,7 @@ Result	fail
         oscap_document_type = 'Source Data Stream'
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
-        oscap_tailoring_uri = 'https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml'
+        oscap_tailoring_uri = 'https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml'
         step_config = {
             'oscap-input-definitions-uri': oscap_input_definitions_uri,
             'oscap-tailoring-uri': oscap_tailoring_uri,
@@ -1189,8 +1189,8 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
@@ -1246,7 +1246,7 @@ Result	fail
                     rf".*Download input definitions: {oscap_input_definitions_uri}"
                     rf".*Downloaded input definitions to: /.+/working/test/rhel\-8.ds.xml"
                     rf".*Download oscap tailoring file: {oscap_tailoring_uri}"
-                    rf".*Download oscap tailoring file to: /.+/working/test/xccdf_com.redhat\.tssc_profile_example_ubi8\-tailoring\-xccdf\.xml"
+                    rf".*Download oscap tailoring file to: /.+/working/test/xccdf_com.redhat\.ploigos_profile_example_ubi8\-tailoring\-xccdf\.xml"
                     rf".*Determine OpenSCAP document type of input file: /.+/working/test/rhel\-8\.ds\.xml"
                     rf".*Determined OpenSCAP document type of input file \(/.+/working/test/rhel\-8\.ds\.xml\): {oscap_document_type}"
                     rf".*Determine OpenSCAP eval type for input file \(/.+/working/test/rhel\-8\.ds\.xml\) of document type: {oscap_document_type}"
@@ -1257,7 +1257,7 @@ Result	fail
                 )
             )
 
-    @patch('tssc.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch('psr.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
@@ -1282,8 +1282,8 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
@@ -1343,7 +1343,7 @@ Result	fail
                 )
             )
 
-    @patch('tssc.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch('psr.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
@@ -1358,7 +1358,7 @@ Result	fail
     ):
         oscap_document_type = 'Source Data Stream'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
-        oscap_tailoring_uri = 'https://raw.githubusercontent.com/rhtconsulting/tssc-example-oscap-content/main/xccdf_com.redhat.tssc_profile_example_ubi8-tailoring-xccdf.xml'
+        oscap_tailoring_uri = 'https://raw.githubusercontent.com/ploigos/ploigos-example-oscap-content/main/xccdf_com.redhat.ploigos_profile_example_ubi8-tailoring-xccdf.xml'
         step_config = {
             'oscap-input-definitions-uri': oscap_input_definitions_uri,
             'oscap-tailoring-uri': oscap_tailoring_uri,
@@ -1370,8 +1370,8 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 

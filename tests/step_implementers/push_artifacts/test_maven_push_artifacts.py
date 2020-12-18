@@ -9,8 +9,8 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc import StepResult
-from tssc.step_implementers.push_artifacts import Maven
+from psr import StepResult
+from psr.step_implementers.push_artifacts import Maven
 
 
 class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
@@ -52,8 +52,8 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_pass(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -114,8 +114,8 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             # config

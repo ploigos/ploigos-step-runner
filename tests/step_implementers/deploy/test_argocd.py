@@ -8,9 +8,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, create_sh_side_effect
-from tssc import StepResult
-from tssc.exceptions import StepRunnerException
-from tssc.step_implementers.deploy.argocd import ArgoCD
+from psr import StepResult
+from psr.exceptions import StepRunnerException
+from psr.step_implementers.deploy.argocd import ArgoCD
 
 
 class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
@@ -69,8 +69,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 ):
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_success_ssh(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -95,8 +95,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_success_https(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -123,8 +123,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_username(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -154,8 +154,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_password(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -185,8 +185,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_creds(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -217,8 +217,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_http_no_git_creds(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -295,8 +295,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
         argocd_get_app_manifest_mock
     ):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -453,8 +453,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
         argocd_get_app_manifest_mock
     ):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
@@ -530,8 +530,8 @@ class TestStepImplementerDeployArgoCD__get_container_image_version(
 ):
     def test_ArgoCD__get_container_image_version_config_value(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'container-image-version': 'v0.42.0'
@@ -548,8 +548,8 @@ class TestStepImplementerDeployArgoCD__get_container_image_version(
 
     def test_ArgoCD__get_container_image_version_no_config_value(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -568,8 +568,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 ):
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_config_value(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'deployment-config-helm-chart-environment-values-file': 'values-AWEOMSE.yaml'
@@ -590,8 +590,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_no_config_value_no_env(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -611,8 +611,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_no_config_value_with_env(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -635,8 +635,8 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
     @patch('sh.yq', create=True)
     def test_ArgoCD__update_yaml_file_value_success(self, yq_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -677,8 +677,8 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
     @patch('sh.yq', create=True)
     def test_ArgoCD__update_yaml_file_value_fail(self, yq_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -739,8 +739,8 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_http(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
@@ -767,8 +767,8 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_https(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
@@ -795,8 +795,8 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_ssh(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
@@ -824,8 +824,8 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_no_env_less_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
@@ -845,8 +845,8 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/TEST')
     def test_ArgoCD__get_app_name_no_env_less_then_max_length_caps(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
@@ -866,8 +866,8 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_no_env_more_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
@@ -887,8 +887,8 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_with_env_less_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
@@ -909,8 +909,8 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
 class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepImplementerDeployArgoCDBase):
     def test_ArgoCD__get_deployment_config_repo_tag_use_tag(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'tag': 'v0.42.0-abc123',
@@ -928,8 +928,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_version(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'version': 'v0.42.0'
@@ -947,8 +947,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_latest(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
@@ -964,8 +964,8 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_tag_with_env(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'tag': 'v0.42.0-main+abc123',
@@ -2202,8 +2202,8 @@ class TestStepImplementerDeployArgoCD__argocd_add_target_cluster(TestStepImpleme
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_default_cluster(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2222,8 +2222,8 @@ class TestStepImplementerDeployArgoCD__argocd_add_target_cluster(TestStepImpleme
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_custom_cluster_kube_skip_tls_true(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2284,8 +2284,8 @@ users:
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_custom_cluster_kube_skip_tls_false(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2346,8 +2346,8 @@ users:
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_fail_custom_cluster_kube_skip_tls_true(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2712,8 +2712,8 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_success_live(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2738,8 +2738,8 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_success_git(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
@@ -2764,8 +2764,8 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_fail(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(

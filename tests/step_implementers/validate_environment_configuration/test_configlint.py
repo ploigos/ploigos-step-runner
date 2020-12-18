@@ -8,9 +8,9 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.validate_environment_configuration import \
+from psr.step_implementers.validate_environment_configuration import \
     Configlint
-from tssc.step_result import StepResult
+from psr.step_result import StepResult
 
 
 class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
@@ -70,8 +70,8 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_yml_path(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -105,8 +105,8 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_rule_path(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -140,8 +140,8 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_pass_prev_step(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -185,8 +185,8 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_scan(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             file_to_validate_contents = 'notused'
             temp_dir.write('config-file-to-validate.yml', file_to_validate_contents.encode())
@@ -240,8 +240,8 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_pass(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'file.txt'
             test_file_path = os.path.join(temp_dir.path, test_file_name)

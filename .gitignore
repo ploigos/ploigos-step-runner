@@ -8,10 +8,10 @@ build/
 coverage.xml
 .pytest_cache
 
-# TSSC build & runtime
-tssc/version.py
-tssc-results
-tssc-working
+# step runner build & runtime
+psr/version.py
+step-runner-results
+step-runner-working
 results.yml/
 .venvs
 

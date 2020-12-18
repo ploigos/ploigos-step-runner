@@ -7,27 +7,27 @@ import unittest
 from testfixtures import TempDirectory
 from unittest.mock import patch
 
-from tests.helpers.base_tssc_test_case import BaseTSSCTestCase
+from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.sops_integration_test_case import SOPSIntegrationTestCase
 from tests.helpers.test_utils import Any
 
-from tssc.config.config_value import ConfigValue
-from tssc.config.decryptors.sops import SOPS
-from tssc.utils.file import parse_yaml_or_json_file
+from psr.config.config_value import ConfigValue
+from psr.config.decryptors.sops import SOPS
+from psr.utils.file import parse_yaml_or_json_file
 
 @patch('sh.sops', create=True)
-class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
+class TestSOPSConfigValueDecryptor(BaseTestCase):
     def test_can_decrypt_true(self, sops_mock):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -39,13 +39,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='not a sops encrypted value',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -57,13 +57,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value=True,
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -75,13 +75,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -89,7 +89,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         sops_decryptor.decrypt(config_value)
         sops_mock.assert_called_once_with(
             '--decrypt',
-            '--extract=["tssc-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
+            '--extract=["step-runner-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
             None,
             encrypted_config_file_path,
             _in=None,
@@ -101,13 +101,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS(
@@ -119,7 +119,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         sops_decryptor.decrypt(config_value)
         sops_mock.assert_called_once_with(
             '--decrypt',
-            '--extract=["tssc-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
+            '--extract=["step-runner-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
             None,
             encrypted_config_file_path,
             '--aws-profile=foo',
@@ -132,7 +132,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         encrypted_config = parse_yaml_or_json_file(encrypted_config_file_path)
@@ -141,7 +141,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -149,7 +149,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         sops_decryptor.decrypt(config_value)
         sops_mock.assert_called_once_with(
             '--decrypt',
-            '--extract=["tssc-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
+            '--extract=["step-runner-config"]["global-environment-defaults"]["DEV"]["kube-api-token"]',
             '--input-type=json',
             '/dev/stdin',
             _in=encrypted_config_json,
@@ -161,7 +161,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source='does-not-exist.yml',
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -177,7 +177,7 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -193,13 +193,13 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -215,26 +215,26 @@ class TestSOPSConfigValueDecryptor(BaseTSSCTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
-            path_parts=["tssc-config", "step-foo", 0, "config", "test1"]
+            path_parts=["step-runner-config", "step-foo", 0, "config", "test1"]
         )
 
         sops_value_path = SOPS.get_sops_value_path(config_value)
         self.assertEqual(
             sops_value_path,
-            '["tssc-config"]["step-foo"][0]["config"]["test1"]')
+            '["step-runner-config"]["step-foo"][0]["config"]["test1"]')
 
 class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
     def test_can_decrypt_true(self):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -246,13 +246,13 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='not a sops encrypted value',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -264,13 +264,13 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -286,7 +286,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         encrypted_config = parse_yaml_or_json_file(encrypted_config_file_path)
@@ -294,7 +294,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -310,7 +310,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source='does-not-exist.yml',
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -326,7 +326,7 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=None,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()
@@ -342,13 +342,13 @@ class TestSOPSConfigValueDecryptorSOPSIntegrationTests(SOPSIntegrationTestCase):
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
-            'tssc-config-secret-stuff.yml'
+            'step-runner-config-secret-stuff.yml'
         )
 
         config_value = ConfigValue(
             value='ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]',
             parent_source=encrypted_config_file_path,
-            path_parts=['tssc-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
+            path_parts=['step-runner-config', 'global-environment-defaults', 'DEV', 'kube-api-token']
         )
 
         sops_decryptor = SOPS()

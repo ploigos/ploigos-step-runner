@@ -4,7 +4,7 @@ import re
 from testfixtures import TempDirectory
 from tests.step_implementers.shared.test_openscap_generic import \
     TestStepImplementerSharedOpenSCAPGeneric
-from tssc.step_implementers.container_image_static_compliance_scan import \
+from psr.step_implementers.container_image_static_compliance_scan import \
     OpenSCAP
 
 
@@ -36,8 +36,8 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -60,8 +60,8 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -91,8 +91,8 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -122,8 +122,8 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
@@ -147,8 +147,8 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
     def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
         step_config = {}
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(

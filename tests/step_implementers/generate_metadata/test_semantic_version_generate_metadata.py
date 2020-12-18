@@ -7,8 +7,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
-from tssc.step_result import StepResult
-from tssc.step_implementers.generate_metadata import SemanticVersion
+from psr.step_result import StepResult
+from psr.step_implementers.generate_metadata import SemanticVersion
 
 
 class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTestCase):
@@ -50,8 +50,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -87,8 +87,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
     def test_run_step_pass_different_pre_release(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}

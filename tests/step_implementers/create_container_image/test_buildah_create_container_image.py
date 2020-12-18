@@ -8,8 +8,8 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.create_container_image import Buildah
-from tssc.step_result import StepResult
+from psr.step_implementers.create_container_image import Buildah
+from psr.step_result import StepResult
 
 
 class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase):
@@ -60,8 +60,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
@@ -133,8 +133,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass_no_container_image_version(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
@@ -199,8 +199,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass_image_tar_file_exists(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
@@ -274,8 +274,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_no_image_spec_file(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -313,8 +313,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_buildah_bud_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
@@ -366,8 +366,8 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_buildah_push_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 

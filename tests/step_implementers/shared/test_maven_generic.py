@@ -6,9 +6,9 @@ from unittest.mock import patch
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tssc.step_implementers.shared.maven_generic import MavenGeneric
-from tssc.step_result import StepResult
-from tssc.utils.file import create_parent_dir
+from psr.step_implementers.shared.maven_generic import MavenGeneric
+from psr.step_result import StepResult
+from psr.utils.file import create_parent_dir
 
 
 class SampleMavenStepImplementer(MavenGeneric):
@@ -42,16 +42,16 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             work_dir_path=work_dir_path
         )
 
-    @patch('tssc.step_implementers.shared.maven_generic.generate_maven_settings')
+    @patch('psr.step_implementers.shared.maven_generic.generate_maven_settings')
     def test__generate_maven_settings(self, utils_generate_maven_settings_mock):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
             maven_servers = {
                 "internal-mirror": {
                     "id": "internal-server",
-                    "username": "tssc"
+                    "username": "ploigos"
                 }
             }
             maven_repositories = {
@@ -104,8 +104,8 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             pom_file_path = os.path.join(test_dir.path, 'pom.xml')
@@ -126,8 +126,8 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_pom_file_does_not_exist(self):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             pom_file_path = os.path.join(test_dir.path, 'pom.xml')
@@ -149,11 +149,11 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__get_effective_pom_call_once(self, write_effective_pom_mock):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             pom_file_path = os.path.join(test_dir.path, 'pom.xml')
@@ -184,11 +184,11 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
                 output_path=expected_effective_pom_path
             )
 
-    @patch('tssc.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
     def test__get_effective_pom_call_twice(self, write_effective_pom_mock):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             pom_file_path = os.path.join(test_dir.path, 'pom.xml')
@@ -226,12 +226,12 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_not_called()
 
-    @patch('tssc.step_implementers.shared.maven_generic.get_xml_element_by_path')
+    @patch('psr.step_implementers.shared.maven_generic.get_xml_element_by_path')
     @patch.object(MavenGeneric, '_get_effective_pom')
     def test__get_effective_pom_element(self, get_effective_pom_mock, get_xml_element_by_path_mock):
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'tssc-results')
-            results_file_name = 'tssc-results.yml'
+            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             pom_file_path = os.path.join(test_dir.path, 'pom.xml')
