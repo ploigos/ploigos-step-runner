@@ -7,9 +7,10 @@ build/
 .coverage
 coverage.xml
 .pytest_cache
+.tox
 
 # step runner build & runtime
-psr/version.py
+src/ploigos_step_runner/version.py
 step-runner-results
 step-runner-working
 results.yml/
@@ -40,6 +41,7 @@ nb-configuration.xml
 # Vim
 *.swp
 *.swo
+tags
 
 # patch
 *.orig
