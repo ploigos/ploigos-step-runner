@@ -62,7 +62,7 @@ class TestFactory(BaseTestCase):
         with self.assertRaisesRegex(
             StepRunnerException,
                 r"Could not dynamically load step \(foo\) step implementer \(DoesNotExist\)"
-                r" from module \(psr.step_implementers.foo\) with class name \(DoesNotExist\)"):
+                r" from module \(ploigos_step_runner.step_implementers.foo\) with class name \(DoesNotExist\)"):
             factory.run_step('foo')
 
     def test_run_step_config_implementer_specified_and_sub_step_config_specified_StepImplementer(self):
@@ -135,7 +135,7 @@ class TestFactory(BaseTestCase):
         with self.assertRaisesRegex(
                 StepRunnerException,
                 r"Could not dynamically load step \(foo\) step implementer \(bar\) "
-                r"from module \(psr.step_implementers.foo\) with class name \(bar\)"):
+                r"from module \(ploigos_step_runner.step_implementers.foo\) with class name \(bar\)"):
             StepRunner._StepRunner__get_step_implementer_class('foo', 'bar')
 
     def test__get_step_implementer_name_class_does_not_exist_given_module_path(self):
@@ -156,7 +156,7 @@ class TestFactory(BaseTestCase):
                     r"\(NotSubClassOfStepImplementer\), and dynamically loads as class "
                     r"\(<class 'tests.helpers.sample_step_implementers.NotSubClassOfStepImplementer'>\) "
                     r"which is not a subclass of required parent class "
-                    r"\(<class 'psr.step_implementer.StepImplementer'>\)."
+                    r"\(<class 'ploigos_step_runner.step_implementer.StepImplementer'>\)."
                 )
         ):
             StepRunner._StepRunner__get_step_implementer_class('foo',

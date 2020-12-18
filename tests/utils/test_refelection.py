@@ -15,10 +15,10 @@ class TestReflectionUtils(BaseTestCase):
 
     def test_import_and_get_class_class_does_not_exist(self):
         self.assertIsNone(
-            import_and_get_class('psr.step_implementers.package', 'HelloWorld')
+            import_and_get_class('ploigos_step_runner.step_implementers.package', 'HelloWorld')
         )
 
     def test_import_and_get_class_class_exists_in_module(self):
         self.assertIsNotNone(
-            import_and_get_class('psr.step_implementers.container_image_static_compliance_scan', 'OpenSCAP')
+            import_and_get_class('ploigos_step_runner.step_implementers.container_image_static_compliance_scan', 'OpenSCAP')
         )

@@ -333,7 +333,7 @@ class TestContainerRegistryLogin(BaseTestCase):
             )
 
 class TestContainerRegistriesLogin(BaseTestCase):
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_dict_of_dicts(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -366,7 +366,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_dict_of_dicts_with_tls_verify_value(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -401,7 +401,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_list_of_dicts_with_containers_config_auth_file(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': {
@@ -436,7 +436,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_dict_of_config_values(self, container_registry_login_mock):
         registries = {
             'registry.redhat.io': ConfigValue({
@@ -469,7 +469,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_dict_of_dicts_with_uri_keys(self, container_registry_login_mock):
         registries = {
             'redhat': {
@@ -504,7 +504,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_list_of_dicts(self, container_registry_login_mock):
         registries = [
             {
@@ -539,7 +539,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_list_of_dicts_with_tls_verify_value(self, container_registry_login_mock):
         registries = [
             {
@@ -576,7 +576,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_list_of_dicts_with_containers_config_auth_file(self, container_registry_login_mock):
         registries = [
             {
@@ -611,7 +611,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ]
         container_registry_login_mock.assert_has_calls(calls)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_list_of_config_value(self, container_registry_login_mock):
         registries = [
             ConfigValue({
@@ -733,7 +733,7 @@ class TestContainerRegistriesLogin(BaseTestCase):
         ):
             container_registries_login(registries)
 
-    @patch('psr.utils.containers.container_registry_login')
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
     def test_registries_none(self, container_registry_login):
         registries = None
 

@@ -42,7 +42,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             work_dir_path=work_dir_path
         )
 
-    @patch('psr.step_implementers.shared.maven_generic.generate_maven_settings')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.generate_maven_settings')
     def test__generate_maven_settings(self, utils_generate_maven_settings_mock):
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
@@ -149,7 +149,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__get_effective_pom_call_once(self, write_effective_pom_mock):
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
@@ -184,7 +184,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
                 output_path=expected_effective_pom_path
             )
 
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__get_effective_pom_call_twice(self, write_effective_pom_mock):
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
@@ -226,7 +226,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_not_called()
 
-    @patch('psr.step_implementers.shared.maven_generic.get_xml_element_by_path')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.get_xml_element_by_path')
     @patch.object(MavenGeneric, '_get_effective_pom')
     def test__get_effective_pom_element(self, get_effective_pom_mock, get_xml_element_by_path_mock):
         with TempDirectory() as test_dir:

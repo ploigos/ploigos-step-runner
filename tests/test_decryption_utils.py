@@ -131,7 +131,7 @@ class TestDecryptionUtils(BaseTestCase):
 
     def test__get_decryption_class_sops_full_name(self):
         decryptor_class = DecryptionUtils._DecryptionUtils__get_decryption_class(
-            'psr.config.decryptors.sops.SOPS'
+            'ploigos_step_runner.config.decryptors.sops.SOPS'
         )
         self.assertEqual(
             decryptor_class,
@@ -142,7 +142,7 @@ class TestDecryptionUtils(BaseTestCase):
         with self.assertRaisesRegex(
             StepRunnerException,
             r"Could not dynamically load decryptor implementer \(DoesNotExist\) " \
-            r"from module \(psr.config.decryptors\) with class name \(DoesNotExist\)"
+            r"from module \(ploigos_step_runner.config.decryptors\) with class name \(DoesNotExist\)"
         ):
             DecryptionUtils._DecryptionUtils__get_decryption_class('DoesNotExist')
 
@@ -160,7 +160,7 @@ class TestDecryptionUtils(BaseTestCase):
             r"For decryptor implementer \(tests.test_decryption_utils.BadConfigValueDecryptor\) " \
             r"dynamically loaded class \(<class 'tests.test_decryption_utils." \
             r"BadConfigValueDecryptor'>\) which is not sub class of " \
-            r"\(<class 'psr.config.config_value_decryptor.ConfigValueDecryptor'>\) and should be."
+            r"\(<class 'ploigos_step_runner.config.config_value_decryptor.ConfigValueDecryptor'>\) and should be."
         ):
             DecryptionUtils._DecryptionUtils__get_decryption_class(
                 'tests.test_decryption_utils.BadConfigValueDecryptor'
