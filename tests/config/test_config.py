@@ -623,7 +623,7 @@ class TestConfig(BaseTestCase):
             r"Expected step \(step-foo\) to have have step config " \
             r"\(ConfigValue\(value=bad-step-config, " \
             r"value_path='\['step-runner-config', 'step-foo'\]\'\)\) of " \
-            r"type dict or list but got: <class 'psr.config.config_value.ConfigValue'>"
+            r"type dict or list but got: <class 'ploigos_step_runner.config.config_value.ConfigValue'>"
         ):
             Config({
                 Config.CONFIG_KEY: {

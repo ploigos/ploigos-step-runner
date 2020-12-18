@@ -1257,7 +1257,7 @@ Result	fail
                 )
             )
 
-    @patch('psr.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch('ploigos_step_runner.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
@@ -1343,7 +1343,7 @@ Result	fail
                 )
             )
 
-    @patch('psr.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
+    @patch('ploigos_step_runner.step_implementers.shared.openscap_generic.download_and_decompress_source_to_destination')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__run_oscap_scan')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
