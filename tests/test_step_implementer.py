@@ -5,10 +5,10 @@ import os
 
 from testfixtures import TempDirectory
 from psr import StepResult
-from psr.config import Config
-from psr.exceptions import StepRunnerException
-from psr.step_runner import StepRunner
-from psr.workflow_result import WorkflowResult
+from ploigos_step_runner.config import Config
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_runner import StepRunner
+from ploigos_step_runner.workflow_result import WorkflowResult
 
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase

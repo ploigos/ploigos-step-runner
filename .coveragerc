@@ -1,5 +1,5 @@
 [run]
-source=psr
+source=src/ploigos_step_runner
 
 [report]
 exclude_lines =

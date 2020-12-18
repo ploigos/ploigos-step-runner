@@ -9,7 +9,7 @@ import os
 import yaml
 from testfixtures import TempDirectory
 
-from psr.__main__ import main
+from ploigos_step_runner.__main__ import main
 
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import create_sops_side_effect

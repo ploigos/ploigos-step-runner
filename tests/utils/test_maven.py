@@ -10,8 +10,8 @@ from unittest.mock import patch
 import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
-from psr.exceptions import StepRunnerException
-from psr.utils.maven import *
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.maven import *
 
 
 class TestMavenUtils(BaseTestCase):

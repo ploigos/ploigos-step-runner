@@ -12,9 +12,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, StringRegexParam
-from psr.exceptions import StepRunnerException
-from psr.step_implementers.sign_container_image import PodmanSign
-from psr.step_result import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.sign_container_image import PodmanSign
+from ploigos_step_runner.step_result import StepResult
 
 
 class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):

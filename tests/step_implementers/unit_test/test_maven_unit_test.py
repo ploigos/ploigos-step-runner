@@ -8,11 +8,11 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from psr.config.config import Config
-from psr.step_implementers.unit_test import Maven
-from psr.step_result import StepResult
-from psr.utils.file import create_parent_dir
-from psr.workflow_result import WorkflowResult
+from ploigos_step_runner.config.config import Config
+from ploigos_step_runner.step_implementers.unit_test import Maven
+from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner.utils.file import create_parent_dir
+from ploigos_step_runner.workflow_result import WorkflowResult
 
 
 class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):

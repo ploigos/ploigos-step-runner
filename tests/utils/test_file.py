@@ -3,7 +3,7 @@ import os
 
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
-from psr.utils.file import (create_parent_dir,
+from ploigos_step_runner.utils.file import (create_parent_dir,
                              download_and_decompress_source_to_destination,
                              parse_yaml_or_json_file)
 

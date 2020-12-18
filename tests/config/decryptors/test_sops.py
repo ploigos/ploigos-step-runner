@@ -11,9 +11,9 @@ from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.sops_integration_test_case import SOPSIntegrationTestCase
 from tests.helpers.test_utils import Any
 
-from psr.config.config_value import ConfigValue
-from psr.config.decryptors.sops import SOPS
-from psr.utils.file import parse_yaml_or_json_file
+from ploigos_step_runner.config.config_value import ConfigValue
+from ploigos_step_runner.config.decryptors.sops import SOPS
+from ploigos_step_runner.utils.file import parse_yaml_or_json_file
 
 @patch('sh.sops', create=True)
 class TestSOPSConfigValueDecryptor(BaseTestCase):

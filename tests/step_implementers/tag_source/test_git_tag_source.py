@@ -11,9 +11,9 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from psr.exceptions import StepRunnerException
-from psr.step_implementers.tag_source import Git
-from psr.step_result import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.tag_source import Git
+from ploigos_step_runner.step_result import StepResult
 
 
 class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):

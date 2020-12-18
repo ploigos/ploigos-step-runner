@@ -1,11 +1,11 @@
 
 
-from psr.config.config_value import ConfigValue
-from psr.config.config_value_decryptor import ConfigValueDecryptor
-from psr.decryption_utils import DecryptionUtils
-from psr.exceptions import StepRunnerException
-from psr.utils.io import TextIOSelectiveObfuscator
-from psr.config.decryptors.sops import SOPS
+from ploigos_step_runner.config.config_value import ConfigValue
+from ploigos_step_runner.config.config_value_decryptor import ConfigValueDecryptor
+from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.io import TextIOSelectiveObfuscator
+from ploigos_step_runner.config.decryptors.sops import SOPS
 
 from contextlib import redirect_stdout
 import io

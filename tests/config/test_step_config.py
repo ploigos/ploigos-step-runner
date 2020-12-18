@@ -4,7 +4,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.config import Config, ConfigValue
+from ploigos_step_runner.config import Config, ConfigValue
 
 class TestStepConfig(BaseTestCase):
     def test_parent_config(self):
