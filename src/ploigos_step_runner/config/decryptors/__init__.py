@@ -2,7 +2,3 @@
 """
 
 from .sops import SOPS
-
-__all__ = [
-    'sops'
-]

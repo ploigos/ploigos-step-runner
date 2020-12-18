@@ -2,7 +2,3 @@
 """
 
 from .argocd import ArgoCD
-
-__all__ = [
-    'argocd'
-]
