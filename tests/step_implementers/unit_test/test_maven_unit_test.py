@@ -156,7 +156,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_default_reports_dir(
         self,
         write_effective_pom_mock,
@@ -208,7 +208,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_pom_specified_reports_dir(
         self,
         write_effective_pom_mock,
@@ -264,7 +264,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_missing_surefire_plugin(
         self,
         write_effective_pom_mock,
@@ -322,7 +322,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_no_unit_tests_defined(
         self,
         write_effective_pom_mock,
@@ -377,7 +377,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_success_fail_on_no_tests_false_and_no_tests(
         self,
         write_effective_pom_mock,
@@ -432,7 +432,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
-    @patch('psr.step_implementers.shared.maven_generic.write_effective_pom')
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
     def test__run_step_fail_mvn_test_failure(
         self,
         write_effective_pom_mock,

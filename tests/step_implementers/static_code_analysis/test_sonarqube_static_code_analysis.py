@@ -54,7 +54,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'username': 'username',
@@ -80,7 +80,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_password(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'username': 'username',
@@ -107,7 +107,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_username(self):
         step_config = {
-            'url' : 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+            'url' : 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
             'application-name': 'app-name',
             'service-name': 'service-name',
             'password': 'password',
@@ -143,7 +143,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name',
                 'username': 'username',
@@ -180,7 +180,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
-                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
@@ -203,7 +203,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name'
 
@@ -238,7 +238,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
-                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.working.directory=' + work_dir_path,
@@ -256,7 +256,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
-                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name'
 
@@ -304,7 +304,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             step_config = {
                 'properties': properties_path,
-                'url': 'https://sonarqube-sonarqube.apps.psr.rht-set.com',
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                 'application-name': 'app-name',
                 'service-name': 'service-name',
                 'username': 'username',
