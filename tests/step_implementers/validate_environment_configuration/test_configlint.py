@@ -8,9 +8,9 @@ import sh
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from psr.step_implementers.validate_environment_configuration import \
+from ploigos_step_runner.step_implementers.validate_environment_configuration import \
     Configlint
-from psr.step_result import StepResult
+from ploigos_step_runner.step_result import StepResult
 
 
 class TestStepImplementerConfiglint(BaseStepImplementerTestCase):

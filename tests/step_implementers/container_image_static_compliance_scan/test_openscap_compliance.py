@@ -4,7 +4,7 @@ import re
 from testfixtures import TempDirectory
 from tests.step_implementers.shared.test_openscap_generic import \
     TestStepImplementerSharedOpenSCAPGeneric
-from psr.step_implementers.container_image_static_compliance_scan import \
+from ploigos_step_runner.step_implementers.container_image_static_compliance_scan import \
     OpenSCAP
 
 

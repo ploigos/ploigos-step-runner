@@ -5,7 +5,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.utils.reflection import import_and_get_class
+from ploigos_step_runner.utils.reflection import import_and_get_class
 
 class TestReflectionUtils(BaseTestCase):
     def test_import_and_get_class_module_does_not_exist(self):

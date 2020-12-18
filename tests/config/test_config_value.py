@@ -8,9 +8,9 @@ from unittest.mock import patch
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import Any, create_sops_side_effect
 
-from psr.config import Config, ConfigValue
-from psr.decryption_utils import DecryptionUtils
-from psr.config.decryptors.sops import SOPS
+from ploigos_step_runner.config import Config, ConfigValue
+from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config.decryptors.sops import SOPS
 
 class TestConfigValue(BaseTestCase):
     def test__eq__is_equal_basic(self):

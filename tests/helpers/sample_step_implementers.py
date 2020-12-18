@@ -1,5 +1,5 @@
 from psr import StepImplementer, StepResult
-from psr.config.config_value import ConfigValue
+from ploigos_step_runner.config.config_value import ConfigValue
 
 
 class FailStepImplementer(StepImplementer):

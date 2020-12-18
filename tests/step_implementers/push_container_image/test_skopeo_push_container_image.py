@@ -12,8 +12,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from psr.step_implementers.push_container_image import Skopeo
-from psr.step_result import StepResult
+from ploigos_step_runner.step_implementers.push_container_image import Skopeo
+from ploigos_step_runner.step_result import StepResult
 
 
 class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):

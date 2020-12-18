@@ -7,8 +7,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
-from psr.step_result import StepResult
-from psr.step_implementers.generate_metadata import SemanticVersion
+from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner.step_implementers.generate_metadata import SemanticVersion
 
 
 class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTestCase):

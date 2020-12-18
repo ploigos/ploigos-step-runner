@@ -5,7 +5,7 @@ Test for the utility for xml operations.
 from os import path
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
-from psr.utils.xml import get_xml_element, get_xml_element_by_path
+from ploigos_step_runner.utils.xml import get_xml_element, get_xml_element_by_path
 
 # pylint: disable=no-self-use
 class TestXMLUtils(BaseTestCase):

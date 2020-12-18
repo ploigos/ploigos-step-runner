@@ -8,7 +8,7 @@ from io import StringIO
 
 import yaml
 from tests.helpers.base_test_case import BaseTestCase
-from psr.utils.io import (TextIOIndenter, TextIOSelectiveObfuscator,
+from ploigos_step_runner.utils.io import (TextIOIndenter, TextIOSelectiveObfuscator,
                            create_sh_redirect_to_multiple_streams_fn_callback)
 
 class TestCreateSHRedirectToMultipleStreamsFNCallback(BaseTestCase):

@@ -6,9 +6,9 @@ from unittest.mock import patch
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from psr.step_implementers.shared.maven_generic import MavenGeneric
-from psr.step_result import StepResult
-from psr.utils.file import create_parent_dir
+from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
+from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner.utils.file import create_parent_dir
 
 
 class SampleMavenStepImplementer(MavenGeneric):

@@ -9,10 +9,10 @@ from testfixtures import TempDirectory
 from tests.helpers.maven_step_implementer_test_case import \
     MaveStepImplementerTestCase
 from tests.helpers.test_utils import Any
-from psr.exceptions import StepRunnerException
-from psr.step_implementers.uat import MavenSeleniumCucumber
-from psr.step_result import StepResult
-from psr.utils.file import create_parent_dir
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.uat import MavenSeleniumCucumber
+from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner.utils.file import create_parent_dir
 
 
 class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):

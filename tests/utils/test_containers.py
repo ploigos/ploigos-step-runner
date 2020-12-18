@@ -7,8 +7,8 @@ from unittest.mock import patch, call
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import *
 
-from psr.config import ConfigValue
-from psr.utils.containers import container_registry_login, container_registries_login
+from ploigos_step_runner.config import ConfigValue
+from ploigos_step_runner.utils.containers import container_registry_login, container_registries_login
 
 def create_which_side_effect(cmd, cmd_path):
     def which_side_effect(*args, **kwargs):

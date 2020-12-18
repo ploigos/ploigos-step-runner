@@ -7,9 +7,9 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.step_result import StepResult
-from psr.workflow_result import WorkflowResult
-from psr.exceptions import StepRunnerException
+from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner.workflow_result import WorkflowResult
+from ploigos_step_runner.exceptions import StepRunnerException
 
 
 def setup_test():

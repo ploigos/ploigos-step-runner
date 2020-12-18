@@ -5,7 +5,7 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.utils.dict import deep_merge
+from ploigos_step_runner.utils.dict import deep_merge
 
 class TestDictUtils(BaseTestCase):
     def test_deep_merge_no_conflict(self):

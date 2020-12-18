@@ -5,7 +5,7 @@ import os.path
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.config import Config, StepConfig, SubStepConfig, ConfigValue
+from ploigos_step_runner.config import Config, StepConfig, SubStepConfig, ConfigValue
 
 class TestSubStepConfig(BaseTestCase):
     def test_constructor_no_sub_step_config_or_step_env_config(self):

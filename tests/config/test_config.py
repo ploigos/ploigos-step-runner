@@ -4,9 +4,9 @@ from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
-from psr.decryption_utils import DecryptionUtils
-from psr.config import Config, ConfigValue
-from psr.config.decryptors.sops import SOPS
+from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config import Config, ConfigValue
+from ploigos_step_runner.config.decryptors.sops import SOPS
 
 class TestConfig(BaseTestCase):
     def test_add_config_invalid_type(self):

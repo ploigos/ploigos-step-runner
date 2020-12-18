@@ -11,7 +11,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from psr import StepResult
-from psr.step_implementers.package import Maven
+from ploigos_step_runner.step_implementers.package import Maven
 
 
 class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
