@@ -14,6 +14,7 @@ Configuration Key  | Required? | Default     | Description
                                                step can succeed when no tests are defined
 `pom-file`         | True      | `'pom.xml'` | pom used to run tests and check \
                                                for existence of custom reportsDirectory
+`tls-verify`       | No        | True        | Disables TLS Verification if set to False
 
 Result Artifacts
 ----------------
@@ -33,6 +34,7 @@ from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGene
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
+    'tls-verify': True,
     'fail-on-no-tests': True,
     'pom-file': 'pom.xml'
 }
@@ -90,6 +92,7 @@ class Maven(MavenGeneric):
         """
         step_result = StepResult.from_step_implementer(self)
 
+        tls_verify = self.get_value('tls-verify')
         pom_file = self.get_value('pom-file')
         fail_on_no_tests = self.get_value('fail-on-no-tests')
 
@@ -115,6 +118,14 @@ class Maven(MavenGeneric):
                 MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
             )
 
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                '-Dmaven.wagon.http.ssl.insecure=true',
+                '-Dmaven.wagon.http.ssl.allowall=true',
+                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+            ]
+
         settings_file = self._generate_maven_settings()
         mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
         try:
@@ -133,6 +144,7 @@ class Maven(MavenGeneric):
                     'test',
                     '-f', pom_file,
                     '-s', settings_file,
+                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )

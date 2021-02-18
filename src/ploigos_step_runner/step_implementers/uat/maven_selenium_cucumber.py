@@ -25,6 +25,7 @@ Configuration Key    | Required? | Default            | Description
                                                         ignore this value.
 `uat-maven-profile`  | Yes       | `integration-test` | Maven profile to use to invoke \
                                                         Selenium tests.
+`tls-verify`         | No        | True               | Disables TLS Verification if set to False
 
 Result Artifacts
 ----------------
@@ -48,6 +49,7 @@ from ploigos_step_runner.step_result import StepResult
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
+    'tls-verify': True,
     'fail-on-no-tests': True,
     'pom-file': 'pom.xml',
     'uat-maven-profile': 'integration-test'
@@ -122,7 +124,7 @@ class MavenSeleniumCucumber(MavenGeneric):
                 " neither were."
             )
 
-    def _run_step(self): # pylint: disable=too-many-locals
+    def _run_step(self): # pylint: disable=too-many-locals,too-many-statements
         """Runs the step implemented by this StepImplementer.
 
         Returns
@@ -140,6 +142,7 @@ class MavenSeleniumCucumber(MavenGeneric):
             self.get_value('deployed-host-urls')
         )
         uat_maven_profile = self.get_value('uat-maven-profile')
+        tls_verify = self.get_value('tls-verify')
 
         # NOTE:
         #   at some point may need to do smarter logic if a deployable has more then one deployed
@@ -179,6 +182,14 @@ class MavenSeleniumCucumber(MavenGeneric):
                 MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
             )
 
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                '-Dmaven.wagon.http.ssl.insecure=true',
+                '-Dmaven.wagon.http.ssl.allowall=true',
+                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+            ]
+
         cucumber_html_report_path = os.path.join(self.work_dir_path, 'cucumber.html')
         cucumber_json_report_path = os.path.join(self.work_dir_path, 'cucumber.json')
         mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
@@ -203,6 +214,7 @@ class MavenSeleniumCucumber(MavenGeneric):
                         f'json:{cucumber_json_report_path}',
                     '-f', pom_file,
                     '-s', settings_file,
+                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )

@@ -38,6 +38,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     def test_step_implementer_config_defaults(self):
         defaults = Maven.step_implementer_config_defaults()
         expected_defaults = {
+            'tls-verify': True,
             'pom-file': 'pom.xml',
             'artifact-extensions': ["jar", "war", "ear"],
             'artifact-parent-dir': 'target'
@@ -398,3 +399,70 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             )
 
             self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+
+    @patch('sh.mvn', create=True)
+    def test_run_step_tls_verify_false(self, mvn_mock):
+        with TempDirectory() as temp_dir:
+            artifact_id = 'my-app'
+            version = '1.0'
+            package = 'war'
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('pom.xml', b'''<project>
+                <modelVersion>4.0.0</modelVersion>
+                <groupId>com.mycompany.app</groupId>
+                <artifactId>my-app</artifactId>
+                <version>1.0</version>
+                <package>war</package>
+            </project>''')
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+
+            step_config = {
+                'pom-file': pom_file_path,
+                'tls-verify': False
+            }
+
+            artifact_file_name = f'{artifact_id}-{version}.{package}'
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='package',
+                implementer='Maven',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
+                pom_file_path,
+                'target',
+                [artifact_file_name])
+
+            result = step_implementer._run_step()
+
+            package_artifacts = {
+                'path': temp_dir.path + '/target/my-app-1.0.war',
+                'artifact-id': 'my-app',
+                'group-id': 'com.mycompany.app',
+                'package-type': 'war',
+                'pom-path': pom_file_path
+            }
+            expected_step_result = StepResult(
+                step_name='package',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
+            mvn_output_file_path = os.path.join(
+                work_dir_path,
+                'package',
+                'mvn_test_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from 'mvn install'.",
+                name='maven-output',
+                value=mvn_output_file_path
+            )
+
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())

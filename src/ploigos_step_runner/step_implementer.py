@@ -299,6 +299,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             that are required before running the step.
         """
 
+    @staticmethod
+    def _str2bool(var):
+        return var.lower() in ("true", "yes")
+
     @abstractmethod
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.

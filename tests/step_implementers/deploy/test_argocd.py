@@ -42,6 +42,7 @@ class TestStepImplementerDeployArgoCD_Other(TestStepImplementerDeployArgoCDBase)
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
             'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
+            'force-push-tags': False,
             'kube-api-skip-tls': False,
             'kube-api-uri': 'https://kubernetes.default.svc',
             'git-name': 'Ploigos Robot'
@@ -376,7 +377,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
                 deployment_config_repo=step_config['deployment-config-repo'],
                 deployment_config_repo_dir='/does/not/matter',
-                deployment_config_repo_tag='v0.42.0'
+                deployment_config_repo_tag='v0.42.0',
+                force_push_tags=False
             )
             argocd_sign_in_mock.assert_called_once_with(
                 argocd_api=step_config['argocd-api'],
@@ -756,12 +758,14 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
                 deployment_config_repo='http://git.ploigos.xys/foo',
                 deployment_config_repo_dir='/does/not/matter',
-                deployment_config_repo_tag='test-tag'
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
             )
             git_tag_and_push_mock.assert_called_once_with(
                 repo_dir='/does/not/matter',
                 tag='test-tag',
-                url='http://test-username:test-password@git.ploigos.xys/foo'
+                url='http://test-username:test-password@git.ploigos.xys/foo',
+                force_push_tags=False
             )
 
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
@@ -784,12 +788,14 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
                 deployment_config_repo='https://git.ploigos.xys/foo',
                 deployment_config_repo_dir='/does/not/matter',
-                deployment_config_repo_tag='test-tag'
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
             )
             git_tag_and_push_mock.assert_called_once_with(
                 repo_dir='/does/not/matter',
                 tag='test-tag',
-                url='https://test-username:test-password@git.ploigos.xys/foo'
+                url='https://test-username:test-password@git.ploigos.xys/foo',
+                force_push_tags=False
             )
 
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
@@ -812,11 +818,13 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
                 deployment_config_repo='git@git.ploigos.xys:foo/bar',
                 deployment_config_repo_dir='/does/not/matter',
-                deployment_config_repo_tag='test-tag'
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
             )
             git_tag_and_push_mock.assert_called_once_with(
                 repo_dir='/does/not/matter',
-                tag='test-tag'
+                tag='test-tag',
+                force_push_tags=False
             )
 
 
@@ -2016,6 +2024,39 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push(TestStepImplementerDeplo
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
+
+    @patch.object(sh, 'git')
+    def test_ArgoCD__git_tag_and_push_override_tls(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+        ArgoCD._ArgoCD__git_tag_and_push(
+            repo_dir=repo_dir,
+            tag=tag,
+            url=url,
+            force_push_tags=True
+        )
+
+        git_mock.push.assert_has_calls([
+            call(
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            ),
+            call(
+                '--tag',
+                '--force',
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            )
+        ])
+        git_mock.tag.assert_called_once_with(
+            tag,
+            '-f',
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
 
 class TestStepImplementerDeployArgoCD__git_commit_file(TestStepImplementerDeployArgoCDBase):
     @patch.object(sh, 'git')

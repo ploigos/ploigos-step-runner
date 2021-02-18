@@ -21,6 +21,7 @@ Configuration Key              | Required | Default | Description
                                                         * artifact.artifact-id <br/>\
                                                         * artifact.path <br/>\
                                                         * artifact.package-type
+`tls-verify`                   | No       | True    | Disables TLS Verification if set to False
 
 Result Artifacts
 ----------------
@@ -72,7 +73,9 @@ from ploigos_step_runner import StepResult
 from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
-DEFAULT_CONFIG = {}
+DEFAULT_CONFIG = {
+    'tls-verify': True
+}
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'maven-push-artifact-repo-url',
     'maven-push-artifact-repo-id',
@@ -132,6 +135,16 @@ class Maven(MavenGeneric):
         maven_push_artifact_repo_url = self.get_value('maven-push-artifact-repo-url')
         version = self.get_value('version')
         package_artifacts = self.get_value('package-artifacts')
+        tls_verify = self.get_value('tls-verify')
+
+        # disable tls verification
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                '-Dmaven.wagon.http.ssl.insecure=true',
+                '-Dmaven.wagon.http.ssl.allowall=true',
+                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+            ]
 
         # Create settings.xml
         settings_file = self._generate_maven_settings()
@@ -166,6 +179,7 @@ class Maven(MavenGeneric):
                         '-Durl=' + maven_push_artifact_repo_url,
                         '-DrepositoryId=' + maven_push_artifact_repo_id,
                         '-s' + settings_file,
+                        *mvn_additional_options,
                         _out=out_callback,
                         _err=err_callback
                     )
