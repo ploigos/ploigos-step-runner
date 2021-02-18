@@ -31,6 +31,8 @@ Configuration Key     | Required? | Default                 | Description
 `artifact-parent-dir` | True      | `'target'`              | Parent directory to look for built \
                                                               artifacts in ending in \
                                                               `artifact-extensions`.
+`tls-verify`          | No        | True                    | Disables TLS Verification if set to \
+                                                              False
 
 Result Artifacts
 ----------------
@@ -97,6 +99,7 @@ from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_
 from ploigos_step_runner.utils.xml import get_xml_element
 
 DEFAULT_CONFIG = {
+    'tls-verify': True,
     'pom-file': 'pom.xml',
     'artifact-extensions': ["jar", "war", "ear"],
     'artifact-parent-dir': 'target'
@@ -154,6 +157,7 @@ class Maven(MavenGeneric):
         """
         step_result = StepResult.from_step_implementer(self)
 
+        tls_verify = self.get_value('tls-verify')
         pom_file = self.get_value('pom-file')
         artifact_extensions = self.get_value('artifact-extensions')
         artifact_parent_dir = self.get_value('artifact-parent-dir')
@@ -162,6 +166,14 @@ class Maven(MavenGeneric):
             step_result.success = False
             step_result.message = f'Given pom file does not exist: {pom_file}'
             return step_result
+
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                '-Dmaven.wagon.http.ssl.insecure=true',
+                '-Dmaven.wagon.http.ssl.allowall=true',
+                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+            ]
 
         settings_file = self._generate_maven_settings()
         mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
@@ -181,6 +193,7 @@ class Maven(MavenGeneric):
                     'install',
                     '-f', pom_file,
                     '-s', settings_file,
+                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )

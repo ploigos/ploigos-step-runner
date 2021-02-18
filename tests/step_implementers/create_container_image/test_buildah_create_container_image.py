@@ -39,7 +39,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             'containers-config-auth-file': os.path.join(Path.home(), '.buildah-auth.json'),
             'imagespecfile': 'Dockerfile',
             'context': '.',
-            'tlsverify': 'true',
+            'tls-verify': 'true',
             'format': 'oci'
         }
         self.assertEqual(defaults, expected_defaults)
@@ -50,7 +50,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             'containers-config-auth-file',
             'imagespecfile',
             'context',
-            'tlsverify',
+            'tls-verify',
             'format',
             'service-name',
             'application-name'
@@ -69,7 +69,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': 'Dockerfile',
                 'context': temp_dir.path,
-                'tlsverify': 'true',
+                'tls-verify': 'true',
                 'format': 'oci',
                 'service-name': 'service-name',
                 'application-name': 'app-name'
@@ -142,7 +142,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': 'Dockerfile',
                 'context': temp_dir.path,
-                'tlsverify': 'true',
+                'tls-verify': 'true',
                 'format': 'oci',
                 'service-name': 'service-name',
                 'application-name': 'app-name'
@@ -208,7 +208,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': 'Dockerfile',
                 'context': temp_dir.path,
-                'tlsverify': 'true',
+                'tls-verify': 'true',
                 'format': 'oci',
                 'service-name': 'service-name',
                 'application-name': 'app-name'
@@ -323,7 +323,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': image_spec_file,
                 'context': temp_dir.path,
-                'tlsverify': 'true',
+                'tls-verify': 'true',
                 'format': 'oci',
                 'service-name': 'service-name',
                 'application-name': 'app-name'
@@ -378,7 +378,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': 'Dockerfile',
                 'context': temp_dir.path,
-                'tlsverify': 'true',
+                'tl-sverify': 'true',
                 'format': 'oci',
                 'service-name': service_name,
                 'application-name': application_name

@@ -122,6 +122,7 @@ class Skopeo(StepImplementer):
         organization = self.get_value('organization')
         image_tar_file = self.get_value('image-tar-file')
         destination_url = self.get_value('destination-url')
+        dest_tls_verify = self.get_value('dest-tls-verify')
 
         image_registry_uri = destination_url
         image_registry_organization = organization
@@ -136,7 +137,8 @@ class Skopeo(StepImplementer):
             containers_config_auth_file = self.get_value('containers-config-auth-file')
             container_registries_login(
                 registries=self.get_value('container-registries'),
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                containers_config_tls_verify=self._str2bool(dest_tls_verify)
             )
 
             # push image

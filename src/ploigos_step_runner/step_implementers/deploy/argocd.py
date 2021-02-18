@@ -89,6 +89,7 @@ Configuration Key         | Required? | Default  | Description
                                                         /`container-image-registry-organization`\
                                                         /`container-image-repository`\
                                                         :`container-image-version`"
+`force-push-tags`         | No        | False    | Force push Git Tags
 
 Results
 -------
@@ -118,6 +119,7 @@ DEFAULT_CONFIG = {
     'deployment-config-helm-chart-path': './',
     'deployment-config-helm-chart-additional-values-files': [],
     'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
+    'force-push-tags': False,
     'kube-api-skip-tls': False,
     'kube-api-uri': 'https://kubernetes.default.svc',
     'git-name': 'Ploigos Robot'
@@ -245,6 +247,7 @@ class ArgoCD(StepImplementer):
         deployment_config_helm_chart_additional_value_files = \
             self.get_value('deployment-config-helm-chart-additional-values-files')
         container_image_tag = self.get_value('container-image-tag')
+        force_push_tags = self.get_value('force-push-tags')
 
         try:
             argocd_app_name = self.__get_app_name()
@@ -290,7 +293,8 @@ class ArgoCD(StepImplementer):
             self.__git_tag_and_push_deployment_config_repo(
                 deployment_config_repo=deployment_config_repo,
                 deployment_config_repo_dir=deployment_config_repo_dir,
-                deployment_config_repo_tag=deployment_config_repo_tag
+                deployment_config_repo_tag=deployment_config_repo_tag,
+                force_push_tags=force_push_tags
             )
             step_result.add_artifact(
                 name='config-repo-git-tag',
@@ -441,7 +445,8 @@ class ArgoCD(StepImplementer):
         self,
         deployment_config_repo,
         deployment_config_repo_dir,
-        deployment_config_repo_tag
+        deployment_config_repo_tag,
+        force_push_tags
     ):
         deployment_config_repo_match = ArgoCD.GIT_REPO_REGEX.match(deployment_config_repo)
         deployment_config_repo_protocol = deployment_config_repo_match.groupdict()['protocol']
@@ -462,12 +467,14 @@ class ArgoCD(StepImplementer):
             ArgoCD.__git_tag_and_push(
                 repo_dir=deployment_config_repo_dir,
                 tag=deployment_config_repo_tag,
-                url=deployment_config_repo_with_user_pass
+                url=deployment_config_repo_with_user_pass,
+                force_push_tags=force_push_tags
             )
         else:
             ArgoCD.__git_tag_and_push(
                 repo_dir=deployment_config_repo_dir,
-                tag=deployment_config_repo_tag
+                tag=deployment_config_repo_tag,
+                force_push_tags=force_push_tags
             )
 
     def __get_app_name(self):
@@ -730,7 +737,7 @@ class ArgoCD(StepImplementer):
             ) from error
 
     @staticmethod
-    def __git_tag_and_push(repo_dir, tag, url=None):
+    def __git_tag_and_push(repo_dir, tag, url=None, force_push_tags=False):
         """
         Raises
         ------
@@ -774,10 +781,15 @@ class ArgoCD(StepImplementer):
                 f"Error tagging repository ({repo_dir}) with tag ({tag}): {error}"
             ) from error
 
+        git_push_additional_arguments = []
+        if force_push_tags:
+            git_push_additional_arguments += ["--force"]
+
         # push tag
         try:
             git_push(
                 '--tag',
+                *git_push_additional_arguments,
                 _cwd=repo_dir,
                 _out=sys.stdout
             )

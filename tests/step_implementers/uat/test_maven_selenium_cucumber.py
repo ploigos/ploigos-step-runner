@@ -134,6 +134,7 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         expected_defaults = {
             'fail-on-no-tests': True,
             'pom-file': 'pom.xml',
+            'tls-verify': True,
             'uat-maven-profile': 'integration-test'
         }
         self.assertEqual(expected_defaults, actual_defaults)
@@ -169,7 +170,8 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         fail_on_no_tests=None,
         uat_maven_profile=None,
         pom_file_name='pom.xml',
-        raise_error_on_tests=False
+        raise_error_on_tests=False,
+        set_tls_verify_false=False
     ):
         results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
         results_file_name = 'step-runner-results.yml'
@@ -183,8 +185,13 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         pom_file_path = os.path.join(test_dir.path, pom_file_name)
         step_config = {
             'pom-file': pom_file_path,
-            'selenium-hub-url': selenium_hub_url
+            'selenium-hub-url': selenium_hub_url,
+            'tls-verify': True
         }
+
+        if set_tls_verify_false:
+            step_config['tls-verify'] = False
+
         target_base_url = None
         if deployed_host_urls:
             step_config['deployed-host-urls'] = deployed_host_urls
@@ -235,20 +242,39 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
 
         result = step_implementer._run_step()
         if assert_mvn_called:
-            mvn_mock.assert_called_once_with(
-                'clean',
-                'test',
-                f'-P{uat_maven_profile}',
-                f'-Dselenium.hub.url={selenium_hub_url}',
-                f'-Dtarget.base.url={target_base_url}',
-                f'-Dcucumber.plugin=' \
-                    f'html:{cucumber_html_report_path},' \
-                    f'json:{cucumber_json_report_path}',
-                '-f', pom_file_path,
-                '-s', settings_file_path,
-                _out=Any(IOBase),
-                _err=Any(IOBase)
-            )
+            if not set_tls_verify_false:
+                mvn_mock.assert_called_once_with(
+                    'clean',
+                    'test',
+                    f'-P{uat_maven_profile}',
+                    f'-Dselenium.hub.url={selenium_hub_url}',
+                    f'-Dtarget.base.url={target_base_url}',
+                    f'-Dcucumber.plugin=' \
+                        f'html:{cucumber_html_report_path},' \
+                        f'json:{cucumber_json_report_path}',
+                    '-f', pom_file_path,
+                    '-s', settings_file_path,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+            else:
+                mvn_mock.assert_called_once_with(
+                    'clean',
+                    'test',
+                    f'-P{uat_maven_profile}',
+                    f'-Dselenium.hub.url={selenium_hub_url}',
+                    f'-Dtarget.base.url={target_base_url}',
+                    f'-Dcucumber.plugin=' \
+                        f'html:{cucumber_html_report_path},' \
+                        f'json:{cucumber_json_report_path}',
+                    '-f', pom_file_path,
+                    '-s', settings_file_path,
+                    '-Dmaven.wagon.http.ssl.insecure=true',
+                    '-Dmaven.wagon.http.ssl.allowall=true',
+                    '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
 
         expected_step_result = StepResult(
             step_name='uat',
@@ -339,6 +365,61 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 artifact_id=artifact_id,
                 surefire_reports_dir=surefire_reports_dir
             )
+
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
+    def test__run_step_tls_verify_false(
+        self,
+        write_effective_pom_mock,
+        mvn_mock,
+        generate_maven_settings_mock
+    ):
+        with TempDirectory() as test_dir:
+            group_id = 'com.mycompany.app'
+            artifact_id = 'my-app'
+            version = '1.0'
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            pom_content = bytes(
+'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(
+                    group_id=group_id,
+                    artifact_id=artifact_id,
+                    version=version
+                ), 'utf-8'
+            )
+
+            self.__run__run_step_test(
+                test_dir=test_dir,
+                mvn_mock=mvn_mock,
+                selenium_hub_url='https://test.xyz:4444',
+                write_effective_pom_mock=write_effective_pom_mock,
+                generate_maven_settings_mock=generate_maven_settings_mock,
+                pom_content=pom_content,
+                group_id=group_id,
+                artifact_id=artifact_id,
+                surefire_reports_dir=surefire_reports_dir,
+                set_tls_verify_false=True
+            )
+
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')

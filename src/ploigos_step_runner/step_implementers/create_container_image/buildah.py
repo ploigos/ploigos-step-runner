@@ -13,7 +13,7 @@ Configuration Key | Required? | Default        | Description
 ------------------|-----------|----------------|-----------
 `imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
 `context`         | True      | `'.'`          | Context to build the container image in
-`tlsverify`       | True      | `'true'`       | Whether to verify TLS when pulling parent images
+`tls-verify`      | True      | `'true'`       | Whether to verify TLS when pulling parent images
 `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
 `containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
                                                  Path to the container registry authentication \
@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     'context': '.',
 
     # Verify TLS Certs?
-    'tlsverify': 'true',
+    'tls-verify': 'true',
 
     # Format of the produced image
     'format': 'oci'
@@ -58,7 +58,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'containers-config-auth-file',
     'imagespecfile',
     'context',
-    'tlsverify',
+    'tls-verify',
     'format',
     'service-name',
     'application-name'
@@ -115,6 +115,7 @@ class Buildah(StepImplementer):
         image_spec_file_location = context + '/' + image_spec_file
         application_name = self.get_value('application-name')
         service_name = self.get_value('service-name')
+        tls_verify = self.get_value('tls-verify')
 
         if not os.path.exists(image_spec_file_location):
             step_result.success = False
@@ -143,7 +144,8 @@ class Buildah(StepImplementer):
             containers_config_auth_file = self.get_value('containers-config-auth-file')
             container_registries_login(
                 registries=self.get_value('container-registries'),
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                containers_config_tls_verify=self._str2bool(tls_verify)
             )
 
             # perform build
@@ -154,7 +156,7 @@ class Buildah(StepImplementer):
             sh.buildah.bud(  # pylint: disable=no-member
                 '--storage-driver=vfs',
                 '--format=' + self.get_value('format'),
-                '--tls-verify=' + str(self.get_value('tlsverify')),
+                '--tls-verify=' + str(tls_verify),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 '--authfile', containers_config_auth_file,
