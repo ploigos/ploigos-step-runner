@@ -91,12 +91,10 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
 
-            # # Expected results
+            # Expected results
             expected_step_result = StepResult(step_name='sign-container-image', sub_step_name='CurlPush',
                                               sub_step_implementer_name='CurlPush')
             expected_step_result.add_artifact(name='container-image-signature-url', value=f'https://sigserver/signatures/{container_image_signature_name}')
-            # expected_step_result.add_artifact(name='container-image-signature-file-sha1', value=None)
-            # expected_step_result.add_artifact(name='container-image-signature-file-md5', value=None)
 
             self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
             curl_mock.assert_called_once_with(
