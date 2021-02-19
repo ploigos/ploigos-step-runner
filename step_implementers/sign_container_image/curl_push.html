@@ -83,6 +83,14 @@ ex: user/hello-node@sha256=
 9e368db3f806eab4c541f5c6b719
 e69f1a2b/signature-1</td>
 </tr>
+<tr>
+<td><code>with-fips</code></td>
+<td>No</td>
+<td>True</td>
+<td>If set to false, allows use
+of MD5 and SHA1 in container
+signature verification.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="result-artifacts">Result Artifacts</h2>
@@ -142,6 +150,9 @@ Configuration Key                           | Required? | Default | Description
                                                                     2cbdb73c9177e63e85d267f738e9\
                                                                     9e368db3f806eab4c541f5c6b719\
                                                                     e69f1a2b/signature-1
+`with-fips`                                 | No        | True    | If set to false, allows use\
+                                                                    of MD5 and SHA1 in container\
+                                                                    signature verification.
 
 Result Artifacts
 ----------------
@@ -166,6 +177,7 @@ from ploigos_step_runner.step_result import StepResult
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
+    &#39;with-fips&#39;: True
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -237,6 +249,7 @@ class CurlPush(StepImplementer):
         # extract step results
         container_image_signature_file_path = self.get_value(&#39;container-image-signature-file-path&#39;)
         container_image_signature_name = self.get_value(&#39;container-image-signature-name&#39;)
+        with_fips = self.get_value(&#39;with-fips&#39;)
 
         try:
             container_image_signature_url, signature_file_md5, signature_file_sha1 = \
@@ -245,18 +258,20 @@ class CurlPush(StepImplementer):
                     container_image_signature_name=container_image_signature_name,
                     signature_server_url=signature_server_url,
                     signature_server_username=signature_server_username,
-                    signature_server_password=signature_server_password
+                    signature_server_password=signature_server_password,
+                    with_fips=with_fips
                 )
 
             step_result.add_artifact(
                 name=&#39;container-image-signature-url&#39;, value=container_image_signature_url,
             )
-            step_result.add_artifact(
-                name=&#39;container-image-signature-file-md5&#39;, value=signature_file_md5,
-            )
-            step_result.add_artifact(
-                name=&#39;container-image-signature-file-sha1&#39;, value=signature_file_sha1
-            )
+            if not with_fips:
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-file-md5&#39;, value=signature_file_md5,
+                )
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-file-sha1&#39;, value=signature_file_sha1
+                )
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
@@ -264,12 +279,13 @@ class CurlPush(StepImplementer):
         return step_result
 
     @staticmethod
-    def __curl_file(
+    def __curl_file(  # pylint: disable=too-many-arguments
             container_image_signature_file_path,
             container_image_signature_name,
             signature_server_url,
             signature_server_username,
-            signature_server_password
+            signature_server_password,
+            with_fips
     ):
         &#34;&#34;&#34;Sends the signature file
 
@@ -282,11 +298,23 @@ class CurlPush(StepImplementer):
         signature_server_url = re.sub(r&#39;/$&#39;, &#39;&#39;, signature_server_url)
         container_image_signature_url = f&#34;{signature_server_url}/{container_image_signature_name}&#34;
 
+        curl_additional_options = []
+        signature_file_md5 = None
+        signature_file_sha1 = None
+
         # calculate hashes
-        with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
-            container_image_signature_file_contents = container_image_signature_file.read()
-            signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
-            signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
+        if not with_fips:
+            with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
+                container_image_signature_file_contents = container_image_signature_file.read()
+                signature_file_md5 = hashlib.md5(container_image_signature_file_contents)\
+                    .hexdigest()
+                signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents)\
+                    .hexdigest()
+
+            curl_additional_options += [
+                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
+            ]
 
         try:
             stdout_result = StringIO()
@@ -302,10 +330,9 @@ class CurlPush(StepImplementer):
             sh.curl(  # pylint: disable=no-member
                 &#39;-sSfv&#39;,
                 &#39;-X&#39;, &#39;PUT&#39;,
-                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
-                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
                 &#39;--user&#39;, f&#34;{signature_server_username}:{signature_server_password}&#34;,
                 &#39;--upload-file&#39;, container_image_signature_file_path,
+                *curl_additional_options,
                 container_image_signature_url,
                 _out=stdout_callback,
                 _err_to_out=True,
@@ -400,6 +427,7 @@ to a destination.</p></div>
         # extract step results
         container_image_signature_file_path = self.get_value(&#39;container-image-signature-file-path&#39;)
         container_image_signature_name = self.get_value(&#39;container-image-signature-name&#39;)
+        with_fips = self.get_value(&#39;with-fips&#39;)
 
         try:
             container_image_signature_url, signature_file_md5, signature_file_sha1 = \
@@ -408,18 +436,20 @@ to a destination.</p></div>
                     container_image_signature_name=container_image_signature_name,
                     signature_server_url=signature_server_url,
                     signature_server_username=signature_server_username,
-                    signature_server_password=signature_server_password
+                    signature_server_password=signature_server_password,
+                    with_fips=with_fips
                 )
 
             step_result.add_artifact(
                 name=&#39;container-image-signature-url&#39;, value=container_image_signature_url,
             )
-            step_result.add_artifact(
-                name=&#39;container-image-signature-file-md5&#39;, value=signature_file_md5,
-            )
-            step_result.add_artifact(
-                name=&#39;container-image-signature-file-sha1&#39;, value=signature_file_sha1
-            )
+            if not with_fips:
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-file-md5&#39;, value=signature_file_md5,
+                )
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-file-sha1&#39;, value=signature_file_sha1
+                )
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
@@ -427,12 +457,13 @@ to a destination.</p></div>
         return step_result
 
     @staticmethod
-    def __curl_file(
+    def __curl_file(  # pylint: disable=too-many-arguments
             container_image_signature_file_path,
             container_image_signature_name,
             signature_server_url,
             signature_server_username,
-            signature_server_password
+            signature_server_password,
+            with_fips
     ):
         &#34;&#34;&#34;Sends the signature file
 
@@ -445,11 +476,23 @@ to a destination.</p></div>
         signature_server_url = re.sub(r&#39;/$&#39;, &#39;&#39;, signature_server_url)
         container_image_signature_url = f&#34;{signature_server_url}/{container_image_signature_name}&#34;
 
+        curl_additional_options = []
+        signature_file_md5 = None
+        signature_file_sha1 = None
+
         # calculate hashes
-        with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
-            container_image_signature_file_contents = container_image_signature_file.read()
-            signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
-            signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
+        if not with_fips:
+            with open(container_image_signature_file_path, &#39;rb&#39;) as container_image_signature_file:
+                container_image_signature_file_contents = container_image_signature_file.read()
+                signature_file_md5 = hashlib.md5(container_image_signature_file_contents)\
+                    .hexdigest()
+                signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents)\
+                    .hexdigest()
+
+            curl_additional_options += [
+                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
+                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
+            ]
 
         try:
             stdout_result = StringIO()
@@ -465,10 +508,9 @@ to a destination.</p></div>
             sh.curl(  # pylint: disable=no-member
                 &#39;-sSfv&#39;,
                 &#39;-X&#39;, &#39;PUT&#39;,
-                &#39;--header&#39;, f&#39;X-Checksum-Sha1:{signature_file_sha1}&#39;,
-                &#39;--header&#39;, f&#39;X-Checksum-MD5:{signature_file_md5}&#39;,
                 &#39;--user&#39;, f&#34;{signature_server_username}:{signature_server_password}&#34;,
                 &#39;--upload-file&#39;, container_image_signature_file_path,
+                *curl_additional_options,
                 container_image_signature_url,
                 _out=stdout_callback,
                 _err_to_out=True,
