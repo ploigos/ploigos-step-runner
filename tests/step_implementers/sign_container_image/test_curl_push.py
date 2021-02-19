@@ -38,7 +38,7 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     # TESTS FOR configuration checks
     def test_step_implementer_config_defaults(self):
         defaults = CurlPush.step_implementer_config_defaults()
-        expected_defaults = {}
+        expected_defaults = {'with-fips': True}
         self.assertEqual(defaults, expected_defaults)
 
     def test__required_config_or_result_keys(self):
@@ -68,7 +68,66 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             step_config = {
                 'container-image-signature-server-url': 'https://sigserver/signatures',
                 'container-image-signature-server-username': 'admin',
-                'container-image-signature-server-password': 'adminPassword'
+                'container-image-signature-server-password': 'adminPassword',
+                'with-fips': True
+            }
+
+            # Previous (fake) results
+            artifact_config = {
+                'container-image-signature-file-path': {'value': container_image_signature_file_path},
+                'container-image-signature-name': {'value': container_image_signature_name},
+            }
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            # Actual results
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='sign-container-image',
+                implementer='CurlPush',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            result = step_implementer._run_step()
+
+            # # Expected results
+            expected_step_result = StepResult(step_name='sign-container-image', sub_step_name='CurlPush',
+                                              sub_step_implementer_name='CurlPush')
+            expected_step_result.add_artifact(name='container-image-signature-url', value=f'https://sigserver/signatures/{container_image_signature_name}')
+            # expected_step_result.add_artifact(name='container-image-signature-file-sha1', value=None)
+            # expected_step_result.add_artifact(name='container-image-signature-file-md5', value=None)
+
+            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
+            curl_mock.assert_called_once_with(
+                '-sSfv',
+                '-X', 'PUT',
+                '--user', "admin:adminPassword",
+                '--upload-file', container_image_signature_file_path,
+                f"https://sigserver/signatures/{container_image_signature_name}",
+                _out=Any(IOBase),
+                _err_to_out=True,
+                _tee='out'
+            )
+
+    @patch('sh.curl', create=True)
+    def test_run_step_pass_nofips(self, curl_mock):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            signature_file_path = 'signature-1'
+            temp_dir.write(signature_file_path, b'bogus signature')
+            container_image_signature_file_path = os.path.join(temp_dir.path, signature_file_path)
+
+            container_image_signature_name = 'jkeam/hello-node@sha256=2cbdb73c9177e63e85d267f738e' \
+                '99e368db3f806eab4c541f5c6b719e69f1a2b/signature-1'
+
+            step_config = {
+                'container-image-signature-server-url': 'https://sigserver/signatures',
+                'container-image-signature-server-username': 'admin',
+                'container-image-signature-server-password': 'adminPassword',
+                'with-fips': False
             }
 
             # Previous (fake) results
@@ -101,10 +160,10 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             curl_mock.assert_called_once_with(
                 '-sSfv',
                 '-X', 'PUT',
-                '--header', StringRegexParam(r'X-Checksum-Sha1:.+'),
-                '--header', StringRegexParam(r'X-Checksum-MD5:.+'),
                 '--user', "admin:adminPassword",
                 '--upload-file', container_image_signature_file_path,
+                '--header', StringRegexParam(r'X-Checksum-Sha1:.+'),
+                '--header', StringRegexParam(r'X-Checksum-MD5:.+'),
                 f"https://sigserver/signatures/{container_image_signature_name}",
                 _out=Any(IOBase),
                 _err_to_out=True,
@@ -176,8 +235,6 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             curl_mock.assert_called_once_with(
                 '-sSfv',
                 '-X', 'PUT',
-                '--header', StringRegexParam(r'X-Checksum-Sha1:.+'),
-                '--header', StringRegexParam(r'X-Checksum-MD5:.+'),
                 '--user', "admin:adminPassword",
                 '--upload-file', container_image_signature_file_path,
                 f"https://sigserver/signatures/{container_image_signature_name}",

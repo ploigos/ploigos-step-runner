@@ -27,6 +27,9 @@ Configuration Key                           | Required? | Default | Description
                                                                     2cbdb73c9177e63e85d267f738e9\
                                                                     9e368db3f806eab4c541f5c6b719\
                                                                     e69f1a2b/signature-1
+`with-fips`                                 | No        | True    | If set to false, allows use\
+                                                                    of MD5 and SHA1 in container\
+                                                                    signature verification.
 
 Result Artifacts
 ----------------
@@ -153,7 +156,7 @@ class CurlPush(StepImplementer):
         return step_result
 
     @staticmethod
-    def __curl_file(
+    def __curl_file(  # pylint: disable=too-many-arguments
             container_image_signature_file_path,
             container_image_signature_name,
             signature_server_url,
@@ -172,15 +175,23 @@ class CurlPush(StepImplementer):
         signature_server_url = re.sub(r'/$', '', signature_server_url)
         container_image_signature_url = f"{signature_server_url}/{container_image_signature_name}"
 
+        curl_additional_options = []
+        signature_file_md5 = None
+        signature_file_sha1 = None
+
         # calculate hashes
         if not with_fips:
             with open(container_image_signature_file_path, 'rb') as container_image_signature_file:
                 container_image_signature_file_contents = container_image_signature_file.read()
-                signature_file_md5 = hashlib.md5(container_image_signature_file_contents).hexdigest()
-                signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents).hexdigest()
-        else:
-            signature_file_md5 = None
-            signature_file_sha1 = None
+                signature_file_md5 = hashlib.md5(container_image_signature_file_contents)\
+                    .hexdigest()
+                signature_file_sha1 = hashlib.sha1(container_image_signature_file_contents)\
+                    .hexdigest()
+
+            curl_additional_options += [
+                '--header', f'X-Checksum-Sha1:{signature_file_sha1}',
+                '--header', f'X-Checksum-MD5:{signature_file_md5}',
+            ]
 
         try:
             stdout_result = StringIO()
@@ -188,13 +199,6 @@ class CurlPush(StepImplementer):
                 sys.stdout,
                 stdout_result
             ])
-
-            curl_additional_options = []
-            if not with_fips:
-                curl_additional_options += [
-                    '--header', f'X-Checksum-Sha1:{signature_file_sha1}',
-                    '--header', f'X-Checksum-MD5:{signature_file_md5}',
-                ]
 
             # -s: Silent
             # -S: Show error
