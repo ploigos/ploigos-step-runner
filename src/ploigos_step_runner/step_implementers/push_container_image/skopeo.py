@@ -46,6 +46,7 @@ Result Artifact Key                     | Description
 """
 import os
 import sys
+from distutils import util
 from pathlib import Path
 
 import sh
@@ -138,7 +139,7 @@ class Skopeo(StepImplementer):
             container_registries_login(
                 registries=self.get_value('container-registries'),
                 containers_config_auth_file=containers_config_auth_file,
-                containers_config_tls_verify=self._str2bool(dest_tls_verify)
+                containers_config_tls_verify=util.strtobool(dest_tls_verify)
             )
 
             # push image
