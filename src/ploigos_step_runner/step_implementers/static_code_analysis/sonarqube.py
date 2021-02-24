@@ -216,6 +216,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.login={username}',
                     f'-Dsonar.password={password}',
                     f'-Dsonar.working.directory={working_directory}',
+                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -226,6 +227,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.projectVersion={version}',
                     f'-Dsonar.projectKey={project_key}',
                     f'-Dsonar.working.directory={working_directory}',
+                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )

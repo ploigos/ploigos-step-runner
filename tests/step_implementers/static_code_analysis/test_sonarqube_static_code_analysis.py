@@ -186,6 +186,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
                     '-Dsonar.working.directory=' + work_dir_path,
+                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
                     _out=sys.stdout,
                     _err=sys.stderr
             )
@@ -242,6 +243,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.working.directory=' + work_dir_path,
+                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
                     _out=sys.stdout,
                     _err=sys.stderr
             )
