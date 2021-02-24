@@ -19,6 +19,8 @@ Key               | Required | Default                     | Description
 `password`        | No       |                             | SonarQube password
 `version`         | Yes      |                             | Version to use for the SonarQube \
                                                              project version (sonar.projectVersion)
+`java-truststore` | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
+                                                             to System.
 
 Result Artifacts
 ----------------
@@ -90,7 +92,8 @@ from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_result import StepResult
 
 DEFAULT_CONFIG = {
-    'properties': './sonar-project.properties'
+    'properties': './sonar-project.properties',
+    'java-truststore': '/etc/pki/java/cacerts'
 }
 
 AUTHENTICATION_CONFIG = {
@@ -198,6 +201,8 @@ class SonarQube(StepImplementer):
         url = self.get_value('url')
         version = self.get_value('version')
         properties_file = self.get_value('properties')
+        java_truststore = self.get_value('java-truststore')
+
         if not os.path.exists(properties_file):
             step_result.success = False
             step_result.message = f'Properties file not found: {properties_file}'
@@ -216,7 +221,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.login={username}',
                     f'-Dsonar.password={password}',
                     f'-Dsonar.working.directory={working_directory}',
-                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
+                    f'-Djavax.net.ssl.trustStore={java_truststore}',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -227,7 +232,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.projectVersion={version}',
                     f'-Dsonar.projectKey={project_key}',
                     f'-Dsonar.working.directory={working_directory}',
-                    '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts',
+                    f'-Djavax.net.ssl.trustStore={java_truststore}',
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
