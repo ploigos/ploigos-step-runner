@@ -38,7 +38,8 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     def test_step_implementer_config_defaults(self):
         defaults = SonarQube.step_implementer_config_defaults()
         expected_defaults = {
-            'properties': './sonar-project.properties'
+            'properties': './sonar-project.properties',
+            'java-truststore': '/etc/pki/java/cacerts'
         }
         self.assertEqual(defaults, expected_defaults)
 
