@@ -53,6 +53,12 @@ step can succeed when no tests are defined</td>
 <td>pom used to run tests and check
 for existence of custom reportsDirectory</td>
 </tr>
+<tr>
+<td><code>tls-verify</code></td>
+<td>No</td>
+<td>True</td>
+<td>Disables TLS Verification if set to False</td>
+</tr>
 </tbody>
 </table>
 <h2 id="result-artifacts">Result Artifacts</h2>
@@ -95,6 +101,7 @@ Configuration Key  | Required? | Default     | Description
                                                step can succeed when no tests are defined
 `pom-file`         | True      | `&#39;pom.xml&#39;` | pom used to run tests and check \
                                                for existence of custom reportsDirectory
+`tls-verify`       | No        | True        | Disables TLS Verification if set to False
 
 Result Artifacts
 ----------------
@@ -114,6 +121,7 @@ from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGene
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
+    &#39;tls-verify&#39;: True,
     &#39;fail-on-no-tests&#39;: True,
     &#39;pom-file&#39;: &#39;pom.xml&#39;
 }
@@ -171,6 +179,7 @@ class Maven(MavenGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
+        tls_verify = self.get_value(&#39;tls-verify&#39;)
         pom_file = self.get_value(&#39;pom-file&#39;)
         fail_on_no_tests = self.get_value(&#39;fail-on-no-tests&#39;)
 
@@ -196,6 +205,14 @@ class Maven(MavenGeneric):
                 MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
             )
 
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
+                &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
+                &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
+            ]
+
         settings_file = self._generate_maven_settings()
         mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
         try:
@@ -214,6 +231,7 @@ class Maven(MavenGeneric):
                     &#39;test&#39;,
                     &#39;-f&#39;, pom_file,
                     &#39;-s&#39;, settings_file,
+                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )
@@ -309,6 +327,7 @@ class Maven(MavenGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
+        tls_verify = self.get_value(&#39;tls-verify&#39;)
         pom_file = self.get_value(&#39;pom-file&#39;)
         fail_on_no_tests = self.get_value(&#39;fail-on-no-tests&#39;)
 
@@ -334,6 +353,14 @@ class Maven(MavenGeneric):
                 MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
             )
 
+        mvn_additional_options = []
+        if not tls_verify:
+            mvn_additional_options += [
+                &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
+                &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
+                &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
+            ]
+
         settings_file = self._generate_maven_settings()
         mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
         try:
@@ -352,6 +379,7 @@ class Maven(MavenGeneric):
                     &#39;test&#39;,
                     &#39;-f&#39;, pom_file,
                     &#39;-s&#39;, settings_file,
+                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )

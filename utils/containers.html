@@ -36,7 +36,10 @@ import sh
 from ploigos_step_runner.config.config_value import ConfigValue
 
 
-def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
+def container_registries_login(  #pylint: disable=too-many-branches
+    registries,
+    containers_config_auth_file=None,
+    containers_config_tls_verify=True):
     &#34;&#34;&#34;Logs into one or more container registries.
 
     Requires one of the following to be installed to do the authentication:
@@ -131,10 +134,13 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
             else:
                 registry_uri = registry_key
 
-            if &#39;tls-verify&#39; in registry_conf:
-                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            if containers_config_tls_verify is False:
+                registry_tls_verify = False
             else:
-                registry_tls_verify = True
+                if &#39;tls-verify&#39; in registry_conf:
+                    registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+                else:
+                    registry_tls_verify = True
 
             container_registry_login(
                 container_registry_uri=registry_uri,
@@ -158,10 +164,13 @@ def container_registries_login(registries, containers_config_auth_file=None): #p
                 f&#34;Configuration for container registry &#34; \
                 f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
 
-            if &#39;tls-verify&#39; in registry_conf:
-                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            if containers_config_tls_verify is False:
+                registry_tls_verify = False
             else:
-                registry_tls_verify = True
+                if &#39;tls-verify&#39; in registry_conf:
+                    registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+                else:
+                    registry_tls_verify = True
 
             container_registry_login(
                 container_registry_uri=registry_conf[&#39;uri&#39;],
@@ -284,7 +293,7 @@ def container_registry_login(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ploigos_step_runner.utils.containers.container_registries_login"><code class="name flex">
-<span>def <span class="ident">container_registries_login</span></span>(<span>registries, containers_config_auth_file=None)</span>
+<span>def <span class="ident">container_registries_login</span></span>(<span>registries, containers_config_auth_file=None, containers_config_tls_verify=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Logs into one or more container registries.</p>
@@ -358,7 +367,10 @@ If not specified default of the underlying authentication system will be used.</
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def container_registries_login(registries, containers_config_auth_file=None): #pylint: disable=too-many-branches
+<pre><code class="python">def container_registries_login(  #pylint: disable=too-many-branches
+    registries,
+    containers_config_auth_file=None,
+    containers_config_tls_verify=True):
     &#34;&#34;&#34;Logs into one or more container registries.
 
     Requires one of the following to be installed to do the authentication:
@@ -453,10 +465,13 @@ If not specified default of the underlying authentication system will be used.</
             else:
                 registry_uri = registry_key
 
-            if &#39;tls-verify&#39; in registry_conf:
-                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            if containers_config_tls_verify is False:
+                registry_tls_verify = False
             else:
-                registry_tls_verify = True
+                if &#39;tls-verify&#39; in registry_conf:
+                    registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+                else:
+                    registry_tls_verify = True
 
             container_registry_login(
                 container_registry_uri=registry_uri,
@@ -480,10 +495,13 @@ If not specified default of the underlying authentication system will be used.</
                 f&#34;Configuration for container registry &#34; \
                 f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
 
-            if &#39;tls-verify&#39; in registry_conf:
-                registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+            if containers_config_tls_verify is False:
+                registry_tls_verify = False
             else:
-                registry_tls_verify = True
+                if &#39;tls-verify&#39; in registry_conf:
+                    registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
+                else:
+                    registry_tls_verify = True
 
             container_registry_login(
                 container_registry_uri=registry_conf[&#39;uri&#39;],

@@ -179,6 +179,7 @@ Result Artifact Key                     | Description
 &#34;&#34;&#34;
 import os
 import sys
+from distutils import util
 from pathlib import Path
 
 import sh
@@ -255,6 +256,7 @@ class Skopeo(StepImplementer):
         organization = self.get_value(&#39;organization&#39;)
         image_tar_file = self.get_value(&#39;image-tar-file&#39;)
         destination_url = self.get_value(&#39;destination-url&#39;)
+        dest_tls_verify = self.get_value(&#39;dest-tls-verify&#39;)
 
         image_registry_uri = destination_url
         image_registry_organization = organization
@@ -269,7 +271,8 @@ class Skopeo(StepImplementer):
             containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
             container_registries_login(
                 registries=self.get_value(&#39;container-registries&#39;),
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                containers_config_tls_verify=util.strtobool(dest_tls_verify)
             )
 
             # push image
@@ -372,6 +375,7 @@ class Skopeo(StepImplementer):
         organization = self.get_value(&#39;organization&#39;)
         image_tar_file = self.get_value(&#39;image-tar-file&#39;)
         destination_url = self.get_value(&#39;destination-url&#39;)
+        dest_tls_verify = self.get_value(&#39;dest-tls-verify&#39;)
 
         image_registry_uri = destination_url
         image_registry_organization = organization
@@ -386,7 +390,8 @@ class Skopeo(StepImplementer):
             containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
             container_registries_login(
                 registries=self.get_value(&#39;container-registries&#39;),
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                containers_config_tls_verify=util.strtobool(dest_tls_verify)
             )
 
             # push image
