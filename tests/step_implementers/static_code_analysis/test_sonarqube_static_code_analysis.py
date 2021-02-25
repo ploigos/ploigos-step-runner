@@ -292,6 +292,69 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
 
+    @patch('sh.sonar_scanner', create=True)
+    def test_run_step_pass_alternate_java_truststore(self, sonar_mock):
+        with TempDirectory() as temp_dir:
+            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+            results_file_name = 'step-runner-results.yml'
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('sonar-project.properties', b'''testing''')
+            properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+            temp_dir.write('alternate.jks', b'''testing''')
+            java_truststore = os.path.join(temp_dir.path, 'alternate.jks')
+
+            step_config = {
+                'properties': properties_path,
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                'application-name': 'app-name',
+                'service-name': 'service-name',
+                'username': 'username',
+                'password': 'password',
+                'java-truststore': java_truststore
+            }
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                results_dir_path=results_dir_path,
+                results_file_name=results_file_name,
+                work_dir_path=work_dir_path,
+            )
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+
+            self.setup_previous_result(work_dir_path, artifact_config)
+
+            result = step_implementer._run_step()
+
+            expected_step_result = StepResult(
+                step_name='static-code-analysis',
+                sub_step_name='SonarQube',
+                sub_step_implementer_name='SonarQube'
+            )
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/report-task.txt'
+            )
+
+            sonar_mock.assert_called_once_with(
+                    '-Dproject.settings=' + properties_path,
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                    '-Dsonar.projectVersion=1.0-123abc',
+                    '-Dsonar.projectKey=app-name:service-name',
+                    '-Dsonar.login=username',
+                    '-Dsonar.password=password',
+                    '-Dsonar.working.directory=' + work_dir_path,
+                    '-Djavax.net.ssl.trustStore=' + java_truststore,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+            )
+
+            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+
     def __run__run_step_fail_sonar_scanner_error_test(
         self,
         sonar_scanner_error,
