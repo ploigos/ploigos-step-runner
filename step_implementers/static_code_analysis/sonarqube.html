@@ -74,6 +74,13 @@ Could come from:</p>
 <td>Version to use for the SonarQube
 project version (sonar.projectVersion)</td>
 </tr>
+<tr>
+<td><code>java-truststore</code></td>
+<td>No</td>
+<td><code>/etc/pki/java/cacerts</code></td>
+<td>Location of Java TrustStore. Defaults
+to System.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="result-artifacts">Result Artifacts</h2>
@@ -163,6 +170,8 @@ Key               | Required | Default                     | Description
 `password`        | No       |                             | SonarQube password
 `version`         | Yes      |                             | Version to use for the SonarQube \
                                                              project version (sonar.projectVersion)
+`java-truststore` | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
+                                                             to System.
 
 Result Artifacts
 ----------------
@@ -234,7 +243,8 @@ from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_result import StepResult
 
 DEFAULT_CONFIG = {
-    &#39;properties&#39;: &#39;./sonar-project.properties&#39;
+    &#39;properties&#39;: &#39;./sonar-project.properties&#39;,
+    &#39;java-truststore&#39;: &#39;/etc/pki/java/cacerts&#39;
 }
 
 AUTHENTICATION_CONFIG = {
@@ -342,6 +352,8 @@ class SonarQube(StepImplementer):
         url = self.get_value(&#39;url&#39;)
         version = self.get_value(&#39;version&#39;)
         properties_file = self.get_value(&#39;properties&#39;)
+        java_truststore = self.get_value(&#39;java-truststore&#39;)
+
         if not os.path.exists(properties_file):
             step_result.success = False
             step_result.message = f&#39;Properties file not found: {properties_file}&#39;
@@ -360,6 +372,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.login={username}&#39;,
                     f&#39;-Dsonar.password={password}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
+                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -370,6 +383,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.projectVersion={version}&#39;,
                     f&#39;-Dsonar.projectKey={project_key}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
+                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -510,6 +524,8 @@ class SonarQube(StepImplementer):
         url = self.get_value(&#39;url&#39;)
         version = self.get_value(&#39;version&#39;)
         properties_file = self.get_value(&#39;properties&#39;)
+        java_truststore = self.get_value(&#39;java-truststore&#39;)
+
         if not os.path.exists(properties_file):
             step_result.success = False
             step_result.message = f&#39;Properties file not found: {properties_file}&#39;
@@ -528,6 +544,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.login={username}&#39;,
                     f&#39;-Dsonar.password={password}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
+                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -538,6 +555,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.projectVersion={version}&#39;,
                     f&#39;-Dsonar.projectKey={project_key}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
+                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
