@@ -221,7 +221,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.login={username}',
                     f'-Dsonar.password={password}',
                     f'-Dsonar.working.directory={working_directory}',
-                    f'-Djavax.net.ssl.trustStore={java_truststore}',
+                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -232,7 +232,7 @@ class SonarQube(StepImplementer):
                     f'-Dsonar.projectVersion={version}',
                     f'-Dsonar.projectKey={project_key}',
                     f'-Dsonar.working.directory={working_directory}',
-                    f'-Djavax.net.ssl.trustStore={java_truststore}',
+                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
