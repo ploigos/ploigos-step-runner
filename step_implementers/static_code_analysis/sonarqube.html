@@ -372,7 +372,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.login={username}&#39;,
                     f&#39;-Dsonar.password={password}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
-                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
+                    _env={&#34;SONAR_SCANNER_OPTS&#34;: f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -383,7 +383,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.projectVersion={version}&#39;,
                     f&#39;-Dsonar.projectKey={project_key}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
-                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
+                    _env={&#34;SONAR_SCANNER_OPTS&#34;: f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -544,7 +544,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.login={username}&#39;,
                     f&#39;-Dsonar.password={password}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
-                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
+                    _env={&#34;SONAR_SCANNER_OPTS&#34;: f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
@@ -555,7 +555,7 @@ class SonarQube(StepImplementer):
                     f&#39;-Dsonar.projectVersion={version}&#39;,
                     f&#39;-Dsonar.projectKey={project_key}&#39;,
                     f&#39;-Dsonar.working.directory={working_directory}&#39;,
-                    f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;,
+                    _env={&#34;SONAR_SCANNER_OPTS&#34;: f&#39;-Djavax.net.ssl.trustStore={java_truststore}&#39;},
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
