@@ -8,8 +8,6 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'container-image-signer-pgp-private-key',
-    'container-image-tag'
 ]
 
 
@@ -55,5 +53,8 @@ class HelloWorld(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 	    #TODO - Add Logic Here
+        
         print("Step Implementer Hello World")
+        print(step_result.get_step_result_yaml(self))
+        print(step_result.get_step_result_json(self))
         return step_result
