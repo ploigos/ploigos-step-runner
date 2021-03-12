@@ -1,5 +1,7 @@
 """`StepImplementers` for the `generate_and_publish_workflow_report` step.
 """
+from ploigos_step_runner import StepImplementer
+
 class HelloWorld(StepImplementer):  
     """StepImplementer for the generate-and-publish-workflow-report step for HelloWorld.
     """
@@ -29,7 +31,8 @@ class HelloWorld(StepImplementer):
         array_list
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
-        """
+        """source .venvs/psr-dev/bin/activate
+
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
