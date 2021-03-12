@@ -1,6 +1,8 @@
 """`StepImplementers` for the `generate_and_publish_workflow_report` step.
 """
 from ploigos_step_runner import StepImplementer
+from ploigos_step_runner.step_result import StepResult
+
 
 DEFAULT_CONFIG = {
 }
