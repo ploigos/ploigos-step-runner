@@ -58,13 +58,14 @@ class HelloWorld(StepImplementer):
 	    #TODO - Add Logic Here
         
         print("Step Implementer Hello World")
-        self.workflow_result.write_results_to_json_file('results.json')
+        resultfile = 'results.json'
+        self.workflow_result.write_results_to_json_file(resultfile)
         sh.curl(  # pylint: disable=no-member
              '-sSfv',
             '-X', 'PUT',
             '--user', "admin:itKiBZaCayMVLua",
-            '--upload-file', 'results.json',
-            'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures',
+            '--upload-file',  resultfile,
+            'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures/results/' + resultfile,
             _err_to_out=True,
             _tee='out'
             )
