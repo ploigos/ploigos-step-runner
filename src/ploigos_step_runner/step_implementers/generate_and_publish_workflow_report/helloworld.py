@@ -59,13 +59,11 @@ class HelloWorld(StepImplementer):
         
         print("Step Implementer Hello World")
         self.workflow_result.write_results_to_json_file('results.json')
-        f = open('results.json')
-        print(f.read())
         sh.curl(  # pylint: disable=no-member
              '-sSfv',
             '-X', 'PUT',
             '--user', "admin:itKiBZaCayMVLua",
-            '--upload-file', 'results.json,
+            '--upload-file', 'results.json',
             '/test/upload/',
             'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures',
             _out=stdout_callback,
