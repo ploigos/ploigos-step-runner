@@ -147,7 +147,6 @@ class Git(StepImplementer):
             print('No username/password found, assuming ssh')
 
         tag = self.__get_tag()
-        print(StepResult.get_step_result_yaml(self))
 
         try:
             self.__git_tag(tag)
