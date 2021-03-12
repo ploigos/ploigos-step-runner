@@ -6,8 +6,6 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'container-image-signer-pgp-private-key',
-    'container-image-tag'
 ]
 
 class HelloWorld(StepImplementer):  
