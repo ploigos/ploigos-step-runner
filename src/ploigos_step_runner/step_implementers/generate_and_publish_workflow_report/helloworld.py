@@ -31,7 +31,7 @@ class HelloWorld(StepImplementer):
         array_list
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
-        """source .venvs/psr-dev/bin/activate
+        """
 
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
