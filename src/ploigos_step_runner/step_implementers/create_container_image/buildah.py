@@ -13,7 +13,7 @@ Configuration Key | Required? | Default        | Description
 ------------------|-----------|----------------|-----------
 `imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
 `context`         | True      | `'.'`          | Context to build the container image in
-`tls-verify`      | True      | `'true'`       | Whether to verify TLS when pulling parent images
+`tls-verify`      | True      | `True`       | Whether to verify TLS when pulling parent images
 `format`          | True      | `'oci'`        | format of the built image's manifest and metadata
 `containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
                                                  Path to the container registry authentication \
@@ -31,7 +31,6 @@ Result Artifact Key | Description
 """
 import os
 import sys
-from distutils import util
 from pathlib import Path
 
 import sh
@@ -49,7 +48,7 @@ DEFAULT_CONFIG = {
     'context': '.',
 
     # Verify TLS Certs?
-    'tls-verify': 'true',
+    'tls-verify': True,
 
     # Format of the produced image
     'format': 'oci'
@@ -146,7 +145,7 @@ class Buildah(StepImplementer):
             container_registries_login(
                 registries=self.get_value('container-registries'),
                 containers_config_auth_file=containers_config_auth_file,
-                containers_config_tls_verify=util.strtobool(tls_verify)
+                containers_config_tls_verify=tls_verify
             )
 
             # perform build
@@ -157,7 +156,7 @@ class Buildah(StepImplementer):
             sh.buildah.bud(  # pylint: disable=no-member
                 '--storage-driver=vfs',
                 '--format=' + self.get_value('format'),
-                '--tls-verify=' + str(tls_verify),
+                '--tls-verify=' + str(tls_verify).lower(),
                 '--layers', '-f', image_spec_file,
                 '-t', tag,
                 '--authfile', containers_config_auth_file,
