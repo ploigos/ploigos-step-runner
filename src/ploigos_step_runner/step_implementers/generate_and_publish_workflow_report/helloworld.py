@@ -55,5 +55,7 @@ class HelloWorld(StepImplementer):
 	    #TODO - Add Logic Here
         
         print("Step Implementer Hello World")
-        print(step_result.get_step_result_json())
+        self.workflow_result.write_results_to_json_file('results.json')
+        f = open('results.json')
+        print(f.read())
         return step_result
