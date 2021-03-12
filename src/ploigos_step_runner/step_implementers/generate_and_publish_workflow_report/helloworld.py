@@ -5,6 +5,11 @@ from ploigos_step_runner import StepImplementer
 DEFAULT_CONFIG = {
 }
 
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    'container-image-signer-pgp-private-key',
+    'container-image-tag'
+]
+
 class HelloWorld(StepImplementer):  
     """StepImplementer for the generate-and-publish-workflow-report step for HelloWorld.
     """
