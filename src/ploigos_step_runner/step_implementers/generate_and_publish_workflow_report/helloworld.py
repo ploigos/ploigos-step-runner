@@ -55,5 +55,5 @@ class HelloWorld(StepImplementer):
 	    #TODO - Add Logic Here
         
         print("Step Implementer Hello World")
-        print(StepResult.get_step_result_json(self))
+        print(step_result.get_step_result_json(self))
         return step_result
