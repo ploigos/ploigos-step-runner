@@ -63,7 +63,7 @@ class HelloWorld(StepImplementer):
         nexusurl = 'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures'
         self.workflow_result.write_results_to_json_file(resultfile)
         sh.curl(  # pylint: disable=no-member
-             '-sSfv',
+            '-sSfv',
             '-X', 'PUT',
             '--user', "user:password",
             '--upload-file',  resultfile,
