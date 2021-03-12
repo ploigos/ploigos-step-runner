@@ -66,8 +66,5 @@ class HelloWorld(StepImplementer):
             '--upload-file', 'results.json',
             '/test/upload/',
             'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures',
-            _out=stdout_callback,
-            _err_to_out=True,
-            _tee='out'
             )
         return step_result
