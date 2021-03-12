@@ -65,7 +65,7 @@ class HelloWorld(StepImplementer):
         sh.curl(  # pylint: disable=no-member
              '-sSfv',
             '-X', 'PUT',
-            '--user', "admin:itKiBZaCayMVLua",
+            '--user', "user:password",
             '--upload-file',  resultfile,
             nexusurl + filepath + resultfile,
             _err_to_out=True,
