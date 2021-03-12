@@ -138,10 +138,7 @@ class CurlPush(StepImplementer):
                     signature_server_password=signature_server_password,
                     with_fips=with_fips
                 )
-
-            step_result.add_artifact(
-                name='container-image-signature-url', value=container_image_signature_url,
-            )
+https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures
             if not with_fips:
                 step_result.add_artifact(
                     name='container-image-signature-file-md5', value=signature_file_md5,

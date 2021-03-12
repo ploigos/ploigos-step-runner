@@ -3,6 +3,9 @@
 from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.step_result import StepResult
 
+import sh
+
+
 
 DEFAULT_CONFIG = {
 }
@@ -58,4 +61,15 @@ class HelloWorld(StepImplementer):
         self.workflow_result.write_results_to_json_file('results.json')
         f = open('results.json')
         print(f.read())
+        sh.curl(  # pylint: disable=no-member
+             '-sSfv',
+            '-X', 'PUT',
+            '--user', "admin:itKiBZaCayMVLua",
+            '--upload-file', 'results.json,
+            '/test/upload/',
+            'https://nexus-devsecops.apps.cluster-801d.801d.example.opentlc.com/repository/container-image-signatures',
+            _out=stdout_callback,
+            _err_to_out=True,
+            _tee='out'
+            )
         return step_result
