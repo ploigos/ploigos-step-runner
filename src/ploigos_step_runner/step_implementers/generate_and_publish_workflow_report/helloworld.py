@@ -2,6 +2,9 @@
 """
 from ploigos_step_runner import StepImplementer
 
+DEFAULT_CONFIG = {
+}
+
 class HelloWorld(StepImplementer):  
     """StepImplementer for the generate-and-publish-workflow-report step for HelloWorld.
     """
