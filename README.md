@@ -42,15 +42,15 @@ python -m pip install -e '.[tests]'
 ```
 
 ### Install test dependencies
-In order to run the tests, you will need skopeo.
+In order to run the tests, you will need tox. Two of the tests also use skopeo.
 
 ```bash
+pip install tox
 sudo dnf install skopeo
 ```
 
 ### Run Tests
 ```bash
-pip install tox
 tox -e test
 ```
 
