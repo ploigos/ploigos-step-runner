@@ -41,8 +41,16 @@ python -m pip install --upgrade pip
 python -m pip install -e '.[tests]'
 ```
 
+### Install test dependencies
+In order to run the tests, you will need skopeo.
+
+```bash
+sudo dnf install skopeo
+```
+
 ### Run Tests
 ```bash
+pip install tox
 tox -e test
 ```
 
