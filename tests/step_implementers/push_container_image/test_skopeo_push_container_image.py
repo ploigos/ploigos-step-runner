@@ -60,7 +60,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-    @patch.object(sh, 'skopeo')
+    @patch.object(sh, 'skopeo', create=True)
     def test_run_step_pass(self, skopeo_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
@@ -135,7 +135,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 _tee='err'
             )
 
-    @patch.object(sh, 'skopeo')
+    @patch.object(sh, 'skopeo', create=True)
     def test_run_step_fail_run_skopeo(self, skopeo_mock):
         with TempDirectory() as temp_dir:
             results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
