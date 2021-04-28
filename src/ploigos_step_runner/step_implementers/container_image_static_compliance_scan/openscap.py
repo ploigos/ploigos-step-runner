@@ -14,6 +14,7 @@ Could come from:
 
  Configuration Key             | Required? | Default | Description
 -------------------------------|-----------|---------|-----------
+`image-tar-file`               | Yes       |         | Path to container image tar file to scan
 `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file \
                                                        to do the evaluation with. \
                                                        Must use protocol file://|http://|https://.
@@ -33,7 +34,6 @@ Could come from:
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
-`image-tar-file`               | Yes       |         | Path to container image tar file to scan
 
 Result Artifacts
 ----------------
