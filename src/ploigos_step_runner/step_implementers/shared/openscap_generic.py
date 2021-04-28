@@ -7,27 +7,27 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key              | Required? | Default | Description
-|--------------------------------|-----------|---------|-----------
-| `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file
-|                                |           |         | to do the evaluation with.
-|                                |           |         | Must use protocol file://|http://|https://.
-|                                |           |         | Must have file extension .xml|.bz2.
-| `oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
-| `oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file
-|                                |           |         | to do the evaluation with.
-|                                |           |         | Must use protocol file://|http://|https://.
-|                                |           |         | Must have file extension .xml|.bz2.
-| `oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files
-|                                |           |         | that have remote references fetch them if
-|                                |           |         | True, else don't.
-|                                |           |         |
-|                                |           |         | WARNING: evaluations will not be complete
-|                                |           |         | if input defintions require remote
-|                                |           |         | resources and this is not True.
-|                                |           |         | For disconnected environments the remote
-|                                |           |         | references should be brought to an internal
-|                                |           |         | mirror.
+ Configuration Key             | Required? | Default | Description
+-------------------------------|-----------|---------|-----------
+`image-tar-file`               | Yes       |         | Path to container image tar file to scan
+`oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file \
+                                                      to do the evaluation with. \
+                                                      Must use protocol file://|http://|https://. \
+                                                      Must have file extension .xml|.bz2.
+`oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
+`oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file \
+                                                      to do the evaluation with. \
+                                                      Must use protocol file://|http://|https://. \
+                                                      Must have file extension .xml|.bz2.
+`oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files \
+                                                       that have remote references fetch them if \
+                                                       True, else don't. \
+                                                       <br/><br/> \
+                                                       **WARNING**: evaluations will not be \
+                                                       complete if input defintions require \
+                                                       remote resources and this is not True. \
+                                                       For disconnected environments the remote \
+                                                       internal mirror.
 
 Expected Previous Step Results
 ------------------------------
