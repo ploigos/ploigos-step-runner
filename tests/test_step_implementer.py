@@ -755,7 +755,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             )
             result = step.run_step()
 
-        self.assertEqual(False, result)
+        self.assertEqual(False, result.success)
 
     def test_create_working_dir_sub_dir(self):
         config = Config({

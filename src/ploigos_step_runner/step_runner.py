@@ -121,7 +121,10 @@ class StepRunner:
             )
 
             # run the step
-            if not sub_step.run_step():
+            step_result = sub_step.run_step()
+
+            # bail out if one of the sub steps fails
+            if not step_result.success:
                 return False
 
         return True

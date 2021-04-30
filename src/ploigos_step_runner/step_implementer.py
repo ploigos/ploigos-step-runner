@@ -334,9 +334,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Returns
         -------
-        bool
-            True on step run success.
-            False on step run failure.
+        StepResult
+            Results of running this step.
         """
 
         StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
@@ -431,7 +430,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
-        return step_result.success
+        return step_result
 
     def get_value(self, key):
         """Get the value for a given key, either from given configuration or from the result
