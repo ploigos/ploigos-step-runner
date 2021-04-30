@@ -2,13 +2,16 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
+from contextlib import redirect_stdout
+from io import StringIO
 
-from testfixtures import TempDirectory
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_runner import StepRunner
 from ploigos_step_runner.workflow_result import WorkflowResult
+from testfixtures import TempDirectory
 
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -877,3 +880,129 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
             )
+
+    def test___print_data_string(self):
+        stdout_buff = StringIO()
+        with redirect_stdout(stdout_buff):
+            StepImplementer._StepImplementer__print_data(
+                title="Test Title",
+                data="test string data"
+            )
+
+        stdout = stdout_buff.getvalue()
+        self.assertEqual(
+            stdout,
+            "        Test Title\n"
+            "            test string data\n\n"
+        )
+
+    def test___print_data_num(self):
+        stdout_buff = StringIO()
+        with redirect_stdout(stdout_buff):
+            StepImplementer._StepImplementer__print_data(
+                title="Test Title",
+                data="42"
+            )
+
+        stdout = stdout_buff.getvalue()
+        self.assertEqual(
+            stdout,
+            "        Test Title\n"
+            "            42\n\n"
+        )
+
+    def test___print_data_list(self):
+        stdout_buff = StringIO()
+        with redirect_stdout(stdout_buff):
+            StepImplementer._StepImplementer__print_data(
+                title="Test Title",
+                data=[
+                    'hello',
+                    'world',
+                    42
+                ]
+            )
+
+        stdout = stdout_buff.getvalue()
+        print(stdout)
+        self.assertEqual(
+            stdout,
+            '        Test Title\n'
+            '            [\n'
+            '                "hello",\n'
+            '                "world",\n'
+            '                42\n'
+            '            ]\n\n'
+        )
+
+    def test___print_data_dict(self):
+        stdout_buff = StringIO()
+        with redirect_stdout(stdout_buff):
+            StepImplementer._StepImplementer__print_data(
+                title="Test Title",
+                data={
+                    'application-name': 'ref-quarkus-mvn-jenkins-std',
+                    'container-registries': {
+                        'quay-quay-enterprise.apps.tssc.rht-set.com': {
+                            'password': '*************************************',
+                            'username': 'ploigos-ref+workflow_reference_quarkus_mvn_jenkins_workflow_standard'
+                        },
+                        'registry.redhat.io': {
+                            'password': '******************************',
+                            'username': '6340056|tssc-integration-infra'
+                        }
+                    },
+                    'maven-mirrors': {
+                        'internal-mirror': {
+                            'id': 'internal-mirror',
+                            'mirror-of': '*',
+                            'url': 'http://artifactory.apps.tssc.rht-set.com/artifactory/release/'
+                        }
+                    },
+                    'maven-servers': {
+                        'internal-mirror': {
+                            'id': 'internal-server',
+                            'password': '***********',
+                            'username': 'tssc'
+                        }
+                    },
+                    'organization': 'ploigos-ref',
+                    'service-name': 'fruit'
+                }
+            )
+
+        stdout = stdout_buff.getvalue()
+        print(stdout)
+        self.assertEqual(
+            stdout,
+            '        Test Title\n'
+            '            {\n'
+            '                "application-name": "ref-quarkus-mvn-jenkins-std",\n'
+            '                "container-registries": {\n'
+            '                    "quay-quay-enterprise.apps.tssc.rht-set.com": {\n'
+            '                        "password": "*************************************",\n'
+            '                        "username": "ploigos-ref+workflow_reference_quarkus_mvn_jenkins_workflow_standard"\n'
+            '                    },\n'
+            '                    "registry.redhat.io": {\n'
+            '                        "password": "******************************",\n'
+            '                        "username": "6340056|tssc-integration-infra"\n'
+            '                    }\n'
+            '                },\n'
+            '                "maven-mirrors": {\n'
+            '                    "internal-mirror": {\n'
+            '                        "id": "internal-mirror",\n'
+            '                        "mirror-of": "*",\n'
+            '                        "url": "http://artifactory.apps.tssc.rht-set.com/artifactory/release/"\n'
+            '                    }\n'
+            '                },\n'
+            '                "maven-servers": {\n'
+            '                    "internal-mirror": {\n'
+            '                        "id": "internal-server",\n'
+            '                        "password": "***********",\n'
+            '                        "username": "tssc"\n'
+            '                    }\n'
+            '                },\n'
+            '                "organization": "ploigos-ref",\n'
+            '                "service-name": "fruit"\n'
+            '            }\n\n'
+        )

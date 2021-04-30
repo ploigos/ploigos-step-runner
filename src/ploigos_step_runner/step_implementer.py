@@ -1,5 +1,6 @@
 """Abstract class and helper constants for StepImplementer.
 """
+import json
 import os
 import pprint
 import sys
@@ -11,6 +12,7 @@ from pathlib import Path
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_result import StepResult
 from ploigos_step_runner.utils.io import TextIOIndenter
+
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     """Convenience constants for the default steps used in the default workflow definition.
@@ -58,6 +60,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     """
 
     __TITLE_LENGTH = 80
+    __INDENT_SIZE   = 4
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -375,7 +378,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             indent=1
         )
 
-        StepImplementer.__print_data('Results', step_result.get_step_result_dict())
+        StepImplementer.__print_data('Environment', step_result.environment)
+        StepImplementer.__print_data('Step', step_result.step_name)
+        StepImplementer.__print_data('Sub Step', step_result.sub_step_name)
+        StepImplementer.__print_data('Sub Step Implementer', step_result.sub_step_implementer_name)
+        StepImplementer.__print_data('Success', step_result.success)
+        StepImplementer.__print_data('Message', step_result.message)
+        StepImplementer.__print_data('Artifacts', step_result.artifacts)
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
@@ -612,7 +621,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Notes
         -----
-        Indent levels are each are 4 spaces wide.
+        Indent levels are each are StepImplementer.__INDENT_SIZE spaces wide.
 
         Parameters
         ----------
@@ -623,13 +632,27 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         indent : int
             Amount to indent the title by and then the content by this +1
         """
-        printer = pprint.PrettyPrinter()
+
         StepImplementer.__print_indented(
             text=title,
             indent=indent
         )
+
+        # NOTE: do a json.dumps so that when printing dicts and arrays the {} and [] get put on
+        #       their own lines which there is no way to do with PrettyPrinter.
+        if isinstance(data, (dict, list)):
+            formated_data = json.dumps(
+                data,
+                indent=StepImplementer.__INDENT_SIZE
+            )
+        elif isinstance(data, str):
+            formated_data = data
+        else:
+            printer = pprint.PrettyPrinter()
+            formated_data = printer.pformat(data)
+
         StepImplementer.__print_indented(
-            text=printer.pformat(data),
+            text=formated_data,
             indent=indent + 1
         )
         print()
@@ -640,7 +663,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Notes
         -----
-        Indent levels are each are 4 spaces wide.
+        Indent levels are each are StepImplementer.__INDENT_SIZE spaces wide.
 
         Parameters
         ----------
@@ -651,5 +674,5 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """
         print(textwrap.indent(
             text=text,
-            prefix=" " * (4 * indent)
+            prefix=" " * (StepImplementer.__INDENT_SIZE * indent)
         ))
