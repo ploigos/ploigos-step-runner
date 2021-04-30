@@ -38,28 +38,18 @@ from runtime configuration.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>image-tar-file</code></td>
+<td>Yes</td>
+<td></td>
+<td>Path to container image tar file to scan</td>
+</tr>
+<tr>
 <td><code>oscap-input-definitions-uri</code></td>
 <td>Yes</td>
 <td></td>
-<td>URI to the OpenSCAP definitions file</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>to do the evaluation with.</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>Must use protocol file://</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>Must have file extension .xml</td>
+<td>URI to the OpenSCAP definitions file
+to do the evaluation with.
+Must use protocol file://</td>
 </tr>
 <tr>
 <td><code>oscap-profile</code></td>
@@ -71,85 +61,23 @@ from runtime configuration.</p>
 <td><code>oscap-tailoring-uri</code></td>
 <td>No</td>
 <td></td>
-<td>URI to OpenSCAP tailoring file</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>to do the evaluation with.</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>Must use protocol file://</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>Must have file extension .xml</td>
+<td>URI to OpenSCAP tailoring file
+to do the evaluation with.
+Must use protocol file://</td>
 </tr>
 <tr>
 <td><code>oscap-fetch-remote-resources</code></td>
 <td>No</td>
 <td>True</td>
-<td>For Source DataStream and XCCDF files</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>that have remote references fetch them if</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>True, else don't.</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>WARNING: evaluations will not be complete</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>if input defintions require remote</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>resources and this is not True.</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>For disconnected environments the remote</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>references should be brought to an internal</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>mirror.</td>
+<td>For Source DataStream and XCCDF files
+that have remote references fetch them if
+True, else don't.
+<br/><br/>
+<strong>WARNING</strong>: evaluations will not be
+complete if input defintions require
+remote resources and this is not True.
+For disconnected environments the remote
+internal mirror.</td>
 </tr>
 </tbody>
 </table>
@@ -208,27 +136,27 @@ Step configuration expected as input to this step.
 Could come from either configuration file or
 from runtime configuration.
 
-| Configuration Key              | Required? | Default | Description
-|--------------------------------|-----------|---------|-----------
-| `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file
-|                                |           |         | to do the evaluation with.
-|                                |           |         | Must use protocol file://|http://|https://.
-|                                |           |         | Must have file extension .xml|.bz2.
-| `oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
-| `oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file
-|                                |           |         | to do the evaluation with.
-|                                |           |         | Must use protocol file://|http://|https://.
-|                                |           |         | Must have file extension .xml|.bz2.
-| `oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files
-|                                |           |         | that have remote references fetch them if
-|                                |           |         | True, else don&#39;t.
-|                                |           |         |
-|                                |           |         | WARNING: evaluations will not be complete
-|                                |           |         | if input defintions require remote
-|                                |           |         | resources and this is not True.
-|                                |           |         | For disconnected environments the remote
-|                                |           |         | references should be brought to an internal
-|                                |           |         | mirror.
+ Configuration Key             | Required? | Default | Description
+-------------------------------|-----------|---------|-----------
+`image-tar-file`               | Yes       |         | Path to container image tar file to scan
+`oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file \
+                                                      to do the evaluation with. \
+                                                      Must use protocol file://|http://|https://. \
+                                                      Must have file extension .xml|.bz2.
+`oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
+`oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file \
+                                                      to do the evaluation with. \
+                                                      Must use protocol file://|http://|https://. \
+                                                      Must have file extension .xml|.bz2.
+`oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files \
+                                                       that have remote references fetch them if \
+                                                       True, else don&#39;t. \
+                                                       &lt;br/&gt;&lt;br/&gt; \
+                                                       **WARNING**: evaluations will not be \
+                                                       complete if input defintions require \
+                                                       remote resources and this is not True. \
+                                                       For disconnected environments the remote \
+                                                       internal mirror.
 
 Expected Previous Step Results
 ------------------------------
