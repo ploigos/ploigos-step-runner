@@ -17,8 +17,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -26,8 +25,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -50,8 +48,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -61,16 +57,14 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
                 'pre-release': {'description': '', 'value': 'master'},
                 'build': {'description': '', 'value': 'abc123'}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='SemanticVersion',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -87,8 +81,6 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
 
     def test_run_step_pass_different_pre_release(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -98,16 +90,14 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
                 'pre-release': {'description': '', 'value': 'feature123'},
                 'build': {'description': '', 'value': 'abc123'}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='SemanticVersion',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()

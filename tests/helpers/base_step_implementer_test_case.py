@@ -23,8 +23,7 @@ class BaseStepImplementerTestCase(BaseTestCase):
         step_name='',
         environment=None,
         implementer='',
-        results_dir_path='',
-        results_file_name='',
+        workflow_result=None,
         work_dir_path='',
     ):
         config = Config({
@@ -41,9 +40,11 @@ class BaseStepImplementerTestCase(BaseTestCase):
         step_config = config.get_step_config(step_name)
         sub_step_config = step_config.get_sub_step(implementer)
 
+        if not workflow_result:
+            workflow_result = WorkflowResult()
+
         step_implementer = step_implementer(
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path,
             config=sub_step_config,
             environment=environment
@@ -80,3 +81,5 @@ class BaseStepImplementerTestCase(BaseTestCase):
         workflow_result.add_step_result(step_result=step_result)
         pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
         workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+
+        return workflow_result

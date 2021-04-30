@@ -13,8 +13,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -22,8 +21,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -43,8 +41,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('package.json', b'''{
@@ -61,8 +57,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='test',
                 implementer='Npm',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -70,8 +64,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_package_file_does_not_exist(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             package_file_path = os.path.join(temp_dir.path, 'package.json')
             step_config = {
@@ -82,8 +74,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='test',
                 implementer='Npm',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -95,8 +85,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('package.json', b'''{
               "name": "my-awesome-package",
@@ -110,8 +98,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Npm',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -129,8 +115,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_version_in_package_file(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('package.json', b'''{
               "name": "my-awesome-package"
@@ -143,8 +127,6 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Npm',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 

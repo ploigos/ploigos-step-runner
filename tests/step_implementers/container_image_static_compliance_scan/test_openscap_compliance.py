@@ -14,8 +14,7 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
             step_config={},
             step_name='test',
             implementer='OpenSCAP',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -23,8 +22,7 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -36,16 +34,12 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -60,16 +54,12 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -91,16 +81,12 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -122,16 +108,12 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -147,16 +129,12 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
     def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
         step_config = {}
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 

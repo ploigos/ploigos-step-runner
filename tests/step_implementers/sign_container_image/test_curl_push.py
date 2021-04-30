@@ -21,8 +21,7 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -30,8 +29,7 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -55,8 +53,6 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     @patch('sh.curl', create=True)
     def test_run_step_pass(self, curl_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             signature_file_path = 'signature-1'
             temp_dir.write(signature_file_path, b'bogus signature')
@@ -77,16 +73,15 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
                 'container-image-signature-file-path': {'value': container_image_signature_file_path},
                 'container-image-signature-name': {'value': container_image_signature_name},
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='sign-container-image',
                 implementer='CurlPush',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -111,8 +106,6 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     @patch('sh.curl', create=True)
     def test_run_step_pass_nofips(self, curl_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             signature_file_path = 'signature-1'
             temp_dir.write(signature_file_path, b'bogus signature')
@@ -133,16 +126,15 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
                 'container-image-signature-file-path': {'value': container_image_signature_file_path},
                 'container-image-signature-name': {'value': container_image_signature_name},
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='sign-container-image',
                 implementer='CurlPush',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -171,8 +163,6 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
     @patch('sh.curl', create=True)
     def test_run_step_fail(self, curl_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             signature_file_path = 'signature-1'
             temp_dir.write(signature_file_path, b'bogus signature')
@@ -192,16 +182,15 @@ class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):
                 'container-image-signature-file-path': {'value': container_image_signature_file_path},
                 'container-image-signature-name': {'value': container_image_signature_name},
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='sign-container-image',
                 implementer='CurlPush',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
             sh.curl.side_effect = sh.ErrorReturnCode('curl', b'mock stdout', b'mock error')
 

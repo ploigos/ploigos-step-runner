@@ -20,8 +20,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -29,8 +28,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -64,16 +62,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -88,16 +82,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             'version': 'notused'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
             with self.assertRaisesRegex(
@@ -115,16 +105,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             'version': 'notused'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
             with self.assertRaisesRegex(
@@ -136,11 +122,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_config = {
                 'properties': properties_path,
@@ -151,21 +140,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'password': 'password'
 
             }
-
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
-
-            artifact_config = {
-                'version': {'description': '', 'value': '1.0-123abc'},
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
 
             result = step_implementer._run_step()
 
@@ -197,11 +178,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass_no_username_and_password(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_config = {
                 'properties': properties_path,
@@ -210,21 +194,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'service-name': 'service-name'
 
             }
-
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
-
-            artifact_config = {
-                'version': {'description': '', 'value': '1.0-123abc'},
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
 
             result = step_implementer._run_step()
 
@@ -254,9 +230,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_fail_no_properties(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_config = {
                 'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
@@ -264,21 +243,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'service-name': 'service-name'
 
             }
-
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
-
-            artifact_config = {
-                'version': {'description': '', 'value': '1.0-123abc'},
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
 
             result = step_implementer._run_step()
 
@@ -295,13 +266,16 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
     @patch('sh.sonar_scanner', create=True)
     def test_run_step_pass_alternate_java_truststore(self, sonar_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties', b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
             temp_dir.write('alternate.jks', b'''testing''')
             java_truststore = os.path.join(temp_dir.path, 'alternate.jks')
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_config = {
                 'properties': properties_path,
@@ -312,21 +286,15 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'password': 'password',
                 'java-truststore': java_truststore
             }
-
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
-            artifact_config = {
-                'version': {'description': '', 'value': '1.0-123abc'},
-            }
 
-            self.setup_previous_result(work_dir_path, artifact_config)
 
             result = step_implementer._run_step()
 
@@ -362,11 +330,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
         sonar_mock
     ):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
             properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_config = {
                 'properties': properties_path,
@@ -377,21 +348,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'password': 'password'
 
             }
-
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='static-code-analysis',
                 implementer='SonarQube',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
+                workflow_result=workflow_result,
                 work_dir_path=work_dir_path,
             )
-
-            artifact_config = {
-                'version': {'description': '', 'value': '1.0-123abc'},
-            }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
 
             sonar_mock.side_effect = sonar_scanner_error
 

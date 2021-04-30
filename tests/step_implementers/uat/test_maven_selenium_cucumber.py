@@ -19,8 +19,6 @@ class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            results_dir_path='',
-            results_file_name='',
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -28,8 +26,6 @@ class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
             step_config=step_config,
             step_name='uat',
             implementer='MavenSeleniumCucumber',
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
             work_dir_path=work_dir_path
         )
 
@@ -38,8 +34,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 ):
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -51,8 +45,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -60,8 +52,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -73,8 +63,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -82,8 +70,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -95,8 +81,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -104,8 +88,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
@@ -116,8 +98,6 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -173,8 +153,6 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         raise_error_on_tests=False,
         set_tls_verify_false=False
     ):
-        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         cucumber_html_report_path = os.path.join(work_dir_path, 'cucumber.html')
@@ -211,8 +189,6 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
             uat_maven_profile = 'integration-test'
         step_implementer = self.create_step_implementer(
             step_config=step_config,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
             work_dir_path=work_dir_path,
         )
 

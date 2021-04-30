@@ -19,8 +19,6 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            results_dir_path='',
-            results_file_name='',
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -28,8 +26,6 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
             step_config=step_config,
             step_name='unit-test',
             implementer='Maven',
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
             work_dir_path=work_dir_path
         )
 
@@ -70,8 +66,6 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
         raise_error_on_tests=False,
         set_tls_verify_false=False,
     ):
-        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         test_dir.write('pom.xml', pom_content)
@@ -89,8 +83,6 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
             step_config['fail-on-no-tests'] = fail_on_no_tests
         step_implementer = self.create_step_implementer(
             step_config=step_config,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
             work_dir_path=work_dir_path,
         )
 

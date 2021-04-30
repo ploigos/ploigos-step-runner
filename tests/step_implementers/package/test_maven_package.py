@@ -20,8 +20,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -29,8 +28,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -87,8 +85,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'war'
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -107,8 +103,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -151,8 +145,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -170,8 +162,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -208,8 +198,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_no_pom(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
@@ -218,8 +206,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -234,8 +220,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_mvn_error(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -251,8 +235,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -296,8 +278,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -315,8 +295,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -352,8 +330,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = ''
             version = ''
             package = ''
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -371,8 +347,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -406,8 +380,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'war'
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -429,8 +401,6 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
