@@ -451,8 +451,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # first try to get config value
         config_value = self.get_config_value(key)
+        # config_value might be a list of ConfigValue objects that need to be converted
         if config_value is not None:
-            return config_value
+            return ConfigValue.convert_leaves_to_values(config_value)
 
         # if not found config value try to get result value specific to current environment
         if self.environment:
