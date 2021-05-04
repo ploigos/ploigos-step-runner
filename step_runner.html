@@ -29,10 +29,13 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Constructs a given named StepImplementer using a given configuration, and runs it.
 &#34;&#34;&#34;
-from ploigos_step_runner.step_implementer import StepImplementer
+import os
+
 from ploigos_step_runner.config.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.reflection import import_and_get_class
+from ploigos_step_runner.workflow_result import WorkflowResult
 
 
 class StepRunner:
@@ -76,20 +79,22 @@ class StepRunner:
     __DEFAULT_MODULE = &#39;ploigos_step_runner.step_implementers&#39;
 
     def __init__(
-            self,
-            config,
-            results_dir_path=&#39;step-runner-results&#39;,
-            results_file_name=&#39;step-runner-results.yml&#39;,
-            work_dir_path=&#39;step-runner-working&#39;):
-
+        self,
+        config,
+        results_dir_path=&#39;step-runner-results&#39;,
+        results_file_name=&#39;step-runner-results.yml&#39;,
+        work_dir_path=&#39;step-runner-working&#39;
+    ):
         if isinstance(config, Config):
             self.__config = config
         else:
             self.__config = Config(config)
 
-        self.results_dir_path = results_dir_path
-        self.results_file_name = results_file_name
-        self.work_dir_path = work_dir_path
+        self.__results_dir_path = results_dir_path
+        self.__results_file_name = results_file_name
+        self.__work_dir_path = work_dir_path
+
+        self.__workflow_result = None
 
     @property
     def config(self):
@@ -100,6 +105,47 @@ class StepRunner:
             Configuration used by this factory.
         &#34;&#34;&#34;
         return self.__config
+
+    @property
+    def results_file_path(self):
+        &#34;&#34;&#34;Get the full path to the results file.
+
+        Returns
+        -------
+        str
+            Full path to the results file.
+        &#34;&#34;&#34;
+        return os.path.join(self.__results_dir_path, self.__results_file_name)
+
+    @property
+    def workflow_result_pickle_file_path(self):
+        &#34;&#34;&#34;
+        Get the full path to the workflow result pickle file.
+        (The &#39;pickle&#39; file contains the serialized list of step results.)
+        The name of the pickle file is the basename of the results_file_name.
+
+        Returns
+        -------
+        str
+           Full path to the workflow pickle (serialized) file.
+        &#34;&#34;&#34;
+        pickle_filename = os.path.splitext(self.__results_file_name)[0] + &#39;.pkl&#39;
+        return os.path.join(self.__work_dir_path, pickle_filename)
+
+    @property
+    def workflow_result(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        WorkflowResult
+            Object containing a list of dictionary of step results
+            from previous steps.
+        &#34;&#34;&#34;
+        if not self.__workflow_result:
+            self.__workflow_result = WorkflowResult.load_from_pickle_file(
+                pickle_filename=self.workflow_result_pickle_file_path
+            )
+        return self.__workflow_result
 
     def run_step(self, step_name, environment=None):
         &#34;&#34;&#34;
@@ -142,15 +188,28 @@ class StepRunner:
 
             # create the StepImplementer instance
             sub_step = step_implementer_class(
-                results_dir_path=self.results_dir_path,
-                results_file_name=self.results_file_name,
-                work_dir_path=self.work_dir_path,
+                work_dir_path=self.__work_dir_path,
                 config=sub_step_config,
-                environment=environment
+                environment=environment,
+                workflow_result=self.workflow_result
             )
 
             # run the step
-            if not sub_step.run_step():
+            step_result = sub_step.run_step()
+
+            # save the step results
+            self.workflow_result.add_step_result(
+                step_result=step_result
+            )
+            self.workflow_result.write_to_pickle_file(
+                pickle_filename=self.workflow_result_pickle_file_path
+            )
+            self.workflow_result.write_results_to_yml_file(
+                yml_filename=self.results_file_path
+            )
+
+            # bail out if one of the sub steps fails
+            if not step_result.success:
                 return False
 
         return True
@@ -301,20 +360,22 @@ False if step returned an error message</dd>
     __DEFAULT_MODULE = &#39;ploigos_step_runner.step_implementers&#39;
 
     def __init__(
-            self,
-            config,
-            results_dir_path=&#39;step-runner-results&#39;,
-            results_file_name=&#39;step-runner-results.yml&#39;,
-            work_dir_path=&#39;step-runner-working&#39;):
-
+        self,
+        config,
+        results_dir_path=&#39;step-runner-results&#39;,
+        results_file_name=&#39;step-runner-results.yml&#39;,
+        work_dir_path=&#39;step-runner-working&#39;
+    ):
         if isinstance(config, Config):
             self.__config = config
         else:
             self.__config = Config(config)
 
-        self.results_dir_path = results_dir_path
-        self.results_file_name = results_file_name
-        self.work_dir_path = work_dir_path
+        self.__results_dir_path = results_dir_path
+        self.__results_file_name = results_file_name
+        self.__work_dir_path = work_dir_path
+
+        self.__workflow_result = None
 
     @property
     def config(self):
@@ -325,6 +386,47 @@ False if step returned an error message</dd>
             Configuration used by this factory.
         &#34;&#34;&#34;
         return self.__config
+
+    @property
+    def results_file_path(self):
+        &#34;&#34;&#34;Get the full path to the results file.
+
+        Returns
+        -------
+        str
+            Full path to the results file.
+        &#34;&#34;&#34;
+        return os.path.join(self.__results_dir_path, self.__results_file_name)
+
+    @property
+    def workflow_result_pickle_file_path(self):
+        &#34;&#34;&#34;
+        Get the full path to the workflow result pickle file.
+        (The &#39;pickle&#39; file contains the serialized list of step results.)
+        The name of the pickle file is the basename of the results_file_name.
+
+        Returns
+        -------
+        str
+           Full path to the workflow pickle (serialized) file.
+        &#34;&#34;&#34;
+        pickle_filename = os.path.splitext(self.__results_file_name)[0] + &#39;.pkl&#39;
+        return os.path.join(self.__work_dir_path, pickle_filename)
+
+    @property
+    def workflow_result(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        WorkflowResult
+            Object containing a list of dictionary of step results
+            from previous steps.
+        &#34;&#34;&#34;
+        if not self.__workflow_result:
+            self.__workflow_result = WorkflowResult.load_from_pickle_file(
+                pickle_filename=self.workflow_result_pickle_file_path
+            )
+        return self.__workflow_result
 
     def run_step(self, step_name, environment=None):
         &#34;&#34;&#34;
@@ -367,15 +469,28 @@ False if step returned an error message</dd>
 
             # create the StepImplementer instance
             sub_step = step_implementer_class(
-                results_dir_path=self.results_dir_path,
-                results_file_name=self.results_file_name,
-                work_dir_path=self.work_dir_path,
+                work_dir_path=self.__work_dir_path,
                 config=sub_step_config,
-                environment=environment
+                environment=environment,
+                workflow_result=self.workflow_result
             )
 
             # run the step
-            if not sub_step.run_step():
+            step_result = sub_step.run_step()
+
+            # save the step results
+            self.workflow_result.add_step_result(
+                step_result=step_result
+            )
+            self.workflow_result.write_to_pickle_file(
+                pickle_filename=self.workflow_result_pickle_file_path
+            )
+            self.workflow_result.write_results_to_yml_file(
+                yml_filename=self.results_file_path
+            )
+
+            # bail out if one of the sub steps fails
+            if not step_result.success:
                 return False
 
         return True
@@ -455,6 +570,89 @@ def config(self):
     return self.__config</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.step_runner.StepRunner.results_file_path"><code class="name">var <span class="ident">results_file_path</span></code></dt>
+<dd>
+<div class="desc"><p>Get the full path to the results file.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Full path to the results file.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def results_file_path(self):
+    &#34;&#34;&#34;Get the full path to the results file.
+
+    Returns
+    -------
+    str
+        Full path to the results file.
+    &#34;&#34;&#34;
+    return os.path.join(self.__results_dir_path, self.__results_file_name)</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_runner.StepRunner.workflow_result"><code class="name">var <span class="ident">workflow_result</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>WorkflowResult</code></dt>
+<dd>Object containing a list of dictionary of step results
+from previous steps.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def workflow_result(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    WorkflowResult
+        Object containing a list of dictionary of step results
+        from previous steps.
+    &#34;&#34;&#34;
+    if not self.__workflow_result:
+        self.__workflow_result = WorkflowResult.load_from_pickle_file(
+            pickle_filename=self.workflow_result_pickle_file_path
+        )
+    return self.__workflow_result</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_runner.StepRunner.workflow_result_pickle_file_path"><code class="name">var <span class="ident">workflow_result_pickle_file_path</span></code></dt>
+<dd>
+<div class="desc"><p>Get the full path to the workflow result pickle file.
+(The 'pickle' file contains the serialized list of step results.)
+The name of the pickle file is the basename of the results_file_name.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Full path to the workflow pickle (serialized) file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def workflow_result_pickle_file_path(self):
+    &#34;&#34;&#34;
+    Get the full path to the workflow result pickle file.
+    (The &#39;pickle&#39; file contains the serialized list of step results.)
+    The name of the pickle file is the basename of the results_file_name.
+
+    Returns
+    -------
+    str
+       Full path to the workflow pickle (serialized) file.
+    &#34;&#34;&#34;
+    pickle_filename = os.path.splitext(self.__results_file_name)[0] + &#39;.pkl&#39;
+    return os.path.join(self.__work_dir_path, pickle_filename)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Methods</h3>
 <dl>
@@ -532,15 +730,28 @@ False if step returned an error message</p></div>
 
         # create the StepImplementer instance
         sub_step = step_implementer_class(
-            results_dir_path=self.results_dir_path,
-            results_file_name=self.results_file_name,
-            work_dir_path=self.work_dir_path,
+            work_dir_path=self.__work_dir_path,
             config=sub_step_config,
-            environment=environment
+            environment=environment,
+            workflow_result=self.workflow_result
         )
 
         # run the step
-        if not sub_step.run_step():
+        step_result = sub_step.run_step()
+
+        # save the step results
+        self.workflow_result.add_step_result(
+            step_result=step_result
+        )
+        self.workflow_result.write_to_pickle_file(
+            pickle_filename=self.workflow_result_pickle_file_path
+        )
+        self.workflow_result.write_results_to_yml_file(
+            yml_filename=self.results_file_path
+        )
+
+        # bail out if one of the sub steps fails
+        if not step_result.success:
             return False
 
     return True</code></pre>
@@ -568,7 +779,10 @@ False if step returned an error message</p></div>
 <h4><code><a title="ploigos_step_runner.step_runner.StepRunner" href="#ploigos_step_runner.step_runner.StepRunner">StepRunner</a></code></h4>
 <ul class="">
 <li><code><a title="ploigos_step_runner.step_runner.StepRunner.config" href="#ploigos_step_runner.step_runner.StepRunner.config">config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_runner.StepRunner.results_file_path" href="#ploigos_step_runner.step_runner.StepRunner.results_file_path">results_file_path</a></code></li>
 <li><code><a title="ploigos_step_runner.step_runner.StepRunner.run_step" href="#ploigos_step_runner.step_runner.StepRunner.run_step">run_step</a></code></li>
+<li><code><a title="ploigos_step_runner.step_runner.StepRunner.workflow_result" href="#ploigos_step_runner.step_runner.StepRunner.workflow_result">workflow_result</a></code></li>
+<li><code><a title="ploigos_step_runner.step_runner.StepRunner.workflow_result_pickle_file_path" href="#ploigos_step_runner.step_runner.StepRunner.workflow_result_pickle_file_path">workflow_result_pickle_file_path</a></code></li>
 </ul>
 </li>
 </ul>
