@@ -28,8 +28,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -37,8 +36,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name='foo',
             implementer='SampleMavenStepImplementer',
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -76,8 +74,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -116,8 +112,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -138,8 +132,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -163,8 +155,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -198,8 +188,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -241,8 +229,6 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 

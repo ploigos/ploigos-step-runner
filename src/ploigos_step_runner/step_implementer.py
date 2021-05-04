@@ -11,7 +11,6 @@ from pathlib import Path
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_result import StepResult
 from ploigos_step_runner.utils.io import TextIOIndenter
-from ploigos_step_runner.workflow_result import WorkflowResult
 
 class DefaultSteps:  # pylint: disable=too-few-public-methods
     """Convenience constants for the default steps used in the default workflow definition.
@@ -42,10 +41,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     Parameters
     ----------
-    results_dir_path : str
-        Path to the directory to write the results of the step to
-    results_file_name : str
-        Name of file to write the results of the step to
+    workflow_result : str
+        TODO doc me
     work_dir_path : str
         Path to the directory to write step working files to
     step_environment_config : dict, optional
@@ -64,20 +61,17 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        results_dir_path,
-        results_file_name,
+        workflow_result,
         work_dir_path,
         config,
         environment=None
     ):
-        self.__results_dir_path = results_dir_path
-        self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
         self.__config = config
         self.__environment = environment
 
-        self.__workflow_result = None
+        self.__workflow_result = workflow_result
 
         super().__init__()
 
@@ -158,34 +152,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         return defaults_for_env
 
     @property
-    def results_file_path(self):
-        """
-        Get the OS path to the results file.
-        EG:  /tmp/tmpno_qi7np/step-runner-results/step-runner-results.yml
-
-        Returns
-        -------
-        str
-            OS path to the results file.
-        """
-        return os.path.join(self.results_dir_path, self.__results_file_name)
-
-    @property
-    def results_dir_path(self):
-        """
-        Get the OS path to the results folder.
-        If the results folder does not exist, create it.
-        EG:  /tmp/tmpno_qi7np/step-runner-results
-
-        Returns
-        -------
-        str
-            OS path to the results folder.
-        """
-        os.makedirs(self.__results_dir_path, exist_ok=True)
-        return self.__results_dir_path
-
-    @property
     def work_dir_path(self):
         """
         Get the OS path to the working folder.
@@ -260,10 +226,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Object containing a list of dictionary of step results
             from previous steps.
         """
-        if not self.__workflow_result:
-            self.__workflow_result = WorkflowResult.load_from_pickle_file(
-                pickle_filename=self.__workflow_result_pickle_file_path
-            )
         return self.__workflow_result
 
     @staticmethod
@@ -334,9 +296,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Returns
         -------
-        bool
-            True on step run success.
-            False on step run failure.
+        StepResult
+            Results of running this step.
         """
 
         StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
@@ -407,17 +368,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             step_result.success = False
             step_result.message = str(invalid_error)
 
-        # save the step results
-        self.workflow_result.add_step_result(
-            step_result=step_result
-        )
-        self.workflow_result.write_to_pickle_file(
-            pickle_filename=self.__workflow_result_pickle_file_path
-        )
-        self.workflow_result.write_results_to_yml_file(
-            yml_filename=self.results_file_path
-        )
-
         # print the step run results
         StepImplementer.__print_section_title(
             f"Results - {self.step_name}",
@@ -425,13 +375,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             indent=1
         )
 
-        StepImplementer.__print_data('Results File Path', self.results_file_path)
-
         StepImplementer.__print_data('Results', step_result.get_step_result_dict())
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 
-        return step_result.success
+        return step_result
 
     def get_value(self, key):
         """Get the value for a given key, either from given configuration or from the result
@@ -592,25 +540,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 environment=environment
             )
         )
-
-    @property
-    def __workflow_result_pickle_file_path(self):
-        """
-        Get the OS path to the workflow result pickle file.
-        (The 'pickle' file contains the serialized list of step results.)
-        The name of the pickle file is the basename of the results_file_name.
-        EG:
-        If the name of the results_file_name is step-runner-results.yml,
-        then the name of the pickle file is step-runner-results.pkl
-        /tmp/tmp9sau_2j5/step-runner-working/step-runner-results.pkl
-
-        Returns
-        -------
-        str
-           OS path to the workflow pickle (serialized) file.
-        """
-        pickle_filename = os.path.splitext(self.__results_file_name)[0] + '.pkl'
-        return os.path.join(self.work_dir_path, pickle_filename)
 
     def create_working_dir_sub_dir(self, sub_dir_relative_path):
         """

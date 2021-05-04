@@ -17,8 +17,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -26,8 +25,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -47,8 +45,6 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'yamlnotused'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -60,15 +56,14 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                     'value': test_file_path
                 }
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='ConfiglintArgocd',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -87,8 +82,6 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_path_file_from_deploy(self):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'yamlnotused'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
@@ -100,15 +93,14 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                     'value': f'{test_file_path}.bad'
                 }
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='ConfiglintArgocd',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             result = step_implementer._run_step()

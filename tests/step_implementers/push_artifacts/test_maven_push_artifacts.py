@@ -19,8 +19,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -28,8 +27,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -53,8 +51,6 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_pass(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -73,16 +69,15 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='push-artifacts',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
             result = step_implementer._run_step()
 
@@ -115,8 +110,6 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             # config
@@ -136,16 +129,15 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='push-artifacts',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
             sh.mvn.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
 
@@ -187,8 +179,6 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_tls_verify_false(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -208,16 +198,15 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='push-artifacts',
                 implementer='Maven',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
             result = step_implementer._run_step()
 

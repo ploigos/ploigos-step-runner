@@ -22,8 +22,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -31,8 +30,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -63,8 +61,6 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo', create=True)
     def test_run_step_pass(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'
@@ -82,8 +78,6 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='push-container-image',
                 implementer='Skopeo',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -138,8 +132,6 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo', create=True)
     def test_run_step_fail_run_skopeo(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'
@@ -157,8 +149,6 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='push-container-image',
                 implementer='Skopeo',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 

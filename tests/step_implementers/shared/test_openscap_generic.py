@@ -23,8 +23,7 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             step_config={},
             step_name='',
             implementer='',
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -32,8 +31,7 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name=step_name,
             implementer=implementer,
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path
         )
 
@@ -59,16 +57,12 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -81,16 +75,12 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             'image-tar-file': 'does-not-matter'
         }
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -112,16 +102,12 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
             )
 
@@ -137,16 +123,12 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
     def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
         step_config = {}
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -1007,24 +989,20 @@ Result	pass
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1099,24 +1077,20 @@ Result	fail
 """
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1189,24 +1163,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1282,24 +1252,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1370,24 +1336,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
-                work_dir_path=work_dir_path,
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type

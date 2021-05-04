@@ -34,9 +34,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         )
 
         pickle = f'{working_dir_path}/step-runner-results.pkl'
-        workflow_results = WorkflowResult.load_from_pickle_file(pickle)
+        workflow_result = WorkflowResult.load_from_pickle_file(pickle)
 
-        step_result = workflow_results.get_step_result(
+        step_result = workflow_result.get_step_result(
             step_name=step
         )
         self.assertEqual(expected_step_results, step_result.get_step_result_dict())
@@ -516,8 +516,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'WriteConfigAsResultsStepImplementer')
 
         step = WriteConfigAsResultsStepImplementer(
-            results_dir_path='',
-            results_file_name='',
+            workflow_result=None,
             work_dir_path='',
             config=sub_step
         )
@@ -575,11 +574,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -604,11 +601,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -627,8 +622,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             step = self.create_given_step_implementer(
@@ -636,8 +629,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='foo',
                 implementer='FooStepImplementer',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
                 work_dir_path=work_dir_path
             )
 
@@ -669,11 +660,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
@@ -712,11 +701,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
@@ -745,17 +732,15 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FailStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FailStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
             result = step.run_step()
 
-        self.assertEqual(False, result)
+        self.assertEqual(False, result.success)
 
     def test_create_working_dir_sub_dir(self):
         config = Config({
@@ -771,11 +756,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'tests.helpers.sample_step_implementers.FooStepImplementer')
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='step-runner-results.yml',
+                workflow_result=WorkflowResult(),
                 work_dir_path=working_dir_path,
                 config=sub_step
             )
@@ -788,63 +771,12 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             self.assertEqual(sub, f'{working_dir_path}/foo/folder1/folder2/folder3')
             self.assertEqual(True, os.path.isdir(sub))
 
-    def test_result_files_and_paths(self):
-        # overkill on tests here
-        config = Config({
-            'step-runner-config': {
-                'foo': {
-                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
-                    'config': {}
-                }
-            }
-        })
-        step_config = config.get_step_config('foo')
-        sub_step = step_config.get_sub_step(
-            'tests.helpers.sample_step_implementers.FooStepImplementer')
-
-        with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'myresults')
-            working_dir_path = os.path.join(test_dir.path, 'mytesting')
-            step = FooStepImplementer(
-                results_dir_path=results_dir_path,
-                results_file_name='myfile',
-                work_dir_path=working_dir_path,
-                config=sub_step
-            )
-
-            self.assertEqual(
-                f'{results_dir_path}/myfile',
-                step.results_file_path
-            )
-
-            self.assertEqual(
-                f'{results_dir_path}',
-                step.results_dir_path
-            )
-
-            self.assertEqual(
-                f'{working_dir_path}',
-                step.work_dir_path
-            )
-
-            self.assertEqual(
-                f'{working_dir_path}/foo',
-                step.work_dir_path_step
-            )
-
-            self.assertEqual(
-                f'{working_dir_path}/myfile.pkl',
-                step._StepImplementer__workflow_result_pickle_file_path
-            )
-
     def test_get_value_no_env(self):
         step_config = {
             'test': 'hello world'
         }
 
         with TempDirectory() as test_dir:
-            results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-            results_file_name = 'step-runner-results.yml'
             work_dir_path = os.path.join(test_dir.path, 'working')
 
             artifact_config = {
@@ -854,15 +786,14 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 },
             }
 
-            self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
             step = self.create_given_step_implementer(
                 step_implementer=FooStepImplementer,
                 step_config=step_config,
                 step_name='foo',
                 implementer='FooStepImplementer',
-                results_dir_path=results_dir_path,
-                results_file_name=results_file_name,
+                workflow_result=workflow_result,
                 work_dir_path=work_dir_path
             )
 
@@ -875,8 +806,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'test': 'hello world'
         }
 
-        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-        results_file_name = 'step-runner-results.yml'
         work_dir_path = os.path.join(test_dir.path, 'working')
 
         workflow_result = WorkflowResult()
@@ -912,8 +841,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name='foo',
             implementer='FooStepImplementer',
-            results_dir_path=results_dir_path,
-            results_file_name=results_file_name,
+            workflow_result=workflow_result,
             work_dir_path=work_dir_path,
             environment=environment
         )
