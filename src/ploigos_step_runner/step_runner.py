@@ -23,9 +23,6 @@ class StepRunner:
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
-    results_dir_path : str, optional
-        Path to the folder for steps to write their results to
-        Default: step-runner-results
     results_file_name : str, optional
         Path to the file for steps to write their results to
         Default: step-runner-results.yml
@@ -52,7 +49,6 @@ class StepRunner:
     def __init__(
         self,
         config,
-        results_dir_path='step-runner-results',
         results_file_name='step-runner-results.yml',
         work_dir_path='step-runner-working'
     ):
@@ -61,7 +57,6 @@ class StepRunner:
         else:
             self.__config = Config(config)
 
-        self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
@@ -86,7 +81,7 @@ class StepRunner:
         str
             Full path to the results file.
         """
-        return os.path.join(self.__results_dir_path, self.__results_file_name)
+        return os.path.join(self.__work_dir_path, self.__results_file_name)
 
     @property
     def workflow_result_pickle_file_path(self):

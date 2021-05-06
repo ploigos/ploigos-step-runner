@@ -29,8 +29,11 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             test_dir,
             environment=None):
         working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
-        results_dir_path = os.path.join(test_dir.path, 'step-runner-results')
-        factory = StepRunner(config, results_dir_path, 'step-runner-results.yml', working_dir_path)
+        factory = StepRunner(
+            config=config,
+            results_file_name='step-runner-results.yml',
+            work_dir_path=working_dir_path
+        )
         factory.run_step(
             step_name=step,
             environment=environment
@@ -979,7 +982,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             )
 
         stdout = stdout_buff.getvalue()
-        print(stdout)
         self.assertEqual(
             stdout,
             '        Test Title\n'
@@ -1027,7 +1029,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             )
 
         stdout = stdout_buff.getvalue()
-        print(stdout)
         self.assertEqual(
             stdout,
             '        Test Title\n'

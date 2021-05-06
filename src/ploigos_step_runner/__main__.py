@@ -84,12 +84,6 @@ def main(argv=None):
         help='Workflow configuration files, or directories containing files, in yml or json'
     )
     parser.add_argument(
-        '-r',
-        '--results-dir',
-        default='step-runner-results',
-        help='Workflow results file in yml or json'
-    )
-    parser.add_argument(
         '--step-config',
         metavar='STEP_CONFIG_KEY=STEP_CONFIG_VALUE',
         nargs='+',
@@ -117,7 +111,7 @@ def main(argv=None):
             sys.exit(102)
 
         config.set_step_config_overrides(args.step, args.step_config)
-        step_runner = StepRunner(config, args.results_dir)
+        step_runner = StepRunner(config)
 
         try:
             if not step_runner.run_step(args.step, args.environment):
