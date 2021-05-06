@@ -16,9 +16,6 @@ Command-Line Options
     -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
         Ploigos workflow configuration files, or directories containing files, in yml or json
 
-    -r RESULTS_DIR, --results-dir RESULTS_DIR
-        Ploigos workflow results file in yml or json
-
     --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
         Override step config provided by the given Ploigos
         config-file with these arguments.
@@ -45,7 +42,7 @@ Step Configuration
 * uat
 * runtime-vulnerability-scan
 * canary-test
-* publish-workflow-results
+* report
 
 ### Variable Precedence
 
@@ -379,9 +376,6 @@ From least precedence to highest precedence.
           #dest-tls-verify: true # Optional
         }
 
-      # WARNING: not yet implemented
-      container-image-unit-test: []
-
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -472,16 +466,8 @@ From least precedence to highest precedence.
       - implementer: MavenSeleniumCucumber
         config: {}
 
-      # WARNING: not yet implemented
-      runtime-vulnerability-scan: []
-
-      canary-test:
-        # WARNING: not yet implemented
-      - implementer: Selenium
-        config: {}
-
-      # WARNING: not yet implemented
-      publish-workflow-results: []
+      # TODO: not yet implemented
+      report: []
 
 ** Example Config file for a NPM built Application **
 
@@ -677,9 +663,6 @@ From least precedence to highest precedence.
           #dest-tls-verify: true # Optional
         }
 
-      # WARNING: not yet implemented
-      container-image-unit-test: []
-
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -763,16 +746,8 @@ From least precedence to highest precedence.
       - implementer: MavenSeleniumCucumber
         config: {}
 
-      # WARNING: not yet implemented
-      runtime-vulnerability-scan: []
-
-      canary-test:
-        # WARNING: not yet implemented
-      - implementer: Selenium
-        config: {}
-
-      # WARNING: not yet implemented
-      publish-workflow-results: []
+      # TODO: not yet implemented
+      report: []
 
 Examples
 --------
@@ -785,8 +760,7 @@ Getting Help
 Example Running the 'generate-metadata' step
 
 >>> psr
-...     --config=my-app-step-runner-config.yml
-...     --results-file=my-app-step-runner-results.yml
+...     --config=my-app-step-runner-config.yml \
 ...     --step=generate-metadata
 
 """

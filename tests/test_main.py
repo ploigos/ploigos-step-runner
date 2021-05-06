@@ -31,6 +31,7 @@ class TestMain(BaseTestCase):
         try:
             with TempDirectory() as temp_dir:
                 os.chdir(temp_dir.path)
+
                 if config_files:
                     argv.append('--config')
                     for config_file in config_files:
@@ -44,19 +45,17 @@ class TestMain(BaseTestCase):
                         else:
                             argv.append(config_file)
 
-                results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-                argv.append('--results-dir')
-                argv.append(results_dir_path)
-
                 if expected_exit_code is not None:
                     with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
                         main(argv)
+                else:
+                    main(argv)
 
-                        if expected_results:
-                            work_dir_path = os.path.join(temp_dir.path, 'step-runner-working')
-                            with open(os.path.join(work_dir_path, "step-runner-results.yml"), 'r') as step_results_file:
-                                results = yaml.safe_load(step_results_file.read())
-                                self.assertEqual(results, expected_results)
+                    if expected_results:
+                        work_dir_path = os.path.join(temp_dir.path, 'step-runner-working')
+                        with open(os.path.join(work_dir_path, "step-runner-results.yml"), 'r') as step_results_file:
+                            results = yaml.safe_load(step_results_file.read())
+                            self.assertCountEqual(results, expected_results)
         finally:
             os.chdir(cwd)
 
