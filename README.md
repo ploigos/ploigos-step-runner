@@ -13,8 +13,7 @@ Ploigos Step Runner (PSR) implemented as a Python library.
 ## Documentation
 
 - [Python Package Documentation](https://ploigos.github.io/ploigos-step-runner/)
-- [Trusted Software Supply Chain (TSSC) Overview](https://rhtconsulting.github.io/tsc-docs/)
-  * **NOTE** Old docs before Ploigos re-name/re-brandh. will be re-written and moved to Ploigos.
+- [Ploigos Overview](https://ploigos.github.io/ploigos-docs/)
 
 ## Install
 
