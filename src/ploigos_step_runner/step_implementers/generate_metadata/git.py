@@ -12,7 +12,7 @@ Could come from:
 Configuration Key     | Required? | Default | Description
 ----------------------|-----------|---------|-----------
 `repo-root`           | Yes       | `./`    | Directory path to the Git repo to generate \
-                                            metadata from.
+                                            metadata from. Must not be in a detached head state.
 `build-string-length` | Yes       | `7`     | Length of the Git hash to use for the \
                                               `build` portion of the semantic version.
 
@@ -107,6 +107,8 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             step_result.message = 'Given directory (repo_root) is a bare Git repository'
             return step_result
 
+        # The SemanticVersion StepImplementer requires the branch name (as stored by 'pre-release' below),
+        # which cannot be retrieved from a detached head
         if repo.head.is_detached:
             step_result.success = False
             step_result.message = 'Expected a Git branch in given directory (repo_root) but has' \
