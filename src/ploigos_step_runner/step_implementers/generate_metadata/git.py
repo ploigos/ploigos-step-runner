@@ -108,9 +108,10 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             step_result.message = 'Given directory (repo_root) is a bare Git repository'
             return step_result
 
-        # The SemanticVersion StepImplementer uses the branch name (as stored by 'pre-release' below), so this step
-        # requires the git repository to not be in a detached head state. If there are any brilliant ideas for
-        # specifying an appropriate pre-release value while in a detached head state, pull requests are welcome!
+        # The SemanticVersion StepImplementer uses the branch name (as stored by 'pre-release'
+        # below), so this step requires the git repository to not be in a detached head state. If
+        # there are any brilliant ideas for specifying an appropriate pre-release value while in a
+        # detached head state, pull requests are welcome!
         if repo.head.is_detached:
             step_result.success = False
             step_result.message = 'Expected a Git branch in given directory (repo_root) but has' \
