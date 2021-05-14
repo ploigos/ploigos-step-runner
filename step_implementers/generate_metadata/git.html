@@ -46,7 +46,8 @@ Could come from:</p>
 <td>Yes</td>
 <td><code>./</code></td>
 <td>Directory path to the Git repo to generate
-metadata from.</td>
+metadata from. Must not be in a detached head state
+so that <code>pre-release</code> value can be determined.</td>
 </tr>
 <tr>
 <td><code>build-string-length</code></td>
@@ -97,7 +98,8 @@ Could come from:
 Configuration Key     | Required? | Default | Description
 ----------------------|-----------|---------|-----------
 `repo-root`           | Yes       | `./`    | Directory path to the Git repo to generate \
-                                            metadata from.
+                                            metadata from. Must not be in a detached head state \
+                                            so that `pre-release` value can be determined.
 `build-string-length` | Yes       | `7`     | Length of the Git hash to use for the \
                                               `build` portion of the semantic version.
 
@@ -192,6 +194,10 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             step_result.message = &#39;Given directory (repo_root) is a bare Git repository&#39;
             return step_result
 
+        # The SemanticVersion StepImplementer uses the branch name (as stored by &#39;pre-release&#39;
+        # below), so this step requires the git repository to not be in a detached head state. If
+        # there are any brilliant ideas for specifying an appropriate pre-release value while in a
+        # detached head state, pull requests are welcome!
         if repo.head.is_detached:
             step_result.success = False
             step_result.message = &#39;Expected a Git branch in given directory (repo_root) but has&#39; \
@@ -304,6 +310,10 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             step_result.message = &#39;Given directory (repo_root) is a bare Git repository&#39;
             return step_result
 
+        # The SemanticVersion StepImplementer uses the branch name (as stored by &#39;pre-release&#39;
+        # below), so this step requires the git repository to not be in a detached head state. If
+        # there are any brilliant ideas for specifying an appropriate pre-release value while in a
+        # detached head state, pull requests are welcome!
         if repo.head.is_detached:
             step_result.success = False
             step_result.message = &#39;Expected a Git branch in given directory (repo_root) but has&#39; \
