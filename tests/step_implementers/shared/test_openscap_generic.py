@@ -1016,17 +1016,25 @@ Result	pass
             with redirect_stdout(stdout_buff):
                 step_result = step_implementer._run_step()
 
-            expected_results = {
-                "test": {
-                    "OpenSCAP": {
-                        "sub-step-implementer-name": "OpenSCAP",
-                        "success": True, "message": "",
-                        "artifacts": {
-                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "",  "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
-            }
-            self.assertEqual(expected_results, step_result.get_step_result_dict())
+            expected_results = StepResult(
+                step_name='test',
+                sub_step_name='OpenSCAP',
+                sub_step_implementer_name='OpenSCAP'
+            )
+            expected_results.success=True
+            expected_results.add_artifact(
+                name='html-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+            )
+            expected_results.add_artifact(
+                name='xml-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+            )
+            expected_results.add_artifact(
+                name='stdout-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-out"
+            )
+            self.assertEqual(expected_results, step_result)
 
             stdout = stdout_buff.getvalue()
 
@@ -1053,12 +1061,13 @@ Result	pass
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__buildah_mount_container')
     @patch.object(OpenSCAPGeneric, '_OpenSCAPGeneric__get_oscap_document_type')
     @patch('sh.buildah', create=True)
-    def test_run_step_fail(self,
-                           buildah_mock,
-                           get_oscap_document_type_mock,
-                           buildah_mount_container_mock,
-                           run_oscap_scan_mock
-                           ):
+    def test_run_step_fail(
+        self,
+        buildah_mock,
+        get_oscap_document_type_mock,
+        buildah_mount_container_mock,
+        run_oscap_scan_mock
+    ):
         oscap_document_type = 'Source Data Stream'
         oscap_eval_type = 'xccdf'
         oscap_input_definitions_uri = 'https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2'
@@ -1103,18 +1112,29 @@ Result	fail
             with redirect_stdout(stdout_buff):
                 step_result = step_implementer._run_step()
 
-            expected_results = {
-                "test": {
-                    "OpenSCAP": {
-                        "sub-step-implementer-name": "OpenSCAP",
-                        "success": False,
-                        "message": "OSCAP eval found issues:\n\nTitle\tInstall dnf-automatic Package\nRule\txccdf_org.ssgproject.content_rule_package_dnf-automatic_installed\nIdent\tCCE-82985-3\nResult\tfail\n",
-                        "artifacts": {
-                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
-            }
-            self.assertEqual(expected_results, step_result.get_step_result_dict())
+            expected_results = StepResult(
+                step_name='test',
+                sub_step_name='OpenSCAP',
+                sub_step_implementer_name='OpenSCAP'
+            )
+            expected_results.success = False
+            expected_results.message = "OSCAP eval found issues:\n\n" \
+                "Title\tInstall dnf-automatic Package\n" \
+                "Rule\txccdf_org.ssgproject.content_rule_package_dnf-automatic_installed" \
+                "\nIdent\tCCE-82985-3\nResult\tfail\n"
+            expected_results.add_artifact(
+                name='html-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+            )
+            expected_results.add_artifact(
+                name='xml-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+            )
+            expected_results.add_artifact(
+                name='stdout-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-out"
+            )
+            self.assertEqual(expected_results, step_result)
 
             stdout = stdout_buff.getvalue()
 
@@ -1190,22 +1210,27 @@ Result	fail
             with redirect_stdout(stdout_buff):
                 result = step_implementer._run_step()
 
-            expected_results = {
-                "test": {
-                    "OpenSCAP": {
-                        "sub-step-implementer-name": "OpenSCAP",
-                        "success": True,
-                        "message": "",
-                        "artifacts": {
-                            "html-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-report.html"},
-                            "xml-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-results.xml"},
-                            "stdout-report": {"description": "", "value": f"{work_dir_path}/test/oscap-xccdf-out"}}}}
-            }
-            self.assertEqual(expected_results, result.get_step_result_dict())
-
+            expected_results = StepResult(
+                step_name='test',
+                sub_step_name='OpenSCAP',
+                sub_step_implementer_name='OpenSCAP'
+            )
+            expected_results.success=True
+            expected_results.add_artifact(
+                name='html-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+            )
+            expected_results.add_artifact(
+                name='xml-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+            )
+            expected_results.add_artifact(
+                name='stdout-report',
+                value=f"{work_dir_path}/test/oscap-xccdf-out"
+            )
+            self.assertEqual(expected_results, result)
 
             stdout = stdout_buff.getvalue()
-
             self.assertRegex(
                 stdout,
                 re.compile(

@@ -1,15 +1,14 @@
-"""Class and helper constants for StepResult
+"""Defines a StepResult object which represents the results of a invocation
+of a StepImplementer#run.
 """
-import json
-
-import yaml
 
 from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
 
 
 class StepResult: # pylint: disable=too-many-instance-attributes
-    """
-    Step result object.
+    """Defines a StepResult object which represents the results of a invocation
+    of a StepImplementer#run.
 
     Parameters
     ----------
@@ -23,7 +22,6 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         Optional. Environment that this step result is for
         if step was run against a specific environment.
     """
-
     def __init__(self, step_name, sub_step_name, sub_step_implementer_name, environment=None):
         self.__step_name = step_name
         self.__sub_step_name = sub_step_name
@@ -46,15 +44,6 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             sub_step_implementer_name=step_implementer.sub_step_implementer_name,
             environment=step_implementer.environment
         )
-
-    def __str__(self):
-        """
-        Returns
-        -------
-        str
-            JSON formatted step result
-        """
-        return self.get_step_result_json()
 
     @property
     def step_name(self):
@@ -99,22 +88,32 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @property
     def artifacts(self):
-        """
+        """Get the artifacts associated with this step result.
+
         Returns
         -------
-        dict
-            All artifacts of the step
-            For Example:
-            {
-                'artifact1': {'description': 'description1', 'value': 'value1'},
-                'artifact2': {'description': '', 'value': 'value2'}
-            }
-
+        dict of str: StepResultArtifacts
+            Key is artifact name, value is StepResultArtifact.
         """
         return self.__artifacts
 
+    @property
+    def artifacts_dicts(self):
+        """Get the artifacts associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultArtifact.
+        """
+        artifact_dicts = []
+        for artifact in self.artifacts.values():
+            artifact_dicts.append(artifact.as_dict())
+
+        return artifact_dicts
+
     def get_artifact(self, name):
-        """Get the dictionary of a specified artifact.
+        """Get artifact with given name for this StepResult.
 
         Parameters
         ----------
@@ -123,13 +122,10 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
         Returns
         -------
-        dict
-            Dictionary for a specified artifact.
-            For example:
-            {'description': 'artifact1', 'value': 'value1'}
-
+        StepResultArtifact
+            The step result artifact with the given name for this StepResult.
         """
-        return self.artifacts.get(name)
+        return self.__artifacts.get(name)
 
     def get_artifact_value(self, name):
         """Get the value for a specified artifact.
@@ -145,28 +141,22 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             The value of the artifact.
         """
         value = None
-        if self.artifacts.get(name):
-            value = self.artifacts.get(name).get('value')
+        if self.__artifacts.get(name):
+            value = self.__artifacts.get(name).value
 
         return value
 
     def add_artifact(self, name, value, description=''):
-        """Insert/Update an artifact with the given pattern:
-
-        "name": {
-            "description": "file description",
-            "value": "step-result.txt"
-        }
+        """Add an artifact to this StepResult.
 
         Parameters
         ----------
         name : str
-            Required name of the artifact
+            Name of the result artifact.
         value : str
-            Required content
+            Arbitrary value of the artifact.
         description : str, optional
-            Optional description (defaults to empty)
-
+            Human readable description of the result artifact (defaults to empty).
         """
         if not name:
             raise StepRunnerException('Name is required to add artifact')
@@ -175,10 +165,11 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         if value == '' or value is None:
             raise StepRunnerException('Value is required to add artifact')
 
-        self.__artifacts[name] = {
-            'description': description,
-            'value': value
-        }
+        self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
 
     @property
     def success(self):
@@ -192,8 +183,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @success.setter
     def success(self, success=True):
-        """
-        Setter for success
+        """Setter for success
         """
         self.__success = success
 
@@ -209,12 +199,11 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @message.setter
     def message(self, message):
-        """
-        Setter for message
+        """Setter for message
         """
         self.__message = message
 
-    def get_sub_step_result(self):
+    def get_sub_step_result_dict(self):
         """
         Returns
         -------
@@ -225,15 +214,16 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                 'sub-step-implementer-name': 'value',
                 'success': Boolean,
                 'message': 'value',
-                'artifacts': {}
+                'artifacts': []
             }
         """
         result = {
             'sub-step-implementer-name': self.sub_step_implementer_name,
             'success': self.success,
             'message': self.message,
-            'artifacts': self.artifacts
+            'artifacts': self.artifacts_dicts
         }
+
         return result
 
     def get_step_result_dict(self):
@@ -262,32 +252,59 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             result = {
                 self.environment: {
                     self.step_name: {
-                        self.sub_step_name: self.get_sub_step_result()
+                        self.sub_step_name: self.get_sub_step_result_dict()
                     }
                 }
             }
         else:
             result = {
                 self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result()
+                    self.sub_step_name: self.get_sub_step_result_dict()
                 }
             }
         return result
 
-    def get_step_result_json(self):
+    def __str__(self):
+        """Get string representation of the step result.
         """
-        Returns
-        -------
-        str
-            JSON formatted step result
-        """
-        return json.dumps(self.get_step_result_dict())
+        return str({
+            'step-name': self.step_name,
+            'sub-step-name': self.sub_step_name,
+            'sub-step-implementer-name': self.sub_step_implementer_name,
+            'environment': self.environment,
+            'success': self.success,
+            'message': self.message,
+            'artifacts': self.artifacts_dicts
+        })
 
-    def get_step_result_yaml(self):
+    def __repr__(self):
+        """Get representation of the step result.
         """
-        Returns
-        -------
-        str
-            YAML formatted step result
+        return "StepResult(" \
+            f"step_name={self.step_name}," \
+            f"sub_step_name={self.sub_step_name}," \
+            f"sub_step_implementer_name={self.sub_step_implementer_name}," \
+            f"environment={self.environment}," \
+            f"success={self.success}," \
+            f"message={self.message}," \
+            f"artifacts={self.artifacts_dicts}" \
+            ")"
+
+    def __eq__(self, other):
+        """StepResult is equal if all properties are equal.
         """
-        return yaml.dump(self.get_step_result_dict())
+        return (
+            isinstance(other, StepResult) and
+            self.step_name == other.step_name and
+            self.sub_step_name == other.sub_step_name and
+            self.sub_step_implementer_name == other.sub_step_implementer_name and
+            self.environment == other.environment and
+            self.success == other.success and
+            self.message == other.message and
+            self.artifacts == other.artifacts
+        )
+
+    def __ne__(self, other):
+        """StepResult is not equal if any properties are not equal.
+        """
+        return not self.__eq__(other)

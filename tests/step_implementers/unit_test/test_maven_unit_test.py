@@ -164,7 +164,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
             self.assertRegex(result.message, expected_result_message_regex)
             self.assertEqual(result.artifacts, expected_step_result.artifacts)
         else:
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Maven, '_generate_maven_settings')
     @patch('sh.mvn', create=True)

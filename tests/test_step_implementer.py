@@ -8,6 +8,7 @@ from io import StringIO
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import step_result_artifact
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_runner import StepRunner
 from ploigos_step_runner.workflow_result import WorkflowResult
@@ -42,7 +43,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         step_result = workflow_result.get_step_result(
             step_name=step
         )
-        self.assertEqual(expected_step_results, step_result.get_step_result_dict())
+        self.assertEqual(step_result, expected_step_results)
 
     def test_one_step_writes_to_empty_results_file(self):
         config1 = {
@@ -59,26 +60,26 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 }
             }
         }
-        config1_expected_step_results = {
-            'write-config-as-results': {
-                'tests.helpers.sample_step_implementers.'
-                'WriteConfigAsResultsStepImplementer': {
-                    'sub-step-implementer-name':
-                        'tests.helpers.sample_step_implementers.'
-                        'WriteConfigAsResultsStepImplementer',
-                    'success': True,
-                    'message': '',
-                    'artifacts': {
-                        'config-1':
-                            {'description': '', 'value': 'config-1'},
-                        'config-overwrite-me':
-                            {'description': '', 'value': 'config-1'},
-                        'required-config-key':
-                            {'description': '', 'value': 'required'}
-                    }
-                }
-            }
-        }
+        config1_expected_step_results = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer'
+        )
+        config1_expected_step_results.success=True
+        config1_expected_step_results.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
@@ -130,22 +131,19 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 }
             }
         }
-        config_expected_step_results = {
-            'write-config-as-results': {
-                'tests.helpers.sample_step_implementers.'
-                'WriteConfigAsResultsStepImplementer': {
-                    'sub-step-implementer-name':
-                        'tests.helpers.sample_step_implementers.'
-                        'WriteConfigAsResultsStepImplementer',
-                    'success': True,
-                    'message': '',
-                    'artifacts': {
-                        'required-config-key':
-                            {'description': '', 'value': False}
-                    }
-                }
-            }
-        }
+
+        config_expected_step_results = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer'
+        )
+        config_expected_step_results.success=True
+        config_expected_step_results.add_artifact(
+            name='required-config-key',
+            value=False
+        )
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
@@ -170,26 +168,26 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             }
         }
 
-        config_expected_step_results = {
-            'write-config-as-results': {
-                'tests.helpers.sample_step_implementers.'
-                'WriteConfigAsResultsStepImplementer': {
-                    'sub-step-implementer-name':
-                        'tests.helpers.sample_step_implementers.'
-                        'WriteConfigAsResultsStepImplementer',
-                    'success': True,
-                    'message': '',
-                    'artifacts': {
-                        'config-1':
-                            {'description': '', 'value': 'config-1'},
-                        'config-overwrite-me':
-                            {'description': '', 'value': 'config-1'},
-                        'required-config-key':
-                            {'description': '', 'value': 'required'}
-                    }
-                }
-            }
-        }
+        config_expected_step_results = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer'
+        )
+        config_expected_step_results.success = True
+        config_expected_step_results.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config_expected_step_results.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config_expected_step_results.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
 
         with TempDirectory() as test_dir:
             results_dir_path = os.path.join(test_dir.path, 'step-runner-working')
@@ -278,6 +276,66 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             }
         }
 
+        config1_expected_step_results_env_1 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-1'
+        )
+        config1_expected_step_results_env_1.success=True
+        config1_expected_step_results_env_1.add_artifact(
+            name='environment-name',
+            value='SAMPLE-ENV-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='sample-config-option-1',
+            value='sample env 1 value'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
+
+        config1_expected_step_results_env_2 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-2'
+        )
+        config1_expected_step_results_env_2.success=True
+        config1_expected_step_results_env_2.add_artifact(
+            name='environment-name',
+            value='SAMPLE-ENV-2'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='sample-config-option-1',
+            value='sample env 2 value'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
+
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -318,58 +376,58 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 }
             }
         }
-        config1_expected_step_results_env_1 = {
-            'SAMPLE-ENV-1': {
-                'write-config-as-results': {
-                    'tests.helpers.sample_step_implementers.'
-                    'WriteConfigAsResultsStepImplementer': {
-                        'sub-step-implementer-name':
-                            'tests.helpers.sample_step_implementers.'
-                            'WriteConfigAsResultsStepImplementer',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'config-1':
-                                {'description': '', 'value': 'config-1'},
-                            'config-overwrite-me':
-                                {'description': '', 'value': 'config-1'},
-                            'required-config-key':
-                                {'description': '', 'value': 'required'},
-                            'sample-config-option-1': {
-                                'description': '',
-                                'value': 'step env config - env 1 value'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        config1_expected_step_results_env_2 = {
-            'SAMPLE-ENV-2': {
-                'write-config-as-results': {
-                    'tests.helpers.sample_step_implementers.'
-                    'WriteConfigAsResultsStepImplementer': {
-                        'sub-step-implementer-name':
-                            'tests.helpers.sample_step_implementers.'
-                            'WriteConfigAsResultsStepImplementer',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'config-1':
-                                {'description': '', 'value': 'config-1'},
-                            'config-overwrite-me':
-                                {'description': '', 'value': 'config-1'},
-                            'required-config-key':
-                                {'description': '', 'value': 'required'},
-                            'sample-config-option-1': {
-                                'description': '',
-                                'value': 'step env config - env 2 value'
-                            }
-                        }
-                    }
-                }
-            }
-        }
+
+        config1_expected_step_results_env_1 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-1'
+        )
+        config1_expected_step_results_env_1.success=True
+        config1_expected_step_results_env_1.add_artifact(
+            name='sample-config-option-1',
+            value='step env config - env 1 value'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
+
+        config1_expected_step_results_env_2 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-2'
+        )
+        config1_expected_step_results_env_2.success=True
+        config1_expected_step_results_env_2.add_artifact(
+            name='sample-config-option-1',
+            value='step env config - env 2 value'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
@@ -421,70 +479,74 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 }
             }
         }
-        config1_expected_step_results_env_1 = {
-            'SAMPLE-ENV-1': {
-                'write-config-as-results': {
-                    'tests.helpers.sample_step_implementers.'
-                    'WriteConfigAsResultsStepImplementer': {
-                        'sub-step-implementer-name':
-                            'tests.helpers.sample_step_implementers.'
-                            'WriteConfigAsResultsStepImplementer',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'environment-name':
-                                {'description': '', 'value': 'SAMPLE-ENV-1'},
-                            'sample-config-option-1': {
-                                'description': '',
-                                 'value': 'step env config - env 1 value - 1'
-                                },
-                            'sample-config-option-2': {
-                                'description': '',
-                                 'value': 'global env config - env 1 value - 2'
-                            },
-                            'config-1':
-                                {'description': '', 'value': 'config-1'},
-                            'config-overwrite-me':
-                                {'description': '', 'value': 'config-1'},
-                            'required-config-key':
-                                {'description': '', 'value': 'required'},
-                        }
-                    }
-                }
-            }
-        }
-        config1_expected_step_results_env_2 = {
-            'SAMPLE-ENV-2': {
-                'write-config-as-results': {
-                    'tests.helpers.sample_step_implementers.'
-                    'WriteConfigAsResultsStepImplementer': {
-                        'sub-step-implementer-name':
-                            'tests.helpers.sample_step_implementers.'
-                            'WriteConfigAsResultsStepImplementer',
-                        'success': True,
-                        'message': '',
-                        'artifacts': {
-                            'environment-name':
-                                {'description': '', 'value': 'SAMPLE-ENV-2'},
-                            'sample-config-option-1': {
-                                'description': '',
-                                 'value': 'step env config - env 2 value - 1'
-                            },
-                            'sample-config-option-2': {
-                                'description': '',
-                                'value': 'global env config - env 2 value - 2'
-                            },
-                            'config-1':
-                                {'description': '', 'value': 'config-1'},
-                            'config-overwrite-me':
-                                {'description': '', 'value': 'config-1'},
-                            'required-config-key':
-                                {'description': '', 'value': 'required'},
-                        }
-                    }
-                }
-            }
-        }
+
+        config1_expected_step_results_env_1 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-1'
+        )
+        config1_expected_step_results_env_1.success=True
+        config1_expected_step_results_env_1.add_artifact(
+            name='environment-name',
+            value='SAMPLE-ENV-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='sample-config-option-1',
+            value='step env config - env 1 value - 1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='sample-config-option-2',
+            value='global env config - env 1 value - 2'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_1.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
+
+        config1_expected_step_results_env_2 = StepResult(
+            step_name='write-config-as-results',
+            sub_step_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.'
+                'WriteConfigAsResultsStepImplementer',
+            environment='SAMPLE-ENV-2'
+        )
+        config1_expected_step_results_env_2.success=True
+        config1_expected_step_results_env_2.add_artifact(
+            name='environment-name',
+            value='SAMPLE-ENV-2'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='sample-config-option-1',
+            value='step env config - env 2 value - 1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='sample-config-option-2',
+            value='global env config - env 2 value - 2'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-1',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='config-overwrite-me',
+            value='config-1'
+        )
+        config1_expected_step_results_env_2.add_artifact(
+            name='required-config-key',
+            value='required'
+        )
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
@@ -540,20 +602,14 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             }
         }
 
-        expected_results = {
-            'required-step-config-test': {
-                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                    'sub-step-implementer-name':
-                        'tests.helpers.sample_step_implementers.'
-                        'RequiredStepConfigStepImplementer',
-                    'success': False,
-                    'message':
-                        "Missing required step configuration"
-                        " or previous step result artifact keys: ['required-config-key']",
-                    'artifacts': {},
-                }
-            }
-        }
+        expected_results = StepResult(
+            step_name='required-step-config-test',
+            sub_step_name='tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+        )
+        expected_results.success = False
+        expected_results.message = "Missing required step configuration" \
+            " or previous step result artifact keys: ['required-config-key']"
 
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(

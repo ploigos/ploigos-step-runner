@@ -105,7 +105,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 name='maven-output',
                 value=mvn_output_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
+            self.assertEqual(expected_step_result, result)
 
     @patch('sh.mvn', create=True)
     def test_run_step_fail(self, mvn_mock):
@@ -234,5 +234,5 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 name='maven-output',
                 value=mvn_output_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
+            self.assertEqual(expected_step_result, result)
 

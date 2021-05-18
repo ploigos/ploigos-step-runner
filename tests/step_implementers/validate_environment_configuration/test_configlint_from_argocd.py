@@ -78,7 +78,7 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
                 name='configlint-yml-path',
                 value=test_file_path
             )
-            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
+            self.assertEqual(expected_step_result, result)
 
     def test_run_step_fail_missing_path_file_from_deploy(self):
         with TempDirectory() as temp_dir:
@@ -112,4 +112,4 @@ class TestStepImplementerConfiglintFromArgocd(BaseStepImplementerTestCase):
             )
             expected_step_result.success = False
             expected_step_result.message = f'File specified in argocd-deployed-manifest {test_file_path}.bad not found'
-            self.assertEqual(expected_step_result.get_step_result_dict(), result.get_step_result_dict())
+            self.assertEqual(expected_step_result, result)

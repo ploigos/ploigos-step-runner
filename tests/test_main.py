@@ -15,41 +15,50 @@ from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import create_sops_side_effect
 
 
-class TestInit(BaseTestCase):
-    def _run_main_test(self, argv, expected_exit_code=None, config_files=None, expected_results=None):
+class TestMain(BaseTestCase):
+    def _run_main_test(
+        self,
+        argv,
+        expected_exit_code=None,
+        config_files=None,
+        expected_results=None
+    ):
+        cwd = os.getcwd()
+
         if argv is None:
             argv = []
 
-        with TempDirectory() as temp_dir:
-            if config_files:
-                argv.append('--config')
-                for config_file in config_files:
-                    if isinstance(config_file, dict):
-                        config_file_name = config_file['name']
-                        config_file_contents = config_file['contents']
+        try:
+            with TempDirectory() as temp_dir:
+                os.chdir(temp_dir.path)
+                if config_files:
+                    argv.append('--config')
+                    for config_file in config_files:
+                        if isinstance(config_file, dict):
+                            config_file_name = config_file['name']
+                            config_file_contents = config_file['contents']
 
-                        temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
-                        config_file_path = os.path.join(temp_dir.path, config_file_name)
-                        argv.append(config_file_path)
-                    else:
-                        argv.append(config_file)
+                            temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
+                            config_file_path = os.path.join(temp_dir.path, config_file_name)
+                            argv.append(config_file_path)
+                        else:
+                            argv.append(config_file)
 
-            results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
-            argv.append('--results-dir')
-            argv.append(results_dir_path)
+                results_dir_path = os.path.join(temp_dir.path, 'step-runner-results')
+                argv.append('--results-dir')
+                argv.append(results_dir_path)
 
-            if expected_exit_code is not None:
-                with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
-                    main(argv)
-            else:
-                main(argv)
+                if expected_exit_code is not None:
+                    with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
+                        main(argv)
 
-                if expected_results:
-                    with open(os.path.join(results_dir_path, "step-runner-results.yml"), 'r') as step_results_file:
-                        results = yaml.safe_load(step_results_file.read())
-                        print(expected_results)
-                        print(results)
-                        self.assertEqual(results, expected_results)
+                        if expected_results:
+                            work_dir_path = os.path.join(temp_dir.path, 'step-runner-working')
+                            with open(os.path.join(work_dir_path, "step-runner-results.yml"), 'r') as step_results_file:
+                                results = yaml.safe_load(step_results_file.read())
+                                self.assertEqual(results, expected_results)
+        finally:
+            os.chdir(cwd)
 
     def test_init(self):
         """
@@ -245,16 +254,12 @@ class TestInit(BaseTestCase):
                 'step-runner-results': {
                     'write-config-as-results': {
                         'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
-                            'artifacts': {
-                                'key1':
-                                    {'description': '', 'value': 'value1'},
-                                'key2':
-                                    {'description': '', 'value': 'value1'},
-                                'key3':
-                                    {'description': '', 'value': 'value2'},
-                                'required-config-key':
-                                    {'description': '', 'value': 'value'}
-                            },
+                            'artifacts': [
+                                {'name': 'key1', 'description': '', 'value': 'value1'},
+                                {'name': 'key2', 'description': '', 'value': 'value1'},
+                                {'name': 'key3', 'description': '', 'value': 'value2'},
+                                {'name': 'required-config-key', 'description': '', 'value': 'value'}
+                            ],
                             'message': '',
                             'sub-step-implementer-name':
                                 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
@@ -378,20 +383,14 @@ class TestInit(BaseTestCase):
                     'step-runner-results': {
                         'write-config-as-results': {
                             'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
-                                'artifacts': {
-                                    'keya':
-                                        {'description': '', 'value': 'a'},
-                                    'keyb':
-                                        {'description': '', 'value': 'b'},
-                                    'keyc':
-                                        {'description': '', 'value': 'c'},
-                                    'keyc2':
-                                        {'description': '', 'value': 'c2'},
-                                    'keyd':
-                                        {'description': '', 'value': 'd'},
-                                    'required-config-key':
-                                        {'description': '', 'value': 'value'}
-                                },
+                                'artifacts': [
+                                    {'name': 'keyc2', 'description': '', 'value': 'c2'},
+                                    {'name': 'keya', 'description': '', 'value': 'a'},
+                                    {'name': 'keyd', 'description': '', 'value': 'd'},
+                                    {'name': 'keyc', 'description': '', 'value': 'c'},
+                                    {'name': 'keyb', 'description': '', 'value': 'b'},
+                                    {'name': 'required-config-key', 'description': '', 'value': 'value'}
+                                ],
                                 'message': '',
                                 'sub-step-implementer-name':
                                     'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
@@ -426,15 +425,19 @@ class TestInit(BaseTestCase):
                     'DEV': {
                         'required-step-config-test': {
                             'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                                'artifacts': {
-                                    'environment-name': {'description': '', 'value': 'DEV'},
-                                    'kube-api-token': {
+                                'artifacts':[
+                                    {'name': 'environment-name', 'description': '', 'value': 'DEV'},
+                                    {
+                                        'name': 'kube-api-token',
                                         'description': '',
-                                        'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'},
-                                    'required-config-key': {
+                                        'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'
+                                    },
+                                    {
+                                        'name': 'required-config-key',
                                         'description': '',
-                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'}
-                                },
+                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
+                                    }
+                                ],
                                 'message': '',
                                 'sub-step-implementer-name':
                                     'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
@@ -479,15 +482,11 @@ class TestInit(BaseTestCase):
                     'DEV': {
                         'required-step-config-test': {
                             'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                                'artifacts': {
-                                    'environment-name':
-                                        {'description': '', 'value': 'DEV'},
-                                    'kube-api-token':
-                                        {'description': '', 'value': 'mock decrypted value'},
-                                    'required-config-key': {
-                                        'description': '',
-                                        'value': 'mock decrypted value'}
-                                },
+                                'artifacts': [
+                                    {'name': 'environment-name', 'description': '', 'value': 'DEV'},
+                                    {'name': 'kube-api-token', 'description': '', 'value': 'mock decrypted value'},
+                                    {'name': 'required-config-key', 'description': '', 'value': 'mock decrypted value'}
+                                ],
                                 'message': '',
                                 'sub-step-implementer-name':
                                     'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
@@ -509,4 +508,3 @@ class TestInit(BaseTestCase):
                 '''
             }]
                             )
-

@@ -90,7 +90,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'Given directory (repo_root) is not a Git repository'
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     def test_root_dir_is_bare_git_repo(self):
         with TempDirectory() as temp_dir:
@@ -118,7 +118,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'Given directory (repo_root) is a bare Git repository'
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     def test_no_commit_history(self):
         with TempDirectory() as temp_dir:
@@ -151,7 +151,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.message = 'Given directory (repo_root) is a ' \
                                            'git branch (git_branch) with no commit history'
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     def test_git_repo_with_single_commit_on_master(self):
         with TempDirectory() as temp_dir:
@@ -235,4 +235,4 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.message = 'Expected a Git branch in given directory (repo_root) ' \
                                            'but has a detached head'
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)

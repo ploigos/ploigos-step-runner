@@ -311,10 +311,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 name='deployed-host-urls',
                 value=['https://fruits.ploigos.xyz']
             )
-            self.assertEqual(
-                actual_step_results.get_step_result_dict(),
-                expected_step_result.get_step_result_dict()
-            )
+            self.assertEqual(actual_step_results, expected_step_result)
 
             get_repo_branch_mock.assert_called_once_with()
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
@@ -460,10 +457,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 value='test-app-name'
             )
 
-            self.assertEqual(
-                actual_step_results.get_step_result_dict(),
-                expected_step_result.get_step_result_dict()
-            )
+            self.assertEqual(actual_step_results, expected_step_result)
 
             get_repo_branch_mock.assert_called_once_with()
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()

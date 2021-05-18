@@ -196,7 +196,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 f"  STDERR:\n" +\
                 f"mock error"
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
             containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
             skopeo_mock.copy.assert_called_once_with(

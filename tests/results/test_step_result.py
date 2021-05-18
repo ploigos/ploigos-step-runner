@@ -1,14 +1,15 @@
+"""Test ResultStep
 """
-  Test ResultStep
-"""
-from tests.helpers.base_test_case import BaseTestCase
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepResult, WorkflowResult
+from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import StepResultArtifact, step_result
+from tests.helpers.base_test_case import BaseTestCase
+from tests.helpers.sample_step_implementers import FooStepImplementer
 
 
 class TestStepResultTest(BaseTestCase):
-    """
-    Test StepResult
+    """Test StepResult
     """
 
     def test_step_name(self):
@@ -37,35 +38,34 @@ class TestStepResultTest(BaseTestCase):
         self.assertEqual(step_result.message, 'testing')
 
     def test_add_artifact(self):
-        step_result_expected = {
-            'step1': {
-                'sub1': {
-                    'sub-step-implementer-name': 'implementer1',
-                    'success': True,
-                    'message': '',
-                    'artifacts': {
-                        'artifact1': {
-                            'description': 'description1',
-                            'value': 'value1'
-                        },
-                        'artifact2': {
-                            'description': 'description2',
-                            'value': 'value2'
-                        },
-                        'artifact3': {
-                            'description': '',
-                            'value': 'value3'
-                        }
-                    }
-                }
-
-            }
-        }
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'value2', 'description2')
         step_result.add_artifact('artifact3', 'value3')
-        self.assertEqual(step_result.get_step_result_dict(), step_result_expected)
+
+        self.assertEqual(
+            step_result.get_artifact('artifact1'),
+            StepResultArtifact(
+                name='artifact1',
+                value='value1',
+                description='description1'
+            )
+        )
+        self.assertEqual(
+            step_result.get_artifact('artifact2'),
+            StepResultArtifact(
+                name='artifact2',
+                value='value2',
+                description='description2'
+            )
+        )
+        self.assertEqual(
+            step_result.get_artifact('artifact3'),
+            StepResultArtifact(
+                name='artifact3',
+                value='value3'
+            )
+        )
 
     def test_add_artifact_missing_name(self):
         step_result = StepResult('step1', 'sub1', 'implementer1')
@@ -84,13 +84,15 @@ class TestStepResultTest(BaseTestCase):
             step_result.add_artifact('name1', '', 'description1')
 
     def test_get_artifact(self):
-        step_result_expected = {
-            'description': 'description1',
-            'value': 'value1'
-        }
+        expected_artifact = StepResultArtifact(
+            name='artifact1',
+            value='value1',
+            description='description1'
+        )
+
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1')
-        self.assertEqual(step_result.get_artifact('artifact1'), step_result_expected)
+        self.assertEqual(step_result.get_artifact('artifact1'), expected_artifact)
 
     def test_get_artifact_value(self):
         step_result_expected = 'value1'
@@ -99,58 +101,477 @@ class TestStepResultTest(BaseTestCase):
         self.assertEqual(step_result.get_artifact_value('artifact1'), step_result_expected)
 
     def test_get_artifacts_property(self):
-        step_result_expected = {
-            'artifact1': {
-                'description': 'description1',
-                'value': 'value1'
-            },
-            'artifact2': {
-                'description': '',
-                'value': 'value2'
-            }
-        }
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'value2')
-        self.assertEqual(step_result.artifacts, step_result_expected)
+
+        expected_artifacts = {
+            'artifact1': StepResultArtifact(name='artifact1', value='value1', description='description1'),
+            'artifact2': StepResultArtifact(name='artifact2', value='value2')
+        }
+
+        self.assertEqual(step_result.artifacts, expected_artifacts)
 
     def test_add_duplicate(self):
-        step_result_expected = {
-            'artifact1': {
-                'description': 'description1',
-                'value': 'value1'
-            },
-            'artifact2': {
-                'description': '',
-                'value': 'lastonewins'
-            }
+        expected_artifacts = {
+            'artifact1': StepResultArtifact(name='artifact1', value='value1', description='description1'),
+            'artifact2': StepResultArtifact(name='artifact2', value='lastonewins')
         }
+
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1')
         step_result.add_artifact('artifact2', 'here')
         step_result.add_artifact('artifact2', 'andhere')
         step_result.add_artifact('artifact2', 'lastonewins')
-        self.assertEqual(step_result.artifacts, step_result_expected)
+        self.assertEqual(step_result.artifacts, expected_artifacts)
 
-    def test_get_step_result_json(self):
-        step_result_expected = '{"step1": {"sub1": {"sub-step-implementer-name": "implementer1", "success": true, "message": "", "artifacts": {"artifact1": {"description": "description1", "value": "value1"}}}}}'
-        step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1')
-        print(step_result)
-        self.assertEqual(step_result.get_step_result_json(), step_result_expected)
+    def test_from_step_implementer_no_env(self):
+        config = Config({
+            'step-runner-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step(
+            'tests.helpers.sample_step_implementers.FooStepImplementer')
 
-    def test_get_step_result_yaml(self):
-        step_result_expected = '''step1:
-  sub1:
-    artifacts:
-      artifact1:
-        description: description1
-        value: value1
-    message: ''
-    sub-step-implementer-name: implementer1
-    success: true
-'''
-        step_result = StepResult('step1', 'sub1', 'implementer1')
-        step_result.add_artifact('artifact1', 'value1', 'description1')
-        print(step_result.get_step_result_yaml())
-        self.assertEqual(step_result.get_step_result_yaml(), step_result_expected)
+        step = FooStepImplementer(
+            workflow_result=WorkflowResult(),
+            work_dir_path=None,
+            config=sub_step
+        )
+
+        step_result = StepResult.from_step_implementer(step)
+
+        expected_step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+
+        self.assertEqual(step_result, expected_step_result)
+
+    def test_from_step_implementer_with_env(self):
+        config = Config({
+            'step-runner-config': {
+                'foo': {
+                    'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'config': {}
+                }
+            }
+        })
+        step_config = config.get_step_config('foo')
+        sub_step = step_config.get_sub_step(
+            'tests.helpers.sample_step_implementers.FooStepImplementer')
+
+        step = FooStepImplementer(
+            workflow_result=WorkflowResult(),
+            work_dir_path=None,
+            config=sub_step,
+            environment='blarg'
+        )
+
+        step_result = StepResult.from_step_implementer(step)
+
+        expected_step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        self.assertEqual(step_result, expected_step_result)
+
+    def test_artifacts_dicts_empty(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+
+        self.assertEqual([], step_result.artifacts_dicts)
+
+    def test_artifacts_dicts_with_artifacts(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected_step_result_artifacts_dicts = [
+            {'description': '', 'name': 'art-str', 'value': 'hello'},
+            {'description': '', 'name': 'art-bool-t', 'value': True},
+            {'description': '', 'name': 'art-bool-f', 'value': False},
+            {'description': 'test artifact', 'name': 'art-desc', 'value': 'world'}
+        ]
+
+        self.assertEqual(expected_step_result_artifacts_dicts, step_result.artifacts_dicts)
+
+    def test_get_sub_step_result_dict(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected = {
+            'artifacts': [
+                {'description': '', 'name': 'art-str', 'value': 'hello'},
+                {'description': '', 'name': 'art-bool-t', 'value': True},
+                {'description': '', 'name': 'art-bool-f', 'value': False},
+                {'description': 'test artifact', 'name': 'art-desc', 'value': 'world'}
+            ],
+            'message': '',
+            'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+            'success': True
+        }
+
+        self.assertEqual(expected, step_result.get_sub_step_result_dict())
+
+    def test_get_step_result_dict_no_env(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected = {
+            'foo': {
+                'tests.helpers.sample_step_implementers.FooStepImplementer': {
+                    'artifacts': [
+                        {'description': '', 'name': 'art-str', 'value': 'hello'},
+                        {'description': '', 'name': 'art-bool-t', 'value': True},
+                        {'description': '', 'name': 'art-bool-f', 'value': False},
+                        {'description': 'test artifact', 'name': 'art-desc', 'value': 'world'}
+                    ],
+                    'message': '',
+                    'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                    'success': True
+                }
+            }
+        }
+
+        self.assertEqual(expected, step_result.get_step_result_dict())
+
+    def test_get_step_result_dict_with_env(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected = {
+            'blarg': {
+                'foo': {
+                    'tests.helpers.sample_step_implementers.FooStepImplementer': {
+                        'artifacts': [
+                            {'description': '', 'name': 'art-str', 'value': 'hello'},
+                            {'description': '', 'name': 'art-bool-t', 'value': True},
+                            {'description': '', 'name': 'art-bool-f', 'value': False},
+                            {'description': 'test artifact', 'name': 'art-desc', 'value': 'world'}
+                        ],
+                        'message': '',
+                        'sub-step-implementer-name': 'tests.helpers.sample_step_implementers.FooStepImplementer',
+                        'success': True
+                    }
+                }
+            }
+        }
+
+        self.assertEqual(expected, step_result.get_step_result_dict())
+
+    def test___str__(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected = "{'step-name': 'foo', 'sub-step-name': "\
+            "'tests.helpers.sample_step_implementers.FooStepImplementer', "\
+            "'sub-step-implementer-name': "\
+            "'tests.helpers.sample_step_implementers.FooStepImplementer', 'environment': 'blarg', "\
+            "'success': True, 'message': '', 'artifacts': [{'name': 'art-str', 'value': 'hello', "\
+            "'description': ''}, {'name': 'art-bool-t', 'value': True, 'description': ''}, "\
+            "{'name': 'art-bool-f', 'value': False, 'description': ''}, "\
+            "{'name': 'art-desc', 'value': 'world', 'description': 'test artifact'}]}"
+
+        self.assertEqual(expected, str(step_result))
+
+    def test___repr__(self):
+        step_result = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        expected = "StepResult(step_name=foo,sub_step_name=tests.helpers." \
+            "sample_step_implementers.FooStepImplementer,sub_step_implementer_name=" \
+            "tests.helpers.sample_step_implementers.FooStepImplementer,environment=" \
+            "blarg,success=True,message=,artifacts=[{'name': 'art-str', 'value': 'hello', "\
+            "'description': ''}, {'name': 'art-bool-t', 'value': True, 'description': ''}, "\
+            "{'name': 'art-bool-f', 'value': False, 'description': ''}, "\
+            "{'name': 'art-desc', 'value': 'world', 'description': 'test artifact'}])"
+
+        self.assertEqual(expected, repr(step_result))
+
+    def test___eq__(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result1.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result1.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result1.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result1.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result2.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result2.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result2.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result2.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        self.assertEqual(step_result1, step_result2)
+
+    def test___nq___artifacts(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+        step_result1.add_artifact(
+            name='art-str',
+            value='hello'
+        )
+        step_result1.add_artifact(
+            name='art-bool-t',
+            value=True
+        )
+        step_result1.add_artifact(
+            name='art-bool-f',
+            value=False
+        )
+        step_result1.add_artifact(
+            name='art-desc',
+            value='world',
+            description='test artifact'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        self.assertNotEqual(step_result1, step_result2)
+
+    def test___nq___step_name(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo1',
+            sub_step_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        self.assertNotEqual(step_result1, step_result2)
+
+    def test___nq___sub_step_name(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='a',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo',
+            sub_step_name='b',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        self.assertNotEqual(step_result1, step_result2)
+
+    def test___nq___sub_step_implementer_name(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='a',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='blarg'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo',
+            sub_step_name='a',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.BarStepImplementer',
+            environment='blarg'
+        )
+
+        self.assertNotEqual(step_result1, step_result2)
+
+    def test___nq___environment(self):
+        step_result1 = StepResult(
+            step_name='foo',
+            sub_step_name='a',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='a'
+        )
+
+        step_result2 = StepResult(
+            step_name='foo',
+            sub_step_name='a',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer',
+            environment='b'
+        )
+
+        self.assertNotEqual(step_result1, step_result2)

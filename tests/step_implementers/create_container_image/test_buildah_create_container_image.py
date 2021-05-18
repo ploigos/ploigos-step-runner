@@ -124,7 +124,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 _err=sys.stderr,
                 _tee='err'
             )
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch('sh.buildah', create=True)
     def test__run_step_pass_no_container_image_version(self, buildah_mock):
@@ -186,7 +186,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 _err=sys.stderr,
                 _tee='err'
             )
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch('sh.buildah', create=True)
     def test__run_step_pass_image_tar_file_exists(self, buildah_mock):
@@ -256,7 +256,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 _err=sys.stderr,
                 _tee='err'
             )
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch('sh.buildah', create=True)
     def test__run_step_fail_no_image_spec_file(self, buildah_mock):
@@ -290,7 +290,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             expected_step_result.success = False
             expected_step_result.message = 'Image specification file does not exist in location: ./Dockerfile'
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch('sh.buildah', create=True)
     def test__run_step_fail_buildah_bud_error(self, buildah_mock):

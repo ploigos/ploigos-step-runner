@@ -276,32 +276,32 @@ class TestStepWorkflowResultTest(BaseTestCase):
     step1:
         sub1:
             artifacts:
-                artifact1:
-                    description: description1
-                    value: value1
-                artifact2:
-                    description: description2
-                    value: value2
-                artifact3:
-                    description: ''
-                    value: value3
-                artifact4:
-                    description: ''
-                    value: false
+            -   description: description1
+                name: artifact1
+                value: value1
+            -   description: description2
+                name: artifact2
+                value: value2
+            -   description: ''
+                name: artifact3
+                value: value3
+            -   description: ''
+                name: artifact4
+                value: false
             message: ''
             sub-step-implementer-name: implementer1
             success: true
         sub2:
             artifacts:
-                artifact1:
-                    description: ''
-                    value: true
-                artifact2:
-                    description: ''
-                    value: false
-                artifact5:
-                    description: ''
-                    value: value5
+            -   description: ''
+                name: artifact1
+                value: true
+            -   description: ''
+                name: artifact2
+                value: false
+            -   description: ''
+                name: artifact5
+                value: value5
             message: ''
             sub-step-implementer-name: implementer2
             success: true
@@ -312,19 +312,14 @@ class TestStepWorkflowResultTest(BaseTestCase):
             wfr.write_results_to_yml_file(yml_file)
 
             expected_yml_file = temp_dir.path + '/test-expected-results.yml'
-            with open(expected_yml_file, 'w') as file:
-                file.write(expected_yml_result)
 
-            self.assertTrue(filecmp.cmp(yml_file, expected_yml_file))
+            with open(yml_file, 'r') as actual:
+                self.assertEqual(actual.read(), expected_yml_result)
 
     def test_write_results_to_yml_file_exception(self):
         wfr = setup_test()
 
-        # the sub-folders will be created
-        # with TempDirectory() as temp_dir:
-        #     wfr.write_results_to_yml_file(f'{temp_dir.path}/NotAStepResult/dir/test.yml')
-        with self.assertRaises(
-                RuntimeError):
+        with self.assertRaises(RuntimeError):
             wfr.write_results_to_yml_file('/NotAStepResult/dir/test.yml')
 
     def test_write_results_to_json_file(self):
@@ -335,28 +330,33 @@ class TestStepWorkflowResultTest(BaseTestCase):
                 "sub-step-implementer-name": "implementer1",
                 "success": true,
                 "message": "",
-                "artifacts": {
-                    "artifact1": {
-                        "description": "description1",
-                        "value": "value1"
+                "artifacts": [
+                    {
+                        "name": "artifact1",
+                        "value": "value1",
+                        "description": "description1"
                     },
-                    "artifact2": {
-                        "description": "description2",
-                        "value": "value2"
+                    {
+                        "name": "artifact2",
+                        "value": "value2",
+                        "description": "description2"
                     },
-                    "artifact3": {
-                        "description": "",
-                        "value": "value3"
+                    {
+                        "name": "artifact3",
+                        "value": "value3",
+                        "description": ""
                     },
-                    "artifact4": {
-                        "description": "",
-                        "value": false
+                    {
+                        "name": "artifact4",
+                        "value": false,
+                        "description": ""
                     },
-                    "same-artifact-all-env-and-no-env": {
-                        "description": "",
-                        "value": "result1"
+                    {
+                        "name": "same-artifact-all-env-and-no-env",
+                        "value": "result1",
+                        "description": ""
                     }
-                }
+                ]
             }
         },
         "step2": {
@@ -364,20 +364,23 @@ class TestStepWorkflowResultTest(BaseTestCase):
                 "sub-step-implementer-name": "implementer2",
                 "success": true,
                 "message": "",
-                "artifacts": {
-                    "artifact1": {
-                        "description": "",
-                        "value": true
+                "artifacts": [
+                    {
+                        "name": "artifact1",
+                        "value": true,
+                        "description": ""
                     },
-                    "artifact2": {
-                        "description": "",
-                        "value": false
+                    {
+                        "name": "artifact2",
+                        "value": false,
+                        "description": ""
                     },
-                    "artifact5": {
-                        "description": "",
-                        "value": "value5"
+                    {
+                        "name": "artifact5",
+                        "value": "value5",
+                        "description": ""
                     }
-                }
+                ]
             }
         },
         "dev": {
@@ -386,20 +389,23 @@ class TestStepWorkflowResultTest(BaseTestCase):
                     "sub-step-implementer-name": "helm",
                     "success": true,
                     "message": "",
-                    "artifacts": {
-                        "same-artifact-diff-env": {
-                            "description": "",
-                            "value": "value-dev-env"
+                    "artifacts": [
+                        {
+                            "name": "same-artifact-diff-env",
+                            "value": "value-dev-env",
+                            "description": ""
                         },
-                        "unique-artifact-to-step-and-environment-1": {
-                            "description": "",
-                            "value": "value1-dev-env"
+                        {
+                            "name": "unique-artifact-to-step-and-environment-1",
+                            "value": "value1-dev-env",
+                            "description": ""
                         },
-                        "same-artifact-all-env-and-no-env": {
-                            "description": "",
-                            "value": "result3-dev-env"
+                        {
+                            "name": "same-artifact-all-env-and-no-env",
+                            "value": "result3-dev-env",
+                            "description": ""
                         }
-                    }
+                    ]
                 }
             }
         },
@@ -409,32 +415,38 @@ class TestStepWorkflowResultTest(BaseTestCase):
                     "sub-step-implementer-name": "helm",
                     "success": true,
                     "message": "",
-                    "artifacts": {
-                        "artifact1": {
-                            "description": "",
-                            "value": true
+                    "artifacts": [
+                        {
+                            "name": "artifact1",
+                            "value": true,
+                            "description": ""
                         },
-                        "artifact2": {
-                            "description": "",
-                            "value": false
+                        {
+                            "name": "artifact2",
+                            "value": false,
+                            "description": ""
                         },
-                        "artifact5": {
-                            "description": "",
-                            "value": "value5"
+                        {
+                            "name": "artifact5",
+                            "value": "value5",
+                            "description": ""
                         },
-                        "same-artifact-diff-env": {
-                            "description": "",
-                            "value": "value-test-env"
+                        {
+                            "name": "same-artifact-diff-env",
+                            "value": "value-test-env",
+                            "description": ""
                         },
-                        "unique-artifact-to-step-and-environment-2": {
-                            "description": "",
-                            "value": "value2-test-env"
+                        {
+                            "name": "unique-artifact-to-step-and-environment-2",
+                            "value": "value2-test-env",
+                            "description": ""
                         },
-                        "same-artifact-all-env-and-no-env": {
-                            "description": "",
-                            "value": "result4-test-env"
+                        {
+                            "name": "same-artifact-all-env-and-no-env",
+                            "value": "result4-test-env",
+                            "description": ""
                         }
-                    }
+                    ]
                 }
             }
         }
@@ -447,8 +459,7 @@ class TestStepWorkflowResultTest(BaseTestCase):
 
             with open(json_file_path, 'r') as actual_json_file:
                 json_file_contents = actual_json_file.read()
-
-                self.assertEqual(expected_json_result, json_file_contents)
+                self.assertEqual(json_file_contents, expected_json_result)
 
     def test_write_results_to_json_file_exception(self):
         wfr = setup_test()

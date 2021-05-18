@@ -384,7 +384,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data('Sub Step Implementer', step_result.sub_step_implementer_name)
         StepImplementer.__print_data('Success', step_result.success)
         StepImplementer.__print_data('Message', step_result.message)
-        StepImplementer.__print_data('Artifacts', step_result.artifacts)
+        StepImplementer.__print_data('Artifacts', step_result.artifacts_dicts)
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name}')
 

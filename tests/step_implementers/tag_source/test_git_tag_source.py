@@ -146,7 +146,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with(None)
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -194,7 +194,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with('http://git-username:git-password@' + url[7:])
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -243,7 +243,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with('https://git-username:git-password@' + url[8:])
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -290,7 +290,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with(None)
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -337,7 +337,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -383,7 +383,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -437,7 +437,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             # verifying correct mocks were called
             git_tag_mock.assert_called_once_with(tag)
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -488,7 +488,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_tag_mock.assert_called_once_with(tag)
             git_url_mock.assert_called_once_with()
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
     @patch.object(Git, '_Git__get_tag')
     @patch.object(Git, '_Git__git_url')
@@ -545,7 +545,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with(None)
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
 # TEST FOR __get_tag
 
@@ -587,7 +587,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             git_url_mock.assert_called_once_with()
             git_push_mock.assert_called_once_with(None)
 
-            self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())
+            self.assertEqual(result, expected_step_result)
 
 # TESTS FOR __git_url
 
