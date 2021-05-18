@@ -57,7 +57,7 @@ Result Artifact Key       | Description
 """
 
 from ploigos_step_runner import StepImplementer
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 DEFAULT_CONFIG = {
     'release-branch': 'master'

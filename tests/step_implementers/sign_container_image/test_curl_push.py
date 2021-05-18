@@ -12,7 +12,7 @@ from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, StringRegexParam
 from ploigos_step_runner.step_implementers.sign_container_image import CurlPush
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 
 class TestStepImplementerCurlPushSourceBase(BaseStepImplementerTestCase):

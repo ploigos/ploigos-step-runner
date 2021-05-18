@@ -2,7 +2,7 @@
   Test ResultStep
 """
 from tests.helpers.base_test_case import BaseTestCase
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 
 

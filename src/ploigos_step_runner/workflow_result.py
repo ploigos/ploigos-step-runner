@@ -7,7 +7,7 @@ import pickle
 import yaml
 
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.utils.dict import deep_merge
 from ploigos_step_runner.utils.file import create_parent_dir
 

@@ -5,11 +5,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 import sh
+from ploigos_step_runner import StepResult
+from ploigos_step_runner.step_implementers.create_container_image import \
+    Buildah
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from ploigos_step_runner.step_implementers.create_container_image import Buildah
-from ploigos_step_runner.step_result import StepResult
 
 
 class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase):

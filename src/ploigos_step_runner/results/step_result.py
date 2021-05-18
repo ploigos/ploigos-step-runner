@@ -4,7 +4,7 @@ import json
 
 import yaml
 
-from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner import StepRunnerException
 
 
 class StepResult: # pylint: disable=too-many-instance-attributes

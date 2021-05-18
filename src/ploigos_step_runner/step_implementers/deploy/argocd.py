@@ -110,7 +110,7 @@ import sh
 import yaml
 from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 DEFAULT_CONFIG = {
     'argocd-sync-timeout-seconds': 60,

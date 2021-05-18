@@ -13,7 +13,7 @@ from tests.helpers.base_step_implementer_test_case import \
 from tests.helpers.test_utils import Any
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.tag_source import Git
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 
 class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):

@@ -7,7 +7,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 from ploigos_step_runner.utils.file import create_parent_dir
 
 

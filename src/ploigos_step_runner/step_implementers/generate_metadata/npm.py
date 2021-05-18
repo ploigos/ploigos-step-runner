@@ -28,7 +28,7 @@ import json
 import os.path
 
 from ploigos_step_runner import StepImplementer
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'

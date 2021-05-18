@@ -26,7 +26,7 @@ Result Artifact Key     | Description
 """
 
 import os
-from ploigos_step_runner.step_result import StepResult
+from ploigos_step_runner import StepResult
 
 from ploigos_step_runner import StepImplementer
 
