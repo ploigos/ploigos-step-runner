@@ -5,13 +5,12 @@ import os
 from contextlib import redirect_stdout
 from io import StringIO
 
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepResult, WorkflowResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import step_result_artifact
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_runner import StepRunner
-from ploigos_step_runner.workflow_result import WorkflowResult
 from testfixtures import TempDirectory
 
 from tests.helpers.base_step_implementer_test_case import \

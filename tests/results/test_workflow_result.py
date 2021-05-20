@@ -1,15 +1,13 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
-import pickle
 import filecmp
-from testfixtures import TempDirectory
+import pickle
 
-from tests.helpers.base_test_case import BaseTestCase
-
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.workflow_result import WorkflowResult
+from ploigos_step_runner import StepResult, WorkflowResult
 from ploigos_step_runner.exceptions import StepRunnerException
+from testfixtures import TempDirectory
+from tests.helpers.base_test_case import BaseTestCase
 
 
 def setup_test():

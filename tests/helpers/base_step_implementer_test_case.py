@@ -6,11 +6,10 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 
 import yaml
-from ploigos_step_runner.step_runner import StepRunner
+from ploigos_step_runner import StepResult, WorkflowResult
 from ploigos_step_runner.config.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.workflow_result import WorkflowResult
+from ploigos_step_runner.step_runner import StepRunner
 
 from .base_test_case import BaseTestCase
 
