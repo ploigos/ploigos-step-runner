@@ -18,8 +18,6 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            step_name='',
-            implementer='',
             results_dir_path='',
             results_file_name='',
             work_dir_path=''
@@ -27,8 +25,8 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
         return self.create_given_step_implementer(
             step_implementer=Rekor,
             step_config=step_config,
-            step_name=step_name,
-            implementer=implementer,
+            step_name='automated_governance',
+            implementer='Rekor',
             results_dir_path=results_dir_path,
             results_file_name=results_file_name,
             work_dir_path=work_dir_path
@@ -85,8 +83,6 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='automated_governance',
-                implementer='Rekor',
                 results_dir_path=results_dir_path,
                 results_file_name=results_file_name,
                 work_dir_path=work_dir_path,
