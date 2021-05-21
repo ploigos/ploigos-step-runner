@@ -41,11 +41,6 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         }
 
     @staticmethod
-    def gpg_side_effect(*_args, **kwargs):
-        """Side effect for gpg key load"""
-        kwargs['_out']('fpr:::::::::DD7208BA0A6359F65B906B29CF4AC14A3D109637:')
-
-    @staticmethod
     def create_podman_image_sign_side_effect(num_signatures=1):
         def podman_image_sign_side_effect(*args, **kwargs):
             if args[0] == 'sign':
@@ -102,7 +97,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-    @patch.object(PodmanSign, '_PodmanSign__import_pgp_key')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_pass(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
@@ -175,7 +170,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             )
             self.assertEqual(expected_step_result, result)
 
-    @patch.object(PodmanSign, '_PodmanSign__import_pgp_key')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_import_pgp_key(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
@@ -225,7 +220,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             self.assertEqual(expected_step_result, result)
 
-    @patch.object(PodmanSign, '_PodmanSign__import_pgp_key')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_sign_image(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
@@ -281,85 +276,6 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.message = 'mock error signing image'
 
             self.assertEqual(expected_step_result, result)
-
-    @patch('sh.gpg', create=True)
-    def test___import_pgp_key_success(self, gpg_mock):
-        gpg_mock.side_effect = TestStepImplementerSignContainerImagePodman.gpg_side_effect
-
-        pgp_private_key=TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
-        PodmanSign._PodmanSign__import_pgp_key(
-            pgp_private_key=pgp_private_key
-        )
-        gpg_mock.assert_called_once_with(
-            '--import',
-            '--fingerprint',
-            '--with-colons',
-            '--import-options=import-show',
-            _in=pgp_private_key,
-            _out=Any(IOBase),
-            _err_to_out=True,
-            _tee='out'
-        )
-
-    @patch('sh.gpg', create=True)
-    def test___import_pgp_key_gpg_import_fail(self, gpg_mock):
-        gpg_mock.side_effect = sh.ErrorReturnCode('gpg', b'mock stdout', b'mock error')
-
-        pgp_private_key=TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                r"Error importing pgp private key:"
-                r".*RAN: gpg"
-                r".*STDOUT:"
-                r".*mock stdout"
-                r".*STDERR:"
-                r".*mock error",
-                re.DOTALL
-            )
-        ):
-            PodmanSign._PodmanSign__import_pgp_key(
-                pgp_private_key=pgp_private_key
-            )
-
-        gpg_mock.assert_called_once_with(
-            '--import',
-            '--fingerprint',
-            '--with-colons',
-            '--import-options=import-show',
-            _in=pgp_private_key,
-            _out=Any(IOBase),
-            _err_to_out=True,
-            _tee='out'
-        )
-
-    @patch('sh.gpg', create=True)
-    def test___import_pgp_key_fail_get_fingerprint(self, gpg_mock):
-        pgp_private_key=TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                r"Error getting PGP fingerprint for PGP key"
-                r" to sign container image\(s\) with. See stdout and stderr for more info.",
-                re.DOTALL
-            )
-        ):
-            PodmanSign._PodmanSign__import_pgp_key(
-                pgp_private_key=pgp_private_key
-            )
-
-        gpg_mock.assert_called_once_with(
-            '--import',
-            '--fingerprint',
-            '--with-colons',
-            '--import-options=import-show',
-            _in=pgp_private_key,
-            _out=Any(IOBase),
-            _err_to_out=True,
-            _tee='out'
-        )
 
     @patch('sh.podman', create=True)
     def test___sign_image_success(self, podman_mock):
