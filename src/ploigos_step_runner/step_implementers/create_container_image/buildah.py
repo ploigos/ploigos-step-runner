@@ -28,12 +28,14 @@ Result Artifact Key | Description
 --------------------------|------------
 `container-image-version` | Container version to tag built image with
 `image-tar-file`          | Path to the built container image as a tar file
+`image-tar-hash`          | Path to the built container image as a tar file
 """
 import os
 import sys
 from pathlib import Path
-
+import hashlib
 import sh
+from io import StringIO
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.utils.containers import container_registries_login
 
@@ -99,6 +101,35 @@ class Buildah(StepImplementer):
             that are required before running the step.
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+
+    def get_file_hash(self, application_name, service_name, tar_file):
+        """Returns file hash of given file.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        """
+        # Has to be a better way to get image hash
+        pod = StringIO()
+        sh.podman.load('-q', '-i', tar_file, _out=pod)
+        image_name = pod.getvalue().rstrip().split('@')[-1]
+        buf = StringIO()
+        # image_name = application_name + '/' + service_name
+        sh.buildah.inspect(image_name,_out=buf)
+
+        for line in buf.getvalue().rsplit('\n'):
+            if 'FromImageDigest' in line:
+                hash = line.split(':')[-1].strip(' ,\"\n')
+                sh.podman.rmi(image_name)
+                return hash
+        # Returning hash for image tar is unreliable
+        # sha256_hash = hashlib.sha256()
+        # with open(file_path, "rb") as f:
+        #     # Read and update hash string value in blocks of 4K
+        #     for byte_block in iter(lambda: f.read(4096), b""):
+        #         sha256_hash.update(byte_block)
+        # return sha256_hash.hexdigest()
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
@@ -196,11 +227,16 @@ class Buildah(StepImplementer):
                 _err=sys.stderr,
                 _tee='err'
             )
-
+            image_tar_hash = self.get_file_hash(application_name, service_name, image_tar_path)
             step_result.add_artifact(
                 name='image-tar-file',
                 value=image_tar_path
             )
+            step_result.add_artifact(
+                name='image-tar-hash',
+                value=image_tar_hash
+            )
+
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             step_result.success = False
             step_result.message = f'Issue invoking buildah push to tar file ' \
