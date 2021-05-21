@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>ploigos_step_runner.step_result API documentation</title>
-<meta name="description" content="Class and helper constants for StepResult" />
+<title>ploigos_step_runner.results.step_result API documentation</title>
+<meta name="description" content="Defines a StepResult object which represents the results of a invocation
+of a StepImplementer#run." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,26 +20,26 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.step_result</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.results.step_result</code></h1>
 </header>
 <section id="section-intro">
-<p>Class and helper constants for StepResult</p>
+<p>Defines a StepResult object which represents the results of a invocation
+of a StepImplementer#run.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Class and helper constants for StepResult
+<pre><code class="python">&#34;&#34;&#34;Defines a StepResult object which represents the results of a invocation
+of a StepImplementer#run.
 &#34;&#34;&#34;
-import json
 
-import yaml
-
-from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
 
 
 class StepResult: # pylint: disable=too-many-instance-attributes
-    &#34;&#34;&#34;
-    Step result object.
+    &#34;&#34;&#34;Defines a StepResult object which represents the results of a invocation
+    of a StepImplementer#run.
 
     Parameters
     ----------
@@ -52,7 +53,6 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         Optional. Environment that this step result is for
         if step was run against a specific environment.
     &#34;&#34;&#34;
-
     def __init__(self, step_name, sub_step_name, sub_step_implementer_name, environment=None):
         self.__step_name = step_name
         self.__sub_step_name = sub_step_name
@@ -75,15 +75,6 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             sub_step_implementer_name=step_implementer.sub_step_implementer_name,
             environment=step_implementer.environment
         )
-
-    def __str__(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            JSON formatted step result
-        &#34;&#34;&#34;
-        return self.get_step_result_json()
 
     @property
     def step_name(self):
@@ -128,22 +119,32 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @property
     def artifacts(self):
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get the artifacts associated with this step result.
+
         Returns
         -------
-        dict
-            All artifacts of the step
-            For Example:
-            {
-                &#39;artifact1&#39;: {&#39;description&#39;: &#39;description1&#39;, &#39;value&#39;: &#39;value1&#39;},
-                &#39;artifact2&#39;: {&#39;description&#39;: &#39;&#39;, &#39;value&#39;: &#39;value2&#39;}
-            }
-
+        dict of str: StepResultArtifacts
+            Key is artifact name, value is StepResultArtifact.
         &#34;&#34;&#34;
         return self.__artifacts
 
+    @property
+    def artifacts_dicts(self):
+        &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultArtifact.
+        &#34;&#34;&#34;
+        artifact_dicts = []
+        for artifact in self.artifacts.values():
+            artifact_dicts.append(artifact.as_dict())
+
+        return artifact_dicts
+
     def get_artifact(self, name):
-        &#34;&#34;&#34;Get the dictionary of a specified artifact.
+        &#34;&#34;&#34;Get artifact with given name for this StepResult.
 
         Parameters
         ----------
@@ -152,13 +153,10 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
         Returns
         -------
-        dict
-            Dictionary for a specified artifact.
-            For example:
-            {&#39;description&#39;: &#39;artifact1&#39;, &#39;value&#39;: &#39;value1&#39;}
-
+        StepResultArtifact
+            The step result artifact with the given name for this StepResult.
         &#34;&#34;&#34;
-        return self.artifacts.get(name)
+        return self.__artifacts.get(name)
 
     def get_artifact_value(self, name):
         &#34;&#34;&#34;Get the value for a specified artifact.
@@ -174,28 +172,22 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             The value of the artifact.
         &#34;&#34;&#34;
         value = None
-        if self.artifacts.get(name):
-            value = self.artifacts.get(name).get(&#39;value&#39;)
+        if self.__artifacts.get(name):
+            value = self.__artifacts.get(name).value
 
         return value
 
     def add_artifact(self, name, value, description=&#39;&#39;):
-        &#34;&#34;&#34;Insert/Update an artifact with the given pattern:
-
-        &#34;name&#34;: {
-            &#34;description&#34;: &#34;file description&#34;,
-            &#34;value&#34;: &#34;step-result.txt&#34;
-        }
+        &#34;&#34;&#34;Add an artifact to this StepResult.
 
         Parameters
         ----------
         name : str
-            Required name of the artifact
+            Name of the result artifact.
         value : str
-            Required content
+            Arbitrary value of the artifact.
         description : str, optional
-            Optional description (defaults to empty)
-
+            Human readable description of the result artifact (defaults to empty).
         &#34;&#34;&#34;
         if not name:
             raise StepRunnerException(&#39;Name is required to add artifact&#39;)
@@ -204,10 +196,11 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         if value == &#39;&#39; or value is None:
             raise StepRunnerException(&#39;Value is required to add artifact&#39;)
 
-        self.__artifacts[name] = {
-            &#39;description&#39;: description,
-            &#39;value&#39;: value
-        }
+        self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
 
     @property
     def success(self):
@@ -221,8 +214,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @success.setter
     def success(self, success=True):
-        &#34;&#34;&#34;
-        Setter for success
+        &#34;&#34;&#34;Setter for success
         &#34;&#34;&#34;
         self.__success = success
 
@@ -238,12 +230,11 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 
     @message.setter
     def message(self, message):
-        &#34;&#34;&#34;
-        Setter for message
+        &#34;&#34;&#34;Setter for message
         &#34;&#34;&#34;
         self.__message = message
 
-    def get_sub_step_result(self):
+    def get_sub_step_result_dict(self):
         &#34;&#34;&#34;
         Returns
         -------
@@ -254,15 +245,16 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                 &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
                 &#39;success&#39;: Boolean,
                 &#39;message&#39;: &#39;value&#39;,
-                &#39;artifacts&#39;: {}
+                &#39;artifacts&#39;: []
             }
         &#34;&#34;&#34;
         result = {
             &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts
+            &#39;artifacts&#39;: self.artifacts_dicts
         }
+
         return result
 
     def get_step_result_dict(self):
@@ -291,35 +283,62 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             result = {
                 self.environment: {
                     self.step_name: {
-                        self.sub_step_name: self.get_sub_step_result()
+                        self.sub_step_name: self.get_sub_step_result_dict()
                     }
                 }
             }
         else:
             result = {
                 self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result()
+                    self.sub_step_name: self.get_sub_step_result_dict()
                 }
             }
         return result
 
-    def get_step_result_json(self):
+    def __str__(self):
+        &#34;&#34;&#34;Get string representation of the step result.
         &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            JSON formatted step result
-        &#34;&#34;&#34;
-        return json.dumps(self.get_step_result_dict())
+        return str({
+            &#39;step-name&#39;: self.step_name,
+            &#39;sub-step-name&#39;: self.sub_step_name,
+            &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
+            &#39;environment&#39;: self.environment,
+            &#39;success&#39;: self.success,
+            &#39;message&#39;: self.message,
+            &#39;artifacts&#39;: self.artifacts_dicts
+        })
 
-    def get_step_result_yaml(self):
+    def __repr__(self):
+        &#34;&#34;&#34;Get representation of the step result.
         &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            YAML formatted step result
+        return &#34;StepResult(&#34; \
+            f&#34;step_name={self.step_name},&#34; \
+            f&#34;sub_step_name={self.sub_step_name},&#34; \
+            f&#34;sub_step_implementer_name={self.sub_step_implementer_name},&#34; \
+            f&#34;environment={self.environment},&#34; \
+            f&#34;success={self.success},&#34; \
+            f&#34;message={self.message},&#34; \
+            f&#34;artifacts={self.artifacts_dicts}&#34; \
+            &#34;)&#34;
+
+    def __eq__(self, other):
+        &#34;&#34;&#34;StepResult is equal if all properties are equal.
         &#34;&#34;&#34;
-        return yaml.dump(self.get_step_result_dict())</code></pre>
+        return (
+            isinstance(other, StepResult) and
+            self.step_name == other.step_name and
+            self.sub_step_name == other.sub_step_name and
+            self.sub_step_implementer_name == other.sub_step_implementer_name and
+            self.environment == other.environment and
+            self.success == other.success and
+            self.message == other.message and
+            self.artifacts == other.artifacts
+        )
+
+    def __ne__(self, other):
+        &#34;&#34;&#34;StepResult is not equal if any properties are not equal.
+        &#34;&#34;&#34;
+        return not self.__eq__(other)</code></pre>
 </details>
 </section>
 <section>
@@ -331,12 +350,13 @@ class StepResult: # pylint: disable=too-many-instance-attributes
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ploigos_step_runner.step_result.StepResult"><code class="flex name class">
+<dt id="ploigos_step_runner.results.step_result.StepResult"><code class="flex name class">
 <span>class <span class="ident">StepResult</span></span>
 <span>(</span><span>step_name, sub_step_name, sub_step_implementer_name, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Step result object.</p>
+<div class="desc"><p>Defines a StepResult object which represents the results of a invocation
+of a StepImplementer#run.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>step_name</code></strong> :&ensp;<code>str</code></dt>
@@ -354,8 +374,8 @@ if step was run against a specific environment.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StepResult: # pylint: disable=too-many-instance-attributes
-    &#34;&#34;&#34;
-    Step result object.
+    &#34;&#34;&#34;Defines a StepResult object which represents the results of a invocation
+    of a StepImplementer#run.
 
     Parameters
     ----------
@@ -369,7 +389,6 @@ if step was run against a specific environment.</dd>
         Optional. Environment that this step result is for
         if step was run against a specific environment.
     &#34;&#34;&#34;
-
     def __init__(self, step_name, sub_step_name, sub_step_implementer_name, environment=None):
         self.__step_name = step_name
         self.__sub_step_name = sub_step_name
@@ -392,15 +411,6 @@ if step was run against a specific environment.</dd>
             sub_step_implementer_name=step_implementer.sub_step_implementer_name,
             environment=step_implementer.environment
         )
-
-    def __str__(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            JSON formatted step result
-        &#34;&#34;&#34;
-        return self.get_step_result_json()
 
     @property
     def step_name(self):
@@ -445,22 +455,32 @@ if step was run against a specific environment.</dd>
 
     @property
     def artifacts(self):
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Get the artifacts associated with this step result.
+
         Returns
         -------
-        dict
-            All artifacts of the step
-            For Example:
-            {
-                &#39;artifact1&#39;: {&#39;description&#39;: &#39;description1&#39;, &#39;value&#39;: &#39;value1&#39;},
-                &#39;artifact2&#39;: {&#39;description&#39;: &#39;&#39;, &#39;value&#39;: &#39;value2&#39;}
-            }
-
+        dict of str: StepResultArtifacts
+            Key is artifact name, value is StepResultArtifact.
         &#34;&#34;&#34;
         return self.__artifacts
 
+    @property
+    def artifacts_dicts(self):
+        &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultArtifact.
+        &#34;&#34;&#34;
+        artifact_dicts = []
+        for artifact in self.artifacts.values():
+            artifact_dicts.append(artifact.as_dict())
+
+        return artifact_dicts
+
     def get_artifact(self, name):
-        &#34;&#34;&#34;Get the dictionary of a specified artifact.
+        &#34;&#34;&#34;Get artifact with given name for this StepResult.
 
         Parameters
         ----------
@@ -469,13 +489,10 @@ if step was run against a specific environment.</dd>
 
         Returns
         -------
-        dict
-            Dictionary for a specified artifact.
-            For example:
-            {&#39;description&#39;: &#39;artifact1&#39;, &#39;value&#39;: &#39;value1&#39;}
-
+        StepResultArtifact
+            The step result artifact with the given name for this StepResult.
         &#34;&#34;&#34;
-        return self.artifacts.get(name)
+        return self.__artifacts.get(name)
 
     def get_artifact_value(self, name):
         &#34;&#34;&#34;Get the value for a specified artifact.
@@ -491,28 +508,22 @@ if step was run against a specific environment.</dd>
             The value of the artifact.
         &#34;&#34;&#34;
         value = None
-        if self.artifacts.get(name):
-            value = self.artifacts.get(name).get(&#39;value&#39;)
+        if self.__artifacts.get(name):
+            value = self.__artifacts.get(name).value
 
         return value
 
     def add_artifact(self, name, value, description=&#39;&#39;):
-        &#34;&#34;&#34;Insert/Update an artifact with the given pattern:
-
-        &#34;name&#34;: {
-            &#34;description&#34;: &#34;file description&#34;,
-            &#34;value&#34;: &#34;step-result.txt&#34;
-        }
+        &#34;&#34;&#34;Add an artifact to this StepResult.
 
         Parameters
         ----------
         name : str
-            Required name of the artifact
+            Name of the result artifact.
         value : str
-            Required content
+            Arbitrary value of the artifact.
         description : str, optional
-            Optional description (defaults to empty)
-
+            Human readable description of the result artifact (defaults to empty).
         &#34;&#34;&#34;
         if not name:
             raise StepRunnerException(&#39;Name is required to add artifact&#39;)
@@ -521,10 +532,11 @@ if step was run against a specific environment.</dd>
         if value == &#39;&#39; or value is None:
             raise StepRunnerException(&#39;Value is required to add artifact&#39;)
 
-        self.__artifacts[name] = {
-            &#39;description&#39;: description,
-            &#39;value&#39;: value
-        }
+        self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
 
     @property
     def success(self):
@@ -538,8 +550,7 @@ if step was run against a specific environment.</dd>
 
     @success.setter
     def success(self, success=True):
-        &#34;&#34;&#34;
-        Setter for success
+        &#34;&#34;&#34;Setter for success
         &#34;&#34;&#34;
         self.__success = success
 
@@ -555,12 +566,11 @@ if step was run against a specific environment.</dd>
 
     @message.setter
     def message(self, message):
-        &#34;&#34;&#34;
-        Setter for message
+        &#34;&#34;&#34;Setter for message
         &#34;&#34;&#34;
         self.__message = message
 
-    def get_sub_step_result(self):
+    def get_sub_step_result_dict(self):
         &#34;&#34;&#34;
         Returns
         -------
@@ -571,15 +581,16 @@ if step was run against a specific environment.</dd>
                 &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
                 &#39;success&#39;: Boolean,
                 &#39;message&#39;: &#39;value&#39;,
-                &#39;artifacts&#39;: {}
+                &#39;artifacts&#39;: []
             }
         &#34;&#34;&#34;
         result = {
             &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts
+            &#39;artifacts&#39;: self.artifacts_dicts
         }
+
         return result
 
     def get_step_result_dict(self):
@@ -608,39 +619,66 @@ if step was run against a specific environment.</dd>
             result = {
                 self.environment: {
                     self.step_name: {
-                        self.sub_step_name: self.get_sub_step_result()
+                        self.sub_step_name: self.get_sub_step_result_dict()
                     }
                 }
             }
         else:
             result = {
                 self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result()
+                    self.sub_step_name: self.get_sub_step_result_dict()
                 }
             }
         return result
 
-    def get_step_result_json(self):
+    def __str__(self):
+        &#34;&#34;&#34;Get string representation of the step result.
         &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            JSON formatted step result
-        &#34;&#34;&#34;
-        return json.dumps(self.get_step_result_dict())
+        return str({
+            &#39;step-name&#39;: self.step_name,
+            &#39;sub-step-name&#39;: self.sub_step_name,
+            &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
+            &#39;environment&#39;: self.environment,
+            &#39;success&#39;: self.success,
+            &#39;message&#39;: self.message,
+            &#39;artifacts&#39;: self.artifacts_dicts
+        })
 
-    def get_step_result_yaml(self):
+    def __repr__(self):
+        &#34;&#34;&#34;Get representation of the step result.
         &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            YAML formatted step result
+        return &#34;StepResult(&#34; \
+            f&#34;step_name={self.step_name},&#34; \
+            f&#34;sub_step_name={self.sub_step_name},&#34; \
+            f&#34;sub_step_implementer_name={self.sub_step_implementer_name},&#34; \
+            f&#34;environment={self.environment},&#34; \
+            f&#34;success={self.success},&#34; \
+            f&#34;message={self.message},&#34; \
+            f&#34;artifacts={self.artifacts_dicts}&#34; \
+            &#34;)&#34;
+
+    def __eq__(self, other):
+        &#34;&#34;&#34;StepResult is equal if all properties are equal.
         &#34;&#34;&#34;
-        return yaml.dump(self.get_step_result_dict())</code></pre>
+        return (
+            isinstance(other, StepResult) and
+            self.step_name == other.step_name and
+            self.sub_step_name == other.sub_step_name and
+            self.sub_step_implementer_name == other.sub_step_implementer_name and
+            self.environment == other.environment and
+            self.success == other.success and
+            self.message == other.message and
+            self.artifacts == other.artifacts
+        )
+
+    def __ne__(self, other):
+        &#34;&#34;&#34;StepResult is not equal if any properties are not equal.
+        &#34;&#34;&#34;
+        return not self.__eq__(other)</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
-<dt id="ploigos_step_runner.step_result.StepResult.from_step_implementer"><code class="name flex">
+<dt id="ploigos_step_runner.results.step_result.StepResult.from_step_implementer"><code class="name flex">
 <span>def <span class="ident">from_step_implementer</span></span>(<span>step_implementer)</span>
 </code></dt>
 <dd>
@@ -671,17 +709,13 @@ def from_step_implementer(cls, step_implementer):
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.step_result.StepResult.artifacts"><code class="name">var <span class="ident">artifacts</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts"><code class="name">var <span class="ident">artifacts</span></code></dt>
 <dd>
-<div class="desc"><h2 id="returns">Returns</h2>
+<div class="desc"><p>Get the artifacts associated with this step result.</p>
+<h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict</code></dt>
-<dd>All artifacts of the step
-For Example:
-{
-'artifact1': {'description': 'description1', 'value': 'value1'},
-'artifact2': {'description': '', 'value': 'value2'}
-}</dd>
+<dt><code>dict</code> of <code>str: StepResultArtifacts</code></dt>
+<dd>Key is artifact name, value is StepResultArtifact.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -689,22 +723,45 @@ For Example:
 </summary>
 <pre><code class="python">@property
 def artifacts(self):
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Get the artifacts associated with this step result.
+
     Returns
     -------
-    dict
-        All artifacts of the step
-        For Example:
-        {
-            &#39;artifact1&#39;: {&#39;description&#39;: &#39;description1&#39;, &#39;value&#39;: &#39;value1&#39;},
-            &#39;artifact2&#39;: {&#39;description&#39;: &#39;&#39;, &#39;value&#39;: &#39;value2&#39;}
-        }
-
+    dict of str: StepResultArtifacts
+        Key is artifact name, value is StepResultArtifact.
     &#34;&#34;&#34;
     return self.__artifacts</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.environment"><code class="name">var <span class="ident">environment</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts_dicts"><code class="name">var <span class="ident">artifacts_dicts</span></code></dt>
+<dd>
+<div class="desc"><p>Get the artifacts associated with this step result as dictionaries.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>dict</code></dt>
+<dd>Each item in list a dict representation of the StepResultArtifact.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def artifacts_dicts(self):
+    &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
+
+    Returns
+    -------
+    list of dict
+        Each item in list a dict representation of the StepResultArtifact.
+    &#34;&#34;&#34;
+    artifact_dicts = []
+    for artifact in self.artifacts.values():
+        artifact_dicts.append(artifact.as_dict())
+
+    return artifact_dicts</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.environment"><code class="name">var <span class="ident">environment</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -728,7 +785,7 @@ def environment(self):
     return self.__environment</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.message"><code class="name">var <span class="ident">message</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.message"><code class="name">var <span class="ident">message</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -750,7 +807,7 @@ def message(self):
     return self.__message</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -772,7 +829,7 @@ def step_name(self):
     return self.__step_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.sub_step_implementer_name"><code class="name">var <span class="ident">sub_step_implementer_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name"><code class="name">var <span class="ident">sub_step_implementer_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -794,7 +851,7 @@ def sub_step_implementer_name(self):
     return self.__sub_step_implementer_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.sub_step_name"><code class="name">var <span class="ident">sub_step_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_name"><code class="name">var <span class="ident">sub_step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -816,7 +873,7 @@ def sub_step_name(self):
     return self.__sub_step_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.success"><code class="name">var <span class="ident">success</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.success"><code class="name">var <span class="ident">success</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -841,45 +898,35 @@ def success(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="ploigos_step_runner.step_result.StepResult.add_artifact"><code class="name flex">
+<dt id="ploigos_step_runner.results.step_result.StepResult.add_artifact"><code class="name flex">
 <span>def <span class="ident">add_artifact</span></span>(<span>self, name, value, description='')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Insert/Update an artifact with the given pattern:</p>
-<p>"name": {
-"description": "file description",
-"value": "step-result.txt"
-}</p>
+<div class="desc"><p>Add an artifact to this StepResult.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>Required name of the artifact</dd>
+<dd>Name of the result artifact.</dd>
 <dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
-<dd>Required content</dd>
+<dd>Arbitrary value of the artifact.</dd>
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Optional description (defaults to empty)</dd>
+<dd>Human readable description of the result artifact (defaults to empty).</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_artifact(self, name, value, description=&#39;&#39;):
-    &#34;&#34;&#34;Insert/Update an artifact with the given pattern:
-
-    &#34;name&#34;: {
-        &#34;description&#34;: &#34;file description&#34;,
-        &#34;value&#34;: &#34;step-result.txt&#34;
-    }
+    &#34;&#34;&#34;Add an artifact to this StepResult.
 
     Parameters
     ----------
     name : str
-        Required name of the artifact
+        Name of the result artifact.
     value : str
-        Required content
+        Arbitrary value of the artifact.
     description : str, optional
-        Optional description (defaults to empty)
-
+        Human readable description of the result artifact (defaults to empty).
     &#34;&#34;&#34;
     if not name:
         raise StepRunnerException(&#39;Name is required to add artifact&#39;)
@@ -888,17 +935,18 @@ def success(self):
     if value == &#39;&#39; or value is None:
         raise StepRunnerException(&#39;Value is required to add artifact&#39;)
 
-    self.__artifacts[name] = {
-        &#39;description&#39;: description,
-        &#39;value&#39;: value
-    }</code></pre>
+    self.__artifacts[name] = StepResultArtifact(
+        name=name,
+        value=value,
+        description=description
+    )</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_artifact"><code class="name flex">
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_artifact"><code class="name flex">
 <span>def <span class="ident">get_artifact</span></span>(<span>self, name)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the dictionary of a specified artifact.</p>
+<div class="desc"><p>Get artifact with given name for this StepResult.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
@@ -906,16 +954,15 @@ def success(self):
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict</code></dt>
-<dd _artifact1_="'artifact1'," _description_:="'description':" _value1_="'value1'" _value_:="'value':">Dictionary for a specified artifact.
-For example:</dd>
+<dt><code>StepResultArtifact</code></dt>
+<dd>The step result artifact with the given name for this StepResult.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_artifact(self, name):
-    &#34;&#34;&#34;Get the dictionary of a specified artifact.
+    &#34;&#34;&#34;Get artifact with given name for this StepResult.
 
     Parameters
     ----------
@@ -924,16 +971,13 @@ For example:</dd>
 
     Returns
     -------
-    dict
-        Dictionary for a specified artifact.
-        For example:
-        {&#39;description&#39;: &#39;artifact1&#39;, &#39;value&#39;: &#39;value1&#39;}
-
+    StepResultArtifact
+        The step result artifact with the given name for this StepResult.
     &#34;&#34;&#34;
-    return self.artifacts.get(name)</code></pre>
+    return self.__artifacts.get(name)</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_artifact_value"><code class="name flex">
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_artifact_value"><code class="name flex">
 <span>def <span class="ident">get_artifact_value</span></span>(<span>self, name)</span>
 </code></dt>
 <dd>
@@ -966,13 +1010,13 @@ For example:</dd>
         The value of the artifact.
     &#34;&#34;&#34;
     value = None
-    if self.artifacts.get(name):
-        value = self.artifacts.get(name).get(&#39;value&#39;)
+    if self.__artifacts.get(name):
+        value = self.__artifacts.get(name).value
 
     return value</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_step_result_dict"><code class="name flex">
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict"><code class="name flex">
 <span>def <span class="ident">get_step_result_dict</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -1026,67 +1070,21 @@ For example:
         result = {
             self.environment: {
                 self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result()
+                    self.sub_step_name: self.get_sub_step_result_dict()
                 }
             }
         }
     else:
         result = {
             self.step_name: {
-                self.sub_step_name: self.get_sub_step_result()
+                self.sub_step_name: self.get_sub_step_result_dict()
             }
         }
     return result</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_step_result_json"><code class="name flex">
-<span>def <span class="ident">get_step_result_json</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>JSON formatted step result</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_step_result_json(self):
-    &#34;&#34;&#34;
-    Returns
-    -------
-    str
-        JSON formatted step result
-    &#34;&#34;&#34;
-    return json.dumps(self.get_step_result_dict())</code></pre>
-</details>
-</dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_step_result_yaml"><code class="name flex">
-<span>def <span class="ident">get_step_result_yaml</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>YAML formatted step result</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_step_result_yaml(self):
-    &#34;&#34;&#34;
-    Returns
-    -------
-    str
-        YAML formatted step result
-    &#34;&#34;&#34;
-    return yaml.dump(self.get_step_result_dict())</code></pre>
-</details>
-</dd>
-<dt id="ploigos_step_runner.step_result.StepResult.get_sub_step_result"><code class="name flex">
-<span>def <span class="ident">get_sub_step_result</span></span>(<span>self)</span>
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict"><code class="name flex">
+<span>def <span class="ident">get_sub_step_result_dict</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
@@ -1098,14 +1096,14 @@ For example:
 'sub-step-implementer-name': 'value',
 'success': Boolean,
 'message': 'value',
-'artifacts': {}
+'artifacts': []
 }</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_sub_step_result(self):
+<pre><code class="python">def get_sub_step_result_dict(self):
     &#34;&#34;&#34;
     Returns
     -------
@@ -1116,15 +1114,16 @@ For example:
             &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
             &#39;success&#39;: Boolean,
             &#39;message&#39;: &#39;value&#39;,
-            &#39;artifacts&#39;: {}
+            &#39;artifacts&#39;: []
         }
     &#34;&#34;&#34;
     result = {
         &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
         &#39;success&#39;: self.success,
         &#39;message&#39;: self.message,
-        &#39;artifacts&#39;: self.artifacts
+        &#39;artifacts&#39;: self.artifacts_dicts
     }
+
     return result</code></pre>
 </details>
 </dd>
@@ -1141,29 +1140,28 @@ For example:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner" href="index.html">ploigos_step_runner</a></code></li>
+<li><code><a title="ploigos_step_runner.results" href="index.html">ploigos_step_runner.results</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ploigos_step_runner.step_result.StepResult" href="#ploigos_step_runner.step_result.StepResult">StepResult</a></code></h4>
+<h4><code><a title="ploigos_step_runner.results.step_result.StepResult" href="#ploigos_step_runner.results.step_result.StepResult">StepResult</a></code></h4>
 <ul class="">
-<li><code><a title="ploigos_step_runner.step_result.StepResult.add_artifact" href="#ploigos_step_runner.step_result.StepResult.add_artifact">add_artifact</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.artifacts" href="#ploigos_step_runner.step_result.StepResult.artifacts">artifacts</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.environment" href="#ploigos_step_runner.step_result.StepResult.environment">environment</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.from_step_implementer" href="#ploigos_step_runner.step_result.StepResult.from_step_implementer">from_step_implementer</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_artifact" href="#ploigos_step_runner.step_result.StepResult.get_artifact">get_artifact</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_artifact_value" href="#ploigos_step_runner.step_result.StepResult.get_artifact_value">get_artifact_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_step_result_dict" href="#ploigos_step_runner.step_result.StepResult.get_step_result_dict">get_step_result_dict</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_step_result_json" href="#ploigos_step_runner.step_result.StepResult.get_step_result_json">get_step_result_json</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_step_result_yaml" href="#ploigos_step_runner.step_result.StepResult.get_step_result_yaml">get_step_result_yaml</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.get_sub_step_result" href="#ploigos_step_runner.step_result.StepResult.get_sub_step_result">get_sub_step_result</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.message" href="#ploigos_step_runner.step_result.StepResult.message">message</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.step_name" href="#ploigos_step_runner.step_result.StepResult.step_name">step_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.sub_step_implementer_name" href="#ploigos_step_runner.step_result.StepResult.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.sub_step_name" href="#ploigos_step_runner.step_result.StepResult.sub_step_name">sub_step_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result.StepResult.success" href="#ploigos_step_runner.step_result.StepResult.success">success</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.add_artifact" href="#ploigos_step_runner.results.step_result.StepResult.add_artifact">add_artifact</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.artifacts" href="#ploigos_step_runner.results.step_result.StepResult.artifacts">artifacts</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.artifacts_dicts" href="#ploigos_step_runner.results.step_result.StepResult.artifacts_dicts">artifacts_dicts</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.environment" href="#ploigos_step_runner.results.step_result.StepResult.environment">environment</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.from_step_implementer" href="#ploigos_step_runner.results.step_result.StepResult.from_step_implementer">from_step_implementer</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_artifact" href="#ploigos_step_runner.results.step_result.StepResult.get_artifact">get_artifact</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_artifact_value" href="#ploigos_step_runner.results.step_result.StepResult.get_artifact_value">get_artifact_value</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_step_result_dict">get_step_result_dict</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict">get_sub_step_result_dict</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.message" href="#ploigos_step_runner.results.step_result.StepResult.message">message</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.step_name" href="#ploigos_step_runner.results.step_result.StepResult.step_name">step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name" href="#ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.sub_step_name" href="#ploigos_step_runner.results.step_result.StepResult.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.success" href="#ploigos_step_runner.results.step_result.StepResult.success">success</a></code></li>
 </ul>
 </li>
 </ul>

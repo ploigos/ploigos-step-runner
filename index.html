@@ -1595,12 +1595,10 @@ Example Running the &#39;generate-metadata&#39; step
 &#34;&#34;&#34;
 
 import __main__
-
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import StepResult, WorkflowResult
 from ploigos_step_runner.step_implementer import DefaultSteps, StepImplementer
-from ploigos_step_runner.step_result import StepResult
-from ploigos_step_runner.step_runner import StepRunner
-from ploigos_step_runner.workflow_result import WorkflowResult</code></pre>
+from ploigos_step_runner.step_runner import StepRunner</code></pre>
 </details>
 </section>
 <section>
@@ -1618,6 +1616,10 @@ from ploigos_step_runner.workflow_result import WorkflowResult</code></pre>
 <dd>
 <div class="desc"><p>Custom Step Runner Exceptions.</p></div>
 </dd>
+<dt><code class="name"><a title="ploigos_step_runner.results" href="results/index.html">ploigos_step_runner.results</a></code></dt>
+<dd>
+<div class="desc"><p>Results for Ploigos workflow.</p></div>
+</dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementer" href="step_implementer.html">ploigos_step_runner.step_implementer</a></code></dt>
 <dd>
 <div class="desc"><p>Abstract class and helper constants for StepImplementer.</p></div>
@@ -1625,10 +1627,6 @@ from ploigos_step_runner.workflow_result import WorkflowResult</code></pre>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers" href="step_implementers/index.html">ploigos_step_runner.step_implementers</a></code></dt>
 <dd>
 <div class="desc"><p>StepImplementer implementations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.step_result" href="step_result.html">ploigos_step_runner.step_result</a></code></dt>
-<dd>
-<div class="desc"><p>Class and helper constants for StepResult</p></div>
 </dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_runner" href="step_runner.html">ploigos_step_runner.step_runner</a></code></dt>
 <dd>
@@ -1641,10 +1639,6 @@ from ploigos_step_runner.workflow_result import WorkflowResult</code></pre>
 <dt><code class="name"><a title="ploigos_step_runner.version" href="version.html">ploigos_step_runner.version</a></code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.workflow_result" href="workflow_result.html">ploigos_step_runner.workflow_result</a></code></dt>
-<dd>
-<div class="desc"><p>Abstract class and helper constants for WorkflowResult</p></div>
 </dd>
 </dl>
 </section>
@@ -1675,13 +1669,12 @@ from ploigos_step_runner.workflow_result import WorkflowResult</code></pre>
 <li><code><a title="ploigos_step_runner.config" href="config/index.html">ploigos_step_runner.config</a></code></li>
 <li><code><a title="ploigos_step_runner.decryption_utils" href="decryption_utils.html">ploigos_step_runner.decryption_utils</a></code></li>
 <li><code><a title="ploigos_step_runner.exceptions" href="exceptions.html">ploigos_step_runner.exceptions</a></code></li>
+<li><code><a title="ploigos_step_runner.results" href="results/index.html">ploigos_step_runner.results</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer" href="step_implementer.html">ploigos_step_runner.step_implementer</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers" href="step_implementers/index.html">ploigos_step_runner.step_implementers</a></code></li>
-<li><code><a title="ploigos_step_runner.step_result" href="step_result.html">ploigos_step_runner.step_result</a></code></li>
 <li><code><a title="ploigos_step_runner.step_runner" href="step_runner.html">ploigos_step_runner.step_runner</a></code></li>
 <li><code><a title="ploigos_step_runner.utils" href="utils/index.html">ploigos_step_runner.utils</a></code></li>
 <li><code><a title="ploigos_step_runner.version" href="version.html">ploigos_step_runner.version</a></code></li>
-<li><code><a title="ploigos_step_runner.workflow_result" href="workflow_result.html">ploigos_step_runner.workflow_result</a></code></li>
 </ul>
 </li>
 </ul>
