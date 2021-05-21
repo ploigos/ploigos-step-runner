@@ -7,7 +7,9 @@ import os
 import re
 import shutil
 import urllib.request
-
+import hashlib
+import base64
+from pathlib import Path
 import yaml
 
 def parse_yaml_or_json_file(yaml_or_json_file):
@@ -156,3 +158,28 @@ def create_parent_dir(file_path):
     parent_dir_path = os.path.dirname(file_path)
     if parent_dir_path:
         os.makedirs(parent_dir_path, exist_ok=True)
+
+def base64_encode(file_path):
+    """Given a file_path, read and encode the contents in base64
+    Returns
+    -------
+    Base64Contents
+        base64 encoded string of file contents
+    """
+    encoding = Path(file_path).read_text().encode('utf-8')
+    return base64.b64encode(encoding).decode('utf-8')
+
+def get_file_hash(file_path):
+    """Returns file hash of given file.
+
+    Returns
+    -------
+    StepResult
+        Object containing the dictionary results of this step.
+    """
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as the_file:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: the_file.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()

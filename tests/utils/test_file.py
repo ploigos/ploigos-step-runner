@@ -5,7 +5,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
 from ploigos_step_runner.utils.file import (create_parent_dir,
                              download_and_decompress_source_to_destination,
-                             parse_yaml_or_json_file)
+                             parse_yaml_or_json_file, base64_encode, get_file_hash)
 
 
 class TestParseYAMLOrJASONFile(BaseTestCase):
@@ -129,3 +129,30 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
             create_parent_dir(file_path)
             self.assertFalse(os.path.exists(file_path))
             self.assertTrue(os.path.exists(os.path.dirname(file_path)))
+
+    def test_base64_encode(self):
+        with TempDirectory() as test_dir:
+            sample_file_path = os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample.txt'
+            )
+
+            result = base64_encode(sample_file_path)
+            self.assertEqual(result,
+                'c2FtcGxlIHRleHQgZmlsZQ=='
+            )
+
+    def test_get_file_hash(self):
+        with TempDirectory() as test_dir:
+            sample_file_path = os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample.txt'
+            )
+
+            result = get_file_hash(sample_file_path)
+            self.assertEqual(result, '09daa01246aa5ee9c29f64f644627a0ea83247857dfea2665689e26b166eef47')
+
+
+
