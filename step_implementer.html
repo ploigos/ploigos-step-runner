@@ -579,20 +579,20 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             )
         )
 
-    def create_working_dir_sub_dir(self, sub_dir_relative_path):
-        &#34;&#34;&#34;
-        Create a folder under the working/stepname folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/sub
+    def create_working_dir_sub_dir(self, sub_dir_relative_path=&#34;&#34;):
+        &#34;&#34;&#34;Create a folder under the working/stepname folder.
+
+        Returns
+        -------
+        str
+            Path to created working sub directory.
         &#34;&#34;&#34;
         file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
     def write_working_file(self, filename, contents=None):
-        &#34;&#34;&#34;
-        Write content or touch filename in working directory
-        for this step.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/filename
+        &#34;&#34;&#34;Write content or touch filename in working directory for this step.
 
         Parameters
         ----------
@@ -1365,20 +1365,20 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             )
         )
 
-    def create_working_dir_sub_dir(self, sub_dir_relative_path):
-        &#34;&#34;&#34;
-        Create a folder under the working/stepname folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/sub
+    def create_working_dir_sub_dir(self, sub_dir_relative_path=&#34;&#34;):
+        &#34;&#34;&#34;Create a folder under the working/stepname folder.
+
+        Returns
+        -------
+        str
+            Path to created working sub directory.
         &#34;&#34;&#34;
         file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
     def write_working_file(self, filename, contents=None):
-        &#34;&#34;&#34;
-        Write content or touch filename in working directory
-        for this step.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/filename
+        &#34;&#34;&#34;Write content or touch filename in working directory for this step.
 
         Parameters
         ----------
@@ -1505,6 +1505,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 <li><a title="ploigos_step_runner.step_implementers.generate_metadata.npm.Npm" href="step_implementers/generate_metadata/npm.html#ploigos_step_runner.step_implementers.generate_metadata.npm.Npm">Npm</a></li>
 <li><a title="ploigos_step_runner.step_implementers.generate_metadata.semantic_version.SemanticVersion" href="step_implementers/generate_metadata/semantic_version.html#ploigos_step_runner.step_implementers.generate_metadata.semantic_version.SemanticVersion">SemanticVersion</a></li>
 <li><a title="ploigos_step_runner.step_implementers.push_container_image.skopeo.Skopeo" href="step_implementers/push_container_image/skopeo.html#ploigos_step_runner.step_implementers.push_container_image.skopeo.Skopeo">Skopeo</a></li>
+<li><a title="ploigos_step_runner.step_implementers.report.result_artifacts_archive.ResultArtifactsArchive" href="step_implementers/report/result_artifacts_archive.html#ploigos_step_runner.step_implementers.report.result_artifacts_archive.ResultArtifactsArchive">ResultArtifactsArchive</a></li>
 <li><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric" href="step_implementers/shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementers.shared.openscap_generic.OpenSCAPGeneric" href="step_implementers/shared/openscap_generic.html#ploigos_step_runner.step_implementers.shared.openscap_generic.OpenSCAPGeneric">OpenSCAPGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementers.sign_container_image.curl_push.CurlPush" href="step_implementers/sign_container_image/curl_push.html#ploigos_step_runner.step_implementers.sign_container_image.curl_push.CurlPush">CurlPush</a></li>
@@ -1878,20 +1879,26 @@ def workflow_result(self):
 <h3>Methods</h3>
 <dl>
 <dt id="ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir"><code class="name flex">
-<span>def <span class="ident">create_working_dir_sub_dir</span></span>(<span>self, sub_dir_relative_path)</span>
+<span>def <span class="ident">create_working_dir_sub_dir</span></span>(<span>self, sub_dir_relative_path='')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a folder under the working/stepname folder.
-EG:
-/tmp/tmpno_qi7np/step-runner-working/stepname/sub</p></div>
+<div class="desc"><p>Create a folder under the working/stepname folder.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Path to created working sub directory.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create_working_dir_sub_dir(self, sub_dir_relative_path):
-    &#34;&#34;&#34;
-    Create a folder under the working/stepname folder.
-    EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/sub
+<pre><code class="python">def create_working_dir_sub_dir(self, sub_dir_relative_path=&#34;&#34;):
+    &#34;&#34;&#34;Create a folder under the working/stepname folder.
+
+    Returns
+    -------
+    str
+        Path to created working sub directory.
     &#34;&#34;&#34;
     file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
     os.makedirs(file_path, exist_ok=True)
@@ -2303,10 +2310,7 @@ False otherwise.</dd>
 <span>def <span class="ident">write_working_file</span></span>(<span>self, filename, contents=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Write content or touch filename in working directory
-for this step.
-EG:
-/tmp/tmpno_qi7np/step-runner-working/stepname/filename</p>
+<div class="desc"><p>Write content or touch filename in working directory for this step.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>filename</code></strong> :&ensp;<code>str</code></dt>
@@ -2324,10 +2328,7 @@ EG:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def write_working_file(self, filename, contents=None):
-    &#34;&#34;&#34;
-    Write content or touch filename in working directory
-    for this step.
-    EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/filename
+    &#34;&#34;&#34;Write content or touch filename in working directory for this step.
 
     Parameters
     ----------

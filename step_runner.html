@@ -52,9 +52,6 @@ class StepRunner:
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
-    results_dir_path : str, optional
-        Path to the folder for steps to write their results to
-        Default: step-runner-results
     results_file_name : str, optional
         Path to the file for steps to write their results to
         Default: step-runner-results.yml
@@ -81,7 +78,6 @@ class StepRunner:
     def __init__(
         self,
         config,
-        results_dir_path=&#39;step-runner-results&#39;,
         results_file_name=&#39;step-runner-results.yml&#39;,
         work_dir_path=&#39;step-runner-working&#39;
     ):
@@ -90,7 +86,6 @@ class StepRunner:
         else:
             self.__config = Config(config)
 
-        self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
@@ -115,7 +110,7 @@ class StepRunner:
         str
             Full path to the results file.
         &#34;&#34;&#34;
-        return os.path.join(self.__results_dir_path, self.__results_file_name)
+        return os.path.join(self.__work_dir_path, self.__results_file_name)
 
     @property
     def workflow_result_pickle_file_path(self):
@@ -277,7 +272,7 @@ class StepRunner:
 <dl>
 <dt id="ploigos_step_runner.step_runner.StepRunner"><code class="flex name class">
 <span>class <span class="ident">StepRunner</span></span>
-<span>(</span><span>config, results_dir_path='step-runner-results', results_file_name='step-runner-results.yml', work_dir_path='step-runner-working')</span>
+<span>(</span><span>config, results_file_name='step-runner-results.yml', work_dir_path='step-runner-working')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Enables the running of arbitrary Ploigos steps via StepImplementers.</p>
@@ -292,9 +287,6 @@ or a string that is a path to a directory containing one or more
 files that are valid YAML or JSON files that are valid
 configurations,
 or a list of any of the former.</dd>
-<dt><strong><code>results_dir_path</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Path to the folder for steps to write their results to
-Default: step-runner-results</dd>
 <dt><strong><code>results_file_name</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>Path to the file for steps to write their results to
 Default: step-runner-results.yml</dd>
@@ -333,9 +325,6 @@ False if step returned an error message</dd>
         files that are valid YAML or JSON files that are valid
         configurations,
         or a list of any of the former.
-    results_dir_path : str, optional
-        Path to the folder for steps to write their results to
-        Default: step-runner-results
     results_file_name : str, optional
         Path to the file for steps to write their results to
         Default: step-runner-results.yml
@@ -362,7 +351,6 @@ False if step returned an error message</dd>
     def __init__(
         self,
         config,
-        results_dir_path=&#39;step-runner-results&#39;,
         results_file_name=&#39;step-runner-results.yml&#39;,
         work_dir_path=&#39;step-runner-working&#39;
     ):
@@ -371,7 +359,6 @@ False if step returned an error message</dd>
         else:
             self.__config = Config(config)
 
-        self.__results_dir_path = results_dir_path
         self.__results_file_name = results_file_name
         self.__work_dir_path = work_dir_path
 
@@ -396,7 +383,7 @@ False if step returned an error message</dd>
         str
             Full path to the results file.
         &#34;&#34;&#34;
-        return os.path.join(self.__results_dir_path, self.__results_file_name)
+        return os.path.join(self.__work_dir_path, self.__results_file_name)
 
     @property
     def workflow_result_pickle_file_path(self):
@@ -591,7 +578,7 @@ def results_file_path(self):
     str
         Full path to the results file.
     &#34;&#34;&#34;
-    return os.path.join(self.__results_dir_path, self.__results_file_name)</code></pre>
+    return os.path.join(self.__work_dir_path, self.__results_file_name)</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.step_runner.StepRunner.workflow_result"><code class="name">var <span class="ident">workflow_result</span></code></dt>

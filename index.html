@@ -36,9 +36,6 @@
 -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
     Ploigos workflow configuration files, or directories containing files, in yml or json
 
--r RESULTS_DIR, --results-dir RESULTS_DIR
-    Ploigos workflow results file in yml or json
-
 --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
     Override step config provided by the given Ploigos
     config-file with these arguments.
@@ -63,7 +60,7 @@
 <li>uat</li>
 <li>runtime-vulnerability-scan</li>
 <li>canary-test</li>
-<li>publish-workflow-results</li>
+<li>report</li>
 </ul>
 <h3 id="variable-precedence">Variable Precedence</h3>
 <p>From least precedence to highest precedence.</p>
@@ -393,9 +390,6 @@ step-runner-config:
       #dest-tls-verify: true # Optional
     }
 
-  # WARNING: not yet implemented
-  container-image-unit-test: []
-
   container-image-static-compliance-scan:
   # sample scans using DataStream file (preferred)
   - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -486,16 +480,8 @@ step-runner-config:
   - implementer: MavenSeleniumCucumber
     config: {}
 
-  # WARNING: not yet implemented
-  runtime-vulnerability-scan: []
-
-  canary-test:
-    # WARNING: not yet implemented
-  - implementer: Selenium
-    config: {}
-
-  # WARNING: not yet implemented
-  publish-workflow-results: []
+  # TODO: not yet implemented
+  report: []
 </code></pre>
 <p><strong> Example Config file for a NPM built Application </strong></p>
 <pre><code>---
@@ -690,9 +676,6 @@ step-runner-config:
       #dest-tls-verify: true # Optional
     }
 
-  # WARNING: not yet implemented
-  container-image-unit-test: []
-
   container-image-static-compliance-scan:
   # sample scans using DataStream file (preferred)
   - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -776,16 +759,8 @@ step-runner-config:
   - implementer: MavenSeleniumCucumber
     config: {}
 
-  # WARNING: not yet implemented
-  runtime-vulnerability-scan: []
-
-  canary-test:
-    # WARNING: not yet implemented
-  - implementer: Selenium
-    config: {}
-
-  # WARNING: not yet implemented
-  publish-workflow-results: []
+  # TODO: not yet implemented
+  report: []
 </code></pre>
 <h2 id="examples">Examples</h2>
 <p>Getting Help</p>
@@ -793,9 +768,7 @@ step-runner-config:
 </code></pre>
 <p>Example Running the 'generate-metadata' step</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; psr
-...     --config=my-app-step-runner-config.yml
-...     --results-file=my-app-step-runner-results.yml
-...     --step=generate-metadata
+...     --config=my-app-step-runner-config.yml ...     --step=generate-metadata
 </code></pre>
 <details class="source">
 <summary>
@@ -818,9 +791,6 @@ Command-Line Options
 
     -c CONFIG [CONFIG ...], --config CONFIG [CONFIG ...]
         Ploigos workflow configuration files, or directories containing files, in yml or json
-
-    -r RESULTS_DIR, --results-dir RESULTS_DIR
-        Ploigos workflow results file in yml or json
 
     --step-config STEP_CONFIG_KEY=STEP_CONFIG_VALUE [STEP_CONFIG_KEY=STEP_CONFIG_VALUE ...]
         Override step config provided by the given Ploigos
@@ -848,7 +818,7 @@ Step Configuration
 * uat
 * runtime-vulnerability-scan
 * canary-test
-* publish-workflow-results
+* report
 
 ### Variable Precedence
 
@@ -1182,9 +1152,6 @@ From least precedence to highest precedence.
           #dest-tls-verify: true # Optional
         }
 
-      # WARNING: not yet implemented
-      container-image-unit-test: []
-
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -1275,16 +1242,8 @@ From least precedence to highest precedence.
       - implementer: MavenSeleniumCucumber
         config: {}
 
-      # WARNING: not yet implemented
-      runtime-vulnerability-scan: []
-
-      canary-test:
-        # WARNING: not yet implemented
-      - implementer: Selenium
-        config: {}
-
-      # WARNING: not yet implemented
-      publish-workflow-results: []
+      # TODO: not yet implemented
+      report: []
 
 ** Example Config file for a NPM built Application **
 
@@ -1480,9 +1439,6 @@ From least precedence to highest precedence.
           #dest-tls-verify: true # Optional
         }
 
-      # WARNING: not yet implemented
-      container-image-unit-test: []
-
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -1566,16 +1522,8 @@ From least precedence to highest precedence.
       - implementer: MavenSeleniumCucumber
         config: {}
 
-      # WARNING: not yet implemented
-      runtime-vulnerability-scan: []
-
-      canary-test:
-        # WARNING: not yet implemented
-      - implementer: Selenium
-        config: {}
-
-      # WARNING: not yet implemented
-      publish-workflow-results: []
+      # TODO: not yet implemented
+      report: []
 
 Examples
 --------
@@ -1588,8 +1536,7 @@ Getting Help
 Example Running the &#39;generate-metadata&#39; step
 
 &gt;&gt;&gt; psr
-...     --config=my-app-step-runner-config.yml
-...     --results-file=my-app-step-runner-results.yml
+...     --config=my-app-step-runner-config.yml \
 ...     --step=generate-metadata
 
 &#34;&#34;&#34;
