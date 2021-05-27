@@ -12,7 +12,7 @@ from ploigos_step_runner.config import Config
 from tests.helpers.base_test_case import BaseTestCase
 
 
-class TestFactory(BaseTestCase):
+class TestStepRunner(BaseTestCase):
     def test_init_valid_config(self):
         config = {
             'step-runner-config': {
@@ -77,7 +77,7 @@ class TestFactory(BaseTestCase):
             }
         }
         with TempDirectory() as temp_dir:
-            factory = StepRunner(config, temp_dir.path)
+            factory = StepRunner(config)
             factory.run_step('foo')
 
     def test_run_step_config_implementer_specified_and_no_sub_step_config_specified_StepImplementer(self):
@@ -91,7 +91,7 @@ class TestFactory(BaseTestCase):
             }
         }
         with TempDirectory() as temp_dir:
-            factory = StepRunner(config, temp_dir.path)
+            factory = StepRunner(config)
             factory.run_step('foo')
 
     def test_run_step_config_only_sub_step_and_is_dict_rather_then_array(self):
@@ -103,7 +103,7 @@ class TestFactory(BaseTestCase):
             }
         }
         with TempDirectory() as temp_dir:
-            factory = StepRunner(config, temp_dir.path)
+            factory = StepRunner(config)
             factory.run_step('foo')
 
     def test_init_with_config_object(self):

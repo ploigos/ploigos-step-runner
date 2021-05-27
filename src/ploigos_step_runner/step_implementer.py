@@ -550,20 +550,20 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             )
         )
 
-    def create_working_dir_sub_dir(self, sub_dir_relative_path):
-        """
-        Create a folder under the working/stepname folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/sub
+    def create_working_dir_sub_dir(self, sub_dir_relative_path=""):
+        """Create a folder under the working/stepname folder.
+
+        Returns
+        -------
+        str
+            Path to created working sub directory.
         """
         file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
     def write_working_file(self, filename, contents=None):
-        """
-        Write content or touch filename in working directory
-        for this step.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname/filename
+        """Write content or touch filename in working directory for this step.
 
         Parameters
         ----------
