@@ -46,9 +46,9 @@ from ploigos_step_runner.utils.dict import deep_merge
 
 
 DEFAULT_CONFIG = {
-    'rekor-server': 'http://rekor.apps.tssc.rht-set.com',
-    'gpg-key': '/var/pgp-private-keys/gpg_public_key',
-    'gpg-user': 'tssc-service-account@redhat.com'
+    'rekor-server': '',
+    'gpg-key': '',
+    'gpg-user': ''
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
