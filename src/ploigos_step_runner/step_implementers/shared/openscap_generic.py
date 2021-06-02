@@ -269,7 +269,7 @@ class OpenSCAPGeneric(StepImplementer):
                     destination_dir=self.work_dir_path_step
                 )
                 print(f"Downloaded input definitions to: {oscap_input_file}")
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f"Error downloading OpenSCAP input file: {error}"
                 ) from error
@@ -285,7 +285,7 @@ class OpenSCAPGeneric(StepImplementer):
                         destination_dir=self.work_dir_path_step
                     )
                     print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f"Error downloading OpenSCAP tailoring file: {error}"
                 ) from error
