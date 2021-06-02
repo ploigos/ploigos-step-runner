@@ -1,11 +1,15 @@
 
+import http
 import os
+import urllib
+from unittest.mock import Mock, patch
 
+from ploigos_step_runner.utils.file import (
+    base64_encode, create_parent_dir,
+    download_and_decompress_source_to_destination, get_file_hash,
+    parse_yaml_or_json_file, upload_file)
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
-from ploigos_step_runner.utils.file import (create_parent_dir,
-                             download_and_decompress_source_to_destination,
-                             parse_yaml_or_json_file, base64_encode, get_file_hash)
 
 
 class TestParseYAMLOrJASONFile(BaseTestCase):
@@ -75,7 +79,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
             with open(destination_path) as downloaded_file:
                 self.assertTrue(downloaded_file.read())
 
-    def test_local_file_download(self):
+    def test_local_file_download_file_prefix(self):
         sample_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
@@ -95,13 +99,33 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
                 self.assertTrue(downloaded_file_contents)
                 self.assertEqual(downloaded_file_contents, sample_file.read())
 
+    def test_local_file_download_forward_slash_prefix(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'cvrf-rhba-2020-0017.xml'
+        )
+
+        with TempDirectory() as test_dir:
+            destination_path = download_and_decompress_source_to_destination(
+                source_url=f"{sample_file_path}",
+                destination_dir=test_dir.path
+            )
+
+            self.assertIsNotNone(destination_path)
+            self.assertRegex(destination_path, rf'{test_dir.path}/cvrf-rhba-2020-0017.xml$')
+            with open(destination_path) as downloaded_file, open(sample_file_path) as sample_file:
+                downloaded_file_contents = downloaded_file.read()
+                self.assertTrue(downloaded_file_contents)
+                self.assertEqual(downloaded_file_contents, sample_file.read())
+
     def test_bad_protocol(self):
         with TempDirectory() as test_dir:
 
             with self.assertRaisesRegex(
-                AssertionError,
+                ValueError,
                 r"Unexpected error, should have been caught by step validation."
-                r" Source \(.+\) must start with known protocol \(file://\|http://\|https://\)."
+                r" Source \(.+\) must start with known protocol \(/|file://\|http://\|https://\)."
             ):
                 download_and_decompress_source_to_destination(
                     source_url="bad://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
@@ -154,5 +178,182 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
             result = get_file_hash(sample_file_path)
             self.assertEqual(result, '09daa01246aa5ee9c29f64f644627a0ea83247857dfea2665689e26b166eef47')
 
+class TestUploadFile(BaseTestCase):
+    def __create_http_response_side_effect(self, read_return):
+        def http_response_side_effect(request):
+            mock_response = Mock()
+            mock_response.read.return_value = read_return
+            return mock_response
 
+        return http_response_side_effect
 
+    def test_source_file_does_not_exist(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            r'Given file path \(/does/not/exist\) to upload does not exist.'
+        ):
+            upload_file(
+                file_path='/does/not/exist',
+                destination_url='/does/not/matter'
+            )
+
+    def test_invalid_destination_url(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            r'Unexpected error, should have been caught by step validation.'
+            r' Destination \(wont-work:///does/not/matter\) must start with known protocol'
+            r'\(/|file://|http://|https://\).'
+        ):
+            upload_file(
+                file_path=sample_file_path,
+                destination_url='wont-work:///does/not/matter'
+            )
+
+    def test_file_prefix(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        with TempDirectory() as test_dir:
+            destination_dir_path = os.path.join(test_dir.path, 'test_dest')
+            actual_result = upload_file(
+                file_path=sample_file_path,
+                destination_url=f"file://{destination_dir_path}"
+            )
+
+            expected_result = os.path.join(destination_dir_path, 'sample.yaml')
+            self.assertEqual(expected_result, actual_result)
+
+            with \
+                open(actual_result, 'r') as uploaded_file, \
+                open(sample_file_path, 'r') as original_file:
+
+                self.assertEqual(original_file.read(), uploaded_file.read())
+
+    def test_forward_slash_prefix(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        with TempDirectory() as test_dir:
+            destination_dir_path = os.path.join(test_dir.path, 'test_dest')
+            actual_result = upload_file(
+                file_path=sample_file_path,
+                destination_url=f"{destination_dir_path}"
+            )
+
+            expected_result = os.path.join(destination_dir_path, 'sample.yaml')
+            self.assertEqual(expected_result, actual_result)
+
+            with \
+                open(actual_result, 'r') as uploaded_file, \
+                open(sample_file_path, 'r') as original_file:
+
+                self.assertEqual(original_file.read(), uploaded_file.read())
+
+    @patch.object(
+         urllib.request.OpenerDirector,
+         'open'
+    )
+    def test_http_prefix_no_auth(self, opener_open_mock):
+        opener_open_mock.side_effect = self.__create_http_response_side_effect(b'hello world 42')
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        actual_result = upload_file(
+            file_path=sample_file_path,
+            destination_url="http://ploigos.com/test/foo42"
+        )
+        self.assertEqual('hello world 42', actual_result)
+
+    @patch.object(
+         urllib.request.OpenerDirector,
+         'open'
+    )
+    def test_https_prefix_no_auth(self, opener_open_mock):
+        opener_open_mock.side_effect = self.__create_http_response_side_effect(b'hello world 42')
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        actual_result = upload_file(
+            file_path=sample_file_path,
+            destination_url="https://ploigos.com/test/foo42"
+        )
+        self.assertEqual('hello world 42', actual_result)
+
+    @patch.object(
+         urllib.request.OpenerDirector,
+         'open'
+    )
+    @patch('urllib.request.HTTPPasswordMgrWithDefaultRealm')
+    def test_https_prefix_auth(self, pass_manager_mock, opener_open_mock):
+        opener_open_mock.side_effect = self.__create_http_response_side_effect(b'hello world 42')
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        actual_result = upload_file(
+            file_path=sample_file_path,
+            destination_url="https://ploigos.com/test/foo42",
+            user_name='test_user',
+            password='pass123'
+        )
+        self.assertEqual('hello world 42', actual_result)
+
+        pass_manager_mock().add_password.assert_called_once_with(
+            None,
+            'ploigos.com',
+            'test_user',
+            'pass123'
+        )
+
+    @patch.object(
+         urllib.request.OpenerDirector,
+         'open'
+    )
+    def test_https_prefix_http_error(self, opener_open_mock):
+        opener_open_mock.side_effect = urllib.error.HTTPError(
+            url='https://ploigos.com/test/foo42',
+            code=442,
+            msg='mock error',
+            hdrs=None,
+            fp=None
+        )
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.yaml'
+        )
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            rf'Error uploading file \({sample_file_path}\)'
+            r' to destination \(https://ploigos.com/test/foo42\) with user name'
+            r' \(None\) and password \(None\): HTTP Error 442: mock error'
+        ):
+            upload_file(
+                file_path=sample_file_path,
+                destination_url="https://ploigos.com/test/foo42"
+            )
