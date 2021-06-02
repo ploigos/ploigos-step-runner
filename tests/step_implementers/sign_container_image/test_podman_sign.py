@@ -7,14 +7,16 @@ from io import IOBase
 from pathlib import Path
 from unittest.mock import patch
 
+import mock
 import sh
+from ploigos_step_runner import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.sign_container_image import \
+    PodmanSign
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any, StringRegexParam
-from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.sign_container_image import PodmanSign
-from ploigos_step_runner import StepResult
+from tests.helpers.test_utils import Any
 
 
 class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
@@ -170,6 +172,308 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             )
             self.assertEqual(expected_step_result, result)
 
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.upload_file')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
+    @patch.object(PodmanSign, '_PodmanSign__sign_image')
+    def test_run_step_pass_with_signature_upload_to_file(
+        self,
+        sign_image_mock,
+        import_pgp_key_mock,
+        upload_file_mock
+    ):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            pgp_private_key_fingerprint = 'abc123'
+            step_config = TestStepImplementerSignContainerImagePodman.generate_config()
+            step_config['container-image-signature-destination-url'] = '/mock/container-sigs'
+            container_image_tag = 'does/not/matter:v0.42.0'
+            signature_name = 'does/not/matter/signature-0'
+
+            # Previous (fake) results
+            artifact_config = {
+                'container-image-tag': {'value': container_image_tag}
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+
+            def import_pgp_key_side_effect(pgp_private_key):
+                return pgp_private_key_fingerprint
+            import_pgp_key_mock.side_effect = import_pgp_key_side_effect
+
+            def sign_image_side_effect(
+                    pgp_private_key_fingerprint,
+                    image_signatures_directory,
+                    container_image_tag
+            ):
+                return os.path.join(image_signatures_directory, signature_name)
+            sign_image_mock.side_effect = sign_image_side_effect
+
+            upload_file_mock.return_value = "mock upload results"
+
+            # Actual results
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='sign-container-image',
+                implementer='PodmanSign',
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
+            )
+
+            result = step_implementer._run_step()
+            import_pgp_key_mock.assert_called_once_with(
+                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+            )
+            sign_image_mock.assert_called_once_with(
+                pgp_private_key_fingerprint=pgp_private_key_fingerprint,
+                image_signatures_directory= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature'
+                ),
+                container_image_tag=container_image_tag
+            )
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='/mock/container-sigs/does/not/matter/signature-0',
+                username=None,
+                password=None
+            )
+
+            expected_step_result = StepResult(
+                step_name='sign-container-image',
+                sub_step_name='PodmanSign',
+                sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-file-path',
+                value= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature',
+                    signature_name
+                )
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-name',
+                value=signature_name
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-private-key-fingerprint',
+                value=pgp_private_key_fingerprint
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-uri',
+                description='URI of the uploaded container image signature',
+                value='/mock/container-sigs/does/not/matter/signature-0'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-upload-results',
+                description='Results of uploading the container image signature' \
+                            ' to the given destination.',
+                value='mock upload results'
+            )
+
+            self.assertEqual(expected_step_result, result)
+
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.upload_file')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
+    @patch.object(PodmanSign, '_PodmanSign__sign_image')
+    def test_run_step_pass_with_signature_upload_to_remote_with_auth(
+        self,
+        sign_image_mock,
+        import_pgp_key_mock,
+        upload_file_mock
+    ):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            pgp_private_key_fingerprint = 'abc123'
+            step_config = TestStepImplementerSignContainerImagePodman.generate_config()
+            step_config['container-image-signature-destination-url'] = \
+                'https://ploigos.com/mock/container-sigs'
+            step_config['container-image-signature-destination-username'] = 'test-user'
+            step_config['container-image-signature-destination-password'] = 'test-pass'
+            container_image_tag = 'does/not/matter:v0.42.0'
+            signature_name = 'does/not/matter/signature-0'
+
+            # Previous (fake) results
+            artifact_config = {
+                'container-image-tag': {'value': container_image_tag}
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+
+            def import_pgp_key_side_effect(pgp_private_key):
+                return pgp_private_key_fingerprint
+            import_pgp_key_mock.side_effect = import_pgp_key_side_effect
+
+            def sign_image_side_effect(
+                    pgp_private_key_fingerprint,
+                    image_signatures_directory,
+                    container_image_tag
+            ):
+                return os.path.join(image_signatures_directory, signature_name)
+            sign_image_mock.side_effect = sign_image_side_effect
+
+            upload_file_mock.return_value = "mock upload results"
+
+            # Actual results
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='sign-container-image',
+                implementer='PodmanSign',
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
+            )
+
+            result = step_implementer._run_step()
+            import_pgp_key_mock.assert_called_once_with(
+                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+            )
+            sign_image_mock.assert_called_once_with(
+                pgp_private_key_fingerprint=pgp_private_key_fingerprint,
+                image_signatures_directory= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature'
+                ),
+                container_image_tag=container_image_tag
+            )
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='https://ploigos.com/mock/container-sigs/does/not/matter/signature-0',
+                username='test-user',
+                password='test-pass'
+            )
+
+            expected_step_result = StepResult(
+                step_name='sign-container-image',
+                sub_step_name='PodmanSign',
+                sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-file-path',
+                value= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature',
+                    signature_name
+                )
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-name',
+                value=signature_name
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-private-key-fingerprint',
+                value=pgp_private_key_fingerprint
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-uri',
+                description='URI of the uploaded container image signature',
+                value='https://ploigos.com/mock/container-sigs/does/not/matter/signature-0'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-upload-results',
+                description='Results of uploading the container image signature' \
+                            ' to the given destination.',
+                value='mock upload results'
+            )
+
+            self.assertEqual(expected_step_result, result)
+
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.upload_file')
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
+    @patch.object(PodmanSign, '_PodmanSign__sign_image')
+    def test_run_step_pass_with_signature_upload_to_remote_with_auth_failure(
+        self,
+        sign_image_mock,
+        import_pgp_key_mock,
+        upload_file_mock
+    ):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            pgp_private_key_fingerprint = 'abc123'
+            step_config = TestStepImplementerSignContainerImagePodman.generate_config()
+            step_config['container-image-signature-destination-url'] = \
+                'https://ploigos.com/mock/container-sigs'
+            step_config['container-image-signature-destination-username'] = 'test-user'
+            step_config['container-image-signature-destination-password'] = 'test-pass'
+            container_image_tag = 'does/not/matter:v0.42.0'
+            signature_name = 'does/not/matter/signature-0'
+
+            # Previous (fake) results
+            artifact_config = {
+                'container-image-tag': {'value': container_image_tag}
+            }
+            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+
+            def import_pgp_key_side_effect(pgp_private_key):
+                return pgp_private_key_fingerprint
+            import_pgp_key_mock.side_effect = import_pgp_key_side_effect
+
+            def sign_image_side_effect(
+                    pgp_private_key_fingerprint,
+                    image_signatures_directory,
+                    container_image_tag
+            ):
+                return os.path.join(image_signatures_directory, signature_name)
+            sign_image_mock.side_effect = sign_image_side_effect
+
+            upload_file_mock.side_effect = RuntimeError('mock upload error')
+
+            # Actual results
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='sign-container-image',
+                implementer='PodmanSign',
+                workflow_result=workflow_result,
+                work_dir_path=work_dir_path
+            )
+
+            result = step_implementer._run_step()
+
+            import_pgp_key_mock.assert_called_once_with(
+                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+            )
+            sign_image_mock.assert_called_once_with(
+                pgp_private_key_fingerprint=pgp_private_key_fingerprint,
+                image_signatures_directory= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature'
+                ),
+                container_image_tag=container_image_tag
+            )
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='https://ploigos.com/mock/container-sigs/does/not/matter/signature-0',
+                username='test-user',
+                password='test-pass'
+            )
+
+            expected_step_result = StepResult(
+                step_name='sign-container-image',
+                sub_step_name='PodmanSign',
+                sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-file-path',
+                value= os.path.join(
+                    work_dir_path,
+                    'sign-container-image/image-signature',
+                    signature_name
+                )
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-name',
+                value=signature_name
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-private-key-fingerprint',
+                value=pgp_private_key_fingerprint
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signature-uri',
+                description='URI of the uploaded container image signature',
+                value='https://ploigos.com/mock/container-sigs/does/not/matter/signature-0'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'mock upload error'
+
+            self.assertEqual(expected_step_result, result)
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_import_pgp_key(self, sign_image_mock, import_pgp_key_mock):

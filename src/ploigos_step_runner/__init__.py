@@ -33,6 +33,7 @@ Step Configuration
 * push-artifacts
 * create-container-image
 * push-container-image
+* sign-container-image
 * container-image-unit-test
 * container-image-static-compliance-scan
 * container-image-static-vulnerability-scan
@@ -386,6 +387,24 @@ From least precedence to highest precedence.
           #dest-tls-verify: true # Optional
         }
 
+      sign-container-image:
+      # sample singing container image but not pushing the signature anywhere
+      #   signature will be included in workflow results archive.
+      - implementer: PodmanSign
+        config: {}
+
+      # sample singing container image and pushing container image signature to remote repository
+      #- implementer: PodmanSign
+      #  config:
+      #    container-image-signature-destination-url: https://repository.ploigos.com/container-image-signatures
+      #    container-image-signature-destination-username: test-user
+      #    container-image-signature-destination-password: pass123 # this value should be put in an encrypted config file
+
+      # sample singing container image and pushing container image signature to local file
+      #- implementer: PodmanSign
+      #  config:
+      #    container-image-signature-destination-url: file://image-signatures-mount/
+
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
       - name: OpenSCAP - Compliance - Example Compliance Profile for UBI8 Container Images [Based on xccdf_org.ssgproject.content_profile_standard]
@@ -680,6 +699,24 @@ From least precedence to highest precedence.
           #src-tls-verify: true # Optional
           #dest-tls-verify: true # Optional
         }
+
+      sign-container-image:
+      # sample singing container image but not pushing the signature anywhere
+      #   signature will be included in workflow results archive.
+      - implementer: PodmanSign
+        config: {}
+
+      # sample singing container image and pushing container image signature to remote repository
+      #- implementer: PodmanSign
+      #  config:
+      #    container-image-signature-destination-url: https://repository.ploigos.com/container-image-signatures
+      #    container-image-signature-destination-username: test-user
+      #    container-image-signature-destination-password: pass123 # this value should be put in an encrypted config file
+
+      # sample singing container image and pushing container image signature to local file
+      #- implementer: PodmanSign
+      #  config:
+      #    container-image-signature-destination-url: file://image-signatures-mount/
 
       container-image-static-compliance-scan:
       # sample scans using DataStream file (preferred)
