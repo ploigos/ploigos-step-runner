@@ -57,7 +57,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
         with TempDirectory() as test_dir:
 
             destination_path = download_and_decompress_source_to_destination(
-                source_url="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
+                source_uri="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
                 destination_dir=test_dir.path
             )
 
@@ -70,7 +70,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
         with TempDirectory() as test_dir:
 
             destination_path = download_and_decompress_source_to_destination(
-                source_url="https://www.redhat.com/security/data/cvrf/2020/cvrf-rhba-2020-0017.xml",
+                source_uri="https://www.redhat.com/security/data/cvrf/2020/cvrf-rhba-2020-0017.xml",
                 destination_dir=test_dir.path
             )
 
@@ -88,7 +88,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
 
         with TempDirectory() as test_dir:
             destination_path = download_and_decompress_source_to_destination(
-                source_url=f"file://{sample_file_path}",
+                source_uri=f"file://{sample_file_path}",
                 destination_dir=test_dir.path
             )
 
@@ -108,7 +108,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
 
         with TempDirectory() as test_dir:
             destination_path = download_and_decompress_source_to_destination(
-                source_url=f"{sample_file_path}",
+                source_uri=f"{sample_file_path}",
                 destination_dir=test_dir.path
             )
 
@@ -128,18 +128,18 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
                 r" Source \(.+\) must start with known protocol \(/|file://\|http://\|https://\)."
             ):
                 download_and_decompress_source_to_destination(
-                    source_url="bad://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
+                    source_uri="bad://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
                     destination_dir=test_dir.path
                 )
 
-    def test_https_bad_url(self):
+    def test_https_bad_uri(self):
         with TempDirectory() as test_dir:
             with self.assertRaisesRegex(
                 RuntimeError,
                 r"Error downloading file \(.+\): HTTP Error 404: Not Found"
             ):
                 download_and_decompress_source_to_destination(
-                    source_url="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/does-not-exist.ds.xml.bz2",
+                    source_uri="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/does-not-exist.ds.xml.bz2",
                     destination_dir=test_dir.path
                 )
 
@@ -194,10 +194,10 @@ class TestUploadFile(BaseTestCase):
         ):
             upload_file(
                 file_path='/does/not/exist',
-                destination_url='/does/not/matter'
+                destination_uri='/does/not/matter'
             )
 
-    def test_invalid_destination_url(self):
+    def test_invalid_destination_uri(self):
         sample_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
@@ -212,7 +212,7 @@ class TestUploadFile(BaseTestCase):
         ):
             upload_file(
                 file_path=sample_file_path,
-                destination_url='wont-work:///does/not/matter'
+                destination_uri='wont-work:///does/not/matter'
             )
 
     def test_file_prefix(self):
@@ -226,7 +226,7 @@ class TestUploadFile(BaseTestCase):
             destination_dir_path = os.path.join(test_dir.path, 'test_dest')
             actual_result = upload_file(
                 file_path=sample_file_path,
-                destination_url=f"file://{destination_dir_path}"
+                destination_uri=f"file://{destination_dir_path}"
             )
 
             expected_result = os.path.join(destination_dir_path, 'sample.yaml')
@@ -249,7 +249,7 @@ class TestUploadFile(BaseTestCase):
             destination_dir_path = os.path.join(test_dir.path, 'test_dest')
             actual_result = upload_file(
                 file_path=sample_file_path,
-                destination_url=f"{destination_dir_path}"
+                destination_uri=f"{destination_dir_path}"
             )
 
             expected_result = os.path.join(destination_dir_path, 'sample.yaml')
@@ -276,7 +276,7 @@ class TestUploadFile(BaseTestCase):
 
         actual_result = upload_file(
             file_path=sample_file_path,
-            destination_url="http://ploigos.com/test/foo42"
+            destination_uri="http://ploigos.com/test/foo42"
         )
         self.assertEqual('hello world 42', actual_result)
 
@@ -295,7 +295,7 @@ class TestUploadFile(BaseTestCase):
 
         actual_result = upload_file(
             file_path=sample_file_path,
-            destination_url="https://ploigos.com/test/foo42"
+            destination_uri="https://ploigos.com/test/foo42"
         )
         self.assertEqual('hello world 42', actual_result)
 
@@ -315,7 +315,7 @@ class TestUploadFile(BaseTestCase):
 
         actual_result = upload_file(
             file_path=sample_file_path,
-            destination_url="https://ploigos.com/test/foo42",
+            destination_uri="https://ploigos.com/test/foo42",
             user_name='test_user',
             password='pass123'
         )
@@ -355,5 +355,5 @@ class TestUploadFile(BaseTestCase):
         ):
             upload_file(
                 file_path=sample_file_path,
-                destination_url="https://ploigos.com/test/foo42"
+                destination_uri="https://ploigos.com/test/foo42"
             )

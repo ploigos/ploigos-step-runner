@@ -61,7 +61,7 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     return parsed_file
 
 def download_and_decompress_source_to_destination(
-    source_url,
+    source_uri,
     destination_dir
 ):
     """Given a source url using a known protocol downloads the file to a given destination
@@ -79,7 +79,7 @@ def download_and_decompress_source_to_destination(
 
     Parameters
     ----------
-    source_url : url
+    source_uri : url
         URL to a source file using a known protocol to download to destination folder
         and decompress if necessary.
     destination_dir : path
@@ -95,39 +95,39 @@ def download_and_decompress_source_to_destination(
     RuntimeError
         If error downloading file.
     ValueError
-        If source_url does not start with file://|http://|https://
+        If source_uri does not start with file://|http://|https://
     """
 
     # depending on the protocol type get the source_file into the working dir
-    if re.match(r'^file://|/', source_url):
+    if re.match(r'^file://|/', source_uri):
         # get the destination dir path
-        if re.match(r'^file://', source_url):
+        if re.match(r'^file://', source_uri):
             # remove file:// and turn into an absolute path
-            source_url_abs_path = os.path.abspath(
-                re.sub('^file://', '', source_url)
+            source_uri_abs_path = os.path.abspath(
+                re.sub('^file://', '', source_uri)
             )
         else:
-            source_url_abs_path = source_url
+            source_uri_abs_path = source_uri
 
         # copy the file to the working dir
-        source_file_name = os.path.basename(source_url_abs_path)
+        source_file_name = os.path.basename(source_uri_abs_path)
         destination_path = os.path.join(destination_dir, source_file_name)
         shutil.copyfile(
-            src=source_url_abs_path,
+            src=source_uri_abs_path,
             dst=destination_path
         )
-    elif re.match(r'^http://|^https://', source_url):
+    elif re.match(r'^http://|^https://', source_uri):
         # download the file to the working dir
-        source_file_name = os.path.basename(source_url)
+        source_file_name = os.path.basename(source_uri)
         destination_path = os.path.join(destination_dir, source_file_name)
 
         try:
             urllib.request.urlretrieve(
-                url=source_url,
+                url=source_uri,
                 filename=destination_path
             )
         except urllib.error.HTTPError as error:
-            raise RuntimeError(f"Error downloading file ({source_url}): {error}") from error
+            raise RuntimeError(f"Error downloading file ({source_uri}): {error}") from error
     else:
         # NOTE:
         #   this should NEVER happen because of the logic in
@@ -135,7 +135,7 @@ def download_and_decompress_source_to_destination(
         #   but rather then failing silently need to do something.
         raise ValueError(
             "Unexpected error, should have been caught by step validation."
-            f" Source ({source_url}) must start with known protocol (/|file://|http://|https://)."
+            f" Source ({source_uri}) must start with known protocol (/|file://|http://|https://)."
         )
 
     # if extension is .bz2, decompress, else assume file is fine as as is
@@ -191,7 +191,7 @@ def get_file_hash(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def upload_file(file_path, destination_url, user_name=None, password=None): # pylint: disable=too-many-locals
+def upload_file(file_path, destination_uri, user_name=None, password=None): # pylint: disable=too-many-locals
     """Uploads a given file to a given destination.
 
     Notes
@@ -206,8 +206,8 @@ def upload_file(file_path, destination_url, user_name=None, password=None): # py
     ----------
     file_path : str
         Path to file to upload.
-    destination_url : str
-        URL to upload file to using known protocol.
+    destination_uri : str
+        URI to upload file to using known protocol.
     user_name : str, optional
         Optional user name to use when uploading the file to an http(s) destination.
     password : str, optional
@@ -224,7 +224,7 @@ def upload_file(file_path, destination_url, user_name=None, password=None): # py
     ------
     ValueError
         If file_path does not exist.
-        If destination_url does not start with /|file://|http://|https://
+        If destination_uri does not start with /|file://|http://|https://
     RuntimeError
         If error uploading file.
     """
@@ -233,15 +233,15 @@ def upload_file(file_path, destination_url, user_name=None, password=None): # py
 
     upload_result = None
 
-    if re.match(r'^file://|/', destination_url):
+    if re.match(r'^file://|/', destination_uri):
         # get the destination dir path
-        if re.match(r'^file://', destination_url):
+        if re.match(r'^file://', destination_uri):
             # remove file:// and turn into an absolute path
             destination_dir_path = os.path.abspath(
-                re.sub('^file://', '', destination_url)
+                re.sub('^file://', '', destination_uri)
             )
         else:
-            destination_dir_path = destination_url
+            destination_dir_path = destination_uri
 
         # create the destination dir
         os.makedirs(destination_dir_path, exist_ok=True)
@@ -255,26 +255,26 @@ def upload_file(file_path, destination_url, user_name=None, password=None): # py
         )
 
         upload_result = destination_path
-    elif re.match(r'^http://|^https://', destination_url):
+    elif re.match(r'^http://|^https://', destination_uri):
         password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 
         if user_name:
-            top_level_url = urlparse(destination_url).netloc
-            password_mgr.add_password(None, top_level_url, user_name, password)
+            top_level_uri = urlparse(destination_uri).netloc
+            password_mgr.add_password(None, top_level_uri, user_name, password)
             handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
             opener = urllib.request.build_opener(handler)
         else:
             opener = urllib.request.build_opener()
 
         with open(file_path, 'rb') as file:
-            request = urllib.request.Request(url=destination_url, data=file.read(), method='PUT')
+            request = urllib.request.Request(url=destination_uri, data=file.read(), method='PUT')
 
             try:
                 result = opener.open(request)
                 upload_result = str(result.read(), encoding='utf8')
             except urllib.error.HTTPError as error:
                 raise RuntimeError(
-                    f"Error uploading file ({file_path}) to destination ({destination_url})"
+                    f"Error uploading file ({file_path}) to destination ({destination_uri})"
                     f" with user name ({user_name}) and password ({password}): {error}"
                 ) from error
 
@@ -285,7 +285,7 @@ def upload_file(file_path, destination_url, user_name=None, password=None): # py
         #   but rather then failing silently need to do something.
         raise ValueError(
             "Unexpected error, should have been caught by step validation."
-            f" Destination ({destination_url}) must start with known protocol"
+            f" Destination ({destination_uri}) must start with known protocol"
             " (/|file://|http://|https://)."
         )
 

@@ -265,7 +265,7 @@ class OpenSCAPGeneric(StepImplementer):
                 oscap_input_definitions_uri = self.get_value('oscap-input-definitions-uri')
                 print(f"\nDownload input definitions: {oscap_input_definitions_uri}")
                 oscap_input_file = download_and_decompress_source_to_destination(
-                    source_url=oscap_input_definitions_uri,
+                    source_uri=oscap_input_definitions_uri,
                     destination_dir=self.work_dir_path_step
                 )
                 print(f"Downloaded input definitions to: {oscap_input_file}")
@@ -281,7 +281,7 @@ class OpenSCAPGeneric(StepImplementer):
                 if oscap_tailoring_file_uri:
                     print(f"\nDownload oscap tailoring file: {oscap_tailoring_file_uri}")
                     oscap_tailoring_file = download_and_decompress_source_to_destination(
-                        source_url=oscap_tailoring_file_uri,
+                        source_uri=oscap_tailoring_file_uri,
                         destination_dir=self.work_dir_path_step
                     )
                     print(f"Download oscap tailoring file to: {oscap_tailoring_file}")
