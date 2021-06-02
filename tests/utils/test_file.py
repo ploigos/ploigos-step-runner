@@ -316,7 +316,7 @@ class TestUploadFile(BaseTestCase):
         actual_result = upload_file(
             file_path=sample_file_path,
             destination_uri="https://ploigos.com/test/foo42",
-            user_name='test_user',
+            username='test_user',
             password='pass123'
         )
         self.assertEqual('hello world 42', actual_result)

@@ -191,7 +191,7 @@ def get_file_hash(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def upload_file(file_path, destination_uri, user_name=None, password=None): # pylint: disable=too-many-locals
+def upload_file(file_path, destination_uri, username=None, password=None): # pylint: disable=too-many-locals
     """Uploads a given file to a given destination.
 
     Notes
@@ -208,7 +208,7 @@ def upload_file(file_path, destination_uri, user_name=None, password=None): # py
         Path to file to upload.
     destination_uri : str
         URI to upload file to using known protocol.
-    user_name : str, optional
+    username : str, optional
         Optional user name to use when uploading the file to an http(s) destination.
     password : str, optional
         Optional password to use when upload the file to an http(s) destination.
@@ -258,9 +258,9 @@ def upload_file(file_path, destination_uri, user_name=None, password=None): # py
     elif re.match(r'^http://|^https://', destination_uri):
         password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
 
-        if user_name:
+        if username:
             top_level_uri = urlparse(destination_uri).netloc
-            password_mgr.add_password(None, top_level_uri, user_name, password)
+            password_mgr.add_password(None, top_level_uri, username, password)
             handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
             opener = urllib.request.build_opener(handler)
         else:
@@ -275,7 +275,7 @@ def upload_file(file_path, destination_uri, user_name=None, password=None): # py
             except urllib.error.HTTPError as error:
                 raise RuntimeError(
                     f"Error uploading file ({file_path}) to destination ({destination_uri})"
-                    f" with user name ({user_name}) and password ({password}): {error}"
+                    f" with user name ({username}) and password ({password}): {error}"
                 ) from error
 
     else:
