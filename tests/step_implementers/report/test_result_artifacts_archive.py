@@ -3,6 +3,7 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
+import mock
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.results.workflow_result import WorkflowResult
 from ploigos_step_runner.step_implementers.report import ResultArtifactsArchive
@@ -31,8 +32,8 @@ class TestStepImplementerResultArtifactsArchive_other(TestStepImplementerResultA
     def test_step_implementer_config_defaults(self):
         defaults = ResultArtifactsArchive.step_implementer_config_defaults()
         expected_defaults = {
-            'archive-format': 'zip',
-            'archive-ignored-artifacts': [
+            'results-archive-format': 'zip',
+            'results-archive-ignored-artifacts': [
                 'package-artifacts',
                 'image-tar-file'
             ]
@@ -46,7 +47,7 @@ class TestStepImplementerResultArtifactsArchive_other(TestStepImplementerResultA
             'application-name',
             'service-name',
             'version',
-            'archive-format'
+            'results-archive-format'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
@@ -118,6 +119,184 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             self.assertEqual(step_result, expected_step_result)
 
             create_archive_mock.assert_called_once()
+
+    @patch('ploigos_step_runner.step_implementers.report.result_artifacts_archive.upload_file')
+    @patch.object(
+        ResultArtifactsArchive,
+        '_ResultArtifactsArchive__create_archive',
+        return_value='/fake/archive/path/foo.zip'
+    )
+    def test__run_step_pass_upload_to_file(self, create_archive_mock, upload_file_mock):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-ORG',
+                'application-name': 'test-APP',
+                'service-name': 'test-SERVICE',
+                'version': '42.0-test',
+                'results-archive-destination-url': '/mock/results-archives'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                work_dir_path=work_dir_path,
+            )
+
+            # mock the upload results
+            upload_file_mock.return_value = "mock upload results"
+
+            # run the step
+            step_result = step_implementer._run_step()
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='report',
+                sub_step_name='ResultArtifactsArchive',
+                sub_step_implementer_name='ResultArtifactsArchive'
+            )
+            expected_step_result.add_artifact(
+                name='result-artifacts-archive',
+                value='/fake/archive/path/foo.zip',
+                description='Archive of all of the step result artifacts marked for archiving.'
+            )
+            expected_step_result.add_artifact(
+                name='results-archive-uri',
+                description='URI of the uploaded results archive.',
+                value='/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip'
+            )
+            expected_step_result.add_artifact(
+                name='results-archive-upload-results',
+                description='Results of uploading the results archive to the given destination.',
+                value='mock upload results'
+            )
+            self.assertEqual(step_result, expected_step_result)
+
+            # verify mocks called
+            create_archive_mock.assert_called_once()
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip',
+                username=None,
+                password=None
+            )
+
+    @patch('ploigos_step_runner.step_implementers.report.result_artifacts_archive.upload_file')
+    @patch.object(
+        ResultArtifactsArchive,
+        '_ResultArtifactsArchive__create_archive',
+        return_value='/fake/archive/path/foo.zip'
+    )
+    def test__run_step_pass_upload_to_remote_with_auth(self, create_archive_mock, upload_file_mock):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-ORG',
+                'application-name': 'test-APP',
+                'service-name': 'test-SERVICE',
+                'version': '42.0-test',
+                'results-archive-destination-url': 'https://ploigos.com/mock/results-archives',
+                'results-archive-destination-username': 'test-user',
+                'results-archive-destination-password': 'test-pass'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                work_dir_path=work_dir_path,
+            )
+
+            # mock the upload results
+            upload_file_mock.return_value = "mock upload results"
+
+            # run the step
+            step_result = step_implementer._run_step()
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='report',
+                sub_step_name='ResultArtifactsArchive',
+                sub_step_implementer_name='ResultArtifactsArchive'
+            )
+            expected_step_result.add_artifact(
+                name='result-artifacts-archive',
+                value='/fake/archive/path/foo.zip',
+                description='Archive of all of the step result artifacts marked for archiving.'
+            )
+            expected_step_result.add_artifact(
+                name='results-archive-uri',
+                description='URI of the uploaded results archive.',
+                value='https://ploigos.com/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip'
+            )
+            expected_step_result.add_artifact(
+                name='results-archive-upload-results',
+                description='Results of uploading the results archive to the given destination.',
+                value='mock upload results'
+            )
+            self.assertEqual(step_result, expected_step_result)
+
+            # verify mocks called
+            create_archive_mock.assert_called_once()
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='https://ploigos.com/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip',
+                username='test-user',
+                password='test-pass'
+            )
+
+    @patch('ploigos_step_runner.step_implementers.report.result_artifacts_archive.upload_file')
+    @patch.object(
+        ResultArtifactsArchive,
+        '_ResultArtifactsArchive__create_archive',
+        return_value='/fake/archive/path/foo.zip'
+    )
+    def test__run_step_pass_upload_to_remote_with_auth_failure(self, create_archive_mock, upload_file_mock):
+        with TempDirectory() as temp_dir:
+            work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-ORG',
+                'application-name': 'test-APP',
+                'service-name': 'test-SERVICE',
+                'version': '42.0-test',
+                'results-archive-destination-url': 'https://ploigos.com/mock/results-archives',
+                'results-archive-destination-username': 'test-user',
+                'results-archive-destination-password': 'test-pass'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                work_dir_path=work_dir_path,
+            )
+
+            # mock the upload results
+            upload_file_mock.side_effect = RuntimeError('mock upload error')
+
+            # run the step
+            step_result = step_implementer._run_step()
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='report',
+                sub_step_name='ResultArtifactsArchive',
+                sub_step_implementer_name='ResultArtifactsArchive'
+            )
+            expected_step_result.add_artifact(
+                name='result-artifacts-archive',
+                value='/fake/archive/path/foo.zip',
+                description='Archive of all of the step result artifacts marked for archiving.'
+            )
+            expected_step_result.add_artifact(
+                name='results-archive-uri',
+                description='URI of the uploaded results archive.',
+                value='https://ploigos.com/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'mock upload error'
+
+            # verify mocks called
+            create_archive_mock.assert_called_once()
+            upload_file_mock.assert_called_once_with(
+                file_path=mock.ANY,
+                destination_uri='https://ploigos.com/mock/results-archives/test-ORG/test-APP/test-SERVICE/foo.zip',
+                username='test-user',
+                password='test-pass'
+            )
+
 
 class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplementerResultArtifactsArchiveBase):
     def test___create_archive_no_results(self):
