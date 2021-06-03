@@ -20,18 +20,35 @@ Configuration Key           | Required? | Default | Description
 `version`                   | True      |         | Version of applicaiton service that this \
                                                     workflow is for. \
                                                     Used in archive name.
-`archive-format`            | True      | 'zip'   | Archive format to use. For valid values see \
+`results-archive-format`    | True      | 'zip'   | Archive format to use. For valid values see \
                                 https://docs.python.org/3/library/shutil.html#shutil.make_archive
-`archive-ignored-artifacts` | False     | `['package-artifacts', 'image-tar-file']` | \
+`results-archive-ignored-artifacts`  \
+                            | False     | `['package-artifacts', 'image-tar-file']` | \
     Result artifacts to not include in this this result artifacts archive.
+`results-archive-destination-url` \
+                            | False     |         | URL to upload the results archive to.\
+                                                    NOTE: TODO describe how URI is formed
+                                                    <br /><br />\
+                                                    Must start with `/` or `file://` to upload \
+                                                    to local file path. \
+                                                    <br /><br />\
+                                                    Or must start with `http://` or `https://` to \
+                                                    upload via a `PUT` to a remote location.
+`results-archive-destination-username` \
+                            | No        |         | Username to use when doing upload via http(s).
+`results-archive-destination-password` \
+                            | No        |         | Password to use when doing upload via http(s).
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key        | Description
----------------------------|------------
-`result-artifacts-archive` | local path to the generated results artifacts archive.
+Result Artifact Key              | Description
+---------------------------------|------------
+`result-artifacts-archive`       | local path to the generated results artifacts archive.
+`results-archive-uri`            | URI of the uploaded results archive.
+`results-archive-upload-results` | Results of uploading the results archive to \
+                                   the given destination.
 
 """
 
@@ -41,10 +58,11 @@ import pprint
 import shutil
 
 from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.utils.file import upload_file
 
 DEFAULT_CONFIG = {
-    'archive-format': 'zip',
-    'archive-ignored-artifacts': [
+    'results-archive-format': 'zip',
+    'results-archive-ignored-artifacts': [
         'package-artifacts',
         'image-tar-file'
     ]
@@ -55,7 +73,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'application-name',
     'service-name',
     'version',
-    'archive-format'
+    'results-archive-format'
 ]
 class ResultArtifactsArchive(StepImplementer):
     """`StepImplementer` for the `report` step which builds and pushes and artifacts archive.
@@ -116,6 +134,38 @@ class ResultArtifactsArchive(StepImplementer):
             description='Archive of all of the step result artifacts marked for archiving.'
         )
 
+        # if destination URL specified, then upload the results archvie
+        results_archive_destination_url = self.get_value('results-archive-destination-url')
+        if results_artifacts_archive and results_archive_destination_url:
+            org = self.get_value('organization')
+            app = self.get_value('application-name')
+            service = self.get_value('service-name')
+            results_artifacts_archive_name = os.path.basename(results_artifacts_archive)
+            results_archive_destination_uri = f"{results_archive_destination_url}/" \
+                f"{org}/{app}/{service}/{results_artifacts_archive_name}"
+            step_result.add_artifact(
+                name='results-archive-uri',
+                description='URI of the uploaded results archive.',
+                value=results_archive_destination_uri
+            )
+
+            try:
+                upload_result = upload_file(
+                    file_path=results_artifacts_archive_value,
+                    destination_uri=results_archive_destination_uri,
+                    username=self.get_value('results-archive-destination-username'),
+                    password=self.get_value('results-archive-destination-password')
+                )
+                step_result.add_artifact(
+                    name='results-archive-upload-results',
+                    description='Results of uploading the results archive ' \
+                        'to the given destination.',
+                    value=upload_result
+                )
+            except RuntimeError as error:
+                step_result.success = False
+                step_result.message = str(error)
+
         return step_result
 
     def __create_archive(self): # pylint: disable=too-many-branches,too-many-locals
@@ -133,7 +183,7 @@ class ResultArtifactsArchive(StepImplementer):
         result_archive_name = f"{org}-{app}-{service}-{version}"
         results_archive_root_dir_path = self.create_working_dir_sub_dir()
 
-        ignored_artifacts = self.get_value('archive-ignored-artifacts')
+        ignored_artifacts = self.get_value('results-archive-ignored-artifacts')
         for previous_step_result in self.workflow_result.workflow_list:
             artifacts = previous_step_result.artifacts
             for artifact in artifacts.values():
@@ -218,7 +268,7 @@ class ResultArtifactsArchive(StepImplementer):
         if os.path.exists(archive_base_name):
             results_artifacts_archive = shutil.make_archive(
                 base_name=archive_base_name,
-                format=self.get_value('archive-format'),
+                format=self.get_value('results-archive-format'),
                 root_dir=results_archive_root_dir_path,
                 base_dir=result_archive_name
             )
