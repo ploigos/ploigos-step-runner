@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>ploigos_step_runner.step_implementers.create_container_image.buildah API documentation</title>
-<meta name="description" content="`StepImplementer` for the `create-container-image step` using Buildah …" />
+<title>ploigos_step_runner.step_implementers.automated_governance.rekor API documentation</title>
+<meta name="description" content="`StepImplementer` for the `automated-governance` step using Rekor …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,10 +19,10 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.step_implementers.create_container_image.buildah</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.step_implementers.automated_governance.rekor</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>create-container-image step</code> using Buildah.</p>
+<p><code>StepImplementer</code> for the <code>automated-governance</code> step using Rekor.</p>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>Step configuration expected as input to this step.
 Could come from:</p>
@@ -42,38 +42,7 @@ Could come from:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>imagespecfile</code></td>
-<td>True</td>
-<td><code>'Dockerfile'</code></td>
-<td>File defining the container image</td>
-</tr>
-<tr>
-<td><code>context</code></td>
-<td>True</td>
-<td><code>'.'</code></td>
-<td>Context to build the container image in</td>
-</tr>
-<tr>
-<td><code>tls-verify</code></td>
-<td>True</td>
-<td><code>True</code></td>
-<td>Whether to verify TLS when pulling parent images</td>
-</tr>
-<tr>
-<td><code>format</code></td>
-<td>True</td>
-<td><code>'oci'</code></td>
-<td>format of the built image's manifest and metadata</td>
-</tr>
-<tr>
-<td><code>containers-config-auth-file</code></td>
-<td>True</td>
-<td><code>'~/.buildah-auth.json'</code></td>
-<td>Path to the container registry authentication
-file to use for container registry authentication.</td>
-</tr>
-<tr>
-<td><code>container-image-version</code></td>
+<td><code>rekor-server</code></td>
 <td>True</td>
 <td></td>
 <td>Version to use when building the container image</td>
@@ -98,13 +67,17 @@ file to use for container registry authentication.</td>
 <td><code>image-tar-file</code></td>
 <td>Path to the built container image as a tar file</td>
 </tr>
+<tr>
+<td><code>image-tar-hash</code></td>
+<td>Path to the built container image as a tar file</td>
+</tr>
 </tbody>
 </table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Buildah.
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `automated-governance` step using Rekor.
 
 Step Configuration
 ------------------
@@ -117,14 +90,7 @@ Could come from:
 
 Configuration Key | Required? | Default        | Description
 ------------------|-----------|----------------|-----------
-`imagespecfile`   | True      | `&#39;Dockerfile&#39;` | File defining the container image
-`context`         | True      | `&#39;.&#39;`          | Context to build the container image in
-`tls-verify`      | True      | `True`       | Whether to verify TLS when pulling parent images
-`format`          | True      | `&#39;oci&#39;`        | format of the built image&#39;s manifest and metadata
-`containers-config-auth-file` | True | `&#39;~/.buildah-auth.json&#39;` | \
-                                                 Path to the container registry authentication \
-                                                 file to use for container registry authentication.
-`container-image-version`     | True |         | Version to use when building the container image
+`rekor-server`     | True |         | Version to use when building the container image
 
 Result Artifacts
 ----------------
@@ -134,60 +100,36 @@ Result Artifact Key | Description
 --------------------------|------------
 `container-image-version` | Container version to tag built image with
 `image-tar-file`          | Path to the built container image as a tar file
+`image-tar-hash`          | Path to the built container image as a tar file
 &#34;&#34;&#34;
+
+from io import StringIO
+import json
 import os
-import sys
 from pathlib import Path
-
+import sys
 import sh
+
 from ploigos_step_runner import StepImplementer, StepResult
-from ploigos_step_runner.utils.containers import container_registries_login
-
-DEFAULT_CONFIG = {
-    # Path to the container registry authentication file to read and write to/from.
-    &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.buildah-auth.json&#39;),
-
-    # Image specification file name
-    &#39;imagespecfile&#39;: &#39;Dockerfile&#39;,
-
-    # Parent path to the image specification file
-    &#39;context&#39;: &#39;.&#39;,
-
-    # Verify TLS Certs?
-    &#39;tls-verify&#39;: True,
-
-    # Format of the produced image
-    &#39;format&#39;: &#39;oci&#39;
-}
+from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.utils.file import base64_encode
+from ploigos_step_runner.utils.file import get_file_hash
+from ploigos_step_runner.utils.gpg import import_gpg_key
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;containers-config-auth-file&#39;,
-    &#39;imagespecfile&#39;,
-    &#39;context&#39;,
-    &#39;tls-verify&#39;,
-    &#39;format&#39;,
-    &#39;service-name&#39;,
-    &#39;application-name&#39;
+    &#39;rekor-server&#39;,
+    &#39;gpg-key&#39;,
+    &#39;gpg-user&#39;
 ]
 
-class Buildah(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Buildah.
+
+class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
+    &#34;&#34;&#34;`StepImplementer` for the `automated-governance` step using Rekor.
     &#34;&#34;&#34;
 
     @staticmethod
     def step_implementer_config_defaults():
-        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -206,6 +148,84 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    @staticmethod
+    def create_rekor_entry(
+        public_key_path,
+        gpg_user,
+        extra_data_file
+    ):
+        &#34;&#34;&#34;Creates a rekor entry as a dict object.
+
+        Returns
+        -------
+        StepResult
+            Dict that contains rekor entry for upload with the cli
+        &#34;&#34;&#34;
+        file_hash = get_file_hash(extra_data_file)
+        sig_file = extra_data_file + &#39;.asc&#39;
+        sig_file_path = Path(sig_file)
+        if sig_file_path.exists():
+            sig_file_path.unlink()
+        import_gpg_key(sig_file, extra_data_file, gpg_user)
+        base64_encoded_extra_data = base64_encode(extra_data_file)
+        rekor_entry = {
+            &#34;kind&#34;: &#34;rekord&#34;,
+            &#34;apiVersion&#34;: &#34;0.0.1&#34;,
+            &#34;spec&#34;: {
+                &#34;signature&#34;: {
+                    &#34;format&#34;: &#34;pgp&#34;,
+                    &#34;content&#34;: base64_encode(sig_file),
+                    &#34;publicKey&#34;: {
+                        &#34;content&#34;: base64_encode(public_key_path)
+                    }
+                },
+                &#34;data&#34;: {
+                    &#34;content&#34;: base64_encoded_extra_data,
+                    &#34;hash&#34;: {
+                        &#34;algorithm&#34;: &#34;sha256&#34;,
+                        &#34;value&#34;: file_hash
+                    }
+                },
+                &#34;extraData&#34;: base64_encoded_extra_data
+            }
+        }
+        return rekor_entry
+
+    @staticmethod
+    def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        &#34;&#34;&#34;
+        rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+        print(&#34;Rekor Entry: &#34; + str(rekor_entry))
+        rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
+
+        if rekor_entry_path.exists():
+            rekor_entry_path.unlink()
+        rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
+        rekor_entry_path.write_text(json.dumps(rekor_entry))
+        rekor_upload_stdout_result = StringIO()
+        rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            rekor_upload_stdout_result
+        ])
+        rekor = sh.rekor( # pylint: disable=no-member
+            &#39;upload&#39;,
+            &#39;--rekor_server&#39;,
+            rekor_server,
+            &#39;--entry&#39;,
+            rekor_entry_path_name,
+            _out=rekor_upload_stdout_callback,
+            _err_to_out=True,
+            _tee=&#39;out&#39;
+        )
+        rekor_uuid = str(rekor).split(&#39;/&#39;)[-1].strip(&#39; \n&#39;)
+        return rekor_entry, rekor_uuid
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -215,106 +235,28 @@ class Buildah(StepImplementer):
             Object containing the dictionary results of this step.
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
-
-        context = self.get_value(&#39;context&#39;)
-        image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = context + &#39;/&#39; + image_spec_file
-        application_name = self.get_value(&#39;application-name&#39;)
-        service_name = self.get_value(&#39;service-name&#39;)
-        tls_verify = self.get_value(&#39;tls-verify&#39;)
-
-        if not os.path.exists(image_spec_file_location):
-            step_result.success = False
-            step_result.message = &#39;Image specification file does not exist in location: &#39; \
-                f&#39;{image_spec_file_location}&#39;
-            return step_result
-
-        image_tag_version = self.get_value(&#39;container-image-version&#39;)
-        if image_tag_version is None:
-            image_tag_version = &#39;latest&#39;
-            print(&#39;No image tag version found in metadata. Using latest&#39;)
-
-        destination = &#34;localhost/{application_name}/{service_name}&#34;.format(
-            application_name=application_name,
-            service_name=service_name
+        rekor_server = self.get_value(&#39;rekor-server&#39;)
+        extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
+        extra_data_file_path = Path(extra_data_file)
+        if extra_data_file_path.exists():
+            extra_data_file_path.unlink()
+        self.workflow_result.write_results_to_json_file(extra_data_file_path)
+        rekor_entry, rekor_uuid = self.upload_to_rekor(
+            rekor_server,
+            extra_data_file,
+            self.get_value(&#39;gpg-key&#39;),
+            self.get_value(&#39;gpg-user&#39;),
+            self.work_dir_path
         )
-        tag = &#34;{destination}:{version}&#34;.format(
-            destination=destination,
-            version=image_tag_version
+        step_result.add_artifact(
+                name=&#39;rekor-entry&#39;,
+                value=rekor_entry
         )
-
-        try:
-            # login to any provider container registries
-            # NOTE: important to specify the auth file because depending on the context this is
-            #       being run in python process may not have permissions to default location
-            containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
-            container_registries_login(
-                registries=self.get_value(&#39;container-registries&#39;),
-                containers_config_auth_file=containers_config_auth_file,
-                containers_config_tls_verify=tls_verify
-            )
-
-            # perform build
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
-            sh.buildah.bud(  # pylint: disable=no-member
-                &#39;--storage-driver=vfs&#39;,
-                &#39;--format=&#39; + self.get_value(&#39;format&#39;),
-                &#39;--tls-verify=&#39; + str(tls_verify).lower(),
-                &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, tag,
-                &#39;--authfile&#39;, containers_config_auth_file,
-                context,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;container-image-version&#39;,
-                value=tag
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
-                f&#39;specification file ({image_spec_file}): {error}&#39;
-            return step_result
-
-        image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
-        try:
-            # Check to see if the tar docker-archive file already exists
-            #   this needs to be run as buildah does not support overwritting
-            #   existing files.
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
-            if os.path.exists(image_tar_path):
-                os.remove(image_tar_path)
-            sh.buildah.push(  # pylint: disable=no-member
-                &#39;--storage-driver=vfs&#39;,
-                tag,
-                &#34;docker-archive:&#34; + image_tar_path,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;image-tar-file&#39;,
-                value=image_tar_path
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = f&#39;Issue invoking buildah push to tar file &#39; \
-                f&#39;({image_tar_path}): {error}&#39;
-            return step_result
-
-        return step_result
-        </code></pre>
+        step_result.add_artifact(
+                name=&#39;rekor-uuid&#39;,
+                value=rekor_uuid
+        )
+        return step_result</code></pre>
 </details>
 </section>
 <section>
@@ -326,34 +268,23 @@ class Buildah(StepImplementer):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.create_container_image.buildah.Buildah"><code class="flex name class">
-<span>class <span class="ident">Buildah</span></span>
+<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor"><code class="flex name class">
+<span>class <span class="ident">Rekor</span></span>
 <span>(</span><span>workflow_result, work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>create-container-image step</code> using Buildah.</p></div>
+<div class="desc"><p><code>StepImplementer</code> for the <code>automated-governance</code> step using Rekor.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Buildah(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Buildah.
+<pre><code class="python">class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
+    &#34;&#34;&#34;`StepImplementer` for the `automated-governance` step using Rekor.
     &#34;&#34;&#34;
 
     @staticmethod
     def step_implementer_config_defaults():
-        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -372,6 +303,84 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    @staticmethod
+    def create_rekor_entry(
+        public_key_path,
+        gpg_user,
+        extra_data_file
+    ):
+        &#34;&#34;&#34;Creates a rekor entry as a dict object.
+
+        Returns
+        -------
+        StepResult
+            Dict that contains rekor entry for upload with the cli
+        &#34;&#34;&#34;
+        file_hash = get_file_hash(extra_data_file)
+        sig_file = extra_data_file + &#39;.asc&#39;
+        sig_file_path = Path(sig_file)
+        if sig_file_path.exists():
+            sig_file_path.unlink()
+        import_gpg_key(sig_file, extra_data_file, gpg_user)
+        base64_encoded_extra_data = base64_encode(extra_data_file)
+        rekor_entry = {
+            &#34;kind&#34;: &#34;rekord&#34;,
+            &#34;apiVersion&#34;: &#34;0.0.1&#34;,
+            &#34;spec&#34;: {
+                &#34;signature&#34;: {
+                    &#34;format&#34;: &#34;pgp&#34;,
+                    &#34;content&#34;: base64_encode(sig_file),
+                    &#34;publicKey&#34;: {
+                        &#34;content&#34;: base64_encode(public_key_path)
+                    }
+                },
+                &#34;data&#34;: {
+                    &#34;content&#34;: base64_encoded_extra_data,
+                    &#34;hash&#34;: {
+                        &#34;algorithm&#34;: &#34;sha256&#34;,
+                        &#34;value&#34;: file_hash
+                    }
+                },
+                &#34;extraData&#34;: base64_encoded_extra_data
+            }
+        }
+        return rekor_entry
+
+    @staticmethod
+    def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        &#34;&#34;&#34;
+        rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+        print(&#34;Rekor Entry: &#34; + str(rekor_entry))
+        rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
+
+        if rekor_entry_path.exists():
+            rekor_entry_path.unlink()
+        rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
+        rekor_entry_path.write_text(json.dumps(rekor_entry))
+        rekor_upload_stdout_result = StringIO()
+        rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            rekor_upload_stdout_result
+        ])
+        rekor = sh.rekor( # pylint: disable=no-member
+            &#39;upload&#39;,
+            &#39;--rekor_server&#39;,
+            rekor_server,
+            &#39;--entry&#39;,
+            rekor_entry_path_name,
+            _out=rekor_upload_stdout_callback,
+            _err_to_out=True,
+            _tee=&#39;out&#39;
+        )
+        rekor_uuid = str(rekor).split(&#39;/&#39;)[-1].strip(&#39; \n&#39;)
+        return rekor_entry, rekor_uuid
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -381,104 +390,27 @@ class Buildah(StepImplementer):
             Object containing the dictionary results of this step.
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
-
-        context = self.get_value(&#39;context&#39;)
-        image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = context + &#39;/&#39; + image_spec_file
-        application_name = self.get_value(&#39;application-name&#39;)
-        service_name = self.get_value(&#39;service-name&#39;)
-        tls_verify = self.get_value(&#39;tls-verify&#39;)
-
-        if not os.path.exists(image_spec_file_location):
-            step_result.success = False
-            step_result.message = &#39;Image specification file does not exist in location: &#39; \
-                f&#39;{image_spec_file_location}&#39;
-            return step_result
-
-        image_tag_version = self.get_value(&#39;container-image-version&#39;)
-        if image_tag_version is None:
-            image_tag_version = &#39;latest&#39;
-            print(&#39;No image tag version found in metadata. Using latest&#39;)
-
-        destination = &#34;localhost/{application_name}/{service_name}&#34;.format(
-            application_name=application_name,
-            service_name=service_name
+        rekor_server = self.get_value(&#39;rekor-server&#39;)
+        extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
+        extra_data_file_path = Path(extra_data_file)
+        if extra_data_file_path.exists():
+            extra_data_file_path.unlink()
+        self.workflow_result.write_results_to_json_file(extra_data_file_path)
+        rekor_entry, rekor_uuid = self.upload_to_rekor(
+            rekor_server,
+            extra_data_file,
+            self.get_value(&#39;gpg-key&#39;),
+            self.get_value(&#39;gpg-user&#39;),
+            self.work_dir_path
         )
-        tag = &#34;{destination}:{version}&#34;.format(
-            destination=destination,
-            version=image_tag_version
+        step_result.add_artifact(
+                name=&#39;rekor-entry&#39;,
+                value=rekor_entry
         )
-
-        try:
-            # login to any provider container registries
-            # NOTE: important to specify the auth file because depending on the context this is
-            #       being run in python process may not have permissions to default location
-            containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
-            container_registries_login(
-                registries=self.get_value(&#39;container-registries&#39;),
-                containers_config_auth_file=containers_config_auth_file,
-                containers_config_tls_verify=tls_verify
-            )
-
-            # perform build
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
-            sh.buildah.bud(  # pylint: disable=no-member
-                &#39;--storage-driver=vfs&#39;,
-                &#39;--format=&#39; + self.get_value(&#39;format&#39;),
-                &#39;--tls-verify=&#39; + str(tls_verify).lower(),
-                &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, tag,
-                &#39;--authfile&#39;, containers_config_auth_file,
-                context,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;container-image-version&#39;,
-                value=tag
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
-                f&#39;specification file ({image_spec_file}): {error}&#39;
-            return step_result
-
-        image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
-        try:
-            # Check to see if the tar docker-archive file already exists
-            #   this needs to be run as buildah does not support overwritting
-            #   existing files.
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
-            if os.path.exists(image_tar_path):
-                os.remove(image_tar_path)
-            sh.buildah.push(  # pylint: disable=no-member
-                &#39;--storage-driver=vfs&#39;,
-                tag,
-                &#34;docker-archive:&#34; + image_tar_path,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;image-tar-file&#39;,
-                value=image_tar_path
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = f&#39;Issue invoking buildah push to tar file &#39; \
-                f&#39;({image_tar_path}): {error}&#39;
-            return step_result
-
+        step_result.add_artifact(
+                name=&#39;rekor-uuid&#39;,
+                value=rekor_uuid
+        )
         return step_result</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -486,6 +418,117 @@ class Buildah(StepImplementer):
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry"><code class="name flex">
+<span>def <span class="ident">create_rekor_entry</span></span>(<span>public_key_path, gpg_user, extra_data_file)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a rekor entry as a dict object.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>StepResult</code></dt>
+<dd>Dict that contains rekor entry for upload with the cli</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def create_rekor_entry(
+    public_key_path,
+    gpg_user,
+    extra_data_file
+):
+    &#34;&#34;&#34;Creates a rekor entry as a dict object.
+
+    Returns
+    -------
+    StepResult
+        Dict that contains rekor entry for upload with the cli
+    &#34;&#34;&#34;
+    file_hash = get_file_hash(extra_data_file)
+    sig_file = extra_data_file + &#39;.asc&#39;
+    sig_file_path = Path(sig_file)
+    if sig_file_path.exists():
+        sig_file_path.unlink()
+    import_gpg_key(sig_file, extra_data_file, gpg_user)
+    base64_encoded_extra_data = base64_encode(extra_data_file)
+    rekor_entry = {
+        &#34;kind&#34;: &#34;rekord&#34;,
+        &#34;apiVersion&#34;: &#34;0.0.1&#34;,
+        &#34;spec&#34;: {
+            &#34;signature&#34;: {
+                &#34;format&#34;: &#34;pgp&#34;,
+                &#34;content&#34;: base64_encode(sig_file),
+                &#34;publicKey&#34;: {
+                    &#34;content&#34;: base64_encode(public_key_path)
+                }
+            },
+            &#34;data&#34;: {
+                &#34;content&#34;: base64_encoded_extra_data,
+                &#34;hash&#34;: {
+                    &#34;algorithm&#34;: &#34;sha256&#34;,
+                    &#34;value&#34;: file_hash
+                }
+            },
+            &#34;extraData&#34;: base64_encoded_extra_data
+        }
+    }
+    return rekor_entry</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor"><code class="name flex">
+<span>def <span class="ident">upload_to_rekor</span></span>(<span>rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Runs the step implemented by this StepImplementer.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>StepResult</code></dt>
+<dd>Object containing the dictionary results of this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
+    &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+
+    Returns
+    -------
+    StepResult
+        Object containing the dictionary results of this step.
+    &#34;&#34;&#34;
+    rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+    print(&#34;Rekor Entry: &#34; + str(rekor_entry))
+    rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
+
+    if rekor_entry_path.exists():
+        rekor_entry_path.unlink()
+    rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
+    rekor_entry_path.write_text(json.dumps(rekor_entry))
+    rekor_upload_stdout_result = StringIO()
+    rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+        sys.stdout,
+        rekor_upload_stdout_result
+    ])
+    rekor = sh.rekor( # pylint: disable=no-member
+        &#39;upload&#39;,
+        &#39;--rekor_server&#39;,
+        rekor_server,
+        &#39;--entry&#39;,
+        rekor_entry_path_name,
+        _out=rekor_upload_stdout_callback,
+        _err_to_out=True,
+        _tee=&#39;out&#39;
+    )
+    rekor_uuid = str(rekor).split(&#39;/&#39;)[-1].strip(&#39; \n&#39;)
+    return rekor_entry, rekor_uuid</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></b></code>:
@@ -530,13 +573,17 @@ class Buildah(StepImplementer):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner.step_implementers.create_container_image" href="index.html">ploigos_step_runner.step_implementers.create_container_image</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.automated_governance" href="index.html">ploigos_step_runner.step_implementers.automated_governance</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ploigos_step_runner.step_implementers.create_container_image.buildah.Buildah" href="#ploigos_step_runner.step_implementers.create_container_image.buildah.Buildah">Buildah</a></code></h4>
+<h4><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor">Rekor</a></code></h4>
+<ul class="">
+<li><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry">create_rekor_entry</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor">upload_to_rekor</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

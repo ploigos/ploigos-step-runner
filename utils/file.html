@@ -36,7 +36,9 @@ import os
 import re
 import shutil
 import urllib.request
-
+import hashlib
+import base64
+from pathlib import Path
 import yaml
 
 def parse_yaml_or_json_file(yaml_or_json_file):
@@ -184,7 +186,32 @@ def create_parent_dir(file_path):
     &#34;&#34;&#34;
     parent_dir_path = os.path.dirname(file_path)
     if parent_dir_path:
-        os.makedirs(parent_dir_path, exist_ok=True)</code></pre>
+        os.makedirs(parent_dir_path, exist_ok=True)
+
+def base64_encode(file_path):
+    &#34;&#34;&#34;Given a file_path, read and encode the contents in base64
+    Returns
+    -------
+    Base64Contents
+        base64 encoded string of file contents
+    &#34;&#34;&#34;
+    encoding = Path(file_path).read_text().encode(&#39;utf-8&#39;)
+    return base64.b64encode(encoding).decode(&#39;utf-8&#39;)
+
+def get_file_hash(file_path):
+    &#34;&#34;&#34;Returns file hash of given file.
+
+    Returns
+    -------
+    StepResult
+        Object containing the dictionary results of this step.
+    &#34;&#34;&#34;
+    sha256_hash = hashlib.sha256()
+    with open(file_path, &#34;rb&#34;) as the_file:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: the_file.read(4096), b&#34;&#34;):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()</code></pre>
 </details>
 </section>
 <section>
@@ -194,6 +221,32 @@ def create_parent_dir(file_path):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="ploigos_step_runner.utils.file.base64_encode"><code class="name flex">
+<span>def <span class="ident">base64_encode</span></span>(<span>file_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Given a file_path, read and encode the contents in base64
+Returns</p>
+<hr>
+<dl>
+<dt><code>Base64Contents</code></dt>
+<dd>base64 encoded string of file contents</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def base64_encode(file_path):
+    &#34;&#34;&#34;Given a file_path, read and encode the contents in base64
+    Returns
+    -------
+    Base64Contents
+        base64 encoded string of file contents
+    &#34;&#34;&#34;
+    encoding = Path(file_path).read_text().encode(&#39;utf-8&#39;)
+    return base64.b64encode(encoding).decode(&#39;utf-8&#39;)</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.utils.file.create_parent_dir"><code class="name flex">
 <span>def <span class="ident">create_parent_dir</span></span>(<span>file_path)</span>
 </code></dt>
@@ -349,6 +402,36 @@ and decompress if necessary.</dd>
     return destination_path</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.file.get_file_hash"><code class="name flex">
+<span>def <span class="ident">get_file_hash</span></span>(<span>file_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns file hash of given file.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>StepResult</code></dt>
+<dd>Object containing the dictionary results of this step.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_file_hash(file_path):
+    &#34;&#34;&#34;Returns file hash of given file.
+
+    Returns
+    -------
+    StepResult
+        Object containing the dictionary results of this step.
+    &#34;&#34;&#34;
+    sha256_hash = hashlib.sha256()
+    with open(file_path, &#34;rb&#34;) as the_file:
+        # Read and update hash string value in blocks of 4K
+        for byte_block in iter(lambda: the_file.read(4096), b&#34;&#34;):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.utils.file.parse_yaml_or_json_file"><code class="name flex">
 <span>def <span class="ident">parse_yaml_or_json_file</span></span>(<span>yaml_or_json_file)</span>
 </code></dt>
@@ -437,8 +520,10 @@ and decompress if necessary.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="ploigos_step_runner.utils.file.base64_encode" href="#ploigos_step_runner.utils.file.base64_encode">base64_encode</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.create_parent_dir" href="#ploigos_step_runner.utils.file.create_parent_dir">create_parent_dir</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.download_and_decompress_source_to_destination" href="#ploigos_step_runner.utils.file.download_and_decompress_source_to_destination">download_and_decompress_source_to_destination</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.file.get_file_hash" href="#ploigos_step_runner.utils.file.get_file_hash">get_file_hash</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.parse_yaml_or_json_file" href="#ploigos_step_runner.utils.file.parse_yaml_or_json_file">parse_yaml_or_json_file</a></code></li>
 </ul>
 </li>

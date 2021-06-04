@@ -61,6 +61,8 @@
 <li>runtime-vulnerability-scan</li>
 <li>canary-test</li>
 <li>report</li>
+<li>publish-workflow-results</li>
+<li>automated-governance</li>
 </ul>
 <h3 id="variable-precedence">Variable Precedence</h3>
 <p>From least precedence to highest precedence.</p>
@@ -382,6 +384,14 @@ step-runner-config:
       #format: 'oci'
     }
 
+  automated-governance:
+  - implementer: Rekor
+    config: {
+      rekor-server: 'http://example-rekor-server-url/',
+      gpg-key: '/path/to/gpg-key',
+      gpg-user: 'gpg-user@example.com'
+    }
+
   push-container-image:
   - implementer: Skopeo
     config: {
@@ -668,6 +678,14 @@ step-runner-config:
       #format: 'oci'
     }
 
+  automated-governance:
+  - implementer: Rekor
+    config: {
+      rekor-server: 'http://example-rekor-server-url/',
+      gpg-key: '/path/to/gpg-key',
+      gpg-user: 'gpg-user@example.com'
+    }
+
   push-container-image:
   - implementer: Skopeo
     config: {
@@ -819,6 +837,8 @@ Step Configuration
 * runtime-vulnerability-scan
 * canary-test
 * report
+* publish-workflow-results
+* automated-governance
 
 ### Variable Precedence
 
@@ -1144,6 +1164,14 @@ From least precedence to highest precedence.
           #format: &#39;oci&#39;
         }
 
+      automated-governance:
+      - implementer: Rekor
+        config: {
+          rekor-server: &#39;http://example-rekor-server-url/&#39;,
+          gpg-key: &#39;/path/to/gpg-key&#39;,
+          gpg-user: &#39;gpg-user@example.com&#39;
+        }
+
       push-container-image:
       - implementer: Skopeo
         config: {
@@ -1429,6 +1457,14 @@ From least precedence to highest precedence.
 
           # Optional.
           #format: &#39;oci&#39;
+        }
+
+      automated-governance:
+      - implementer: Rekor
+        config: {
+          rekor-server: &#39;http://example-rekor-server-url/&#39;,
+          gpg-key: &#39;/path/to/gpg-key&#39;,
+          gpg-user: &#39;gpg-user@example.com&#39;
         }
 
       push-container-image:
