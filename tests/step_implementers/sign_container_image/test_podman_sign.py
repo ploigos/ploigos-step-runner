@@ -38,7 +38,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @staticmethod
     def generate_config():
         return {
-            'container-image-signer-pgp-private-key': \
+            'signer-pgp-private-key': \
                 TestStepImplementerSignContainerImagePodman.TEST_FAKE_PRIVATE_KEY
         }
 
@@ -94,7 +94,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     def test__required_config_or_result_keys(self):
         required_keys = PodmanSign._required_config_or_result_keys()
         expected_required_keys = [
-            'container-image-signer-pgp-private-key',
+            ['signer-pgp-private-key', 'container-image-signer-pgp-private-key'],
             'container-image-tag'
         ]
         self.assertEqual(required_keys, expected_required_keys)
@@ -138,7 +138,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
@@ -167,7 +167,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 value=signature_name
             )
             expected_step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
+                name='container-image-signature-signer-private-key-fingerprint',
                 value=pgp_private_key_fingerprint
             )
             self.assertEqual(expected_step_result, result)
@@ -220,7 +220,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
@@ -255,7 +255,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 value=signature_name
             )
             expected_step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
+                name='container-image-signature-signer-private-key-fingerprint',
                 value=pgp_private_key_fingerprint
             )
             expected_step_result.add_artifact(
@@ -323,7 +323,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
@@ -358,7 +358,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 value=signature_name
             )
             expected_step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
+                name='container-image-signature-signer-private-key-fingerprint',
                 value=pgp_private_key_fingerprint
             )
             expected_step_result.add_artifact(
@@ -427,7 +427,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             result = step_implementer._run_step()
 
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
@@ -462,7 +462,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 value=signature_name
             )
             expected_step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
+                name='container-image-signature-signer-private-key-fingerprint',
                 value=pgp_private_key_fingerprint
             )
             expected_step_result.add_artifact(
@@ -473,6 +473,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'mock upload error'
 
+            print(expected_step_result)
+            print(result)
             self.assertEqual(expected_step_result, result)
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
@@ -489,7 +491,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             }
             workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
 
-            import_pgp_key_mock.side_effect = StepRunnerException('mock error importing pgp key')
+            import_pgp_key_mock.side_effect = RuntimeError('mock error importing pgp key')
 
             def sign_image_side_effect(
                     pgp_private_key_fingerprint,
@@ -511,7 +513,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
 
             expected_step_result = StepResult(
@@ -522,6 +524,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'mock error importing pgp key'
 
+            print(expected_step_result)
+            print(result)
             self.assertEqual(expected_step_result, result)
 
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
@@ -556,7 +560,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
             result = step_implementer._run_step()
             import_pgp_key_mock.assert_called_once_with(
-                pgp_private_key=step_config['container-image-signer-pgp-private-key']
+                pgp_private_key=step_config['signer-pgp-private-key']
             )
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
@@ -573,7 +577,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 sub_step_implementer_name='PodmanSign'
             )
             expected_step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
+                name='container-image-signature-signer-private-key-fingerprint',
                 value=pgp_private_key_fingerprint
             )
             expected_step_result.success = False

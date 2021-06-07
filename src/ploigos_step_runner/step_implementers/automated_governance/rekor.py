@@ -24,33 +24,46 @@ Result Artifact Key | Description
 `image-tar-hash`          | Path to the built container image as a tar file
 """
 
-from io import StringIO
 import json
 import os
-from pathlib import Path
 import sys
-import sh
+from io import StringIO
+from pathlib import Path
 
+import sh
 from ploigos_step_runner import StepImplementer, StepResult
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
-from ploigos_step_runner.utils.file import base64_encode
-from ploigos_step_runner.utils.file import get_file_hash
-from ploigos_step_runner.utils.gpg import import_gpg_key
+from ploigos_step_runner.utils.file import base64_encode, get_file_hash
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.utils.pgp import detach_sign_with_pgp_key
+
+
+DEFAULT_CONFIG = {}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'rekor-server',
     'gpg-key',
     'gpg-user'
 ]
-
-
 class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
     """`StepImplementer` for the `automated-governance` step using Rekor.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
-        return
+        """Getter for the StepImplementer's configuration defaults.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        """
+        return DEFAULT_CONFIG
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -87,7 +100,11 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         sig_file_path = Path(sig_file)
         if sig_file_path.exists():
             sig_file_path.unlink()
-        import_gpg_key(sig_file, extra_data_file, gpg_user)
+        detach_sign_with_pgp_key(
+            output_signature_path=sig_file,
+            file_to_sign_path=extra_data_file,
+            pgp_private_key_fingerprint=gpg_user
+        )
         base64_encoded_extra_data = base64_encode(extra_data_file)
         rekor_entry = {
             "kind": "rekord",
