@@ -1,4 +1,8 @@
-"""Shared utils for dealing with gpg keys.
+"""Shared utils for dealing with PGP keys.
+
+Note that these functions use the "gpg" program to interact with PGP keys, but as PGP is the
+standard and GPG is an implementation of that standard, we universally refer to anything having
+to do with PGP keys as "PGP" rather then "GPG".
 """
 
 import re
@@ -7,43 +11,60 @@ from io import StringIO
 import sh
 
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
-from ploigos_step_runner.exceptions import StepRunnerException
 
-def import_gpg_key(sig_file, extra_data_file, gpg_user):
-    """Runs the step implemented by this StepImplementer.
+def detach_sign_with_pgp_key(file_to_sign_path, pgp_private_key_fingerprint, output_signature_path):
+    """Does a detached sign of a given file using a given users private key.
 
-    Returns
-    -------
-    StepResult
-        Object containing the dictionary results of this step.
+    Parameters
+    ----------
+    file_to_sign_path : str
+        Path to file to create a detached PGP signature for.
+
+    pgp_private_key_fingerprint : str
+        PGP private key fingerprint to sign the given file with.
+
+    output_signature_path : str
+        File path to put the detached signature in.
+
+    Raises
+    ------
+    RuntimeError
+        If error signing given file with given key.
     """
-    gpg_stdout_result = StringIO()
-    gpg_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-        sys.stdout,
-        gpg_stdout_result
-    ])
-    sh.gpg( # pylint: disable=no-member
-        '--armor',
-        '-u',
-        gpg_user,
-        '--output',
-        sig_file,
-        '--detach-sign',
-        extra_data_file,
-        _out=gpg_stdout_callback,
-        # _in=extra_data,
-        _err_to_out=True,
-        _tee='out'
-    )
-    return gpg_stdout_result
+    try:
+        sh.gpg( # pylint: disable=no-member
+            '--armor',
+            '--local-user',
+            pgp_private_key_fingerprint,
+            '--output',
+            output_signature_path,
+            '--detach-sign',
+            file_to_sign_path
+        )
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f"Error performing detached signature of file ({file_to_sign_path})" \
+            f" with PGP key ({pgp_private_key_fingerprint}): {error}"
+        ) from error
 
 def import_pgp_key(pgp_private_key):
-    """Runs the step implemented by this StepImplementer.
+    """Imports a PGP key.
+
+    Parameters
+    ----------
+    pgp_private_key : str
+        PGP key to import.
 
     Returns
     -------
-    StepResult
-        Object containing the dictionary results of this step.
+    str
+        Fingerprint of the imported PGP key.
+
+    Raises
+    ------
+    RuntimeError
+        If error getting PGP fingerprint for imported PGP key
+        If error importing PGP key.
     """
     # Example input to match on:
     #   sec:-:3072:1:CF4AC14A3D109637:1601483310:1664555310::-:::scESC::::::23::0:
@@ -81,7 +102,7 @@ def import_pgp_key(pgp_private_key):
             gpg_import_stdout_result.getvalue()
         )
         if len(gpg_imported_pgp_private_key_fingerprints) < 1:
-            raise StepRunnerException(
+            raise RuntimeError(
                 "Error getting PGP fingerprint for PGP key"
                 " to sign container image(s) with. See stdout and stderr for more info."
             )
@@ -92,7 +113,7 @@ def import_pgp_key(pgp_private_key):
             f"fingerprint='{pgp_private_key_fingerprint}'"
         )
     except sh.ErrorReturnCode as error:
-        raise StepRunnerException(
+        raise RuntimeError(
             f"Error importing pgp private key: {error}"
         ) from error
 

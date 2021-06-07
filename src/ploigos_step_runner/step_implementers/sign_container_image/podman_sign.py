@@ -11,7 +11,9 @@ Could come from:
 
 Configuration Key      | Required? | Default | Description
 -----------------------|-----------|---------|-------------
-`container-image-signer-pgp-private-key` \
+`signer-pgp-private-key` \
+                       | Yes       |         | PGP Private Key used to sign the image
+`container-image-signer-pgp-private-key` (deprecated)\
                        | Yes       |         | PGP Private Key used to sign the image
 `container-image-tag`  | Yes       |         | Tag of the container image to sign
 `container-image-signature-destination-url` \
@@ -34,22 +36,23 @@ Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key                                 | Description
-----------------------------------------------------|------------
-`container-image-signature-private-key-fingerprint` | Fingerprint for the private key used to sign \
-                                                      the container image.
-`container-image-signature-file-path`               | File path to created image signature.
-`container-image-signature-name`                    | Fully qualified name of the \
-                                                      name of the image signature, \
-                                                      including: organization, repo, \
-                                                      and hash. <br/>\
-                                                      ex: user/hello-node@sha256=\
-                                                      2cbdb73c9177e63e85d267f738e9\
-                                                      9e368db3f806eab4c541f5c6b719\
-                                                      e69f1a2b/signature-1
-`container-image-signature-uri`                     | URI of the uploaded container image signature.
-`container-image-signature-upload-results`          | Results of uploading the container image \
-                                                      signature to the given destination.
+Result Artifact Key                        | Description
+-------------------------------------------|------------
+`container-image-signature-signer-private-key-fingerprint` \
+                                           | Fingerprint for the private key used to sign \
+                                             the container image.
+`container-image-signature-file-path`      | File path to created image signature.
+`container-image-signature-name`           | Fully qualified name of the \
+                                             name of the image signature, \
+                                             including: organization, repo, \
+                                             and hash. <br/>\
+                                             ex: user/hello-node@sha256=\
+                                             2cbdb73c9177e63e85d267f738e9\
+                                             9e368db3f806eab4c541f5c6b719\
+                                             e69f1a2b/signature-1
+`container-image-signature-uri`            | URI of the uploaded container image signature.
+`container-image-signature-upload-results` | Results of uploading the container image \
+                                             signature to the given destination.
 
 """
 import glob
@@ -60,13 +63,15 @@ import sh
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.file import upload_file
-from ploigos_step_runner.utils.gpg import import_pgp_key
+from ploigos_step_runner.utils.pgp import import_pgp_key
 
 DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'container-image-signer-pgp-private-key',
+    # signer-pgp-private-key - new key name
+    # container-image-signer-pgp-private-key - old key name
+    ['signer-pgp-private-key', 'container-image-signer-pgp-private-key'],
     'container-image-tag'
 ]
 
@@ -118,8 +123,8 @@ class PodmanSign(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # get the pgp private key to sign the image with
-        image_signer_pgp_private_key = self.get_value(
-            'container-image-signer-pgp-private-key'
+        signer_pgp_private_key = self.get_value(
+            ['signer-pgp-private-key', 'container-image-signer-pgp-private-key']
         )
 
         # get the uri to the image to sign
@@ -129,19 +134,19 @@ class PodmanSign(StepImplementer):
             sub_dir_relative_path='image-signature'
         )
 
-        # import the PGP key and get the finger print
         try:
-            image_signer_pgp_private_key_fingerprint = import_pgp_key(
-                pgp_private_key=image_signer_pgp_private_key
+            # import the PGP key and get the finger print
+            signer_pgp_private_key_fingerprint = import_pgp_key(
+                pgp_private_key=signer_pgp_private_key
             )
             step_result.add_artifact(
-                name='container-image-signature-private-key-fingerprint',
-                value=image_signer_pgp_private_key_fingerprint
+                name='container-image-signature-signer-private-key-fingerprint',
+                value=signer_pgp_private_key_fingerprint
             )
 
             # sign the image
             signature_file_path = PodmanSign.__sign_image(
-                pgp_private_key_fingerprint=image_signer_pgp_private_key_fingerprint,
+                pgp_private_key_fingerprint=signer_pgp_private_key_fingerprint,
                 image_signatures_directory=image_signatures_directory,
                 container_image_tag=container_image_tag
             )
@@ -154,7 +159,7 @@ class PodmanSign(StepImplementer):
                 name='container-image-signature-name',
                 value=signature_name
             )
-        except StepRunnerException as error:
+        except (RuntimeError, StepRunnerException) as error:
             step_result.success = False
             step_result.message = str(error)
 
