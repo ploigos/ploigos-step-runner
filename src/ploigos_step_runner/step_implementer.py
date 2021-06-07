@@ -396,8 +396,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        key : str
+        key : str, array
             Key to get the configuration value or result value for.
+            If array will get configuration value or result value for first key in list with a
+            value.
 
         Returns
         -------
@@ -406,24 +408,34 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             key. Or None if not found.
         """
 
-        # first try to get config value
-        config_value = self.get_config_value(key)
-        if config_value is not None:
-            return config_value
+        if isinstance(key, list):
+            keys = key
+        else:
+            keys = [key]
 
-        # if not found config value try to get result value specific to current environment
-        if self.environment:
+        for k in keys:
+            # first try to get config value
+            config_value = self.get_config_value(k)
+            if config_value is not None:
+                return config_value
+
+            # if not found config value try to get result value specific to current environment
+            if self.environment:
+                result_value = self.get_result_value(
+                    artifact_name=k,
+                    environment=self.environment
+                )
+                if result_value is not None:
+                    return result_value
+
+            # last try getting result value from no specific environment
             result_value = self.get_result_value(
-                artifact_name=key,
-                environment=self.environment
+                artifact_name=k
             )
-            if result_value is not None:
-                return result_value
 
-        # last try getting result value from no specific environment
-        result_value = self.get_result_value(
-            artifact_name=key
-        )
+            if result_value:
+                break
+
         return result_value
 
     def get_config_value(self, key):
