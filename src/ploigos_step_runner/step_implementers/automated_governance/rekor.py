@@ -9,19 +9,28 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default        | Description
-------------------|-----------|----------------|-----------
-`rekor-server`     | True |         | Version to use when building the container image
+Configuration Key  | Required? | Default | Description
+-------------------|-----------|---------|-----------
+`rekor-server-url` | Yes       |         | URL for Rekor server to upload artifact(s) to.
+`signer-pgp-public-key-path` \
+                   | Yes       |         | DEPRECIATED. Will be removed in next release in favor \
+                                           of automatically getting public key from private key. \
+                                           Path to PGP public key corresponding to private key \
+                                           that will be used to sign the Rekor artifact.
+`signer-pgp-private-key-user` \
+                   | Yes       |         | DEPRECIATED. Will be removed in next release in favor \
+                                           of `signer-pgp-private-key` which will import a given \
+                                           PGP private key and automatically determine the \
+                                           PGP private key fingerprint.
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
 Result Artifact Key | Description
---------------------------|------------
-`container-image-version` | Container version to tag built image with
-`image-tar-file`          | Path to the built container image as a tar file
-`image-tar-hash`          | Path to the built container image as a tar file
+--------------------|------------
+`rekor-uuid`        | UUID of Rekor entry created by artifact upload.
+`rekor-entry`       | DEPRECIATED. Will likely be removed in next release.
 """
 
 import json
@@ -41,9 +50,9 @@ from ploigos_step_runner.utils.pgp import detach_sign_with_pgp_key
 DEFAULT_CONFIG = {}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'rekor-server',
-    'gpg-key',
-    'gpg-user'
+    'rekor-server-url',
+    'signer-pgp-public-key-path',
+    'signer-pgp-private-key-user'
 ]
 class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
     """`StepImplementer` for the `automated-governance` step using Rekor.
@@ -84,16 +93,11 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def create_rekor_entry(
-        public_key_path,
-        gpg_user,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
         extra_data_file
     ):
-        """Creates a rekor entry as a dict object.
-
-        Returns
-        -------
-        StepResult
-            Dict that contains rekor entry for upload with the cli
+        """TODO: function will be refactored in next release. will doc then.
         """
         file_hash = get_file_hash(extra_data_file)
         sig_file = extra_data_file + '.asc'
@@ -103,7 +107,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         detach_sign_with_pgp_key(
             output_signature_path=sig_file,
             file_to_sign_path=extra_data_file,
-            pgp_private_key_fingerprint=gpg_user
+            pgp_private_key_fingerprint=signer_pgp_private_key_user
         )
         base64_encoded_extra_data = base64_encode(extra_data_file)
         rekor_entry = {
@@ -114,7 +118,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
                     "format": "pgp",
                     "content": base64_encode(sig_file),
                     "publicKey": {
-                        "content": base64_encode(public_key_path)
+                        "content": base64_encode(signer_pgp_public_key_path)
                     }
                 },
                 "data": {
@@ -130,15 +134,20 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         return rekor_entry
 
     @staticmethod
-    def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
-        """Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
+    def upload_to_rekor(
+        rekor_server,
+        extra_data_file,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
+        work_dir_path
+    ):
+        """TODO: function will be refactored in next release. will doc then.
         """
-        rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+        rekor_entry = Rekor.create_rekor_entry(
+            signer_pgp_public_key_path=signer_pgp_public_key_path,
+            signer_pgp_private_key_user=signer_pgp_private_key_user,
+            extra_data_file=extra_data_file
+        )
         print("Rekor Entry: " + str(rekor_entry))
         rekor_entry_path = Path(os.path.join(work_dir_path, 'entry.json'))
 
@@ -173,18 +182,18 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
-        rekor_server = self.get_value('rekor-server')
+        rekor_server = self.get_value('rekor-server-url')
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+'.json')
         extra_data_file_path = Path(extra_data_file)
         if extra_data_file_path.exists():
             extra_data_file_path.unlink()
         self.workflow_result.write_results_to_json_file(extra_data_file_path)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
-            rekor_server,
-            extra_data_file,
-            self.get_value('gpg-key'),
-            self.get_value('gpg-user'),
-            self.work_dir_path
+            rekor_server=rekor_server,
+            extra_data_file=extra_data_file,
+            signer_pgp_public_key_path=self.get_value('signer-pgp-public-key-path'),
+            signer_pgp_private_key_user=self.get_value('signer-pgp-private-key-user'),
+            work_dir_path=self.work_dir_path
         )
         step_result.add_artifact(
                 name='rekor-entry',

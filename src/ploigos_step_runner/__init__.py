@@ -374,9 +374,9 @@ From least precedence to highest precedence.
       automated-governance:
       - implementer: Rekor
         config: {
-          rekor-server: 'http://example-rekor-server-url/',
-          gpg-key: '/path/to/gpg-key',
-          gpg-user: 'gpg-user@example.com'
+          rekor-server-url: 'http://example-rekor-server-url-url/',
+          signer-pgp-public-key-path: '/path/to/signer-pgp-public-key-path',
+          signer-pgp-private-key-user: 'signer-pgp-private-key-user@example.com'
         }
 
       push-container-image:
@@ -687,9 +687,9 @@ From least precedence to highest precedence.
       automated-governance:
       - implementer: Rekor
         config: {
-          rekor-server: 'http://example-rekor-server-url/',
-          gpg-key: '/path/to/gpg-key',
-          gpg-user: 'gpg-user@example.com'
+          rekor-server-url: 'http://example-rekor-server-url-url/',
+          signer-pgp-public-key-path: '/path/to/signer-pgp-public-key-path',
+          signer-pgp-private-key-user: 'signer-pgp-private-key-user@example.com'
         }
 
       push-container-image:
