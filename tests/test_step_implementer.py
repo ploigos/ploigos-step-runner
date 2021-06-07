@@ -1,6 +1,3 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
 import os
 from contextlib import redirect_stdout
 from io import StringIO
@@ -17,17 +14,19 @@ from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.sample_step_implementers import (
     FailStepImplementer, FooStepImplementer,
+    RequiredStepConfigMultipleOptionsStepImplementer,
     WriteConfigAsResultsStepImplementer)
 
 
 class TestStepImplementer(BaseStepImplementerTestCase):
     def _run_step_implementer_test(
-            self,
-            config,
-            step,
-            expected_step_results,
-            test_dir,
-            environment=None):
+        self,
+        config,
+        step,
+        expected_step_results,
+        test_dir,
+        environment=None
+    ):
         working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
         factory = StepRunner(
             config=config,
@@ -47,6 +46,54 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         )
         self.assertEqual(step_result, expected_step_results)
 
+    def _setup_get_value_with_env_test(self, test_dir, environment):
+        step_config = {
+            'test': 'hello world',
+            'old-param-name': 'foo42',
+            'new-param-name': 'bar42'
+        }
+
+        work_dir_path = os.path.join(test_dir.path, 'working')
+
+        workflow_result = WorkflowResult()
+
+        step_result_deploy_test = StepResult(
+            step_name='deploy',
+            sub_step_name='ArgoCD',
+            sub_step_implementer_name='ArgoCD',
+            environment='TEST'
+        )
+        step_result_deploy_test.add_artifact(
+            name='deployed-host-urls',
+            value='https://awesome-app.test.ploigos.xyz'
+        )
+        workflow_result.add_step_result(step_result=step_result_deploy_test)
+
+        step_result_deploy_prod = StepResult(
+            step_name='deploy',
+            sub_step_name='ArgoCD',
+            sub_step_implementer_name='ArgoCD',
+            environment='PROD'
+        )
+        step_result_deploy_prod.add_artifact(
+            name='deployed-host-urls',
+            value='https://awesome-app.prod.ploigos.xyz'
+        )
+        workflow_result.add_step_result(step_result=step_result_deploy_prod)
+        pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
+        workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
+
+        return self.create_given_step_implementer(
+            step_implementer=FooStepImplementer,
+            step_config=step_config,
+            step_name='foo',
+            implementer='FooStepImplementer',
+            workflow_result=workflow_result,
+            work_dir_path=work_dir_path,
+            environment=environment
+        )
+
+class TestStepImplementer_run_step(TestStepImplementer):
     def test_one_step_writes_to_empty_results_file(self):
         config1 = {
             'step-runner-config': {
@@ -568,31 +615,6 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 'SAMPLE-ENV-2'
             )
 
-    def test_empty_constructor_params(self):
-        config = Config({
-            'step-runner-config': {
-                'write-config-as-results': {
-                    'implementer': 'tests.helpers.sample_step_implementers.'
-                                   'WriteConfigAsResultsStepImplementer'
-                }
-            }
-        })
-        step_config = config.get_step_config('write-config-as-results')
-        sub_step = step_config.get_sub_step(
-            'tests.helpers.sample_step_implementers.'
-            'WriteConfigAsResultsStepImplementer')
-
-        step = WriteConfigAsResultsStepImplementer(
-            workflow_result=None,
-            work_dir_path='',
-            config=sub_step
-        )
-
-        self.assertEqual(step.step_environment_config, {})
-        self.assertEqual(step.step_config, {})
-        self.assertEqual(step.global_config_defaults, {})
-        self.assertEqual(step.global_environment_config_defaults, {})
-
     def test_missing_required_config_key(self):
         config = {
             'step-runner-config': {
@@ -620,6 +642,31 @@ class TestStepImplementer(BaseStepImplementerTestCase):
                 expected_results,
                 test_dir
             )
+class TestStepImplementer_other(TestStepImplementer):
+    def test_empty_constructor_params(self):
+        config = Config({
+            'step-runner-config': {
+                'write-config-as-results': {
+                    'implementer': 'tests.helpers.sample_step_implementers.'
+                                   'WriteConfigAsResultsStepImplementer'
+                }
+            }
+        })
+        step_config = config.get_step_config('write-config-as-results')
+        sub_step = step_config.get_sub_step(
+            'tests.helpers.sample_step_implementers.'
+            'WriteConfigAsResultsStepImplementer')
+
+        step = WriteConfigAsResultsStepImplementer(
+            workflow_result=None,
+            work_dir_path='',
+            config=sub_step
+        )
+
+        self.assertEqual(step.step_environment_config, {})
+        self.assertEqual(step.step_config, {})
+        self.assertEqual(step.global_config_defaults, {})
+        self.assertEqual(step.global_environment_config_defaults, {})
 
     def test_write_working_file(self):
         config = Config({
@@ -832,6 +879,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             self.assertEqual(sub, f'{working_dir_path}/foo/folder1/folder2/folder3')
             self.assertEqual(True, os.path.isdir(sub))
 
+class TestStepImplementer_get_value(TestStepImplementer):
     def test_get_value_no_env(self):
         step_config = {
             'test': 'hello world'
@@ -862,54 +910,9 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             self.assertEqual(step.get_value('fake-previous-step-artifact'), 'world hello')
             self.assertIsNone(step.get_value('does-not-exist'))
 
-    def __setup_get_value_with_env_test(self, test_dir, environment):
-        step_config = {
-            'test': 'hello world'
-        }
-
-        work_dir_path = os.path.join(test_dir.path, 'working')
-
-        workflow_result = WorkflowResult()
-
-        step_result_deploy_test = StepResult(
-            step_name='deploy',
-            sub_step_name='ArgoCD',
-            sub_step_implementer_name='ArgoCD',
-            environment='TEST'
-        )
-        step_result_deploy_test.add_artifact(
-            name='deployed-host-urls',
-            value='https://awesome-app.test.ploigos.xyz'
-        )
-        workflow_result.add_step_result(step_result=step_result_deploy_test)
-
-        step_result_deploy_prod = StepResult(
-            step_name='deploy',
-            sub_step_name='ArgoCD',
-            sub_step_implementer_name='ArgoCD',
-            environment='PROD'
-        )
-        step_result_deploy_prod.add_artifact(
-            name='deployed-host-urls',
-            value='https://awesome-app.prod.ploigos.xyz'
-        )
-        workflow_result.add_step_result(step_result=step_result_deploy_prod)
-        pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
-        workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
-
-        return self.create_given_step_implementer(
-            step_implementer=FooStepImplementer,
-            step_config=step_config,
-            step_name='foo',
-            implementer='FooStepImplementer',
-            workflow_result=workflow_result,
-            work_dir_path=work_dir_path,
-            environment=environment
-        )
-
     def test_get_value_from_step_not_run_against_specific_environment(self):
         with TempDirectory() as test_dir:
-            step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment=None)
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment=None)
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
@@ -917,7 +920,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_get_value_from_step_run_in_environment_that_has_result_value_for_that_environment_1(self):
         with TempDirectory() as test_dir:
-            step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='TEST')
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='TEST')
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
@@ -925,7 +928,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_get_value_from_step_run_in_environment_that_has_result_value_for_that_environment_2(self):
         with TempDirectory() as test_dir:
-            step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='PROD')
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='PROD')
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
                 'https://awesome-app.prod.ploigos.xyz'
@@ -933,12 +936,97 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
     def test_get_value_from_step_run_in_environment_that_nodes_not_have_result_value_for_that_environment(self):
         with TempDirectory() as test_dir:
-            step = self.__setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
                 'https://awesome-app.test.ploigos.xyz'
             )
 
+    def test_get_value_multiple_keys_1(self):
+        with TempDirectory() as test_dir:
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
+            self.assertEqual(
+                step.get_value(['old-param-name', 'new-param-name']),
+                'foo42'
+            )
+
+    def test_get_value_multiple_keys_2(self):
+        with TempDirectory() as test_dir:
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
+            self.assertEqual(
+                step.get_value(['new-param-name', 'old-param-name']),
+                'bar42'
+            )
+
+    def test_get_value_multiple_keys_3(self):
+        with TempDirectory() as test_dir:
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
+            self.assertEqual(
+                step.get_value(['does-not-exist', 'old-param-name']),
+                'foo42'
+            )
+
+    def test_get_value_multiple_keys_4(self):
+        with TempDirectory() as test_dir:
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
+            self.assertEqual(
+                step.get_value(['old-param-name', 'does-not-exist']),
+                'foo42'
+            )
+
+class TestStepImplementer_validate_required_config_or_previous_step_result_artifact_keys(TestStepImplementer):
+    def test__validate_required_config_or_previous_step_result_artifact_keys_mutliple_keys_missing_config(self):
+        with TempDirectory() as test_dir:
+            step_config = {}
+
+            step = self.create_given_step_implementer(
+                step_implementer=RequiredStepConfigMultipleOptionsStepImplementer,
+                step_config=step_config,
+                step_name='foo',
+                implementer='RequiredStepConfigMultipleOptionsStepImplementer',
+                work_dir_path=test_dir.path
+            )
+
+            with self.assertRaisesRegex(
+                AssertionError,
+                r"Missing required step configuration or previous step result artifact keys: "
+                r"\[\['new-required-key', 'old-required-key'\]\]"
+            ):
+                step._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_mutliple_keys_first_option(self):
+        with TempDirectory() as test_dir:
+            step_config = {
+                'new-required-key': 'new-value-42'
+            }
+
+            step = self.create_given_step_implementer(
+                step_implementer=RequiredStepConfigMultipleOptionsStepImplementer,
+                step_config=step_config,
+                step_name='foo',
+                implementer='RequiredStepConfigMultipleOptionsStepImplementer',
+                work_dir_path=test_dir.path
+            )
+
+            step._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_mutliple_keys_second_option(self):
+        with TempDirectory() as test_dir:
+            step_config = {
+                'old-required-key': 'new-value-42'
+            }
+
+            step = self.create_given_step_implementer(
+                step_implementer=RequiredStepConfigMultipleOptionsStepImplementer,
+                step_config=step_config,
+                step_name='foo',
+                implementer='RequiredStepConfigMultipleOptionsStepImplementer',
+                work_dir_path=test_dir.path
+            )
+
+            step._validate_required_config_or_previous_step_result_artifact_keys()
+
+class TestStepImplementer___print_data_string(TestStepImplementer):
     def test___print_data_string(self):
         stdout_buff = StringIO()
         with redirect_stdout(stdout_buff):
