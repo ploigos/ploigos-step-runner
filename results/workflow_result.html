@@ -101,6 +101,52 @@ class WorkflowResult:
 
         return value
 
+    def get_evidence_value(
+        self,
+        evidence,
+        step_name=None,
+        sub_step_name=None,
+        environment=None
+    ): # pylint: disable=too-many-boolean-expressions
+        &#34;&#34;&#34;Search for an evidence.
+
+        If step_name, sub_step_name, or environment are provided ensure the evidence comes
+        from the first
+
+        1.  if step_name is provided, look for the evidence in the step
+        2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
+        3.  else, search ALL steps for the FIRST match of the evidence.
+
+        Parameters
+        ----------
+        evidence: str
+           The artifact name to search for
+        step_name: str optional
+           Optionally search only in one step
+        sub_step_name: str optional
+            Optionally search only in one step
+        environment : str
+            Optional. Environment to get the step result for.
+
+        Returns
+        -------
+        Str
+           &#39;v1.0.2&#39;
+        &#34;&#34;&#34;
+
+        value = None
+        for step_result in self.workflow_list:
+            if ( \
+                (not step_name or step_result.step_name == step_name) and \
+                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+                (not environment or step_result.environment == environment)
+            ):
+                value = step_result.get_evidence_value(name=evidence)
+                if value is not None:
+                    break
+
+        return value
+
     def add_step_result(self, step_result):
         &#34;&#34;&#34;Add a single step_result to the workflow list.
 
@@ -369,6 +415,52 @@ The WorkflowResult represents ALL previous results.</p></div>
                 (not environment or step_result.environment == environment)
             ):
                 value = step_result.get_artifact_value(name=artifact)
+                if value is not None:
+                    break
+
+        return value
+
+    def get_evidence_value(
+        self,
+        evidence,
+        step_name=None,
+        sub_step_name=None,
+        environment=None
+    ): # pylint: disable=too-many-boolean-expressions
+        &#34;&#34;&#34;Search for an evidence.
+
+        If step_name, sub_step_name, or environment are provided ensure the evidence comes
+        from the first
+
+        1.  if step_name is provided, look for the evidence in the step
+        2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
+        3.  else, search ALL steps for the FIRST match of the evidence.
+
+        Parameters
+        ----------
+        evidence: str
+           The artifact name to search for
+        step_name: str optional
+           Optionally search only in one step
+        sub_step_name: str optional
+            Optionally search only in one step
+        environment : str
+            Optional. Environment to get the step result for.
+
+        Returns
+        -------
+        Str
+           &#39;v1.0.2&#39;
+        &#34;&#34;&#34;
+
+        value = None
+        for step_result in self.workflow_list:
+            if ( \
+                (not step_name or step_result.step_name == step_name) and \
+                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+                (not environment or step_result.environment == environment)
+            ):
+                value = step_result.get_evidence_value(name=evidence)
                 if value is not None:
                     break
 
@@ -803,6 +895,88 @@ from the first</p>
     return value</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value"><code class="name flex">
+<span>def <span class="ident">get_evidence_value</span></span>(<span>self, evidence, step_name=None, sub_step_name=None, environment=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Search for an evidence.</p>
+<p>If step_name, sub_step_name, or environment are provided ensure the evidence comes
+from the first</p>
+<ol>
+<li>if step_name is provided, look for the evidence in the step</li>
+<li>elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step</li>
+<li>else, search ALL steps for the FIRST match of the evidence.</li>
+</ol>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>evidence</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+<dt>The artifact name to search for</dt>
+<dt><strong><code>step_name</code></strong> :&ensp;<code>str optional</code></dt>
+<dd>&nbsp;</dd>
+<dt>Optionally search only in one step</dt>
+<dt><strong><code>sub_step_name</code></strong> :&ensp;<code>str optional</code></dt>
+<dd>Optionally search only in one step</dd>
+<dt><strong><code>environment</code></strong> :&ensp;<code>str</code></dt>
+<dd>Optional. Environment to get the step result for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>'v1.0.2'</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_evidence_value(
+    self,
+    evidence,
+    step_name=None,
+    sub_step_name=None,
+    environment=None
+): # pylint: disable=too-many-boolean-expressions
+    &#34;&#34;&#34;Search for an evidence.
+
+    If step_name, sub_step_name, or environment are provided ensure the evidence comes
+    from the first
+
+    1.  if step_name is provided, look for the evidence in the step
+    2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
+    3.  else, search ALL steps for the FIRST match of the evidence.
+
+    Parameters
+    ----------
+    evidence: str
+       The artifact name to search for
+    step_name: str optional
+       Optionally search only in one step
+    sub_step_name: str optional
+        Optionally search only in one step
+    environment : str
+        Optional. Environment to get the step result for.
+
+    Returns
+    -------
+    Str
+       &#39;v1.0.2&#39;
+    &#34;&#34;&#34;
+
+    value = None
+    for step_result in self.workflow_list:
+        if ( \
+            (not step_name or step_result.step_name == step_name) and \
+            (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+            (not environment or step_result.environment == environment)
+        ):
+            value = step_result.get_evidence_value(name=evidence)
+            if value is not None:
+                break
+
+    return value</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result"><code class="name flex">
 <span>def <span class="ident">get_step_result</span></span>(<span>self, step_name, sub_step_name=None, environment=None)</span>
 </code></dt>
@@ -1001,6 +1175,7 @@ from the first</p>
 <ul class="">
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.add_step_result" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.add_step_result">add_step_result</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.get_artifact_value" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.get_artifact_value">get_artifact_value</a></code></li>
+<li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value">get_evidence_value</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result">get_step_result</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.load_from_pickle_file" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.load_from_pickle_file">load_from_pickle_file</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list">workflow_list</a></code></li>

@@ -35,6 +35,7 @@ of a StepImplementer#run.
 
 from ploigos_step_runner import StepRunnerException
 from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
+from ploigos_step_runner.results.step_result_evidence import StepResultEvidence
 
 
 class StepResult: # pylint: disable=too-many-instance-attributes
@@ -61,6 +62,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         self.__success = True
         self.__message = &#39;&#39;
         self.__artifacts = {}
+        self.__evidence = {}
 
     @classmethod
     def from_step_implementer(cls, step_implementer):
@@ -129,6 +131,17 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         return self.__artifacts
 
     @property
+    def evidence(self):
+        &#34;&#34;&#34;Get the evidence associated with this step result.
+
+        Returns
+        -------
+        dict of str: StepResultEvidence
+            Key is evidence name, value is StepResultEvidence.
+        &#34;&#34;&#34;
+        return self.__evidence
+
+    @property
     def artifacts_dicts(self):
         &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
 
@@ -142,6 +155,21 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             artifact_dicts.append(artifact.as_dict())
 
         return artifact_dicts
+
+    @property
+    def evidence_dicts(self):
+        &#34;&#34;&#34;Get the evidence associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultEvidence.
+        &#34;&#34;&#34;
+        evidence_dicts = []
+        for evidence in self.evidence.values():
+            evidence_dicts.append(evidence.as_dict())
+
+        return evidence_dicts
 
     def get_artifact(self, name):
         &#34;&#34;&#34;Get artifact with given name for this StepResult.
@@ -157,6 +185,21 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             The step result artifact with the given name for this StepResult.
         &#34;&#34;&#34;
         return self.__artifacts.get(name)
+
+    def get_evidence(self, name):
+        &#34;&#34;&#34;Get evidence with given name for this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence to return.
+
+        Returns
+        -------
+        StepResultEvidence
+            The step result evidence with the given name for this StepResult.
+        &#34;&#34;&#34;
+        return self.__evidence.get(name)
 
     def get_artifact_value(self, name):
         &#34;&#34;&#34;Get the value for a specified artifact.
@@ -174,6 +217,25 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         value = None
         if self.__artifacts.get(name):
             value = self.__artifacts.get(name).value
+
+        return value
+
+    def get_evidence_value(self, name):
+        &#34;&#34;&#34;Get the value for a specified evidence.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence.
+
+        Returns
+        -------
+        str
+            The value of the evidence.
+        &#34;&#34;&#34;
+        value = None
+        if self.evidence.get(name):
+            value = self.__evidence.get(name).value
 
         return value
 
@@ -197,6 +259,31 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             raise StepRunnerException(&#39;Value is required to add artifact&#39;)
 
         self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
+
+    def add_evidence(self, name, value, description=&#39;&#39;):
+        &#34;&#34;&#34;Add evidence to this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            Name of the result evidence.
+        value : str
+            Arbitrary value of the evidence.
+        description : str, optional
+            Human readable description of the result evidence (defaults to empty).
+        &#34;&#34;&#34;
+        if not name:
+            raise StepRunnerException(&#39;Name is required to add evidence&#39;)
+
+        # False can be the value
+        if value == &#39;&#39; or value is None:
+            raise StepRunnerException(&#39;Value is required to add evidence&#39;)
+
+        self.__evidence[name] = StepResultEvidence(
             name=name,
             value=value,
             description=description
@@ -245,14 +332,16 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                 &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
                 &#39;success&#39;: Boolean,
                 &#39;message&#39;: &#39;value&#39;,
-                &#39;artifacts&#39;: []
+                &#39;artifacts&#39;: [],
+                &#39;evidence&#39;: []
             }
         &#34;&#34;&#34;
         result = {
             &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts
+            &#39;artifacts&#39;: self.artifacts_dicts,
+            &#39;evidence&#39;: self.evidence_dicts
         }
 
         return result
@@ -274,7 +363,13 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                         &#34;name&#34;: {
                             &#34;description&#34;: &#34;file description&#34;,
                             &#34;value&#34;: &#34;step-result.txt&#34;
+                        },
+                    &#34;evidence&#34;: {
+                        &#34;name&#34;: {
+                            &#34;description&#34;: &#34;piece of evidence&#34;,
+                            &#34;value&#34;: &#34;evidence&#34;
                         }
+                    }
                     }
                 }
             }
@@ -305,7 +400,8 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             &#39;environment&#39;: self.environment,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts
+            &#39;artifacts&#39;: self.artifacts_dicts,
+            &#39;evidence&#39;: self.evidence_dicts
         })
 
     def __repr__(self):
@@ -319,6 +415,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             f&#34;success={self.success},&#34; \
             f&#34;message={self.message},&#34; \
             f&#34;artifacts={self.artifacts_dicts}&#34; \
+            f&#34;evidence={self.evidence_dicts}&#34; \
             &#34;)&#34;
 
     def __eq__(self, other):
@@ -332,7 +429,8 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             self.environment == other.environment and
             self.success == other.success and
             self.message == other.message and
-            self.artifacts == other.artifacts
+            self.artifacts == other.artifacts and
+            self.evidence == other.evidence
         )
 
     def __ne__(self, other):
@@ -397,6 +495,7 @@ if step was run against a specific environment.</dd>
         self.__success = True
         self.__message = &#39;&#39;
         self.__artifacts = {}
+        self.__evidence = {}
 
     @classmethod
     def from_step_implementer(cls, step_implementer):
@@ -465,6 +564,17 @@ if step was run against a specific environment.</dd>
         return self.__artifacts
 
     @property
+    def evidence(self):
+        &#34;&#34;&#34;Get the evidence associated with this step result.
+
+        Returns
+        -------
+        dict of str: StepResultEvidence
+            Key is evidence name, value is StepResultEvidence.
+        &#34;&#34;&#34;
+        return self.__evidence
+
+    @property
     def artifacts_dicts(self):
         &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
 
@@ -478,6 +588,21 @@ if step was run against a specific environment.</dd>
             artifact_dicts.append(artifact.as_dict())
 
         return artifact_dicts
+
+    @property
+    def evidence_dicts(self):
+        &#34;&#34;&#34;Get the evidence associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultEvidence.
+        &#34;&#34;&#34;
+        evidence_dicts = []
+        for evidence in self.evidence.values():
+            evidence_dicts.append(evidence.as_dict())
+
+        return evidence_dicts
 
     def get_artifact(self, name):
         &#34;&#34;&#34;Get artifact with given name for this StepResult.
@@ -493,6 +618,21 @@ if step was run against a specific environment.</dd>
             The step result artifact with the given name for this StepResult.
         &#34;&#34;&#34;
         return self.__artifacts.get(name)
+
+    def get_evidence(self, name):
+        &#34;&#34;&#34;Get evidence with given name for this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence to return.
+
+        Returns
+        -------
+        StepResultEvidence
+            The step result evidence with the given name for this StepResult.
+        &#34;&#34;&#34;
+        return self.__evidence.get(name)
 
     def get_artifact_value(self, name):
         &#34;&#34;&#34;Get the value for a specified artifact.
@@ -510,6 +650,25 @@ if step was run against a specific environment.</dd>
         value = None
         if self.__artifacts.get(name):
             value = self.__artifacts.get(name).value
+
+        return value
+
+    def get_evidence_value(self, name):
+        &#34;&#34;&#34;Get the value for a specified evidence.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence.
+
+        Returns
+        -------
+        str
+            The value of the evidence.
+        &#34;&#34;&#34;
+        value = None
+        if self.evidence.get(name):
+            value = self.__evidence.get(name).value
 
         return value
 
@@ -533,6 +692,31 @@ if step was run against a specific environment.</dd>
             raise StepRunnerException(&#39;Value is required to add artifact&#39;)
 
         self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
+
+    def add_evidence(self, name, value, description=&#39;&#39;):
+        &#34;&#34;&#34;Add evidence to this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            Name of the result evidence.
+        value : str
+            Arbitrary value of the evidence.
+        description : str, optional
+            Human readable description of the result evidence (defaults to empty).
+        &#34;&#34;&#34;
+        if not name:
+            raise StepRunnerException(&#39;Name is required to add evidence&#39;)
+
+        # False can be the value
+        if value == &#39;&#39; or value is None:
+            raise StepRunnerException(&#39;Value is required to add evidence&#39;)
+
+        self.__evidence[name] = StepResultEvidence(
             name=name,
             value=value,
             description=description
@@ -581,14 +765,16 @@ if step was run against a specific environment.</dd>
                 &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
                 &#39;success&#39;: Boolean,
                 &#39;message&#39;: &#39;value&#39;,
-                &#39;artifacts&#39;: []
+                &#39;artifacts&#39;: [],
+                &#39;evidence&#39;: []
             }
         &#34;&#34;&#34;
         result = {
             &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts
+            &#39;artifacts&#39;: self.artifacts_dicts,
+            &#39;evidence&#39;: self.evidence_dicts
         }
 
         return result
@@ -610,7 +796,13 @@ if step was run against a specific environment.</dd>
                         &#34;name&#34;: {
                             &#34;description&#34;: &#34;file description&#34;,
                             &#34;value&#34;: &#34;step-result.txt&#34;
+                        },
+                    &#34;evidence&#34;: {
+                        &#34;name&#34;: {
+                            &#34;description&#34;: &#34;piece of evidence&#34;,
+                            &#34;value&#34;: &#34;evidence&#34;
                         }
+                    }
                     }
                 }
             }
@@ -641,7 +833,8 @@ if step was run against a specific environment.</dd>
             &#39;environment&#39;: self.environment,
             &#39;success&#39;: self.success,
             &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts
+            &#39;artifacts&#39;: self.artifacts_dicts,
+            &#39;evidence&#39;: self.evidence_dicts
         })
 
     def __repr__(self):
@@ -655,6 +848,7 @@ if step was run against a specific environment.</dd>
             f&#34;success={self.success},&#34; \
             f&#34;message={self.message},&#34; \
             f&#34;artifacts={self.artifacts_dicts}&#34; \
+            f&#34;evidence={self.evidence_dicts}&#34; \
             &#34;)&#34;
 
     def __eq__(self, other):
@@ -668,7 +862,8 @@ if step was run against a specific environment.</dd>
             self.environment == other.environment and
             self.success == other.success and
             self.message == other.message and
-            self.artifacts == other.artifacts
+            self.artifacts == other.artifacts and
+            self.evidence == other.evidence
         )
 
     def __ne__(self, other):
@@ -783,6 +978,58 @@ def environment(self):
         else None.
     &#34;&#34;&#34;
     return self.__environment</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.evidence"><code class="name">var <span class="ident">evidence</span></code></dt>
+<dd>
+<div class="desc"><p>Get the evidence associated with this step result.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code> of <code>str: StepResultEvidence</code></dt>
+<dd>Key is evidence name, value is StepResultEvidence.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def evidence(self):
+    &#34;&#34;&#34;Get the evidence associated with this step result.
+
+    Returns
+    -------
+    dict of str: StepResultEvidence
+        Key is evidence name, value is StepResultEvidence.
+    &#34;&#34;&#34;
+    return self.__evidence</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.evidence_dicts"><code class="name">var <span class="ident">evidence_dicts</span></code></dt>
+<dd>
+<div class="desc"><p>Get the evidence associated with this step result as dictionaries.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>dict</code></dt>
+<dd>Each item in list a dict representation of the StepResultEvidence.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def evidence_dicts(self):
+    &#34;&#34;&#34;Get the evidence associated with this step result as dictionaries.
+
+    Returns
+    -------
+    list of dict
+        Each item in list a dict representation of the StepResultEvidence.
+    &#34;&#34;&#34;
+    evidence_dicts = []
+    for evidence in self.evidence.values():
+        evidence_dicts.append(evidence.as_dict())
+
+    return evidence_dicts</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.message"><code class="name">var <span class="ident">message</span></code></dt>
@@ -942,6 +1189,50 @@ def success(self):
     )</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.add_evidence"><code class="name flex">
+<span>def <span class="ident">add_evidence</span></span>(<span>self, name, value, description='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add evidence to this StepResult.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the result evidence.</dd>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Arbitrary value of the evidence.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Human readable description of the result evidence (defaults to empty).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_evidence(self, name, value, description=&#39;&#39;):
+    &#34;&#34;&#34;Add evidence to this StepResult.
+
+    Parameters
+    ----------
+    name : str
+        Name of the result evidence.
+    value : str
+        Arbitrary value of the evidence.
+    description : str, optional
+        Human readable description of the result evidence (defaults to empty).
+    &#34;&#34;&#34;
+    if not name:
+        raise StepRunnerException(&#39;Name is required to add evidence&#39;)
+
+    # False can be the value
+    if value == &#39;&#39; or value is None:
+        raise StepRunnerException(&#39;Value is required to add evidence&#39;)
+
+    self.__evidence[name] = StepResultEvidence(
+        name=name,
+        value=value,
+        description=description
+    )</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_artifact"><code class="name flex">
 <span>def <span class="ident">get_artifact</span></span>(<span>self, name)</span>
 </code></dt>
@@ -1016,6 +1307,80 @@ def success(self):
     return value</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_evidence"><code class="name flex">
+<span>def <span class="ident">get_evidence</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get evidence with given name for this StepResult.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the evidence to return.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>StepResultEvidence</code></dt>
+<dd>The step result evidence with the given name for this StepResult.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_evidence(self, name):
+    &#34;&#34;&#34;Get evidence with given name for this StepResult.
+
+    Parameters
+    ----------
+    name : str
+        The name of the evidence to return.
+
+    Returns
+    -------
+    StepResultEvidence
+        The step result evidence with the given name for this StepResult.
+    &#34;&#34;&#34;
+    return self.__evidence.get(name)</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.get_evidence_value"><code class="name flex">
+<span>def <span class="ident">get_evidence_value</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the value for a specified evidence.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the evidence.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The value of the evidence.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_evidence_value(self, name):
+    &#34;&#34;&#34;Get the value for a specified evidence.
+
+    Parameters
+    ----------
+    name : str
+        The name of the evidence.
+
+    Returns
+    -------
+    str
+        The value of the evidence.
+    &#34;&#34;&#34;
+    value = None
+    if self.evidence.get(name):
+        value = self.__evidence.get(name).value
+
+    return value</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict"><code class="name flex">
 <span>def <span class="ident">get_step_result_dict</span></span>(<span>self)</span>
 </code></dt>
@@ -1035,6 +1400,12 @@ For example:
 "name": {
 "description": "file description",
 "value": "step-result.txt"
+},
+"evidence": {
+"name": {
+"description": "piece of evidence",
+"value": "evidence"
+}
 }
 }
 }
@@ -1061,7 +1432,13 @@ For example:
                     &#34;name&#34;: {
                         &#34;description&#34;: &#34;file description&#34;,
                         &#34;value&#34;: &#34;step-result.txt&#34;
+                    },
+                &#34;evidence&#34;: {
+                    &#34;name&#34;: {
+                        &#34;description&#34;: &#34;piece of evidence&#34;,
+                        &#34;value&#34;: &#34;evidence&#34;
                     }
+                }
                 }
             }
         }
@@ -1096,7 +1473,8 @@ For example:
 'sub-step-implementer-name': 'value',
 'success': Boolean,
 'message': 'value',
-'artifacts': []
+'artifacts': [],
+'evidence': []
 }</dd>
 </dl></div>
 <details class="source">
@@ -1114,14 +1492,16 @@ For example:
             &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
             &#39;success&#39;: Boolean,
             &#39;message&#39;: &#39;value&#39;,
-            &#39;artifacts&#39;: []
+            &#39;artifacts&#39;: [],
+            &#39;evidence&#39;: []
         }
     &#34;&#34;&#34;
     result = {
         &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
         &#39;success&#39;: self.success,
         &#39;message&#39;: self.message,
-        &#39;artifacts&#39;: self.artifacts_dicts
+        &#39;artifacts&#39;: self.artifacts_dicts,
+        &#39;evidence&#39;: self.evidence_dicts
     }
 
     return result</code></pre>
@@ -1149,12 +1529,17 @@ For example:
 <h4><code><a title="ploigos_step_runner.results.step_result.StepResult" href="#ploigos_step_runner.results.step_result.StepResult">StepResult</a></code></h4>
 <ul class="">
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.add_artifact" href="#ploigos_step_runner.results.step_result.StepResult.add_artifact">add_artifact</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.add_evidence" href="#ploigos_step_runner.results.step_result.StepResult.add_evidence">add_evidence</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.artifacts" href="#ploigos_step_runner.results.step_result.StepResult.artifacts">artifacts</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.artifacts_dicts" href="#ploigos_step_runner.results.step_result.StepResult.artifacts_dicts">artifacts_dicts</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.environment" href="#ploigos_step_runner.results.step_result.StepResult.environment">environment</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.evidence" href="#ploigos_step_runner.results.step_result.StepResult.evidence">evidence</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.evidence_dicts" href="#ploigos_step_runner.results.step_result.StepResult.evidence_dicts">evidence_dicts</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.from_step_implementer" href="#ploigos_step_runner.results.step_result.StepResult.from_step_implementer">from_step_implementer</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_artifact" href="#ploigos_step_runner.results.step_result.StepResult.get_artifact">get_artifact</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_artifact_value" href="#ploigos_step_runner.results.step_result.StepResult.get_artifact_value">get_artifact_value</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_evidence" href="#ploigos_step_runner.results.step_result.StepResult.get_evidence">get_evidence</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_evidence_value" href="#ploigos_step_runner.results.step_result.StepResult.get_evidence_value">get_evidence_value</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_step_result_dict">get_step_result_dict</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict">get_sub_step_result_dict</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.message" href="#ploigos_step_runner.results.step_result.StepResult.message">message</a></code></li>
