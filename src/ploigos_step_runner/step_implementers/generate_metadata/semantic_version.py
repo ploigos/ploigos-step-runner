@@ -142,4 +142,13 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             value=image_tag
         )
 
+        step_result.add_evidence(
+            name='version',
+            value=version
+        )
+        step_result.add_evidence(
+            name='container-image-version',
+            value=image_tag
+        )
+
         return step_result
