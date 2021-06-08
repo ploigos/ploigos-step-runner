@@ -45,14 +45,45 @@ Could come from:</p>
 <td><code>container-image-signer-pgp-private-key</code></td>
 <td>Yes</td>
 <td></td>
-<td>PGP Private Key used to
-sign the image</td>
+<td>PGP Private Key used to sign the image</td>
 </tr>
 <tr>
 <td><code>container-image-tag</code></td>
 <td>Yes</td>
 <td></td>
 <td>Tag of the container image to sign</td>
+</tr>
+<tr>
+<td><code>container-image-signature-destination-url</code></td>
+<td>No</td>
+<td></td>
+<td>URL to upload the container image signature to.
+The container image signature name will be appended
+to form the container image signature URI.
+<br /><br />
+Must start with <code>/</code> or <code>file://</code> to upload
+to local file path.
+<br /><br />
+Or must start with <code>http://</code> or <code>https://</code> to
+upload via a <code>PUT</code> to a remote location.</td>
+</tr>
+<tr>
+<td><code>container-image-signature-destination-username</code></td>
+<td>No</td>
+<td></td>
+<td>Username to use when doing upload via http(s).</td>
+</tr>
+<tr>
+<td><code>container-image-signature-destination-password</code></td>
+<td>No</td>
+<td></td>
+<td>Password to use when doing upload via http(s).</td>
+</tr>
+<tr>
+<td>``</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -73,7 +104,7 @@ the container image.</td>
 </tr>
 <tr>
 <td><code>container-image-signature-file-path</code></td>
-<td>File path to create image signature.</td>
+<td>File path to created image signature.</td>
 </tr>
 <tr>
 <td><code>container-image-signature-name</code></td>
@@ -85,6 +116,15 @@ ex: user/hello-node@sha256=
 2cbdb73c9177e63e85d267f738e9
 9e368db3f806eab4c541f5c6b719
 e69f1a2b/signature-1</td>
+</tr>
+<tr>
+<td><code>container-image-signature-uri</code></td>
+<td>URI of the uploaded container image signature.</td>
+</tr>
+<tr>
+<td><code>container-image-signature-upload-results</code></td>
+<td>Results of uploading the container image
+signature to the given destination.</td>
 </tr>
 </tbody>
 </table>
@@ -103,21 +143,36 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key                        | Required? | Default  | Description
------------------------------------------|-----------|----------|-------------
-`container-image-signer-pgp-private-key` | Yes       |          | PGP Private Key used to \
-                                                                  sign the image
-`container-image-tag`                    | Yes       |          | Tag of the container image to sign
+Configuration Key      | Required? | Default | Description
+-----------------------|-----------|---------|-------------
+`container-image-signer-pgp-private-key` \
+                       | Yes       |         | PGP Private Key used to sign the image
+`container-image-tag`  | Yes       |         | Tag of the container image to sign
+`container-image-signature-destination-url` \
+                       | No        |         | URL to upload the container image signature to.\
+                                               The container image signature name will be appended \
+                                               to form the container image signature URI. \
+                                               &lt;br /&gt;&lt;br /&gt;\
+                                               Must start with `/` or `file://` to upload \
+                                               to local file path. \
+                                               &lt;br /&gt;&lt;br /&gt;\
+                                               Or must start with `http://` or `https://` to \
+                                               upload via a `PUT` to a remote location.
+`container-image-signature-destination-username` \
+                       | No        |         | Username to use when doing upload via http(s).
+`container-image-signature-destination-password` \
+                       | No        |         | Password to use when doing upload via http(s).
+``
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key                   | Description
---------------------------------------|------------
+Result Artifact Key                                 | Description
+----------------------------------------------------|------------
 `container-image-signature-private-key-fingerprint` | Fingerprint for the private key used to sign \
                                                       the container image.
-`container-image-signature-file-path`               | File path to create image signature.
+`container-image-signature-file-path`               | File path to created image signature.
 `container-image-signature-name`                    | Fully qualified name of the \
                                                       name of the image signature, \
                                                       including: organization, repo, \
@@ -126,15 +181,19 @@ Result Artifact Key                   | Description
                                                       2cbdb73c9177e63e85d267f738e9\
                                                       9e368db3f806eab4c541f5c6b719\
                                                       e69f1a2b/signature-1
+`container-image-signature-uri`                     | URI of the uploaded container image signature.
+`container-image-signature-upload-results`          | Results of uploading the container image \
+                                                      signature to the given destination.
+
 &#34;&#34;&#34;
 import glob
 import os
 import sys
 
 import sh
-from ploigos_step_runner import StepImplementer
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.file import upload_file
 from ploigos_step_runner.utils.gpg import import_pgp_key
 
 DEFAULT_CONFIG = {
@@ -232,6 +291,37 @@ class PodmanSign(StepImplementer):
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
+
+
+        # upload the image signature
+        container_image_signature_destination_url = self.get_value(
+            &#39;container-image-signature-destination-url&#39;
+        )
+        if container_image_signature_destination_url:
+            container_image_signature_destination_uri = \
+                f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
+            step_result.add_artifact(
+                name=&#39;container-image-signature-uri&#39;,
+                description=&#39;URI of the uploaded container image signature&#39;,
+                value=container_image_signature_destination_uri
+            )
+
+            try:
+                upload_result = upload_file(
+                    file_path=signature_file_path,
+                    destination_uri=container_image_signature_destination_uri,
+                    username=self.get_value(&#39;container-image-signature-destination-username&#39;),
+                    password=self.get_value(&#39;container-image-signature-destination-password&#39;)
+                )
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-upload-results&#39;,
+                    description=&#39;Results of uploading the container image signature&#39; \
+                                &#39; to the given destination.&#39;,
+                    value=upload_result
+                )
+            except RuntimeError as error:
+                step_result.success = False
+                step_result.message = str(error)
 
         return step_result
 
@@ -390,6 +480,37 @@ an image signature.</p></div>
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
+
+
+        # upload the image signature
+        container_image_signature_destination_url = self.get_value(
+            &#39;container-image-signature-destination-url&#39;
+        )
+        if container_image_signature_destination_url:
+            container_image_signature_destination_uri = \
+                f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
+            step_result.add_artifact(
+                name=&#39;container-image-signature-uri&#39;,
+                description=&#39;URI of the uploaded container image signature&#39;,
+                value=container_image_signature_destination_uri
+            )
+
+            try:
+                upload_result = upload_file(
+                    file_path=signature_file_path,
+                    destination_uri=container_image_signature_destination_uri,
+                    username=self.get_value(&#39;container-image-signature-destination-username&#39;),
+                    password=self.get_value(&#39;container-image-signature-destination-password&#39;)
+                )
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-upload-results&#39;,
+                    description=&#39;Results of uploading the container image signature&#39; \
+                                &#39; to the given destination.&#39;,
+                    value=upload_result
+                )
+            except RuntimeError as error:
+                step_result.success = False
+                step_result.message = str(error)
 
         return step_result
 

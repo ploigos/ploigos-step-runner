@@ -394,11 +394,11 @@ class OpenSCAPGeneric(StepImplementer):
                 oscap_input_definitions_uri = self.get_value(&#39;oscap-input-definitions-uri&#39;)
                 print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
                 oscap_input_file = download_and_decompress_source_to_destination(
-                    source_url=oscap_input_definitions_uri,
+                    source_uri=oscap_input_definitions_uri,
                     destination_dir=self.work_dir_path_step
                 )
                 print(f&#34;Downloaded input definitions to: {oscap_input_file}&#34;)
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f&#34;Error downloading OpenSCAP input file: {error}&#34;
                 ) from error
@@ -410,11 +410,11 @@ class OpenSCAPGeneric(StepImplementer):
                 if oscap_tailoring_file_uri:
                     print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
                     oscap_tailoring_file = download_and_decompress_source_to_destination(
-                        source_url=oscap_tailoring_file_uri,
+                        source_uri=oscap_tailoring_file_uri,
                         destination_dir=self.work_dir_path_step
                     )
                     print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f&#34;Error downloading OpenSCAP tailoring file: {error}&#34;
                 ) from error
@@ -1013,11 +1013,11 @@ class OpenSCAPGeneric(StepImplementer):
                 oscap_input_definitions_uri = self.get_value(&#39;oscap-input-definitions-uri&#39;)
                 print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
                 oscap_input_file = download_and_decompress_source_to_destination(
-                    source_url=oscap_input_definitions_uri,
+                    source_uri=oscap_input_definitions_uri,
                     destination_dir=self.work_dir_path_step
                 )
                 print(f&#34;Downloaded input definitions to: {oscap_input_file}&#34;)
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f&#34;Error downloading OpenSCAP input file: {error}&#34;
                 ) from error
@@ -1029,11 +1029,11 @@ class OpenSCAPGeneric(StepImplementer):
                 if oscap_tailoring_file_uri:
                     print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
                     oscap_tailoring_file = download_and_decompress_source_to_destination(
-                        source_url=oscap_tailoring_file_uri,
+                        source_uri=oscap_tailoring_file_uri,
                         destination_dir=self.work_dir_path_step
                     )
                     print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
-            except (RuntimeError, AssertionError) as error:
+            except (RuntimeError, ValueError) as error:
                 raise StepRunnerException(
                     f&#34;Error downloading OpenSCAP tailoring file: {error}&#34;
                 ) from error

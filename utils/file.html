@@ -30,16 +30,19 @@
 <pre><code class="python">&#34;&#34;&#34;Shared utils for dealing with files.
 &#34;&#34;&#34;
 
+import base64
 import bz2
+import hashlib
 import json
 import os
 import re
 import shutil
 import urllib.request
-import hashlib
-import base64
 from pathlib import Path
+from urllib.parse import urlparse
+
 import yaml
+
 
 def parse_yaml_or_json_file(yaml_or_json_file):
     &#34;&#34;&#34;
@@ -87,7 +90,7 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     return parsed_file
 
 def download_and_decompress_source_to_destination(
-    source_url,
+    source_uri,
     destination_dir
 ):
     &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination
@@ -105,7 +108,7 @@ def download_and_decompress_source_to_destination(
 
     Parameters
     ----------
-    source_url : url
+    source_uri : url
         URL to a source file using a known protocol to download to destination folder
         and decompress if necessary.
     destination_dir : path
@@ -120,44 +123,48 @@ def download_and_decompress_source_to_destination(
     ------
     RuntimeError
         If error downloading file.
-    AssertionError
-        If source_url does not start with file://|http://|https://
+    ValueError
+        If source_uri does not start with file://|http://|https://
     &#34;&#34;&#34;
 
     # depending on the protocol type get the source_file into the working dir
-    if re.match(r&#39;^file://&#39;, source_url):
-        # remove file:// and turn into an absolute path
-        source_url_abs_path = os.path.abspath(
-            re.sub(&#39;^file://&#39;, &#39;&#39;, source_url)
-        )
+    if re.match(r&#39;^file://|/&#39;, source_uri):
+        # get the destination dir path
+        if re.match(r&#39;^file://&#39;, source_uri):
+            # remove file:// and turn into an absolute path
+            source_uri_abs_path = os.path.abspath(
+                re.sub(&#39;^file://&#39;, &#39;&#39;, source_uri)
+            )
+        else:
+            source_uri_abs_path = source_uri
 
         # copy the file to the working dir
-        source_file_name = os.path.basename(source_url_abs_path)
+        source_file_name = os.path.basename(source_uri_abs_path)
         destination_path = os.path.join(destination_dir, source_file_name)
         shutil.copyfile(
-            src=source_url_abs_path,
+            src=source_uri_abs_path,
             dst=destination_path
         )
-    elif re.match(r&#39;^http://|^https://&#39;, source_url):
+    elif re.match(r&#39;^http://|^https://&#39;, source_uri):
         # download the file to the working dir
-        source_file_name = os.path.basename(source_url)
+        source_file_name = os.path.basename(source_uri)
         destination_path = os.path.join(destination_dir, source_file_name)
 
         try:
             urllib.request.urlretrieve(
-                url=source_url,
+                url=source_uri,
                 filename=destination_path
             )
         except urllib.error.HTTPError as error:
-            raise RuntimeError(f&#34;Error downloading file ({source_url}): {error}&#34;) from error
+            raise RuntimeError(f&#34;Error downloading file ({source_uri}): {error}&#34;) from error
     else:
         # NOTE:
         #   this should NEVER happen because of the logic in
         #   _validate_required_config_or_previous_step_result_artifact_keys
         #   but rather then failing silently need to do something.
-        raise AssertionError(
+        raise ValueError(
             &#34;Unexpected error, should have been caught by step validation.&#34;
-            f&#34; Source ({source_url}) must start with known protocol (file://|http://|https://).&#34;
+            f&#34; Source ({source_uri}) must start with known protocol (/|file://|http://|https://).&#34;
         )
 
     # if extension is .bz2, decompress, else assume file is fine as as is
@@ -211,7 +218,107 @@ def get_file_hash(file_path):
         # Read and update hash string value in blocks of 4K
         for byte_block in iter(lambda: the_file.read(4096), b&#34;&#34;):
             sha256_hash.update(byte_block)
-    return sha256_hash.hexdigest()</code></pre>
+    return sha256_hash.hexdigest()
+
+def upload_file(file_path, destination_uri, username=None, password=None): # pylint: disable=too-many-locals
+    &#34;&#34;&#34;Uploads a given file to a given destination.
+
+    Notes
+    -----
+    Known source protocols
+    * /        - local file path
+    * file://  - local file path
+    * http://  - remote upload
+    * https:// - remote upload
+
+    Parameters
+    ----------
+    file_path : str
+        Path to file to upload.
+    destination_uri : str
+        URI to upload file to using known protocol.
+    username : str, optional
+        Optional user name to use when uploading the file to an http(s) destination.
+    password : str, optional
+        Optional password to use when upload the file to an http(s) destination.
+
+    Returns
+    -------
+    str
+        If given destination is a local file path,
+        then return the full path of the destination file.
+        If given destination is a remote upload, return the response body as a string.
+
+    Raises
+    ------
+    ValueError
+        If file_path does not exist.
+        If destination_uri does not start with /|file://|http://|https://
+    RuntimeError
+        If error uploading file.
+    &#34;&#34;&#34;
+    if not os.path.exists(file_path):
+        raise ValueError(f&#34;Given file path ({file_path}) to upload does not exist.&#34;)
+
+    upload_result = None
+
+    if re.match(r&#39;^file://|/&#39;, destination_uri):
+        # get the destination dir path
+        if re.match(r&#39;^file://&#39;, destination_uri):
+            # remove file:// and turn into an absolute path
+            destination_dir_path = os.path.abspath(
+                re.sub(&#39;^file://&#39;, &#39;&#39;, destination_uri)
+            )
+        else:
+            destination_dir_path = destination_uri
+
+        # create the destination dir
+        os.makedirs(destination_dir_path, exist_ok=True)
+
+        # copy the file to the destination dir
+        destination_file_name = os.path.basename(file_path)
+        destination_path = os.path.join(destination_dir_path, destination_file_name)
+        shutil.copyfile(
+            src=file_path,
+            dst=destination_path
+        )
+
+        upload_result = destination_path
+    elif re.match(r&#39;^http://|^https://&#39;, destination_uri):
+        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+
+        if username:
+            top_level_uri = urlparse(destination_uri).netloc
+            password_mgr.add_password(None, top_level_uri, username, password)
+            handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+            opener = urllib.request.build_opener(handler)
+        else:
+            opener = urllib.request.build_opener()
+
+        with open(file_path, &#39;rb&#39;) as file:
+            request = urllib.request.Request(url=destination_uri, data=file.read(), method=&#39;PUT&#39;)
+
+            try:
+                result = opener.open(request)
+                upload_result = str(result.read(), encoding=&#39;utf8&#39;)
+            except urllib.error.HTTPError as error:
+                raise RuntimeError(
+                    f&#34;Error uploading file ({file_path}) to destination ({destination_uri})&#34;
+                    f&#34; with user name ({username}) and password ({password}): {error}&#34;
+                ) from error
+
+    else:
+        # NOTE:
+        #   this should NEVER happen because of the logic in
+        #   _validate_required_config_or_previous_step_result_artifact_keys
+        #   but rather then failing silently need to do something.
+        raise ValueError(
+            &#34;Unexpected error, should have been caught by step validation.&#34;
+            f&#34; Destination ({destination_uri}) must start with known protocol&#34;
+            &#34; (/|file://|http://|https://).&#34;
+        )
+
+    return upload_result</code></pre>
 </details>
 </section>
 <section>
@@ -275,7 +382,7 @@ Returns</p>
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.file.download_and_decompress_source_to_destination"><code class="name flex">
-<span>def <span class="ident">download_and_decompress_source_to_destination</span></span>(<span>source_url, destination_dir)</span>
+<span>def <span class="ident">download_and_decompress_source_to_destination</span></span>(<span>source_uri, destination_dir)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Given a source url using a known protocol downloads the file to a given destination
@@ -289,7 +396,7 @@ and decompresses it if known compression method.</p>
 * bz2</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>source_url</code></strong> :&ensp;<code>url</code></dt>
+<dt><strong><code>source_uri</code></strong> :&ensp;<code>url</code></dt>
 <dd>URL to a source file using a known protocol to download to destination folder
 and decompress if necessary.</dd>
 <dt><strong><code>destination_dir</code></strong> :&ensp;<code>path</code></dt>
@@ -304,15 +411,15 @@ and decompress if necessary.</dd>
 <dl>
 <dt><code>RuntimeError</code></dt>
 <dd>If error downloading file.</dd>
-<dt><code>AssertionError</code></dt>
-<dd>If source_url does not start with file://|<a href="http://|https://">http://|https://</a></dd>
+<dt><code>ValueError</code></dt>
+<dd>If source_uri does not start with file://|<a href="http://|https://">http://|https://</a></dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def download_and_decompress_source_to_destination(
-    source_url,
+    source_uri,
     destination_dir
 ):
     &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination
@@ -330,7 +437,7 @@ and decompress if necessary.</dd>
 
     Parameters
     ----------
-    source_url : url
+    source_uri : url
         URL to a source file using a known protocol to download to destination folder
         and decompress if necessary.
     destination_dir : path
@@ -345,44 +452,48 @@ and decompress if necessary.</dd>
     ------
     RuntimeError
         If error downloading file.
-    AssertionError
-        If source_url does not start with file://|http://|https://
+    ValueError
+        If source_uri does not start with file://|http://|https://
     &#34;&#34;&#34;
 
     # depending on the protocol type get the source_file into the working dir
-    if re.match(r&#39;^file://&#39;, source_url):
-        # remove file:// and turn into an absolute path
-        source_url_abs_path = os.path.abspath(
-            re.sub(&#39;^file://&#39;, &#39;&#39;, source_url)
-        )
+    if re.match(r&#39;^file://|/&#39;, source_uri):
+        # get the destination dir path
+        if re.match(r&#39;^file://&#39;, source_uri):
+            # remove file:// and turn into an absolute path
+            source_uri_abs_path = os.path.abspath(
+                re.sub(&#39;^file://&#39;, &#39;&#39;, source_uri)
+            )
+        else:
+            source_uri_abs_path = source_uri
 
         # copy the file to the working dir
-        source_file_name = os.path.basename(source_url_abs_path)
+        source_file_name = os.path.basename(source_uri_abs_path)
         destination_path = os.path.join(destination_dir, source_file_name)
         shutil.copyfile(
-            src=source_url_abs_path,
+            src=source_uri_abs_path,
             dst=destination_path
         )
-    elif re.match(r&#39;^http://|^https://&#39;, source_url):
+    elif re.match(r&#39;^http://|^https://&#39;, source_uri):
         # download the file to the working dir
-        source_file_name = os.path.basename(source_url)
+        source_file_name = os.path.basename(source_uri)
         destination_path = os.path.join(destination_dir, source_file_name)
 
         try:
             urllib.request.urlretrieve(
-                url=source_url,
+                url=source_uri,
                 filename=destination_path
             )
         except urllib.error.HTTPError as error:
-            raise RuntimeError(f&#34;Error downloading file ({source_url}): {error}&#34;) from error
+            raise RuntimeError(f&#34;Error downloading file ({source_uri}): {error}&#34;) from error
     else:
         # NOTE:
         #   this should NEVER happen because of the logic in
         #   _validate_required_config_or_previous_step_result_artifact_keys
         #   but rather then failing silently need to do something.
-        raise AssertionError(
+        raise ValueError(
             &#34;Unexpected error, should have been caught by step validation.&#34;
-            f&#34; Source ({source_url}) must start with known protocol (file://|http://|https://).&#34;
+            f&#34; Source ({source_uri}) must start with known protocol (/|file://|http://|https://).&#34;
         )
 
     # if extension is .bz2, decompress, else assume file is fine as as is
@@ -502,6 +613,151 @@ and decompress if necessary.</dd>
     return parsed_file</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.file.upload_file"><code class="name flex">
+<span>def <span class="ident">upload_file</span></span>(<span>file_path, destination_uri, username=None, password=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Uploads a given file to a given destination.</p>
+<h2 id="notes">Notes</h2>
+<p>Known source protocols
+* /
+- local file path
+* file://
+- local file path
+* http://
+- remote upload
+* https:// - remote upload</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to file to upload.</dd>
+<dt><strong><code>destination_uri</code></strong> :&ensp;<code>str</code></dt>
+<dd>URI to upload file to using known protocol.</dd>
+<dt><strong><code>username</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Optional user name to use when uploading the file to an http(s) destination.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Optional password to use when upload the file to an http(s) destination.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>If given destination is a local file path,
+then return the full path of the destination file.
+If given destination is a remote upload, return the response body as a string.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If file_path does not exist.
+If destination_uri does not start with /|file://|<a href="http://|https://">http://|https://</a></dd>
+<dt><code>RuntimeError</code></dt>
+<dd>If error uploading file.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def upload_file(file_path, destination_uri, username=None, password=None): # pylint: disable=too-many-locals
+    &#34;&#34;&#34;Uploads a given file to a given destination.
+
+    Notes
+    -----
+    Known source protocols
+    * /        - local file path
+    * file://  - local file path
+    * http://  - remote upload
+    * https:// - remote upload
+
+    Parameters
+    ----------
+    file_path : str
+        Path to file to upload.
+    destination_uri : str
+        URI to upload file to using known protocol.
+    username : str, optional
+        Optional user name to use when uploading the file to an http(s) destination.
+    password : str, optional
+        Optional password to use when upload the file to an http(s) destination.
+
+    Returns
+    -------
+    str
+        If given destination is a local file path,
+        then return the full path of the destination file.
+        If given destination is a remote upload, return the response body as a string.
+
+    Raises
+    ------
+    ValueError
+        If file_path does not exist.
+        If destination_uri does not start with /|file://|http://|https://
+    RuntimeError
+        If error uploading file.
+    &#34;&#34;&#34;
+    if not os.path.exists(file_path):
+        raise ValueError(f&#34;Given file path ({file_path}) to upload does not exist.&#34;)
+
+    upload_result = None
+
+    if re.match(r&#39;^file://|/&#39;, destination_uri):
+        # get the destination dir path
+        if re.match(r&#39;^file://&#39;, destination_uri):
+            # remove file:// and turn into an absolute path
+            destination_dir_path = os.path.abspath(
+                re.sub(&#39;^file://&#39;, &#39;&#39;, destination_uri)
+            )
+        else:
+            destination_dir_path = destination_uri
+
+        # create the destination dir
+        os.makedirs(destination_dir_path, exist_ok=True)
+
+        # copy the file to the destination dir
+        destination_file_name = os.path.basename(file_path)
+        destination_path = os.path.join(destination_dir_path, destination_file_name)
+        shutil.copyfile(
+            src=file_path,
+            dst=destination_path
+        )
+
+        upload_result = destination_path
+    elif re.match(r&#39;^http://|^https://&#39;, destination_uri):
+        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+
+        if username:
+            top_level_uri = urlparse(destination_uri).netloc
+            password_mgr.add_password(None, top_level_uri, username, password)
+            handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+            opener = urllib.request.build_opener(handler)
+        else:
+            opener = urllib.request.build_opener()
+
+        with open(file_path, &#39;rb&#39;) as file:
+            request = urllib.request.Request(url=destination_uri, data=file.read(), method=&#39;PUT&#39;)
+
+            try:
+                result = opener.open(request)
+                upload_result = str(result.read(), encoding=&#39;utf8&#39;)
+            except urllib.error.HTTPError as error:
+                raise RuntimeError(
+                    f&#34;Error uploading file ({file_path}) to destination ({destination_uri})&#34;
+                    f&#34; with user name ({username}) and password ({password}): {error}&#34;
+                ) from error
+
+    else:
+        # NOTE:
+        #   this should NEVER happen because of the logic in
+        #   _validate_required_config_or_previous_step_result_artifact_keys
+        #   but rather then failing silently need to do something.
+        raise ValueError(
+            &#34;Unexpected error, should have been caught by step validation.&#34;
+            f&#34; Destination ({destination_uri}) must start with known protocol&#34;
+            &#34; (/|file://|http://|https://).&#34;
+        )
+
+    return upload_result</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -525,6 +781,7 @@ and decompress if necessary.</dd>
 <li><code><a title="ploigos_step_runner.utils.file.download_and_decompress_source_to_destination" href="#ploigos_step_runner.utils.file.download_and_decompress_source_to_destination">download_and_decompress_source_to_destination</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.get_file_hash" href="#ploigos_step_runner.utils.file.get_file_hash">get_file_hash</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.parse_yaml_or_json_file" href="#ploigos_step_runner.utils.file.parse_yaml_or_json_file">parse_yaml_or_json_file</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.file.upload_file" href="#ploigos_step_runner.utils.file.upload_file">upload_file</a></code></li>
 </ul>
 </li>
 </ul>
