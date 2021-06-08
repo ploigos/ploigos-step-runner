@@ -388,19 +388,19 @@ From least precedence to highest precedence.
         }
 
       sign-container-image:
-      # sample singing container image but not pushing the signature anywhere
+      # sample signing container image but not pushing the signature anywhere
       #   signature will be included in workflow results archive.
       - implementer: PodmanSign
         config: {}
 
-      # sample singing container image and pushing container image signature to remote repository
+      # sample signing container image and pushing container image signature to remote repository
       #- implementer: PodmanSign
       #  config:
       #    container-image-signature-destination-url: https://repository.ploigos.com/container-image-signatures
       #    container-image-signature-destination-username: test-user
       #    container-image-signature-destination-password: pass123 # this value should be put in an encrypted config file
 
-      # sample singing container image and pushing container image signature to local file
+      # sample signing container image and pushing container image signature to local file
       #- implementer: PodmanSign
       #  config:
       #    container-image-signature-destination-url: file://image-signatures-mount/
@@ -701,19 +701,19 @@ From least precedence to highest precedence.
         }
 
       sign-container-image:
-      # sample singing container image but not pushing the signature anywhere
+      # sample signing container image but not pushing the signature anywhere
       #   signature will be included in workflow results archive.
       - implementer: PodmanSign
         config: {}
 
-      # sample singing container image and pushing container image signature to remote repository
+      # sample signing container image and pushing container image signature to remote repository
       #- implementer: PodmanSign
       #  config:
       #    container-image-signature-destination-url: https://repository.ploigos.com/container-image-signatures
       #    container-image-signature-destination-username: test-user
       #    container-image-signature-destination-password: pass123 # this value should be put in an encrypted config file
 
-      # sample singing container image and pushing container image signature to local file
+      # sample signing container image and pushing container image signature to local file
       #- implementer: PodmanSign
       #  config:
       #    container-image-signature-destination-url: file://image-signatures-mount/
