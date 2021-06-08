@@ -425,8 +425,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        key : str
+        key : str, array
             Key to get the configuration value or result value for.
+            If array will get configuration value or result value for first key in list with a
+            value.
 
         Returns
         -------
@@ -435,24 +437,34 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             key. Or None if not found.
         &#34;&#34;&#34;
 
-        # first try to get config value
-        config_value = self.get_config_value(key)
-        if config_value is not None:
-            return config_value
+        if isinstance(key, list):
+            keys = key
+        else:
+            keys = [key]
 
-        # if not found config value try to get result value specific to current environment
-        if self.environment:
+        for k in keys:
+            # first try to get config value
+            config_value = self.get_config_value(k)
+            if config_value is not None:
+                return config_value
+
+            # if not found config value try to get result value specific to current environment
+            if self.environment:
+                result_value = self.get_result_value(
+                    artifact_name=k,
+                    environment=self.environment
+                )
+                if result_value is not None:
+                    return result_value
+
+            # last try getting result value from no specific environment
             result_value = self.get_result_value(
-                artifact_name=key,
-                environment=self.environment
+                artifact_name=k
             )
-            if result_value is not None:
-                return result_value
 
-        # last try getting result value from no specific environment
-        result_value = self.get_result_value(
-            artifact_name=key
-        )
+            if result_value:
+                break
+
         return result_value
 
     def get_config_value(self, key):
@@ -1211,8 +1223,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        key : str
+        key : str, array
             Key to get the configuration value or result value for.
+            If array will get configuration value or result value for first key in list with a
+            value.
 
         Returns
         -------
@@ -1221,24 +1235,34 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             key. Or None if not found.
         &#34;&#34;&#34;
 
-        # first try to get config value
-        config_value = self.get_config_value(key)
-        if config_value is not None:
-            return config_value
+        if isinstance(key, list):
+            keys = key
+        else:
+            keys = [key]
 
-        # if not found config value try to get result value specific to current environment
-        if self.environment:
+        for k in keys:
+            # first try to get config value
+            config_value = self.get_config_value(k)
+            if config_value is not None:
+                return config_value
+
+            # if not found config value try to get result value specific to current environment
+            if self.environment:
+                result_value = self.get_result_value(
+                    artifact_name=k,
+                    environment=self.environment
+                )
+                if result_value is not None:
+                    return result_value
+
+            # last try getting result value from no specific environment
             result_value = self.get_result_value(
-                artifact_name=key,
-                environment=self.environment
+                artifact_name=k
             )
-            if result_value is not None:
-                return result_value
 
-        # last try getting result value from no specific environment
-        result_value = self.get_result_value(
-            artifact_name=key
-        )
+            if result_value:
+                break
+
         return result_value
 
     def get_config_value(self, key):
@@ -2089,8 +2113,10 @@ In this example, 'foo' is the artifact name, return 'bar'
 of any previous step.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
-<dd>Key to get the configuration value or result value for.</dd>
+<dt><strong><code>key</code></strong> :&ensp;<code>str, array</code></dt>
+<dd>Key to get the configuration value or result value for.
+If array will get configuration value or result value for first key in list with a
+value.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -2108,8 +2134,10 @@ key. Or None if not found.</dd>
 
     Parameters
     ----------
-    key : str
+    key : str, array
         Key to get the configuration value or result value for.
+        If array will get configuration value or result value for first key in list with a
+        value.
 
     Returns
     -------
@@ -2118,24 +2146,34 @@ key. Or None if not found.</dd>
         key. Or None if not found.
     &#34;&#34;&#34;
 
-    # first try to get config value
-    config_value = self.get_config_value(key)
-    if config_value is not None:
-        return config_value
+    if isinstance(key, list):
+        keys = key
+    else:
+        keys = [key]
 
-    # if not found config value try to get result value specific to current environment
-    if self.environment:
+    for k in keys:
+        # first try to get config value
+        config_value = self.get_config_value(k)
+        if config_value is not None:
+            return config_value
+
+        # if not found config value try to get result value specific to current environment
+        if self.environment:
+            result_value = self.get_result_value(
+                artifact_name=k,
+                environment=self.environment
+            )
+            if result_value is not None:
+                return result_value
+
+        # last try getting result value from no specific environment
         result_value = self.get_result_value(
-            artifact_name=key,
-            environment=self.environment
+            artifact_name=k
         )
-        if result_value is not None:
-            return result_value
 
-    # last try getting result value from no specific environment
-    result_value = self.get_result_value(
-        artifact_name=key
-    )
+        if result_value:
+            break
+
     return result_value</code></pre>
 </details>
 </dd>

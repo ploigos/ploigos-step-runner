@@ -42,10 +42,28 @@ Could come from:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>rekor-server</code></td>
-<td>True</td>
+<td><code>rekor-server-url</code></td>
+<td>Yes</td>
 <td></td>
-<td>Version to use when building the container image</td>
+<td>URL for Rekor server to upload artifact(s) to.</td>
+</tr>
+<tr>
+<td><code>signer-pgp-public-key-path</code></td>
+<td>Yes</td>
+<td></td>
+<td>DEPRECIATED. Will be removed in next release in favor
+of automatically getting public key from private key.
+Path to PGP public key corresponding to private key
+that will be used to sign the Rekor artifact.</td>
+</tr>
+<tr>
+<td><code>signer-pgp-private-key-user</code></td>
+<td>Yes</td>
+<td></td>
+<td>DEPRECIATED. Will be removed in next release in favor
+of <code>signer-pgp-private-key</code> which will import a given
+PGP private key and automatically determine the
+PGP private key fingerprint.</td>
 </tr>
 </tbody>
 </table>
@@ -60,16 +78,12 @@ Could come from:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>container-image-version</code></td>
-<td>Container version to tag built image with</td>
+<td><code>rekor-uuid</code></td>
+<td>UUID of Rekor entry created by artifact upload.</td>
 </tr>
 <tr>
-<td><code>image-tar-file</code></td>
-<td>Path to the built container image as a tar file</td>
-</tr>
-<tr>
-<td><code>image-tar-hash</code></td>
-<td>Path to the built container image as a tar file</td>
+<td><code>rekor-entry</code></td>
+<td>DEPRECIATED. Will likely be removed in next release.</td>
 </tr>
 </tbody>
 </table>
@@ -88,48 +102,70 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default        | Description
-------------------|-----------|----------------|-----------
-`rekor-server`     | True |         | Version to use when building the container image
+Configuration Key  | Required? | Default | Description
+-------------------|-----------|---------|-----------
+`rekor-server-url` | Yes       |         | URL for Rekor server to upload artifact(s) to.
+`signer-pgp-public-key-path` \
+                   | Yes       |         | DEPRECIATED. Will be removed in next release in favor \
+                                           of automatically getting public key from private key. \
+                                           Path to PGP public key corresponding to private key \
+                                           that will be used to sign the Rekor artifact.
+`signer-pgp-private-key-user` \
+                   | Yes       |         | DEPRECIATED. Will be removed in next release in favor \
+                                           of `signer-pgp-private-key` which will import a given \
+                                           PGP private key and automatically determine the \
+                                           PGP private key fingerprint.
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
 Result Artifact Key | Description
---------------------------|------------
-`container-image-version` | Container version to tag built image with
-`image-tar-file`          | Path to the built container image as a tar file
-`image-tar-hash`          | Path to the built container image as a tar file
+--------------------|------------
+`rekor-uuid`        | UUID of Rekor entry created by artifact upload.
+`rekor-entry`       | DEPRECIATED. Will likely be removed in next release.
 &#34;&#34;&#34;
 
-from io import StringIO
 import json
 import os
-from pathlib import Path
 import sys
-import sh
+from io import StringIO
+from pathlib import Path
 
+import sh
 from ploigos_step_runner import StepImplementer, StepResult
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
-from ploigos_step_runner.utils.file import base64_encode
-from ploigos_step_runner.utils.file import get_file_hash
-from ploigos_step_runner.utils.gpg import import_gpg_key
+from ploigos_step_runner.utils.file import base64_encode, get_file_hash
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.utils.pgp import detach_sign_with_pgp_key
+
+
+DEFAULT_CONFIG = {}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;rekor-server&#39;,
-    &#39;gpg-key&#39;,
-    &#39;gpg-user&#39;
+    &#39;rekor-server-url&#39;,
+    &#39;signer-pgp-public-key-path&#39;,
+    &#39;signer-pgp-private-key-user&#39;
 ]
-
-
 class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;`StepImplementer` for the `automated-governance` step using Rekor.
     &#34;&#34;&#34;
 
     @staticmethod
     def step_implementer_config_defaults():
-        return
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -150,23 +186,22 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def create_rekor_entry(
-        public_key_path,
-        gpg_user,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
         extra_data_file
     ):
-        &#34;&#34;&#34;Creates a rekor entry as a dict object.
-
-        Returns
-        -------
-        StepResult
-            Dict that contains rekor entry for upload with the cli
+        &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
         file_hash = get_file_hash(extra_data_file)
         sig_file = extra_data_file + &#39;.asc&#39;
         sig_file_path = Path(sig_file)
         if sig_file_path.exists():
             sig_file_path.unlink()
-        import_gpg_key(sig_file, extra_data_file, gpg_user)
+        detach_sign_with_pgp_key(
+            output_signature_path=sig_file,
+            file_to_sign_path=extra_data_file,
+            pgp_private_key_fingerprint=signer_pgp_private_key_user
+        )
         base64_encoded_extra_data = base64_encode(extra_data_file)
         rekor_entry = {
             &#34;kind&#34;: &#34;rekord&#34;,
@@ -176,7 +211,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
                     &#34;format&#34;: &#34;pgp&#34;,
                     &#34;content&#34;: base64_encode(sig_file),
                     &#34;publicKey&#34;: {
-                        &#34;content&#34;: base64_encode(public_key_path)
+                        &#34;content&#34;: base64_encode(signer_pgp_public_key_path)
                     }
                 },
                 &#34;data&#34;: {
@@ -192,15 +227,20 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         return rekor_entry
 
     @staticmethod
-    def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
+    def upload_to_rekor(
+        rekor_server,
+        extra_data_file,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
+        work_dir_path
+    ):
+        &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
-        rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+        rekor_entry = Rekor.create_rekor_entry(
+            signer_pgp_public_key_path=signer_pgp_public_key_path,
+            signer_pgp_private_key_user=signer_pgp_private_key_user,
+            extra_data_file=extra_data_file
+        )
         print(&#34;Rekor Entry: &#34; + str(rekor_entry))
         rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
@@ -235,18 +275,18 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             Object containing the dictionary results of this step.
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
-        rekor_server = self.get_value(&#39;rekor-server&#39;)
+        rekor_server = self.get_value(&#39;rekor-server-url&#39;)
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
         extra_data_file_path = Path(extra_data_file)
         if extra_data_file_path.exists():
             extra_data_file_path.unlink()
         self.workflow_result.write_results_to_json_file(extra_data_file_path)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
-            rekor_server,
-            extra_data_file,
-            self.get_value(&#39;gpg-key&#39;),
-            self.get_value(&#39;gpg-user&#39;),
-            self.work_dir_path
+            rekor_server=rekor_server,
+            extra_data_file=extra_data_file,
+            signer_pgp_public_key_path=self.get_value(&#39;signer-pgp-public-key-path&#39;),
+            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;),
+            work_dir_path=self.work_dir_path
         )
         step_result.add_artifact(
                 name=&#39;rekor-entry&#39;,
@@ -284,7 +324,19 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def step_implementer_config_defaults():
-        return
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -305,23 +357,22 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def create_rekor_entry(
-        public_key_path,
-        gpg_user,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
         extra_data_file
     ):
-        &#34;&#34;&#34;Creates a rekor entry as a dict object.
-
-        Returns
-        -------
-        StepResult
-            Dict that contains rekor entry for upload with the cli
+        &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
         file_hash = get_file_hash(extra_data_file)
         sig_file = extra_data_file + &#39;.asc&#39;
         sig_file_path = Path(sig_file)
         if sig_file_path.exists():
             sig_file_path.unlink()
-        import_gpg_key(sig_file, extra_data_file, gpg_user)
+        detach_sign_with_pgp_key(
+            output_signature_path=sig_file,
+            file_to_sign_path=extra_data_file,
+            pgp_private_key_fingerprint=signer_pgp_private_key_user
+        )
         base64_encoded_extra_data = base64_encode(extra_data_file)
         rekor_entry = {
             &#34;kind&#34;: &#34;rekord&#34;,
@@ -331,7 +382,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
                     &#34;format&#34;: &#34;pgp&#34;,
                     &#34;content&#34;: base64_encode(sig_file),
                     &#34;publicKey&#34;: {
-                        &#34;content&#34;: base64_encode(public_key_path)
+                        &#34;content&#34;: base64_encode(signer_pgp_public_key_path)
                     }
                 },
                 &#34;data&#34;: {
@@ -347,15 +398,20 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         return rekor_entry
 
     @staticmethod
-    def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
+    def upload_to_rekor(
+        rekor_server,
+        extra_data_file,
+        signer_pgp_public_key_path,
+        signer_pgp_private_key_user,
+        work_dir_path
+    ):
+        &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
-        rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+        rekor_entry = Rekor.create_rekor_entry(
+            signer_pgp_public_key_path=signer_pgp_public_key_path,
+            signer_pgp_private_key_user=signer_pgp_private_key_user,
+            extra_data_file=extra_data_file
+        )
         print(&#34;Rekor Entry: &#34; + str(rekor_entry))
         rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
@@ -390,18 +446,18 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             Object containing the dictionary results of this step.
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
-        rekor_server = self.get_value(&#39;rekor-server&#39;)
+        rekor_server = self.get_value(&#39;rekor-server-url&#39;)
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
         extra_data_file_path = Path(extra_data_file)
         if extra_data_file_path.exists():
             extra_data_file_path.unlink()
         self.workflow_result.write_results_to_json_file(extra_data_file_path)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
-            rekor_server,
-            extra_data_file,
-            self.get_value(&#39;gpg-key&#39;),
-            self.get_value(&#39;gpg-user&#39;),
-            self.work_dir_path
+            rekor_server=rekor_server,
+            extra_data_file=extra_data_file,
+            signer_pgp_public_key_path=self.get_value(&#39;signer-pgp-public-key-path&#39;),
+            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;),
+            work_dir_path=self.work_dir_path
         )
         step_result.add_artifact(
                 name=&#39;rekor-entry&#39;,
@@ -421,38 +477,32 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 <h3>Static methods</h3>
 <dl>
 <dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry"><code class="name flex">
-<span>def <span class="ident">create_rekor_entry</span></span>(<span>public_key_path, gpg_user, extra_data_file)</span>
+<span>def <span class="ident">create_rekor_entry</span></span>(<span>signer_pgp_public_key_path, signer_pgp_private_key_user, extra_data_file)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates a rekor entry as a dict object.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>StepResult</code></dt>
-<dd>Dict that contains rekor entry for upload with the cli</dd>
-</dl></div>
+<div class="desc"><p>TODO: function will be refactored in next release. will doc then.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def create_rekor_entry(
-    public_key_path,
-    gpg_user,
+    signer_pgp_public_key_path,
+    signer_pgp_private_key_user,
     extra_data_file
 ):
-    &#34;&#34;&#34;Creates a rekor entry as a dict object.
-
-    Returns
-    -------
-    StepResult
-        Dict that contains rekor entry for upload with the cli
+    &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
     &#34;&#34;&#34;
     file_hash = get_file_hash(extra_data_file)
     sig_file = extra_data_file + &#39;.asc&#39;
     sig_file_path = Path(sig_file)
     if sig_file_path.exists():
         sig_file_path.unlink()
-    import_gpg_key(sig_file, extra_data_file, gpg_user)
+    detach_sign_with_pgp_key(
+        output_signature_path=sig_file,
+        file_to_sign_path=extra_data_file,
+        pgp_private_key_fingerprint=signer_pgp_private_key_user
+    )
     base64_encoded_extra_data = base64_encode(extra_data_file)
     rekor_entry = {
         &#34;kind&#34;: &#34;rekord&#34;,
@@ -462,7 +512,7 @@ def create_rekor_entry(
                 &#34;format&#34;: &#34;pgp&#34;,
                 &#34;content&#34;: base64_encode(sig_file),
                 &#34;publicKey&#34;: {
-                    &#34;content&#34;: base64_encode(public_key_path)
+                    &#34;content&#34;: base64_encode(signer_pgp_public_key_path)
                 }
             },
             &#34;data&#34;: {
@@ -478,30 +528,63 @@ def create_rekor_entry(
     return rekor_entry</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor"><code class="name flex">
-<span>def <span class="ident">upload_to_rekor</span></span>(<span>rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path)</span>
+<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.step_implementer_config_defaults"><code class="name flex">
+<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Runs the step implemented by this StepImplementer.</p>
+<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>StepResult</code></dt>
-<dd>Object containing the dictionary results of this step.</dd>
-</dl></div>
+<dt><code>dict</code></dt>
+<dd>Default values to use for step configuration values.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>These are the lowest precedence configuration values.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_path):
-    &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+def step_implementer_config_defaults():
+    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
 
     Returns
     -------
-    StepResult
-        Object containing the dictionary results of this step.
+    dict
+        Default values to use for step configuration values.
+
+    Notes
+    -----
+    These are the lowest precedence configuration values.
+
     &#34;&#34;&#34;
-    rekor_entry = Rekor.create_rekor_entry(gpg_key, gpg_user, extra_data_file)
+    return DEFAULT_CONFIG</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor"><code class="name flex">
+<span>def <span class="ident">upload_to_rekor</span></span>(<span>rekor_server, extra_data_file, signer_pgp_public_key_path, signer_pgp_private_key_user, work_dir_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TODO: function will be refactored in next release. will doc then.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def upload_to_rekor(
+    rekor_server,
+    extra_data_file,
+    signer_pgp_public_key_path,
+    signer_pgp_private_key_user,
+    work_dir_path
+):
+    &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
+    &#34;&#34;&#34;
+    rekor_entry = Rekor.create_rekor_entry(
+        signer_pgp_public_key_path=signer_pgp_public_key_path,
+        signer_pgp_private_key_user=signer_pgp_private_key_user,
+        extra_data_file=extra_data_file
+    )
     print(&#34;Rekor Entry: &#34; + str(rekor_entry))
     rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
@@ -547,7 +630,6 @@ def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_p
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
@@ -582,6 +664,7 @@ def upload_to_rekor(rekor_server, extra_data_file, gpg_key, gpg_user, work_dir_p
 <h4><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor">Rekor</a></code></h4>
 <ul class="">
 <li><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.create_rekor_entry">create_rekor_entry</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor" href="#ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor">upload_to_rekor</a></code></li>
 </ul>
 </li>
