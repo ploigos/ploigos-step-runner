@@ -177,4 +177,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
                 name='rekor-uuid',
                 value=rekor_uuid
         )
+
+        #Add evidence to step result
+        step_result.add_evidence(
+                name='rekor-entry',
+                value=rekor_entry
+        )
+
+
         return step_result
