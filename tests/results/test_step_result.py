@@ -67,6 +67,36 @@ class TestStepResultTest(BaseTestCase):
             )
         )
 
+    def test_add_evidence(self):
+        step_result = StepResult('step1', 'sub1', 'implementer1')
+        step_result.add_evidence('evidence1', 'value1', 'description1')
+        step_result.add_evidence('evidence2', 'value2', 'description2')
+        step_result.add_evidence('evidence3', 'value3')
+
+        self.assertEqual(
+            step_result.get_evidence('evidence1'),
+            StepResultArtifact(
+                name='evidence1',
+                value='value1',
+                description='description1'
+            )
+        )
+        self.assertEqual(
+            step_result.get_evidence('evidence2'),
+            StepResultArtifact(
+                name='evidence2',
+                value='value2',
+                description='description2'
+            )
+        )
+        self.assertEqual(
+            step_result.get_evidence('evidence3'),
+            StepResultArtifact(
+                name='evidence3',
+                value='value3'
+            )
+        )
+
     def test_add_artifact_missing_name(self):
         step_result = StepResult('step1', 'sub1', 'implementer1')
 
@@ -75,6 +105,14 @@ class TestStepResultTest(BaseTestCase):
                 r"Name is required to add artifact"):
             step_result.add_artifact('', 'value1', 'description1')
 
+    def test_add_evidence_missing_name(self):
+        step_result = StepResult('step1', 'sub1', 'implementer1')
+
+        with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Name is required to add evidence"):
+            step_result.add_evidence('', 'value1', 'description1')
+
     def test_add_artifact_missing_value(self):
         step_result = StepResult('step1', 'sub1', 'implementer1')
 
@@ -82,6 +120,14 @@ class TestStepResultTest(BaseTestCase):
                 StepRunnerException,
                 r"Value is required to add artifact"):
             step_result.add_artifact('name1', '', 'description1')
+
+    def test_add_evidence_missing_value(self):
+        step_result = StepResult('step1', 'sub1', 'implementer1')
+
+        with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Value is required to add evidence"):
+            step_result.add_evidence('name1', '', 'description1')
 
     def test_get_artifact(self):
         expected_artifact = StepResultArtifact(
@@ -93,6 +139,17 @@ class TestStepResultTest(BaseTestCase):
         step_result = StepResult('step1', 'sub1', 'implementer1')
         step_result.add_artifact('artifact1', 'value1', 'description1')
         self.assertEqual(step_result.get_artifact('artifact1'), expected_artifact)
+
+    def test_get_evidence(self):
+        expected_evidence = StepResultArtifact(
+            name='evidence1',
+            value='value1',
+            description='description1'
+        )
+
+        step_result = StepResult('step1', 'sub1', 'implementer1')
+        step_result.add_evidence('evidence1', 'value1', 'description1')
+        self.assertEqual(step_result.get_evidence('evidence1'), expected_evidence)
 
     def test_get_artifact_value(self):
         step_result_expected = 'value1'
