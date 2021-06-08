@@ -4,6 +4,7 @@ of a StepImplementer#run.
 
 from ploigos_step_runner import StepRunnerException
 from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
+from ploigos_step_runner.results.step_result_evidence import StepResultEvidence
 
 
 class StepResult: # pylint: disable=too-many-instance-attributes
@@ -30,6 +31,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         self.__success = True
         self.__message = ''
         self.__artifacts = {}
+        self.__evidence = {}
 
     @classmethod
     def from_step_implementer(cls, step_implementer):
@@ -98,6 +100,17 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         return self.__artifacts
 
     @property
+    def evidence(self):
+        """Get the evidence associated with this step result.
+
+        Returns
+        -------
+        dict of str: StepResultEvidence
+            Key is evidence name, value is StepResultEvidence.
+        """
+        return self.__evidence
+
+    @property
     def artifacts_dicts(self):
         """Get the artifacts associated with this step result as dictionaries.
 
@@ -111,6 +124,21 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             artifact_dicts.append(artifact.as_dict())
 
         return artifact_dicts
+
+    @property
+    def evidence_dicts(self):
+        """Get the evidence associated with this step result as dictionaries.
+
+        Returns
+        -------
+        list of dict
+            Each item in list a dict representation of the StepResultEvidence.
+        """
+        evidence_dicts = []
+        for evidence in self.evidence.values():
+            evidence_dicts.append(evidence.as_dict())
+
+        return evidence_dicts
 
     def get_artifact(self, name):
         """Get artifact with given name for this StepResult.
@@ -126,6 +154,21 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             The step result artifact with the given name for this StepResult.
         """
         return self.__artifacts.get(name)
+
+    def get_evidence(self, name):
+        """Get evidence with given name for this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence to return.
+
+        Returns
+        -------
+        StepResultEvidence
+            The step result evidence with the given name for this StepResult.
+        """
+        return self.__evidence.get(name)
 
     def get_artifact_value(self, name):
         """Get the value for a specified artifact.
@@ -143,6 +186,25 @@ class StepResult: # pylint: disable=too-many-instance-attributes
         value = None
         if self.__artifacts.get(name):
             value = self.__artifacts.get(name).value
+
+        return value
+
+    def get_evidence_value(self, name):
+        """Get the value for a specified evidence.
+
+        Parameters
+        ----------
+        name : str
+            The name of the evidence.
+
+        Returns
+        -------
+        str
+            The value of the evidence.
+        """
+        value = None
+        if self.evidence.get(name):
+            value = self.__evidence.get(name).value
 
         return value
 
@@ -166,6 +228,31 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             raise StepRunnerException('Value is required to add artifact')
 
         self.__artifacts[name] = StepResultArtifact(
+            name=name,
+            value=value,
+            description=description
+        )
+
+    def add_evidence(self, name, value, description=''):
+        """Add evidence to this StepResult.
+
+        Parameters
+        ----------
+        name : str
+            Name of the result evidence.
+        value : str
+            Arbitrary value of the evidence.
+        description : str, optional
+            Human readable description of the result evidence (defaults to empty).
+        """
+        if not name:
+            raise StepRunnerException('Name is required to add evidence')
+
+        # False can be the value
+        if value == '' or value is None:
+            raise StepRunnerException('Value is required to add evidence')
+
+        self.__evidence[name] = StepResultEvidence(
             name=name,
             value=value,
             description=description
@@ -214,14 +301,16 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                 'sub-step-implementer-name': 'value',
                 'success': Boolean,
                 'message': 'value',
-                'artifacts': []
+                'artifacts': [],
+                'evidence': []
             }
         """
         result = {
             'sub-step-implementer-name': self.sub_step_implementer_name,
             'success': self.success,
             'message': self.message,
-            'artifacts': self.artifacts_dicts
+            'artifacts': self.artifacts_dicts,
+            'evidence': self.evidence_dicts
         }
 
         return result
@@ -243,7 +332,13 @@ class StepResult: # pylint: disable=too-many-instance-attributes
                         "name": {
                             "description": "file description",
                             "value": "step-result.txt"
+                        },
+                    "evidence": {
+                        "name": {
+                            "description": "piece of evidence",
+                            "value": "evidence"
                         }
+                    }
                     }
                 }
             }
@@ -274,7 +369,8 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             'environment': self.environment,
             'success': self.success,
             'message': self.message,
-            'artifacts': self.artifacts_dicts
+            'artifacts': self.artifacts_dicts,
+            'evidence': self.evidence_dicts
         })
 
     def __repr__(self):
@@ -288,6 +384,7 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             f"success={self.success}," \
             f"message={self.message}," \
             f"artifacts={self.artifacts_dicts}" \
+            f"evidence={self.evidence_dicts}" \
             ")"
 
     def __eq__(self, other):
@@ -301,7 +398,8 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             self.environment == other.environment and
             self.success == other.success and
             self.message == other.message and
-            self.artifacts == other.artifacts
+            self.artifacts == other.artifacts and
+            self.evidence == other.evidence
         )
 
     def __ne__(self, other):

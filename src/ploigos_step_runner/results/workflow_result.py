@@ -72,6 +72,52 @@ class WorkflowResult:
 
         return value
 
+    def get_evidence_value(
+        self,
+        evidence,
+        step_name=None,
+        sub_step_name=None,
+        environment=None
+    ): # pylint: disable=too-many-boolean-expressions
+        """Search for an evidence.
+
+        If step_name, sub_step_name, or environment are provided ensure the evidence comes
+        from the first
+
+        1.  if step_name is provided, look for the evidence in the step
+        2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
+        3.  else, search ALL steps for the FIRST match of the evidence.
+
+        Parameters
+        ----------
+        evidence: str
+           The artifact name to search for
+        step_name: str optional
+           Optionally search only in one step
+        sub_step_name: str optional
+            Optionally search only in one step
+        environment : str
+            Optional. Environment to get the step result for.
+
+        Returns
+        -------
+        Str
+           'v1.0.2'
+        """
+
+        value = None
+        for step_result in self.workflow_list:
+            if ( \
+                (not step_name or step_result.step_name == step_name) and \
+                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
+                (not environment or step_result.environment == environment)
+            ):
+                value = step_result.get_evidence_value(name=evidence)
+                if value is not None:
+                    break
+
+        return value
+
     def add_step_result(self, step_result):
         """Add a single step_result to the workflow list.
 

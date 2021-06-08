@@ -18,15 +18,30 @@ def setup_test():
     step_result1.add_artifact('artifact4', False)
     step_result1.add_artifact('same-artifact-all-env-and-no-env', 'result1')
 
+    step_result1.add_evidence('evidence1', 'value1', 'description1')
+    step_result1.add_evidence('evidence2', 'value2', 'description2')
+    step_result1.add_evidence('evidence3', 'value3')
+    step_result1.add_evidence('evidence4', False)
+    step_result1.add_evidence('same-evidence-all-env-and-no-env', 'result1')
+    
+
     step_result2 = StepResult('step2', 'sub2', 'implementer2')
     step_result2.add_artifact('artifact1', True)
     step_result2.add_artifact('artifact2', False)
     step_result2.add_artifact('artifact5', 'value5')
 
+    step_result2.add_evidence('evidence1', True)
+    step_result2.add_evidence('evidence2', False)
+    step_result2.add_evidence('evidence5', 'value5')
+
     step_result3 = StepResult('deploy', 'deploy-sub', 'helm', 'dev')
     step_result3.add_artifact('same-artifact-diff-env', 'value-dev-env')
     step_result3.add_artifact('unique-artifact-to-step-and-environment-1', 'value1-dev-env')
     step_result3.add_artifact('same-artifact-all-env-and-no-env', 'result3-dev-env')
+
+    step_result3.add_evidence('same-evidence-diff-env', 'value-dev-env')
+    step_result3.add_evidence('unique-evidence-to-step-and-environment-1', 'value1-dev-env')
+    step_result3.add_evidence('same-evidence-all-env-and-no-env', 'result3-dev-env')
 
     step_result4 = StepResult('deploy', 'deploy-sub', 'helm', 'test')
     step_result4.add_artifact('artifact1', True)
@@ -35,6 +50,13 @@ def setup_test():
     step_result4.add_artifact('same-artifact-diff-env', 'value-test-env')
     step_result4.add_artifact('unique-artifact-to-step-and-environment-2', 'value2-test-env')
     step_result4.add_artifact('same-artifact-all-env-and-no-env', 'result4-test-env')
+
+    step_result4.add_evidence('evidence1', True)
+    step_result4.add_evidence('evidence2', False)
+    step_result4.add_evidence('evidence5', 'value5')
+    step_result4.add_evidence('same-evidence-diff-env', 'value-test-env')
+    step_result4.add_evidence('unique-evidence-to-step-and-environment-2', 'value2-test-env')
+    step_result4.add_evidence('same-evidence-all-env-and-no-env', 'result4-test-env')
 
     wfr = WorkflowResult()
     wfr.add_step_result(step_result1)
@@ -52,10 +74,19 @@ def setup_test_sub_steps():
     step_result1.add_artifact('artifact3', 'value3')
     step_result1.add_artifact('artifact4', False)
 
+    step_result1.add_evidence('evidence1', 'value1', 'description1')
+    step_result1.add_evidence('evidence2', 'value2', 'description2')
+    step_result1.add_evidence('evidence3', 'value3')
+    step_result1.add_evidence('evidence4', False)
+
     step_result2 = StepResult('step1', 'sub2', 'implementer2')
     step_result2.add_artifact('artifact1', True)
     step_result2.add_artifact('artifact2', False)
     step_result2.add_artifact('artifact5', 'value5')
+
+    step_result2.add_evidence('evidence1', True)
+    step_result2.add_evidence('evidence2', False)
+    step_result2.add_evidence('evidence5', 'value5')
 
     wfr = WorkflowResult()
     wfr.add_step_result(step_result1)
@@ -96,6 +127,33 @@ class TestStepWorkflowResultTest(BaseTestCase):
             wfr.get_artifact_value(artifact='bad')
         )
 
+    def test_get_evidence_value_without_step(self):
+        wfr = setup_test()
+
+        expected_evidence = 'value1'
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence1')
+        )
+
+        expected_evidence = 'value5'
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence5')
+        )
+
+        expected_evidence = False
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence4')
+        )
+
+        expected_evidence = None
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='bad')
+        )
+
     def test_get_artifact_value_with_step(self):
         wfr = setup_test()
 
@@ -115,6 +173,25 @@ class TestStepWorkflowResultTest(BaseTestCase):
             wfr.get_artifact_value(artifact='artifact2', step_name='bad')
         )
 
+    def test_get_evidence_value_with_step(self):
+        wfr = setup_test()
+
+        expected_evidence = 'value1'
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence1', step_name='step1')
+        )
+        expected_evidence = False
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence2', step_name='step2')
+        )
+        expected_evidence = None
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence2', step_name='bad')
+        )
+
     def test_get_artifact_value_with_step_sub_step(self):
         wfr = setup_test()
 
@@ -132,6 +209,25 @@ class TestStepWorkflowResultTest(BaseTestCase):
         self.assertEqual(
             expected_artifact,
             wfr.get_artifact_value(artifact='artifact2', step_name='step2', sub_step_name='bad')
+        )
+
+    def test_get_evidence_value_with_step_sub_step(self):
+        wfr = setup_test()
+
+        expected_evidence = 'value1'
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence1', step_name='step1', sub_step_name='sub1')
+        )
+        expected_evidence = False
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence2', step_name='step2', sub_step_name='sub2')
+        )
+        expected_evidence = None
+        self.assertEqual(
+            expected_evidence,
+            wfr.get_evidence_value(evidence='evidence2', step_name='step2', sub_step_name='bad')
         )
 
     def test_get_artifact_value_in_step_executed_in_different_environments_and_no_environment(self):
@@ -160,6 +256,32 @@ class TestStepWorkflowResultTest(BaseTestCase):
             'result4-test-env'
         )
 
+    def test_get_evidence_value_in_step_executed_in_different_environments_and_no_environment(self):
+        wfr = setup_test()
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-all-env-and-no-env'
+            ),
+            'result1'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-all-env-and-no-env',
+                environment='dev'
+            ),
+            'result3-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-all-env-and-no-env',
+                environment='test'
+            ),
+            'result4-test-env'
+        )
+
     def test_get_artifact_value_in_step_executed_in_different_environments(self):
         wfr = setup_test()
 
@@ -181,6 +303,32 @@ class TestStepWorkflowResultTest(BaseTestCase):
         self.assertEqual(
             wfr.get_artifact_value(
                 artifact='same-artifact-diff-env',
+                environment='test'
+            ),
+            'value-test-env'
+        )
+
+    def test_get_evidence_value_in_step_executed_in_different_environments(self):
+        wfr = setup_test()
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-diff-env'
+            ),
+            'value-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-diff-env',
+                environment='dev'
+            ),
+            'value-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='same-evidence-diff-env',
                 environment='test'
             ),
             'value-test-env'
@@ -235,9 +383,59 @@ class TestStepWorkflowResultTest(BaseTestCase):
             'value2-test-env'
         )
 
+    def test_get_evidence_value_unique_to_environment(self):
+        wfr = setup_test()
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-1'
+            ),
+            'value1-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-1',
+                environment='dev'
+            ),
+            'value1-dev-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-1',
+                environment='test'
+            ),
+            None
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-2'
+            ),
+            'value2-test-env'
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-2',
+                environment='dev'
+            ),
+            None
+        )
+
+        self.assertEqual(
+            wfr.get_evidence_value(
+                evidence='unique-evidence-to-step-and-environment-2',
+                environment='test'
+            ),
+            'value2-test-env'
+        )
+
     def test_add_step_result_duplicate_no_env(self):
         duplicate_step_result = StepResult('step1', 'sub1', 'implementer1')
         duplicate_step_result.add_artifact('newartifact', 'newvalue', 'newdescription')
+        duplicate_step_result.add_evidence('newevidence', 'newvalue', 'newdescription')
 
         wfr = setup_test()
 
@@ -251,6 +449,7 @@ class TestStepWorkflowResultTest(BaseTestCase):
     def test_add_step_result_duplicate_with_env(self):
         duplicate_step_result = StepResult('deploy', 'deploy-sub', 'helm', 'dev')
         duplicate_step_result.add_artifact('newartifact', 'newvalue', 'newdescription')
+        duplicate_step_result.add_evidence('newevidence', 'newvalue', 'newdescription')
 
         wfr = setup_test()
 
@@ -286,6 +485,19 @@ class TestStepWorkflowResultTest(BaseTestCase):
             -   description: ''
                 name: artifact4
                 value: false
+            evidence:
+            -   description: description1
+                name: evidence1
+                value: value1
+            -   description: description2
+                name: evidence2
+                value: value2
+            -   description: ''
+                name: evidence3
+                value: value3
+            -   description: ''
+                name: evidence4
+                value: false
             message: ''
             sub-step-implementer-name: implementer1
             success: true
@@ -299,6 +511,16 @@ class TestStepWorkflowResultTest(BaseTestCase):
                 value: false
             -   description: ''
                 name: artifact5
+                value: value5
+            evidence:
+            -   description: ''
+                name: evidence1
+                value: true
+            -   description: ''
+                name: evidence2
+                value: false
+            -   description: ''
+                name: evidence5
                 value: value5
             message: ''
             sub-step-implementer-name: implementer2
@@ -354,6 +576,33 @@ class TestStepWorkflowResultTest(BaseTestCase):
                         "value": "result1",
                         "description": ""
                     }
+                ],
+                "evidence": [
+                    {
+                        "name": "evidence1",
+                        "value": "value1",
+                        "description": "description1"
+                    },
+                    {
+                        "name": "evidence2",
+                        "value": "value2",
+                        "description": "description2"
+                    },
+                    {
+                        "name": "evidence3",
+                        "value": "value3",
+                        "description": ""
+                    },
+                    {
+                        "name": "evidence4",
+                        "value": false,
+                        "description": ""
+                    },
+                    {
+                        "name": "same-evidence-all-env-and-no-env",
+                        "value": "result1",
+                        "description": ""
+                    }
                 ]
             }
         },
@@ -375,6 +624,23 @@ class TestStepWorkflowResultTest(BaseTestCase):
                     },
                     {
                         "name": "artifact5",
+                        "value": "value5",
+                        "description": ""
+                    }
+                ],
+                "evidence": [
+                    {
+                        "name": "evidence1",
+                        "value": true,
+                        "description": ""
+                    },
+                    {
+                        "name": "evidence2",
+                        "value": false,
+                        "description": ""
+                    },
+                    {
+                        "name": "evidence5",
                         "value": "value5",
                         "description": ""
                     }
@@ -400,6 +666,23 @@ class TestStepWorkflowResultTest(BaseTestCase):
                         },
                         {
                             "name": "same-artifact-all-env-and-no-env",
+                            "value": "result3-dev-env",
+                            "description": ""
+                        }
+                    ],
+                    "evidence": [
+                        {
+                            "name": "same-evidence-diff-env",
+                            "value": "value-dev-env",
+                            "description": ""
+                        },
+                        {
+                            "name": "unique-evidence-to-step-and-environment-1",
+                            "value": "value1-dev-env",
+                            "description": ""
+                        },
+                        {
+                            "name": "same-evidence-all-env-and-no-env",
                             "value": "result3-dev-env",
                             "description": ""
                         }
@@ -441,6 +724,38 @@ class TestStepWorkflowResultTest(BaseTestCase):
                         },
                         {
                             "name": "same-artifact-all-env-and-no-env",
+                            "value": "result4-test-env",
+                            "description": ""
+                        }
+                    ],
+                    "evidence": [
+                        {
+                            "name": "evidence1",
+                            "value": true,
+                            "description": ""
+                        },
+                        {
+                            "name": "evidence2",
+                            "value": false,
+                            "description": ""
+                        },
+                        {
+                            "name": "evidence5",
+                            "value": "value5",
+                            "description": ""
+                        },
+                        {
+                            "name": "same-evidence-diff-env",
+                            "value": "value-test-env",
+                            "description": ""
+                        },
+                        {
+                            "name": "unique-evidence-to-step-and-environment-2",
+                            "value": "value2-test-env",
+                            "description": ""
+                        },
+                        {
+                            "name": "same-evidence-all-env-and-no-env",
                             "value": "result4-test-env",
                             "description": ""
                         }
