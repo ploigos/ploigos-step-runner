@@ -257,6 +257,15 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             value=image_tag
         )
 
+        step_result.add_evidence(
+            name=&#39;version&#39;,
+            value=version
+        )
+        step_result.add_evidence(
+            name=&#39;container-image-version&#39;,
+            value=image_tag
+        )
+
         return step_result</code></pre>
 </details>
 </section>
@@ -348,6 +357,15 @@ semantic version from given input.</p></div>
             value=version
         )
         step_result.add_artifact(
+            name=&#39;container-image-version&#39;,
+            value=image_tag
+        )
+
+        step_result.add_evidence(
+            name=&#39;version&#39;,
+            value=version
+        )
+        step_result.add_evidence(
             name=&#39;container-image-version&#39;,
             value=image_tag
         )
