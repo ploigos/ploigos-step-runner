@@ -90,7 +90,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             self.assertEqual(expected_settings_xml_path, actual_settings_xml_path)
 
             utils_generate_maven_settings_mock.assert_called_once_with(
-                working_dir=step_implementer.work_dir_path_step,
+                working_dir=step_implementer.work_dir_path,
                 maven_servers=maven_servers,
                 maven_repositories=maven_repositories,
                 maven_mirrors=maven_mirrors
@@ -162,7 +162,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
 
             # first call
-            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path_step, 'effective-pom.xml')
+            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path, 'effective-pom.xml')
             actual_effective_pom_path = step_implementer._get_effective_pom()
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_called_once_with(
@@ -193,7 +193,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
 
             # first call
-            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path_step, 'effective-pom.xml')
+            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path, 'effective-pom.xml')
             actual_effective_pom_path = step_implementer._get_effective_pom()
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_called_once_with(
@@ -203,7 +203,7 @@ class TestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
 
             # second call
             write_effective_pom_mock.reset_mock()
-            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path_step, 'effective-pom.xml')
+            expected_effective_pom_path = os.path.join(step_implementer.work_dir_path, 'effective-pom.xml')
             actual_effective_pom_path = step_implementer._get_effective_pom()
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_not_called()

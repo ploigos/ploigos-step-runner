@@ -127,7 +127,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -181,7 +181,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result = StepResult(step_name='package', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -247,7 +247,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Maven'
             )
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -310,7 +310,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in multiple artifacts with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -358,7 +358,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in 0 with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -420,7 +420,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(

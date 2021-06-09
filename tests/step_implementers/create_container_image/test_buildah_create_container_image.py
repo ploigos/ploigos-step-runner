@@ -99,7 +99,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar'
+                value=f'{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar'
             )
 
 
@@ -119,7 +119,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
-                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar',
+                f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -162,7 +162,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-latest.tar'
+                value=f'{step_implementer.work_dir_path}/image-app-name-service-name-latest.tar'
             )
 
             buildah_mock.bud.assert_called_once_with(
@@ -181,7 +181,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:latest',
-                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-latest.tar',
+                f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-latest.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -231,7 +231,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar'
+                value=f'{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar'
             )
 
 
@@ -251,7 +251,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
-                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar',
+                f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -377,7 +377,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             result = step_implementer._run_step()
 
             image_tar_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 f'image-{application_name}-{service_name}-{image_tag_version}.tar'
             )
             self.assertFalse(result.success)

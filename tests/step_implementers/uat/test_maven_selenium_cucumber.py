@@ -262,7 +262,7 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
 
         if assert_report_artifact:
             mvn_test_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(

@@ -43,8 +43,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     Parameters
     ----------
-    workflow_result : str
-        TODO doc me
+    workflow_result : WorkflowResult
+        The WorkflowResult to add StepResult to when running this StepImplementer.
     parent_work_dir_path : str
         Path to the directory to write step working files to
     step_environment_config : dict, optional
@@ -155,11 +155,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         return defaults_for_env
 
     @property
-    def work_dir_path_step(self):
-        """
-        Get the OS path to the working folder for this step.
+    def work_dir_path(self):
+        """Get the OS path to the working folder for this step.
         If the folder does not exist, create it.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname
 
         Returns
         -------
@@ -556,7 +554,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             Path to created working sub directory.
         """
-        file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
+        file_path = os.path.join(self.work_dir_path, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
@@ -576,7 +574,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Return a string to the file path
         """
         # eg: step-runner-working/step_name
-        file_path = os.path.join(self.work_dir_path_step, filename)
+        file_path = os.path.join(self.work_dir_path, filename)
 
         # sub-directories might be passed filename, eg: foo/filename
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

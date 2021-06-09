@@ -1024,15 +1024,15 @@ Result	pass
             expected_results.success=True
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, step_result)
 
@@ -1124,15 +1124,15 @@ Result	fail
                 "\nIdent\tCCE-82985-3\nResult\tfail\n"
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, step_result)
 
@@ -1218,15 +1218,15 @@ Result	fail
             expected_results.success=True
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, result)
 

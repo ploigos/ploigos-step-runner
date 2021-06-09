@@ -202,7 +202,7 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
             upload_mock.side_effect = upload_mock_side_effect
 
             extra_data_file = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'automated-governance.json'
             )
 

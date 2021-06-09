@@ -96,7 +96,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -152,7 +152,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 value=[]
             )
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -223,7 +223,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
             mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
