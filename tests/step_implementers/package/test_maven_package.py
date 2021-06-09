@@ -21,7 +21,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Maven,
@@ -29,7 +29,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     # TESTS FOR configuration checks
@@ -85,7 +85,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'war'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -103,7 +103,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
@@ -127,8 +127,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -145,7 +144,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -162,7 +161,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
@@ -182,8 +181,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result = StepResult(step_name='package', sub_step_name='Maven', sub_step_implementer_name='Maven')
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -198,7 +196,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_no_pom(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {}
 
@@ -206,7 +204,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -220,7 +218,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail_mvn_error(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -235,7 +233,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
@@ -249,8 +247,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Maven'
             )
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -278,7 +275,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'jar'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -295,7 +292,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
@@ -313,8 +310,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in multiple artifacts with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -330,7 +326,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = ''
             version = ''
             package = ''
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml',b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -347,7 +343,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
@@ -362,8 +358,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = "pom resulted in 0 with expected artifact extensions (['jar', 'war', 'ear']), this is unsupported"
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -380,7 +375,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             artifact_id = 'my-app'
             version = '1.0'
             package = 'war'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
@@ -401,7 +396,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='package',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             mvn_mock.side_effect = TestStepImplementerMavenPackageBase.create_mvn_side_effect(
@@ -425,8 +420,7 @@ class TestStepImplementerMavenPackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='package-artifacts', value=[package_artifacts])
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'package',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(

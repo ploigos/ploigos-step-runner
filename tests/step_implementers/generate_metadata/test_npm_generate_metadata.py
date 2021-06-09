@@ -14,7 +14,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Npm,
@@ -22,7 +22,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -41,7 +41,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('package.json', b'''{
               "name": "my-awesome-package",
@@ -57,14 +57,14 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='test',
                 implementer='Npm',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_package_file_does_not_exist(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             package_file_path = os.path.join(temp_dir.path, 'package.json')
             step_config = {
                 'package-file': package_file_path
@@ -74,7 +74,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='test',
                 implementer='Npm',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             with self.assertRaisesRegex(
@@ -85,7 +85,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('package.json', b'''{
               "name": "my-awesome-package",
               "version": "42.1"
@@ -98,7 +98,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Npm',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -115,7 +115,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_version_in_package_file(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('package.json', b'''{
               "name": "my-awesome-package"
             }''')
@@ -127,7 +127,7 @@ class TestStepImplementerGenerateMetadataNpm(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Npm',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()

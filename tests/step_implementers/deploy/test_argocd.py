@@ -17,7 +17,7 @@ class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
     def create_step_implementer(
         self,
         step_config={},
-        work_dir_path='',
+        parent_work_dir_path='',
         environment=None
     ):
         return self.create_given_step_implementer(
@@ -25,7 +25,7 @@ class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
             step_config=step_config,
             step_name='deploy',
             implementer='ArgoCD',
-            work_dir_path=work_dir_path,
+            parent_work_dir_path=parent_work_dir_path,
             environment=environment
         )
 
@@ -67,7 +67,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 ):
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_success_ssh(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -82,14 +82,14 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_success_https(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -106,14 +106,14 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_username(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -129,7 +129,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -140,7 +140,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_password(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -156,7 +156,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -167,7 +167,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_creds(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -182,7 +182,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -195,7 +195,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
     def test_ArgoCD_validate_required_config_or_previous_step_result_artifact_keys_fail_http_no_git_creds(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -210,7 +210,7 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -269,7 +269,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
         argocd_get_app_manifest_mock
     ):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -284,7 +284,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 environment='PROD'
             )
 
@@ -317,9 +317,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
             get_app_name_mock.assert_called_once_with()
             deployment_config_repo_dir = os.path.join(
-                work_dir_path,
-                'deploy',
-                'PROD',
+                step_implementer.work_dir_path_step,
                 'deployment-config-repo'
             )
             clone_repo_mock.assert_called_once_with(
@@ -421,7 +419,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
         argocd_get_app_manifest_mock
     ):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
@@ -436,7 +434,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 environment='PROD'
             )
 
@@ -463,9 +461,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
             get_app_name_mock.assert_called_once_with()
             deployment_config_repo_dir = os.path.join(
-                work_dir_path,
-                'deploy',
-                'PROD',
+                step_implementer.work_dir_path_step,
                 'deployment-config-repo'
             )
             clone_repo_mock.assert_called_once_with(
@@ -491,13 +487,13 @@ class TestStepImplementerDeployArgoCD__get_container_image_version(
 ):
     def test_ArgoCD__get_container_image_version_config_value(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'container-image-version': 'v0.42.0'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             image_version = step_implementer._ArgoCD__get_container_image_version()
@@ -505,12 +501,12 @@ class TestStepImplementerDeployArgoCD__get_container_image_version(
 
     def test_ArgoCD__get_container_image_version_no_config_value(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             image_version = step_implementer._ArgoCD__get_container_image_version()
@@ -521,13 +517,13 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 ):
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_config_value(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'deployment-config-helm-chart-environment-values-file': 'values-AWEOMSE.yaml'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             deployment_config_helm_chart_env_value_file = \
@@ -539,12 +535,12 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_no_config_value_no_env(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             deployment_config_helm_chart_env_value_file = \
@@ -556,12 +552,12 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
 
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_no_config_value_with_env(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 environment='PROD'
             )
 
@@ -576,12 +572,12 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
     @patch('sh.yq', create=True)
     def test_ArgoCD__update_yaml_file_value_success(self, yq_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             updated_file_path = step_implementer._ArgoCD__update_yaml_file_value(
@@ -591,8 +587,7 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
             )
             self.assertEqual(updated_file_path, '/does/not/matter/chart/values-PROD.yaml')
             yq_script_file_path = os.path.join(
-                work_dir_path,
-                'deploy',
+                step_implementer.work_dir_path_step,
                 'update-yaml-file-yq-script.yaml'
             )
             yq_mock.write.assert_called_once_with(
@@ -614,12 +609,12 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
     @patch('sh.yq', create=True)
     def test_ArgoCD__update_yaml_file_value_fail(self, yq_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             yq_mock.write.side_effect = create_sh_side_effect(
@@ -648,8 +643,7 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
                     value=value
                 )
                 yq_script_file_path = os.path.join(
-                    work_dir_path,
-                    'deploy',
+                    step_implementer.work_dir_path_step,
                     'update-yaml-file-yq-script.yaml'
                 )
                 yq_mock.write.assert_called_once_with(
@@ -672,14 +666,14 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_http(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
                 'git-password': 'test-password'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
@@ -698,14 +692,14 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_https(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
                 'git-password': 'test-password'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
@@ -724,14 +718,14 @@ class TestStepImplementerDeployArgoCD__git_tag_and_push_deployment_config_repo(T
     @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push')
     def test_ArgoCD__git_tag_and_push_deployment_config_repo_ssh(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'git-username': 'test-username',
                 'git-password': 'test-password'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._ArgoCD__git_tag_and_push_deployment_config_repo(
@@ -751,7 +745,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_no_env_less_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
                 'application-name': 'test-app',
@@ -759,7 +753,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             app_name = step_implementer._ArgoCD__get_app_name()
@@ -768,7 +762,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/TEST')
     def test_ArgoCD__get_app_name_no_env_less_then_max_length_caps(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -776,7 +770,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             app_name = step_implementer._ArgoCD__get_app_name()
@@ -785,7 +779,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_no_env_more_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
                 'application-name': 'test-app',
@@ -793,7 +787,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             app_name = step_implementer._ArgoCD__get_app_name()
@@ -802,7 +796,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
     @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
     def test_ArgoCD__get_app_name_with_env_less_then_max_length(self, get_repo_branch_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-org',
                 'application-name': 'test-app',
@@ -810,7 +804,7 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 environment='PROD'
             )
 
@@ -820,14 +814,14 @@ class TestStepImplementerDeployArgoCD__get_app_name(TestStepImplementerDeployArg
 class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepImplementerDeployArgoCDBase):
     def test_ArgoCD__get_deployment_config_repo_tag_use_tag(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'tag': 'v0.42.0-abc123',
                 'version': 'v0.42.0'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             deployment_config_repo_tag = step_implementer._ArgoCD__get_deployment_config_repo_tag()
@@ -835,13 +829,13 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_version(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'version': 'v0.42.0'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             deployment_config_repo_tag = step_implementer._ArgoCD__get_deployment_config_repo_tag()
@@ -850,12 +844,12 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_latest(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             deployment_config_repo_tag = step_implementer._ArgoCD__get_deployment_config_repo_tag()
@@ -863,14 +857,14 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_repo_tag(TestStepIm
 
     def test_ArgoCD__get_deployment_config_repo_tag_use_tag_with_env(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'tag': 'v0.42.0-main+abc123',
                 'version': 'v0.42.0'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 environment='PROD'
             )
 
@@ -2130,10 +2124,10 @@ class TestStepImplementerDeployArgoCD__argocd_add_target_cluster(TestStepImpleme
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_default_cluster(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._ArgoCD__argocd_add_target_cluster(
@@ -2146,10 +2140,10 @@ class TestStepImplementerDeployArgoCD__argocd_add_target_cluster(TestStepImpleme
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_custom_cluster_kube_skip_tls_true(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
             expected_config_argocd_cluster_context_file_contents = """---
 apiVersion: v1
@@ -2179,8 +2173,7 @@ users:
             )
 
             config_argocd_cluster_context_file_path = os.path.join(
-                work_dir_path,
-                'deploy',
+                step_implementer.work_dir_path_step,
                 'config-argocd-cluster-context.yaml'
             )
             argocd_mock.cluster.add.assert_called_once_with(
@@ -2204,10 +2197,10 @@ users:
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_custom_cluster_kube_skip_tls_false(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
             expected_config_argocd_cluster_context_file_contents = """---
 apiVersion: v1
@@ -2237,8 +2230,7 @@ users:
             )
 
             config_argocd_cluster_context_file_path = os.path.join(
-                work_dir_path,
-                'deploy',
+                step_implementer.work_dir_path_step,
                 'config-argocd-cluster-context.yaml'
             )
             argocd_mock.cluster.add.assert_called_once_with(
@@ -2262,10 +2254,10 @@ users:
     @patch('sh.argocd', create=True)
     def test_ArgoCD__argocd_add_target_cluster_fail_custom_cluster_kube_skip_tls_true(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
             expected_config_argocd_cluster_context_file_contents = """---
 apiVersion: v1
@@ -2311,8 +2303,7 @@ users:
                 )
 
                 config_argocd_cluster_context_file_path = os.path.join(
-                    work_dir_path,
-                    'deploy',
+                    step_implementer.work_dir_path_step,
                     'config-argocd-cluster-context.yaml'
                 )
                 argocd_mock.cluster.add.assert_called_once_with(
@@ -2624,10 +2615,10 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_success_live(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             arogcd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
@@ -2646,10 +2637,10 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_success_git(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             arogcd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
@@ -2668,11 +2659,11 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
     @patch('sh.argocd', create=True)
     def test___argocd_get_app_manifest_fail(self, argocd_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config={},
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             argocd_mock.app.manifests.side_effect = create_sh_side_effect(

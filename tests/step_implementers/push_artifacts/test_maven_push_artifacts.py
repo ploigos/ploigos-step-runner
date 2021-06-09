@@ -20,7 +20,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Maven,
@@ -28,7 +28,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -51,7 +51,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_pass(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
                 'maven-push-artifact-repo-url': 'pass',
@@ -69,7 +69,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
@@ -77,7 +77,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 step_name='push-artifacts',
                 implementer='Maven',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
             result = step_implementer._run_step()
 
@@ -96,8 +96,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'push-artifacts',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -110,7 +109,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_fail(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             # config
             step_config = {
@@ -129,7 +128,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
@@ -137,7 +136,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 step_name='push-artifacts',
                 implementer='Maven',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
             sh.mvn.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
 
@@ -153,8 +152,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 value=[]
             )
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'push-artifacts',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
@@ -179,7 +177,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
     @patch('sh.mvn', create=True)
     def test_run_step_tls_verify_false(self, mvn_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
                 'maven-push-artifact-repo-url': 'pass',
@@ -198,7 +196,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 'package-artifacts': {'value': package_artifacts},
                 'version': {'value': 'test-version'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             # Actual results
             step_implementer = self.create_step_implementer(
@@ -206,7 +204,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
                 step_name='push-artifacts',
                 implementer='Maven',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
             result = step_implementer._run_step()
 
@@ -225,8 +223,7 @@ class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
             mvn_output_file_path = os.path.join(
-                work_dir_path,
-                'push-artifacts',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(

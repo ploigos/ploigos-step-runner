@@ -229,7 +229,7 @@ class TestStepResultTest(BaseTestCase):
 
         step = FooStepImplementer(
             workflow_result=WorkflowResult(),
-            work_dir_path=None,
+            parent_work_dir_path=None,
             config=sub_step
         )
 
@@ -258,7 +258,7 @@ class TestStepResultTest(BaseTestCase):
 
         step = FooStepImplementer(
             workflow_result=WorkflowResult(),
-            work_dir_path=None,
+            parent_work_dir_path=None,
             config=sub_step,
             environment='blarg'
         )
@@ -527,7 +527,7 @@ class TestStepResultTest(BaseTestCase):
             name='evi-desc',
             value='world',
             description='test evidence'
-        )        
+        )
 
         expected = {
             'blarg': {

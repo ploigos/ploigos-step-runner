@@ -19,14 +19,14 @@ class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=MavenSeleniumCucumber,
             step_config=step_config,
             step_name='uat',
             implementer='MavenSeleniumCucumber',
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
 class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys(
@@ -34,7 +34,7 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
 ):
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             Path(pom_file_path).touch()
@@ -45,14 +45,14 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             Path(pom_file_path).touch()
@@ -63,14 +63,14 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             Path(pom_file_path).touch()
@@ -81,14 +81,14 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
             Path(pom_file_path).touch()
@@ -98,7 +98,7 @@ class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -153,10 +153,10 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         raise_error_on_tests=False,
         set_tls_verify_false=False
     ):
-        work_dir_path = os.path.join(test_dir.path, 'working')
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-        cucumber_html_report_path = os.path.join(work_dir_path, 'uat', 'cucumber.html')
-        cucumber_json_report_path = os.path.join(work_dir_path, 'uat', 'cucumber.json')
+        cucumber_html_report_path = os.path.join(parent_work_dir_path, 'uat', 'cucumber.html')
+        cucumber_json_report_path = os.path.join(parent_work_dir_path, 'uat', 'cucumber.json')
 
         test_dir.write(pom_file_name, pom_content)
 
@@ -189,7 +189,7 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
             uat_maven_profile = 'integration-test'
         step_implementer = self.create_step_implementer(
             step_config=step_config,
-            work_dir_path=work_dir_path,
+            parent_work_dir_path=parent_work_dir_path,
         )
 
         # mock generating settings
@@ -262,8 +262,7 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
 
         if assert_report_artifact:
             mvn_test_output_file_path = os.path.join(
-                work_dir_path,
-                'uat',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(
