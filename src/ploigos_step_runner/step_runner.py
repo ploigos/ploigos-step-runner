@@ -154,7 +154,7 @@ class StepRunner:
 
             # create the StepImplementer instance
             sub_step = step_implementer_class(
-                work_dir_path=self.__work_dir_path,
+                parent_work_dir_path=self.__work_dir_path,
                 config=sub_step_config,
                 environment=environment,
                 workflow_result=self.workflow_result

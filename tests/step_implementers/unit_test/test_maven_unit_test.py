@@ -18,14 +18,14 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Maven,
             step_config=step_config,
             step_name='unit-test',
             implementer='Maven',
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -65,7 +65,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
         raise_error_on_tests=False,
         set_tls_verify_false=False,
     ):
-        work_dir_path = os.path.join(test_dir.path, 'working')
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
         test_dir.write('pom.xml', pom_content)
 
@@ -82,7 +82,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
             step_config['fail-on-no-tests'] = fail_on_no_tests
         step_implementer = self.create_step_implementer(
             step_config=step_config,
-            work_dir_path=work_dir_path,
+            parent_work_dir_path=parent_work_dir_path,
         )
 
         # mock generating settings
@@ -143,8 +143,7 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
 
         if assert_report_artifact:
             mvn_test_output_file_path = os.path.join(
-                work_dir_path,
-                'unit-test',
+                step_implementer.work_dir_path_step,
                 'mvn_test_output.txt'
             )
             expected_step_result.add_artifact(

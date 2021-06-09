@@ -39,7 +39,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Configlint,
@@ -47,7 +47,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     # TESTS FOR configuration checks
@@ -68,7 +68,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_yml_path(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
             temp_dir.write(test_file_path, b'ignored')
@@ -81,7 +81,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='Configlint',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -99,7 +99,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_bad_rule_path(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
             temp_dir.write(test_file_path, b'ignored')
@@ -112,7 +112,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='Configlint',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -130,7 +130,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_pass_prev_step(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'rules'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
             temp_dir.write(test_file_path, b'ignored')
@@ -141,14 +141,14 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             artifact_config = {
                 'configlint-yml-path': {'value': f'{test_file_path}'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='Configlint',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -161,7 +161,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
 
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',
@@ -172,7 +172,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_fail_scan(self, configlint_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             file_to_validate_contents = 'notused'
             temp_dir.write('config-file-to-validate.yml', file_to_validate_contents.encode())
             file_to_validate_file_path = str(os.path.join(temp_dir.path, 'config-file-to-validate.yml'))
@@ -197,7 +197,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='Configlint',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -212,7 +212,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             expected_step_result.message = 'Failed config-lint scan.'
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',
@@ -223,7 +223,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
     @patch('sh.config_lint', create=True)
     def test_run_step_pass(self, config_lint_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             test_file_name = 'file.txt'
             test_file_path = os.path.join(temp_dir.path, test_file_name)
             temp_dir.write(test_file_path, b'ignored')
@@ -236,7 +236,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='validate-environment-configuration',
                 implementer='Configlint',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             config_lint_mock.side_effect = sh.ErrorReturnCode('config_lint', b'mock out', b'mock error')
@@ -252,7 +252,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             expected_step_result.message = 'Unexpected Error invoking config-lint.'
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{work_dir_path}/validate-environment-configuration/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',

@@ -21,7 +21,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         self,
         workflow_result=None,
         step_config={},
-        work_dir_path=''
+        parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Git,
@@ -29,7 +29,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_name='tag-source',
             implementer='Git',
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
 # TESTS FOR configuration checks
@@ -45,7 +45,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
          with TempDirectory() as test_dir:
-            work_dir_path = os.path.join(test_dir.path, 'working')
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
                 'git-username': 'git-username',
@@ -53,21 +53,21 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_username(self):
          with TempDirectory() as test_dir:
-            work_dir_path = os.path.join(test_dir.path, 'working')
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
                 'git-password': 'git-password'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -78,14 +78,14 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_password(self):
          with TempDirectory() as test_dir:
-            work_dir_path = os.path.join(test_dir.path, 'working')
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
             step_config = {
                 'git-username': 'git-username'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -105,7 +105,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
                 'url': url,
@@ -118,12 +118,12 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
                 'container-image-version': {'description': '', 'value': tag}
             }
 
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             def get_tag_side_effect():
@@ -156,12 +156,12 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'http://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url,
@@ -171,7 +171,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -204,13 +204,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'https://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url,
@@ -220,7 +220,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -253,13 +253,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url
@@ -267,7 +267,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -300,13 +300,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'http://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url
@@ -314,7 +314,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -347,13 +347,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'https://git.ploigos.xyz/ploigos-references/ploigos-reference-app-quarkus-rest-json.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url
@@ -361,7 +361,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -393,13 +393,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url,
@@ -409,7 +409,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -447,13 +447,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url,
@@ -463,7 +463,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -498,13 +498,13 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = '1.0+69442c8'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'version': {'description': '', 'value': tag},
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url,
@@ -514,7 +514,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def get_tag_side_effect():
@@ -556,12 +556,12 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             tag = 'latest'
             url = 'git@github.com:ploigos/ploigos-step-runner.git'
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': url
@@ -569,7 +569,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             def git_url_side_effect():
@@ -603,18 +603,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         remote_origin_url = "https://does.not.matter.xyz/foo.git"
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             git_mock.config.side_effect = TestStepImplementerTagSourceGit.\
@@ -627,18 +627,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     @patch('sh.git', create=True)
     def test__git_url_url_from_git_config_error(self, git_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             git_mock.config.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
@@ -654,12 +654,12 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         remote_origin_url = "https://does.not.matter.xyz/foo.git"
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'url': remote_origin_url
@@ -667,7 +667,7 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             git_mock.assert_not_called()
@@ -683,18 +683,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         git_tag_value = "1.0+69442c8"
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer._Git__git_tag(git_tag_value)
@@ -712,18 +712,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         git_tag_value = "1.0+69442c8"
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             git_mock.tag.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')
@@ -741,18 +741,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         url = 'www.xyz.com'
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer._Git__git_push(url)
@@ -769,18 +769,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
     def test__git_push_no_url_success(self, git_mock):
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer._Git__git_push(None)
@@ -797,18 +797,18 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
         url = 'www.xyz.com'
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-69442c8'}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {}
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             git_mock.push.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock error')

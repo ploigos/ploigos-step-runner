@@ -23,7 +23,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Skopeo,
@@ -31,7 +31,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -61,7 +61,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo', create=True)
     def test_run_step_pass(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'
             image_version = '1.0-69442c8'
@@ -78,7 +78,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='push-container-image',
                 implementer='Skopeo',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -132,7 +132,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     @patch.object(sh, 'skopeo', create=True)
     def test_run_step_fail_run_skopeo(self, skopeo_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             image_tar_file = 'fake-image.tar'
             image_version = '1.0-69442c8'
@@ -149,7 +149,7 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='push-container-image',
                 implementer='Skopeo',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             skopeo_mock.copy.side_effect = sh.ErrorReturnCode('skopeo', b'mock stdout', b'mock error')

@@ -43,15 +43,15 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
             self,
             step_config={},
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Rekor,
             step_config=step_config,
-            step_name='automated_governance',
+            step_name='automated-governance',
             implementer='Rekor',
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test__required_config_or_result_keys(self):
@@ -65,7 +65,7 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
 
     def test_create_rekor_entry(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             signer_pgp_public_key_path = os.path.join(
                 os.path.dirname(__file__),
                 '../../helpers','files',
@@ -78,7 +78,7 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
                 print("Key already imported.")
 
             # Write empty WorkflowResult to json file to use as Rekor extra data
-            extra_data_file = os.path.join(work_dir_path, 'automated_governance.json')
+            extra_data_file = os.path.join(parent_work_dir_path, 'automated-governance', 'automated-governance.json')
             extra_data_file_path = Path(extra_data_file)
             WorkflowResult().write_results_to_json_file(extra_data_file_path)
 
@@ -98,17 +98,28 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
     @patch('sh.rekor', create=True)
     def test_upload_to_rekor(self, rekor_mock, create_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             signer_pgp_public_key_path = os.path.join(
                 os.path.dirname(__file__),
                 '../../helpers','files',
                 'ploigos-step-runner-tests-public.key'
             )
 
-            extra_data_file = os.path.join(work_dir_path, 'automated_governance.json')
+            step_config = {
+                'rekor-server-url': TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_SERVER,
+                'signer-pgp-public-key-path': signer_pgp_public_key_path,
+                'signer-pgp-private-key-user': TestStepImplementerAutomatedGovernanceRekor.TEST_signer_pgp_private_key_user
+            }
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            extra_data_file = os.path.join(parent_work_dir_path, 'automated-governance', 'automated-governance.json')
             extra_data_file_path = Path(extra_data_file)
             WorkflowResult().write_results_to_json_file(extra_data_file_path)
-            rekor_entry_path_name = os.path.join(work_dir_path, 'entry.json')
+            rekor_entry_path_name = os.path.join(parent_work_dir_path, 'automated-governance', 'entry.json')
 
             def create_mock_side_effect(signer_pgp_public_key_path, signer_pgp_private_key_user, extra_data_file):
                 return TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_ENTRY
@@ -122,12 +133,11 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
             rekor_entry_path = Path(rekor_entry_path_name)
             rekor_entry_path.touch()
 
-            result_entry, result_uuid = Rekor.upload_to_rekor(
+            result_entry, result_uuid = step_implementer.upload_to_rekor(
                 rekor_server=TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_SERVER,
                 extra_data_file=extra_data_file,
                 signer_pgp_public_key_path=signer_pgp_public_key_path,
-                signer_pgp_private_key_user=TestStepImplementerAutomatedGovernanceRekor.TEST_signer_pgp_private_key_user,
-                work_dir_path=work_dir_path
+                signer_pgp_private_key_user=TestStepImplementerAutomatedGovernanceRekor.TEST_signer_pgp_private_key_user
             )
 
             rekor_mock.assert_called_once_with(
@@ -145,11 +155,10 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
 
     @patch.object(Rekor, 'upload_to_rekor')
     def test__run_step(self, upload_mock):
-        """
-        Testing extra_data in rekor_entry
+        """Testing extra_data in rekor_entry
         """
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             signer_pgp_public_key_path = os.path.join(
                 os.path.dirname(__file__),
                 '../../helpers','files',
@@ -164,11 +173,11 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             expected_step_result = StepResult(
-                step_name='automated_governance',
+                step_name='automated-governance',
                 sub_step_name='Rekor',
                 sub_step_implementer_name='Rekor'
             )
@@ -186,17 +195,15 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
                 rekor_server,
                 extra_data_file,
                 signer_pgp_public_key_path,
-                signer_pgp_private_key_user,
-                work_dir_path
+                signer_pgp_private_key_user
             ):
                 return TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_ENTRY, TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_UUID
 
             upload_mock.side_effect = upload_mock_side_effect
 
             extra_data_file = os.path.join(
-                work_dir_path,
-                'automated_governance',
-                'automated_governance.json'
+                step_implementer.work_dir_path_step,
+                'automated-governance.json'
             )
 
             result = step_implementer._run_step()
@@ -204,8 +211,7 @@ class TestStepImplementerAutomatedGovernanceRekor(BaseStepImplementerTestCase):
                 rekor_server=TestStepImplementerAutomatedGovernanceRekor.TEST_REKOR_SERVER,
                 extra_data_file=extra_data_file,
                 signer_pgp_public_key_path=signer_pgp_public_key_path,
-                signer_pgp_private_key_user=TestStepImplementerAutomatedGovernanceRekor.TEST_signer_pgp_private_key_user,
-                work_dir_path=step_implementer.work_dir_path_step
+                signer_pgp_private_key_user=TestStepImplementerAutomatedGovernanceRekor.TEST_signer_pgp_private_key_user
             )
 
             self.assertEqual(result.get_step_result_dict(), expected_step_result.get_step_result_dict())

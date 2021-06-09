@@ -75,7 +75,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=PodmanSign,
@@ -83,7 +83,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -103,7 +103,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_pass(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             container_image_tag = 'does/not/matter:v0.42.0'
@@ -113,7 +113,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             def import_pgp_key_side_effect(pgp_private_key):
                 return pgp_private_key_fingerprint
@@ -133,7 +133,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -143,7 +143,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
                 image_signatures_directory= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag
@@ -157,7 +157,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
                 value= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature',
                     signature_name
                 )
@@ -182,7 +182,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         upload_file_mock
     ):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             step_config['container-image-signature-destination-url'] = '/mock/container-sigs'
@@ -193,7 +193,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             def import_pgp_key_side_effect(pgp_private_key):
                 return pgp_private_key_fingerprint
@@ -215,7 +215,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -225,7 +225,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
                 image_signatures_directory= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag
@@ -245,7 +245,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
                 value= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature',
                     signature_name
                 )
@@ -282,7 +282,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         upload_file_mock
     ):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             step_config['container-image-signature-destination-url'] = \
@@ -296,7 +296,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             def import_pgp_key_side_effect(pgp_private_key):
                 return pgp_private_key_fingerprint
@@ -318,7 +318,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -328,7 +328,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
                 image_signatures_directory= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag
@@ -348,7 +348,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
                 value= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature',
                     signature_name
                 )
@@ -385,7 +385,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         upload_file_mock
     ):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             step_config['container-image-signature-destination-url'] = \
@@ -399,7 +399,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             def import_pgp_key_side_effect(pgp_private_key):
                 return pgp_private_key_fingerprint
@@ -421,7 +421,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -432,7 +432,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
                 image_signatures_directory= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag
@@ -452,7 +452,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
                 value= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature',
                     signature_name
                 )
@@ -480,7 +480,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_import_pgp_key(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             container_image_tag = 'does/not/matter:v0.42.0'
             signature_name = 'does/not/matter/signature-0'
@@ -489,7 +489,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             import_pgp_key_mock.side_effect = RuntimeError('mock error importing pgp key')
 
@@ -508,7 +508,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -532,7 +532,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_sign_image(self, sign_image_mock, import_pgp_key_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
             step_config = TestStepImplementerSignContainerImagePodman.generate_config()
             container_image_tag = 'does/not/matter:v0.42.0'
@@ -541,7 +541,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             artifact_config = {
                 'container-image-tag': {'value': container_image_tag}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             def import_pgp_key_side_effect(pgp_private_key):
                 return pgp_private_key_fingerprint
@@ -555,7 +555,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 implementer='PodmanSign',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -565,7 +565,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             sign_image_mock.assert_called_once_with(
                 pgp_private_key_fingerprint=pgp_private_key_fingerprint,
                 image_signatures_directory= os.path.join(
-                    work_dir_path,
+                    parent_work_dir_path,
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag

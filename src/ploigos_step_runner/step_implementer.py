@@ -65,11 +65,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
-        work_dir_path,
+        parent_work_dir_path,
         config,
         environment=None
     ):
-        self.__work_dir_path = work_dir_path
+        self.__parent_work_dir_path = parent_work_dir_path
 
         self.__config = config
         self.__environment = environment
@@ -166,7 +166,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             OS path to the working folder plus step name.
         """
-        work_dir_path_step = os.path.join(self.__work_dir_path, self.step_name)
+        work_dir_path_step = os.path.join(self.__parent_work_dir_path, self.step_name)
         if self.environment:
             work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
         os.makedirs(work_dir_path_step, exist_ok=True)

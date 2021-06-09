@@ -19,7 +19,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Git,
@@ -27,7 +27,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -45,7 +45,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
             create_git_commit_with_sample_file(temp_dir, repo)
@@ -58,7 +58,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -68,7 +68,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_root_dir_is_not_git_repo(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'repo-root': '/'
             }
@@ -77,7 +77,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -94,7 +94,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_root_dir_is_bare_git_repo(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             Repo.init(str(temp_dir.path), bare=True)
 
             step_config = {
@@ -105,7 +105,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -122,7 +122,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_no_commit_history(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             Repo.init(str(temp_dir.path))
 
             step_config = {
@@ -133,7 +133,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -155,7 +155,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_git_repo_with_single_commit_on_master(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
             create_git_commit_with_sample_file(temp_dir, repo)
@@ -168,7 +168,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -178,7 +178,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_git_repo_with_single_commit_on_feature(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
             create_git_commit_with_sample_file(temp_dir, repo)
@@ -195,7 +195,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -206,7 +206,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_directory_is_detached(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             repo = Repo.init(str(temp_dir.path))
 
             # create commits
@@ -224,7 +224,7 @@ class TestStepImplementerGitGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Git',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()

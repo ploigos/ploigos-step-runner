@@ -24,7 +24,7 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=OpenSCAPGeneric,
@@ -32,7 +32,7 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -57,13 +57,13 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
@@ -75,13 +75,13 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
             'image-tar-file': 'does-not-matter'
         }
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             with self.assertRaisesRegex(
@@ -102,13 +102,13 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
         }
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -123,13 +123,13 @@ class TestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
     def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
         step_config = {}
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             with self.assertRaisesRegex(
@@ -989,20 +989,20 @@ Result	pass
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1024,15 +1024,15 @@ Result	pass
             expected_results.success=True
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, step_result)
 
@@ -1086,20 +1086,20 @@ Result	fail
 """
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1124,15 +1124,15 @@ Result	fail
                 "\nIdent\tCCE-82985-3\nResult\tfail\n"
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, step_result)
 
@@ -1183,20 +1183,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1218,15 +1218,15 @@ Result	fail
             expected_results.success=True
             expected_results.add_artifact(
                 name='html-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-report.html"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-report.html"
             )
             expected_results.add_artifact(
                 name='xml-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-results.xml"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-results.xml"
             )
             expected_results.add_artifact(
                 name='stdout-report',
-                value=f"{work_dir_path}/test/oscap-xccdf-out"
+                value=f"{step_implementer.work_dir_path_step}/oscap-xccdf-out"
             )
             self.assertEqual(expected_results, result)
 
@@ -1277,20 +1277,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type
@@ -1361,20 +1361,20 @@ Result	fail
         oscap_eval_fails = None
 
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             mount_path = '/does/not/matter/container-mount'
 
             artifact_config = {
                 'image-tar-file': {'description': '', 'value': image_tar_file}
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='test',
                 implementer='OpenSCAP',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             get_oscap_document_type_mock.return_value = oscap_document_type

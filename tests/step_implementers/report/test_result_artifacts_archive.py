@@ -17,7 +17,7 @@ class TestStepImplementerResultArtifactsArchiveBase(BaseStepImplementerTestCase)
             self,
             step_config={},
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=ResultArtifactsArchive,
@@ -25,7 +25,7 @@ class TestStepImplementerResultArtifactsArchiveBase(BaseStepImplementerTestCase)
             step_name='report',
             implementer='ResultArtifactsArchive',
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
 class TestStepImplementerResultArtifactsArchive_other(TestStepImplementerResultArtifactsArchiveBase):
@@ -59,7 +59,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
     )
     def test__run_step_pass_no_archive(self, create_archive_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -68,7 +68,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_result = step_implementer._run_step()
@@ -93,7 +93,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
     )
     def test__run_step_pass(self, create_archive_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -102,7 +102,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_result = step_implementer._run_step()
@@ -128,7 +128,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
     )
     def test__run_step_pass_upload_to_file(self, create_archive_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -138,7 +138,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             # mock the upload results
@@ -187,7 +187,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
     )
     def test__run_step_pass_upload_to_remote_with_auth(self, create_archive_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -199,7 +199,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             # mock the upload results
@@ -248,7 +248,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
     )
     def test__run_step_pass_upload_to_remote_with_auth_failure(self, create_archive_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -260,7 +260,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             # mock the upload results
@@ -301,7 +301,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
 class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplementerResultArtifactsArchiveBase):
     def test___create_archive_no_results(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -310,7 +310,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             archive_path = step_implementer._ResultArtifactsArchive__create_archive()
@@ -319,7 +319,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_string_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -339,7 +339,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             workflow_result.add_step_result(step_result)
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -357,7 +357,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_file_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -383,7 +383,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -402,7 +402,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_dir_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -433,7 +433,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -461,7 +461,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_list_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -485,7 +485,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             workflow_result.add_step_result(step_result)
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -510,7 +510,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_dict_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -534,7 +534,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             workflow_result.add_step_result(step_result)
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -559,7 +559,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_bool_result(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -579,7 +579,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             workflow_result.add_step_result(step_result)
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -600,7 +600,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_string_result_with_env(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -621,7 +621,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             workflow_result.add_step_result(step_result)
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 
@@ -639,7 +639,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
     def test___create_archive_file_result_with_env(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -666,7 +666,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
                 workflow_result=workflow_result
             )
 

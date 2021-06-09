@@ -16,7 +16,7 @@ class BaseStepImplementerTestCase(BaseTestCase):
         environment=None,
         implementer='',
         workflow_result=None,
-        work_dir_path='',
+        parent_work_dir_path='',
     ):
         config = Config({
             Config.CONFIG_KEY: {
@@ -37,7 +37,7 @@ class BaseStepImplementerTestCase(BaseTestCase):
 
         step_implementer = step_implementer(
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path,
+            parent_work_dir_path=parent_work_dir_path,
             config=sub_step_config,
             environment=environment
         )

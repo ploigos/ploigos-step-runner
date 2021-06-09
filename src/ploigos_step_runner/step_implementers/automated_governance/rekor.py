@@ -133,13 +133,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         }
         return rekor_entry
 
-    @staticmethod
     def upload_to_rekor(
+        self,
         rekor_server,
         extra_data_file,
         signer_pgp_public_key_path,
-        signer_pgp_private_key_user,
-        work_dir_path
+        signer_pgp_private_key_user
     ):
         """TODO: function will be refactored in next release. will doc then.
         """
@@ -148,13 +147,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             signer_pgp_private_key_user=signer_pgp_private_key_user,
             extra_data_file=extra_data_file
         )
-        print("Rekor Entry: " + str(rekor_entry))
-        rekor_entry_path = Path(os.path.join(work_dir_path, 'entry.json'))
 
-        if rekor_entry_path.exists():
-            rekor_entry_path.unlink()
-        rekor_entry_path_name = os.path.join(work_dir_path, 'entry.json')
-        rekor_entry_path.write_text(json.dumps(rekor_entry))
+        rekor_entry_path = self.write_working_file(
+            filename='entry.json',
+            contents=bytes(json.dumps(rekor_entry), 'utf-8')
+        )
+
         rekor_upload_stdout_result = StringIO()
         rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
             sys.stdout,
@@ -165,7 +163,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             '--rekor_server',
             rekor_server,
             '--entry',
-            rekor_entry_path_name,
+            rekor_entry_path,
             _out=rekor_upload_stdout_callback,
             _err_to_out=True,
             _tee='out'
@@ -192,8 +190,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             rekor_server=rekor_server,
             extra_data_file=extra_data_file,
             signer_pgp_public_key_path=self.get_value('signer-pgp-public-key-path'),
-            signer_pgp_private_key_user=self.get_value('signer-pgp-private-key-user'),
-            work_dir_path=self.work_dir_path_step
+            signer_pgp_private_key_user=self.get_value('signer-pgp-private-key-user')
         )
         step_result.add_artifact(
                 name='rekor-entry',

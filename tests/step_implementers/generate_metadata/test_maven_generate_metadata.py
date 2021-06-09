@@ -17,7 +17,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Maven,
@@ -25,7 +25,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
     def test_step_implementer_config_defaults(self):
@@ -42,7 +42,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -59,14 +59,14 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_package_file_does_not_exist(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
 
@@ -77,7 +77,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             with self.assertRaisesRegex(
@@ -88,7 +88,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_pass(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -105,7 +105,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -121,7 +121,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
     def test_run_step_fail_missing_version_in_pom_file(self):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             temp_dir.write('pom.xml', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
@@ -137,7 +137,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 step_config=step_config,
                 step_name='generate-metadata',
                 implementer='Maven',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()

@@ -20,7 +20,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             step_name='',
             implementer='',
             workflow_result=None,
-            work_dir_path=''
+            parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Buildah,
@@ -28,7 +28,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             step_name=step_name,
             implementer=implementer,
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path
+            parent_work_dir_path=parent_work_dir_path
         )
 
 # TESTS FOR configuration checks
@@ -59,13 +59,13 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
@@ -81,7 +81,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_name='create-container-image',
                 implementer='Buildah',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
 
@@ -99,7 +99,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar'
+                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar'
             )
 
 
@@ -119,7 +119,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
-                'docker-archive:' + work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar',
+                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -129,7 +129,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass_no_container_image_version(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
             step_config = {
@@ -146,7 +146,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_config=step_config,
                 step_name='create-container-image',
                 implementer='Buildah',
-                work_dir_path=work_dir_path,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
             result = step_implementer._run_step()
@@ -162,7 +162,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=work_dir_path + '/create-container-image/image-app-name-service-name-latest.tar'
+                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-latest.tar'
             )
 
             buildah_mock.bud.assert_called_once_with(
@@ -181,7 +181,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:latest',
-                'docker-archive:' + work_dir_path + '/create-container-image/image-app-name-service-name-latest.tar',
+                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-latest.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -191,13 +191,13 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_pass_image_tar_file_exists(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
@@ -213,7 +213,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_name='create-container-image',
                 implementer='Buildah',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             step_implementer.write_working_file('image-app-name-service-name-1.0-123abc.tar')
@@ -231,7 +231,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
             expected_step_result.add_artifact(
                 name='image-tar-file',
-                value=work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar'
+                value=f'{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar'
             )
 
 
@@ -251,7 +251,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             buildah_mock.push.assert_called_once_with(
                 '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
-                'docker-archive:' + work_dir_path + '/create-container-image/image-app-name-service-name-1.0-123abc.tar',
+                f'docker-archive:{step_implementer.work_dir_path_step}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee='err'
@@ -261,12 +261,12 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_no_image_spec_file(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'service-name': 'service-name',
@@ -277,7 +277,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_name='create-container-image',
                 implementer='Buildah',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             result = step_implementer._run_step()
@@ -295,13 +295,13 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_buildah_bud_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             image_spec_file = 'Dockerfile'
             step_config = {
@@ -318,7 +318,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_name='create-container-image',
                 implementer='Buildah',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             buildah_mock.bud.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
@@ -343,7 +343,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     @patch('sh.buildah', create=True)
     def test__run_step_fail_buildah_push_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
-            work_dir_path = os.path.join(temp_dir.path, 'working')
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Dockerfile',b'''testing''')
 
             application_name = 'app-name'
@@ -353,7 +353,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             artifact_config = {
                 'container-image-version': {'description': '', 'value': image_tag_version},
             }
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
@@ -369,7 +369,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 step_name='create-container-image',
                 implementer='Buildah',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             buildah_mock.push.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
@@ -377,8 +377,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             result = step_implementer._run_step()
 
             image_tar_path = os.path.join(
-                work_dir_path,
-                'create-container-image',
+                step_implementer.work_dir_path_step,
                 f'image-{application_name}-{service_name}-{image_tag_version}.tar'
             )
             self.assertFalse(result.success)

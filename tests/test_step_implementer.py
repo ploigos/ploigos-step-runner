@@ -53,7 +53,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             'new-param-name': 'bar42'
         }
 
-        work_dir_path = os.path.join(test_dir.path, 'working')
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
         workflow_result = WorkflowResult()
 
@@ -80,7 +80,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             value='https://awesome-app.prod.ploigos.xyz'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_prod)
-        pickle_filename = os.path.join(work_dir_path, 'step-runner-results.pkl')
+        pickle_filename = os.path.join(parent_work_dir_path, 'step-runner-results.pkl')
         workflow_result.write_to_pickle_file(pickle_filename=pickle_filename)
 
         return self.create_given_step_implementer(
@@ -89,7 +89,7 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             step_name='foo',
             implementer='FooStepImplementer',
             workflow_result=workflow_result,
-            work_dir_path=work_dir_path,
+            parent_work_dir_path=parent_work_dir_path,
             environment=environment
         )
 
@@ -659,7 +659,7 @@ class TestStepImplementer_other(TestStepImplementer):
 
         step = WriteConfigAsResultsStepImplementer(
             workflow_result=None,
-            work_dir_path='',
+            parent_work_dir_path='',
             config=sub_step
         )
 
@@ -685,7 +685,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step
             )
 
@@ -712,7 +712,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step
             )
 
@@ -730,14 +730,14 @@ class TestStepImplementer_other(TestStepImplementer):
         }
 
         with TempDirectory() as test_dir:
-            work_dir_path = os.path.join(test_dir.path, 'working')
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
             step = self.create_given_step_implementer(
                 step_implementer=FooStepImplementer,
                 step_config=step_config,
                 step_name='foo',
                 implementer='FooStepImplementer',
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             self.assertEqual(step.get_config_value('test'), 'hello world')
@@ -771,7 +771,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
             )
@@ -812,7 +812,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step,
                 environment='SAMPLE-ENV-1'
             )
@@ -843,7 +843,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FailStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step
             )
             result = step.run_step()
@@ -867,7 +867,7 @@ class TestStepImplementer_other(TestStepImplementer):
             working_dir_path = os.path.join(test_dir.path, 'step-runner-working')
             step = FooStepImplementer(
                 workflow_result=WorkflowResult(),
-                work_dir_path=working_dir_path,
+                parent_work_dir_path=working_dir_path,
                 config=sub_step
             )
 
@@ -886,7 +886,7 @@ class TestStepImplementer_get_value(TestStepImplementer):
         }
 
         with TempDirectory() as test_dir:
-            work_dir_path = os.path.join(test_dir.path, 'working')
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
             artifact_config = {
                 'fake-previous-step-artifact': {
@@ -895,7 +895,7 @@ class TestStepImplementer_get_value(TestStepImplementer):
                 },
             }
 
-            workflow_result = self.setup_previous_result(work_dir_path, artifact_config)
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
             step = self.create_given_step_implementer(
                 step_implementer=FooStepImplementer,
@@ -903,7 +903,7 @@ class TestStepImplementer_get_value(TestStepImplementer):
                 step_name='foo',
                 implementer='FooStepImplementer',
                 workflow_result=workflow_result,
-                work_dir_path=work_dir_path
+                parent_work_dir_path=parent_work_dir_path
             )
 
             self.assertEqual(step.get_value('test'), 'hello world')
@@ -984,7 +984,7 @@ class TestStepImplementer_validate_required_config_or_previous_step_result_artif
                 step_config=step_config,
                 step_name='foo',
                 implementer='RequiredStepConfigMultipleOptionsStepImplementer',
-                work_dir_path=test_dir.path
+                parent_work_dir_path=test_dir.path
             )
 
             with self.assertRaisesRegex(
@@ -1005,7 +1005,7 @@ class TestStepImplementer_validate_required_config_or_previous_step_result_artif
                 step_config=step_config,
                 step_name='foo',
                 implementer='RequiredStepConfigMultipleOptionsStepImplementer',
-                work_dir_path=test_dir.path
+                parent_work_dir_path=test_dir.path
             )
 
             step._validate_required_config_or_previous_step_result_artifact_keys()
@@ -1021,7 +1021,7 @@ class TestStepImplementer_validate_required_config_or_previous_step_result_artif
                 step_config=step_config,
                 step_name='foo',
                 implementer='RequiredStepConfigMultipleOptionsStepImplementer',
-                work_dir_path=test_dir.path
+                parent_work_dir_path=test_dir.path
             )
 
             step._validate_required_config_or_previous_step_result_artifact_keys()
