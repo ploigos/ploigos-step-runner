@@ -211,7 +211,7 @@ class SonarQube(StepImplementer):
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
-            working_directory = self.work_dir_path
+            working_directory = self.work_dir_path_step
             if username:
                 sh.sonar_scanner(  # pylint: disable=no-member
                     f'-Dproject.settings={properties_file}',

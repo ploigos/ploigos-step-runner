@@ -45,7 +45,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     ----------
     workflow_result : str
         TODO doc me
-    work_dir_path : str
+    parent_work_dir_path : str
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
@@ -155,20 +155,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         return defaults_for_env
 
     @property
-    def work_dir_path(self):
-        """
-        Get the OS path to the working folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working
-
-        Returns
-        -------
-        str
-            OS path to the working folder.
-        """
-        os.makedirs(self.__work_dir_path, exist_ok=True)
-        return os.path.abspath(self.__work_dir_path)
-
-    @property
     def work_dir_path_step(self):
         """
         Get the OS path to the working folder for this step.
@@ -180,7 +166,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             OS path to the working folder plus step name.
         """
-        work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
+        work_dir_path_step = os.path.join(self.__work_dir_path, self.step_name)
         if self.environment:
             work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
         os.makedirs(work_dir_path_step, exist_ok=True)

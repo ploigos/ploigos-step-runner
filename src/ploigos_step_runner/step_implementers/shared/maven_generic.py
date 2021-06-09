@@ -53,7 +53,7 @@ class MavenGeneric(StepImplementer):
         )
 
         return generate_maven_settings(
-            working_dir=self.work_dir_path,
+            working_dir=self.work_dir_path_step,
             maven_servers=maven_servers,
             maven_repositories=maven_repositories,
             maven_mirrors=maven_mirrors
@@ -67,7 +67,7 @@ class MavenGeneric(StepImplementer):
         str
             Path to the written effective pom generated from the 'pom-file' value.
         """
-        effective_pom_path = os.path.join(self.work_dir_path, 'effective-pom.xml')
+        effective_pom_path = os.path.join(self.work_dir_path_step, 'effective-pom.xml')
 
         if not os.path.exists(effective_pom_path):
             write_effective_pom(
