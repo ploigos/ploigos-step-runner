@@ -283,7 +283,7 @@ class Buildah(StepImplementer):
             return step_result
 
         image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
+        image_tar_path = os.path.join(self.work_dir_path, image_tar_file)
         try:
             # Check to see if the tar docker-archive file already exists
             #   this needs to be run as buildah does not support overwritting
@@ -313,8 +313,7 @@ class Buildah(StepImplementer):
                 f&#39;({image_tar_path}): {error}&#39;
             return step_result
 
-        return step_result
-        </code></pre>
+        return step_result</code></pre>
 </details>
 </section>
 <section>
@@ -328,7 +327,7 @@ class Buildah(StepImplementer):
 <dl>
 <dt id="ploigos_step_runner.step_implementers.create_container_image.buildah.Buildah"><code class="flex name class">
 <span>class <span class="ident">Buildah</span></span>
-<span>(</span><span>workflow_result, work_dir_path, config, environment=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code>StepImplementer</code> for the <code>create-container-image step</code> using Buildah.</p></div>
@@ -449,7 +448,7 @@ class Buildah(StepImplementer):
             return step_result
 
         image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
+        image_tar_path = os.path.join(self.work_dir_path, image_tar_file)
         try:
             # Check to see if the tar docker-archive file already exists
             #   this needs to be run as buildah does not support overwritting
@@ -509,7 +508,6 @@ class Buildah(StepImplementer):
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>

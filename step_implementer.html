@@ -72,9 +72,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     Parameters
     ----------
-    workflow_result : str
-        TODO doc me
-    work_dir_path : str
+    workflow_result : WorkflowResult
+        The WorkflowResult to add StepResult to when running this StepImplementer.
+    parent_work_dir_path : str
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
@@ -94,11 +94,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
-        work_dir_path,
+        parent_work_dir_path,
         config,
         environment=None
     ):
-        self.__work_dir_path = work_dir_path
+        self.__parent_work_dir_path = parent_work_dir_path
 
         self.__config = config
         self.__environment = environment
@@ -185,31 +185,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     @property
     def work_dir_path(self):
-        &#34;&#34;&#34;
-        Get the OS path to the working folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working
-
-        Returns
-        -------
-        str
-            OS path to the working folder.
-        &#34;&#34;&#34;
-        os.makedirs(self.__work_dir_path, exist_ok=True)
-        return os.path.abspath(self.__work_dir_path)
-
-    @property
-    def work_dir_path_step(self):
-        &#34;&#34;&#34;
-        Get the OS path to the working folder for this step.
+        &#34;&#34;&#34;Get the OS path to the working folder for this step.
         If the folder does not exist, create it.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname
 
         Returns
         -------
         str
             OS path to the working folder plus step name.
         &#34;&#34;&#34;
-        work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
+        work_dir_path_step = os.path.join(self.__parent_work_dir_path, self.step_name)
         if self.environment:
             work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
         os.makedirs(work_dir_path_step, exist_ok=True)
@@ -599,7 +583,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             Path to created working sub directory.
         &#34;&#34;&#34;
-        file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
+        file_path = os.path.join(self.work_dir_path, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
@@ -619,7 +603,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Return a string to the file path
         &#34;&#34;&#34;
         # eg: step-runner-working/step_name
-        file_path = os.path.join(self.work_dir_path_step, filename)
+        file_path = os.path.join(self.work_dir_path, filename)
 
         # sub-directories might be passed filename, eg: foo/filename
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -837,15 +821,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 </dd>
 <dt id="ploigos_step_runner.step_implementer.StepImplementer"><code class="flex name class">
 <span>class <span class="ident">StepImplementer</span></span>
-<span>(</span><span>workflow_result, work_dir_path, config, environment=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract representation of a step implementer.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>workflow_result</code></strong> :&ensp;<code>str</code></dt>
-<dd>TODO doc me</dd>
-<dt><strong><code>work_dir_path</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>workflow_result</code></strong> :&ensp;<code>WorkflowResult</code></dt>
+<dd>The WorkflowResult to add StepResult to when running this StepImplementer.</dd>
+<dt><strong><code>parent_work_dir_path</code></strong> :&ensp;<code>str</code></dt>
 <dd>Path to the directory to write step working files to</dd>
 <dt><strong><code>step_environment_config</code></strong> :&ensp;<code>dict</code>, optional</dt>
 <dd>Step configuration specific to the current environment.</dd>
@@ -870,9 +854,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     Parameters
     ----------
-    workflow_result : str
-        TODO doc me
-    work_dir_path : str
+    workflow_result : WorkflowResult
+        The WorkflowResult to add StepResult to when running this StepImplementer.
+    parent_work_dir_path : str
         Path to the directory to write step working files to
     step_environment_config : dict, optional
         Step configuration specific to the current environment.
@@ -892,11 +876,11 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
-        work_dir_path,
+        parent_work_dir_path,
         config,
         environment=None
     ):
-        self.__work_dir_path = work_dir_path
+        self.__parent_work_dir_path = parent_work_dir_path
 
         self.__config = config
         self.__environment = environment
@@ -983,31 +967,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
     @property
     def work_dir_path(self):
-        &#34;&#34;&#34;
-        Get the OS path to the working folder.
-        EG:  /tmp/tmpno_qi7np/step-runner-working
-
-        Returns
-        -------
-        str
-            OS path to the working folder.
-        &#34;&#34;&#34;
-        os.makedirs(self.__work_dir_path, exist_ok=True)
-        return os.path.abspath(self.__work_dir_path)
-
-    @property
-    def work_dir_path_step(self):
-        &#34;&#34;&#34;
-        Get the OS path to the working folder for this step.
+        &#34;&#34;&#34;Get the OS path to the working folder for this step.
         If the folder does not exist, create it.
-        EG:  /tmp/tmpno_qi7np/step-runner-working/stepname
 
         Returns
         -------
         str
             OS path to the working folder plus step name.
         &#34;&#34;&#34;
-        work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
+        work_dir_path_step = os.path.join(self.__parent_work_dir_path, self.step_name)
         if self.environment:
             work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
         os.makedirs(work_dir_path_step, exist_ok=True)
@@ -1397,7 +1365,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         str
             Path to created working sub directory.
         &#34;&#34;&#34;
-        file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
+        file_path = os.path.join(self.work_dir_path, sub_dir_relative_path)
         os.makedirs(file_path, exist_ok=True)
         return file_path
 
@@ -1417,7 +1385,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Return a string to the file path
         &#34;&#34;&#34;
         # eg: step-runner-working/step_name
-        file_path = os.path.join(self.work_dir_path_step, filename)
+        file_path = os.path.join(self.work_dir_path, filename)
 
         # sub-directories might be passed filename, eg: foo/filename
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -1814,39 +1782,8 @@ def sub_step_name(self):
 </dd>
 <dt id="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path"><code class="name">var <span class="ident">work_dir_path</span></code></dt>
 <dd>
-<div class="desc"><p>Get the OS path to the working folder.
-EG:
-/tmp/tmpno_qi7np/step-runner-working</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>str</code></dt>
-<dd>OS path to the working folder.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def work_dir_path(self):
-    &#34;&#34;&#34;
-    Get the OS path to the working folder.
-    EG:  /tmp/tmpno_qi7np/step-runner-working
-
-    Returns
-    -------
-    str
-        OS path to the working folder.
-    &#34;&#34;&#34;
-    os.makedirs(self.__work_dir_path, exist_ok=True)
-    return os.path.abspath(self.__work_dir_path)</code></pre>
-</details>
-</dd>
-<dt id="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step"><code class="name">var <span class="ident">work_dir_path_step</span></code></dt>
-<dd>
 <div class="desc"><p>Get the OS path to the working folder for this step.
-If the folder does not exist, create it.
-EG:
-/tmp/tmpno_qi7np/step-runner-working/stepname</p>
+If the folder does not exist, create it.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
@@ -1857,18 +1794,16 @@ EG:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def work_dir_path_step(self):
-    &#34;&#34;&#34;
-    Get the OS path to the working folder for this step.
+def work_dir_path(self):
+    &#34;&#34;&#34;Get the OS path to the working folder for this step.
     If the folder does not exist, create it.
-    EG:  /tmp/tmpno_qi7np/step-runner-working/stepname
 
     Returns
     -------
     str
         OS path to the working folder plus step name.
     &#34;&#34;&#34;
-    work_dir_path_step = os.path.join(self.work_dir_path, self.step_name)
+    work_dir_path_step = os.path.join(self.__parent_work_dir_path, self.step_name)
     if self.environment:
         work_dir_path_step = os.path.join(work_dir_path_step, self.environment)
     os.makedirs(work_dir_path_step, exist_ok=True)
@@ -1924,7 +1859,7 @@ def workflow_result(self):
     str
         Path to created working sub directory.
     &#34;&#34;&#34;
-    file_path = os.path.join(self.work_dir_path_step, sub_dir_relative_path)
+    file_path = os.path.join(self.work_dir_path, sub_dir_relative_path)
     os.makedirs(file_path, exist_ok=True)
     return file_path</code></pre>
 </details>
@@ -2381,7 +2316,7 @@ False otherwise.</dd>
         Return a string to the file path
     &#34;&#34;&#34;
     # eg: step-runner-working/step_name
-    file_path = os.path.join(self.work_dir_path_step, filename)
+    file_path = os.path.join(self.work_dir_path, filename)
 
     # sub-directories might be passed filename, eg: foo/filename
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -2457,7 +2392,6 @@ False otherwise.</dd>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path" href="#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step" href="#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.workflow_result" href="#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>

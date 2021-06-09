@@ -226,13 +226,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         }
         return rekor_entry
 
-    @staticmethod
     def upload_to_rekor(
+        self,
         rekor_server,
         extra_data_file,
         signer_pgp_public_key_path,
-        signer_pgp_private_key_user,
-        work_dir_path
+        signer_pgp_private_key_user
     ):
         &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
@@ -241,13 +240,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             signer_pgp_private_key_user=signer_pgp_private_key_user,
             extra_data_file=extra_data_file
         )
-        print(&#34;Rekor Entry: &#34; + str(rekor_entry))
-        rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
-        if rekor_entry_path.exists():
-            rekor_entry_path.unlink()
-        rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
-        rekor_entry_path.write_text(json.dumps(rekor_entry))
+        rekor_entry_path = self.write_working_file(
+            filename=&#39;entry.json&#39;,
+            contents=bytes(json.dumps(rekor_entry), &#39;utf-8&#39;)
+        )
+
         rekor_upload_stdout_result = StringIO()
         rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
             sys.stdout,
@@ -258,7 +256,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             &#39;--rekor_server&#39;,
             rekor_server,
             &#39;--entry&#39;,
-            rekor_entry_path_name,
+            rekor_entry_path,
             _out=rekor_upload_stdout_callback,
             _err_to_out=True,
             _tee=&#39;out&#39;
@@ -277,16 +275,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         step_result = StepResult.from_step_implementer(self)
         rekor_server = self.get_value(&#39;rekor-server-url&#39;)
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
-        extra_data_file_path = Path(extra_data_file)
-        if extra_data_file_path.exists():
-            extra_data_file_path.unlink()
-        self.workflow_result.write_results_to_json_file(extra_data_file_path)
+        self.workflow_result.write_results_to_json_file(extra_data_file)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
             rekor_server=rekor_server,
             extra_data_file=extra_data_file,
             signer_pgp_public_key_path=self.get_value(&#39;signer-pgp-public-key-path&#39;),
-            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;),
-            work_dir_path=self.work_dir_path
+            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;)
         )
         step_result.add_artifact(
                 name=&#39;rekor-entry&#39;,
@@ -310,7 +304,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
 <dl>
 <dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor"><code class="flex name class">
 <span>class <span class="ident">Rekor</span></span>
-<span>(</span><span>workflow_result, work_dir_path, config, environment=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p><code>StepImplementer</code> for the <code>automated-governance</code> step using Rekor.</p></div>
@@ -397,13 +391,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         }
         return rekor_entry
 
-    @staticmethod
     def upload_to_rekor(
+        self,
         rekor_server,
         extra_data_file,
         signer_pgp_public_key_path,
-        signer_pgp_private_key_user,
-        work_dir_path
+        signer_pgp_private_key_user
     ):
         &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
         &#34;&#34;&#34;
@@ -412,13 +405,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             signer_pgp_private_key_user=signer_pgp_private_key_user,
             extra_data_file=extra_data_file
         )
-        print(&#34;Rekor Entry: &#34; + str(rekor_entry))
-        rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
-        if rekor_entry_path.exists():
-            rekor_entry_path.unlink()
-        rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
-        rekor_entry_path.write_text(json.dumps(rekor_entry))
+        rekor_entry_path = self.write_working_file(
+            filename=&#39;entry.json&#39;,
+            contents=bytes(json.dumps(rekor_entry), &#39;utf-8&#39;)
+        )
+
         rekor_upload_stdout_result = StringIO()
         rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
             sys.stdout,
@@ -429,7 +421,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             &#39;--rekor_server&#39;,
             rekor_server,
             &#39;--entry&#39;,
-            rekor_entry_path_name,
+            rekor_entry_path,
             _out=rekor_upload_stdout_callback,
             _err_to_out=True,
             _tee=&#39;out&#39;
@@ -448,16 +440,12 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         step_result = StepResult.from_step_implementer(self)
         rekor_server = self.get_value(&#39;rekor-server-url&#39;)
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+&#39;.json&#39;)
-        extra_data_file_path = Path(extra_data_file)
-        if extra_data_file_path.exists():
-            extra_data_file_path.unlink()
-        self.workflow_result.write_results_to_json_file(extra_data_file_path)
+        self.workflow_result.write_results_to_json_file(extra_data_file)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
             rekor_server=rekor_server,
             extra_data_file=extra_data_file,
             signer_pgp_public_key_path=self.get_value(&#39;signer-pgp-public-key-path&#39;),
-            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;),
-            work_dir_path=self.work_dir_path
+            signer_pgp_private_key_user=self.get_value(&#39;signer-pgp-private-key-user&#39;)
         )
         step_result.add_artifact(
                 name=&#39;rekor-entry&#39;,
@@ -561,8 +549,11 @@ def step_implementer_config_defaults():
     return DEFAULT_CONFIG</code></pre>
 </details>
 </dd>
+</dl>
+<h3>Methods</h3>
+<dl>
 <dt id="ploigos_step_runner.step_implementers.automated_governance.rekor.Rekor.upload_to_rekor"><code class="name flex">
-<span>def <span class="ident">upload_to_rekor</span></span>(<span>rekor_server, extra_data_file, signer_pgp_public_key_path, signer_pgp_private_key_user, work_dir_path)</span>
+<span>def <span class="ident">upload_to_rekor</span></span>(<span>self, rekor_server, extra_data_file, signer_pgp_public_key_path, signer_pgp_private_key_user)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>TODO: function will be refactored in next release. will doc then.</p></div>
@@ -570,13 +561,12 @@ def step_implementer_config_defaults():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@staticmethod
-def upload_to_rekor(
+<pre><code class="python">def upload_to_rekor(
+    self,
     rekor_server,
     extra_data_file,
     signer_pgp_public_key_path,
-    signer_pgp_private_key_user,
-    work_dir_path
+    signer_pgp_private_key_user
 ):
     &#34;&#34;&#34;TODO: function will be refactored in next release. will doc then.
     &#34;&#34;&#34;
@@ -585,13 +575,12 @@ def upload_to_rekor(
         signer_pgp_private_key_user=signer_pgp_private_key_user,
         extra_data_file=extra_data_file
     )
-    print(&#34;Rekor Entry: &#34; + str(rekor_entry))
-    rekor_entry_path = Path(os.path.join(work_dir_path, &#39;entry.json&#39;))
 
-    if rekor_entry_path.exists():
-        rekor_entry_path.unlink()
-    rekor_entry_path_name = os.path.join(work_dir_path, &#39;entry.json&#39;)
-    rekor_entry_path.write_text(json.dumps(rekor_entry))
+    rekor_entry_path = self.write_working_file(
+        filename=&#39;entry.json&#39;,
+        contents=bytes(json.dumps(rekor_entry), &#39;utf-8&#39;)
+    )
+
     rekor_upload_stdout_result = StringIO()
     rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
         sys.stdout,
@@ -602,7 +591,7 @@ def upload_to_rekor(
         &#39;--rekor_server&#39;,
         rekor_server,
         &#39;--entry&#39;,
-        rekor_entry_path_name,
+        rekor_entry_path,
         _out=rekor_upload_stdout_callback,
         _err_to_out=True,
         _tee=&#39;out&#39;
@@ -634,7 +623,6 @@ def upload_to_rekor(
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>

@@ -395,7 +395,7 @@ class OpenSCAPGeneric(StepImplementer):
                 print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
                 oscap_input_file = download_and_decompress_source_to_destination(
                     source_uri=oscap_input_definitions_uri,
-                    destination_dir=self.work_dir_path_step
+                    destination_dir=self.work_dir_path
                 )
                 print(f&#34;Downloaded input definitions to: {oscap_input_file}&#34;)
             except (RuntimeError, ValueError) as error:
@@ -411,7 +411,7 @@ class OpenSCAPGeneric(StepImplementer):
                     print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
                     oscap_tailoring_file = download_and_decompress_source_to_destination(
                         source_uri=oscap_tailoring_file_uri,
-                        destination_dir=self.work_dir_path_step
+                        destination_dir=self.work_dir_path
                     )
                     print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
             except (RuntimeError, ValueError) as error:
@@ -809,7 +809,7 @@ class OpenSCAPGeneric(StepImplementer):
 <dl>
 <dt id="ploigos_step_runner.step_implementers.shared.openscap_generic.OpenSCAPGeneric"><code class="flex name class">
 <span>class <span class="ident">OpenSCAPGeneric</span></span>
-<span>(</span><span>workflow_result, work_dir_path, config, environment=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A generic OpenSCAP step implementer that can be used for more then one step.</p>
@@ -1014,7 +1014,7 @@ class OpenSCAPGeneric(StepImplementer):
                 print(f&#34;\nDownload input definitions: {oscap_input_definitions_uri}&#34;)
                 oscap_input_file = download_and_decompress_source_to_destination(
                     source_uri=oscap_input_definitions_uri,
-                    destination_dir=self.work_dir_path_step
+                    destination_dir=self.work_dir_path
                 )
                 print(f&#34;Downloaded input definitions to: {oscap_input_file}&#34;)
             except (RuntimeError, ValueError) as error:
@@ -1030,7 +1030,7 @@ class OpenSCAPGeneric(StepImplementer):
                     print(f&#34;\nDownload oscap tailoring file: {oscap_tailoring_file_uri}&#34;)
                     oscap_tailoring_file = download_and_decompress_source_to_destination(
                         source_uri=oscap_tailoring_file_uri,
-                        destination_dir=self.work_dir_path_step
+                        destination_dir=self.work_dir_path
                     )
                     print(f&#34;Download oscap tailoring file to: {oscap_tailoring_file}&#34;)
             except (RuntimeError, ValueError) as error:
@@ -1472,7 +1472,6 @@ class OpenSCAPGeneric(StepImplementer):
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path_step">work_dir_path_step</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
