@@ -155,8 +155,8 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
     ):
         work_dir_path = os.path.join(test_dir.path, 'working')
 
-        cucumber_html_report_path = os.path.join(work_dir_path, 'cucumber.html')
-        cucumber_json_report_path = os.path.join(work_dir_path, 'cucumber.json')
+        cucumber_html_report_path = os.path.join(work_dir_path, 'uat', 'cucumber.html')
+        cucumber_json_report_path = os.path.join(work_dir_path, 'uat', 'cucumber.json')
 
         test_dir.write(pom_file_name, pom_content)
 
@@ -885,6 +885,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             effective_pom_path = os.path.join(
                 test_dir.path,
                 'working',
+                'uat',
                 'effective-pom.xml'
             )
             self.__run__run_step_test(

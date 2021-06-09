@@ -183,7 +183,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         """
         step_result = StepResult.from_step_implementer(self)
         rekor_server = self.get_value('rekor-server-url')
-        extra_data_file = os.path.join(self.work_dir_path, self.step_name+'.json')
+        extra_data_file = os.path.join(self.work_dir_path_step, self.step_name+'.json')
         extra_data_file_path = Path(extra_data_file)
         if extra_data_file_path.exists():
             extra_data_file_path.unlink()
@@ -193,7 +193,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
             extra_data_file=extra_data_file,
             signer_pgp_public_key_path=self.get_value('signer-pgp-public-key-path'),
             signer_pgp_private_key_user=self.get_value('signer-pgp-private-key-user'),
-            work_dir_path=self.work_dir_path
+            work_dir_path=self.work_dir_path_step
         )
         step_result.add_artifact(
                 name='rekor-entry',

@@ -366,6 +366,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             effective_pom_path = os.path.join(
                 test_dir.path,
                 'working',
+                'unit-test',
                 'effective-pom.xml'
             )
             self.__run__run_step_test(

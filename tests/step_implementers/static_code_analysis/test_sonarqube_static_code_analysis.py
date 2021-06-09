@@ -158,7 +158,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
-                value=f'{temp_dir.path}/working/report-task.txt'
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
             )
 
             sonar_mock.assert_called_once_with(
@@ -168,7 +168,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + work_dir_path,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -212,7 +212,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
-                value=f'{temp_dir.path}/working/report-task.txt'
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
             )
 
             sonar_mock.assert_called_once_with(
@@ -220,7 +220,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
-                    '-Dsonar.working.directory=' + work_dir_path,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -306,7 +306,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             )
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
-                value=f'{temp_dir.path}/working/report-task.txt'
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
             )
 
             sonar_mock.assert_called_once_with(
@@ -316,7 +316,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + work_dir_path,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
                     _env={'SONAR_SCANNER_OPTS': f'-Djavax.net.ssl.trustStore={java_truststore}'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -369,7 +369,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
-                value=f'{temp_dir.path}/working/report-task.txt'
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
             )
 
             self.assertEqual(result.success, expected_step_result.success)
