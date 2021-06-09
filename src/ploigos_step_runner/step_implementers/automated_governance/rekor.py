@@ -181,7 +181,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         """
         step_result = StepResult.from_step_implementer(self)
         rekor_server = self.get_value('rekor-server-url')
-        extra_data_file = os.path.join(self.work_dir_path_step, self.step_name+'.json')
+        extra_data_file = os.path.join(self.work_dir_path, self.step_name+'.json')
         extra_data_file_path = Path(extra_data_file)
         if extra_data_file_path.exists():
             extra_data_file_path.unlink()

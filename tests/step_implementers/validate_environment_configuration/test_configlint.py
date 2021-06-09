@@ -161,7 +161,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
 
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',
@@ -212,7 +212,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             expected_step_result.message = 'Failed config-lint scan.'
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',
@@ -252,7 +252,7 @@ class TestStepImplementerConfiglint(BaseStepImplementerTestCase):
             expected_step_result.message = 'Unexpected Error invoking config-lint.'
             expected_step_result.add_artifact(
                 name='configlint-result-set',
-                value=f'{step_implementer.work_dir_path_step}/configlint_results_file.txt'
+                value=f'{step_implementer.work_dir_path}/configlint_results_file.txt'
             )
             expected_step_result.add_artifact(
                 name='configlint-yml-path',

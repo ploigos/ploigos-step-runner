@@ -317,7 +317,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
             get_app_name_mock.assert_called_once_with()
             deployment_config_repo_dir = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
             clone_repo_mock.assert_called_once_with(
@@ -461,7 +461,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
             get_app_name_mock.assert_called_once_with()
             deployment_config_repo_dir = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
             clone_repo_mock.assert_called_once_with(
@@ -587,7 +587,7 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
             )
             self.assertEqual(updated_file_path, '/does/not/matter/chart/values-PROD.yaml')
             yq_script_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'update-yaml-file-yq-script.yaml'
             )
             yq_mock.write.assert_called_once_with(
@@ -643,7 +643,7 @@ class TestStepImplementerDeployArgoCD__update_yaml_file_value(TestStepImplemente
                     value=value
                 )
                 yq_script_file_path = os.path.join(
-                    step_implementer.work_dir_path_step,
+                    step_implementer.work_dir_path,
                     'update-yaml-file-yq-script.yaml'
                 )
                 yq_mock.write.assert_called_once_with(
@@ -2173,7 +2173,7 @@ users:
             )
 
             config_argocd_cluster_context_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'config-argocd-cluster-context.yaml'
             )
             argocd_mock.cluster.add.assert_called_once_with(
@@ -2230,7 +2230,7 @@ users:
             )
 
             config_argocd_cluster_context_file_path = os.path.join(
-                step_implementer.work_dir_path_step,
+                step_implementer.work_dir_path,
                 'config-argocd-cluster-context.yaml'
             )
             argocd_mock.cluster.add.assert_called_once_with(
@@ -2303,7 +2303,7 @@ users:
                 )
 
                 config_argocd_cluster_context_file_path = os.path.join(
-                    step_implementer.work_dir_path_step,
+                    step_implementer.work_dir_path,
                     'config-argocd-cluster-context.yaml'
                 )
                 argocd_mock.cluster.add.assert_called_once_with(

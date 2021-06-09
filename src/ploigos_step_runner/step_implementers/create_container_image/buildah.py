@@ -177,7 +177,7 @@ class Buildah(StepImplementer):
             return step_result
 
         image_tar_file = f'image-{application_name}-{service_name}-{image_tag_version}.tar'
-        image_tar_path = os.path.join(self.work_dir_path_step, image_tar_file)
+        image_tar_path = os.path.join(self.work_dir_path, image_tar_file)
         try:
             # Check to see if the tar docker-archive file already exists
             #   this needs to be run as buildah does not support overwritting
@@ -208,4 +208,3 @@ class Buildah(StepImplementer):
             return step_result
 
         return step_result
-        

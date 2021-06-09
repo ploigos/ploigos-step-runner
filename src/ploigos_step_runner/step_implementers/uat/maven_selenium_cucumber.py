@@ -190,8 +190,8 @@ class MavenSeleniumCucumber(MavenGeneric):
                 '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
             ]
 
-        cucumber_html_report_path = os.path.join(self.work_dir_path_step, 'cucumber.html')
-        cucumber_json_report_path = os.path.join(self.work_dir_path_step, 'cucumber.json')
+        cucumber_html_report_path = os.path.join(self.work_dir_path, 'cucumber.html')
+        cucumber_json_report_path = os.path.join(self.work_dir_path, 'cucumber.json')
         mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
         try:
             with open(mvn_output_file_path, 'w') as mvn_output_file:

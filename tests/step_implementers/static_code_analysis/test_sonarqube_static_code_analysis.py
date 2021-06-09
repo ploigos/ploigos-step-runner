@@ -168,7 +168,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -220,7 +220,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
-                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -316,7 +316,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                     '-Dsonar.projectKey=app-name:service-name',
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + step_implementer.work_dir_path_step,
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     _env={'SONAR_SCANNER_OPTS': f'-Djavax.net.ssl.trustStore={java_truststore}'},
                     _out=sys.stdout,
                     _err=sys.stderr
