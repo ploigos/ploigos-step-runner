@@ -182,10 +182,7 @@ class Rekor(StepImplementer):  # pylint: disable=too-few-public-methods
         step_result = StepResult.from_step_implementer(self)
         rekor_server = self.get_value('rekor-server-url')
         extra_data_file = os.path.join(self.work_dir_path, self.step_name+'.json')
-        extra_data_file_path = Path(extra_data_file)
-        if extra_data_file_path.exists():
-            extra_data_file_path.unlink()
-        self.workflow_result.write_results_to_json_file(extra_data_file_path)
+        self.workflow_result.write_results_to_json_file(extra_data_file)
         rekor_entry, rekor_uuid = self.upload_to_rekor(
             rekor_server=rekor_server,
             extra_data_file=extra_data_file,
