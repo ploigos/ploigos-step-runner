@@ -160,6 +160,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 name='sonarqube-result-set',
                 value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
             )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=True
+            )
 
             sonar_mock.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
@@ -213,6 +217,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
                 value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
+            )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=True
             )
 
             sonar_mock.assert_called_once_with(
@@ -295,8 +303,6 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 parent_work_dir_path=parent_work_dir_path
             )
 
-
-
             result = step_implementer._run_step()
 
             expected_step_result = StepResult(
@@ -307,6 +313,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
                 value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
+            )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=True
             )
 
             sonar_mock.assert_called_once_with(
@@ -370,6 +380,10 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             expected_step_result.add_artifact(
                 name='sonarqube-result-set',
                 value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
+            )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=False
             )
 
             self.assertEqual(result.success, expected_step_result.success)

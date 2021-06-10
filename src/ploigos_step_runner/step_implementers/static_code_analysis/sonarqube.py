@@ -208,6 +208,7 @@ class SonarQube(StepImplementer):
             step_result.message = f'Properties file not found: {properties_file}'
             return step_result
 
+        sonarqube_success = False
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
@@ -236,6 +237,8 @@ class SonarQube(StepImplementer):
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
+
+            sonarqube_success = True
         except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
             # Error Code 1: INTERNAL_ERROR
             # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
@@ -259,4 +262,10 @@ class SonarQube(StepImplementer):
             name='sonarqube-result-set',
             value=f'{working_directory}/report-task.txt'
         )
+
+        step_result.add_evidence(
+            name='sonarqube-quality-gate-pass',
+            value=sonarqube_success
+        )
+
         return step_result
