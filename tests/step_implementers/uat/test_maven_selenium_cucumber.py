@@ -145,13 +145,16 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         write_mock_test_results=True,
         assert_mvn_called=True,
         assert_report_artifact=True,
+        assert_evidence=True,
         expected_result_success=True,
         expected_result_message='',
         fail_on_no_tests=None,
         uat_maven_profile=None,
         pom_file_name='pom.xml',
         raise_error_on_tests=False,
-        set_tls_verify_false=False
+        set_tls_verify_false=False,
+        aggregate_xml_element_attribute_values_mock=False,
+        aggregate_xml_element_attribute_values_mock_fail=False
     ):
         parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -215,6 +218,20 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
                 ],
                 raise_error_on_tests=raise_error_on_tests
             )
+
+        # mock evidence
+        if aggregate_xml_element_attribute_values_mock and not aggregate_xml_element_attribute_values_mock_fail:
+            aggregate_xml_element_attribute_values_mock.return_value = {
+                'time': '42', 
+                'tests': '42', 
+                'errors': '0', 
+                'skipped': '0', 
+                'failures': '0'
+                }
+        elif aggregate_xml_element_attribute_values_mock_fail:
+            aggregate_xml_element_attribute_values_mock.return_value = {
+                'time': '42'
+                }
 
         result = step_implementer._run_step()
         if assert_mvn_called:
@@ -285,9 +302,44 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
                 name='cucumber-report-json',
                 value=cucumber_json_report_path
             )
-
+        
+        if assert_evidence and not aggregate_xml_element_attribute_values_mock_fail:
+            expected_step_result.add_evidence(
+                name='uat-evidence-time',
+                description='Surefire report value for time',
+                value='42'
+            )
+            expected_step_result.add_evidence(
+                name='uat-evidence-tests',
+                description='Surefire report value for tests',
+                value='42'
+            )
+            expected_step_result.add_evidence(
+                name='uat-evidence-errors',
+                description='Surefire report value for errors',
+                value='0'
+            )
+            expected_step_result.add_evidence(
+                name='uat-evidence-skipped',
+                description='Surefire report value for skipped',
+                value='0'
+            )
+            expected_step_result.add_evidence(
+                name='uat-evidence-failures',
+                description='Surefire report value for failures',
+                value='0'
+            )
+        elif assert_evidence and aggregate_xml_element_attribute_values_mock_fail:
+            expected_step_result.add_evidence(
+                name='uat-evidence-time',
+                description='Surefire report value for time',
+                value='42'
+            )
+        print(result)
         self.assertEqual(expected_step_result, result)
 
+
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -295,7 +347,8 @@ class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSel
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -335,12 +388,14 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
                 surefire_reports_dir=surefire_reports_dir
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -348,7 +403,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -388,6 +444,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -395,6 +452,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 set_tls_verify_false=True
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -402,7 +460,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -443,6 +502,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -450,6 +510,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 deployed_host_urls=deployed_host_urls
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -457,7 +518,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -498,6 +560,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -505,6 +568,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 deployed_host_urls=deployed_host_urls
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -512,7 +576,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock,
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -553,6 +618,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -563,6 +629,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     f" targeting first one (https://foo.ploigos.xyz) for user acceptance test (UAT)."
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -570,7 +637,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -610,6 +678,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -617,6 +686,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 uat_maven_profile='custom-uat-profile'
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -624,7 +694,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -664,6 +735,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -671,6 +743,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 pom_file_name='custom-pom.xml'
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -678,7 +751,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -718,6 +792,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -727,6 +802,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 expected_result_success=True
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -734,7 +810,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -774,6 +851,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
+                assert_evidence=False,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -786,6 +865,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     " but 'fail-on-no-tests' is False."
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -793,7 +873,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -833,6 +914,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
+                assert_evidence=False,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -844,6 +927,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     " using maven profile (integration-test)."
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -851,7 +935,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -893,6 +978,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
+                assert_evidence=False,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -904,6 +991,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 assert_report_artifact=False
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -911,7 +999,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -955,12 +1044,15 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
+                assert_evidence=True,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
                 surefire_reports_dir=surefire_reports_dir
             )
 
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
     @patch('sh.mvn', create=True)
     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
@@ -968,7 +1060,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         self,
         write_effective_pom_mock,
         mvn_mock,
-        generate_maven_settings_mock
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
     ):
         with TempDirectory() as test_dir:
             group_id = 'com.mycompany.app'
@@ -1008,6 +1101,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                 selenium_hub_url='https://test.xyz:4444',
                 write_effective_pom_mock=write_effective_pom_mock,
                 generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=None,
+                assert_evidence=False,
                 pom_content=pom_content,
                 group_id=group_id,
                 artifact_id=artifact_id,
@@ -1018,3 +1113,64 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     ", 'surefire-reports', 'cucumber-report-html', and 'cucumber-report-json'" \
                     " report artifacts for details."
             )
+
+    @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
+    @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
+    def test__run_step_failure_missing_evidence_attribute(
+        self,
+        write_effective_pom_mock,
+        mvn_mock,
+        generate_maven_settings_mock,
+        aggregate_xml_element_attribute_values_mock
+    ):
+        with TempDirectory() as test_dir:
+            group_id = 'com.mycompany.app'
+            artifact_id = 'my-app'
+            version = '1.0'
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            pom_content = bytes(
+'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+xmlns="http://maven.apache.org/POM/4.0.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{group_id}</groupId>
+    <artifactId>{artifact_id}</artifactId>
+    <version>{version}</version>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${{surefire-plugin.version}}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>'''.format(
+                    group_id=group_id,
+                    artifact_id=artifact_id,
+                    version=version
+                ), 'utf-8'
+            )
+
+            self.__run__run_step_test(
+                test_dir=test_dir,
+                mvn_mock=mvn_mock,
+                selenium_hub_url='https://test.xyz:4444',
+                write_effective_pom_mock=write_effective_pom_mock,
+                generate_maven_settings_mock=generate_maven_settings_mock,
+                aggregate_xml_element_attribute_values_mock=aggregate_xml_element_attribute_values_mock,
+                aggregate_xml_element_attribute_values_mock_fail=True,
+                assert_evidence=True,
+                pom_content=pom_content,
+                group_id=group_id,
+                artifact_id=artifact_id,
+                surefire_reports_dir=surefire_reports_dir,
+                expected_result_success=False,
+                expected_result_message="Error gathering evidence from "\
+                            "surefire report, expected attribute tests "\
+                            "not found in report " + surefire_reports_dir)

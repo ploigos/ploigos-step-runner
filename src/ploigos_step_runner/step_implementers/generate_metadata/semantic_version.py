@@ -137,6 +137,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             name='version',
             value=version
         )
+
         step_result.add_artifact(
             name='container-image-version',
             value=image_tag
