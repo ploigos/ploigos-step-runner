@@ -2,10 +2,11 @@
 
 Test for the utility for xml operations.
 """
+import os
 from os import path
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
-from ploigos_step_runner.utils.xml import get_xml_element, get_xml_element_by_path
+from ploigos_step_runner.utils.xml import get_xml_element, get_xml_element_by_path, aggregate_xml_element_attribute_values
 
 # pylint: disable=no-self-use
 class TestXMLUtils(BaseTestCase):
@@ -216,3 +217,82 @@ class TestXMLUtils(BaseTestCase):
             )
 
             assert element is None
+
+    def test_parse_xml_element_for_attributes(self):
+        """Test to get an xml attribute from xml element
+
+        """
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.xml'
+        )
+
+        element = 'testsuite'
+        attribs = ['time', 'tests']
+
+        results = aggregate_xml_element_attribute_values(sample_file_path, element, attribs)
+
+        expected_results = {'tests': 3, 'time': 4.485}
+
+        self.assertEqual(results, expected_results)
+
+    def test_parse_xml_element_for_attributes_multiple_files(self):
+        """Test that element attributes are aggregated if multiple files with same element/attributes exist.
+
+        """
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files/multiple_xml'
+        )
+
+        element = 'testsuite'
+        attribs = ['time', 'tests','quality']
+
+        results = aggregate_xml_element_attribute_values(sample_file_path, element, attribs)
+
+        expected_results = {'time': 8.97, 'tests': 6, 'quality': ['42', 'medium-rare']}
+
+        self.assertCountEqual(results, expected_results)
+
+    def test_parse_xml_element_for_attributes_element_not_found(self):
+        """Test that function returns empty dict if element is not found in file.
+
+        """
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.xml'
+        )
+
+        element = 'testsuite2'
+        attribs = ['time', 'tests']
+
+        results = aggregate_xml_element_attribute_values(sample_file_path, element, attribs)
+
+        expected_results = {}
+
+        self.assertEqual(results, expected_results)
+
+    def test_parse_xml_element_for_attributes_missing_attribute(self):
+        """Test that function returns empty dict if attribute is not found in element in file.
+
+        """
+
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'sample.xml'
+        )
+
+        element = 'testsuite2'
+        attribs = ['time', 'tests', 'quality']
+
+        results = aggregate_xml_element_attribute_values(sample_file_path, element, attribs)
+
+        expected_results = {}
+
+        self.assertEqual(results, expected_results)
