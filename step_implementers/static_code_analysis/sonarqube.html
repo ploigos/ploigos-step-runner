@@ -359,6 +359,7 @@ class SonarQube(StepImplementer):
             step_result.message = f&#39;Properties file not found: {properties_file}&#39;
             return step_result
 
+        sonarqube_success = False
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
@@ -387,6 +388,8 @@ class SonarQube(StepImplementer):
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
+
+            sonarqube_success = True
         except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
             # Error Code 1: INTERNAL_ERROR
             # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
@@ -410,6 +413,12 @@ class SonarQube(StepImplementer):
             name=&#39;sonarqube-result-set&#39;,
             value=f&#39;{working_directory}/report-task.txt&#39;
         )
+
+        step_result.add_evidence(
+            name=&#39;sonarqube-quality-gate-pass&#39;,
+            value=sonarqube_success
+        )
+
         return step_result</code></pre>
 </details>
 </section>
@@ -531,6 +540,7 @@ class SonarQube(StepImplementer):
             step_result.message = f&#39;Properties file not found: {properties_file}&#39;
             return step_result
 
+        sonarqube_success = False
         try:
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
@@ -559,6 +569,8 @@ class SonarQube(StepImplementer):
                     _out=sys.stdout,
                     _err=sys.stderr
                 )
+
+            sonarqube_success = True
         except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
             # Error Code 1: INTERNAL_ERROR
             # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
@@ -582,6 +594,12 @@ class SonarQube(StepImplementer):
             name=&#39;sonarqube-result-set&#39;,
             value=f&#39;{working_directory}/report-task.txt&#39;
         )
+
+        step_result.add_evidence(
+            name=&#39;sonarqube-quality-gate-pass&#39;,
+            value=sonarqube_success
+        )
+
         return step_result</code></pre>
 </details>
 <h3>Ancestors</h3>
