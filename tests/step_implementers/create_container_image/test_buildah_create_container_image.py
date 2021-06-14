@@ -36,7 +36,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
         defaults = Buildah.step_implementer_config_defaults()
         expected_defaults = {
             'containers-config-auth-file': os.path.join(Path.home(), '.buildah-auth.json'),
-            'imagespecfile': 'Dockerfile',
+            'imagespecfile': 'Containerfile',
             'context': '.',
             'tls-verify': True,
             'format': 'oci'
@@ -60,7 +60,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     def test__run_step_pass(self, buildah_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('Dockerfile',b'''testing''')
+            temp_dir.write('Containerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
@@ -69,7 +69,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
-                'imagespecfile': 'Dockerfile',
+                'imagespecfile': 'Containerfile',
                 'context': temp_dir.path,
                 'tls-verify': True,
                 'format': 'oci',
@@ -107,7 +107,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
-                '--layers', '-f', 'Dockerfile',
+                '--layers', '-f', 'Containerfile',
                 '-t', 'localhost/app-name/service-name:1.0-123abc',
                 '--authfile', 'buildah-auth.json',
                 temp_dir.path,
@@ -130,11 +130,11 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     def test__run_step_pass_no_container_image_version(self, buildah_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('Dockerfile',b'''testing''')
+            temp_dir.write('Containerfile',b'''testing''')
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
-                'imagespecfile': 'Dockerfile',
+                'imagespecfile': 'Containerfile',
                 'context': temp_dir.path,
                 'tls-verify': True,
                 'format': 'oci',
@@ -169,7 +169,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
-                '--layers', '-f', 'Dockerfile',
+                '--layers', '-f', 'Containerfile',
                 '-t', 'localhost/app-name/service-name:latest',
                 '--authfile', 'buildah-auth.json',
                 temp_dir.path,
@@ -192,7 +192,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     def test__run_step_pass_image_tar_file_exists(self, buildah_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('Dockerfile',b'''testing''')
+            temp_dir.write('Containerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
@@ -201,7 +201,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
-                'imagespecfile': 'Dockerfile',
+                'imagespecfile': 'Containerfile',
                 'context': temp_dir.path,
                 'tls-verify': True,
                 'format': 'oci',
@@ -239,7 +239,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
-                '--layers', '-f', 'Dockerfile',
+                '--layers', '-f', 'Containerfile',
                 '-t', 'localhost/app-name/service-name:1.0-123abc',
                 '--authfile', 'buildah-auth.json',
                 temp_dir.path,
@@ -288,7 +288,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
                 sub_step_implementer_name='Buildah'
             )
             expected_step_result.success = False
-            expected_step_result.message = 'Image specification file does not exist in location: ./Dockerfile'
+            expected_step_result.message = 'Image specification file does not exist in location: ./Containerfile'
 
             self.assertEqual(result, expected_step_result)
 
@@ -296,14 +296,14 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     def test__run_step_fail_buildah_bud_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('Dockerfile',b'''testing''')
+            temp_dir.write('Containerfile',b'''testing''')
 
             artifact_config = {
                 'container-image-version': {'description': '', 'value': '1.0-123abc'},
             }
             workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
 
-            image_spec_file = 'Dockerfile'
+            image_spec_file = 'Containerfile'
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
                 'imagespecfile': image_spec_file,
@@ -344,7 +344,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
     def test__run_step_fail_buildah_push_error(self, buildah_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            temp_dir.write('Dockerfile',b'''testing''')
+            temp_dir.write('Containerfile',b'''testing''')
 
             application_name = 'app-name'
             service_name = 'service-name'
@@ -357,7 +357,7 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
 
             step_config = {
                 'containers-config-auth-file': 'buildah-auth.json',
-                'imagespecfile': 'Dockerfile',
+                'imagespecfile': 'Containerfile',
                 'context': temp_dir.path,
                 'tl-sverify': 'true',
                 'format': 'oci',
