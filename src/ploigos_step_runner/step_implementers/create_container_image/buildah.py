@@ -9,16 +9,19 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default        | Description
-------------------|-----------|----------------|-----------
-`imagespecfile`   | True      | `'Dockerfile'` | File defining the container image
-`context`         | True      | `'.'`          | Context to build the container image in
-`tls-verify`      | True      | `True`       | Whether to verify TLS when pulling parent images
-`format`          | True      | `'oci'`        | format of the built image's manifest and metadata
-`containers-config-auth-file` | True | `'~/.buildah-auth.json'` | \
-                                                 Path to the container registry authentication \
-                                                 file to use for container registry authentication.
-`container-image-version`     | True |         | Version to use when building the container image
+Configuration Key | Required? | Default | Description
+------------------|-----------|---------|-----------
+`imagespecfile`   | True      | `'Containerfile'` \
+                                        | File defining the container image
+`context`         | True      | `'.'`   | Context to build the container image in
+`tls-verify`      | True      | `True`  | Whether to verify TLS when pulling parent images
+`format`          | True      | `'oci'` | format of the built image's manifest and metadata
+`containers-config-auth-file` \
+                  | True      | `'~/.buildah-auth.json'` \
+                                        | Path to the container registry authentication \
+                                          file to use for container registry authentication.
+`container-image-version` \
+                  | True      |         | Version to use when building the container image
 
 Result Artifacts
 ----------------
@@ -42,7 +45,7 @@ DEFAULT_CONFIG = {
     'containers-config-auth-file': os.path.join(Path.home(), '.buildah-auth.json'),
 
     # Image specification file name
-    'imagespecfile': 'Dockerfile',
+    'imagespecfile': 'Containerfile',
 
     # Parent path to the image specification file
     'context': '.',
@@ -112,7 +115,7 @@ class Buildah(StepImplementer):
 
         context = self.get_value('context')
         image_spec_file = self.get_value('imagespecfile')
-        image_spec_file_location = context + '/' + image_spec_file
+        image_spec_file_location = os.path.join(context, image_spec_file)
         application_name = self.get_value('application-name')
         service_name = self.get_value('service-name')
         tls_verify = self.get_value('tls-verify')
