@@ -195,7 +195,7 @@ class ResultArtifactsArchive(StepImplementer):
                     if isinstance(artifact.value, str) and os.path.exists(artifact.value):
                         # create directory with name of artifact to put file(s) in
                         if previous_step_result.environment:
-                            results_archvie_artifact_dir_path = self.create_working_dir_sub_dir(
+                            results_archive_artifact_dir_path = self.create_working_dir_sub_dir(
                                 os.path.join(
                                     result_archive_name,
                                     previous_step_result.step_name,
@@ -205,7 +205,7 @@ class ResultArtifactsArchive(StepImplementer):
                                 )
                             )
                         else:
-                            results_archvie_artifact_dir_path = self.create_working_dir_sub_dir(
+                            results_archive_artifact_dir_path = self.create_working_dir_sub_dir(
                                 os.path.join(
                                     result_archive_name,
                                     previous_step_result.step_name,
@@ -215,10 +215,10 @@ class ResultArtifactsArchive(StepImplementer):
                             )
 
                         if os.path.isfile(artifact.value):
-                            shutil.copy(artifact.value, results_archvie_artifact_dir_path)
+                            shutil.copy(artifact.value, results_archive_artifact_dir_path)
                         elif os.path.isdir(artifact.value):
                             dest_path = os.path.join(
-                                results_archvie_artifact_dir_path,
+                                results_archive_artifact_dir_path,
                                 os.path.basename(artifact.value)
                             )
                             shutil.copytree(artifact.value, dest_path)
