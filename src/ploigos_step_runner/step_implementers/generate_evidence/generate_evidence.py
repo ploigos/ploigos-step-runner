@@ -216,19 +216,19 @@ class GenerateEvidence(StepImplementer):
 
             evidence = previous_step_result.evidence
             for piece_of_evidence in evidence.values():
-                
-                workflow_dict[step_name][sub_step_name][attestations_keyword][piece_of_evidence.name]\
+                workflow_dict[step_name][sub_step_name]\
+                [attestations_keyword][piece_of_evidence.name]\
                  = {
                     'name': piece_of_evidence.name,
                     'value': piece_of_evidence.value,
                     'description': piece_of_evidence.description,
                  }
                 if previous_step_result.environment:
-                    workflow_dict[step_name][sub_step_name][attestations_keyword][piece_of_evidence.name]\
+                    workflow_dict[step_name][sub_step_name]\
+                    [attestations_keyword][piece_of_evidence.name]\
                      ['environment'] = previous_step_result.environment
 
         #Add step to workflow dictionary
-        
         if workflow_dict:
             gathered_evidence = {
                 'apiVersion': GenerateEvidence.API_VERSION,
