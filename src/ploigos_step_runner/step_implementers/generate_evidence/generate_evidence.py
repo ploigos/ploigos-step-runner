@@ -40,9 +40,9 @@ Results artifacts output by this step.
 
 Result Artifact Key              | Description
 ---------------------------------|------------
-`result-generate-evidence-path`  | Absolute path to the generated evidence JSON file.
-`evidence-uri`            | URI of the uploaded results archive.
-`evidence-upload-results` | Results of uploading the results archive to \
+`evidence-path`                  | Absolute path to the generated evidence JSON file.
+`evidence-uri`                   | URI of the uploaded results archive.
+`evidence-upload-results`        | Results of uploading the results archive to \
                                    the given destination.
 
 """
@@ -154,27 +154,34 @@ class GenerateEvidence(StepImplementer):
                     password=self.get_value('evidence-destination-password')
                 )
                 step_result.add_artifact(
-                    name='results-evidence-upload-results',
+                    name='evidence-upload-results',
                     description='Results of uploading the evidence JSON file ' \
                         'to the given destination.',
                     value=upload_result
                 )
                 step_result.add_artifact(
-                name='evidence-uri',
-                description='URI of the uploaded results archive.',
-                value=evidence_destination_uri
+                    name='evidence-uri',
+                    description='URI of the uploaded results archive.',
+                    value=evidence_destination_uri
                 )
+
+                step_result.success = True
+                step_result.message = 'Evidence successfully packaged ' \
+                'in JSON file and uploaded to data store.'
+
             except RuntimeError as error:
                 step_result.success = False
                 step_result.message = str(error)
                 return step_result
+        else:
+            step_result.success = True
+            step_result.message = 'Evidence successfully packaged ' \
+            'in JSON file but was not uploaded to data store (no '\
+            'destination URI specified).'
 
-        step_result.success = True
-        step_result.message = 'Evidence successfully packaged ' \
-            'in JSON file and uploaded to data store.'
 
         step_result.add_artifact(
-            name='result-generate-evidence-path',
+            name='evidence-path',
             value=evidence_path,
             description='File path of evidence.'
         )
@@ -231,7 +238,3 @@ class GenerateEvidence(StepImplementer):
             }
 
         return gathered_evidence
-
-    def __write_evidence_to_json_file(self, evidence, evidence_path):
-        """Dumps the given evidence at the provided file path as JSON
-        """
