@@ -40,6 +40,31 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
                 }
             }
 
+    GATHER_EVIDENCE_MOCK_DICT_WITH_ENVIRONMENT = {
+        'apiVersion': "automated-governance/v1alpha1",
+        'kind': "WorkflowEvidence",
+        'workflow': {
+            'test-step': {
+                'test-sub-step': {
+                    'attestations': {
+                        'test-evidence': {
+                            'name': 'test-evidence',
+                            'value': 'test-value',
+                            'description': 'test-description',
+                            'environment': 'foo'
+                        },
+                        'test-evidence2': {
+                            'name': 'test-evidence2',
+                            'value': 'test-value2',
+                            'description': 'test-description2',
+                            'environment': 'foo'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     GATHER_EVIDENCE_MOCK_JSON = \
                             """{
     "apiVersion": "automated-governance/v1alpha1",
@@ -68,7 +93,8 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
             self,
             step_config={},
             workflow_result=None,
-            parent_work_dir_path=''
+            parent_work_dir_path='',
+            environment=None
     ):
         return self.create_given_step_implementer(
             step_implementer=GenerateEvidence,
@@ -76,7 +102,8 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
             step_name='generate_evidence',
             implementer='GenerateEvidence',
             workflow_result=workflow_result,
-            parent_work_dir_path=parent_work_dir_path
+            parent_work_dir_path=parent_work_dir_path,
+            environment=environment
         )
 
 class TestStepImplementerGenerateEvidence_other(TestStepImplementerGenerateEvidenceBase):
@@ -398,7 +425,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
 class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGenerateEvidenceBase):
 
 
-    def __setup_evidence(self, parent_work_dir_path, evidence=True):
+    def __setup_evidence(self, parent_work_dir_path, evidence=True, environment=None):
         step_config = {
                 'organization': 'test-ORG',
                 'application-name': 'test-APP',
@@ -409,7 +436,8 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
         step_result = StepResult(
             step_name='test-step',
             sub_step_name='test-sub-step',
-            sub_step_implementer_name='test-sub-step-implementer'
+            sub_step_implementer_name='test-sub-step-implementer',
+            environment=environment
         )
         
         step_result.add_evidence(
@@ -426,10 +454,11 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
         workflow_result = WorkflowResult()
         workflow_result.add_step_result(step_result)
 
+        
         step_implementer = self.create_step_implementer(
             step_config=step_config,
             parent_work_dir_path=parent_work_dir_path,
-            workflow_result=workflow_result
+            workflow_result=workflow_result,
         )
 
         return step_implementer
@@ -463,3 +492,15 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
             gathered_evidence = step_implementer._GenerateEvidence__gather_evidence()
 
             self.assertIsNone(gathered_evidence)
+
+    def test__gather_evidence_with_environment(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            
+            step_implementer =  self.__setup_evidence(parent_work_dir_path, environment='foo')
+
+            gathered_evidence = step_implementer._GenerateEvidence__gather_evidence()
+            
+            expected_gathered_evidence = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT_WITH_ENVIRONMENT
+
+            self.assertEqual(gathered_evidence, expected_gathered_evidence)

@@ -200,38 +200,37 @@ class GenerateEvidence(StepImplementer):
         """
 
         gathered_evidence = None
-        workflow_dict = {}
-        evidence_key = 'evidence'
-        piece_of_evidence_name = 'name'
         attestations_keyword = 'attestations'
+        workflow_dict = {}
 
         #Iterate over all previous step results
         for previous_step_result in self.workflow_result.workflow_list:
             step_name = previous_step_result.step_name
+            sub_step_name = previous_step_result.sub_step_name
+            if step_name not in workflow_dict:
+                workflow_dict[step_name] = {}
+            if sub_step_name not in workflow_dict[step_name]:
+                workflow_dict[step_name][sub_step_name] = {}
 
-            step_results = previous_step_result.get_step_result_dict()[step_name]
-            sub_steps = {}
+            workflow_dict[step_name][sub_step_name][attestations_keyword] = {}
 
-            #Iterate over sub steps in step result
-            for sub_step in step_results:
-                if step_results[sub_step][evidence_key]:
-                    evidence_dict = {}
-                    for piece_of_evidence in step_results[sub_step][evidence_key]:
-                        evidence_dict_key = piece_of_evidence[piece_of_evidence_name]
-                        evidence_dict[evidence_dict_key] = piece_of_evidence
+            evidence = previous_step_result.evidence
+            for piece_of_evidence in evidence.values():
+                
+                workflow_dict[step_name][sub_step_name][attestations_keyword][piece_of_evidence.name]\
+                 = {
+                    'name': piece_of_evidence.name,
+                    'value': piece_of_evidence.value,
+                    'description': piece_of_evidence.description,
+                 }
+                if previous_step_result.environment:
+                    workflow_dict[step_name][sub_step_name][attestations_keyword][piece_of_evidence.name]\
+                     ['environment'] = previous_step_result.environment
 
-                    sub_step_evidence = {
-                        sub_step: {
-                            attestations_keyword:
-                                evidence_dict
-                        }
-                    }
-                    sub_steps = sub_step_evidence
-
-            #Add step to workflow dictionary
-            if sub_steps:
-                workflow_dict[step_name] = sub_steps
-                gathered_evidence = {
+        #Add step to workflow dictionary
+        
+        if workflow_dict:
+            gathered_evidence = {
                 'apiVersion': GenerateEvidence.API_VERSION,
                 'kind': GenerateEvidence.KIND,
                 'workflow': workflow_dict
