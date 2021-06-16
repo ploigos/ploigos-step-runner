@@ -44,7 +44,7 @@ Could come from:</p>
 <tr>
 <td><code>imagespecfile</code></td>
 <td>True</td>
-<td><code>'Dockerfile'</code></td>
+<td><code>'Containerfile'</code></td>
 <td>File defining the container image</td>
 </tr>
 <tr>
@@ -115,16 +115,19 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default        | Description
-------------------|-----------|----------------|-----------
-`imagespecfile`   | True      | `&#39;Dockerfile&#39;` | File defining the container image
-`context`         | True      | `&#39;.&#39;`          | Context to build the container image in
-`tls-verify`      | True      | `True`       | Whether to verify TLS when pulling parent images
-`format`          | True      | `&#39;oci&#39;`        | format of the built image&#39;s manifest and metadata
-`containers-config-auth-file` | True | `&#39;~/.buildah-auth.json&#39;` | \
-                                                 Path to the container registry authentication \
-                                                 file to use for container registry authentication.
-`container-image-version`     | True |         | Version to use when building the container image
+Configuration Key | Required? | Default | Description
+------------------|-----------|---------|-----------
+`imagespecfile`   | True      | `&#39;Containerfile&#39;` \
+                                        | File defining the container image
+`context`         | True      | `&#39;.&#39;`   | Context to build the container image in
+`tls-verify`      | True      | `True`  | Whether to verify TLS when pulling parent images
+`format`          | True      | `&#39;oci&#39;` | format of the built image&#39;s manifest and metadata
+`containers-config-auth-file` \
+                  | True      | `&#39;~/.buildah-auth.json&#39;` \
+                                        | Path to the container registry authentication \
+                                          file to use for container registry authentication.
+`container-image-version` \
+                  | True      |         | Version to use when building the container image
 
 Result Artifacts
 ----------------
@@ -148,7 +151,7 @@ DEFAULT_CONFIG = {
     &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.buildah-auth.json&#39;),
 
     # Image specification file name
-    &#39;imagespecfile&#39;: &#39;Dockerfile&#39;,
+    &#39;imagespecfile&#39;: &#39;Containerfile&#39;,
 
     # Parent path to the image specification file
     &#39;context&#39;: &#39;.&#39;,
@@ -218,7 +221,7 @@ class Buildah(StepImplementer):
 
         context = self.get_value(&#39;context&#39;)
         image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = context + &#39;/&#39; + image_spec_file
+        image_spec_file_location = os.path.join(context, image_spec_file)
         application_name = self.get_value(&#39;application-name&#39;)
         service_name = self.get_value(&#39;service-name&#39;)
         tls_verify = self.get_value(&#39;tls-verify&#39;)
@@ -383,7 +386,7 @@ class Buildah(StepImplementer):
 
         context = self.get_value(&#39;context&#39;)
         image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = context + &#39;/&#39; + image_spec_file
+        image_spec_file_location = os.path.join(context, image_spec_file)
         application_name = self.get_value(&#39;application-name&#39;)
         service_name = self.get_value(&#39;service-name&#39;)
         tls_verify = self.get_value(&#39;tls-verify&#39;)
