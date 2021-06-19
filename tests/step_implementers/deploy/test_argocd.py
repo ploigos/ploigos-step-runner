@@ -2151,7 +2151,7 @@ kind: Config
 current-context: https://api.dev.ploigos.xyz-context
 clusters:
 - cluster:
-    kube-api-skip-tls: true
+    insecure-skip-tls-verify: true
     server: https://api.dev.ploigos.xyz
   name: default-cluster
 contexts:
@@ -2208,7 +2208,7 @@ kind: Config
 current-context: https://api.dev.ploigos.xyz-context
 clusters:
 - cluster:
-    kube-api-skip-tls: false
+    insecure-skip-tls-verify: false
     server: https://api.dev.ploigos.xyz
   name: default-cluster
 contexts:
@@ -2265,7 +2265,7 @@ kind: Config
 current-context: https://api.dev.ploigos.xyz-context
 clusters:
 - cluster:
-    kube-api-skip-tls: true
+    insecure-skip-tls-verify: true
     server: https://api.dev.ploigos.xyz
   name: default-cluster
 contexts:
