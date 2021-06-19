@@ -887,7 +887,7 @@ kind: Config
 current-context: {context_name}
 clusters:
 - cluster:
-    kube-api-skip-tls: {str(kube_api_skip_tls).lower()}
+    insecure-skip-tls-verify: {str(kube_api_skip_tls).lower()}
     server: {kube_api}
   name: default-cluster
 contexts:
