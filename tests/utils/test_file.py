@@ -183,6 +183,8 @@ class TestUploadFile(BaseTestCase):
         def http_response_side_effect(request):
             mock_response = Mock()
             mock_response.read.return_value = read_return
+            mock_response.status = '201'
+            mock_response.reason = 'Created'
             return mock_response
 
         return http_response_side_effect
@@ -278,7 +280,7 @@ class TestUploadFile(BaseTestCase):
             file_path=sample_file_path,
             destination_uri="http://ploigos.com/test/foo42"
         )
-        self.assertEqual('hello world 42', actual_result)
+        self.assertEqual('status=201, reason=Created, body=hello world 42', actual_result)
 
     @patch.object(
          urllib.request.OpenerDirector,
@@ -297,7 +299,7 @@ class TestUploadFile(BaseTestCase):
             file_path=sample_file_path,
             destination_uri="https://ploigos.com/test/foo42"
         )
-        self.assertEqual('hello world 42', actual_result)
+        self.assertEqual('status=201, reason=Created, body=hello world 42', actual_result)
 
     @patch.object(
          urllib.request.OpenerDirector,
@@ -319,7 +321,7 @@ class TestUploadFile(BaseTestCase):
             username='test_user',
             password='pass123'
         )
-        self.assertEqual('hello world 42', actual_result)
+        self.assertEqual('status=201, reason=Created, body=hello world 42', actual_result)
 
         pass_manager_mock().add_password.assert_called_once_with(
             None,
