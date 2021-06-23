@@ -191,7 +191,10 @@ class TestConfig(BaseTestCase):
                     'contents' : {
                         Config.CONFIG_KEY: {
                             'step-test-foo' : {
-                                'implementer': 'foo'
+                                'implementer': 'foo',
+                                'config': {
+                                  'f': 'hello1'
+                                }
                             }
                         }
                     }
@@ -201,7 +204,10 @@ class TestConfig(BaseTestCase):
                     'contents' : {
                         Config.CONFIG_KEY: {
                             'step-test-bar' : {
-                                'implementer': 'bar'
+                                'implementer': 'bar',
+                                'config': {
+                                  'b': 'hello2'
+                                }
                             }
                         }
                     }
@@ -226,6 +232,250 @@ class TestConfig(BaseTestCase):
 
             self.assertEqual(config.global_defaults, {})
             self.assertEqual(config.global_environment_defaults, {})
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('foo').get_config_value('f'),
+                'hello1'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-bar').get_sub_step('bar').get_config_value('b'),
+                'hello2'
+            )
+
+    def test_add_two_valid_files_one_sub_step_diff_config(self):
+        with TempDirectory() as temp_dir:
+            config_dir = "test"
+
+            config_files = [
+                {
+                    'name': os.path.join(config_dir,'foo.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'implementer': 'foo',
+                                    'config': {
+                                        'foo': 'hello'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    'name': os.path.join(config_dir,'bar.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'implementer': 'foo',
+                                    'config': {
+                                        'bar': 'world'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+            ]
+
+            for config_file in config_files:
+                config_file_name = config_file['name']
+                config_file_contents = config_file['contents']
+                temp_dir.write(
+                    config_file_name,
+                    bytes(f"{config_file_contents}", 'utf-8')
+                )
+
+            config = Config()
+            config.add_config(
+                [
+                    os.path.join(temp_dir.path, config_dir, 'foo.yml'),
+                    os.path.join(temp_dir.path, config_dir, 'bar.yml')
+                ]
+            )
+
+            self.assertEqual(config.global_defaults, {})
+            self.assertEqual(config.global_environment_defaults, {})
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('foo').get_config_value('foo'),
+                'hello'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('foo').get_config_value('bar'),
+                'world'
+            )
+
+    def test_add_two_valid_files_two_sub_step_diff_config(self):
+        with TempDirectory() as temp_dir:
+            config_dir = "test"
+
+            config_files = [
+                {
+                    'name': os.path.join(config_dir,'foo.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'implementer': 'a',
+                                    'config': {
+                                        'a1': 'hello-a1'
+                                    }
+                                },
+                                {
+                                    'implementer': 'b',
+                                    'config': {
+                                        'b1': 'hello-b1'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    'name': os.path.join(config_dir,'bar.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'implementer': 'a',
+                                    'config': {
+                                        'a2': 'hello-a2'
+                                    }
+                                },
+                                {
+                                    'implementer': 'b',
+                                    'config': {
+                                       'b2': 'hello-b2'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+            ]
+
+            for config_file in config_files:
+                config_file_name = config_file['name']
+                config_file_contents = config_file['contents']
+                temp_dir.write(
+                    config_file_name,
+                    bytes(f"{config_file_contents}", 'utf-8')
+                )
+
+            config = Config()
+            config.add_config(
+                [
+                    os.path.join(temp_dir.path, config_dir, 'foo.yml'),
+                    os.path.join(temp_dir.path, config_dir, 'bar.yml')
+                ]
+            )
+
+            self.assertEqual(config.global_defaults, {})
+            self.assertEqual(config.global_environment_defaults, {})
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('a').get_config_value('a1'),
+                'hello-a1'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('b').get_config_value('b1'),
+                'hello-b1'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('a').get_config_value('a2'),
+                'hello-a2'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('b').get_config_value('b2'),
+                'hello-b2'
+            )
+
+    def test_add_two_valid_files_two_sub_step_with_human_names_diff_config(self):
+        with TempDirectory() as temp_dir:
+            config_dir = "test"
+
+            config_files = [
+                {
+                    'name': os.path.join(config_dir,'foo.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'name': 'A human',
+                                    'implementer': 'a',
+                                    'config': {
+                                        'a1': 'hello-a1'
+                                    }
+                                },
+                                {
+                                    'name': 'B human',
+                                    'implementer': 'b',
+                                    'config': {
+                                        'b1': 'hello-b1'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    'name': os.path.join(config_dir,'bar.yml'),
+                    'contents' : {
+                        Config.CONFIG_KEY: {
+                            'step-test-foo' : [
+                                 {
+                                    'name': 'A human',
+                                    'implementer': 'a',
+                                    'config': {
+                                        'a2': 'hello-a2'
+                                    }
+                                },
+                                {
+                                    'name': 'B human',
+                                    'implementer': 'b',
+                                    'config': {
+                                        'b2': 'hello-b2'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+            ]
+
+            for config_file in config_files:
+                config_file_name = config_file['name']
+                config_file_contents = config_file['contents']
+                temp_dir.write(
+                    config_file_name,
+                    bytes(f"{config_file_contents}", 'utf-8')
+                )
+
+            config = Config()
+            config.add_config(
+                [
+                    os.path.join(temp_dir.path, config_dir, 'foo.yml'),
+                    os.path.join(temp_dir.path, config_dir, 'bar.yml')
+                ]
+            )
+
+            self.assertEqual(config.global_defaults, {})
+            self.assertEqual(config.global_environment_defaults, {})
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('A human').get_config_value('a1'),
+                'hello-a1'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('B human').get_config_value('b1'),
+                'hello-b1'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('A human').get_config_value('a2'),
+                'hello-a2'
+            )
+            self.assertEqual(
+                config.get_step_config('step-test-foo').get_sub_step('B human').get_config_value('b2'),
+                'hello-b2'
+            )
 
     def test_add_config_dir_one_valid_file_one_invalid_file(self):
         with TempDirectory() as temp_dir:
