@@ -89,12 +89,11 @@ def parse_yaml_or_json_file(yaml_or_json_file):
 
     return parsed_file
 
-def download_and_decompress_source_to_destination(
+def download_source_to_destination(
     source_uri,
     destination_dir
 ):
-    &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination
-    and decompresses it if known compression method.
+    &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination.
 
     Notes
     -----
@@ -102,9 +101,6 @@ def download_and_decompress_source_to_destination(
     * file://
     * http://
     * https://
-
-    Known compression types
-    * bz2
 
     Parameters
     ----------
@@ -117,7 +113,7 @@ def download_and_decompress_source_to_destination(
     Returns
     -------
     str
-        Path to the downloaded and decompressed (if needed) file from given source.
+        Path to the downloaded file from given source.
 
     Raises
     ------
@@ -166,6 +162,47 @@ def download_and_decompress_source_to_destination(
             &#34;Unexpected error, should have been caught by step validation.&#34;
             f&#34; Source ({source_uri}) must start with known protocol (/|file://|http://|https://).&#34;
         )
+    return destination_path
+
+def download_and_decompress_source_to_destination(
+    source_uri,
+    destination_dir
+):
+    &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination
+    and decompresses it if known compression method.
+
+    Notes
+    -----
+    Known source protocols
+    * file://
+    * http://
+    * https://
+
+    Known compression types
+    * bz2
+
+    Parameters
+    ----------
+    source_uri : url
+        URL to a source file using a known protocol to download to destination folder
+        and decompress if necessary.
+    destination_dir : path
+        Path to directory to download and decompress if necessary the source url to.
+
+    Returns
+    -------
+    str
+        Path to the downloaded and decompressed (if needed) file from given source.
+
+    Raises
+    ------
+    RuntimeError
+        If error downloading file.
+    ValueError
+        If source_uri does not start with file://|http://|https://
+    &#34;&#34;&#34;
+
+    destination_path = download_source_to_destination(source_uri, destination_dir)
 
     # if extension is .bz2, decompress, else assume file is fine as as is
     file_path, file_extension = os.path.splitext(destination_path)
@@ -462,6 +499,93 @@ and decompress if necessary.</dd>
         If source_uri does not start with file://|http://|https://
     &#34;&#34;&#34;
 
+    destination_path = download_source_to_destination(source_uri, destination_dir)
+
+    # if extension is .bz2, decompress, else assume file is fine as as is
+    file_path, file_extension = os.path.splitext(destination_path)
+    if file_extension == &#39;.bz2&#39;:
+        # NOTE: file_path is whats left after removeing .bz2 from the end
+        with \
+                bz2.BZ2File(destination_path) as decompressed_source, \
+                open(file_path,&#34;wb&#34;) as decompressed_destination:
+
+            shutil.copyfileobj(decompressed_source, decompressed_destination)
+
+            # NOTE: the compressed file was decompressed to file_path
+            #       therefor that is now the actual file we want
+            destination_path = file_path
+
+    return destination_path</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.utils.file.download_source_to_destination"><code class="name flex">
+<span>def <span class="ident">download_source_to_destination</span></span>(<span>source_uri, destination_dir)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Given a source url using a known protocol downloads the file to a given destination.</p>
+<h2 id="notes">Notes</h2>
+<p>Known source protocols
+* file://
+* http://
+* https://</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>source_uri</code></strong> :&ensp;<code>url</code></dt>
+<dd>URL to a source file using a known protocol to download to destination folder
+and decompress if necessary.</dd>
+<dt><strong><code>destination_dir</code></strong> :&ensp;<code>path</code></dt>
+<dd>Path to directory to download and decompress if necessary the source url to.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Path to the downloaded file from given source.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If error downloading file.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If source_uri does not start with file://|<a href="http://|https://">http://|https://</a></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def download_source_to_destination(
+    source_uri,
+    destination_dir
+):
+    &#34;&#34;&#34;Given a source url using a known protocol downloads the file to a given destination.
+
+    Notes
+    -----
+    Known source protocols
+    * file://
+    * http://
+    * https://
+
+    Parameters
+    ----------
+    source_uri : url
+        URL to a source file using a known protocol to download to destination folder
+        and decompress if necessary.
+    destination_dir : path
+        Path to directory to download and decompress if necessary the source url to.
+
+    Returns
+    -------
+    str
+        Path to the downloaded file from given source.
+
+    Raises
+    ------
+    RuntimeError
+        If error downloading file.
+    ValueError
+        If source_uri does not start with file://|http://|https://
+    &#34;&#34;&#34;
+
     # depending on the protocol type get the source_file into the working dir
     if re.match(r&#39;^file://|/&#39;, source_uri):
         # get the destination dir path
@@ -501,21 +625,6 @@ and decompress if necessary.</dd>
             &#34;Unexpected error, should have been caught by step validation.&#34;
             f&#34; Source ({source_uri}) must start with known protocol (/|file://|http://|https://).&#34;
         )
-
-    # if extension is .bz2, decompress, else assume file is fine as as is
-    file_path, file_extension = os.path.splitext(destination_path)
-    if file_extension == &#39;.bz2&#39;:
-        # NOTE: file_path is whats left after removeing .bz2 from the end
-        with \
-                bz2.BZ2File(destination_path) as decompressed_source, \
-                open(file_path,&#34;wb&#34;) as decompressed_destination:
-
-            shutil.copyfileobj(decompressed_source, decompressed_destination)
-
-            # NOTE: the compressed file was decompressed to file_path
-            #       therefor that is now the actual file we want
-            destination_path = file_path
-
     return destination_path</code></pre>
 </details>
 </dd>
@@ -791,6 +900,7 @@ If destination_uri does not start with /|file://|<a href="http://|https://">http
 <li><code><a title="ploigos_step_runner.utils.file.base64_encode" href="#ploigos_step_runner.utils.file.base64_encode">base64_encode</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.create_parent_dir" href="#ploigos_step_runner.utils.file.create_parent_dir">create_parent_dir</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.download_and_decompress_source_to_destination" href="#ploigos_step_runner.utils.file.download_and_decompress_source_to_destination">download_and_decompress_source_to_destination</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.file.download_source_to_destination" href="#ploigos_step_runner.utils.file.download_source_to_destination">download_source_to_destination</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.get_file_hash" href="#ploigos_step_runner.utils.file.get_file_hash">get_file_hash</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.parse_yaml_or_json_file" href="#ploigos_step_runner.utils.file.parse_yaml_or_json_file">parse_yaml_or_json_file</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.file.upload_file" href="#ploigos_step_runner.utils.file.upload_file">upload_file</a></code></li>

@@ -104,7 +104,7 @@ def import_pgp_key(pgp_private_key):
     #   grp:::::::::A483EE079EC1D58A954E3AAF3BCC61EDD7596BF0:
     gpg_regex = re.compile(r&#34;^fpr:+([^:]+):$&#34;, re.MULTILINE)
 
-    print(&#34;Import PGP private key to sign container image(s) with&#34;)
+    print(&#34;Import PGP private key to sign artifacts with&#34;)
     try:
         # import the key
 
@@ -141,7 +141,7 @@ def import_pgp_key(pgp_private_key):
         pgp_private_key_fingerprint = gpg_imported_pgp_private_key_fingerprints[0]
 
         print(
-            &#34;Imported PGP private key to sign container image(s) with: &#34;
+            &#34;Imported PGP private key to sign artifacts with: &#34;
             f&#34;fingerprint=&#39;{pgp_private_key_fingerprint}&#39;&#34;
         )
     except sh.ErrorReturnCode as error:
@@ -149,7 +149,45 @@ def import_pgp_key(pgp_private_key):
             f&#34;Error importing pgp private key: {error}&#34;
         ) from error
 
-    return pgp_private_key_fingerprint</code></pre>
+    return pgp_private_key_fingerprint
+
+def export_pgp_public_key(pgp_private_key_fingerprint):
+    &#34;&#34;&#34;Exports a PGP public key given a private key fingerprint.
+
+    Parameters
+    ----------
+    pgp_private_key_fingerprint : str
+        PGP fingerprint.
+
+    Returns
+    -------
+    str
+        Public key from the private key fingerprint.
+
+    Raises
+    ------
+    RuntimeError
+        If error getting exported PGP public key
+    &#34;&#34;&#34;
+    try:
+        gpg_export_stdout_result = StringIO()
+
+        sh.gpg( # pylint: disable=no-member
+            &#39;--armor&#39;,
+            &#39;--export&#39;,
+            pgp_private_key_fingerprint,
+            _out=gpg_export_stdout_result,
+            _err_to_out=True,
+            _tee=&#39;out&#39;
+        )
+
+        gpg_public_key = gpg_export_stdout_result.getvalue()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#34;Error exporting pgp public key: {error}&#34;
+        ) from error
+
+    return gpg_public_key</code></pre>
 </details>
 </section>
 <section>
@@ -218,6 +256,69 @@ def import_pgp_key(pgp_private_key):
         ) from error</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.pgp.export_pgp_public_key"><code class="name flex">
+<span>def <span class="ident">export_pgp_public_key</span></span>(<span>pgp_private_key_fingerprint)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Exports a PGP public key given a private key fingerprint.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>pgp_private_key_fingerprint</code></strong> :&ensp;<code>str</code></dt>
+<dd>PGP fingerprint.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Public key from the private key fingerprint.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If error getting exported PGP public key</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def export_pgp_public_key(pgp_private_key_fingerprint):
+    &#34;&#34;&#34;Exports a PGP public key given a private key fingerprint.
+
+    Parameters
+    ----------
+    pgp_private_key_fingerprint : str
+        PGP fingerprint.
+
+    Returns
+    -------
+    str
+        Public key from the private key fingerprint.
+
+    Raises
+    ------
+    RuntimeError
+        If error getting exported PGP public key
+    &#34;&#34;&#34;
+    try:
+        gpg_export_stdout_result = StringIO()
+
+        sh.gpg( # pylint: disable=no-member
+            &#39;--armor&#39;,
+            &#39;--export&#39;,
+            pgp_private_key_fingerprint,
+            _out=gpg_export_stdout_result,
+            _err_to_out=True,
+            _tee=&#39;out&#39;
+        )
+
+        gpg_public_key = gpg_export_stdout_result.getvalue()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#34;Error exporting pgp public key: {error}&#34;
+        ) from error
+
+    return gpg_public_key</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.utils.pgp.import_pgp_key"><code class="name flex">
 <span>def <span class="ident">import_pgp_key</span></span>(<span>pgp_private_key)</span>
 </code></dt>
@@ -268,7 +369,7 @@ If error importing PGP key.</dd>
     #   grp:::::::::A483EE079EC1D58A954E3AAF3BCC61EDD7596BF0:
     gpg_regex = re.compile(r&#34;^fpr:+([^:]+):$&#34;, re.MULTILINE)
 
-    print(&#34;Import PGP private key to sign container image(s) with&#34;)
+    print(&#34;Import PGP private key to sign artifacts with&#34;)
     try:
         # import the key
 
@@ -305,7 +406,7 @@ If error importing PGP key.</dd>
         pgp_private_key_fingerprint = gpg_imported_pgp_private_key_fingerprints[0]
 
         print(
-            &#34;Imported PGP private key to sign container image(s) with: &#34;
+            &#34;Imported PGP private key to sign artifacts with: &#34;
             f&#34;fingerprint=&#39;{pgp_private_key_fingerprint}&#39;&#34;
         )
     except sh.ErrorReturnCode as error:
@@ -335,6 +436,7 @@ If error importing PGP key.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="ploigos_step_runner.utils.pgp.detach_sign_with_pgp_key" href="#ploigos_step_runner.utils.pgp.detach_sign_with_pgp_key">detach_sign_with_pgp_key</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.pgp.export_pgp_public_key" href="#ploigos_step_runner.utils.pgp.export_pgp_public_key">export_pgp_public_key</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.pgp.import_pgp_key" href="#ploigos_step_runner.utils.pgp.import_pgp_key">import_pgp_key</a></code></li>
 </ul>
 </li>
