@@ -60,12 +60,11 @@ def parse_yaml_or_json_file(yaml_or_json_file):
 
     return parsed_file
 
-def download_and_decompress_source_to_destination(
+def download_source_to_destination(
     source_uri,
     destination_dir
 ):
-    """Given a source url using a known protocol downloads the file to a given destination
-    and decompresses it if known compression method.
+    """Given a source url using a known protocol downloads the file to a given destination.
 
     Notes
     -----
@@ -73,9 +72,6 @@ def download_and_decompress_source_to_destination(
     * file://
     * http://
     * https://
-
-    Known compression types
-    * bz2
 
     Parameters
     ----------
@@ -88,7 +84,7 @@ def download_and_decompress_source_to_destination(
     Returns
     -------
     str
-        Path to the downloaded and decompressed (if needed) file from given source.
+        Path to the downloaded file from given source.
 
     Raises
     ------
@@ -137,6 +133,47 @@ def download_and_decompress_source_to_destination(
             "Unexpected error, should have been caught by step validation."
             f" Source ({source_uri}) must start with known protocol (/|file://|http://|https://)."
         )
+    return destination_path
+
+def download_and_decompress_source_to_destination(
+    source_uri,
+    destination_dir
+):
+    """Given a source url using a known protocol downloads the file to a given destination
+    and decompresses it if known compression method.
+
+    Notes
+    -----
+    Known source protocols
+    * file://
+    * http://
+    * https://
+
+    Known compression types
+    * bz2
+
+    Parameters
+    ----------
+    source_uri : url
+        URL to a source file using a known protocol to download to destination folder
+        and decompress if necessary.
+    destination_dir : path
+        Path to directory to download and decompress if necessary the source url to.
+
+    Returns
+    -------
+    str
+        Path to the downloaded and decompressed (if needed) file from given source.
+
+    Raises
+    ------
+    RuntimeError
+        If error downloading file.
+    ValueError
+        If source_uri does not start with file://|http://|https://
+    """
+
+    destination_path = download_source_to_destination(source_uri, destination_dir)
 
     # if extension is .bz2, decompress, else assume file is fine as as is
     file_path, file_extension = os.path.splitext(destination_path)

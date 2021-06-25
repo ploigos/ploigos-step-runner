@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from ploigos_step_runner.utils.file import (
     base64_encode, create_parent_dir,
+    download_source_to_destination,
     download_and_decompress_source_to_destination, get_file_hash,
     parse_yaml_or_json_file, upload_file)
 from testfixtures import TempDirectory
@@ -143,41 +144,82 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
                     destination_dir=test_dir.path
                 )
 
-    def test_create_parent_dir(self):
+class TestDownloadSourceToDestination(BaseTestCase):
+    def test_https_xml(self):
         with TempDirectory() as test_dir:
-            file_path = os.path.join(test_dir.path, 'hello/world/does/not/exit/foo.yml')
-
-            self.assertFalse(os.path.exists(file_path))
-            self.assertFalse(os.path.exists(os.path.dirname(file_path)))
-
-            create_parent_dir(file_path)
-            self.assertFalse(os.path.exists(file_path))
-            self.assertTrue(os.path.exists(os.path.dirname(file_path)))
-
-    def test_base64_encode(self):
-        with TempDirectory() as test_dir:
-            sample_file_path = os.path.join(
-                os.path.dirname(__file__),
-                'files',
-                'sample.txt'
+            destination_path = download_source_to_destination(
+                source_uri="https://www.redhat.com/security/data/cvrf/2020/cvrf-rhba-2020-0017.xml",
+                destination_dir=test_dir.path
             )
 
-            result = base64_encode(sample_file_path)
-            self.assertEqual(result,
-                'c2FtcGxlIHRleHQgZmlsZQ=='
-            )
+            self.assertIsNotNone(destination_path)
+            self.assertRegex(destination_path, rf'{test_dir.path}/cvrf-rhba-2020-0017.xml$')
+            with open(destination_path) as downloaded_file:
+                self.assertTrue(downloaded_file.read())
 
-    def test_get_file_hash(self):
+    def test_local_file_download_file_prefix(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'cvrf-rhba-2020-0017.xml'
+        )
+
         with TempDirectory() as test_dir:
-            sample_file_path = os.path.join(
-                os.path.dirname(__file__),
-                'files',
-                'sample.txt'
+            destination_path = download_source_to_destination(
+                source_uri=f"file://{sample_file_path}",
+                destination_dir=test_dir.path
             )
 
-            result = get_file_hash(sample_file_path)
-            self.assertEqual(result, '09daa01246aa5ee9c29f64f644627a0ea83247857dfea2665689e26b166eef47')
+            self.assertIsNotNone(destination_path)
+            self.assertRegex(destination_path, rf'{test_dir.path}/cvrf-rhba-2020-0017.xml$')
+            with open(destination_path) as downloaded_file, open(sample_file_path) as sample_file:
+                downloaded_file_contents = downloaded_file.read()
+                self.assertTrue(downloaded_file_contents)
+                self.assertEqual(downloaded_file_contents, sample_file.read())
 
+    def test_local_file_download_forward_slash_prefix(self):
+        sample_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'cvrf-rhba-2020-0017.xml'
+        )
+
+        with TempDirectory() as test_dir:
+            destination_path = download_source_to_destination(
+                source_uri=f"{sample_file_path}",
+                destination_dir=test_dir.path
+            )
+
+            self.assertIsNotNone(destination_path)
+            self.assertRegex(destination_path, rf'{test_dir.path}/cvrf-rhba-2020-0017.xml$')
+            with open(destination_path) as downloaded_file, open(sample_file_path) as sample_file:
+                downloaded_file_contents = downloaded_file.read()
+                self.assertTrue(downloaded_file_contents)
+                self.assertEqual(downloaded_file_contents, sample_file.read())
+
+    def test_bad_protocol(self):
+        with TempDirectory() as test_dir:
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"Unexpected error, should have been caught by step validation."
+                r" Source \(.+\) must start with known protocol \(/|file://\|http://\|https://\)."
+            ):
+                download_source_to_destination(
+                    source_uri="bad://www.redhat.com/security/data/metrics/ds/v2/RHEL8/rhel-8.ds.xml.bz2",
+                    destination_dir=test_dir.path
+                )
+
+    def test_https_bad_uri(self):
+        with TempDirectory() as test_dir:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"Error downloading file \(.+\): HTTP Error 404: Not Found"
+            ):
+                download_source_to_destination(
+                    source_uri="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/does-not-exist.ds.xml.bz2",
+                    destination_dir=test_dir.path
+                )
 class TestUploadFile(BaseTestCase):
     def __create_http_response_side_effect(self, read_return):
         def http_response_side_effect(request):
@@ -359,3 +401,38 @@ class TestUploadFile(BaseTestCase):
                 file_path=sample_file_path,
                 destination_uri="https://ploigos.com/test/foo42"
             )
+class TestFileMisc(BaseTestCase):
+    def test_create_parent_dir(self):
+        with TempDirectory() as test_dir:
+            file_path = os.path.join(test_dir.path, 'hello/world/does/not/exit/foo.yml')
+
+            self.assertFalse(os.path.exists(file_path))
+            self.assertFalse(os.path.exists(os.path.dirname(file_path)))
+
+            create_parent_dir(file_path)
+            self.assertFalse(os.path.exists(file_path))
+            self.assertTrue(os.path.exists(os.path.dirname(file_path)))
+
+    def test_base64_encode(self):
+        with TempDirectory() as test_dir:
+            sample_file_path = os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample.txt'
+            )
+
+            result = base64_encode(sample_file_path)
+            self.assertEqual(result,
+                'c2FtcGxlIHRleHQgZmlsZQ=='
+            )
+
+    def test_get_file_hash(self):
+        with TempDirectory() as test_dir:
+            sample_file_path = os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample.txt'
+            )
+
+            result = get_file_hash(sample_file_path)
+            self.assertEqual(result, '09daa01246aa5ee9c29f64f644627a0ea83247857dfea2665689e26b166eef47')

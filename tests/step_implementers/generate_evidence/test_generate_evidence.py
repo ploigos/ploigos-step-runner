@@ -129,7 +129,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
         GenerateEvidence,
         '_GenerateEvidence__gather_evidence',
         return_value = None
-    )    
+    )
     def test__run_step_pass_no_evidence(self, generate_evidence_mock):
         step_config = {
             'organization': 'test-ORG',
@@ -151,7 +151,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
             sub_step_implementer_name='GenerateEvidence'
         )
 
-        
+
         expected_step_result.add_artifact(
             name='result-generate-evidence',
             value='No evidence to generate.',
@@ -210,7 +210,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
         GenerateEvidence,
         '_GenerateEvidence__gather_evidence',
         return_value = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT
-    )    
+    )
     def test_run_step_write_results_to_json_file(self, gather_evidence_mock):
 
         expected_evidence = self.GATHER_EVIDENCE_MOCK_JSON
@@ -232,7 +232,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
 
             # run the step
             step_result = step_implementer._run_step()
-            
+
             json_file_path = step_result.get_artifact_value("evidence-path")
 
             with open(json_file_path, 'r') as actual_json_file:
@@ -245,7 +245,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
         GenerateEvidence,
         '_GenerateEvidence__gather_evidence',
         return_value = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT
-    )    
+    )
     def test__run_step_upload_to_file(self, gather_evidence_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -308,10 +308,10 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
         GenerateEvidence,
         '_GenerateEvidence__gather_evidence',
         return_value = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT
-    )    
+    )
     def test__upload_to_remote_with_auth(self, gather_evidence_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
-            
+
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
             step_config = {
@@ -375,7 +375,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
         GenerateEvidence,
         '_GenerateEvidence__gather_evidence',
         return_value = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT
-    )    
+    )
     def test__run_step_pass_upload_to_remote_with_auth_failure(self, gather_evidence_mock, upload_file_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -421,7 +421,7 @@ class TestStepImplementerGenerateEvidence_run_step(TestStepImplementerGenerateEv
                 username='test-user',
                 password='test-pass'
             )
-            
+
 class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGenerateEvidenceBase):
 
 
@@ -439,7 +439,7 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
             sub_step_implementer_name='test-sub-step-implementer',
             environment=environment
         )
-        
+
         step_result.add_evidence(
             name='test-evidence',
             value="test-value",
@@ -454,7 +454,7 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
         workflow_result = WorkflowResult()
         workflow_result.add_step_result(step_result)
 
-        
+
         step_implementer = self.create_step_implementer(
             step_config=step_config,
             parent_work_dir_path=parent_work_dir_path,
@@ -465,11 +465,11 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
     def test__gather_evidence(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            
+
             step_implementer =  self.__setup_evidence(parent_work_dir_path)
 
             gathered_evidence = step_implementer._GenerateEvidence__gather_evidence()
-            
+
             expected_gathered_evidence = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT
 
             self.assertEqual(gathered_evidence, expected_gathered_evidence)
@@ -496,11 +496,11 @@ class TestStepImplementerGenerateEvidence_gather_evidence(TestStepImplementerGen
     def test__gather_evidence_with_environment(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            
+
             step_implementer =  self.__setup_evidence(parent_work_dir_path, environment='foo')
 
             gathered_evidence = step_implementer._GenerateEvidence__gather_evidence()
-            
+
             expected_gathered_evidence = TestStepImplementerGenerateEvidenceBase.GATHER_EVIDENCE_MOCK_DICT_WITH_ENVIRONMENT
 
             self.assertEqual(gathered_evidence, expected_gathered_evidence)
