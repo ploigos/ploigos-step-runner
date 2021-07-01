@@ -159,25 +159,20 @@ class PodmanSign(StepImplementer):
                 name='container-image-signature-name',
                 value=signature_name
             )
-        except (RuntimeError, StepRunnerException) as error:
-            step_result.success = False
-            step_result.message = str(error)
 
-
-        # upload the image signature
-        container_image_signature_destination_url = self.get_value(
-            'container-image-signature-destination-url'
-        )
-        if container_image_signature_destination_url:
-            container_image_signature_destination_uri = \
-                f"{container_image_signature_destination_url}/{signature_name}"
-            step_result.add_artifact(
-                name='container-image-signature-uri',
-                description='URI of the uploaded container image signature',
-                value=container_image_signature_destination_uri
+             # upload the image signature
+            container_image_signature_destination_url = self.get_value(
+                'container-image-signature-destination-url'
             )
+            if container_image_signature_destination_url:
+                container_image_signature_destination_uri = \
+                    f"{container_image_signature_destination_url}/{signature_name}"
+                step_result.add_artifact(
+                    name='container-image-signature-uri',
+                    description='URI of the uploaded container image signature',
+                    value=container_image_signature_destination_uri
+                )
 
-            try:
                 upload_result = upload_file(
                     file_path=signature_file_path,
                     destination_uri=container_image_signature_destination_uri,
@@ -190,9 +185,9 @@ class PodmanSign(StepImplementer):
                                 ' to the given destination.',
                     value=upload_result
                 )
-            except RuntimeError as error:
-                step_result.success = False
-                step_result.message = str(error)
+        except (RuntimeError, StepRunnerException) as error:
+            step_result.success = False
+            step_result.message = str(error)
 
         return step_result
 
