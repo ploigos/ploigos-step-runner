@@ -58,14 +58,17 @@ Result Artifact Key                        | Description
 import glob
 import os
 import sys
+from distutils import util
 
 import sh
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.containers import container_registries_login
 from ploigos_step_runner.utils.file import upload_file
 from ploigos_step_runner.utils.pgp import import_pgp_key
 
 DEFAULT_CONFIG = {
+    'src-tls-verify': 'true'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -142,6 +145,19 @@ class PodmanSign(StepImplementer):
             step_result.add_artifact(
                 name='container-image-signature-signer-private-key-fingerprint',
                 value=signer_pgp_private_key_fingerprint
+            )
+
+            # login to any provider container registries
+            # NOTE 1: can not use auth file, even though we want to, because podman image sign
+            #         does not accept authfile.
+            #         https://github.com/containers/podman/issues/10866
+            # NOTE 2: have to force login to use podman because even though logging in with
+            #         any of the tools should work, in testing the podman sign only worked
+            #         from within the python virtual environment if the login happened with podman.
+            container_registries_login(
+                registries=self.get_value('container-registries'),
+                containers_config_tls_verify=util.strtobool(self.get_value('src-tls-verify')),
+                container_command_short_name='podman'
             )
 
             # sign the image

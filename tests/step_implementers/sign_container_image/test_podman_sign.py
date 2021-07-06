@@ -88,7 +88,9 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
 
     def test_step_implementer_config_defaults(self):
         defaults = PodmanSign.step_implementer_config_defaults()
-        expected_defaults = {}
+        expected_defaults = {
+            'src-tls-verify': 'true'
+        }
         self.assertEqual(defaults, expected_defaults)
 
     def test__required_config_or_result_keys(self):
@@ -99,9 +101,15 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
+    @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.container_registries_login')
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
-    def test_run_step_pass(self, sign_image_mock, import_pgp_key_mock):
+    def test_run_step_pass(
+        self,
+        sign_image_mock,
+        import_pgp_key_mock,
+        container_registries_login
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             pgp_private_key_fingerprint = 'abc123'
@@ -120,9 +128,9 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             import_pgp_key_mock.side_effect = import_pgp_key_side_effect
 
             def sign_image_side_effect(
-                    pgp_private_key_fingerprint,
-                    image_signatures_directory,
-                    container_image_tag
+                pgp_private_key_fingerprint,
+                image_signatures_directory,
+                container_image_tag
             ):
                 return os.path.join(image_signatures_directory, signature_name)
             sign_image_mock.side_effect = sign_image_side_effect
@@ -147,6 +155,12 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                     'sign-container-image/image-signature'
                 ),
                 container_image_tag=container_image_tag
+            )
+
+            container_registries_login.assert_called_once_with(
+                registries=None,
+                containers_config_tls_verify=True,
+                container_command_short_name='podman'
             )
 
             expected_step_result = StepResult(

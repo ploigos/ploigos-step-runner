@@ -37,7 +37,10 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
     def test_step_implementer_config_defaults(self):
         defaults = Skopeo.step_implementer_config_defaults()
         expected_defaults = {
-            'containers-config-auth-file': os.path.join(Path.home(), '.skopeo-auth.json'),
+            'containers-config-auth-file': os.path.join(
+                Path.home(),
+                '.container-image-repo-auth.json'
+            ),
             'dest-tls-verify': 'true',
             'src-tls-verify': 'true'
         }
@@ -117,7 +120,10 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
                 expected_step_result.get_step_result_dict()
             )
 
-            containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
+            containers_config_auth_file = os.path.join(
+                Path.home(),
+                '.container-image-repo-auth.json'
+            )
             skopeo_mock.copy.assert_called_once_with(
                 "--src-tls-verify=true",
                 "--dest-tls-verify=true",
@@ -198,7 +204,10 @@ class TestStepImplementerSkopeoSourceBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-            containers_config_auth_file = os.path.join(Path.home(), '.skopeo-auth.json')
+            containers_config_auth_file = os.path.join(
+                Path.home(),
+                '.container-image-repo-auth.json'
+            )
             skopeo_mock.copy.assert_called_once_with(
                 "--src-tls-verify=true",
                 "--dest-tls-verify=true",
