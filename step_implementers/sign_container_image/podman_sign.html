@@ -299,25 +299,20 @@ class PodmanSign(StepImplementer):
                 name=&#39;container-image-signature-name&#39;,
                 value=signature_name
             )
-        except (RuntimeError, StepRunnerException) as error:
-            step_result.success = False
-            step_result.message = str(error)
 
-
-        # upload the image signature
-        container_image_signature_destination_url = self.get_value(
-            &#39;container-image-signature-destination-url&#39;
-        )
-        if container_image_signature_destination_url:
-            container_image_signature_destination_uri = \
-                f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
-            step_result.add_artifact(
-                name=&#39;container-image-signature-uri&#39;,
-                description=&#39;URI of the uploaded container image signature&#39;,
-                value=container_image_signature_destination_uri
+             # upload the image signature
+            container_image_signature_destination_url = self.get_value(
+                &#39;container-image-signature-destination-url&#39;
             )
+            if container_image_signature_destination_url:
+                container_image_signature_destination_uri = \
+                    f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-uri&#39;,
+                    description=&#39;URI of the uploaded container image signature&#39;,
+                    value=container_image_signature_destination_uri
+                )
 
-            try:
                 upload_result = upload_file(
                     file_path=signature_file_path,
                     destination_uri=container_image_signature_destination_uri,
@@ -330,9 +325,9 @@ class PodmanSign(StepImplementer):
                                 &#39; to the given destination.&#39;,
                     value=upload_result
                 )
-            except RuntimeError as error:
-                step_result.success = False
-                step_result.message = str(error)
+        except (RuntimeError, StepRunnerException) as error:
+            step_result.success = False
+            step_result.message = str(error)
 
         return step_result
 
@@ -488,25 +483,20 @@ an image signature.</p></div>
                 name=&#39;container-image-signature-name&#39;,
                 value=signature_name
             )
-        except (RuntimeError, StepRunnerException) as error:
-            step_result.success = False
-            step_result.message = str(error)
 
-
-        # upload the image signature
-        container_image_signature_destination_url = self.get_value(
-            &#39;container-image-signature-destination-url&#39;
-        )
-        if container_image_signature_destination_url:
-            container_image_signature_destination_uri = \
-                f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
-            step_result.add_artifact(
-                name=&#39;container-image-signature-uri&#39;,
-                description=&#39;URI of the uploaded container image signature&#39;,
-                value=container_image_signature_destination_uri
+             # upload the image signature
+            container_image_signature_destination_url = self.get_value(
+                &#39;container-image-signature-destination-url&#39;
             )
+            if container_image_signature_destination_url:
+                container_image_signature_destination_uri = \
+                    f&#34;{container_image_signature_destination_url}/{signature_name}&#34;
+                step_result.add_artifact(
+                    name=&#39;container-image-signature-uri&#39;,
+                    description=&#39;URI of the uploaded container image signature&#39;,
+                    value=container_image_signature_destination_uri
+                )
 
-            try:
                 upload_result = upload_file(
                     file_path=signature_file_path,
                     destination_uri=container_image_signature_destination_uri,
@@ -519,9 +509,9 @@ an image signature.</p></div>
                                 &#39; to the given destination.&#39;,
                     value=upload_result
                 )
-            except RuntimeError as error:
-                step_result.success = False
-                step_result.message = str(error)
+        except (RuntimeError, StepRunnerException) as error:
+            step_result.success = False
+            step_result.message = str(error)
 
         return step_result
 

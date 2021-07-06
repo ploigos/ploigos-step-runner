@@ -305,7 +305,7 @@ class RekorSignGeneric(StepImplementer):  # pylint: disable=too-few-public-metho
             _err_to_out=True,
             _tee=&#39;out&#39;
         )
-        rekor_uuid = str(rekor).split(&#39;/&#39;)[-1].strip(&#39; \n&#39;)
+        rekor_uuid = str(rekor).rsplit(&#39;/&#39;, maxsplit=1)[-1].strip(&#39; \n&#39;)
         return rekor_uuid
 
     def _run_step(self):
@@ -564,7 +564,7 @@ class RekorSignGeneric(StepImplementer):  # pylint: disable=too-few-public-metho
             _err_to_out=True,
             _tee=&#39;out&#39;
         )
-        rekor_uuid = str(rekor).split(&#39;/&#39;)[-1].strip(&#39; \n&#39;)
+        rekor_uuid = str(rekor).rsplit(&#39;/&#39;, maxsplit=1)[-1].strip(&#39; \n&#39;)
         return rekor_uuid
 
     def _run_step(self):
