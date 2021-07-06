@@ -482,36 +482,6 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             argocd_get_app_manifest_mock.assert_not_called()
             get_deployed_host_urls_mock.assert_not_called()
 
-class TestStepImplementerDeployArgoCD__get_container_image_version(
-    TestStepImplementerDeployArgoCDBase
-):
-    def test_ArgoCD__get_container_image_version_config_value(self):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            step_config = {
-                'container-image-version': 'v0.42.0'
-            }
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                parent_work_dir_path=parent_work_dir_path,
-            )
-
-            image_version = step_implementer._ArgoCD__get_container_image_version()
-            self.assertEqual(image_version, 'v0.42.0')
-
-    def test_ArgoCD__get_container_image_version_no_config_value(self):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            step_config = {
-            }
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                parent_work_dir_path=parent_work_dir_path,
-            )
-
-            image_version = step_implementer._ArgoCD__get_container_image_version()
-            self.assertEqual(image_version, 'latest')
-
 class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environment_values_file(
     TestStepImplementerDeployArgoCDBase
 ):
