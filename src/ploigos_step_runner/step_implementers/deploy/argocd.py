@@ -365,14 +365,6 @@ class ArgoCD(StepImplementer):
 
         return step_result
 
-    def __get_container_image_version(self):
-        image_version = self.get_value('container-image-version')
-        if image_version is None:
-            image_version = 'latest'
-            print('No image version found in metadata. Using latest.')
-        return image_version
-
-
     def __get_deployment_config_helm_chart_environment_values_file(self):
         """Get the deployment configuration Helm Chart environment specific value file.
 
