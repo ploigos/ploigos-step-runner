@@ -35,11 +35,12 @@ import sys
 import sh
 from ploigos_step_runner.config.config_value import ConfigValue
 
-
 def container_registries_login(  #pylint: disable=too-many-branches
     registries,
     containers_config_auth_file=None,
-    containers_config_tls_verify=True):
+    containers_config_tls_verify=True,
+    container_command_short_name=None
+):
     &#34;&#34;&#34;Logs into one or more container registries.
 
     Requires one of the following to be installed to do the authentication:
@@ -101,6 +102,9 @@ def container_registries_login(  #pylint: disable=too-many-branches
     containers_config_auth_file : str, optional
         Path of the authentication file.
         If not specified default of the underlying authentication system will be used.
+    container_command_short_name : str, optional
+        Short name for the command to log in with.
+        If not provided will pick the first command found in order (buildah, podman, skopeo).
 
     See Also
     --------
@@ -147,7 +151,8 @@ def container_registries_login(  #pylint: disable=too-many-branches
                 container_registry_username=registry_conf[&#39;username&#39;],
                 container_registry_password=registry_conf[&#39;password&#39;],
                 container_registry_tls_verify=registry_tls_verify,
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                container_command_short_name=container_command_short_name
             )
     elif isinstance(registries, list):
         for registry_conf in registries:
@@ -177,15 +182,17 @@ def container_registries_login(  #pylint: disable=too-many-branches
                 container_registry_username=registry_conf[&#39;username&#39;],
                 container_registry_password=registry_conf[&#39;password&#39;],
                 container_registry_tls_verify=registry_tls_verify,
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                container_command_short_name=container_command_short_name
             )
 
-def container_registry_login(
+def container_registry_login( #pylint: disable=too-many-arguments,too-many-branches
     container_registry_uri,
     container_registry_username,
     container_registry_password,
     container_registry_tls_verify=True,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    container_command_short_name=None
 ):
     &#34;&#34;&#34;Performs the login for a single container registry.
 
@@ -209,6 +216,9 @@ def container_registry_login(
     containers_config_auth_file : str or ConfigValue, optional
         Path of the authentication file.
         If not specified default of the underlying authentication system will be used.
+    container_command_short_name : str, optional
+        Short name for the command to log in with.
+        If not provided will pick the first command found in order (buildah, podman, skopeo).
 
     Raises
     ------
@@ -246,7 +256,17 @@ def container_registry_login(
     buildah_path = sh.which(&#39;buildah&#39;)
     podman_path = sh.which(&#39;podman&#39;)
     skopeo_path = sh.which(&#39;skopeo&#39;)
-    if buildah_path is not None:
+    if container_command_short_name:
+        given_command_path = sh.which(container_command_short_name)
+        if given_command_path:
+            container_command = sh.Command(container_command_short_name).bake()
+        else:
+            raise RuntimeError(
+                f&#34;When attempting to login to container registry ({container_registry_uri}) &#34;
+                f&#34;could not find the given expected tool ({container_command_short_name}) &#34;
+                &#34;to login with.&#34;
+            )
+    elif buildah_path is not None:
         container_command = sh.buildah.bake() #pylint: disable=no-member
     elif podman_path is not None:
         container_command = sh.podman.bake() #pylint: disable=no-member
@@ -270,6 +290,7 @@ def container_registry_login(
         # NOTE: need to bake in the flags prior to the registry due to nonesense with
         #       required ordering by the login command and how sh handles
         #       escaping and ordering parameters
+        print(f&#34;Login ({container_command}) to container image registry ({container_registry_uri})&#34;)
         login_comnmand = container_command.login.bake(**login_command_named_flags)
         login_comnmand(
             container_registry_uri,
@@ -293,7 +314,7 @@ def container_registry_login(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ploigos_step_runner.utils.containers.container_registries_login"><code class="name flex">
-<span>def <span class="ident">container_registries_login</span></span>(<span>registries, containers_config_auth_file=None, containers_config_tls_verify=True)</span>
+<span>def <span class="ident">container_registries_login</span></span>(<span>registries, containers_config_auth_file=None, containers_config_tls_verify=True, container_command_short_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Logs into one or more container registries.</p>
@@ -351,6 +372,9 @@ If none, does nothing.</dd>
 <dt><strong><code>containers_config_auth_file</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>Path of the authentication file.
 If not specified default of the underlying authentication system will be used.</dd>
+<dt><strong><code>container_command_short_name</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Short name for the command to log in with.
+If not provided will pick the first command found in order (buildah, podman, skopeo).</dd>
 </dl>
 <h2 id="see-also">See Also</h2>
 <dl>
@@ -370,7 +394,9 @@ If not specified default of the underlying authentication system will be used.</
 <pre><code class="python">def container_registries_login(  #pylint: disable=too-many-branches
     registries,
     containers_config_auth_file=None,
-    containers_config_tls_verify=True):
+    containers_config_tls_verify=True,
+    container_command_short_name=None
+):
     &#34;&#34;&#34;Logs into one or more container registries.
 
     Requires one of the following to be installed to do the authentication:
@@ -432,6 +458,9 @@ If not specified default of the underlying authentication system will be used.</
     containers_config_auth_file : str, optional
         Path of the authentication file.
         If not specified default of the underlying authentication system will be used.
+    container_command_short_name : str, optional
+        Short name for the command to log in with.
+        If not provided will pick the first command found in order (buildah, podman, skopeo).
 
     See Also
     --------
@@ -478,7 +507,8 @@ If not specified default of the underlying authentication system will be used.</
                 container_registry_username=registry_conf[&#39;username&#39;],
                 container_registry_password=registry_conf[&#39;password&#39;],
                 container_registry_tls_verify=registry_tls_verify,
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                container_command_short_name=container_command_short_name
             )
     elif isinstance(registries, list):
         for registry_conf in registries:
@@ -508,12 +538,13 @@ If not specified default of the underlying authentication system will be used.</
                 container_registry_username=registry_conf[&#39;username&#39;],
                 container_registry_password=registry_conf[&#39;password&#39;],
                 container_registry_tls_verify=registry_tls_verify,
-                containers_config_auth_file=containers_config_auth_file
+                containers_config_auth_file=containers_config_auth_file,
+                container_command_short_name=container_command_short_name
             )</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.containers.container_registry_login"><code class="name flex">
-<span>def <span class="ident">container_registry_login</span></span>(<span>container_registry_uri, container_registry_username, container_registry_password, container_registry_tls_verify=True, containers_config_auth_file=None)</span>
+<span>def <span class="ident">container_registry_login</span></span>(<span>container_registry_uri, container_registry_username, container_registry_password, container_registry_tls_verify=True, containers_config_auth_file=None, container_command_short_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Performs the login for a single container registry.</p>
@@ -536,6 +567,9 @@ NOTE: no matter what SSL is used to authenticate with container registry</dd>
 <dt><strong><code>containers_config_auth_file</code></strong> :&ensp;<code>str</code> or <code>ConfigValue</code>, optional</dt>
 <dd>Path of the authentication file.
 If not specified default of the underlying authentication system will be used.</dd>
+<dt><strong><code>container_command_short_name</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Short name for the command to log in with.
+If not provided will pick the first command found in order (buildah, podman, skopeo).</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -558,12 +592,13 @@ When error loging into container registry.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def container_registry_login(
+<pre><code class="python">def container_registry_login( #pylint: disable=too-many-arguments,too-many-branches
     container_registry_uri,
     container_registry_username,
     container_registry_password,
     container_registry_tls_verify=True,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    container_command_short_name=None
 ):
     &#34;&#34;&#34;Performs the login for a single container registry.
 
@@ -587,6 +622,9 @@ When error loging into container registry.</dd>
     containers_config_auth_file : str or ConfigValue, optional
         Path of the authentication file.
         If not specified default of the underlying authentication system will be used.
+    container_command_short_name : str, optional
+        Short name for the command to log in with.
+        If not provided will pick the first command found in order (buildah, podman, skopeo).
 
     Raises
     ------
@@ -624,7 +662,17 @@ When error loging into container registry.</dd>
     buildah_path = sh.which(&#39;buildah&#39;)
     podman_path = sh.which(&#39;podman&#39;)
     skopeo_path = sh.which(&#39;skopeo&#39;)
-    if buildah_path is not None:
+    if container_command_short_name:
+        given_command_path = sh.which(container_command_short_name)
+        if given_command_path:
+            container_command = sh.Command(container_command_short_name).bake()
+        else:
+            raise RuntimeError(
+                f&#34;When attempting to login to container registry ({container_registry_uri}) &#34;
+                f&#34;could not find the given expected tool ({container_command_short_name}) &#34;
+                &#34;to login with.&#34;
+            )
+    elif buildah_path is not None:
         container_command = sh.buildah.bake() #pylint: disable=no-member
     elif podman_path is not None:
         container_command = sh.podman.bake() #pylint: disable=no-member
@@ -648,6 +696,7 @@ When error loging into container registry.</dd>
         # NOTE: need to bake in the flags prior to the registry due to nonesense with
         #       required ordering by the login command and how sh handles
         #       escaping and ordering parameters
+        print(f&#34;Login ({container_command}) to container image registry ({container_registry_uri})&#34;)
         login_comnmand = container_command.login.bake(**login_command_named_flags)
         login_comnmand(
             container_registry_uri,

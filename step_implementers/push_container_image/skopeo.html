@@ -64,7 +64,7 @@ automatically be applied</td>
 <tr>
 <td><code>containers-config-auth-file</code></td>
 <td>Yes</td>
-<td><code>'~/.skopeo-auth.json'</code></td>
+<td><code>'~/.container-image-repo-auth.json'</code></td>
 <td>Path to the container registry authentication file
 to use for container registry authentication.</td>
 </tr>
@@ -149,7 +149,7 @@ Configuration Key | Required? | Default  | Description
                                            automatically be applied
 `src-tls-verify`  | Yes       | `&#39;true&#39;` | Whether to very TLS for source of image
 `dest-tls-verify` | Yes       | `&#39;true&#39;` | Whether to verify TLS for destination of image
-`containers-config-auth-file` | Yes | `&#39;~/.skopeo-auth.json&#39;` | \
+`containers-config-auth-file` | Yes | `&#39;~/.container-image-repo-auth.json&#39;` | \
                                            Path to the container registry authentication file \
                                            to use for container registry authentication.
 `container-image-version`     | Yes |    | Tag to push container image with
@@ -189,7 +189,7 @@ from ploigos_step_runner.utils.containers import container_registries_login
 DEFAULT_CONFIG = {
     &#39;src-tls-verify&#39;: &#39;true&#39;,
     &#39;dest-tls-verify&#39;: &#39;true&#39;,
-    &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.skopeo-auth.json&#39;)
+    &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.container-image-repo-auth.json&#39;)
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
