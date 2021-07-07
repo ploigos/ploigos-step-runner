@@ -12,6 +12,7 @@ Could come from:
 Configuration Key       | Required? | Default | Description
 -------------------     |-----------|---------|-----------
 `workflow-policy-uri`   | Yes       |         | URI to policy used to audit attestations
+`evidence-uri`          | Yes       |         | URI to evidence file to be audited
 
 Result Artifacts
 ----------------
@@ -34,10 +35,11 @@ from ploigos_step_runner.utils.io import \
 DEFAULT_CONFIG = {}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'workflow-policy-uri'
+    'workflow-policy-uri',
+    'evidence-uri'
 ]
 class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-methods
-    """`StepImplementer` for the generic Rekor class.
+    """`StepImplementer` for the OPA class.
     """
 
     DEFAULT_WORKFLOW_POLICY_QUERY = "data.workflowResult.passAll"
@@ -91,38 +93,57 @@ class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-method
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _audit_attestation(self, # pylint: disable=no-self-use
+    def __audit_attestation(self, # pylint: disable=no-self-use
         workflow_attestation_file_path,
         workflow_policy_file_path,
         workflow_policy_query):
+        """Method to run the opa shell command to evaluate a data file with a provided
+           query file and given query.
+
+        Parameters
+        ----------
+        workflow_attestation_file_path
+            File path to the workflow attestation file
+        workflow_policy_file_path
+            File path to the workflow policy file
+        workflow_policy_query
+            Query that is run against the policy file
+
+        Returns
+        -------
+        string
+            Output of the opa shell command. This is more important
+            to output if the query fails.
+        int
+            Return code for opa shell command. A value of 0
+            means the query succeeeded whereas a value of
+            1 means the query failed.
+        """
 
         opa_attestation_stdout_result = StringIO()
         opa_attestation_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
             sys.stdout,
             opa_attestation_stdout_result
         ])
-        sh.opa( # pylint: disable=no-member
-            'opa',
-            'eval',
-            '--fail',
-            '--entry',
-            '-i',
-            workflow_attestation_file_path,
-            '-d',
-            workflow_policy_file_path,
-            workflow_policy_query,
-            _out=opa_attestation_stdout_callback,
-            _err_to_out=True,
-            _tee='out'
-        )
 
-        return_code = sh.ErrorReturnCode
+        try:
+            sh.opa( # pylint: disable=no-member
+                'eval',
+                '--fail-defined',
+                '-d',
+                workflow_attestation_file_path,
+                '-i',
+                workflow_policy_file_path,
+                workflow_policy_query,
+                _out=opa_attestation_stdout_callback,
+                _err_to_out=True,
+                _tee='out'
+            )
 
-        return opa_attestation_stdout_callback, return_code
+        except sh.ErrorReturnCode as error:
+            return f"Error evaluating query against data:  {error}", 1
 
-
-
-
+        return 'Audit was successful', 0
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
@@ -136,14 +157,12 @@ class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-method
 
         work_dir = self.work_dir_path
 
-        uri_artifact_key = 'evidence-uri'
-
         #workflow attestation uri
-        workflow_attestation_uri = self.get_value(uri_artifact_key)
+        workflow_attestation_uri = self.get_value('evidence-uri')
 
         if workflow_attestation_uri is None:
             step_result.success = False
-            step_result.message = "No value found for " + uri_artifact_key
+            step_result.message = 'No value found for evidence-uri'
             return step_result
 
         workflow_attestation_file_path = download_source_to_destination(
@@ -158,7 +177,7 @@ class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-method
             workflow_policy_uri,
             work_dir)
 
-        audit_results, return_code = self._audit_attestation(workflow_attestation_file_path,
+        audit_results, return_code = self.__audit_attestation(workflow_attestation_file_path,
             workflow_policy_file_path,
             self.DEFAULT_WORKFLOW_POLICY_QUERY)
 
@@ -166,15 +185,13 @@ class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-method
             step_result.success = False
             step_result.message = "Attestation error: " + audit_results
 
-            detailed_report, return_code = self._audit_attestation(workflow_attestation_file_path,
+            detailed_report, return_code = self.__audit_attestation(workflow_attestation_file_path,
                 workflow_policy_file_path,
                 self.DEFAULT_WORKFLOW_POLICY_DATA_QUERY)
             audit_results = detailed_report
 
         else:
             step_result.message = "Audit was successful"
-            audit_results = "Audit was successful"
-
 
         step_result.add_artifact(
                 name='audit-results',

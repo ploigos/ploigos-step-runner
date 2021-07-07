@@ -4,15 +4,17 @@ from pathlib import Path
 from unittest.mock import patch
 
 import mock
+import re
+import sh
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.results.workflow_result import WorkflowResult
 from ploigos_step_runner.step_implementers.audit_attestation import OpenPolicyAgent
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
+from tests.helpers.test_utils import Any, create_sh_side_effect
 
-class TestStepImplementerAuditAttestationBase(BaseStepImplementerTestCase):
+class TestStepImplementerOpenPolicyAgentBase(BaseStepImplementerTestCase):
 
     def create_step_implementer(
             self,
@@ -31,7 +33,7 @@ class TestStepImplementerAuditAttestationBase(BaseStepImplementerTestCase):
             environment=environment
         )
 
-class TestStepImplementerOpenPolicyAgent_other(TestStepImplementerAuditAttestationBase):
+class TestStepImplementerOpenPolicyAgent_other(TestStepImplementerOpenPolicyAgentBase):
     def test_step_implementer_config_defaults(self):
         defaults = OpenPolicyAgent.step_implementer_config_defaults()
         expected_defaults = {
@@ -41,17 +43,18 @@ class TestStepImplementerOpenPolicyAgent_other(TestStepImplementerAuditAttestati
     def test__required_config_or_result_keys(self):
         required_keys = OpenPolicyAgent._required_config_or_result_keys()
         expected_required_keys = [
-            'workflow-policy-uri'
+            'workflow-policy-uri',
+            'evidence-uri'
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-class TestStepImplementerAuditAttestation_run_step(TestStepImplementerAuditAttestationBase):
+class TestStepImplementerOpenPolicyAgent_run_step(TestStepImplementerOpenPolicyAgentBase):
 
 
     @patch('ploigos_step_runner.step_implementers.audit_attestation.opa.download_source_to_destination')
     @patch.object(
         OpenPolicyAgent,
-        '_audit_attestation',
+        '_OpenPolicyAgent__audit_attestation',
         return_value = None
     )
     def test__run_step_pass_audit_success(self,
@@ -87,7 +90,7 @@ class TestStepImplementerAuditAttestation_run_step(TestStepImplementerAuditAttes
                 parent_work_dir_path + '/workflow_attestion.json',
                 parent_work_dir_path + '/workflow_policy.rego']
 
-            audit_attestation_mock.return_value = "", 0
+            audit_attestation_mock.return_value = "Audit was successful", 0
 
             step_result = step_implementer._run_step()
 
@@ -159,7 +162,7 @@ class TestStepImplementerAuditAttestation_run_step(TestStepImplementerAuditAttes
     @patch('ploigos_step_runner.step_implementers.audit_attestation.opa.download_source_to_destination')
     @patch.object(
         OpenPolicyAgent,
-        '_audit_attestation',
+        '_OpenPolicyAgent__audit_attestation',
         return_value = None
     )
     def test__run_step_fail_audit_fail_error_on_audit(self,
@@ -228,11 +231,7 @@ class TestStepImplementerAuditAttestation_run_step(TestStepImplementerAuditAttes
                 ]
             )
 
-
-
-
-
-class TestStepImplementerAuditAttestation_audit_attestation(TestStepImplementerAuditAttestationBase):
+class TestStepImplementerOpenPolicyAgent_audit_attestation(TestStepImplementerOpenPolicyAgentBase):
 
     @patch('sh.opa', create=True)
     def test_audit_attestation_pass(self, audit_results_mock):
@@ -245,29 +244,59 @@ class TestStepImplementerAuditAttestation_audit_attestation(TestStepImplementerA
         step_implementer = self.create_step_implementer(
             step_config=step_config
         )
-
         audit_results_mock.return_value = "pass"
+
         workflow_attestation_file_path = "workflow_attestation_file_path"
         workflow_policy_file_path = "workflow_policy_file_path"
         workflow_policy_query =  "fooquery"
 
-        step_implementer._audit_attestation(
+        step_implementer._OpenPolicyAgent__audit_attestation(
             workflow_attestation_file_path = "workflow_attestation_file_path",
             workflow_policy_file_path = "workflow_policy_file_path",
             workflow_policy_query =  "fooquery"
         )
 
         audit_results_mock.assert_called_once_with(
-            'opa',
             'eval',
-            '--fail',
-            '--entry',
-            '-i',
-            workflow_attestation_file_path,
+            '--fail-defined',
             '-d',
+            workflow_attestation_file_path,
+            '-i',
             workflow_policy_file_path,
             workflow_policy_query,
             _out=Any(IOBase),
             _err_to_out=True,
             _tee='out'
         )
+
+    @patch('sh.opa', create=True)
+    def test_audit_attestation_fail(self, audit_results_mock):
+
+
+        step_config = {
+                'workflow-policy-uri': "https://foo.bar"
+        }
+
+        step_implementer = self.create_step_implementer(
+            step_config=step_config
+        )
+        audit_results_mock.return_value = "pass"
+        audit_results_mock.side_effect = sh.ErrorReturnCode('opa', b'mock out', b'mock error')
+
+        result_message, result_return_code = step_implementer._OpenPolicyAgent__audit_attestation(
+            workflow_attestation_file_path = "workflow_attestation_file_path",
+            workflow_policy_file_path = "workflow_policy_file_path",
+            workflow_policy_query =  "fooquery"
+        )
+
+        self.assertRegex(result_message, re.compile(
+                r"Error evaluating query against data:"
+                r".*RAN: opa"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            ))
+
+        self.assertEqual(result_return_code, 1)
