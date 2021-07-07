@@ -1,14 +1,14 @@
-import sys
-import sh
 import re
 from io import IOBase
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
+import sh
+from ploigos_step_runner.config import ConfigValue
+from ploigos_step_runner.utils.containers import (container_registries_login,
+                                                  container_registry_login)
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import *
 
-from ploigos_step_runner.config import ConfigValue
-from ploigos_step_runner.utils.containers import container_registry_login, container_registries_login
 
 def create_which_side_effect(cmd, cmd_path):
     def which_side_effect(*args, **kwargs):
@@ -103,6 +103,55 @@ class TestContainerRegistryLogin(BaseTestCase):
             _err=Any(IOBase),
             _tee='err'
         )
+
+    @patch('sh.Command')
+    @patch('sh.which', create=True)
+    def test_use_given_command_exists(self, which_mock, container_command_mock):
+        which_mock.side_effect = create_which_side_effect(
+            cmd='fake-podman',
+            cmd_path='/mock/fake-podman'
+        )
+
+        container_registry_login(
+            container_registry_uri='registry.example.xyz',
+            container_registry_username='example',
+            container_registry_password='nope',
+            container_command_short_name='fake-podman'
+        )
+
+        container_command_mock().bake.assert_called_once()
+        container_command_mock().bake().login.bake.assert_called_once_with(
+            password_stdin=True,
+            username='example',
+            tls_verify='true'
+        )
+        container_command_mock().bake().login.bake().assert_called_once_with(
+            'registry.example.xyz',
+            _in='nope',
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )
+
+    @patch('sh.Command')
+    @patch('sh.which', create=True)
+    def test_use_given_command_does_not_exists(self, which_mock, container_command_mock):
+        which_mock.side_effect = create_which_side_effect(
+            cmd=None,
+            cmd_path=None
+        )
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            r"When attempting to login to container registry \(registry.example.xyz\) "
+            r"could not find the given expected tool \(fake-podman\) to login with"
+        ):
+            container_registry_login(
+                container_registry_uri='registry.example.xyz',
+                container_registry_username='example',
+                container_registry_password='nope',
+                container_command_short_name='fake-podman'
+            )
 
     @patch('sh.buildah', create=True)
     @patch('sh.which', create=True)
@@ -354,14 +403,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -389,14 +440,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -457,14 +510,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None,
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -492,14 +547,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -527,14 +584,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -564,14 +623,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -599,14 +660,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file='/tmp/mock/auth.json'
+                containers_config_auth_file='/tmp/mock/auth.json',
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file='/tmp/mock/auth.json'
+                containers_config_auth_file='/tmp/mock/auth.json',
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -634,14 +697,16 @@ class TestContainerRegistriesLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=True,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -741,6 +806,44 @@ class TestContainerRegistriesLogin(BaseTestCase):
 
         container_registry_login.assert_not_called()
 
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
+    def test_given_command_short_name_exists(self, container_registry_login_mock):
+        registries = {
+            'registry.redhat.io': {
+                'username': 'hello1@world.xyz',
+                'password': 'nope1'
+            },
+            'registry.internal.example.xyz': {
+                'username': 'hello2@example.xyz',
+                'password': 'nope2'
+            }
+        }
+
+        container_registries_login(
+            registries=registries,
+            container_command_short_name='fake-podman'
+        )
+
+        calls = [
+            call(
+                container_registry_uri='registry.redhat.io',
+                container_registry_username='hello1@world.xyz',
+                container_registry_password='nope1',
+                container_registry_tls_verify=True,
+                containers_config_auth_file=None,
+                container_command_short_name='fake-podman'
+            ),
+            call(
+                container_registry_uri='registry.internal.example.xyz',
+                container_registry_username='hello2@example.xyz',
+                container_registry_password='nope2',
+                container_registry_tls_verify=True,
+                containers_config_auth_file=None,
+                container_command_short_name='fake-podman'
+            )
+        ]
+        container_registry_login_mock.assert_has_calls(calls)
+
 
 class TestContainerRegistriesLoginForceOverrideTlsVerifyLogin(BaseTestCase):
     @patch('ploigos_step_runner.utils.containers.container_registry_login')
@@ -764,14 +867,16 @@ class TestContainerRegistriesLoginForceOverrideTlsVerifyLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
@@ -799,14 +904,16 @@ class TestContainerRegistriesLoginForceOverrideTlsVerifyLogin(BaseTestCase):
                 container_registry_username='hello1@world.xyz',
                 container_registry_password='nope1',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             ),
             call(
                 container_registry_uri='registry.internal.example.xyz',
                 container_registry_username='hello2@example.xyz',
                 container_registry_password='nope2',
                 container_registry_tls_verify=False,
-                containers_config_auth_file=None
+                containers_config_auth_file=None,
+                container_command_short_name=None
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)

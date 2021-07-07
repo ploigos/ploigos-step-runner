@@ -48,7 +48,7 @@ tox -e test
 Or to run for just a particular implementer, and include the sections of code that you didn't cover
 
 ```bash
-python3 -m pytest --cov=psr --cov-report term-missing tests/step_implementers/package/test_maven_package.py
+python3 -m pytest --cov --cov-report term-missing tests/step_implementers/package/test_maven_package.py
 ```
 
 ### Run linter
