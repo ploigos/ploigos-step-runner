@@ -324,8 +324,10 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
                 repo_branch='feature/test',
-                user_email=step_config['git-email'],
-                user_name=step_config['git-name']
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name'],
+		  username=None,
+		  password=None
             )
             update_yaml_file_value_mock.assert_called_once_with(
                 file='/does/not/matter/charts/foo/values-PROD.yaml',
@@ -468,8 +470,10 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
                 repo_branch='feature/test',
-                user_email=step_config['git-email'],
-                user_name=step_config['git-name']
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name'],
+		  username=None,
+		  password=None
             )
             update_yaml_file_value_mock.assert_not_called()
             git_commit_file_mock.assert_not_called()
@@ -1315,14 +1319,19 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'Password'
         ArgoCD._ArgoCD__clone_repo(
             repo_dir=repo_dir,
             repo_url=repo_url,
             repo_branch=repo_branch,
-            user_email=user_email,
-            user_name=user_name
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+	      password=password
+            
         )
 
         git_mock.clone.assert_called_once_with(
@@ -1340,27 +1349,80 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         git_mock.config.assert_has_calls([
             call(
                 'user.email',
-                user_email,
+                git_email,
                 _cwd=repo_dir,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             ),
             call(
                 'user.name',
-                user_name,
+                git_name,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+	
+    @patch.object(sh, 'git')
+    def test_ArgoCD__clone_repo_success_new_branch_https(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'https://Test:Password@git.ploigos.xyz'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'Password'
+        repo_url_with_auth = 'https://git.ploigos.xyz'
+        ArgoCD._ArgoCD__clone_repo(
+            repo_dir=repo_dir,
+            repo_url=repo_url_with_auth,
+            repo_branch=repo_branch,
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+	      password=password
+            
+        )
+
+        git_mock.clone.assert_called_once_with(
+            repo_url,
+            repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.checkout.assert_called_once_with(
+            repo_branch,
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.config.assert_has_calls([
+            call(
+                'user.email',
+                git_email,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                'user.name',
+                git_name,
                 _cwd=repo_dir,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             )
         ])
 
+
     @patch.object(sh, 'git')
     def test_ArgoCD__clone_repo_success_existing_branch(self, git_mock):
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
 
         git_mock.checkout.side_effect = [
             sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
@@ -1371,8 +1433,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
             repo_dir=repo_dir,
             repo_url=repo_url,
             repo_branch=repo_branch,
-            user_email=user_email,
-            user_name=user_name
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+            password=password
         )
 
         git_mock.clone.assert_called_once_with(
@@ -1399,14 +1463,14 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         git_mock.config.assert_has_calls([
             call(
                 'user.email',
-                user_email,
+                git_email,
                 _cwd=repo_dir,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
             ),
             call(
                 'user.name',
-                user_name,
+                git_name,
                 _cwd=repo_dir,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
@@ -1418,8 +1482,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
 
         git_mock.clone.side_effect = create_sh_side_effect(
             exception=sh.ErrorReturnCode('git', b'mock out', b'mock git clone error')
@@ -1441,8 +1507,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 repo_dir=repo_dir,
                 repo_url=repo_url,
                 repo_branch=repo_branch,
-                user_email=user_email,
-                user_name=user_name
+                git_email=git_email,
+                git_name=git_name,
+		  username=username,
+                password=password
             )
 
             git_mock.clone.assert_called_once_with(
@@ -1459,8 +1527,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
 
         git_mock.checkout.side_effect = [
             sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
@@ -1484,8 +1554,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 repo_dir=repo_dir,
                 repo_url=repo_url,
                 repo_branch=repo_branch,
-                user_email=user_email,
-                user_name=user_name
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
             )
 
             git_mock.clone.assert_called_once_with(
@@ -1516,8 +1588,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
 
         git_mock.config.side_effect = [
             sh.ErrorReturnCode('git', b'mock out', b'mock git config email error'),
@@ -1527,8 +1601,8 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         with self.assertRaisesRegex(
             StepRunnerException,
             re.compile(
-                rf"Unexpected error configuring git user.email \({user_email}\)"
-                rf" and user.name \({user_name}\) for repository \({repo_url}\)"
+                rf"Unexpected error configuring git user.email \({git_email}\)"
+                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
                 rf" in directory \({repo_dir}\):"
                 r".*RAN: git"
                 r".*STDOUT:"
@@ -1542,8 +1616,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 repo_dir=repo_dir,
                 repo_url=repo_url,
                 repo_branch=repo_branch,
-                user_email=user_email,
-                user_name=user_name
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
             )
 
             git_mock.clone.assert_called_once_with(
@@ -1569,7 +1645,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
             ])
             git_mock.config.assert_called_once_with(
                 'user.email',
-                user_email,
+                git_email,
                 _cwd=repo_dir,
                 _out=Any(IOBase),
                 _err=Any(IOBase)
@@ -1580,8 +1656,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         repo_dir = '/does/not/matter'
         repo_url = 'git@git.ploigos.xyz:/foo/test.git'
         repo_branch = 'feature/test'
-        user_email = 'test@ploigos.xyz'
-        user_name = 'Test Robot'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
 
         git_mock.config.side_effect = [
             None,
@@ -1591,8 +1669,8 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
         with self.assertRaisesRegex(
             StepRunnerException,
             re.compile(
-                rf"Unexpected error configuring git user.email \({user_email}\)"
-                rf" and user.name \({user_name}\) for repository \({repo_url}\)"
+                rf"Unexpected error configuring git user.email \({git_email}\)"
+                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
                 rf" in directory \({repo_dir}\):"
                 r".*RAN: git"
                 r".*STDOUT:"
@@ -1606,8 +1684,10 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 repo_dir=repo_dir,
                 repo_url=repo_url,
                 repo_branch=repo_branch,
-                user_email=user_email,
-                user_name=user_name
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
             )
 
             git_mock.clone.assert_called_once_with(
@@ -1634,14 +1714,14 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
             git_mock.config.assert_has_calls([
                 call(
                     'user.email',
-                    user_email,
+                    git_email,
                     _cwd=repo_dir,
                     _out=Any(IOBase),
                     _err=Any(IOBase)
                 ),
                 call(
                     'user.name',
-                    user_name,
+                    git_name,
                     _cwd=repo_dir,
                     _out=Any(IOBase),
                     _err=Any(IOBase)
