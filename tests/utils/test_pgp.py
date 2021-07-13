@@ -222,7 +222,7 @@ B8pBNt1QOA==
             '--export',
             pgp_private_key_fingerprint,
             _out=Any(IOBase),
-            _err_to_out=True,
+            _err_to_out=False,
             _tee='out'
         )
         
@@ -252,6 +252,6 @@ B8pBNt1QOA==
             '--export',
             pgp_private_key_fingerprint,
             _out=Any(IOBase),
-            _err_to_out=True,
+            _err_to_out=False,
             _tee='out'
         )
