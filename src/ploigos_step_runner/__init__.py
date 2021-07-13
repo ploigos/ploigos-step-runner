@@ -371,12 +371,23 @@ From least precedence to highest precedence.
           #format: 'oci'
         }
 
-      automated-governance:
-      - implementer: Rekor
+      generate-evidence:
+      - implementer: GenerateEvidence
+        config: {
+          evidence-destination-url: 'http:/example-evidence-destination-url',
+          evidence-destination-username: 'username'
+        }
+      - implementer: RekorSignEvidence
         config: {
           rekor-server-url: 'http://example-rekor-server-url-url/',
-          signer-pgp-public-key-path: '/path/to/signer-pgp-public-key-path',
-          signer-pgp-private-key-user: 'signer-pgp-private-key-user@example.com'
+          signer-pgp-private-key: '/path/to/signer-pgp-private-key-path'
+        }
+
+      audit-attestation:
+      - implementer: OpenPolicyAgent
+        config: {
+          workflow-policy-uri: 'http://example-workflow-policy-uri/uri',
+          evidence-uri: 'http://example-evidence-uri/uri'
         }
 
       push-container-image:
@@ -684,12 +695,23 @@ From least precedence to highest precedence.
           #format: 'oci'
         }
 
-      automated-governance:
-      - implementer: Rekor
+      generate-evidence:
+      - implementer: GenerateEvidence
+        config: {
+          evidence-destination-url: 'http:/example-evidence-destination-url',
+          evidence-destination-username: 'username'
+        }
+      - implementer: RekorSignEvidence
         config: {
           rekor-server-url: 'http://example-rekor-server-url-url/',
-          signer-pgp-public-key-path: '/path/to/signer-pgp-public-key-path',
-          signer-pgp-private-key-user: 'signer-pgp-private-key-user@example.com'
+          signer-pgp-private-key: '/path/to/signer-pgp-private-key-path'
+        }
+
+      audit-attestation:
+      - implementer: OpenPolicyAgent
+        config: {
+          workflow-policy-uri: 'http://example-workflow-policy-uri/uri',
+          evidence-uri: 'http://example-evidence-uri/uri'
         }
 
       push-container-image:
