@@ -145,7 +145,7 @@ def export_pgp_public_key(pgp_private_key_fingerprint):
             '--export',
             pgp_private_key_fingerprint,
             _out=gpg_export_stdout_result,
-            _err_to_out=True,
+            _err_to_out=False,
             _tee='out'
         )
 
