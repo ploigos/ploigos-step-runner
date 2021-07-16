@@ -864,9 +864,7 @@ class ArgoCD(StepImplementer):
                 argocd_api,
                 f'--username={username}',
                 f'--password={password}',
-                insecure_flag,
-                _out=sys.stdout,
-                _err=sys.stderr
+                insecure_flag
             )
         except sh.ErrorReturnCode as error:
             raise StepRunnerException(f"Error logging in to ArgoCD: {error}") from error
