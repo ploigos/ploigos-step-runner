@@ -4,14 +4,15 @@ Test for the utility for maven operations.
 """
 import re
 import xml.etree.ElementTree as ET
-from io import BytesIO
-from unittest.mock import patch
+from io import BytesIO, StringIO, TextIOWrapper
+from unittest.mock import patch, call, mock_open
 
 import sh
-from testfixtures import TempDirectory
-from tests.helpers.base_test_case import BaseTestCase
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import *
+from testfixtures import TempDirectory
+from tests.helpers.base_test_case import BaseTestCase
+from tests.helpers.test_utils import Any
 
 
 class TestMavenUtils(BaseTestCase):
@@ -1041,3 +1042,255 @@ class TestMavenUtils(BaseTestCase):
                 f'-f={pom_file_path}',
                 f'-Doutput={effective_pom_path}'
             )
+
+class TestMavenUtils_run_maven(BaseTestCase):
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_defaults(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            run_maven(
+                mvn_output_file_path=mvn_output_file_path,
+                settings_file=settings_file,
+                pom_file=pom_file,
+                phases_and_goals=phases_and_goals,
+            )
+
+            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            redirect_mock.assert_has_calls([
+                call([
+                    sys.stdout,
+                    mock_open.return_value
+                ]),
+                call([
+                    sys.stderr,
+                    mock_open.return_value
+                ])
+            ])
+
+            mvn_mock.assert_called_once_with(
+                'fake',
+                '-f', '/fake/pom.xml',
+                '-s', '/fake/settings.xml',
+                '--no-transfer-progress',
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
+
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_with_single_profile(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            run_maven(
+                mvn_output_file_path=mvn_output_file_path,
+                settings_file=settings_file,
+                pom_file=pom_file,
+                phases_and_goals=phases_and_goals,
+                profiles=['fake-profile']
+            )
+
+            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            redirect_mock.assert_has_calls([
+                call([
+                    sys.stdout,
+                    mock_open.return_value
+                ]),
+                call([
+                    sys.stderr,
+                    mock_open.return_value
+                ])
+            ])
+
+            mvn_mock.assert_called_once_with(
+                'fake',
+                '-f', '/fake/pom.xml',
+                '-s', '/fake/settings.xml',
+                '-P', 'fake-profile',
+                '--no-transfer-progress',
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
+
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_with_multiple_profile(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            run_maven(
+                mvn_output_file_path=mvn_output_file_path,
+                settings_file=settings_file,
+                pom_file=pom_file,
+                phases_and_goals=phases_and_goals,
+                profiles=['fake-profile1', 'fake-profile2']
+            )
+
+            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            redirect_mock.assert_has_calls([
+                call([
+                    sys.stdout,
+                    mock_open.return_value
+                ]),
+                call([
+                    sys.stderr,
+                    mock_open.return_value
+                ])
+            ])
+
+            mvn_mock.assert_called_once_with(
+                'fake',
+                '-f', '/fake/pom.xml',
+                '-s', '/fake/settings.xml',
+                '-P', 'fake-profile1,fake-profile2',
+                '--no-transfer-progress',
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
+
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_with_no_tls(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            run_maven(
+                mvn_output_file_path=mvn_output_file_path,
+                settings_file=settings_file,
+                pom_file=pom_file,
+                phases_and_goals=phases_and_goals,
+                tls_verify=False
+            )
+
+            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            redirect_mock.assert_has_calls([
+                call([
+                    sys.stdout,
+                    mock_open.return_value
+                ]),
+                call([
+                    sys.stderr,
+                    mock_open.return_value
+                ])
+            ])
+
+            mvn_mock.assert_called_once_with(
+                'fake',
+                '-f', '/fake/pom.xml',
+                '-s', '/fake/settings.xml',
+                '--no-transfer-progress',
+                '-Dmaven.wagon.http.ssl.insecure=true',
+                '-Dmaven.wagon.http.ssl.allowall=true',
+                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
+
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_transfer_progress(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            run_maven(
+                mvn_output_file_path=mvn_output_file_path,
+                settings_file=settings_file,
+                pom_file=pom_file,
+                phases_and_goals=phases_and_goals,
+                no_transfer_progress=False
+            )
+
+            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            redirect_mock.assert_has_calls([
+                call([
+                    sys.stdout,
+                    mock_open.return_value
+                ]),
+                call([
+                    sys.stderr,
+                    mock_open.return_value
+                ])
+            ])
+
+            mvn_mock.assert_called_once_with(
+                'fake',
+                '-f', '/fake/pom.xml',
+                '-s', '/fake/settings.xml',
+                None,
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
+
+    @patch('sh.mvn', create=True)
+    @patch('ploigos_step_runner.utils.maven.create_sh_redirect_to_multiple_streams_fn_callback')
+    @patch("builtins.open", new_callable=mock_open)
+    def test_success_failure(self, mock_open, redirect_mock, mvn_mock):
+        with TempDirectory() as temp_dir:
+            mvn_output_file_path = os.path.join(temp_dir.path, 'maven_output.txt')
+            settings_file = '/fake/settings.xml'
+            pom_file = '/fake/pom.xml'
+            phases_and_goals = 'fake'
+
+            mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock stdout', b'mock error')
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                re.compile(
+                    r"Error running maven."
+                    r".*RAN: mvn"
+                    r".*STDOUT:"
+                    r".*mock stdout"
+                    r".*STDERR:"
+                    r".*mock error",
+                    re.DOTALL
+                )
+            ):
+                run_maven(
+                    mvn_output_file_path=mvn_output_file_path,
+                    settings_file=settings_file,
+                    pom_file=pom_file,
+                    phases_and_goals=phases_and_goals,
+                )
+
+                mock_open.assert_called_with(mvn_output_file_path, 'w')
+                redirect_mock.assert_has_calls([
+                    call([
+                        sys.stdout,
+                        mock_open.return_value
+                    ]),
+                    call([
+                        sys.stderr,
+                        mock_open.return_value
+                    ])
+                ])
+
+                mvn_mock.assert_called_once_with(
+                    'fake',
+                    '-f', '/fake/pom.xml',
+                    '-s', '/fake/settings.xml',
+                    '--no-transfer-progress',
+                    _out=Any(StringIO),
+                    _err=Any(StringIO)
+                )
