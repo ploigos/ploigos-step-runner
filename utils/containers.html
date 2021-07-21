@@ -138,13 +138,13 @@ def container_registries_login(  #pylint: disable=too-many-branches
             else:
                 registry_uri = registry_key
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if &#39;tls-verify&#39; in registry_conf:
                     registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_uri,
@@ -169,13 +169,13 @@ def container_registries_login(  #pylint: disable=too-many-branches
                 f&#34;Configuration for container registry &#34; \
                 f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if &#39;tls-verify&#39; in registry_conf:
                     registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_conf[&#39;uri&#39;],
@@ -494,13 +494,13 @@ If not provided will pick the first command found in order (buildah, podman, sko
             else:
                 registry_uri = registry_key
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if &#39;tls-verify&#39; in registry_conf:
                     registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_uri,
@@ -525,13 +525,13 @@ If not provided will pick the first command found in order (buildah, podman, sko
                 f&#34;Configuration for container registry &#34; \
                 f&#34;must specify a &#39;password&#39;: {registry_conf}&#34;
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if &#39;tls-verify&#39; in registry_conf:
                     registry_tls_verify = registry_conf[&#39;tls-verify&#39;]
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_conf[&#39;uri&#39;],
