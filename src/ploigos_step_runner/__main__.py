@@ -111,7 +111,12 @@ def main(argv=None):
             sys.exit(102)
 
         config.set_step_config_overrides(args.step, args.step_config)
-        step_runner = StepRunner(config)
+        # it is VERY important that the working dir be an absolute path because some
+        # commands (looking at you maven) will change the context of relative paths on you
+        step_runner = StepRunner(
+            config=config,
+            work_dir_path=os.path.abspath('step-runner-working')
+        )
 
         try:
             if not step_runner.run_step(args.step, args.environment):

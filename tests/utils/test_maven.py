@@ -971,7 +971,7 @@ class TestMavenUtils(BaseTestCase):
     @patch('sh.mvn', create=True)
     def test_write_effective_pom_success(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
-        effective_pom_path = 'output/effective-pom.xml'
+        effective_pom_path = '/tmp/output/effective-pom.xml'
 
         actual_effective_pom_path = write_effective_pom(
             pom_file_path=pom_file_path,
@@ -987,7 +987,7 @@ class TestMavenUtils(BaseTestCase):
     @patch('sh.mvn', create=True)
     def test_write_effective_pom_fail(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
-        effective_pom_path = 'output/effective-pom.xml'
+        effective_pom_path = '/tmp/output/effective-pom.xml'
 
         mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock stdout', b'mock error')
 
@@ -1000,6 +1000,35 @@ class TestMavenUtils(BaseTestCase):
                 r".*mock stdout"
                 r".*STDERR:"
                 r".*mock error",
+                re.DOTALL
+            )
+        ):
+            write_effective_pom(
+                pom_file_path=pom_file_path,
+                output_path=effective_pom_path
+            )
+            mvn_mock.assert_any_call(
+                'help:effective-pom',
+                f'-f={pom_file_path}',
+                f'-Doutput={effective_pom_path}'
+            )
+
+    @patch('sh.mvn', create=True)
+    def test_write_effective_pom_fail_not_absolute_path(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = 'output/effective-pom.xml'
+
+        mvn_mock.side_effect = sh.ErrorReturnCode('mvn', b'mock stdout', b'mock error')
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Given output path \({effective_pom_path}\) is not absolute which will mean "
+                rf"your output file will actually end up being relative to the pom file "
+                rf"\({pom_file_path}\) rather than your expected root. Rather then handling this, "
+                rf"just give this function an absolute path. "
+                rf"If you are a user seeing this, a programmer messed up somewhere, "
+                rf"report an issue.",
                 re.DOTALL
             )
         ):
