@@ -1,6 +1,7 @@
 """Shared utils for maven operations.
 """
 
+import os
 import xml.etree.ElementTree as ET
 
 import sh
@@ -419,6 +420,15 @@ def write_effective_pom(
     StepRunnerException
         If issue generating effective pom.
     """
+
+    if not os.path.isabs(output_path):
+        raise StepRunnerException(
+            f"Given output path ({output_path}) is not absolute which will mean your output"
+            f" file will actually end up being relative to the pom file ({pom_file_path}) rather"
+            " than your expected root. Rather then handling this, just give this function an"
+            " absolute path."
+            " If you are a user seeing this, a programmer messed up somewhere, report an issue."
+        )
 
     try:
         sh.mvn( # pylint: disable=no-member
