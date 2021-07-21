@@ -1,8 +1,6 @@
 from io import StringIO
 import os.path
 
-import unittest
-from testfixtures import TempDirectory
 from unittest.mock import patch
 
 from tests.helpers.base_test_case import BaseTestCase

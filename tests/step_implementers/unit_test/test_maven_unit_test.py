@@ -1,23 +1,92 @@
 import os
-import re
-from io import IOBase, StringIO
-from shutil import copyfile
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import Mock, patch
 
-from ploigos_step_runner import StepResult, WorkflowResult
-from ploigos_step_runner.config.config import Config
+from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
 from ploigos_step_runner.step_implementers.unit_test import Maven
-from ploigos_step_runner.utils.file import create_parent_dir
 from testfixtures import TempDirectory
-from tests.helpers.maven_step_implementer_test_case import \
-    MaveStepImplementerTestCase
-from tests.helpers.test_utils import Any
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 
 
-class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
+@patch("ploigos_step_runner.step_implementers.shared.MavenGeneric.__init__")
+class TestStepImplementerMavenTest___init__(BaseStepImplementerTestCase):
+    def test_defaults(self, mock_super_init):
+        workflow_result = WorkflowResult()
+        parent_work_dir_path = '/fake/path'
+        config = {}
+
+        Maven(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config
+        )
+
+        mock_super_init.assert_called_once_with(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=None,
+            maven_phases_and_goals=['test']
+        )
+
+    def test_given_environment(self, mock_super_init):
+        workflow_result = WorkflowResult()
+        parent_work_dir_path = '/fake/path'
+        config = {}
+
+        Maven(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment='mock-env'
+        )
+
+        mock_super_init.assert_called_once_with(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment='mock-env',
+            maven_phases_and_goals=['test']
+        )
+
+class TestStepImplementerMavenTest_step_implementer_config_defaults(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Maven.step_implementer_config_defaults(),
+            {
+                'pom-file': 'pom.xml',
+                'tls-verify': True,
+                'maven-profiles': [],
+                'maven-additional-arguments': [],
+                'maven-no-transfer-progress': True,
+                'fail-on-no-tests': True
+            }
+        )
+
+class TestStepImplementerMavenTest__required_config_or_result_keys(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Maven._required_config_or_result_keys(),
+            [
+                'pom-file',
+                'fail-on-no-tests'
+            ]
+        )
+
+@patch.object(Maven, '_run_maven_step')
+@patch.object(Maven, 'write_working_file', return_value='/mock/mvn_output.txt')
+class TestStepImplementerMavenTest__run_step(
+    BaseStepImplementerTestCase
+):
     def create_step_implementer(
             self,
             step_config={},
+            workflow_result=None,
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
@@ -25,535 +94,448 @@ class TestStepImplementerMavenUnitTest(MaveStepImplementerTestCase):
             step_config=step_config,
             step_name='unit-test',
             implementer='Maven',
+            workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
 
-    def test_step_implementer_config_defaults(self):
-        defaults = Maven.step_implementer_config_defaults()
-        expected_defaults = {
-            'fail-on-no-tests': True,
-            'pom-file': 'pom.xml',
-            'tls-verify': True
-        }
-        self.assertEqual(defaults, expected_defaults)
-
-    def test__required_config_or_result_keys(self):
-        required_keys = Maven._required_config_or_result_keys()
-        expected_required_keys = [
-            'fail-on-no-tests',
-            'pom-file'
-        ]
-        self.assertEqual(required_keys, expected_required_keys)
-
-    def __run__run_step_test(
+    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    def test_success_default_reports_dir(
         self,
-        test_dir,
-        mvn_mock,
-        write_effective_pom_mock,
-        generate_maven_settings_mock,
-        pom_content,
-        group_id,
-        artifact_id,
-        surefire_reports_dir,
-        write_mock_test_results=True,
-        assert_mvn_called=True,
-        assert_report_artifact=True,
-        expected_result_success=True,
-        expected_result_message='',
-        expected_result_message_regex=None,
-        fail_on_no_tests=None,
-        raise_error_on_tests=False,
-        set_tls_verify_false=False,
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
     ):
-        parent_work_dir_path = os.path.join(test_dir.path, 'working')
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-        test_dir.write('pom.xml', pom_content)
-
-        pom_file_path = os.path.join(test_dir.path, 'pom.xml')
-        step_config = {
-            'pom-file': pom_file_path,
-            'tls-verify': True
-        }
-
-        if set_tls_verify_false:
-            step_config['tls-verify'] = False
-
-        if fail_on_no_tests is not None:
-            step_config['fail-on-no-tests'] = fail_on_no_tests
-        step_implementer = self.create_step_implementer(
-            step_config=step_config,
-            parent_work_dir_path=parent_work_dir_path,
-        )
-
-        # mock generating settings
-        settings_file_path = "/does/not/matter/settings.xml"
-        def generate_maven_settings_side_effect():
-            return settings_file_path
-        generate_maven_settings_mock.side_effect = generate_maven_settings_side_effect
-
-        # mock effective pom
-        def write_effective_pom_mock_side_effect(pom_file_path, output_path):
-            create_parent_dir(pom_file_path)
-            copyfile(pom_file_path, output_path)
-        write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
-
-        # mock test results
-        if write_mock_test_results:
-            mvn_mock.side_effect = MaveStepImplementerTestCase.create_mvn_side_effect(
-                pom_file=pom_file_path,
-                artifact_parent_dir=surefire_reports_dir,
-                artifact_names=[
-                    f'{group_id}.{artifact_id}.ClassNameTest.txt',
-                    f'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'
-                ],
-                raise_error_on_tests=raise_error_on_tests
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
-        result = step_implementer._run_step()
-        if assert_mvn_called:
-            if not set_tls_verify_false:
-                mvn_mock.assert_called_once_with(
-                    'clean',
-                    'test',
-                    '-f', pom_file_path,
-                    '-s', settings_file_path,
-                    _out=Any(IOBase),
-                    _err=Any(IOBase)
-                )
-            else:
-                mvn_mock.assert_called_once_with(
-                    'clean',
-                    'test',
-                    '-f', pom_file_path,
-                    '-s', settings_file_path,
-                    '-Dmaven.wagon.http.ssl.insecure=true',
-                    '-Dmaven.wagon.http.ssl.allowall=true',
-                    '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
-                    _out=Any(IOBase),
-                    _err=Any(IOBase)
-                )
+            # setup sideeffects
+            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
+            group_id = 'com.ploigos.app'
+            artifact_id = 'my-app'
+            surefire_artifact_names = [
+                f'{group_id}.{artifact_id}.ClassNameTest.txt',
+                f'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'
+            ]
+            def run_maven_side_effect(mvn_output_file_path):
+                os.makedirs(surefire_reports_dir, exist_ok=True)
 
-        expected_step_result = StepResult(
-            step_name='unit-test',
-            sub_step_name='Maven',
-            sub_step_implementer_name='Maven'
-        )
-        expected_step_result.success = expected_result_success
-        expected_step_result.message = expected_result_message
+                for artifact_name in surefire_artifact_names:
+                    artifact_path = os.path.join(
+                        surefire_reports_dir,
+                        artifact_name
+                    )
+                    Path(artifact_path).touch()
 
-        if assert_report_artifact:
-            mvn_test_output_file_path = os.path.join(
-                step_implementer.work_dir_path,
-                'mvn_test_output.txt'
+            mock_run_maven_step.side_effect = run_maven_side_effect
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
             )
             expected_step_result.add_artifact(
-                description="Standard out and standard error from 'mvn test'.",
+                description="Standard out and standard error from maven.",
                 name='maven-output',
-                value=mvn_test_output_file_path
+                value='/mock/mvn_output.txt'
             )
             expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
                 name='surefire-reports',
-                description="Surefire reports generated from 'mvn test'.",
-                value=surefire_reports_dir,
+                value=surefire_reports_dir
             )
 
-        if expected_result_message_regex:
-            self.assertEqual(result.success, expected_step_result.success)
-            self.assertRegex(result.message, expected_result_message_regex)
-            self.assertEqual(result.artifacts, expected_step_result.artifacts)
-        else:
-            self.assertEqual(result, expected_step_result)
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_success_default_reports_dir(
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
+
+    @patch.object(
+        Maven,
+        '_get_effective_pom_element',
+        side_effect=['mock surefire element', Mock(text='mock/fake/reports')]
+    )
+    def test_success_pom_specified_relative_reports_dir(
         self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
     ):
         with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # setup sideeffects
+            surefire_reports_dir = os.path.join(test_dir.path, 'mock/fake/reports')
+            group_id = 'com.ploigos.app'
             artifact_id = 'my-app'
-            version = '1.0'
+            surefire_artifact_names = [
+                f'{group_id}.{artifact_id}.ClassNameTest.txt',
+                f'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'
+            ]
+            def run_maven_side_effect(mvn_output_file_path):
+                os.makedirs(surefire_reports_dir, exist_ok=True)
+
+                for artifact_name in surefire_artifact_names:
+                    artifact_path = os.path.join(
+                        surefire_reports_dir,
+                        artifact_name
+                    )
+                    Path(artifact_path).touch()
+
+            mock_run_maven_step.side_effect = run_maven_side_effect
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
+                name='surefire-reports',
+                value=surefire_reports_dir
+            )
+
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
+
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
+
+    @patch.object(Maven, '_get_effective_pom_element')
+    def test_success_pom_specified_absolute_reports_dir(
+        self,
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # setup sideeffects
+            surefire_reports_dir = os.path.join(test_dir.path, 'mock-abs/fake/reports')
+            mock_effective_pom_element.side_effect = [
+                'mock surefire element',
+                Mock(text=surefire_reports_dir)
+            ]
+            group_id = 'com.ploigos.app'
+            artifact_id = 'my-app'
+            surefire_artifact_names = [
+                f'{group_id}.{artifact_id}.ClassNameTest.txt',
+                f'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'
+            ]
+            def run_maven_side_effect(mvn_output_file_path):
+                os.makedirs(surefire_reports_dir, exist_ok=True)
+
+                for artifact_name in surefire_artifact_names:
+                    artifact_path = os.path.join(
+                        surefire_reports_dir,
+                        artifact_name
+                    )
+                    Path(artifact_path).touch()
+
+            mock_run_maven_step.side_effect = run_maven_side_effect
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
+                name='surefire-reports',
+                value=surefire_reports_dir
+            )
+
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
+
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
+
+    @patch.object(Maven, '_get_effective_pom_element', side_effect=[None, None])
+    @patch.object(Maven, '_get_effective_pom', return_value='mock-effective-pom.xml')
+    def test_fail_no_surefire_plugin(
+        self,
+        mock_effective_pom,
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # setup sideeffects
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
+            group_id = 'com.ploigos.app'
+            artifact_id = 'my-app'
+            surefire_artifact_names = [
+                f'{group_id}.{artifact_id}.ClassNameTest.txt',
+                f'TEST-{group_id}.{artifact_id}.ClassNameTest.xml'
+            ]
+            def run_maven_side_effect(mvn_output_file_path):
+                os.makedirs(surefire_reports_dir, exist_ok=True)
+
+                for artifact_name in surefire_artifact_names:
+                    artifact_path = os.path.join(
+                        surefire_reports_dir,
+                        artifact_name
+                    )
+                    Path(artifact_path).touch()
+
+            mock_run_maven_step.side_effect = run_maven_side_effect
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'Unit test dependency "maven-surefire-plugin" ' \
+                f'missing from effective pom (mock-effective-pom.xml).'
+
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
             )
 
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-            )
+            mock_run_maven_step.assert_not_called()
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_tls_verify_false(
+    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    def test_fail_no_tests(
         self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
     ):
         with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = 'No unit tests defined.'
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
+                name='surefire-reports',
+                value=surefire_reports_dir
             )
 
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-                set_tls_verify_false=True
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
             )
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_success_pom_specified_reports_dir(
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
+
+    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    def test_success_but_no_tests(
         self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
     ):
         with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
-            surefire_reports_dir = os.path.join(test_dir.path, 'target/custom-surefire-reports-dir')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-                <configuration>
-                    <reportsDirectory>{surefire_reports_dir}</reportsDirectory>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version,
-                    surefire_reports_dir=surefire_reports_dir
-                ), 'utf-8'
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file,
+                'fail-on-no-tests': False
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
             )
 
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir
-            )
+            # run step
+            actual_step_result = step_implementer._run_step()
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_fail_missing_surefire_plugin(
-        self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
-    ):
-        with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
-            surefire_reports_dir = os.path.join(test_dir.path, 'target/custom-surefire-reports-dir')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
-            )
-
-            effective_pom_path = os.path.join(
-                test_dir.path,
-                'working',
-                'unit-test',
-                'effective-pom.xml'
-            )
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-                expected_result_success=False,
-                expected_result_message='Unit test dependency "maven-surefire-plugin" ' \
-                    f'missing from effective pom ({effective_pom_path}).',
-                assert_mvn_called=False,
-                assert_report_artifact=False
-            )
-
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_fail_no_unit_tests_defined(
-        self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
-    ):
-        with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
+            # create expected step result
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
+                name='surefire-reports',
+                value=surefire_reports_dir
             )
 
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-                write_mock_test_results=False,
-                expected_result_success=False,
-                expected_result_message='No unit tests defined.'
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
             )
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_success_fail_on_no_tests_false_and_no_tests(
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
+
+    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    def test_fail_maven_run(
         self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
+        mock_effective_pom_element,
+        mock_write_working_file,
+        mock_run_maven_step
     ):
         with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run step with mock failure
+            mock_run_maven_step.side_effect = StepRunnerException('Mock error running maven')
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = "Error running 'maven test' to run unit tests. " \
+                "More details maybe found in 'maven-output' and `surefire-reports` " \
+                f"report artifact: Mock error running maven"
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Surefire reports generated by maven.",
+                name='surefire-reports',
+                value=surefire_reports_dir
             )
 
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-                write_mock_test_results=False,
-                fail_on_no_tests=False,
-                expected_result_message="No unit tests defined, but 'fail-on-no-tests' is False."
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
             )
 
-    @patch.object(Maven, '_generate_maven_settings')
-    @patch('sh.mvn', create=True)
-    @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
-    def test__run_step_fail_mvn_test_failure(
-        self,
-        write_effective_pom_mock,
-        mvn_mock,
-        generate_maven_settings_mock
-    ):
-        with TempDirectory() as test_dir:
-            group_id = 'com.mycompany.app'
-            artifact_id = 'my-app'
-            version = '1.0'
-            surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
-            pom_content = bytes(
-'''<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>{group_id}</groupId>
-    <artifactId>{artifact_id}</artifactId>
-    <version>{version}</version>
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${{surefire-plugin.version}}</version>
-            </plugin>
-        </plugins>
-    </build>
-</project>'''.format(
-                    group_id=group_id,
-                    artifact_id=artifact_id,
-                    version=version
-                ), 'utf-8'
-            )
-
-            self.__run__run_step_test(
-                test_dir=test_dir,
-                mvn_mock=mvn_mock,
-                write_effective_pom_mock=write_effective_pom_mock,
-                generate_maven_settings_mock=generate_maven_settings_mock,
-                pom_content=pom_content,
-                group_id=group_id,
-                artifact_id=artifact_id,
-                surefire_reports_dir=surefire_reports_dir,
-                raise_error_on_tests=True,
-                expected_result_success=False,
-                expected_result_message_regex=re.compile(
-                    r"Unit test failures. See 'maven-output'" \
-                    r" and 'surefire-reports' report artifacts for details:"
-                    r".*RAN: mvn"
-                    r".*STDOUT:"
-                    r".*mock out"
-                    r".*STDERR:"
-                    r".*mock error",
-                    re.DOTALL
-                )
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
             )

@@ -1,235 +1,329 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-import os
-import re
-from unittest.mock import patch
 
-import sh
+import os
+from unittest.mock import PropertyMock, patch
+
+from ploigos_step_runner import StepResult, WorkflowResult, StepRunnerException
+from ploigos_step_runner.step_implementers.push_artifacts import Maven
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.push_artifacts import Maven
 
 
-class TestStepImplementerMavenPushArtifacts(BaseStepImplementerTestCase):
+@patch("ploigos_step_runner.step_implementers.shared.MavenGeneric.__init__")
+class TestStepImplementerMavenDeploy___init__(BaseStepImplementerTestCase):
+    def test_defaults(self, mock_super_init):
+        workflow_result = WorkflowResult()
+        parent_work_dir_path = '/fake/path'
+        config = {}
+
+        Maven(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config
+        )
+
+        mock_super_init.assert_called_once_with(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=None,
+            maven_phases_and_goals=['deploy']
+        )
+
+    def test_given_environment(self, mock_super_init):
+        workflow_result = WorkflowResult()
+        parent_work_dir_path = '/fake/path'
+        config = {}
+
+        Maven(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment='mock-env'
+        )
+
+        mock_super_init.assert_called_once_with(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment='mock-env',
+            maven_phases_and_goals=['deploy']
+        )
+
+class TestStepImplementerMavenDeploy_step_implementer_config_defaults(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Maven.step_implementer_config_defaults(),
+            {
+                'pom-file': 'pom.xml',
+                'tls-verify': True,
+                'maven-profiles': [],
+                'maven-additional-arguments': [],
+                'maven-no-transfer-progress': True,
+                'maven-additional-arguments': [
+                    '-Dmaven.install.skip=true',
+                    '-Dmaven.test.skip=true'
+                ]
+            }
+        )
+
+class TestStepImplementerMavenDeploy__required_config_or_result_keys(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Maven._required_config_or_result_keys(),
+            [
+                'pom-file',
+                'maven-push-artifact-repo-url',
+                'maven-push-artifact-repo-id',
+                'version'
+            ]
+        )
+
+@patch('ploigos_step_runner.step_implementers.push_artifacts.maven.run_maven')
+@patch.object(Maven, '_run_maven_step')
+@patch.object(
+    Maven,
+    'write_working_file',
+    side_effect=['/mock/mvn_versions_set_output.txt', '/mock/mvn_deploy_output.txt']
+)
+@patch.object(
+    Maven,
+    'maven_settings_file',
+    new_callable=PropertyMock,
+    return_value='/fake/settings.xml'
+)
+class TestStepImplementerMavenDeploy__run_step(
+    BaseStepImplementerTestCase
+):
     def create_step_implementer(
             self,
             step_config={},
-            step_name='',
-            implementer='',
             workflow_result=None,
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
             step_implementer=Maven,
             step_config=step_config,
-            step_name=step_name,
-            implementer=implementer,
+            step_name='deploy',
+            implementer='Maven',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
 
-    def test_step_implementer_config_defaults(self):
-        actual_defaults = Maven.step_implementer_config_defaults()
-        expected_defaults = {
-            'tls-verify': True
-        }
-        self.assertEqual(expected_defaults, actual_defaults)
+    def test_success(
+        self,
+        mock_settings_file,
+        mock_write_working_file,
+        mock_run_maven_step,
+        mock_run_maven
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-    def test__required_config_or_result_keys(self):
-        actual_required_keys = Maven._required_config_or_result_keys()
-        expected_required_keys = [
-            'maven-push-artifact-repo-url',
-            'maven-push-artifact-repo-id',
-            'version',
-            'package-artifacts'
-        ]
-        self.assertEqual(expected_required_keys, actual_required_keys)
-
-    @patch('sh.mvn', create=True)
-    def test_run_step_pass(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            maven_push_artifact_repo_id = 'mock-repo-id'
+            maven_push_artifact_repo_url = 'https://mock-repo.ploigos.com'
+            version = '0.42.0-mock'
             step_config = {
-                'maven-push-artifact-repo-url': 'pass',
-                'maven-push-artifact-repo-id': 'pass'
+                'pom-file': pom_file,
+                'maven-push-artifact-repo-id': maven_push_artifact_repo_id,
+                'maven-push-artifact-repo-url': maven_push_artifact_repo_url,
+                'version': version
             }
-
-            # Previous (fake) results
-            package_artifacts = [{
-                'path': 'test-path',
-                'group-id': 'test-group-id',
-                'artifact-id': 'test-artifact-id',
-                'package-type': 'test-package-type'
-            }]
-            artifact_config = {
-                'package-artifacts': {'value': package_artifacts},
-                'version': {'value': 'test-version'}
-            }
-            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
-
-            # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='push-artifacts',
-                implementer='Maven',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
+                parent_work_dir_path=parent_work_dir_path,
             )
-            result = step_implementer._run_step()
 
-            # Expected results
-            push_artifacts = [{
-                'artifact-id': 'test-artifact-id',
-                'group-id': 'test-group-id',
-                'version': 'test-version',
-                'path': 'test-path',
-                'packaging': 'test-package-type',
-            }]
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
             expected_step_result = StepResult(
-                step_name='push-artifacts',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
-            )
-            expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
-            mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path,
-                'mvn_test_output.txt'
-            )
-            expected_step_result.add_artifact(
-                description="Standard out and standard error from 'mvn install'.",
-                name='maven-output',
-                value=mvn_output_file_path
-            )
-            self.assertEqual(expected_step_result, result)
-
-    @patch('sh.mvn', create=True)
-    def test_run_step_fail(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            # config
-            step_config = {
-                'maven-push-artifact-repo-url': 'pass',
-                'maven-push-artifact-repo-id': 'pass'
-            }
-
-            # Previous (fake) results
-            package_artifacts = [{
-                'path': 'test-path',
-                'group-id': 'test-group-id',
-                'artifact-id': 'test-artifact-id',
-                'package-type': 'test-package-type'
-            }]
-            artifact_config = {
-                'package-artifacts': {'value': package_artifacts},
-                'version': {'value': 'test-version'}
-            }
-            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
-
-            # Actual results
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='push-artifacts',
-                implementer='Maven',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
-            )
-            sh.mvn.side_effect = sh.ErrorReturnCode('mvn', b'mock out', b'mock error')
-
-            result = step_implementer._run_step()
-
-            expected_step_result = StepResult(
-                step_name='push-artifacts',
+                step_name='deploy',
                 sub_step_name='Maven',
                 sub_step_implementer_name='Maven'
             )
             expected_step_result.add_artifact(
-                name='push-artifacts',
-                value=[]
-            )
-            mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path,
-                'mvn_test_output.txt'
+                description="Standard out and standard error from running maven to update version.",
+                name='maven-update-version-output',
+                value='/mock/mvn_versions_set_output.txt'
             )
             expected_step_result.add_artifact(
-                description="Standard out and standard error from 'mvn install'.",
-                name='maven-output',
-                value=mvn_output_file_path
+                description="Standard out and standard error from running maven to " \
+                    "push artifacts to repository.",
+                name='maven-push-artifacts-output',
+                value='/mock/mvn_deploy_output.txt'
+            )
+
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
+
+            mock_write_working_file.assert_called()
+            mock_run_maven.assert_called_with(
+                mvn_output_file_path='/mock/mvn_versions_set_output.txt',
+                settings_file='/fake/settings.xml',
+                pom_file=pom_file,
+                phases_and_goals=['versions:set'],
+                additional_arguments=[
+                    f'-DnewVersion={version}'
+                ]
+            )
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_deploy_output.txt',
+                step_implementer_additional_arguments=[
+                    '-DaltDeploymentRepository=' \
+                    f'{maven_push_artifact_repo_id}::default::{maven_push_artifact_repo_url}'
+                ]
+            )
+
+    def test_fail_set_version(
+        self,
+        mock_settings_file,
+        mock_write_working_file,
+        mock_run_maven_step,
+        mock_run_maven
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            maven_push_artifact_repo_id = 'mock-repo-id'
+            maven_push_artifact_repo_url = 'https://mock-repo.ploigos.com'
+            version = '0.42.0-mock'
+            step_config = {
+                'pom-file': pom_file,
+                'maven-push-artifact-repo-id': maven_push_artifact_repo_id,
+                'maven-push-artifact-repo-url': maven_push_artifact_repo_url,
+                'version': version
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run step with mvn version:set failure
+            mock_run_maven.side_effect = StepRunnerException('mock error setting new pom version')
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='deploy',
+                sub_step_name='Maven',
+                sub_step_implementer_name='Maven'
             )
             expected_step_result.success = False
+            expected_step_result.message = "Error running 'maven deploy' to push artifacts. " \
+                "More details maybe found in 'maven-output' report artifact: " \
+                "mock error setting new pom version"
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from running maven to update version.",
+                name='maven-update-version-output',
+                value='/mock/mvn_versions_set_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from running maven to " \
+                    "push artifacts to repository.",
+                name='maven-push-artifacts-output',
+                value='/mock/mvn_deploy_output.txt'
+            )
 
-            self.assertEqual(result.success, expected_step_result.success)
-            self.assertRegex(result.message, re.compile(
-                r"Push artifacts failures. See 'maven-output' report artifacts for details:"
-                r".*RAN: mvn"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock error",
-                re.DOTALL
-            ))
-            self.assertEqual(result.artifacts, expected_step_result.artifacts)
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
 
-    @patch('sh.mvn', create=True)
-    def test_run_step_tls_verify_false(self, mvn_mock):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            mock_write_working_file.assert_called()
+            mock_run_maven.assert_called_with(
+                mvn_output_file_path='/mock/mvn_versions_set_output.txt',
+                settings_file='/fake/settings.xml',
+                pom_file=pom_file,
+                phases_and_goals=['versions:set'],
+                additional_arguments=[
+                    f'-DnewVersion={version}'
+                ]
+            )
+            mock_run_maven_step.assert_not_called()
 
+    def test_fail_mvn_depoy(
+        self,
+        mock_settings_file,
+        mock_write_working_file,
+        mock_run_maven_step,
+        mock_run_maven
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            maven_push_artifact_repo_id = 'mock-repo-id'
+            maven_push_artifact_repo_url = 'https://mock-repo.ploigos.com'
+            version = '0.42.0-mock'
             step_config = {
-                'maven-push-artifact-repo-url': 'pass',
-                'maven-push-artifact-repo-id': 'pass',
-                'tls-verify': False
+                'pom-file': pom_file,
+                'maven-push-artifact-repo-id': maven_push_artifact_repo_id,
+                'maven-push-artifact-repo-url': maven_push_artifact_repo_url,
+                'version': version
             }
-
-            # Previous (fake) results
-            package_artifacts = [{
-                'path': 'test-path',
-                'group-id': 'test-group-id',
-                'artifact-id': 'test-artifact-id',
-                'package-type': 'test-package-type'
-            }]
-            artifact_config = {
-                'package-artifacts': {'value': package_artifacts},
-                'version': {'value': 'test-version'}
-            }
-            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
-
-            # Actual results
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
-                step_name='push-artifacts',
-                implementer='Maven',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
+                parent_work_dir_path=parent_work_dir_path,
             )
-            result = step_implementer._run_step()
 
-            # Expected results
-            push_artifacts = [{
-                'artifact-id': 'test-artifact-id',
-                'group-id': 'test-group-id',
-                'version': 'test-version',
-                'path': 'test-path',
-                'packaging': 'test-package-type',
-            }]
+            # run step with mvn deploy failure
+            mock_run_maven_step.side_effect = StepRunnerException('mock error running mvn deploy')
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
             expected_step_result = StepResult(
-                step_name='push-artifacts',
+                step_name='deploy',
                 sub_step_name='Maven',
                 sub_step_implementer_name='Maven'
             )
-            expected_step_result.add_artifact(name='push-artifacts', value=push_artifacts)
-            mvn_output_file_path = os.path.join(
-                step_implementer.work_dir_path,
-                'mvn_test_output.txt'
+            expected_step_result.success = False
+            expected_step_result.message = "Error running 'maven deploy' to push artifacts. " \
+                "More details maybe found in 'maven-output' report artifact: " \
+                "mock error running mvn deploy"
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from running maven to update version.",
+                name='maven-update-version-output',
+                value='/mock/mvn_versions_set_output.txt'
             )
             expected_step_result.add_artifact(
-                description="Standard out and standard error from 'mvn install'.",
-                name='maven-output',
-                value=mvn_output_file_path
+                description="Standard out and standard error from running maven to " \
+                    "push artifacts to repository.",
+                name='maven-push-artifacts-output',
+                value='/mock/mvn_deploy_output.txt'
             )
-            self.assertEqual(expected_step_result, result)
 
+            # verify step result
+            self.assertEqual(
+                actual_step_result,
+                expected_step_result
+            )
+
+            mock_write_working_file.assert_called()
+            mock_run_maven.assert_called_with(
+                mvn_output_file_path='/mock/mvn_versions_set_output.txt',
+                settings_file='/fake/settings.xml',
+                pom_file=pom_file,
+                phases_and_goals=['versions:set'],
+                additional_arguments=[
+                    f'-DnewVersion={version}'
+                ]
+            )
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_deploy_output.txt',
+                step_implementer_additional_arguments=[
+                    '-DaltDeploymentRepository=' \
+                    f'{maven_push_artifact_repo_id}::default::{maven_push_artifact_repo_url}'
+                ]
+            )

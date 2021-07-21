@@ -8,13 +8,24 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key  | Required? | Default     | Description
--------------------|-----------|-------------|-----------
-`fail-on-no-tests` | True      | True        | Value to specify whether unit-test \
-                                               step can succeed when no tests are defined
-`pom-file`         | True      | `'pom.xml'` | pom used to run tests and check \
-                                               for existence of custom reportsDirectory
-`tls-verify`       | No        | True        | Disables TLS Verification if set to False
+Configuration Key            | Required? | Default | Description
+-----------------------------|-----------|---------|-----------
+`pom-file`                   | Yes       | `'pom.xml'` | pom used when executing maven.
+`tls-verify`                 | No        | `True`  | Disables TLS Verification if set to False
+`maven-profiles`             | No        | `[]`    | List of maven profiles to use.
+`maven-no-transfer-progress` | No        | `True`  | \
+                            `True` to suppress the transfer progress of packages maven downloads.
+                            `False` to have the transfer progress printed.\
+                            See https://maven.apache.org/ref/current/maven-embedder/cli.html
+`maven-additional-arguments` | No        | `[]`    | List of additional arguments to use.
+`maven-servers`              | No        |         | Dictionary of dictionaries of \
+                                                     id, username, password
+`maven-repositories`         | No        |         | Dictionary of dictionaries of \
+                                                     id, url, snapshots, releases
+`maven-mirrors`              | No        |         | Dictionary of dictionaries of \
+                                                     id, url, mirror_of
+`fail-on-no-tests`           | Yes       | `True ` | `True` to fail if there are not tests to run. \
+                                                     `False` to ignore if there are no tests to run.
 
 Result Artifacts
 ----------------
@@ -26,28 +37,37 @@ Result Artifact Key | Description
 `surefile-reports`  | Path to Surefire reports generated from invoking Maven.
 """
 import os
-import sys
 
-import sh
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.step_implementers.shared.maven_generic import \
+    MavenGeneric
 
 DEFAULT_CONFIG = {
-    'tls-verify': True,
-    'fail-on-no-tests': True,
-    'pom-file': 'pom.xml'
+    'fail-on-no-tests': True
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'fail-on-no-tests',
-    'pom-file'
+    'pom-file',
+    'fail-on-no-tests'
 ]
-
 
 class Maven(MavenGeneric):
     """`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
     """
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment,
+            maven_phases_and_goals=['test']
+        )
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -61,9 +81,8 @@ class Maven(MavenGeneric):
         Notes
         -----
         These are the lowest precedence configuration values.
-
         """
-        return DEFAULT_CONFIG
+        return {**MavenGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -92,11 +111,11 @@ class Maven(MavenGeneric):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        tls_verify = self.get_value('tls-verify')
         pom_file = self.get_value('pom-file')
         fail_on_no_tests = self.get_value('fail-on-no-tests')
 
         # ensure surefire plugin enabled
+        # NOTE: should this really be hard requirement?
         maven_surefire_plugin = self._get_effective_pom_element(
             element_path=MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH
         )
@@ -111,62 +130,47 @@ class Maven(MavenGeneric):
             element_path=MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH
         )
         if reports_dir is not None:
-            test_results_dir = reports_dir.text
+            if os.path.isabs(reports_dir.text):
+                test_results_dir = reports_dir.text
+            else:
+                test_results_dir = os.path.join(
+                    os.path.dirname(os.path.abspath(pom_file)),
+                    reports_dir.text
+                )
         else:
             test_results_dir = os.path.join(
                 os.path.dirname(os.path.abspath(pom_file)),
                 MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
             )
 
-        mvn_additional_options = []
-        if not tls_verify:
-            mvn_additional_options += [
-                '-Dmaven.wagon.http.ssl.insecure=true',
-                '-Dmaven.wagon.http.ssl.allowall=true',
-                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
-            ]
-
-        settings_file = self._generate_maven_settings()
-        mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
+        # run the tests
+        mvn_output_file_path = self.write_working_file('mvn_output.txt')
         try:
-            with open(mvn_output_file_path, 'w') as mvn_output_file:
-                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stdout,
-                    mvn_output_file
-                ])
-                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stderr,
-                    mvn_output_file
-                ])
+            # execute maven step (params come from config)
+            self._run_maven_step(
+                mvn_output_file_path=mvn_output_file_path
+            )
 
-                sh.mvn( # pylint: disable=no-member
-                    'clean',
-                    'test',
-                    '-f', pom_file,
-                    '-s', settings_file,
-                    *mvn_additional_options,
-                    _out=out_callback,
-                    _err=err_callback
-                )
-
+            # check if any tests were run
             if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
                 if fail_on_no_tests:
                     step_result.message = 'No unit tests defined.'
                     step_result.success = False
                 else:
                     step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
-        except sh.ErrorReturnCode as error:
-            step_result.message = "Unit test failures. See 'maven-output'" \
-                f" and 'surefire-reports' report artifacts for details: {error}"
+        except StepRunnerException as error:
             step_result.success = False
+            step_result.message = "Error running 'maven test' to run unit tests. " \
+                "More details maybe found in 'maven-output' and `surefire-reports` " \
+                f"report artifact: {error}"
         finally:
             step_result.add_artifact(
-                description="Standard out and standard error from 'mvn test'.",
+                description="Standard out and standard error from maven.",
                 name='maven-output',
                 value=mvn_output_file_path
             )
             step_result.add_artifact(
-                description="Surefire reports generated from 'mvn test'.",
+                description="Surefire reports generated by maven.",
                 name='surefire-reports',
                 value=test_results_dir
             )
