@@ -917,3 +917,78 @@ class TestContainerRegistriesLoginForceOverrideTlsVerifyLogin(BaseTestCase):
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
+
+
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
+    def test_list_of_dicts_truthy(self, container_registry_login_mock):
+        registries = [
+            {
+                'uri': 'registry.redhat.io',
+                'username': 'hello1@world.xyz',
+                'password': 'nope1'
+            },
+            {
+                'uri': 'registry.internal.example.xyz',
+                'username': 'hello2@example.xyz',
+                'password': 'nope2'
+            }
+        ]
+
+        container_registries_login(registries, containers_config_tls_verify=1)
+
+        calls = [
+            call(
+                container_registry_uri='registry.redhat.io',
+                container_registry_username='hello1@world.xyz',
+                container_registry_password='nope1',
+                container_registry_tls_verify=True,
+                containers_config_auth_file=None,
+                container_command_short_name=None
+            ),
+            call(
+                container_registry_uri='registry.internal.example.xyz',
+                container_registry_username='hello2@example.xyz',
+                container_registry_password='nope2',
+                container_registry_tls_verify=True,
+                containers_config_auth_file=None,
+                container_command_short_name=None
+            )
+        ]
+        container_registry_login_mock.assert_has_calls(calls)
+
+    @patch('ploigos_step_runner.utils.containers.container_registry_login')
+    def test_list_of_dicts_falsey(self, container_registry_login_mock):
+        registries = [
+            {
+                'uri': 'registry.redhat.io',
+                'username': 'hello1@world.xyz',
+                'password': 'nope1'
+            },
+            {
+                'uri': 'registry.internal.example.xyz',
+                'username': 'hello2@example.xyz',
+                'password': 'nope2'
+            }
+        ]
+
+        container_registries_login(registries, containers_config_tls_verify=0)
+
+        calls = [
+            call(
+                container_registry_uri='registry.redhat.io',
+                container_registry_username='hello1@world.xyz',
+                container_registry_password='nope1',
+                container_registry_tls_verify=False,
+                containers_config_auth_file=None,
+                container_command_short_name=None
+            ),
+            call(
+                container_registry_uri='registry.internal.example.xyz',
+                container_registry_username='hello2@example.xyz',
+                container_registry_password='nope2',
+                container_registry_tls_verify=False,
+                containers_config_auth_file=None,
+                container_command_short_name=None
+            )
+        ]
+        container_registry_login_mock.assert_has_calls(calls)
