@@ -109,13 +109,13 @@ def container_registries_login(  #pylint: disable=too-many-branches
             else:
                 registry_uri = registry_key
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if 'tls-verify' in registry_conf:
                     registry_tls_verify = registry_conf['tls-verify']
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_uri,
@@ -140,13 +140,13 @@ def container_registries_login(  #pylint: disable=too-many-branches
                 f"Configuration for container registry " \
                 f"must specify a 'password': {registry_conf}"
 
-            if containers_config_tls_verify is False:
-                registry_tls_verify = False
-            else:
+            if containers_config_tls_verify:
                 if 'tls-verify' in registry_conf:
                     registry_tls_verify = registry_conf['tls-verify']
                 else:
                     registry_tls_verify = True
+            else:
+                registry_tls_verify = False
 
             container_registry_login(
                 container_registry_uri=registry_conf['uri'],
