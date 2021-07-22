@@ -19,7 +19,7 @@ Ploigos Step Runner (PSR) implemented as a Python library.
 
 Latest Release
 ```bash
-not yet released
+pip install ploigos-step-runner
 ```
 
 Latest Development Release
