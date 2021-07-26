@@ -12,7 +12,7 @@ Configuration Key  | Required? | Default     | Description
 -------------------|-----------|-------------|-----------
 `fail-on-no-tests` | True      | True        | Value to specify whether unit-test \
                                                step can succeed when no tests are defined
-`package-json-file`         | True      | `'package.json'` | package file used to run tests and check \
+`package-file`         | True      | `'package.json'` | package file used to run tests and check \
                                                for existence of custom reportsDirectory
 `tls-verify`       | No        | True        | Disables TLS Verification if set to False
 
@@ -23,29 +23,29 @@ Results artifacts output by this step.
 Result Artifact Key | Description
 --------------------|------------
 `npm-output`      | Path to Stdout and Stderr from invoking npm.
-`surefile-reports`  | Path to Surefire reports generated from invoking Maven.
+# `surefile-reports`  | Path to Surefire reports generated from invoking Maven.
 """
 import os
 import sys
 
 import sh
 from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
+from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
     'tls-verify': True,
     'fail-on-no-tests': True,
-    'pom-file': 'pom.xml'
+    'package-file': 'package.json'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'fail-on-no-tests',
-    'pom-file'
+    'package-file'
 ]
 
 
-class Maven(MavenGeneric):
+class Npm(NpmGeneric):
     """`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
     """
 
@@ -93,18 +93,8 @@ class Maven(MavenGeneric):
         step_result = StepResult.from_step_implementer(self)
 
         tls_verify = self.get_value('tls-verify')
-        pom_file = self.get_value('pom-file')
+        pom_file = self.get_value('package-file')
         fail_on_no_tests = self.get_value('fail-on-no-tests')
-
-        # ensure surefire plugin enabled
-        maven_surefire_plugin = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH
-        )
-        if maven_surefire_plugin is None:
-            step_result.success = False
-            step_result.message = 'Unit test dependency "maven-surefire-plugin" ' \
-                f'missing from effective pom ({self._get_effective_pom()}).'
-            return step_result
 
         # get surefire test results dir
         reports_dir = self._get_effective_pom_element(
