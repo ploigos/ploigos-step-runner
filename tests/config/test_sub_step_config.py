@@ -626,3 +626,34 @@ class TestSubStepConfig(BaseTestCase):
             "step-foo-foo-env2")
 
         self.assertIsNone(sub_step.get_config_value('does-not-exist'))
+
+    def test_get_config_value_list(self):
+        config = Config({
+            Config.CONFIG_KEY: {
+                'global-defaults': {
+                    'global-default-unique-0': ['global-default-a', 'global-default-b'],
+                },
+                'step-foo': [
+                    {
+                        'implementer': 'foo1',
+                        'config': {
+                            'step-foo-foo1-unique-0': ['step-foo-foo1-a', 'step-foo-foo1-b'],
+                        }
+                    }
+                ]
+
+            }
+        })
+
+        step_config = config.get_step_config('step-foo')
+        sub_step = step_config.get_sub_step('foo1')
+
+        self.assertEqual(
+            sub_step.get_config_value('global-default-unique-0'),
+            ['global-default-a', 'global-default-b']
+        )
+
+        self.assertEqual(
+            sub_step.get_config_value('step-foo-foo1-unique-0'),
+            ['step-foo-foo1-a', 'step-foo-foo1-b']
+        )
