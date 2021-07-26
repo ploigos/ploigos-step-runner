@@ -281,7 +281,7 @@ class SubStepConfig:
             if isinstance(runtime_step_config[key], ConfigValue):
                 value = runtime_step_config[key].value
             else:
-                value = copy.deepcopy(runtime_step_config[key])
+                value = ConfigValue.convert_leaves_to_values(runtime_step_config[key])
         else:
             value = None
 
