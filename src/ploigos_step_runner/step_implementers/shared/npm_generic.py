@@ -16,13 +16,19 @@ class NpmGeneric(StepImplementer):
 
     def _generate_package_json(self):
         package_author = ConfigValue.convert_leaves_to_values(
-            self.get_value('package-params.author')
+            self.get_value('author')
+        )
+        package_author_email = ConfigValue.convert_leaves_to_values(
+            self.get_value('author-email')
         )
         package_license = ConfigValue.convert_leaves_to_values(
-            self.get_value('package-params.license')
+            self.get_value('license')
         )
 
-        print(self.work_dir_path,
-        package_author,
-        package_license)
+        return generate_package_json(
+            working_dir=self.work_dir_path,
+            author=package_author,
+            author_email=package_author_email,
+            license=package_license
+        )
 
