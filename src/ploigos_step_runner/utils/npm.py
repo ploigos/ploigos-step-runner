@@ -8,6 +8,7 @@ import os
 
 
 def generate_package_json(working_dir, author, author_email, license):
+    print(isinstance(working_dir, str))
     try:
         os.chdir(working_dir)
         # set initial values for package.json and create file
