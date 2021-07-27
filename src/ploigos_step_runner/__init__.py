@@ -320,7 +320,7 @@ From least precedence to highest precedence.
         }
 
       unit-test:
-      - implementer: Maven
+      - implementer: MavenTest
         config: {
           # Optional.
           # fail-on-no-tests: true
@@ -330,7 +330,7 @@ From least precedence to highest precedence.
         }
 
       package:
-      - implementer: Maven
+      - implementer: MavenPackage
         config: {
           # Optional.
           #pom-file: 'pom.xml'
@@ -343,7 +343,7 @@ From least precedence to highest precedence.
         }
 
       push-artifacts:
-      - implementer: Maven
+      - implementer: MavenDeploy
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
@@ -503,7 +503,7 @@ From least precedence to highest precedence.
         }
 
       uat:
-      - implementer: MavenSeleniumCucumber
+      - implementer: MavenTestSeleniumCucumber
         config: {}
 
       # TODO: not yet implemented
@@ -820,7 +820,7 @@ From least precedence to highest precedence.
           readiness-probe-path: ''
 
       uat:
-      - implementer: MavenSeleniumCucumber
+      - implementer: MavenTestSeleniumCucumber
         config: {}
 
       # TODO: not yet implemented
