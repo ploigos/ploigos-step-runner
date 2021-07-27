@@ -4,13 +4,13 @@ from unittest.mock import Mock, patch
 
 from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.uat import MavenSeleniumCucumber
+from ploigos_step_runner.step_implementers.uat import MavenTestSeleniumCucumber
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
 
-class BaseTestStepImplementerSharedMavenSeleniumCucumber(BaseStepImplementerTestCase):
+class BaseTestStepImplementerSharedMavenTestSeleniumCucumber(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -18,22 +18,22 @@ class BaseTestStepImplementerSharedMavenSeleniumCucumber(BaseStepImplementerTest
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=MavenSeleniumCucumber,
+            step_implementer=MavenTestSeleniumCucumber,
             step_config=step_config,
             step_name='uat',
-            implementer='MavenSeleniumCucumber',
+            implementer='MavenTestSeleniumCucumber',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
 
 @patch("ploigos_step_runner.step_implementers.shared.MavenGeneric.__init__")
-class TestStepImplementerMavenTestMavenSeleniumCucumber___init__(BaseStepImplementerTestCase):
+class TestStepImplementerMavenTestMavenTestSeleniumCucumber___init__(BaseStepImplementerTestCase):
     def test_defaults(self, mock_super_init):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        MavenSeleniumCucumber(
+        MavenTestSeleniumCucumber(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config
@@ -52,7 +52,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber___init__(BaseStepImpleme
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        MavenSeleniumCucumber(
+        MavenTestSeleniumCucumber(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
@@ -67,12 +67,12 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber___init__(BaseStepImpleme
             maven_phases_and_goals=['test']
         )
 
-class TestStepImplementerMavenTestMavenSeleniumCucumber_step_implementer_config_defaults(
+class TestStepImplementerMavenTestMavenTestSeleniumCucumber_step_implementer_config_defaults(
     BaseStepImplementerTestCase
 ):
     def test_result(self):
         self.assertEqual(
-            MavenSeleniumCucumber.step_implementer_config_defaults(),
+            MavenTestSeleniumCucumber.step_implementer_config_defaults(),
             {
                 'pom-file': 'pom.xml',
                 'tls-verify': True,
@@ -84,12 +84,12 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber_step_implementer_config_
             }
         )
 
-class TestStepImplementerMavenTestMavenSeleniumCucumber__required_config_or_result_keys(
+class TestStepImplementerMavenTestMavenTestSeleniumCucumber__required_config_or_result_keys(
     BaseStepImplementerTestCase
 ):
     def test_result(self):
         self.assertEqual(
-            MavenSeleniumCucumber._required_config_or_result_keys(),
+            MavenTestSeleniumCucumber._required_config_or_result_keys(),
             [
                 'pom-file',
                 'fail-on-no-tests',
@@ -99,7 +99,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__required_config_or_resu
 
 @patch("ploigos_step_runner.step_implementers.shared.MavenGeneric._validate_required_config_or_previous_step_result_artifact_keys")
 class TestStepImplementerSharedMavenGeneric__validate_required_config_or_previous_step_result_artifact_keys(
-    BaseTestStepImplementerSharedMavenSeleniumCucumber
+    BaseTestStepImplementerSharedMavenTestSeleniumCucumber
 ):
     def test_valid_target_host_url(self, mock_super_validate):
         with TempDirectory() as test_dir:
@@ -150,10 +150,10 @@ class TestStepImplementerSharedMavenGeneric__validate_required_config_or_previou
 
             mock_super_validate.assert_called_once_with()
 
-@patch.object(MavenSeleniumCucumber, '_run_maven_step')
-@patch.object(MavenSeleniumCucumber, 'write_working_file', return_value='/mock/mvn_output.txt')
+@patch.object(MavenTestSeleniumCucumber, '_run_maven_step')
+@patch.object(MavenTestSeleniumCucumber, 'write_working_file', return_value='/mock/mvn_output.txt')
 @patch(
-    'ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values',
+    'ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values',
     return_value={
         'time': '42',
         'tests': '42',
@@ -161,14 +161,14 @@ class TestStepImplementerSharedMavenGeneric__validate_required_config_or_previou
         'skipped': '0',
         'failures': '0'
     })
-class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
-    BaseTestStepImplementerSharedMavenSeleniumCucumber
+class TestStepImplementerMavenTestMavenTestSeleniumCucumber__run_step(
+    BaseTestStepImplementerSharedMavenTestSeleniumCucumber
 ):
     def __expected_step_result_base(self):
         expected_step_result = StepResult(
             step_name='uat',
-            sub_step_name='MavenSeleniumCucumber',
-            sub_step_implementer_name='MavenSeleniumCucumber'
+            sub_step_name='MavenTestSeleniumCucumber',
+            sub_step_implementer_name='MavenTestSeleniumCucumber'
         )
 
         return expected_step_result
@@ -258,7 +258,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
         return run_maven_side_effect
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -321,7 +321,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -384,7 +384,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -451,7 +451,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', Mock(text='mock/fake/reports')]
     )
@@ -513,7 +513,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
                 ]
             )
 
-    @patch.object(MavenSeleniumCucumber, '_get_effective_pom_element')
+    @patch.object(MavenTestSeleniumCucumber, '_get_effective_pom_element')
     def test_success_target_host_url_pom_specified_absolute_reports_dir(
         self,
         mock_effective_pom_element,
@@ -576,8 +576,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
                 ]
             )
 
-    @patch.object(MavenSeleniumCucumber, '_get_effective_pom_element', side_effect=[None, None])
-    @patch.object(MavenSeleniumCucumber, '_get_effective_pom', return_value='mock-effective-pom.xml')
+    @patch.object(MavenTestSeleniumCucumber, '_get_effective_pom_element', side_effect=[None, None])
+    @patch.object(MavenTestSeleniumCucumber, '_get_effective_pom', return_value='mock-effective-pom.xml')
     def test_fail_no_surefire_plugin(
         self,
         mock_effective_pom,
@@ -626,7 +626,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             mock_run_maven_step.assert_not_called()
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -687,7 +687,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -749,7 +749,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -818,7 +818,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
             )
 
     @patch.object(
-        MavenSeleniumCucumber,
+        MavenTestSeleniumCucumber,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', None]
     )
@@ -883,24 +883,24 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
                 ]
             )
 
-# class TestStepImplementerMavenSeleniumCucumberBase(MaveStepImplementerTestCase):
+# class TestStepImplementerMavenTestSeleniumCucumberBase(MaveStepImplementerTestCase):
 #     def create_step_implementer(
 #             self,
 #             step_config={},
 #             parent_work_dir_path=''
 #     ):
 #         return self.create_given_step_implementer(
-#             step_implementer=MavenSeleniumCucumber,
+#             step_implementer=MavenTestSeleniumCucumber,
 #             step_config=step_config,
 #             step_name='uat',
-#             implementer='MavenSeleniumCucumber',
+#             implementer='MavenTestSeleniumCucumber',
 #             parent_work_dir_path=parent_work_dir_path
 #         )
 
-# class TestStepImplementerDeployMavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys(
-#     TestStepImplementerMavenSeleniumCucumberBase
+# class TestStepImplementerDeployMavenTestSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys(
+#     TestStepImplementerMavenTestSeleniumCucumberBase
 # ):
-#     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
+#     def test_MavenTestSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_target_host_url(self):
 #         with TempDirectory() as temp_dir:
 #             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -918,7 +918,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 
 #             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-#     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
+#     def test_MavenTestSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_1(self):
 #         with TempDirectory() as temp_dir:
 #             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -936,7 +936,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 
 #             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-#     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
+#     def test_MavenTestSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_success_deployed_host_urls_2(self):
 #         with TempDirectory() as temp_dir:
 #             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -954,7 +954,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 
 #             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-#     def test_MavenSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
+#     def test_MavenTestSeleniumCucumber_validate_required_config_or_previous_step_result_artifact_keys_fail_no_target_urls(self):
 #         with TempDirectory() as temp_dir:
 #             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -976,9 +976,9 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #             ):
 #                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-# class TestStepImplementerMavenSeleniumCucumber_Other(TestStepImplementerMavenSeleniumCucumberBase):
+# class TestStepImplementerMavenTestSeleniumCucumber_Other(TestStepImplementerMavenTestSeleniumCucumberBase):
 #     def test_step_implementer_config_defaults(self):
-#         actual_defaults = MavenSeleniumCucumber.step_implementer_config_defaults()
+#         actual_defaults = MavenTestSeleniumCucumber.step_implementer_config_defaults()
 #         expected_defaults = {
 #             'fail-on-no-tests': True,
 #             'pom-file': 'pom.xml',
@@ -988,7 +988,7 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #         self.assertEqual(expected_defaults, actual_defaults)
 
 #     def test__required_config_or_result_keys(self):
-#         actual_required_keys = MavenSeleniumCucumber._required_config_or_result_keys()
+#         actual_required_keys = MavenTestSeleniumCucumber._required_config_or_result_keys()
 #         expected_required_keys = [
 #             'fail-on-no-tests',
 #             'pom-file',
@@ -1139,8 +1139,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 
 #         expected_step_result = StepResult(
 #             step_name='uat',
-#             sub_step_name='MavenSeleniumCucumber',
-#             sub_step_implementer_name='MavenSeleniumCucumber'
+#             sub_step_name='MavenTestSeleniumCucumber',
+#             sub_step_implementer_name='MavenTestSeleniumCucumber'
 #         )
 #         expected_step_result.success = expected_result_success
 #         expected_step_result.message = expected_result_message
@@ -1207,8 +1207,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #         self.assertEqual(expected_step_result, result)
 
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_defaults(
@@ -1263,8 +1263,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 surefire_reports_dir=surefire_reports_dir
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_tls_verify_false(
@@ -1320,8 +1320,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 set_tls_verify_false=True
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success__deployed_host_urls_str(
@@ -1378,8 +1378,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 deployed_host_urls=deployed_host_urls
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success__deployed_host_urls_array_1(
@@ -1436,8 +1436,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 deployed_host_urls=deployed_host_urls
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success__deployed_host_urls_array_2(
@@ -1497,8 +1497,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                     f" targeting first one (https://foo.ploigos.xyz) for user acceptance test (UAT)."
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_provided_profile_override(
@@ -1554,8 +1554,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 uat_maven_profile='custom-uat-profile'
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_provided_pom_file_override(
@@ -1611,8 +1611,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 pom_file_name='custom-pom.xml'
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_provided_fail_on_no_tests_false_with_tests(
@@ -1670,8 +1670,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 expected_result_success=True
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_provided_fail_on_no_tests_false_with_no_tests(
@@ -1733,8 +1733,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                     " but 'fail-on-no-tests' is False."
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_fail_provided_fail_on_no_tests_true_with_no_tests(
@@ -1795,8 +1795,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                     " using maven profile (integration-test)."
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_fail_no_surefire_plugin(
@@ -1859,8 +1859,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 assert_report_artifact=False
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_success_pom_specified_reports_dir(
@@ -1920,8 +1920,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                 surefire_reports_dir=surefire_reports_dir
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_fail_mvn_test_failure(
@@ -1982,8 +1982,8 @@ class TestStepImplementerMavenTestMavenSeleniumCucumber__run_step(
 #                     " report artifacts for details."
 #             )
 
-#     @patch('ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber.aggregate_xml_element_attribute_values')
-#     @patch.object(MavenSeleniumCucumber, '_generate_maven_settings')
+#     @patch('ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.aggregate_xml_element_attribute_values')
+#     @patch.object(MavenTestSeleniumCucumber, '_generate_maven_settings')
 #     @patch('sh.mvn', create=True)
 #     @patch('ploigos_step_runner.step_implementers.shared.maven_generic.write_effective_pom')
 #     def test__run_step_failure_missing_evidence_attribute(

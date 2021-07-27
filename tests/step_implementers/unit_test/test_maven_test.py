@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
-from ploigos_step_runner.step_implementers.unit_test import Maven
+from ploigos_step_runner.step_implementers.unit_test import MavenTest
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -16,7 +16,7 @@ class TestStepImplementerMavenTest___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenTest(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config
@@ -35,7 +35,7 @@ class TestStepImplementerMavenTest___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenTest(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
@@ -55,7 +55,7 @@ class TestStepImplementerMavenTest_step_implementer_config_defaults(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven.step_implementer_config_defaults(),
+            MavenTest.step_implementer_config_defaults(),
             {
                 'pom-file': 'pom.xml',
                 'tls-verify': True,
@@ -71,15 +71,15 @@ class TestStepImplementerMavenTest__required_config_or_result_keys(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven._required_config_or_result_keys(),
+            MavenTest._required_config_or_result_keys(),
             [
                 'pom-file',
                 'fail-on-no-tests'
             ]
         )
 
-@patch.object(Maven, '_run_maven_step')
-@patch.object(Maven, 'write_working_file', return_value='/mock/mvn_output.txt')
+@patch.object(MavenTest, '_run_maven_step')
+@patch.object(MavenTest, 'write_working_file', return_value='/mock/mvn_output.txt')
 class TestStepImplementerMavenTest__run_step(
     BaseStepImplementerTestCase
 ):
@@ -90,15 +90,15 @@ class TestStepImplementerMavenTest__run_step(
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=Maven,
+            step_implementer=MavenTest,
             step_config=step_config,
             step_name='unit-test',
-            implementer='Maven',
+            implementer='MavenTest',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
 
-    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    @patch.object(MavenTest, '_get_effective_pom_element', side_effect=['mock surefire element', None])
     def test_success_default_reports_dir(
         self,
         mock_effective_pom_element,
@@ -143,8 +143,8 @@ class TestStepImplementerMavenTest__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -169,7 +169,7 @@ class TestStepImplementerMavenTest__run_step(
             )
 
     @patch.object(
-        Maven,
+        MavenTest,
         '_get_effective_pom_element',
         side_effect=['mock surefire element', Mock(text='mock/fake/reports')]
     )
@@ -217,8 +217,8 @@ class TestStepImplementerMavenTest__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -242,7 +242,7 @@ class TestStepImplementerMavenTest__run_step(
                 mvn_output_file_path='/mock/mvn_output.txt'
             )
 
-    @patch.object(Maven, '_get_effective_pom_element')
+    @patch.object(MavenTest, '_get_effective_pom_element')
     def test_success_pom_specified_absolute_reports_dir(
         self,
         mock_effective_pom_element,
@@ -291,8 +291,8 @@ class TestStepImplementerMavenTest__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -316,8 +316,8 @@ class TestStepImplementerMavenTest__run_step(
                 mvn_output_file_path='/mock/mvn_output.txt'
             )
 
-    @patch.object(Maven, '_get_effective_pom_element', side_effect=[None, None])
-    @patch.object(Maven, '_get_effective_pom', return_value='mock-effective-pom.xml')
+    @patch.object(MavenTest, '_get_effective_pom_element', side_effect=[None, None])
+    @patch.object(MavenTest, '_get_effective_pom', return_value='mock-effective-pom.xml')
     def test_fail_no_surefire_plugin(
         self,
         mock_effective_pom,
@@ -363,8 +363,8 @@ class TestStepImplementerMavenTest__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.success = False
             expected_step_result.message = 'Unit test dependency "maven-surefire-plugin" ' \
@@ -378,7 +378,7 @@ class TestStepImplementerMavenTest__run_step(
 
             mock_run_maven_step.assert_not_called()
 
-    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    @patch.object(MavenTest, '_get_effective_pom_element', side_effect=['mock surefire element', None])
     def test_fail_no_tests(
         self,
         mock_effective_pom_element,
@@ -404,8 +404,8 @@ class TestStepImplementerMavenTest__run_step(
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.success = False
             expected_step_result.message = 'No unit tests defined.'
@@ -431,7 +431,7 @@ class TestStepImplementerMavenTest__run_step(
                 mvn_output_file_path='/mock/mvn_output.txt'
             )
 
-    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    @patch.object(MavenTest, '_get_effective_pom_element', side_effect=['mock surefire element', None])
     def test_success_but_no_tests(
         self,
         mock_effective_pom_element,
@@ -458,8 +458,8 @@ class TestStepImplementerMavenTest__run_step(
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
             expected_step_result.add_artifact(
@@ -484,7 +484,7 @@ class TestStepImplementerMavenTest__run_step(
                 mvn_output_file_path='/mock/mvn_output.txt'
             )
 
-    @patch.object(Maven, '_get_effective_pom_element', side_effect=['mock surefire element', None])
+    @patch.object(MavenTest, '_get_effective_pom_element', side_effect=['mock surefire element', None])
     def test_fail_maven_run(
         self,
         mock_effective_pom_element,
@@ -511,8 +511,8 @@ class TestStepImplementerMavenTest__run_step(
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
             expected_step_result = StepResult(
                 step_name='unit-test',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenTest',
+                sub_step_implementer_name='MavenTest'
             )
             expected_step_result.success = False
             expected_step_result.message = "Error running 'maven test' to run unit tests. " \

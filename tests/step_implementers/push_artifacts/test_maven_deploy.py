@@ -3,7 +3,7 @@ import os
 from unittest.mock import PropertyMock, patch
 
 from ploigos_step_runner import StepResult, WorkflowResult, StepRunnerException
-from ploigos_step_runner.step_implementers.push_artifacts import Maven
+from ploigos_step_runner.step_implementers.push_artifacts import MavenDeploy
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -16,7 +16,7 @@ class TestStepImplementerMavenDeploy___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenDeploy(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config
@@ -35,7 +35,7 @@ class TestStepImplementerMavenDeploy___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenDeploy(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
@@ -55,7 +55,7 @@ class TestStepImplementerMavenDeploy_step_implementer_config_defaults(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven.step_implementer_config_defaults(),
+            MavenDeploy.step_implementer_config_defaults(),
             {
                 'pom-file': 'pom.xml',
                 'tls-verify': True,
@@ -74,7 +74,7 @@ class TestStepImplementerMavenDeploy__required_config_or_result_keys(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven._required_config_or_result_keys(),
+            MavenDeploy._required_config_or_result_keys(),
             [
                 'pom-file',
                 'maven-push-artifact-repo-url',
@@ -83,15 +83,15 @@ class TestStepImplementerMavenDeploy__required_config_or_result_keys(
             ]
         )
 
-@patch('ploigos_step_runner.step_implementers.push_artifacts.maven.run_maven')
-@patch.object(Maven, '_run_maven_step')
+@patch('ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.run_maven')
+@patch.object(MavenDeploy, '_run_maven_step')
 @patch.object(
-    Maven,
+    MavenDeploy,
     'write_working_file',
     side_effect=['/mock/mvn_versions_set_output.txt', '/mock/mvn_deploy_output.txt']
 )
 @patch.object(
-    Maven,
+    MavenDeploy,
     'maven_settings_file',
     new_callable=PropertyMock,
     return_value='/fake/settings.xml'
@@ -106,10 +106,10 @@ class TestStepImplementerMavenDeploy__run_step(
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=Maven,
+            step_implementer=MavenDeploy,
             step_config=step_config,
             step_name='deploy',
-            implementer='Maven',
+            implementer='MavenDeploy',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
@@ -145,8 +145,8 @@ class TestStepImplementerMavenDeploy__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='deploy',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenDeploy',
+                sub_step_implementer_name='MavenDeploy'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from running maven to update version.",
@@ -216,8 +216,8 @@ class TestStepImplementerMavenDeploy__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='deploy',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenDeploy',
+                sub_step_implementer_name='MavenDeploy'
             )
             expected_step_result.success = False
             expected_step_result.message = "Error running 'maven deploy' to push artifacts. " \
@@ -285,8 +285,8 @@ class TestStepImplementerMavenDeploy__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='deploy',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenDeploy',
+                sub_step_implementer_name='MavenDeploy'
             )
             expected_step_result.success = False
             expected_step_result.message = "Error running 'maven deploy' to push artifacts. " \

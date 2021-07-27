@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
-from ploigos_step_runner.step_implementers.package import Maven
+from ploigos_step_runner.step_implementers.package import MavenPackage
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -16,7 +16,7 @@ class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenPackage(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config
@@ -35,7 +35,7 @@ class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        Maven(
+        MavenPackage(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
@@ -55,7 +55,7 @@ class TestStepImplementerMavenPackage_step_implementer_config_defaults(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven.step_implementer_config_defaults(),
+            MavenPackage.step_implementer_config_defaults(),
             {
                 'pom-file': 'pom.xml',
                 'tls-verify': True,
@@ -75,14 +75,14 @@ class TestStepImplementerMavenPackage__required_config_or_result_keys(
 ):
     def test_result(self):
         self.assertEqual(
-            Maven._required_config_or_result_keys(),
+            MavenPackage._required_config_or_result_keys(),
             [
                 'pom-file'
             ]
         )
 
-@patch.object(Maven, '_run_maven_step')
-@patch.object(Maven, 'write_working_file', return_value='/mock/mvn_output.txt')
+@patch.object(MavenPackage, '_run_maven_step')
+@patch.object(MavenPackage, 'write_working_file', return_value='/mock/mvn_output.txt')
 class TestStepImplementerMavenPackage__run_step(
     BaseStepImplementerTestCase
 ):
@@ -93,10 +93,10 @@ class TestStepImplementerMavenPackage__run_step(
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=Maven,
+            step_implementer=MavenPackage,
             step_config=step_config,
             step_name='package',
-            implementer='Maven',
+            implementer='MavenPackage',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
@@ -140,8 +140,8 @@ class TestStepImplementerMavenPackage__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenPackage',
+                sub_step_implementer_name='MavenPackage'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -206,8 +206,8 @@ class TestStepImplementerMavenPackage__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenPackage',
+                sub_step_implementer_name='MavenPackage'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -262,8 +262,8 @@ class TestStepImplementerMavenPackage__run_step(
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='MavenPackage',
+                sub_step_implementer_name='MavenPackage'
             )
             expected_step_result.success = False
             expected_step_result.message = "Error running 'maven package' to package artifacts. " \
