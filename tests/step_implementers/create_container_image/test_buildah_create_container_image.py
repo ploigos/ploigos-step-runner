@@ -104,7 +104,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
 
 
             buildah_mock.bud.assert_called_once_with(
-                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
@@ -117,7 +116,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
 
             buildah_mock.push.assert_called_once_with(
-                '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
                 f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
@@ -166,7 +164,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
 
             buildah_mock.bud.assert_called_once_with(
-                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
@@ -179,7 +176,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
 
             buildah_mock.push.assert_called_once_with(
-                '--storage-driver=vfs',
                 'localhost/app-name/service-name:latest',
                 f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-latest.tar',
                 _out=sys.stdout,
@@ -236,7 +232,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
 
 
             buildah_mock.bud.assert_called_once_with(
-                '--storage-driver=vfs',
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
@@ -249,7 +244,6 @@ class TestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase
             )
 
             buildah_mock.push.assert_called_once_with(
-                '--storage-driver=vfs',
                 'localhost/app-name/service-name:1.0-123abc',
                 f'docker-archive:{step_implementer.work_dir_path}/image-app-name-service-name-1.0-123abc.tar',
                 _out=sys.stdout,
