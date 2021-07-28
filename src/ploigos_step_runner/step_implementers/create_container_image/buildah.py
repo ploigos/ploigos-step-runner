@@ -152,12 +152,7 @@ class Buildah(StepImplementer):
             )
 
             # perform build
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
             sh.buildah.bud(  # pylint: disable=no-member
-                '--storage-driver=vfs',
                 '--format=' + self.get_value('format'),
                 '--tls-verify=' + str(tls_verify).lower(),
                 '--layers', '-f', image_spec_file,
@@ -185,14 +180,9 @@ class Buildah(StepImplementer):
             # Check to see if the tar docker-archive file already exists
             #   this needs to be run as buildah does not support overwritting
             #   existing files.
-            #
-            # NOTE: using --storage-driver=vfs so that container does not need escalated privileges
-            #       vfs is less efficient then fuse (which would require host mounts),
-            #       but such is the price we pay for security.
             if os.path.exists(image_tar_path):
                 os.remove(image_tar_path)
             sh.buildah.push(  # pylint: disable=no-member
-                '--storage-driver=vfs',
                 tag,
                 "docker-archive:" + image_tar_path,
                 _out=sys.stdout,
