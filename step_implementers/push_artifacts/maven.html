@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>ploigos_step_runner.step_implementers.push_artifacts.maven API documentation</title>
-<meta name="description" content="`StepImplementer` for the `package` step using Maven …" />
+<meta name="description" content="DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,344 +22,45 @@
 <h1 class="title">Module <code>ploigos_step_runner.step_implementers.push_artifacts.maven</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>package</code> step using Maven.</p>
-<h2 id="step-configuration">Step Configuration</h2>
-<p>Step configuration expected as input to this step.
-Could come from:</p>
-<ul>
-<li>static configuration</li>
-<li>runtime configuration</li>
-<li>previous step results</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>Configuration Key</th>
-<th>Required</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>maven-push-artifact-repo-url</code></td>
-<td>yes</td>
-<td></td>
-<td>id for the maven servers and mirrors</td>
-</tr>
-<tr>
-<td><code>maven-push-artifact-repo-id</code></td>
-<td>Yes</td>
-<td></td>
-<td>url for the maven servers and mirrors</td>
-</tr>
-<tr>
-<td><code>version</code></td>
-<td>Yes</td>
-<td></td>
-<td>version to push</td>
-</tr>
-<tr>
-<td><code>package-artifacts</code></td>
-<td>Yes</td>
-<td></td>
-<td>Artifacts is dictionary
-Each element of an <code>artifact</code> will be used
-as a parameter to deploy to repository: <br/>
-* artifact.group-id <br/>
-* artifact.artifact-id <br/>
-* artifact.path <br/>
-* artifact.package-type</td>
-</tr>
-<tr>
-<td><code>tls-verify</code></td>
-<td>No</td>
-<td>True</td>
-<td>Disables TLS Verification if set to False</td>
-</tr>
-</tbody>
-</table>
-<h2 id="result-artifacts">Result Artifacts</h2>
-<p>Results artifacts output by this step.</p>
-<table>
-<thead>
-<tr>
-<th>Result Artifact Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>push-artifacts</code></td>
-<td>An array of dictionaries with information on the built artifacts.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="push-artifacts">push-artifacts</h2>
-<p>Keys in the dictionary elements in the <code>push-artifacts</code> array in the step results.</p>
-<table>
-<thead>
-<tr>
-<th>Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>path</code></td>
-<td>Absolute path to the artifact pushed to the artifact repository</td>
-</tr>
-<tr>
-<td><code>artifact-id</code></td>
-<td>Maven artifact ID pushed to the artifact repository</td>
-</tr>
-<tr>
-<td><code>group-id</code></td>
-<td>Maven group ID pushed to the artifact repository</td>
-</tr>
-<tr>
-<td><code>version</code></td>
-<td>Version pushed to the artifact repository</td>
-</tr>
-<tr>
-<td><code>packaging</code></td>
-<td>Type of package (eg: jar, war)</td>
-</tr>
-</tbody>
-</table>
-<h2 id="examples">Examples</h2>
-<p><strong>Example: Step Configuration (minimal)</strong></p>
-<pre><code>push-artifacts:
-- implementer: Maven
-  config:
-    maven-push-artifact-repo-id: internal-id-name
-    maven-push-artifact-repo-url: url-to server
-</code></pre>
-<p><strong>Example: Generated Maven Deploy (uses both step configuration and previous results)</strong></p>
-<pre><code>mvn
-  deploy:deploy-file'
-  -Durl=maven-push-artifact-repo-url
-  -Dversion=package.artifact.version
-  -DgroupId=package.artifact.group-id
-  -DartifactId=package.artifact.artifact-id
-  -Dfile=package.artifact.path
-  -Dpackaging=package.artifact.package-type
-  -DrepositoryId=maven-push-artifact-repo-id
-  -s settings.xml
-</code></pre>
+<p>DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead.</p>
+<p>This is an alias to MavenDeploy so as to keep things backwards compatible,
+but eventually should/can will be removed.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
+<pre><code class="python">&#34;&#34;&#34;DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead.
 
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-
-  * static configuration
-  * runtime configuration
-  * previous step results
-
-Configuration Key              | Required | Default | Description
--------------------------------|----------|---------|------------------------------------------
-`maven-push-artifact-repo-url` | yes      |         | id for the maven servers and mirrors
-`maven-push-artifact-repo-id`  | Yes      |         | url for the maven servers and mirrors
-`version`                      | Yes      |         | version to push
-`package-artifacts`            | Yes      |         | Artifacts is dictionary \
-                                                      Each element of an `artifact` will be used \
-                                                      as a parameter to deploy to repository: &lt;br/&gt;\
-                                                        * artifact.group-id &lt;br/&gt;\
-                                                        * artifact.artifact-id &lt;br/&gt;\
-                                                        * artifact.path &lt;br/&gt;\
-                                                        * artifact.package-type
-`tls-verify`                   | No       | True    | Disables TLS Verification if set to False
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key | Description
---------------------|------------
-`push-artifacts`    | An array of dictionaries with information on the built artifacts.
-
-## push-artifacts
-Keys in the dictionary elements in the `push-artifacts` array in the step results.
-
-| Key             | Description
-|-----------------|------------
-| `path`          | Absolute path to the artifact pushed to the artifact repository
-| `artifact-id`   | Maven artifact ID pushed to the artifact repository
-| `group-id`      | Maven group ID pushed to the artifact repository
-| `version`       | Version pushed to the artifact repository
-| `packaging`     | Type of package (eg: jar, war)
-
-Examples
---------
-
-**Example: Step Configuration (minimal)**
-
-    push-artifacts:
-    - implementer: Maven
-      config:
-        maven-push-artifact-repo-id: internal-id-name
-        maven-push-artifact-repo-url: url-to server
-
-**Example: Generated Maven Deploy (uses both step configuration and previous results)**
-
-    mvn
-      deploy:deploy-file&#39;
-      -Durl=maven-push-artifact-repo-url
-      -Dversion=package.artifact.version
-      -DgroupId=package.artifact.group-id
-      -DartifactId=package.artifact.artifact-id
-      -Dfile=package.artifact.path
-      -Dpackaging=package.artifact.package-type
-      -DrepositoryId=maven-push-artifact-repo-id
-      -s settings.xml
+This is an alias to MavenDeploy so as to keep things backwards compatible,
+but eventually should/can will be removed.
 &#34;&#34;&#34;
-import sys
 
-import sh
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.step_implementers.push_artifacts.maven_deploy import MavenDeploy
 
-DEFAULT_CONFIG = {
-    &#39;tls-verify&#39;: True
-}
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;maven-push-artifact-repo-url&#39;,
-    &#39;maven-push-artifact-repo-id&#39;,
-    &#39;version&#39;,
-    &#39;package-artifacts&#39;
-]
+class Maven(MavenDeploy):
+    &#34;&#34;&#34;DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead.
 
-class Maven(MavenGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
+    This is an alias to MavenDeploy so as to keep things backwards compatible,
+    but eventually should/can will be removed.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;
-        Getter for the StepImplementer&#39;s configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _run_step(self): # pylint: disable=too-many-locals
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        # Get config items
-        maven_push_artifact_repo_id = self.get_value(&#39;maven-push-artifact-repo-id&#39;)
-        maven_push_artifact_repo_url = self.get_value(&#39;maven-push-artifact-repo-url&#39;)
-        version = self.get_value(&#39;version&#39;)
-        package_artifacts = self.get_value(&#39;package-artifacts&#39;)
-        tls_verify = self.get_value(&#39;tls-verify&#39;)
-
-        # disable tls verification
-        mvn_additional_options = []
-        if not tls_verify:
-            mvn_additional_options += [
-                &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
-                &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
-                &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
-            ]
-
-        # Create settings.xml
-        settings_file = self._generate_maven_settings()
-
-        # push the artifacts
-        push_artifacts = []
-        mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
-        try:
-            for package in package_artifacts:
-                artifact_path = package[&#39;path&#39;]
-                group_id = package[&#39;group-id&#39;]
-                artifact_id = package[&#39;artifact-id&#39;]
-                package_type = package[&#39;package-type&#39;]
-
-                # push the artifact
-                with open(mvn_output_file_path, &#39;a&#39;) as mvn_output_file:
-                    out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                        sys.stdout,
-                        mvn_output_file
-                    ])
-                    err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                        sys.stderr,
-                        mvn_output_file
-                    ])
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-Durl=&#39; + maven_push_artifact_repo_url,
-                        &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
-                        &#39;-s&#39; + settings_file,
-                        *mvn_additional_options,
-                        _out=out_callback,
-                        _err=err_callback
-                    )
-
-                # record the pushed artifact
-                push_artifacts.append({
-                    &#39;artifact-id&#39;: artifact_id,
-                    &#39;group-id&#39;: group_id,
-                    &#39;version&#39;: version,
-                    &#39;path&#39;: artifact_path,
-                    &#39;packaging&#39;: package_type,
-                })
-        except sh.ErrorReturnCode as error:
-            step_result.success = False
-            step_result.message = &#34;Push artifacts failures. See &#39;maven-output&#39; report artifacts &#34; \
-                f&#34;for details: {error}&#34;
-
-        step_result.add_artifact(
-            description=&#34;Standard out and standard error from &#39;mvn install&#39;.&#34;,
-            name=&#39;maven-output&#39;,
-            value=mvn_output_file_path
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
         )
-        step_result.add_artifact(
-            name=&#39;push-artifacts&#39;,
-            value=push_artifacts
-        )
-        return step_result</code></pre>
+
+        print(
+            &#34;DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy &#34;
+            &#34;instead.&#34;
+        )</code></pre>
 </details>
 </section>
 <section>
@@ -376,202 +77,72 @@ class Maven(MavenGeneric):
 <span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>package</code> step using Maven.</p></div>
+<div class="desc"><p>DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead.</p>
+<p>This is an alias to MavenDeploy so as to keep things backwards compatible,
+but eventually should/can will be removed.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Maven(MavenGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `package` step using Maven.
+<pre><code class="python">class Maven(MavenDeploy):
+    &#34;&#34;&#34;DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy instead.
+
+    This is an alias to MavenDeploy so as to keep things backwards compatible,
+    but eventually should/can will be removed.
     &#34;&#34;&#34;
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;
-        Getter for the StepImplementer&#39;s configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _run_step(self): # pylint: disable=too-many-locals
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        # Get config items
-        maven_push_artifact_repo_id = self.get_value(&#39;maven-push-artifact-repo-id&#39;)
-        maven_push_artifact_repo_url = self.get_value(&#39;maven-push-artifact-repo-url&#39;)
-        version = self.get_value(&#39;version&#39;)
-        package_artifacts = self.get_value(&#39;package-artifacts&#39;)
-        tls_verify = self.get_value(&#39;tls-verify&#39;)
-
-        # disable tls verification
-        mvn_additional_options = []
-        if not tls_verify:
-            mvn_additional_options += [
-                &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
-                &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
-                &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
-            ]
-
-        # Create settings.xml
-        settings_file = self._generate_maven_settings()
-
-        # push the artifacts
-        push_artifacts = []
-        mvn_output_file_path = self.write_working_file(&#39;mvn_test_output.txt&#39;)
-        try:
-            for package in package_artifacts:
-                artifact_path = package[&#39;path&#39;]
-                group_id = package[&#39;group-id&#39;]
-                artifact_id = package[&#39;artifact-id&#39;]
-                package_type = package[&#39;package-type&#39;]
-
-                # push the artifact
-                with open(mvn_output_file_path, &#39;a&#39;) as mvn_output_file:
-                    out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                        sys.stdout,
-                        mvn_output_file
-                    ])
-                    err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                        sys.stderr,
-                        mvn_output_file
-                    ])
-                    sh.mvn(  # pylint: disable=no-member
-                        &#39;deploy:deploy-file&#39;,
-                        &#39;-Dversion=&#39; + version,
-                        &#39;-Dfile=&#39; + artifact_path,
-                        &#39;-DgroupId=&#39; + group_id,
-                        &#39;-DartifactId=&#39; + artifact_id,
-                        &#39;-Dpackaging=&#39; + package_type,
-                        &#39;-Durl=&#39; + maven_push_artifact_repo_url,
-                        &#39;-DrepositoryId=&#39; + maven_push_artifact_repo_id,
-                        &#39;-s&#39; + settings_file,
-                        *mvn_additional_options,
-                        _out=out_callback,
-                        _err=err_callback
-                    )
-
-                # record the pushed artifact
-                push_artifacts.append({
-                    &#39;artifact-id&#39;: artifact_id,
-                    &#39;group-id&#39;: group_id,
-                    &#39;version&#39;: version,
-                    &#39;path&#39;: artifact_path,
-                    &#39;packaging&#39;: package_type,
-                })
-        except sh.ErrorReturnCode as error:
-            step_result.success = False
-            step_result.message = &#34;Push artifacts failures. See &#39;maven-output&#39; report artifacts &#34; \
-                f&#34;for details: {error}&#34;
-
-        step_result.add_artifact(
-            description=&#34;Standard out and standard error from &#39;mvn install&#39;.&#34;,
-            name=&#39;maven-output&#39;,
-            value=mvn_output_file_path
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
         )
-        step_result.add_artifact(
-            name=&#39;push-artifacts&#39;,
-            value=push_artifacts
-        )
-        return step_result</code></pre>
+
+        print(
+            &#34;DEPRECATED: use ploigos_step_runner.step_implementers.push_artifacts.MavenDeploy &#34;
+            &#34;instead.&#34;
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy" href="maven_deploy.html#ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy">MavenDeploy</a></li>
 <li><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="ploigos_step_runner.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults"><code class="name flex">
-<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>Default values to use for step configuration values.</dd>
-</dl>
-<h2 id="notes">Notes</h2>
-<p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;
-    Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></b></code>:
+<li><code><b><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy" href="maven_deploy.html#ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy">MavenDeploy</a></b></code>:
 <ul class="hlist">
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.create_working_dir_sub_dir" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.environment" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.environment">environment</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.get_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.get_copy_of_runtime_step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.get_result_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_result_value">get_result_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.get_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_value">get_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.global_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.global_environment_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.has_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.run_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.run_step">run_step</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config">step_config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_config_overrides" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_environment_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_name">step_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.create_working_dir_sub_dir" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.environment" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.get_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.get_copy_of_runtime_step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.get_result_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_result_value">get_result_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.get_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_value">get_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.global_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.global_environment_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.has_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.maven_phases_and_goals" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_phases_and_goals">maven_phases_and_goals</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.maven_settings_file" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_settings_file">maven_settings_file</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.run_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.step_config_overrides" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.step_environment_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.step_implementer_config_defaults" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
 </ul>
@@ -582,12 +153,7 @@ def step_implementer_config_defaults():
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#result-artifacts">Result Artifacts</a></li>
-<li><a href="#push-artifacts">push-artifacts</a></li>
-<li><a href="#examples">Examples</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
@@ -599,9 +165,6 @@ def step_implementer_config_defaults():
 <ul>
 <li>
 <h4><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven.Maven" href="#ploigos_step_runner.step_implementers.push_artifacts.maven.Maven">Maven</a></code></h4>
-<ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.push_artifacts.maven.Maven.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

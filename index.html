@@ -334,7 +334,7 @@ step-runner-config:
     }
 
   unit-test:
-  - implementer: Maven
+  - implementer: MavenTest
     config: {
       # Optional.
       # fail-on-no-tests: true
@@ -344,7 +344,7 @@ step-runner-config:
     }
 
   package:
-  - implementer: Maven
+  - implementer: MavenPackage
     config: {
       # Optional.
       #pom-file: 'pom.xml'
@@ -357,7 +357,7 @@ step-runner-config:
     }
 
   push-artifacts:
-  - implementer: Maven
+  - implementer: MavenDeploy
     config: {
       # Required.
       # URL to the artifact repository to push the artifact to.
@@ -517,7 +517,7 @@ step-runner-config:
     }
 
   uat:
-  - implementer: MavenSeleniumCucumber
+  - implementer: MavenTestSeleniumCucumber
     config: {}
 
   # TODO: not yet implemented
@@ -833,7 +833,7 @@ step-runner-config:
       readiness-probe-path: ''
 
   uat:
-  - implementer: MavenSeleniumCucumber
+  - implementer: MavenTestSeleniumCucumber
     config: {}
 
   # TODO: not yet implemented
@@ -1173,7 +1173,7 @@ From least precedence to highest precedence.
         }
 
       unit-test:
-      - implementer: Maven
+      - implementer: MavenTest
         config: {
           # Optional.
           # fail-on-no-tests: true
@@ -1183,7 +1183,7 @@ From least precedence to highest precedence.
         }
 
       package:
-      - implementer: Maven
+      - implementer: MavenPackage
         config: {
           # Optional.
           #pom-file: &#39;pom.xml&#39;
@@ -1196,7 +1196,7 @@ From least precedence to highest precedence.
         }
 
       push-artifacts:
-      - implementer: Maven
+      - implementer: MavenDeploy
         config: {
           # Required.
           # URL to the artifact repository to push the artifact to.
@@ -1356,7 +1356,7 @@ From least precedence to highest precedence.
         }
 
       uat:
-      - implementer: MavenSeleniumCucumber
+      - implementer: MavenTestSeleniumCucumber
         config: {}
 
       # TODO: not yet implemented
@@ -1673,7 +1673,7 @@ From least precedence to highest precedence.
           readiness-probe-path: &#39;&#39;
 
       uat:
-      - implementer: MavenSeleniumCucumber
+      - implementer: MavenTestSeleniumCucumber
         config: {}
 
       # TODO: not yet implemented

@@ -29,12 +29,14 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Shared utils for maven operations.
 &#34;&#34;&#34;
-
 import os
+import sys
 import xml.etree.ElementTree as ET
 
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
 
 
 def generate_maven_settings(working_dir, maven_servers, maven_repositories, maven_mirrors):
@@ -470,7 +472,99 @@ def write_effective_pom(
             f&#34;Error generating effective pom for &#39;{pom_file_path}&#39; to &#39;{output_path}&#39;: {error}&#34;
         ) from error
 
-    return output_path</code></pre>
+    return output_path
+
+def run_maven( #pylint: disable=too-many-arguments
+    mvn_output_file_path,
+    settings_file,
+    pom_file,
+    phases_and_goals,
+    tls_verify=True,
+    additional_arguments=None,
+    profiles=None,
+    no_transfer_progress=True
+):
+    &#34;&#34;&#34;Runs maven using the given configuration.
+
+    Parameters
+    ----------
+    mvn_output_file_path : str
+        Path to file containing the maven stdout and stderr output.
+    phases_and_goals : [str]
+        List of maven phases and/or goals to execute.
+    additional_arguments : [str]
+        List of additional arguments to use.
+    pom_file : str (path)
+        pom used when executing maven.
+    tls_verify : boolean
+        Disables TLS Verification if set to False
+    profiles : [str]
+        List of maven profiles to use.
+    no_transfer_progress : boolean
+        `True` to suppress the transfer progress of packages maven downloads.
+        `False` to have the transfer progress printed.\
+        See https://maven.apache.org/ref/current/maven-embedder/cli.html
+    settings_file : str (path)
+        Maven settings file to use.
+
+    Raises
+    ------
+    StepRunnerException
+        If maven returns a none 0 exit code.
+    &#34;&#34;&#34;
+
+    if not isinstance(phases_and_goals, list):
+        phases_and_goals = [phases_and_goals]
+
+    # create profile argument
+    profiles_arguments = &#34;&#34;
+    if profiles:
+        profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
+
+    # create no transfer progress argument
+    no_transfer_progress_argument = None
+    if no_transfer_progress:
+        no_transfer_progress_argument = &#39;--no-transfer-progress&#39;
+
+    # create tls arguments
+    tls_arguments = []
+    if not tls_verify:
+        tls_arguments += [
+            &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
+            &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
+            &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
+        ]
+
+    if not additional_arguments:
+        additional_arguments = []
+
+    # run maven
+    try:
+        with open(mvn_output_file_path, &#39;w&#39;) as mvn_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                mvn_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                mvn_output_file
+            ])
+
+            sh.mvn( # pylint: disable=no-member
+                *phases_and_goals,
+                &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
+                *profiles_arguments,
+                no_transfer_progress_argument,
+                *tls_arguments,
+                *additional_arguments,
+                _out=out_callback,
+                _err=err_callback
+            )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running maven. {error}&#34;
+        ) from error</code></pre>
 </details>
 </section>
 <section>
@@ -1043,6 +1137,134 @@ Dictionary of id, url, mirror_of</p>
     return settings_path</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.maven.run_maven"><code class="name flex">
+<span>def <span class="ident">run_maven</span></span>(<span>mvn_output_file_path, settings_file, pom_file, phases_and_goals, tls_verify=True, additional_arguments=None, profiles=None, no_transfer_progress=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Runs maven using the given configuration.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>mvn_output_file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to file containing the maven stdout and stderr output.</dd>
+<dt><strong><code>phases_and_goals</code></strong> :&ensp;<code>[str]</code></dt>
+<dd>List of maven phases and/or goals to execute.</dd>
+<dt><strong><code>additional_arguments</code></strong> :&ensp;<code>[str]</code></dt>
+<dd>List of additional arguments to use.</dd>
+<dt><strong><code>pom_file</code></strong> :&ensp;<code>str (path)</code></dt>
+<dd>pom used when executing maven.</dd>
+<dt><strong><code>tls_verify</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Disables TLS Verification if set to False</dd>
+<dt><strong><code>profiles</code></strong> :&ensp;<code>[str]</code></dt>
+<dd>List of maven profiles to use.</dd>
+<dt><strong><code>no_transfer_progress</code></strong> :&ensp;<code>boolean</code></dt>
+<dd><code>True</code> to suppress the transfer progress of packages maven downloads.
+<code>False</code> to have the transfer progress printed.
+See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https://maven.apache.org/ref/current/maven-embedder/cli.html</a></dd>
+<dt><strong><code>settings_file</code></strong> :&ensp;<code>str (path)</code></dt>
+<dd>Maven settings file to use.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>StepRunnerException</code></dt>
+<dd>If maven returns a none 0 exit code.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_maven( #pylint: disable=too-many-arguments
+    mvn_output_file_path,
+    settings_file,
+    pom_file,
+    phases_and_goals,
+    tls_verify=True,
+    additional_arguments=None,
+    profiles=None,
+    no_transfer_progress=True
+):
+    &#34;&#34;&#34;Runs maven using the given configuration.
+
+    Parameters
+    ----------
+    mvn_output_file_path : str
+        Path to file containing the maven stdout and stderr output.
+    phases_and_goals : [str]
+        List of maven phases and/or goals to execute.
+    additional_arguments : [str]
+        List of additional arguments to use.
+    pom_file : str (path)
+        pom used when executing maven.
+    tls_verify : boolean
+        Disables TLS Verification if set to False
+    profiles : [str]
+        List of maven profiles to use.
+    no_transfer_progress : boolean
+        `True` to suppress the transfer progress of packages maven downloads.
+        `False` to have the transfer progress printed.\
+        See https://maven.apache.org/ref/current/maven-embedder/cli.html
+    settings_file : str (path)
+        Maven settings file to use.
+
+    Raises
+    ------
+    StepRunnerException
+        If maven returns a none 0 exit code.
+    &#34;&#34;&#34;
+
+    if not isinstance(phases_and_goals, list):
+        phases_and_goals = [phases_and_goals]
+
+    # create profile argument
+    profiles_arguments = &#34;&#34;
+    if profiles:
+        profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
+
+    # create no transfer progress argument
+    no_transfer_progress_argument = None
+    if no_transfer_progress:
+        no_transfer_progress_argument = &#39;--no-transfer-progress&#39;
+
+    # create tls arguments
+    tls_arguments = []
+    if not tls_verify:
+        tls_arguments += [
+            &#39;-Dmaven.wagon.http.ssl.insecure=true&#39;,
+            &#39;-Dmaven.wagon.http.ssl.allowall=true&#39;,
+            &#39;-Dmaven.wagon.http.ssl.ignore.validity.dates=true&#39;,
+        ]
+
+    if not additional_arguments:
+        additional_arguments = []
+
+    # run maven
+    try:
+        with open(mvn_output_file_path, &#39;w&#39;) as mvn_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                mvn_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                mvn_output_file
+            ])
+
+            sh.mvn( # pylint: disable=no-member
+                *phases_and_goals,
+                &#39;-f&#39;, pom_file,
+                &#39;-s&#39;, settings_file,
+                *profiles_arguments,
+                no_transfer_progress_argument,
+                *tls_arguments,
+                *additional_arguments,
+                _out=out_callback,
+                _err=err_callback
+            )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running maven. {error}&#34;
+        ) from error</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.utils.maven.write_effective_pom"><code class="name flex">
 <span>def <span class="ident">write_effective_pom</span></span>(<span>pom_file_path, output_path)</span>
 </code></dt>
@@ -1149,6 +1371,7 @@ Dictionary of id, url, mirror_of</p>
 <li><code><a title="ploigos_step_runner.utils.maven.add_maven_server" href="#ploigos_step_runner.utils.maven.add_maven_server">add_maven_server</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.maven.add_maven_servers" href="#ploigos_step_runner.utils.maven.add_maven_servers">add_maven_servers</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.maven.generate_maven_settings" href="#ploigos_step_runner.utils.maven.generate_maven_settings">generate_maven_settings</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.maven.run_maven" href="#ploigos_step_runner.utils.maven.run_maven">run_maven</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.maven.write_effective_pom" href="#ploigos_step_runner.utils.maven.write_effective_pom">write_effective_pom</a></code></li>
 </ul>
 </li>
