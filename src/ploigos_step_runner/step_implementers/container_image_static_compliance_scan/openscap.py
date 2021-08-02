@@ -14,16 +14,15 @@ Could come from:
 
  Configuration Key             | Required? | Default | Description
 -------------------------------|-----------|---------|-----------
-`image-tar-file`               | Yes       |         | Path to container image tar file to scan
+`container-image-tag`          | Yes       |         | Container image tag to scan.
 `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file \
                                                        to do the evaluation with. \
-                                                       Must use protocol file://|http://|https://.
-                               |           |         | Must have file extension .xml|.bz2.
-`oscap-profile`                | Yes       |         | OpenSCAP profile to evaluate.
+                                                       Must use protocol file://|http://|https://. \
+                                                       Must have file extension .xml|.bz2.
+`oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
 `oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file \
                                                        to do the evaluation with. \
-                                                       Must use protocol \
-                                                       file://|http://|https://. \
+                                                       Must use protocol file://|http://|https://. \
                                                        Must have file extension .xml|.bz2.
 `oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files \
                                                        that have remote references fetch them if \
@@ -34,6 +33,12 @@ Could come from:
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
+`[container-image-pull-repository-type, container-image-repository-type]` \
+                               | Yes       | 'containers-storage:' \
+                                                     | \
+                                           Container repository type for the pull image source. \
+                                           See https://github.com/containers/skopeo for valid \
+                                           options.
 
 Result Artifacts
 ----------------

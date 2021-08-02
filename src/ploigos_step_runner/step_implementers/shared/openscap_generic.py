@@ -9,16 +9,16 @@ from runtime configuration.
 
  Configuration Key             | Required? | Default | Description
 -------------------------------|-----------|---------|-----------
-`image-tar-file`               | Yes       |         | Path to container image tar file to scan
+`container-image-tag`          | Yes       |         | Container image tag to scan.
 `oscap-input-definitions-uri`  | Yes       |         | URI to the OpenSCAP definitions file \
-                                                      to do the evaluation with. \
-                                                      Must use protocol file://|http://|https://. \
-                                                      Must have file extension .xml|.bz2.
+                                                       to do the evaluation with. \
+                                                       Must use protocol file://|http://|https://. \
+                                                       Must have file extension .xml|.bz2.
 `oscap-profile`                | No        |         | OpenSCAP profile to evaluate.
 `oscap-tailoring-uri`          | No        |         | URI to OpenSCAP tailoring file \
-                                                      to do the evaluation with. \
-                                                      Must use protocol file://|http://|https://. \
-                                                      Must have file extension .xml|.bz2.
+                                                       to do the evaluation with. \
+                                                       Must use protocol file://|http://|https://. \
+                                                       Must have file extension .xml|.bz2.
 `oscap-fetch-remote-resources` | No        | True    | For Source DataStream and XCCDF files \
                                                        that have remote references fetch them if \
                                                        True, else don't. \
@@ -28,15 +28,12 @@ from runtime configuration.
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
-
-Expected Previous Step Results
-------------------------------
-
-Results expected from previous steps that this step requires.
-
-| Step Name                | Result Key       | Description
-|--------------------------|------------------|--------------
-| `create-container-image` | `image-tar-file` | Image to scan
+`[container-image-pull-repository-type, container-image-repository-type]` \
+                               | Yes       | 'containers-storage:' \
+                                                     | \
+                                           Container repository type for the pull image source. \
+                                           See https://github.com/containers/skopeo for valid \
+                                           options.
 
 Results
 -------
@@ -52,23 +49,32 @@ Results output by this step.
 
 import os
 import re
-import sys
 from distutils.util import strtobool
 from io import StringIO
 
 import sh
 from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils.file import download_and_decompress_source_to_destination
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.utils.containers import (create_container_from_image,
+                                                  mount_container)
+from ploigos_step_runner.utils.file import \
+    download_and_decompress_source_to_destination
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
-    'oscap-fetch-remote-resources': True
+    'oscap-fetch-remote-resources': True,
+    'container-image-pull-repository-type': 'containers-storage:',
+    'container-image-repository-type': 'containers-storage:'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'oscap-input-definitions-uri',
-    'image-tar-file'
+    'container-image-tag',
+    'container-image-pull-repository-type',
+
+    # being flexible for different use cases of proceeding steps
+    ['container-image-pull-repository-type', 'container-image-repository-type']
 ]
 
 
@@ -226,23 +232,23 @@ class OpenSCAPGeneric(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        image_tar_file = self.get_value('image-tar-file')
-
+        # get config
+        image_tag = self.get_value('container-image-tag')
         oscap_profile = self.get_value('oscap-profile')
         oscap_fetch_remote_resources = self.get_value('oscap-fetch-remote-resources')
-
-        # create a container name from the tar file name, step name, and sub step name
-        container_name = os.path.splitext(os.path.basename(image_tar_file))[0]
-        container_name += f"-{self.step_name}-{self.sub_step_name}"
+        pull_repository_type = self.get_value([
+            'container-image-pull-repository-type',
+            'container-image-repository-type'
+        ])
 
         try:
-            # import image tar file to vfs file system
-            print(f"\nImport image: {image_tar_file}")
-            OpenSCAPGeneric.__buildah_import_image_from_tar(
-                image_tar_file=image_tar_file,
-                container_name=container_name
+            # create container from image that can be mounted
+            print(f"\nCreate container from image ({image_tag})")
+            container_name = create_container_from_image(
+                image_tag=image_tag,
+                repository_type=pull_repository_type
             )
-            print(f"Imported image: {image_tar_file}")
+            print(f"Created container ({container_name}) from image ({image_tag})")
 
             # baking `buildah unshare` command to wrap other buildah commands with
             # so that container does not need to be running in a privileged mode to be able
@@ -254,7 +260,7 @@ class OpenSCAPGeneric(StepImplementer):
             # NOTE: run in the context of `buildah unshare` so that container does not
             #       need to be run in a privileged mode
             print(f"\nMount container: {container_name}")
-            container_mount_path = OpenSCAPGeneric.__buildah_mount_container(
+            container_mount_path = mount_container(
                 buildah_unshare_command=buildah_unshare_command,
                 container_id=container_name
             )
@@ -352,95 +358,11 @@ class OpenSCAPGeneric(StepImplementer):
                 name='stdout-report',
                 value=oscap_out_file_path
             )
-        except StepRunnerException as error:
+        except (StepRunnerException, RuntimeError) as error:
             step_result.success = False
             step_result.message = str(error)
 
         return step_result
-
-    @staticmethod
-    def __buildah_import_image_from_tar(image_tar_file, container_name):
-        """Import a container image using buildah form a TAR file.
-
-        Parameters
-        ----------
-        image_tar_file : str
-            Path to TAR file to import as a container image.
-        container_name : str
-            name for the working container.
-
-        Returns
-        -------
-        str
-            Name of the imported container.
-
-        Raises
-        ------
-        StepRunnerException
-            If error importing image.
-        """
-        # import image tar file to vfs file system
-        try:
-            sh.buildah(  # pylint: disable=no-member
-                'from',
-                '--storage-driver', 'vfs',
-                '--name', container_name,
-                f"docker-archive:{image_tar_file}",
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee='err'
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f'Error importing the image ({image_tar_file}): {error}'
-            ) from error
-
-        return container_name
-
-    @staticmethod
-    def __buildah_mount_container(buildah_unshare_command, container_id):
-        """Use buildah to mount a container.
-
-        Parameters
-        ----------
-        buildah_unshare_command : sh.buildah.unshare.bake()
-            A baked sh.buildah.unshare command to use to run this command in the context off
-            so that this can be done "rootless".
-        container_id : str
-            ID of the container to mount.
-
-        Returns
-        -------
-        str
-            Absolute path to the mounted container.
-
-        Raises
-        ------
-        StepRunnerException
-            If error mounting the container.
-        """
-        mount_path = None
-        try:
-            buildah_mount_out_buff = StringIO()
-            buildah_mount_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                sys.stdout,
-                buildah_mount_out_buff
-            ])
-            buildah_mount_command = buildah_unshare_command.bake("buildah", "mount")
-            buildah_mount_command(
-                '--storage-driver', 'vfs',
-                container_id,
-                _out=buildah_mount_out_callback,
-                _err=sys.stderr,
-                _tee='err'
-            )
-            mount_path = buildah_mount_out_buff.getvalue().rstrip()
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f'Error mounting container ({container_id}): {error}'
-            ) from error
-
-        return mount_path
 
     @staticmethod
     def __get_oscap_document_type(oscap_input_file):

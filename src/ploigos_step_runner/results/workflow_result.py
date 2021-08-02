@@ -35,8 +35,8 @@ class WorkflowResult:
     ): # pylint: disable=too-many-boolean-expressions
         """Search for an artifact.
 
-        If step_name, sub_step_name, or environment are provided ensure the artifact comes
-        from the first
+        If step_name, sub_step_name, or environment are not provided ensure the artifact comes
+        from the last step that returned that artifact.
 
         1.  if step_name is provided, look for the artifact in the step
         2.  elif step_name and sub_step_name is provided, look for the artifact in the step/sub_step

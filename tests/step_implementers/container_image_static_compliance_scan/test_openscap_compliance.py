@@ -1,14 +1,15 @@
 import os
 import re
 
-from testfixtures import TempDirectory
-from tests.step_implementers.shared.test_openscap_generic import \
-    TestStepImplementerSharedOpenSCAPGeneric
+import tests.step_implementers.shared.test_openscap_generic
 from ploigos_step_runner.step_implementers.container_image_static_compliance_scan import \
     OpenSCAP
+from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
 
 
-class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImplementerSharedOpenSCAPGeneric):
+class BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -26,123 +27,52 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP(TestStepImpl
             parent_work_dir_path=parent_work_dir_path
         )
 
-    def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
-        step_config = {
-            'oscap-input-definitions-uri': 'https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml',
-            'oscap-profile': 'foo',
-            'image-tar-file': 'does-not-matter'
-        }
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP_step_implementer_config_defaults(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric_step_implementer_config_defaults
+):
+    pass
 
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP__required_config_or_result_keys(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP
+):
+    def test_result(self):
+        required_keys = OpenSCAP._required_config_or_result_keys()
+        expected_required_keys = [
+            'oscap-profile',
+            'oscap-input-definitions-uri',
+            'container-image-tag',
+            'container-image-pull-repository-type',
+            ['container-image-pull-repository-type', 'container-image-repository-type']
+        ]
+        self.assertEqual(required_keys, expected_required_keys)
 
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                parent_work_dir_path=parent_work_dir_path
-            )
+class TestStepImplementerContainerImageStaticVulnerabilityScanOpenSCAP__validate_required_config_or_previous_step_result_artifact_keys(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric__validate_required_config_or_previous_step_result_artifact_keys
+):
+    pass
 
-            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP___get_oscap_document_type(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric___get_oscap_document_type
+):
+    pass
 
-    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_extension(self):
-        oscap_input_definitions_uri = 'https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml.foo'
-        step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri,
-            'oscap-profile': 'foo',
-            'image-tar-file': 'does-not-matter'
-        }
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP___get_oscap_eval_type_based_on_document_type(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric___get_oscap_eval_type_based_on_document_type
+):
+    pass
 
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP___run_oscap_scan(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric___run_oscap_scan
+):
+    pass
 
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                parent_work_dir_path=parent_work_dir_path
-            )
-
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    re.compile(
-                        r'Open SCAP input definitions source '
-                        rf'\({oscap_input_definitions_uri}\) must be of known type \(xml\|bz2\), got: \.foo'
-                    )
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
-    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_protocal(self):
-        oscap_input_definitions_uri = 'foo://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml'
-        step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri,
-            'oscap-profile': 'foo',
-            'image-tar-file': 'does-not-matter'
-        }
-
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                parent_work_dir_path=parent_work_dir_path
-            )
-
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    re.compile(
-                        r'Open SCAP input definitions source '
-                        rf'\({oscap_input_definitions_uri}\) must start with known protocol '
-                        r'\(file://\|http://\|https://\)\.'
-                    )
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
-    def test__validate_required_config_or_previous_step_result_artifact_keys_missing_oscap_profile(self):
-        oscap_input_definitions_uri = 'https://atopathways.redhatgov.io/compliance-as-code/scap/ssg-rhel8-ds.xml'
-        step_config = {
-            'oscap-input-definitions-uri': oscap_input_definitions_uri,
-            'image-tar-file': 'does-not-matter'
-        }
-
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                parent_work_dir_path=parent_work_dir_path
-            )
-
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    re.compile(
-                        r"Missing required step configuration or previous step result"
-                        r" artifact keys: \['oscap-profile'\]"
-                    )
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
-    def test__validate_required_config_or_previous_step_result_artifact_keys_missing_required_keys(self):
-        step_config = {}
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='OpenSCAP',
-                parent_work_dir_path=parent_work_dir_path
-            )
-
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    re.compile(
-                        r"Missing required step configuration or previous step result"
-                        r" artifact keys: \['oscap-profile', 'oscap-input-definitions-uri', 'image-tar-file'\]"
-                    )
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP__run_step(
+    BaseTestStepImplementerContainerImageStaticComplianceScanOpenSCAP,
+    tests.step_implementers.shared.test_openscap_generic.TestStepImplementerSharedOpenSCAPGeneric__run_step
+):
+    pass
