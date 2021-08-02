@@ -89,7 +89,7 @@ class WorkflowResult:
         &#34;&#34;&#34;
 
         value = None
-        for step_result in self.workflow_list:
+        for step_result in reversed(self.workflow_list):
             if ( \
                 (not step_name or step_result.step_name == step_name) and \
                 (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
@@ -408,7 +408,7 @@ The WorkflowResult represents ALL previous results.</p></div>
         &#34;&#34;&#34;
 
         value = None
-        for step_result in self.workflow_list:
+        for step_result in reversed(self.workflow_list):
             if ( \
                 (not step_name or step_result.step_name == step_name) and \
                 (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
@@ -882,7 +882,7 @@ from the first</p>
     &#34;&#34;&#34;
 
     value = None
-    for step_result in self.workflow_list:
+    for step_result in reversed(self.workflow_list):
         if ( \
             (not step_name or step_result.step_name == step_name) and \
             (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
