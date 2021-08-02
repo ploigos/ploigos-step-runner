@@ -57,6 +57,17 @@ class TestStepImplementer(BaseStepImplementerTestCase):
 
         workflow_result = WorkflowResult()
 
+        step_result_no_evn = StepResult(
+            step_name='foo',
+            sub_step_name='Mock',
+            sub_step_implementer_name='Mock'
+        )
+        step_result_no_evn.add_artifact(
+            name='container-image-tag',
+            value='localhost/mock:0.42.0-weird'
+        )
+        workflow_result.add_step_result(step_result=step_result_no_evn)
+
         step_result_deploy_test = StepResult(
             step_name='deploy',
             sub_step_name='ArgoCD',
@@ -66,6 +77,10 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         step_result_deploy_test.add_artifact(
             name='deployed-host-urls',
             value='https://awesome-app.test.ploigos.xyz'
+        )
+        step_result_deploy_test.add_artifact(
+            name='container-image-tag',
+            value='localhost/test/mock:0.42.0-weird'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_test)
 
@@ -78,6 +93,10 @@ class TestStepImplementer(BaseStepImplementerTestCase):
         step_result_deploy_prod.add_artifact(
             name='deployed-host-urls',
             value='https://awesome-app.prod.ploigos.xyz'
+        )
+        step_result_deploy_test.add_artifact(
+            name='container-image-tag',
+            value='localhost/prod/mock:0.42.0-weird'
         )
         workflow_result.add_step_result(step_result=step_result_deploy_prod)
         pickle_filename = os.path.join(parent_work_dir_path, 'step-runner-results.pkl')
@@ -910,12 +929,21 @@ class TestStepImplementer_get_value(TestStepImplementer):
             self.assertEqual(step.get_value('fake-previous-step-artifact'), 'world hello')
             self.assertIsNone(step.get_value('does-not-exist'))
 
-    def test_get_value_from_step_not_run_against_specific_environment(self):
+    def test_get_value_from_artifact_without_specifing_environment_where_last_artifact_was_from_environment_and_artifact_never_set_without_environment(self):
         with TempDirectory() as test_dir:
             step = self._setup_get_value_with_env_test(test_dir=test_dir, environment=None)
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
-                'https://awesome-app.test.ploigos.xyz'
+                'https://awesome-app.prod.ploigos.xyz'
+            )
+
+    # NOTE: maybe this should actually return the first instance where the environment was not set?
+    def test_get_value_from_artifact_without_specifing_environment_where_last_artifact_was_from_environment_and_artifact_was_set_without_environment(self):
+        with TempDirectory() as test_dir:
+            step = self._setup_get_value_with_env_test(test_dir=test_dir, environment=None)
+            self.assertEqual(
+                step.get_value('container-image-tag'),
+                'localhost/prod/mock:0.42.0-weird'
             )
 
     def test_get_value_from_step_run_in_environment_that_has_result_value_for_that_environment_1(self):
@@ -939,7 +967,7 @@ class TestStepImplementer_get_value(TestStepImplementer):
             step = self._setup_get_value_with_env_test(test_dir=test_dir, environment='RANDOM')
             self.assertEqual(
                 step.get_value('deployed-host-urls'),
-                'https://awesome-app.test.ploigos.xyz'
+                'https://awesome-app.prod.ploigos.xyz'
             )
 
     def test_get_value_multiple_keys_1(self):
