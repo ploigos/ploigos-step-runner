@@ -23,7 +23,7 @@ def setup_test():
     step_result1.add_evidence('evidence3', 'value3')
     step_result1.add_evidence('evidence4', False)
     step_result1.add_evidence('same-evidence-all-env-and-no-env', 'result1')
-    
+
 
     step_result2 = StepResult('step2', 'sub2', 'implementer2')
     step_result2.add_artifact('artifact1', True)
@@ -103,7 +103,7 @@ class TestStepWorkflowResultTest(BaseTestCase):
     def test_get_artifact_value_without_step(self):
         wfr = setup_test()
 
-        expected_artifact = 'value1'
+        expected_artifact = True
         self.assertEqual(
             expected_artifact,
             wfr.get_artifact_value(artifact='artifact1')
@@ -237,7 +237,7 @@ class TestStepWorkflowResultTest(BaseTestCase):
             wfr.get_artifact_value(
                 artifact='same-artifact-all-env-and-no-env'
             ),
-            'result1'
+            'result4-test-env'
         )
 
         self.assertEqual(
@@ -289,7 +289,7 @@ class TestStepWorkflowResultTest(BaseTestCase):
             wfr.get_artifact_value(
                 artifact='same-artifact-diff-env'
             ),
-            'value-dev-env'
+            'value-test-env'
         )
 
         self.assertEqual(

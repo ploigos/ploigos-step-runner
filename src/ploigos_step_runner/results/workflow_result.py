@@ -60,7 +60,7 @@ class WorkflowResult:
         """
 
         value = None
-        for step_result in self.workflow_list:
+        for step_result in reversed(self.workflow_list):
             if ( \
                 (not step_name or step_result.step_name == step_name) and \
                 (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
