@@ -4,8 +4,7 @@ from unittest.mock import call, patch
 
 import sh
 from ploigos_step_runner.config import ConfigValue
-from ploigos_step_runner.utils.containers import (container_registries_login,
-                                                  container_registry_login)
+from ploigos_step_runner.utils.containers import *
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import *
 
@@ -992,3 +991,145 @@ class TestContainerRegistriesLoginForceOverrideTlsVerifyLogin(BaseTestCase):
             )
         ]
         container_registry_login_mock.assert_has_calls(calls)
+
+class Test_create_container_from_image(BaseTestCase):
+    @patch('sh.buildah', create=True)
+    def test_success_default_repository_type(self, buildah_mock):
+        # setup test
+        image_tag = "localhost/mock-org/mock-image:v0.42.0-mock"
+
+        # run test
+        buildah_mock.side_effect = create_sh_side_effect(
+            mock_stdout='mock-image-working-container-mock'
+        )
+        actual_container_name = create_container_from_image(
+            image_tag=image_tag
+        )
+
+        # verify
+        self.assertEqual(actual_container_name, 'mock-image-working-container-mock')
+
+        buildah_mock.assert_called_once_with(
+            'from',
+            f"container-storage:{image_tag}",
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )
+
+    @patch('sh.buildah', create=True)
+    def test_success_remote_repository_type(self, buildah_mock):
+        # setup test
+        image_tag = "quay.io/mock-org/mock-image:v0.42.0-mock"
+
+        # run test
+        buildah_mock.side_effect = create_sh_side_effect(
+            mock_stdout='mock-image-working-container-mock'
+        )
+        actual_container_name = create_container_from_image(
+            image_tag=image_tag,
+            repository_type='docker://'
+        )
+
+        # verify
+        self.assertEqual(actual_container_name, 'mock-image-working-container-mock')
+
+        buildah_mock.assert_called_once_with(
+            'from',
+            f"docker://{image_tag}",
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )
+
+    @patch('sh.buildah', create=True)
+    def test_error(self, buildah_mock):
+        # setup test
+        image_tag = "localhost/mock-org/mock-image:v0.42.0-mock"
+
+        # run test with mock error
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                rf"Error creating container from image \({image_tag}\):"
+                r".*RAN: buildah"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            )
+        ):
+            buildah_mock.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
+            create_container_from_image(
+                image_tag=image_tag
+            )
+
+        # verify
+        buildah_mock.assert_called_once_with(
+            'from',
+            f"container-storage:{image_tag}",
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )
+
+class Test_mount_container(BaseTestCase):
+    @patch('sh.buildah', create=True)
+    def test_success(self, buildah_mock):
+        buildah_unshare_command = sh.buildah.bake('unshare')
+        container_name = "test"
+
+        expected_mount_path = '/this/is/a/path'
+        buildah_mock.bake('unshare').bake('buildah', 'mount').side_effect = create_sh_side_effect(
+            mock_stdout=f"{expected_mount_path}",
+        )
+
+        container_mount_path = mount_container(
+            buildah_unshare_command=buildah_unshare_command,
+            container_id=container_name
+        )
+
+        self.assertEqual(container_mount_path, expected_mount_path)
+
+        buildah_mock.bake('unshare').bake('buildah', 'mount').assert_called_once_with(
+            container_name,
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )
+
+    @patch('sh.buildah', create=True)
+    def test_buildah_error(self, buildah_mock):
+        buildah_unshare_command = sh.buildah.bake('unshare')
+        container_name = "test"
+
+        buildah_mock.bake('unshare').bake('buildah', 'mount').side_effect = sh.ErrorReturnCode(
+            'buildah mount',
+            b'mock out',
+            b'mock error'
+        )
+
+        with self.assertRaisesRegex(
+                RuntimeError,
+                re.compile(
+                    rf"Error mounting container \({container_name}\):"
+                    r".*RAN: buildah"
+                    r".*STDOUT:"
+                    r".*mock out"
+                    r".*STDERR:"
+                    r".*mock error",
+                    re.DOTALL
+                )
+        ):
+            mount_container(
+                buildah_unshare_command=buildah_unshare_command,
+                container_id=container_name
+            )
+
+        buildah_mock.bake('unshare').bake('buildah', 'mount').assert_called_once_with(
+            container_name,
+            _out=Any(IOBase),
+            _err=Any(IOBase),
+            _tee='err'
+        )

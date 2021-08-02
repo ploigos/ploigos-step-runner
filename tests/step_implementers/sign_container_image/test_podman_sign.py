@@ -97,7 +97,7 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
         required_keys = PodmanSign._required_config_or_result_keys()
         expected_required_keys = [
             ['signer-pgp-private-key', 'container-image-signer-pgp-private-key'],
-            'container-image-tag'
+            ['container-image-push-tag', 'container-image-tag']
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
@@ -162,11 +162,14 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 containers_config_tls_verify=True,
                 container_command_short_name='podman'
             )
-
             expected_step_result = StepResult(
                 step_name='sign-container-image',
                 sub_step_name='PodmanSign',
                 sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
             )
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
@@ -255,6 +258,10 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 sub_step_name='PodmanSign',
                 sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
             )
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
@@ -358,6 +365,14 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 step_name='sign-container-image',
                 sub_step_name='PodmanSign',
                 sub_step_implementer_name='PodmanSign'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
+            )
+            expected_step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
             )
             expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
@@ -464,6 +479,10 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
                 sub_step_implementer_name='PodmanSign'
             )
             expected_step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
+            )
+            expected_step_result.add_artifact(
                 name='container-image-signature-file-path',
                 value= os.path.join(
                     parent_work_dir_path,
@@ -487,9 +506,8 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'mock upload error'
 
-            print(expected_step_result)
-            print(result)
             self.assertEqual(expected_step_result, result)
+
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')
     @patch.object(PodmanSign, '_PodmanSign__sign_image')
     def test_run_step_fail_import_pgp_key(self, sign_image_mock, import_pgp_key_mock):
@@ -538,8 +556,6 @@ class TestStepImplementerSignContainerImagePodman(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = 'mock error importing pgp key'
 
-            print(expected_step_result)
-            print(result)
             self.assertEqual(expected_step_result, result)
 
     @patch('ploigos_step_runner.step_implementers.sign_container_image.podman_sign.import_pgp_key')

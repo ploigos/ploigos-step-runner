@@ -41,6 +41,7 @@ Result Artifact Key                        | Description
 `container-image-signature-signer-private-key-fingerprint` \
                                            | Fingerprint for the private key used to sign \
                                              the container image.
+`container-image-signed-tag`               | TODO
 `container-image-signature-file-path`      | File path to created image signature.
 `container-image-signature-name`           | Fully qualified name of the \
                                              name of the image signature, \
@@ -75,7 +76,9 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     # signer-pgp-private-key - new key name
     # container-image-signer-pgp-private-key - old key name
     ['signer-pgp-private-key', 'container-image-signer-pgp-private-key'],
-    'container-image-tag'
+
+    # being flexible for different use cases of proceeding steps
+    ['container-image-push-tag', 'container-image-tag']
 ]
 
 class PodmanSign(StepImplementer):
@@ -131,12 +134,11 @@ class PodmanSign(StepImplementer):
         )
 
         # get the uri to the image to sign
-        container_image_tag = self.get_value('container-image-tag')
+        container_image_tag = self.get_value(['container-image-push-tag', 'container-image-tag'])
 
         image_signatures_directory = self.create_working_dir_sub_dir(
             sub_dir_relative_path='image-signature'
         )
-
         try:
             # import the PGP key and get the finger print
             signer_pgp_private_key_fingerprint = import_pgp_key(
@@ -165,6 +167,10 @@ class PodmanSign(StepImplementer):
                 pgp_private_key_fingerprint=signer_pgp_private_key_fingerprint,
                 image_signatures_directory=image_signatures_directory,
                 container_image_tag=container_image_tag
+            )
+            step_result.add_artifact(
+                name='container-image-signed-tag',
+                value=container_image_tag,
             )
             step_result.add_artifact(
                 name='container-image-signature-file-path',
