@@ -265,7 +265,7 @@ class ArgoCD(StepImplementer):
                 repo_branch=deployment_config_repo_branch,
                 git_email=self.get_value('git-email'),
                 git_name=self.get_value('git-name'),
-	          username = self.get_value('git-username'),
+                username = self.get_value('git-username'),
                 password = self.get_value('git-password')
             )
 
