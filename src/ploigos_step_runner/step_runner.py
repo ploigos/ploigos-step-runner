@@ -145,6 +145,7 @@ class StepRunner:
             f"Can not run step ({step_name}) because no step configuration provided."
 
         # for each sub step in the step config get the step implementer and run it
+        aggregate_success = True
         for sub_step_config in sub_step_configs:
             sub_step_implementer_name = sub_step_config.sub_step_implementer_name
 
@@ -174,11 +175,16 @@ class StepRunner:
                 yml_filename=self.results_file_path
             )
 
-            # bail out if one of the sub steps fails
-            if not step_result.success:
-                return False
+            # aggregate success
+            aggregate_success = (aggregate_success and step_result.success)
 
-        return True
+            # if this sub step failed and not configured to continue on failure, bail
+            # else execute next sub step and continue aggregating success
+            if (not step_result.success) and \
+                    (not sub_step_config.sub_step_contine_sub_steps_on_failure):
+                break
+
+        return aggregate_success
 
     @staticmethod
     def __get_step_implementer_class(step_name, step_implementer_name):

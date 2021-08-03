@@ -1,13 +1,9 @@
-# pylint: disable=line-too-long
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-
 import re
+from unittest.mock import patch
 
-from testfixtures import TempDirectory
-from ploigos_step_runner import StepRunner, StepRunnerException
+from ploigos_step_runner import StepResult, StepRunner, StepRunnerException
 from ploigos_step_runner.config import Config
+from testfixtures import TempDirectory
 
 from tests.helpers.base_test_case import BaseTestCase
 
@@ -174,3 +170,245 @@ class TestStepRunner(BaseTestCase):
                 'tests.helpers.sample_step_implementers.FooStepImplementer'
             )
         )
+
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer2._run_step')
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer._run_step')
+    def test_run_step_multiple_sub_steps_all_succeed(
+        self,
+        foo_step_implementer_run_step_mock,
+        foo_step_implementer2_run_step_mock
+    ):
+        config = {
+            'step-runner-config': {
+                'foo': [
+                    {
+                        'name': 'Mock Sub Step 1',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    },
+                    {
+                        'name': 'Mock Sub Step 2',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer2'
+                    }
+                ]
+            }
+        }
+
+        # mock return value
+        mock_sub_step_1_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 1',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_1_result.success = True
+        mock_sub_step_2_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 2',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_2_result.success = True
+
+        foo_step_implementer_run_step_mock.return_value = mock_sub_step_1_result
+        foo_step_implementer2_run_step_mock.return_value = mock_sub_step_2_result
+
+        # run test
+        step_runner = StepRunner(config)
+        actual_success = step_runner.run_step('foo')
+
+        # validate
+        self.assertTrue(actual_success)
+        foo_step_implementer_run_step_mock.assert_called_once()
+        foo_step_implementer2_run_step_mock.assert_called_once()
+
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer2._run_step')
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer._run_step')
+    def test_run_step_multiple_sub_steps_first_sub_step_fail(
+        self,
+        foo_step_implementer_run_step_mock,
+        foo_step_implementer2_run_step_mock
+    ):
+        config = {
+            'step-runner-config': {
+                'foo': [
+                    {
+                        'name': 'Mock Sub Step 1',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    },
+                    {
+                        'name': 'Mock Sub Step 2',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer2'
+                    }
+                ]
+            }
+        }
+
+        # mock return value
+        mock_sub_step_1_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 1',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_1_result.success = False
+        mock_sub_step_2_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 2',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_2_result.success = True
+
+        foo_step_implementer_run_step_mock.return_value = mock_sub_step_1_result
+        foo_step_implementer2_run_step_mock.return_value = mock_sub_step_2_result
+
+        # run test
+        step_runner = StepRunner(config)
+        actual_success = step_runner.run_step('foo')
+
+        # validate
+        self.assertFalse(actual_success)
+        foo_step_implementer_run_step_mock.assert_called_once()
+        foo_step_implementer2_run_step_mock.assert_not_called()
+
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer2._run_step')
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer._run_step')
+    def test_run_step_multiple_sub_steps_second_sub_step_fail(
+        self,
+        foo_step_implementer_run_step_mock,
+        foo_step_implementer2_run_step_mock
+    ):
+        config = {
+            'step-runner-config': {
+                'foo': [
+                    {
+                        'name': 'Mock Sub Step 1',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    },
+                    {
+                        'name': 'Mock Sub Step 2',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer2'
+                    }
+                ]
+            }
+        }
+
+        # mock return value
+        mock_sub_step_1_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 1',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_1_result.success = True
+        mock_sub_step_2_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 2',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_2_result.success = False
+
+        foo_step_implementer_run_step_mock.return_value = mock_sub_step_1_result
+        foo_step_implementer2_run_step_mock.return_value = mock_sub_step_2_result
+
+        # run test
+        step_runner = StepRunner(config)
+        actual_success = step_runner.run_step('foo')
+
+        # validate
+        self.assertFalse(actual_success)
+        foo_step_implementer_run_step_mock.assert_called_once()
+        foo_step_implementer2_run_step_mock.assert_called_once()
+
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer2._run_step')
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer._run_step')
+    def test_run_step_multiple_sub_steps_first_sub_step_fail_contine_sub_steps_on_failure_bool(
+        self,
+        foo_step_implementer_run_step_mock,
+        foo_step_implementer2_run_step_mock
+    ):
+        config = {
+            'step-runner-config': {
+                'foo': [
+                    {
+                        'name': 'Mock Sub Step 1',
+                        'continue-sub-steps-on-failure': True,
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    },
+                    {
+                        'name': 'Mock Sub Step 2',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer2'
+                    }
+                ]
+            }
+        }
+
+        # mock return value
+        mock_sub_step_1_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 1',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_1_result.success = False
+        mock_sub_step_2_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 2',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_2_result.success = True
+
+        foo_step_implementer_run_step_mock.return_value = mock_sub_step_1_result
+        foo_step_implementer2_run_step_mock.return_value = mock_sub_step_2_result
+
+        # run test
+        step_runner = StepRunner(config)
+        actual_success = step_runner.run_step('foo')
+
+        # validate
+        self.assertFalse(actual_success)
+        foo_step_implementer_run_step_mock.assert_called_once()
+        foo_step_implementer2_run_step_mock.assert_called_once()
+
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer2._run_step')
+    @patch('tests.helpers.sample_step_implementers.FooStepImplementer._run_step')
+    def test_run_step_multiple_sub_steps_first_sub_step_fail_contine_sub_steps_on_failure_str(
+        self,
+        foo_step_implementer_run_step_mock,
+        foo_step_implementer2_run_step_mock
+    ):
+        config = {
+            'step-runner-config': {
+                'foo': [
+                    {
+                        'name': 'Mock Sub Step 1',
+                        'continue-sub-steps-on-failure': 'true',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer'
+                    },
+                    {
+                        'name': 'Mock Sub Step 2',
+                        'implementer': 'tests.helpers.sample_step_implementers.FooStepImplementer2'
+                    }
+                ]
+            }
+        }
+
+        # mock return value
+        mock_sub_step_1_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 1',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_1_result.success = False
+        mock_sub_step_2_result = StepResult(
+            step_name='foo',
+            sub_step_name='Mock Sub Step 2',
+            sub_step_implementer_name='tests.helpers.sample_step_implementers.FooStepImplementer'
+        )
+        mock_sub_step_2_result.success = True
+
+        foo_step_implementer_run_step_mock.return_value = mock_sub_step_1_result
+        foo_step_implementer2_run_step_mock.return_value = mock_sub_step_2_result
+
+        # run test
+        step_runner = StepRunner(config)
+        actual_success = step_runner.run_step('foo')
+
+        # validate
+        self.assertFalse(actual_success)
+        foo_step_implementer_run_step_mock.assert_called_once()
+        foo_step_implementer2_run_step_mock.assert_called_once()

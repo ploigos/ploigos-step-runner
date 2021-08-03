@@ -1,12 +1,11 @@
 import os.path
 
-from testfixtures import TempDirectory
-
-from tests.helpers.base_test_case import BaseTestCase
-
-from ploigos_step_runner.decryption_utils import DecryptionUtils
 from ploigos_step_runner.config import Config, ConfigValue
 from ploigos_step_runner.config.decryptors.sops import SOPS
+from ploigos_step_runner.decryption_utils import DecryptionUtils
+from testfixtures import TempDirectory
+from tests.helpers.base_test_case import BaseTestCase
+
 
 class TestConfig(BaseTestCase):
     def test_add_config_invalid_type(self):
@@ -920,6 +919,102 @@ class TestConfig(BaseTestCase):
             {
                 'test2': 'foo'
             }
+        )
+
+    def test_sub_step_with_continue_sub_steps_on_failure_bool(self):
+        config = Config({
+            Config.CONFIG_KEY: {
+                'step-foo': [
+                    {
+                        'implementer': 'foo1',
+                        'continue-sub-steps-on-failure': True,
+                        'config': {
+                            'test1': 'foo'
+                        }
+                    },
+                    {
+                        'implementer': 'foo2',
+                        'config': {
+                            'test2': 'foo'
+                        }
+                    }
+                ]
+
+            }
+        })
+
+        step_config = config.get_step_config('step-foo')
+        self.assertEqual(len(step_config.sub_steps), 2)
+
+        self.assertEqual(
+            ConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').sub_step_config,
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
+        self.assertEqual(
+            ConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo2').sub_step_config
+            ),
+            {
+                'test2': 'foo'
+            }
+        )
+        self.assertTrue(
+            step_config.get_sub_step('foo1').sub_step_contine_sub_steps_on_failure
+        )
+        self.assertFalse(
+            step_config.get_sub_step('foo2').sub_step_contine_sub_steps_on_failure
+        )
+
+    def test_sub_step_with_continue_sub_steps_on_failure_str(self):
+        config = Config({
+            Config.CONFIG_KEY: {
+                'step-foo': [
+                    {
+                        'implementer': 'foo1',
+                        'continue-sub-steps-on-failure': 'true',
+                        'config': {
+                            'test1': 'foo'
+                        }
+                    },
+                    {
+                        'implementer': 'foo2',
+                        'config': {
+                            'test2': 'foo'
+                        }
+                    }
+                ]
+
+            }
+        })
+
+        step_config = config.get_step_config('step-foo')
+        self.assertEqual(len(step_config.sub_steps), 2)
+
+        self.assertEqual(
+            ConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo1').sub_step_config,
+            ),
+            {
+                'test1': 'foo'
+            }
+        )
+        self.assertEqual(
+            ConfigValue.convert_leaves_to_values(
+                step_config.get_sub_step('foo2').sub_step_config
+            ),
+            {
+                'test2': 'foo'
+            }
+        )
+        self.assertTrue(
+            step_config.get_sub_step('foo1').sub_step_contine_sub_steps_on_failure
+        )
+        self.assertFalse(
+            step_config.get_sub_step('foo2').sub_step_contine_sub_steps_on_failure
         )
 
     def test_sub_step_with_name(self):
