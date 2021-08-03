@@ -1,67 +1,38 @@
 """`StepImplementer` for the `unit-test` step using npm 
 
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-* static configuration
-* runtime configuration
-* previous step results
-
-Configuration Key  | Required? | Default     | Description
--------------------|-----------|-------------|-----------
-`fail-on-no-tests` | True      | True        | Value to specify whether unit-test \
-                                               step can succeed when no tests are defined
-`package-file`         | True      | `'package.json'` | package file used to run tests and check \
-                                               for existence of custom reportsDirectory
-`tls-verify`       | No        | True        | Disables TLS Verification if set to False
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key | Description
---------------------|------------
-`npm-output`      | Path to Stdout and Stderr from invoking npm.
-# `surefile-reports`  | Path to Surefire reports generated from invoking Maven.
 """
 import os
+from posixpath import abspath
 import sys
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 import sh
 from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
-    'tls-verify': True,
-    'fail-on-no-tests': True,
     'package-file': 'package.json'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'fail-on-no-tests',
     'package-file'
 ]
-
-
-class Npm(NpmGeneric):
-    """`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
+class Npm(StepImplementer):
+    """`StepImplementer` for the `unit-test` step using npm.
     """
 
     @staticmethod
     def step_implementer_config_defaults():
         """Getter for the StepImplementer's configuration defaults.
 
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
         Notes
         -----
         These are the lowest precedence configuration values.
 
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
         """
         return DEFAULT_CONFIG
 
@@ -82,6 +53,25 @@ class Npm(NpmGeneric):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        """Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given 'package-file' exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        """
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        package_file = self.get_value('package-file')
+        assert os.path.exists(package_file), \
+            f'Given npm package file (package-file) does not exist: {package_file}'
+
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
 
@@ -92,73 +82,49 @@ class Npm(NpmGeneric):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        tls_verify = self.get_value('tls-verify')
-        pom_file = self.get_value('package-file')
-        fail_on_no_tests = self.get_value('fail-on-no-tests')
+        # package_file = self.get_value('package-file')
 
-        # get surefire test results dir
-        reports_dir = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH
-        )
-        if reports_dir is not None:
-            test_results_dir = reports_dir.text
-        else:
-            test_results_dir = os.path.join(
-                os.path.dirname(os.path.abspath(pom_file)),
-                MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
-            )
-
-        mvn_additional_options = []
-        if not tls_verify:
-            mvn_additional_options += [
-                '-Dmaven.wagon.http.ssl.insecure=true',
-                '-Dmaven.wagon.http.ssl.allowall=true',
-                '-Dmaven.wagon.http.ssl.ignore.validity.dates=true',
-            ]
-
-        settings_file = self._generate_maven_settings()
-        mvn_output_file_path = self.write_working_file('mvn_test_output.txt')
+        npm_output_file_path = self.write_working_file('npm_test_output.txt')
         try:
-            with open(mvn_output_file_path, 'w') as mvn_output_file:
+            with open(npm_output_file_path, 'w') as npm_output_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     sys.stdout,
-                    mvn_output_file
+                    npm_output_file
                 ])
                 err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     sys.stderr,
-                    mvn_output_file
+                    npm_output_file
                 ])
 
-                sh.mvn( # pylint: disable=no-member
-                    'clean',
+                sh.npm( # pylint: disable=no-member
+                    'run',
                     'test',
-                    '-f', pom_file,
-                    '-s', settings_file,
-                    *mvn_additional_options,
                     _out=out_callback,
                     _err=err_callback
                 )
+            test_results_dir = os.path.abspath()
+            print(test_results_dir)
 
-            if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
-                if fail_on_no_tests:
-                    step_result.message = 'No unit tests defined.'
-                    step_result.success = False
-                else:
-                    step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
+            # if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
+            #     if fail_on_no_tests:
+            #         step_result.message = 'No unit tests defined.'
+            #         step_result.success = False
+            #     else:
+            #         step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
         except sh.ErrorReturnCode as error:
-            step_result.message = "Unit test failures. See 'maven-output'" \
+            step_result.message = "Unit test failures. See 'npm-output'" \
                 f" and 'surefire-reports' report artifacts for details: {error}"
             step_result.success = False
         finally:
             step_result.add_artifact(
-                description="Standard out and standard error from 'mvn test'.",
-                name='maven-output',
-                value=mvn_output_file_path
+                description="Standard out and standard error from 'npm test'.",
+                name='npm-output',
+                value=npm_output_file_path
             )
-            step_result.add_artifact(
-                description="Surefire reports generated from 'mvn test'.",
-                name='surefire-reports',
-                value=test_results_dir
-            )
+            # step_result.add_artifact(
+            #     description="Surefire reports generated from 'mvn test'.",
+            #     name='surefire-reports',
+            #     value=test_results_dir
+            # )
 
-        return step_result
+            return step_result
