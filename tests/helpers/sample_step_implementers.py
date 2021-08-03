@@ -30,6 +30,19 @@ class FooStepImplementer(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
         return step_result
 
+class FooStepImplementer2(StepImplementer):
+    @staticmethod
+    def step_implementer_config_defaults():
+        return {}
+
+    @staticmethod
+    def _required_config_or_result_keys():
+        return []
+
+    def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
+        return step_result
+
 
 class RequiredStepConfigStepImplementer(StepImplementer):
     @staticmethod

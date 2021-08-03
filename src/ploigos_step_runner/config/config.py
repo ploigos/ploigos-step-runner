@@ -4,12 +4,14 @@
 import copy
 import glob
 import os.path
+from distutils import util
 
-from ploigos_step_runner.decryption_utils import DecryptionUtils
-from ploigos_step_runner.config.step_config import StepConfig
 from ploigos_step_runner.config.config_value import ConfigValue
-from ploigos_step_runner.utils.file import parse_yaml_or_json_file
+from ploigos_step_runner.config.step_config import StepConfig
+from ploigos_step_runner.decryption_utils import DecryptionUtils
 from ploigos_step_runner.utils.dict import deep_merge
+from ploigos_step_runner.utils.file import parse_yaml_or_json_file
+
 
 class Config:
     """Representation of configuration for Ploigos workflow.
@@ -42,6 +44,7 @@ class Config:
     CONFIG_KEY_GLOBAL_DEFAULTS = 'global-defaults'
     CONFIG_KEY_GLOBAL_ENVIRONMENT_DEFAULTS = 'global-environment-defaults'
     CONFIG_KEY_ENVIRONMENT_NAME = 'environment-name'
+    CONFIG_KEY_CONTINUE_SUB_STEPS_ON_FAILURE = 'continue-sub-steps-on-failure'
     CONFIG_KEY_STEP_IMPLEMENTER = 'implementer'
     CONFIG_KEY_SUB_STEP_NAME = 'name'
     CONFIG_KEY_SUB_STEP_CONFIG = 'config'
@@ -263,7 +266,7 @@ class Config:
                 f"Failed to add parsed configuration file ({config_file}): {error}"
             ) from error
 
-    def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches
+    def __add_config_dict(self, config_dict, source_file_path=None): # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Add a configuration dictionary to the list of configuration dictionaries.
 
         Parameters
@@ -374,24 +377,41 @@ class Config:
                     else:
                         sub_step_name = sub_step_implementer_name
 
+                    # determine sub step config
                     if Config.CONFIG_KEY_SUB_STEP_CONFIG in sub_step:
                         sub_step_config_dict = copy.deepcopy(
                             sub_step[Config.CONFIG_KEY_SUB_STEP_CONFIG])
                     else:
                         sub_step_config_dict = {}
 
+                    # determine sub step environment config
                     if Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG in sub_step:
                         sub_step_env_config = copy.deepcopy(
                             sub_step[Config.CONFIG_KEY_SUB_STEP_ENVIRONMENT_CONFIG])
                     else:
                         sub_step_env_config = {}
 
+                    # determine if continue sub steps on this sub step failure
+                    sub_step_contine_sub_steps_on_failure = False
+                    if Config.CONFIG_KEY_CONTINUE_SUB_STEPS_ON_FAILURE in sub_step:
+                        sub_step_contine_sub_steps_on_failure = sub_step[
+                            Config.CONFIG_KEY_CONTINUE_SUB_STEPS_ON_FAILURE
+                        ]
+                        if isinstance(sub_step_contine_sub_steps_on_failure.value, bool):
+                            sub_step_contine_sub_steps_on_failure = \
+                                sub_step_contine_sub_steps_on_failure.value
+                        else:
+                            sub_step_contine_sub_steps_on_failure = bool(
+                                util.strtobool(sub_step_contine_sub_steps_on_failure.value)
+                            )
+
                     self.add_or_update_step_config(
                         step_name=step_name,
                         sub_step_name=sub_step_name,
                         sub_step_implementer_name=sub_step_implementer_name,
                         sub_step_config_dict=sub_step_config_dict,
-                        sub_step_env_config=sub_step_env_config
+                        sub_step_env_config=sub_step_env_config,
+                        sub_step_contine_sub_steps_on_failure=sub_step_contine_sub_steps_on_failure
                     )
 
     @staticmethod
@@ -434,12 +454,14 @@ class Config:
             )
 
     def add_or_update_step_config( # pylint: disable=too-many-arguments
-            self,
-            step_name,
-            sub_step_name,
-            sub_step_implementer_name,
-            sub_step_config_dict,
-            sub_step_env_config):
+        self,
+        step_name,
+        sub_step_name,
+        sub_step_implementer_name,
+        sub_step_config_dict,
+        sub_step_env_config,
+        sub_step_contine_sub_steps_on_failure=False
+    ):
         """Adds a new step configuration with a single new sub step or
         updates an existing step with new or updated sub step.
 
@@ -461,6 +483,9 @@ class Config:
                 new or updated step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step environment configuration.
+        sub_step_contine_sub_steps_on_failure : bool
+            True to continue executing other sub steps in current step if this sub step fails.
+            False to fail all step execution if this sub step fails.
 
         Raises
         ------
@@ -482,5 +507,6 @@ class Config:
             sub_step_name=sub_step_name,
             sub_step_implementer_name=sub_step_implementer_name,
             sub_step_config_dict=sub_step_config_dict,
-            sub_step_env_config=sub_step_env_config
+            sub_step_env_config=sub_step_env_config,
+            sub_step_contine_sub_steps_on_failure=sub_step_contine_sub_steps_on_failure
         )

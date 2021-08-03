@@ -22,6 +22,9 @@ class SubStepConfig:
         Configuration specific to this sub step.
     sub_step_env_config : dict, optional
         Environment specific configuration specific to this sub step.
+    sub_step_contine_sub_steps_on_failure : bool
+        True to continue executing other sub steps in current step if this sub step fails.
+        False to fail all step execution if this sub step fails.
 
     Attributes
     ----------
@@ -33,16 +36,19 @@ class SubStepConfig:
     """
 
     def __init__( # pylint: disable=too-many-arguments
-            self,
-            parent_step_config,
-            sub_step_name,
-            sub_step_implementer_name,
-            sub_step_config_dict=None,
-            sub_step_env_config=None):
+        self,
+        parent_step_config,
+        sub_step_name,
+        sub_step_implementer_name,
+        sub_step_config_dict=None,
+        sub_step_env_config=None,
+        sub_step_contine_sub_steps_on_failure=False
+    ):
 
         self.__parent_step_config = parent_step_config
         self.__sub_step_name = sub_step_name
         self.__sub_step_implementer_name = sub_step_implementer_name
+        self.__sub_step_contine_sub_steps_on_failure = sub_step_contine_sub_steps_on_failure
 
         if sub_step_config_dict is None:
             sub_step_config_dict = {}
@@ -146,6 +152,19 @@ class SubStepConfig:
             The environment specific configuration for all environments for this sub step.
         """
         return copy.deepcopy(self.__sub_step_env_config)
+
+    @property
+    def sub_step_contine_sub_steps_on_failure(self):
+        """Gets whether to continue executing other sub steps that belong to the step that
+        this sub step belongs to or not if this sub step fails.
+
+        Returns
+        -------
+        bool
+            True to continue executing other sub steps in current step if this sub step fails.
+            False to fail all step execution if this sub step fails.
+        """
+        return self.__sub_step_contine_sub_steps_on_failure
 
     def get_global_environment_defaults(self, env):
         """Convince function for getting the global environment defaults from the parent config.
