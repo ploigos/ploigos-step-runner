@@ -320,7 +320,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # print information about the configuration
         StepImplementer.__print_section_title(
-            f&#34;Configuration - {self.step_name}&#34;,
+            f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -1102,7 +1102,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # print information about the configuration
         StepImplementer.__print_section_title(
-            f&#34;Configuration - {self.step_name}&#34;,
+            f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -2197,7 +2197,7 @@ False otherwise.</dd>
 
     # print information about the configuration
     StepImplementer.__print_section_title(
-        f&#34;Configuration - {self.step_name}&#34;,
+        f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
         div_char=&#34;-&#34;,
         indent=1
     )

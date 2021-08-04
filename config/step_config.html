@@ -131,11 +131,13 @@ class StepConfig:
         self.__step_config_overrides = step_config_overrides if step_config_overrides else {}
 
     def add_or_update_sub_step_config(
-            self,
-            sub_step_name,
-            sub_step_implementer_name,
-            sub_step_config_dict=None,
-            sub_step_env_config=None):
+        self,
+        sub_step_name,
+        sub_step_implementer_name,
+        sub_step_config_dict=None,
+        sub_step_env_config=None,
+        sub_step_contine_sub_steps_on_failure=False
+    ): # pylint: disable=too-many-arguments
         &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
         Parameters
@@ -153,6 +155,9 @@ class StepConfig:
             Sub step environment configuration to add or update for named sub step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step environment configuration.
+        sub_step_contine_sub_steps_on_failure : bool
+            True to continue executing other sub steps in current step if this sub step fails.
+            False to fail all step execution if this sub step fails.
 
         Raises
         ------
@@ -178,18 +183,27 @@ class StepConfig:
                 sub_step_name=sub_step_name,
                 sub_step_implementer_name=sub_step_implementer_name,
                 sub_step_config_dict=sub_step_config_dict,
-                sub_step_env_config=sub_step_env_config
+                sub_step_env_config=sub_step_env_config,
+                sub_step_contine_sub_steps_on_failure=sub_step_contine_sub_steps_on_failure
             )
             self.sub_steps.append(sub_step_config)
         else:
-            assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
+            assert sub_step_implementer_name == existing_sub_step_config.sub_step_implementer_name,\
                 f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
                 &#34; with new config due to new sub step implementer&#34; + \
                 f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-                f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
+                f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
 
-            sub_step_config.merge_sub_step_config(sub_step_config_dict)
-            sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+            assert sub_step_contine_sub_steps_on_failure == \
+                    existing_sub_step_config.sub_step_contine_sub_steps_on_failure, \
+                f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
+                &#34; with new config due to new continue sub steps on failure&#34; + \
+                f&#34; ({sub_step_contine_sub_steps_on_failure}) not matching existing&#34; + \
+                &#34; continue sub steps on failure &#34; + \
+                f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
+
+            existing_sub_step_config.merge_sub_step_config(sub_step_config_dict)
+            existing_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 </section>
 <section>
@@ -325,11 +339,13 @@ class StepConfig:
         self.__step_config_overrides = step_config_overrides if step_config_overrides else {}
 
     def add_or_update_sub_step_config(
-            self,
-            sub_step_name,
-            sub_step_implementer_name,
-            sub_step_config_dict=None,
-            sub_step_env_config=None):
+        self,
+        sub_step_name,
+        sub_step_implementer_name,
+        sub_step_config_dict=None,
+        sub_step_env_config=None,
+        sub_step_contine_sub_steps_on_failure=False
+    ): # pylint: disable=too-many-arguments
         &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
         Parameters
@@ -347,6 +363,9 @@ class StepConfig:
             Sub step environment configuration to add or update for named sub step.
             If updating this can not have any duplicative leaf keys to the existing
                 sub step environment configuration.
+        sub_step_contine_sub_steps_on_failure : bool
+            True to continue executing other sub steps in current step if this sub step fails.
+            False to fail all step execution if this sub step fails.
 
         Raises
         ------
@@ -372,18 +391,27 @@ class StepConfig:
                 sub_step_name=sub_step_name,
                 sub_step_implementer_name=sub_step_implementer_name,
                 sub_step_config_dict=sub_step_config_dict,
-                sub_step_env_config=sub_step_env_config
+                sub_step_env_config=sub_step_env_config,
+                sub_step_contine_sub_steps_on_failure=sub_step_contine_sub_steps_on_failure
             )
             self.sub_steps.append(sub_step_config)
         else:
-            assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
+            assert sub_step_implementer_name == existing_sub_step_config.sub_step_implementer_name,\
                 f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
                 &#34; with new config due to new sub step implementer&#34; + \
                 f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-                f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
+                f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
 
-            sub_step_config.merge_sub_step_config(sub_step_config_dict)
-            sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+            assert sub_step_contine_sub_steps_on_failure == \
+                    existing_sub_step_config.sub_step_contine_sub_steps_on_failure, \
+                f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
+                &#34; with new config due to new continue sub steps on failure&#34; + \
+                f&#34; ({sub_step_contine_sub_steps_on_failure}) not matching existing&#34; + \
+                &#34; continue sub steps on failure &#34; + \
+                f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
+
+            existing_sub_step_config.merge_sub_step_config(sub_step_config_dict)
+            existing_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -480,7 +508,7 @@ def sub_steps(self):
 <h3>Methods</h3>
 <dl>
 <dt id="ploigos_step_runner.config.step_config.StepConfig.add_or_update_sub_step_config"><code class="name flex">
-<span>def <span class="ident">add_or_update_sub_step_config</span></span>(<span>self, sub_step_name, sub_step_implementer_name, sub_step_config_dict=None, sub_step_env_config=None)</span>
+<span>def <span class="ident">add_or_update_sub_step_config</span></span>(<span>self, sub_step_name, sub_step_implementer_name, sub_step_config_dict=None, sub_step_env_config=None, sub_step_contine_sub_steps_on_failure=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a new or update an existing sub step configuration for this step.</p>
@@ -499,6 +527,9 @@ sub step configuration.</dd>
 <dd>Sub step environment configuration to add or update for named sub step.
 If updating this can not have any duplicative leaf keys to the existing
 sub step environment configuration.</dd>
+<dt><strong><code>sub_step_contine_sub_steps_on_failure</code></strong> :&ensp;<code>bool</code></dt>
+<dd>True to continue executing other sub steps in current step if this sub step fails.
+False to fail all step execution if this sub step fails.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -516,11 +547,13 @@ existing sub step environment configuration.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_or_update_sub_step_config(
-        self,
-        sub_step_name,
-        sub_step_implementer_name,
-        sub_step_config_dict=None,
-        sub_step_env_config=None):
+    self,
+    sub_step_name,
+    sub_step_implementer_name,
+    sub_step_config_dict=None,
+    sub_step_env_config=None,
+    sub_step_contine_sub_steps_on_failure=False
+): # pylint: disable=too-many-arguments
     &#34;&#34;&#34;Add a new or update an existing sub step configuration for this step.
 
     Parameters
@@ -538,6 +571,9 @@ existing sub step environment configuration.</dd>
         Sub step environment configuration to add or update for named sub step.
         If updating this can not have any duplicative leaf keys to the existing
             sub step environment configuration.
+    sub_step_contine_sub_steps_on_failure : bool
+        True to continue executing other sub steps in current step if this sub step fails.
+        False to fail all step execution if this sub step fails.
 
     Raises
     ------
@@ -563,18 +599,27 @@ existing sub step environment configuration.</dd>
             sub_step_name=sub_step_name,
             sub_step_implementer_name=sub_step_implementer_name,
             sub_step_config_dict=sub_step_config_dict,
-            sub_step_env_config=sub_step_env_config
+            sub_step_env_config=sub_step_env_config,
+            sub_step_contine_sub_steps_on_failure=sub_step_contine_sub_steps_on_failure
         )
         self.sub_steps.append(sub_step_config)
     else:
-        assert sub_step_implementer_name == sub_step_config.sub_step_implementer_name, \
+        assert sub_step_implementer_name == existing_sub_step_config.sub_step_implementer_name,\
             f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
             &#34; with new config due to new sub step implementer&#34; + \
             f&#34; ({sub_step_implementer_name}) not matching existing sub step implementer&#34; + \
-            f&#34; ({sub_step_config.sub_step_implementer_name}).&#34;
+            f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
 
-        sub_step_config.merge_sub_step_config(sub_step_config_dict)
-        sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
+        assert sub_step_contine_sub_steps_on_failure == \
+                existing_sub_step_config.sub_step_contine_sub_steps_on_failure, \
+            f&#34;Step ({self.step_name}) failed to update sub step ({sub_step_name})&#34; + \
+            &#34; with new config due to new continue sub steps on failure&#34; + \
+            f&#34; ({sub_step_contine_sub_steps_on_failure}) not matching existing&#34; + \
+            &#34; continue sub steps on failure &#34; + \
+            f&#34; ({existing_sub_step_config.sub_step_implementer_name}).&#34;
+
+        existing_sub_step_config.merge_sub_step_config(sub_step_config_dict)
+        existing_sub_step_config.merge_sub_step_env_config(sub_step_env_config)</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.config.step_config.StepConfig.get_sub_step"><code class="name flex">
