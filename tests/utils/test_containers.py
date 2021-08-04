@@ -1133,3 +1133,66 @@ class Test_mount_container(BaseTestCase):
             _err=Any(IOBase),
             _tee='err'
         )
+
+class Test_determine_container_image_build_tag_info(BaseTestCase):
+    def test_given_image_version(self):
+        actual_build_full_tag, actual_build_short_tag, actual_image_registry_uri, \
+            actual_image_repository, actual_image_version = \
+            determine_container_image_build_tag_info(
+                image_version='1.0-123abc',
+                organization='mock-org',
+                application_name='mock-app',
+                service_name='mock-service'
+            )
+
+        self.assertEqual(
+            actual_build_full_tag,
+            'localhost/mock-org/mock-app-mock-service:1.0-123abc'
+        )
+        self.assertEqual(
+            actual_build_short_tag,
+            'mock-org/mock-app-mock-service:1.0-123abc'
+        )
+        self.assertEqual(
+            actual_image_registry_uri,
+            'localhost'
+        )
+        self.assertEqual(
+            actual_image_repository,
+            'mock-app-mock-service'
+        )
+        self.assertEqual(
+            actual_image_version,
+            '1.0-123abc'
+        )
+
+    def test_default_image_version(self):
+        actual_build_full_tag, actual_build_short_tag, actual_image_registry_uri, \
+            actual_image_repository, actual_image_version = \
+            determine_container_image_build_tag_info(
+                image_version=None,
+                organization='mock-org',
+                application_name='mock-app',
+                service_name='mock-service'
+            )
+
+        self.assertEqual(
+            actual_build_full_tag,
+            'localhost/mock-org/mock-app-mock-service:latest'
+        )
+        self.assertEqual(
+            actual_build_short_tag,
+            'mock-org/mock-app-mock-service:latest'
+        )
+        self.assertEqual(
+            actual_image_registry_uri,
+            'localhost'
+        )
+        self.assertEqual(
+            actual_image_repository,
+            'mock-app-mock-service'
+        )
+        self.assertEqual(
+            actual_image_version,
+            'latest'
+        )

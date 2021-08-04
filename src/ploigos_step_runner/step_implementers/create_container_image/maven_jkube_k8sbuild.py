@@ -1,4 +1,4 @@
-"""`StepImplementer` for the `create-container-image step` using Buildah.
+"""`StepImplementer` for the `create-container-image` step using Maven JKube Plugin.
 
 Step Configuration
 ------------------
@@ -9,25 +9,31 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key  | Required? | Default | Description
--------------------|-----------|---------|-----------
-`imagespecfile`    | True      | `'Containerfile'` \
-                                         | File defining the container image
-`context`          | True      | `'.'`   | Context to build the container image in
-`tls-verify`       | True      | `True`  | Whether to verify TLS when pulling parent images
-`format`           | True      | `'oci'` | format of the built image's manifest and metadata
-`containers-config-auth-file` \
-                   | False     |         | Path to the container registry authentication \
-                                           file to use for container registry authentication. \
-                                           If one is not provided one will be created in the \
-                                           working directory.
-`container-image-version` \
-                   | True      |         | Version to use when building the container image
-`organization`     | True      |         | Used in built container image tag
-`application_name` | True      |         | Used in built container image tag
-`service_name`     | True      |         | Used in built container image tag
-`container-registries` \
-                   | False     |         | Hash of container registries to authenticate with.
+Configuration Key             | Required? | Default | Description
+------------------------------|-----------|---------|-----------
+`pom-file`                    | Yes       | `'pom.xml'` | pom used when executing maven.
+`tls-verify`                  | No        | `True`  | Disables TLS Verification if set to False
+`maven-profiles`              | No        | `[]`    | List of maven profiles to use.
+`maven-no-transfer-progress`  | No        | `True`  | `True` to suppress the transfer progress of packages maven downloads.
+                                                     `False` to have the transfer progress printed.\
+                                                    See https://maven.apache.org/ref/current/maven-embedder/cli.html
+`maven-additional-arguments`  | No        | `['-Dmaven.test.skip=true', '-Dmaven.install.skip=true']` \
+                                                    | List of additional arguments to use. \
+                                                      Skipping tests by default because assuming \
+                                                      a previous step already ran them. \
+                                                      Skipping install backs assuming this is \
+                                                      running in an ephermal environment where \
+                                                      that would be a waist of time, and also \
+                                                      that a previous step ran `package` \
+                                                      and `push-artifacts` steps.
+`maven-servers`               | No        |         | Dictionary of dictionaries of id, username, password
+`maven-repositories`          | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
+`maven-mirrors`               | No        |         | Dictionary of dictionaries of id, url, mirror_of
+`container-image-version`     | Yes       |         | Version to use when building the container image
+`organization`                | Yes       |         | Used in built container image tag
+`application_name`            | Yes       |         | Used in built container image tag
+`service_name`                | Yes       |         | Used in built container image tag
+`container-registries`        | No        |         | Hash of container registries to authenticate with.
 
 Result Artifacts
 ----------------
@@ -48,59 +54,57 @@ Result Artifact Key                     | Description
                                           Takes the form of: \
                                           `container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version`
 
-""" # pylint: disable=line-too-long
+"""# pylint: disable=line-too-long
 
-import os
-import sys
-from distutils import util
-
-import sh
-from ploigos_step_runner import StepImplementer, StepResult
-from ploigos_step_runner.utils.containers import (
-    container_registries_login, determine_container_image_build_tag_info)
+from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.step_implementers.shared.maven_generic import \
+    MavenGeneric
+from ploigos_step_runner.utils.containers import \
+    determine_container_image_build_tag_info
 
 DEFAULT_CONFIG = {
-    # Image specification file name
-    'imagespecfile': 'Containerfile',
-
-    # Parent path to the image specification file
-    'context': '.',
-
-    # Verify TLS Certs?
-    'tls-verify': True,
-
-    # Format of the produced image
-    'format': 'oci'
+    'maven-additional-arguments': [
+        '-Dmaven.install.skip=true',
+        '-Dmaven.test.skip=true'
+    ]
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'imagespecfile',
-    'context',
-    'tls-verify',
-    'format',
-    'organization',
-    'service-name',
-    'application-name'
+    'pom-file'
 ]
 
-class Buildah(StepImplementer):
-    """`StepImplementer` for the `create-container-image step` using Buildah.
+class MavenJKubeK8sBuild(MavenGeneric):
+    """`StepImplementer` for the `create-container-image` step using Maven JKube Plugin.
     """
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment,
+            maven_phases_and_goals=['k8s:build']
+        )
 
     @staticmethod
     def step_implementer_config_defaults():
         """Getter for the StepImplementer's configuration defaults.
 
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
         Returns
         -------
         dict
             Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
         """
-        return DEFAULT_CONFIG
+        return {**MavenGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -119,30 +123,7 @@ class Buildah(StepImplementer):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        """Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-        * given 'imagespecfile' exists
-
-        Raises
-        ------
-        AssertionError
-            If step configuration or previous step result artifacts have invalid required values
-        """
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        # if pom-file has value verify file exists
-        # If it doesn't have value and is required function will have already failed
-        image_spec_file = self.get_value('imagespecfile')
-        context = self.get_value('context')
-        image_spec_file_full_path = os.path.join(context, image_spec_file)
-        assert os.path.exists(image_spec_file_full_path), \
-            f'Given imagespecfile ({image_spec_file}) does not exist in given context ({context}).'
-
-    def _run_step(self):
+    def _run_step(self): # pylint: disable=too-many-locals
         """Runs the step implemented by this StepImplementer.
 
         Returns
@@ -151,12 +132,6 @@ class Buildah(StepImplementer):
             Object containing the dictionary results of this step.
         """
         step_result = StepResult.from_step_implementer(self)
-
-        # get config
-        image_spec_file = self.get_value('imagespecfile')
-        tls_verify = self.get_value('tls-verify')
-        if isinstance(tls_verify, str):
-            tls_verify = bool(util.strtobool(tls_verify))
 
         # create local build tag
         image_registry_organization = self.get_value('organization')
@@ -168,40 +143,28 @@ class Buildah(StepImplementer):
                 service_name=self.get_value('service-name')
             )
 
+        # push the artifacts
+        mvn_jkube_output_file_path = self.write_working_file('mvn_k8s_build_output.txt')
         try:
-            # login to any provider container registries
-            # NOTE: important to specify the auth file because depending on the context this is
-            #       being run in python process may not have permissions to default location
-            containers_config_auth_file = self.get_value('containers-config-auth-file')
-            if not containers_config_auth_file:
-                containers_config_auth_file = os.path.join(
-                    self.work_dir_path,
-                    'container-auth.json'
-                )
-            container_registries_login(
-                registries=self.get_value('container-registries'),
-                containers_config_auth_file=containers_config_auth_file,
-                containers_config_tls_verify=tls_verify
+            # execute maven step (params come from config)
+            print("Build container image with Maven Jkube kubernetes plugin")
+            self._run_maven_step(
+                mvn_output_file_path=mvn_jkube_output_file_path,
+                step_implementer_additional_arguments=[
+                    f"-Djkube.generator.name={build_full_tag}"
+                ]
             )
-
-            # perform build
-            sh.buildah.bud(  # pylint: disable=no-member
-                '--format=' + self.get_value('format'),
-                '--tls-verify=' + str(tls_verify).lower(),
-                '--layers', '-f', image_spec_file,
-                '-t', build_full_tag,
-                '--authfile', containers_config_auth_file,
-                self.get_value('context'),
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee='err'
-            )
-
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message = 'Issue invoking buildah bud with given image ' \
-                f'specification file ({image_spec_file}): {error}'
-            return step_result
+            step_result.message = "Error running 'maven k8s:build' to create container image. " \
+                f"More details maybe found in 'maven-jkube-output' report artifact: {error}"
+        finally:
+            step_result.add_artifact(
+                description="Standard out and standard error from running maven to " \
+                    "create container image.",
+                name='maven-jkube-output',
+                value=mvn_jkube_output_file_path
+            )
 
         # add artifacts
         step_result.add_artifact(

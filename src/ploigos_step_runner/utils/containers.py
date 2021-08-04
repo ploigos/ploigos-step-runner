@@ -375,3 +375,43 @@ def mount_container(buildah_unshare_command, container_id):
         ) from error
 
     return mount_path
+
+def determine_container_image_build_tag_info(
+    image_version,
+    organization,
+    application_name,
+    service_name
+):
+    """Determines the full and short build tags for a new container image.
+
+    Parameters
+    ----------
+    image_version : str
+        A given image version. If none given, latest will be used.
+    organization : str
+        Organization the container image belongs to.
+    application_name : str
+        Application the container image belongs to.
+    service_name : str
+        Service the container image implements.
+
+    Returns
+    -------
+    str, str, str, str, str
+        First result is the full build tag, including registry URI.
+        Second result is the short build tag, as in no registry URI.
+        Third result is the image registry uri.
+        Forth result is the image repository name.
+        Fifth result is the used image version.
+
+    """
+    if image_version is None:
+        image_version = 'latest'
+        print('No image tag version found in metadata. Using latest')
+    image_registry_uri = 'localhost'
+    image_registry_organization = organization
+    image_repository = f"{application_name}-{service_name}"
+    build_short_tag = f"{image_registry_organization}/{image_repository}:{image_version}"
+    build_full_tag = f"{image_registry_uri}/{build_short_tag}"
+
+    return build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version
