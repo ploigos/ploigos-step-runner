@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>ploigos_step_runner.utils.containers API documentation</title>
 <meta name="description" content="Shared utils for dealing with containers." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -31,9 +31,13 @@
 &#34;&#34;&#34;
 
 import sys
+from io import StringIO
 
 import sh
 from ploigos_step_runner.config.config_value import ConfigValue
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
+
 
 def container_registries_login(  #pylint: disable=too-many-branches
     registries,
@@ -303,7 +307,103 @@ def container_registry_login( #pylint: disable=too-many-arguments,too-many-branc
         raise RuntimeError(
             f&#34;Failed to login to container registry ({container_registry_uri}) &#34;
             f&#34;with username ({container_registry_username}): {error}&#34;
-        ) from error</code></pre>
+        ) from error
+
+def create_container_from_image(
+    image_tag,
+    repository_type=&#39;container-storage:&#39;
+):
+    &#34;&#34;&#34;Import a container image using buildah form a TAR file.
+
+    Parameters
+    ----------
+    image_tag : str
+        Image tag to create a container from.
+        ex:
+        * localhost/my-app:latest
+        * quay.io/my-org/my-app:latest
+        * docker-archive:/local/path/to/my-app-container-image.tar
+    container_name : str
+        name for the working container.
+    repository_type : str
+        The type of repository to mount the given image tag from.
+        See https://github.com/containers/skopeo for details on different repository types.
+
+    Returns
+    -------
+    str
+        Name of the imported container.
+
+    Raises
+    ------
+    RuntimeError
+        If error importing image.
+    &#34;&#34;&#34;
+    container_name = None
+    try:
+        buildah_from_out_buff = StringIO()
+        buildah_from_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            buildah_from_out_buff
+        ])
+        sh.buildah(  # pylint: disable=no-member
+            &#39;from&#39;,
+            f&#34;{repository_type}{image_tag}&#34;,
+            _out=buildah_from_out_callback,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+        container_name = buildah_from_out_buff.getvalue().rstrip()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#39;Error creating container from image ({image_tag}): {error}&#39;
+        ) from error
+
+    return container_name
+
+
+def mount_container(buildah_unshare_command, container_id):
+    &#34;&#34;&#34;Use buildah to mount a container.
+
+    Parameters
+    ----------
+    buildah_unshare_command : sh.buildah.unshare.bake()
+        A baked sh.buildah.unshare command to use to run this command in the context off
+        so that this can be done &#34;rootless&#34;.
+    container_id : str
+        ID of the container to mount.
+
+    Returns
+    -------
+    str
+        Absolute path to the mounted container.
+
+    Raises
+    ------
+    RuntimeError
+        If error mounting the container.
+    &#34;&#34;&#34;
+    mount_path = None
+    try:
+        buildah_mount_out_buff = StringIO()
+        buildah_mount_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            buildah_mount_out_buff
+        ])
+        buildah_mount_command = buildah_unshare_command.bake(&#34;buildah&#34;, &#34;mount&#34;)
+        buildah_mount_command(
+            container_id,
+            _out=buildah_mount_out_callback,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+        mount_path = buildah_mount_out_buff.getvalue().rstrip()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#39;Error mounting container ({container_id}): {error}&#39;
+        ) from error
+
+    return mount_path</code></pre>
 </details>
 </section>
 <section>
@@ -712,6 +812,163 @@ When error loging into container registry.</dd>
         ) from error</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.containers.create_container_from_image"><code class="name flex">
+<span>def <span class="ident">create_container_from_image</span></span>(<span>image_tag, repository_type='container-storage:')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Import a container image using buildah form a TAR file.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>image_tag</code></strong> :&ensp;<code>str</code></dt>
+<dd>Image tag to create a container from.
+ex:
+* localhost/my-app:latest
+* quay.io/my-org/my-app:latest
+* docker-archive:/local/path/to/my-app-container-image.tar</dd>
+<dt><strong><code>container_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>name for the working container.</dd>
+<dt><strong><code>repository_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of repository to mount the given image tag from.
+See <a href="https://github.com/containers/skopeo">https://github.com/containers/skopeo</a> for details on different repository types.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Name of the imported container.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If error importing image.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_container_from_image(
+    image_tag,
+    repository_type=&#39;container-storage:&#39;
+):
+    &#34;&#34;&#34;Import a container image using buildah form a TAR file.
+
+    Parameters
+    ----------
+    image_tag : str
+        Image tag to create a container from.
+        ex:
+        * localhost/my-app:latest
+        * quay.io/my-org/my-app:latest
+        * docker-archive:/local/path/to/my-app-container-image.tar
+    container_name : str
+        name for the working container.
+    repository_type : str
+        The type of repository to mount the given image tag from.
+        See https://github.com/containers/skopeo for details on different repository types.
+
+    Returns
+    -------
+    str
+        Name of the imported container.
+
+    Raises
+    ------
+    RuntimeError
+        If error importing image.
+    &#34;&#34;&#34;
+    container_name = None
+    try:
+        buildah_from_out_buff = StringIO()
+        buildah_from_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            buildah_from_out_buff
+        ])
+        sh.buildah(  # pylint: disable=no-member
+            &#39;from&#39;,
+            f&#34;{repository_type}{image_tag}&#34;,
+            _out=buildah_from_out_callback,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+        container_name = buildah_from_out_buff.getvalue().rstrip()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#39;Error creating container from image ({image_tag}): {error}&#39;
+        ) from error
+
+    return container_name</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.utils.containers.mount_container"><code class="name flex">
+<span>def <span class="ident">mount_container</span></span>(<span>buildah_unshare_command, container_id)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Use buildah to mount a container.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>buildah_unshare_command</code></strong> :&ensp;<code>sh.buildah.unshare.bake()</code></dt>
+<dd>A baked sh.buildah.unshare command to use to run this command in the context off
+so that this can be done "rootless".</dd>
+<dt><strong><code>container_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>ID of the container to mount.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Absolute path to the mounted container.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If error mounting the container.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mount_container(buildah_unshare_command, container_id):
+    &#34;&#34;&#34;Use buildah to mount a container.
+
+    Parameters
+    ----------
+    buildah_unshare_command : sh.buildah.unshare.bake()
+        A baked sh.buildah.unshare command to use to run this command in the context off
+        so that this can be done &#34;rootless&#34;.
+    container_id : str
+        ID of the container to mount.
+
+    Returns
+    -------
+    str
+        Absolute path to the mounted container.
+
+    Raises
+    ------
+    RuntimeError
+        If error mounting the container.
+    &#34;&#34;&#34;
+    mount_path = None
+    try:
+        buildah_mount_out_buff = StringIO()
+        buildah_mount_out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+            sys.stdout,
+            buildah_mount_out_buff
+        ])
+        buildah_mount_command = buildah_unshare_command.bake(&#34;buildah&#34;, &#34;mount&#34;)
+        buildah_mount_command(
+            container_id,
+            _out=buildah_mount_out_callback,
+            _err=sys.stderr,
+            _tee=&#39;err&#39;
+        )
+        mount_path = buildah_mount_out_buff.getvalue().rstrip()
+    except sh.ErrorReturnCode as error:
+        raise RuntimeError(
+            f&#39;Error mounting container ({container_id}): {error}&#39;
+        ) from error
+
+    return mount_path</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -732,13 +989,15 @@ When error loging into container registry.</dd>
 <ul class="">
 <li><code><a title="ploigos_step_runner.utils.containers.container_registries_login" href="#ploigos_step_runner.utils.containers.container_registries_login">container_registries_login</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.containers.container_registry_login" href="#ploigos_step_runner.utils.containers.container_registry_login">container_registry_login</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.containers.create_container_from_image" href="#ploigos_step_runner.utils.containers.create_container_from_image">create_container_from_image</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.containers.mount_container" href="#ploigos_step_runner.utils.containers.mount_container">mount_container</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

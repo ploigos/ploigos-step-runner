@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>ploigos_step_runner.step_implementers.create_container_image.buildah API documentation</title>
 <meta name="description" content="`StepImplementer` for the `create-container-image step` using Buildah …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -67,16 +67,42 @@ Could come from:</p>
 </tr>
 <tr>
 <td><code>containers-config-auth-file</code></td>
-<td>True</td>
-<td><code>'~/.buildah-auth.json'</code></td>
+<td>False</td>
+<td></td>
 <td>Path to the container registry authentication
-file to use for container registry authentication.</td>
+file to use for container registry authentication.
+If one is not provided one will be created in the
+working directory.</td>
 </tr>
 <tr>
 <td><code>container-image-version</code></td>
 <td>True</td>
 <td></td>
 <td>Version to use when building the container image</td>
+</tr>
+<tr>
+<td><code>organization</code></td>
+<td>True</td>
+<td></td>
+<td>Used in built container image tag</td>
+</tr>
+<tr>
+<td><code>application_name</code></td>
+<td>True</td>
+<td></td>
+<td>Used in built container image tag</td>
+</tr>
+<tr>
+<td><code>service_name</code></td>
+<td>True</td>
+<td></td>
+<td>Used in built container image tag</td>
+</tr>
+<tr>
+<td><code>container-registries</code></td>
+<td>False</td>
+<td></td>
+<td>Hash of container registries to authenticate with.</td>
 </tr>
 </tbody>
 </table>
@@ -91,12 +117,44 @@ file to use for container registry authentication.</td>
 </thead>
 <tbody>
 <tr>
-<td><code>container-image-version</code></td>
-<td>Container version to tag built image with</td>
+<td><code>container-image-registry-uri</code></td>
+<td>Registry URI poriton of the container image tag
+of the built container image.</td>
 </tr>
 <tr>
-<td><code>image-tar-file</code></td>
-<td>Path to the built container image as a tar file</td>
+<td><code>container-image-registry-organization</code></td>
+<td>Organization portion of the container image tag
+of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-repository</code></td>
+<td>Repository portion of the container image tag
+of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-name</code></td>
+<td>Another way to reference the
+repository portion of the container image tag
+of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-version</code></td>
+<td>Version portion of the container image tag
+of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-tag</code></td>
+<td>Full container image tag of the built container,
+including the registry URI. <br/>
+Takes the form of:
+<code>container-image-registry-organization/container-image-repository:container-image-version</code></td>
+</tr>
+<tr>
+<td><code>container-image-short-tag</code></td>
+<td>Short container image tag of the built container image,
+excluding the registry URI. <br/>
+Takes the form of:
+<code>container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version</code></td>
 </tr>
 </tbody>
 </table>
@@ -115,41 +173,64 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default | Description
-------------------|-----------|---------|-----------
-`imagespecfile`   | True      | `&#39;Containerfile&#39;` \
-                                        | File defining the container image
-`context`         | True      | `&#39;.&#39;`   | Context to build the container image in
-`tls-verify`      | True      | `True`  | Whether to verify TLS when pulling parent images
-`format`          | True      | `&#39;oci&#39;` | format of the built image&#39;s manifest and metadata
+Configuration Key  | Required? | Default | Description
+-------------------|-----------|---------|-----------
+`imagespecfile`    | True      | `&#39;Containerfile&#39;` \
+                                         | File defining the container image
+`context`          | True      | `&#39;.&#39;`   | Context to build the container image in
+`tls-verify`       | True      | `True`  | Whether to verify TLS when pulling parent images
+`format`           | True      | `&#39;oci&#39;` | format of the built image&#39;s manifest and metadata
 `containers-config-auth-file` \
-                  | True      | `&#39;~/.buildah-auth.json&#39;` \
-                                        | Path to the container registry authentication \
-                                          file to use for container registry authentication.
+                   | False     |         | Path to the container registry authentication \
+                                           file to use for container registry authentication. \
+                                           If one is not provided one will be created in the \
+                                           working directory.
 `container-image-version` \
-                  | True      |         | Version to use when building the container image
+                   | True      |         | Version to use when building the container image
+`organization`     | True      |         | Used in built container image tag
+`application_name` | True      |         | Used in built container image tag
+`service_name`     | True      |         | Used in built container image tag
+`container-registries` \
+                   | False     |         | Hash of container registries to authenticate with.
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key | Description
---------------------------|------------
-`container-image-version` | Container version to tag built image with
-`image-tar-file`          | Path to the built container image as a tar file
-&#34;&#34;&#34;
+Result Artifact Key            | Description
+-------------------------------|------------
+`container-image-registry-uri` | Registry URI poriton of the container image tag \
+                                 of the built container image.
+`container-image-registry-organization` \
+                               | Organization portion of the container image tag \
+                                 of the built container image.
+`container-image-repository`   | Repository portion of the container image tag \
+                                 of the built container image.
+`container-image-name`         | Another way to reference the \
+                                 repository portion of the container image tag \
+                                 of the built container image.
+`container-image-version`      | Version portion of the container image tag \
+                                 of the built container image.
+`container-image-tag`          | Full container image tag of the built container, \
+                                 including the registry URI. &lt;br/&gt; \
+                                 Takes the form of: \
+                                    `container-image-registry-organization/container-image-repository:container-image-version`
+`container-image-short-tag`    | Short container image tag of the built container image, \
+                                 excluding the registry URI. &lt;br/&gt; \
+                                 Takes the form of: \
+                                    `container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version`
+
+&#34;&#34;&#34; # pylint: disable=line-too-long
+
 import os
 import sys
-from pathlib import Path
+from distutils import util
 
 import sh
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.utils.containers import container_registries_login
 
 DEFAULT_CONFIG = {
-    # Path to the container registry authentication file to read and write to/from.
-    &#39;containers-config-auth-file&#39;: os.path.join(Path.home(), &#39;.buildah-auth.json&#39;),
-
     # Image specification file name
     &#39;imagespecfile&#39;: &#39;Containerfile&#39;,
 
@@ -164,11 +245,11 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;containers-config-auth-file&#39;,
     &#39;imagespecfile&#39;,
     &#39;context&#39;,
     &#39;tls-verify&#39;,
     &#39;format&#39;,
+    &#39;organization&#39;,
     &#39;service-name&#39;,
     &#39;application-name&#39;
 ]
@@ -209,6 +290,29 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;imagespecfile&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # if pom-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        image_spec_file = self.get_value(&#39;imagespecfile&#39;)
+        context = self.get_value(&#39;context&#39;)
+        image_spec_file_full_path = os.path.join(context, image_spec_file)
+        assert os.path.exists(image_spec_file_full_path), \
+            f&#39;Given imagespecfile ({image_spec_file}) does not exist in given context ({context}).&#39;
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -219,38 +323,33 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        context = self.get_value(&#39;context&#39;)
+        # get config
         image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = os.path.join(context, image_spec_file)
-        application_name = self.get_value(&#39;application-name&#39;)
-        service_name = self.get_value(&#39;service-name&#39;)
         tls_verify = self.get_value(&#39;tls-verify&#39;)
+        if isinstance(tls_verify, str):
+            tls_verify = bool(util.strtobool(tls_verify))
 
-        if not os.path.exists(image_spec_file_location):
-            step_result.success = False
-            step_result.message = &#39;Image specification file does not exist in location: &#39; \
-                f&#39;{image_spec_file_location}&#39;
-            return step_result
-
-        image_tag_version = self.get_value(&#39;container-image-version&#39;)
-        if image_tag_version is None:
-            image_tag_version = &#39;latest&#39;
+        # create local build tag
+        image_version = self.get_value(&#39;container-image-version&#39;)
+        if image_version is None:
+            image_version = &#39;latest&#39;
             print(&#39;No image tag version found in metadata. Using latest&#39;)
-
-        destination = &#34;localhost/{application_name}/{service_name}&#34;.format(
-            application_name=application_name,
-            service_name=service_name
-        )
-        tag = &#34;{destination}:{version}&#34;.format(
-            destination=destination,
-            version=image_tag_version
-        )
+        image_registry_uri = &#39;localhost&#39;
+        image_registry_organization = self.get_value(&#39;organization&#39;)
+        image_repository = f&#34;{self.get_value(&#39;application-name&#39;)}-{self.get_value(&#39;service-name&#39;)}&#34;
+        short_tag = f&#34;{image_registry_organization}/{image_repository}:{image_version}&#34;
+        build_tag = f&#34;{image_registry_uri}/{short_tag}&#34;
 
         try:
             # login to any provider container registries
             # NOTE: important to specify the auth file because depending on the context this is
             #       being run in python process may not have permissions to default location
             containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
+            if not containers_config_auth_file:
+                containers_config_auth_file = os.path.join(
+                    self.work_dir_path,
+                    &#39;container-auth.json&#39;
+                )
             container_registries_login(
                 registries=self.get_value(&#39;container-registries&#39;),
                 containers_config_auth_file=containers_config_auth_file,
@@ -262,49 +361,62 @@ class Buildah(StepImplementer):
                 &#39;--format=&#39; + self.get_value(&#39;format&#39;),
                 &#39;--tls-verify=&#39; + str(tls_verify).lower(),
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, tag,
+                &#39;-t&#39;, build_tag,
                 &#39;--authfile&#39;, containers_config_auth_file,
-                context,
+                self.get_value(&#39;context&#39;),
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee=&#39;err&#39;
             )
 
-            step_result.add_artifact(
-                name=&#39;container-image-version&#39;,
-                value=tag
-            )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             step_result.success = False
             step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
                 f&#39;specification file ({image_spec_file}): {error}&#39;
             return step_result
 
-        image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path, image_tar_file)
-        try:
-            # Check to see if the tar docker-archive file already exists
-            #   this needs to be run as buildah does not support overwritting
-            #   existing files.
-            if os.path.exists(image_tar_path):
-                os.remove(image_tar_path)
-            sh.buildah.push(  # pylint: disable=no-member
-                tag,
-                &#34;docker-archive:&#34; + image_tar_path,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;image-tar-file&#39;,
-                value=image_tar_path
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = f&#39;Issue invoking buildah push to tar file &#39; \
-                f&#39;({image_tar_path}): {error}&#39;
-            return step_result
+        # add artifacts
+        step_result.add_artifact(
+            name=&#39;container-image-registry-uri&#39;,
+            value=image_registry_uri,
+            description=&#39;Registry URI poriton of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-registry-organization&#39;,
+            value=image_registry_organization,
+            description=&#39;Organization portion of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-repository&#39;,
+            value=image_repository,
+            description=&#39;Repository portion of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-name&#39;,
+            value=image_repository,
+            description=&#39;Another way to reference the&#39; \
+                &#39; repository portion of the container image tag of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-version&#39;,
+            value=image_version,
+            description=&#39;Version portion of the container image tag of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-tag&#39;,
+            value=build_tag,
+            description=&#39;Full container image tag of the built container,&#39; \
+                &#39; including the registry URI.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-short-tag&#39;,
+            value=short_tag,
+            description=&#39;Short container image tag of the built container image,&#39; \
+                &#39; excluding the registry URI.&#39;
+        )
 
         return step_result</code></pre>
 </details>
@@ -364,6 +476,29 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;imagespecfile&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # if pom-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        image_spec_file = self.get_value(&#39;imagespecfile&#39;)
+        context = self.get_value(&#39;context&#39;)
+        image_spec_file_full_path = os.path.join(context, image_spec_file)
+        assert os.path.exists(image_spec_file_full_path), \
+            f&#39;Given imagespecfile ({image_spec_file}) does not exist in given context ({context}).&#39;
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -374,38 +509,33 @@ class Buildah(StepImplementer):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        context = self.get_value(&#39;context&#39;)
+        # get config
         image_spec_file = self.get_value(&#39;imagespecfile&#39;)
-        image_spec_file_location = os.path.join(context, image_spec_file)
-        application_name = self.get_value(&#39;application-name&#39;)
-        service_name = self.get_value(&#39;service-name&#39;)
         tls_verify = self.get_value(&#39;tls-verify&#39;)
+        if isinstance(tls_verify, str):
+            tls_verify = bool(util.strtobool(tls_verify))
 
-        if not os.path.exists(image_spec_file_location):
-            step_result.success = False
-            step_result.message = &#39;Image specification file does not exist in location: &#39; \
-                f&#39;{image_spec_file_location}&#39;
-            return step_result
-
-        image_tag_version = self.get_value(&#39;container-image-version&#39;)
-        if image_tag_version is None:
-            image_tag_version = &#39;latest&#39;
+        # create local build tag
+        image_version = self.get_value(&#39;container-image-version&#39;)
+        if image_version is None:
+            image_version = &#39;latest&#39;
             print(&#39;No image tag version found in metadata. Using latest&#39;)
-
-        destination = &#34;localhost/{application_name}/{service_name}&#34;.format(
-            application_name=application_name,
-            service_name=service_name
-        )
-        tag = &#34;{destination}:{version}&#34;.format(
-            destination=destination,
-            version=image_tag_version
-        )
+        image_registry_uri = &#39;localhost&#39;
+        image_registry_organization = self.get_value(&#39;organization&#39;)
+        image_repository = f&#34;{self.get_value(&#39;application-name&#39;)}-{self.get_value(&#39;service-name&#39;)}&#34;
+        short_tag = f&#34;{image_registry_organization}/{image_repository}:{image_version}&#34;
+        build_tag = f&#34;{image_registry_uri}/{short_tag}&#34;
 
         try:
             # login to any provider container registries
             # NOTE: important to specify the auth file because depending on the context this is
             #       being run in python process may not have permissions to default location
             containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
+            if not containers_config_auth_file:
+                containers_config_auth_file = os.path.join(
+                    self.work_dir_path,
+                    &#39;container-auth.json&#39;
+                )
             container_registries_login(
                 registries=self.get_value(&#39;container-registries&#39;),
                 containers_config_auth_file=containers_config_auth_file,
@@ -417,49 +547,62 @@ class Buildah(StepImplementer):
                 &#39;--format=&#39; + self.get_value(&#39;format&#39;),
                 &#39;--tls-verify=&#39; + str(tls_verify).lower(),
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, tag,
+                &#39;-t&#39;, build_tag,
                 &#39;--authfile&#39;, containers_config_auth_file,
-                context,
+                self.get_value(&#39;context&#39;),
                 _out=sys.stdout,
                 _err=sys.stderr,
                 _tee=&#39;err&#39;
             )
 
-            step_result.add_artifact(
-                name=&#39;container-image-version&#39;,
-                value=tag
-            )
         except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
             step_result.success = False
             step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
                 f&#39;specification file ({image_spec_file}): {error}&#39;
             return step_result
 
-        image_tar_file = f&#39;image-{application_name}-{service_name}-{image_tag_version}.tar&#39;
-        image_tar_path = os.path.join(self.work_dir_path, image_tar_file)
-        try:
-            # Check to see if the tar docker-archive file already exists
-            #   this needs to be run as buildah does not support overwritting
-            #   existing files.
-            if os.path.exists(image_tar_path):
-                os.remove(image_tar_path)
-            sh.buildah.push(  # pylint: disable=no-member
-                tag,
-                &#34;docker-archive:&#34; + image_tar_path,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-
-            step_result.add_artifact(
-                name=&#39;image-tar-file&#39;,
-                value=image_tar_path
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            step_result.success = False
-            step_result.message = f&#39;Issue invoking buildah push to tar file &#39; \
-                f&#39;({image_tar_path}): {error}&#39;
-            return step_result
+        # add artifacts
+        step_result.add_artifact(
+            name=&#39;container-image-registry-uri&#39;,
+            value=image_registry_uri,
+            description=&#39;Registry URI poriton of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-registry-organization&#39;,
+            value=image_registry_organization,
+            description=&#39;Organization portion of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-repository&#39;,
+            value=image_repository,
+            description=&#39;Repository portion of the container image tag&#39; \
+                &#39; of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-name&#39;,
+            value=image_repository,
+            description=&#39;Another way to reference the&#39; \
+                &#39; repository portion of the container image tag of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-version&#39;,
+            value=image_version,
+            description=&#39;Version portion of the container image tag of the built container image.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-tag&#39;,
+            value=build_tag,
+            description=&#39;Full container image tag of the built container,&#39; \
+                &#39; including the registry URI.&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;container-image-short-tag&#39;,
+            value=short_tag,
+            description=&#39;Short container image tag of the built container image,&#39; \
+                &#39; excluding the registry URI.&#39;
+        )
 
         return step_result</code></pre>
 </details>
@@ -525,7 +668,7 @@ class Buildah(StepImplementer):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
