@@ -82,8 +82,6 @@ class Npm(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        # package_file = self.get_value('package-file')
-
         npm_output_file_path = self.write_working_file('npm_test_output.txt')
         try:
             with open(npm_output_file_path, 'w') as npm_output_file:
@@ -102,18 +100,10 @@ class Npm(StepImplementer):
                     _out=out_callback,
                     _err=err_callback
                 )
-            test_results_dir = os.path.abspath()
-            print(test_results_dir)
 
-            # if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
-            #     if fail_on_no_tests:
-            #         step_result.message = 'No unit tests defined.'
-            #         step_result.success = False
-            #     else:
-            #         step_result.message = "No unit tests defined, but 'fail-on-no-tests' is False."
         except sh.ErrorReturnCode as error:
             step_result.message = "Unit test failures. See 'npm-output'" \
-                f" and 'surefire-reports' report artifacts for details: {error}"
+                f" report artifacts for details: {error}"
             step_result.success = False
         finally:
             step_result.add_artifact(
@@ -121,10 +111,5 @@ class Npm(StepImplementer):
                 name='npm-output',
                 value=npm_output_file_path
             )
-            # step_result.add_artifact(
-            #     description="Surefire reports generated from 'mvn test'.",
-            #     name='surefire-reports',
-            #     value=test_results_dir
-            # )
 
             return step_result
