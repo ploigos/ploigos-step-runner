@@ -22,7 +22,7 @@ class Npm(NpmGeneric):
     """`StepImplementer` for the `unit-test` step using npm.
     """
 
-    def __init__(self, workflow_result, parent_work_dir_path, config, environment, npm_targets):
+    def __init__(self, workflow_result, parent_work_dir_path, config, environment):
         super().__init__(workflow_result, parent_work_dir_path, config, environment=environment, npm_targets=['test'])
 
     @staticmethod
