@@ -397,7 +397,8 @@ def add_maven_mirror(
 
 def write_effective_pom(
     pom_file_path,
-    output_path
+    output_path,
+    profiles=None
 ):
     """Generates the effective pom for a given pom and writes it to a given directory
 
@@ -407,6 +408,8 @@ def write_effective_pom(
         Path to pom file to render the effective pom for.
     output_path : str
         Path to write the effective pom to.
+    profiles : list
+        Maven profiles to use when generating the effective pom.
 
     See
     ---
@@ -432,11 +435,16 @@ def write_effective_pom(
             " If you are a user seeing this, a programmer messed up somewhere, report an issue."
         )
 
+    profiles_arguments = ""
+    if profiles:
+        profiles_arguments = ['-P', f"{','.join(profiles)}"]
+
     try:
         sh.mvn( # pylint: disable=no-member
             'help:effective-pom',
             f'-f={pom_file_path}',
-            f'-Doutput={output_path}'
+            f'-Doutput={output_path}',
+            *profiles_arguments
         )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(

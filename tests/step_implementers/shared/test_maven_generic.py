@@ -363,7 +363,7 @@ class TestStepImplementerSharedMavenGeneric__get_effective_pom(
 
             # mock effective pom
             Path(pom_file_path).touch()
-            def write_effective_pom_mock_side_effect(pom_file_path, output_path):
+            def write_effective_pom_mock_side_effect(pom_file_path, output_path, profiles):
                 create_parent_dir(pom_file_path)
                 copyfile(pom_file_path, output_path)
             write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
@@ -377,7 +377,8 @@ class TestStepImplementerSharedMavenGeneric__get_effective_pom(
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_called_once_with(
                 pom_file_path=pom_file_path,
-                output_path=expected_effective_pom_path
+                output_path=expected_effective_pom_path,
+                profiles=[]
             )
 
     def test__get_effective_pom_call_twice(self, write_effective_pom_mock):
@@ -396,7 +397,7 @@ class TestStepImplementerSharedMavenGeneric__get_effective_pom(
 
             # mock effective pom
             Path(pom_file_path).touch()
-            def write_effective_pom_mock_side_effect(pom_file_path, output_path):
+            def write_effective_pom_mock_side_effect(pom_file_path, output_path, profiles):
                 create_parent_dir(pom_file_path)
                 copyfile(pom_file_path, output_path)
             write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
@@ -410,7 +411,8 @@ class TestStepImplementerSharedMavenGeneric__get_effective_pom(
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_called_once_with(
                 pom_file_path=pom_file_path,
-                output_path=expected_effective_pom_path
+                output_path=expected_effective_pom_path,
+                profiles=[]
             )
 
             # second call
@@ -422,6 +424,41 @@ class TestStepImplementerSharedMavenGeneric__get_effective_pom(
             actual_effective_pom_path = step_implementer._get_effective_pom()
             self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
             write_effective_pom_mock.assert_not_called()
+
+    def test_call_with_profiles(self, write_effective_pom_mock):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file_path = os.path.join(test_dir.path, 'pom.xml')
+            step_config = {
+                'pom-file': pom_file_path,
+                'maven-profiles': ['mock-profile1']
+            }
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # mock effective pom
+            Path(pom_file_path).touch()
+            def write_effective_pom_mock_side_effect(pom_file_path, output_path, profiles):
+                create_parent_dir(pom_file_path)
+                copyfile(pom_file_path, output_path)
+            write_effective_pom_mock.side_effect = write_effective_pom_mock_side_effect
+
+            # first call
+            expected_effective_pom_path = os.path.join(
+                step_implementer.work_dir_path,
+                'effective-pom.xml'
+            )
+            actual_effective_pom_path = step_implementer._get_effective_pom()
+            self.assertEqual(actual_effective_pom_path, expected_effective_pom_path)
+            write_effective_pom_mock.assert_called_once_with(
+                pom_file_path=pom_file_path,
+                output_path=expected_effective_pom_path,
+                profiles=['mock-profile1']
+            )
 
 @patch('ploigos_step_runner.step_implementers.shared.maven_generic.get_xml_element_by_path')
 @patch.object(MavenGeneric, '_get_effective_pom')

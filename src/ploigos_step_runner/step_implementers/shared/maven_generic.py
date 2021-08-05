@@ -189,7 +189,8 @@ class MavenGeneric(StepImplementer):
         if not os.path.exists(effective_pom_path):
             write_effective_pom(
                 pom_file_path=self.get_value('pom-file'),
-                output_path=effective_pom_path
+                output_path=effective_pom_path,
+                profiles=self.get_value('maven-profiles')
             )
 
         return effective_pom_path
