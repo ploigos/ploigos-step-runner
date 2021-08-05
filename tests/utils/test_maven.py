@@ -986,6 +986,42 @@ class TestMavenUtils(BaseTestCase):
         )
 
     @patch('sh.mvn', create=True)
+    def test_write_effective_pom_with_one_profile(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = '/tmp/output/effective-pom.xml'
+
+        actual_effective_pom_path = write_effective_pom(
+            pom_file_path=pom_file_path,
+            output_path=effective_pom_path,
+            profiles=['mock-profile1']
+        )
+        self.assertEqual(actual_effective_pom_path, effective_pom_path)
+        mvn_mock.assert_any_call(
+            'help:effective-pom',
+            f'-f={pom_file_path}',
+            f'-Doutput={effective_pom_path}',
+            '-P', 'mock-profile1'
+        )
+
+    @patch('sh.mvn', create=True)
+    def test_write_effective_pom_with_mutliple_profiles(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = '/tmp/output/effective-pom.xml'
+
+        actual_effective_pom_path = write_effective_pom(
+            pom_file_path=pom_file_path,
+            output_path=effective_pom_path,
+            profiles=['mock-profile1', 'mock-profile2']
+        )
+        self.assertEqual(actual_effective_pom_path, effective_pom_path)
+        mvn_mock.assert_any_call(
+            'help:effective-pom',
+            f'-f={pom_file_path}',
+            f'-Doutput={effective_pom_path}',
+            '-P', 'mock-profile1,mock-profile2'
+        )
+
+    @patch('sh.mvn', create=True)
     def test_write_effective_pom_fail(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = '/tmp/output/effective-pom.xml'
