@@ -130,9 +130,6 @@ def aggregate_xml_element_attribute_values(xml_file_path, xml_element, attribs):
     elif os.path.isfile(xml_file_path):
         xml_files = [xml_file_path]
 
-    with open(xml_files[0], "r") as xml_file:
-        print("line: " + xml_file.read())
-
     for attrib in attribs:
         report_results[attrib] = []
 
