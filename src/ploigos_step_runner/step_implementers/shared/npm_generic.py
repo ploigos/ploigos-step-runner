@@ -75,7 +75,7 @@ class NpmGeneric(StepImplementer):
 
         Validates that:
         * required configuration is given
-        * given 'pom-file' exists
+        * given 'package-file' exists
 
         Raises
         ------
@@ -84,7 +84,7 @@ class NpmGeneric(StepImplementer):
         """
         super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        # if pom-file has value verify file exists
+        # if package-file has value verify file exists
         # If it doesn't have value and is required function will have already failed
         package_file = self.get_value('package-file')
         if package_file is not None:
@@ -113,8 +113,7 @@ class NpmGeneric(StepImplementer):
 
     def _run_npm_step(
         self,
-        npm_output_file_path,
-        step_implementer_additional_arguments=None
+        npm_output_file_path
     ):
         """Runs npm using the configuration given to this step runner.
 
@@ -133,7 +132,6 @@ class NpmGeneric(StepImplementer):
 
         targets = self.npm_targets
         package_file = self.get_value('package-file')
-        # tls_verify = self.get_value('tls-verify')
 
         run_npm(
             npm_output_file_path=npm_output_file_path,

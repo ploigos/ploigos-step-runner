@@ -57,25 +57,6 @@ class Npm(NpmGeneric):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    # def _validate_required_config_or_previous_step_result_artifact_keys(self):
-    #     """Validates that the required configuration keys or previous step result artifacts
-    #     are set and have valid values.
-
-    #     Validates that:
-    #     * required configuration is given
-    #     * given 'package-file' exists
-
-    #     Raises
-    #     ------
-    #     AssertionError
-    #         If step configuration or previous step result artifacts have invalid required values
-    #     """
-    #     super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-    #     package_file = self.get_value('package-file')
-    #     assert os.path.exists(package_file), \
-    #         f'Given npm package file (package-file) does not exist: {package_file}'
-
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
 
