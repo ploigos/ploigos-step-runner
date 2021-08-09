@@ -4,7 +4,6 @@
 import os
 from posixpath import abspath
 import sys
-# from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
 from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
 

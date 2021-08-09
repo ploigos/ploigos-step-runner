@@ -9,7 +9,7 @@ from ploigos_step_runner.utils.io import \
 def run_npm( 
     npm_output_file_path,
     package_file,
-    targets
+    npm_run_scripts
 ):
     try:
         with open(npm_output_file_path, 'w') as npm_output_file:
@@ -22,10 +22,10 @@ def run_npm(
                 npm_output_file
             ])
             
-            for target in targets:
+            for script in npm_run_scripts:
                 sh.npm( 
                     'run',
-                    target,
+                    script,
                     _out=out_callback,
                     _err=err_callback
                 )
