@@ -22,7 +22,7 @@ class Npm(NpmGeneric):
     """
 
     def __init__(self, workflow_result, parent_work_dir_path, config, environment):
-        super().__init__(workflow_result, parent_work_dir_path, config, environment=environment, npm_targets=['test'])
+        super().__init__(workflow_result, parent_work_dir_path, config, environment=environment, npm_run_scripts=['test'])
 
     @staticmethod
     def step_implementer_config_defaults():
