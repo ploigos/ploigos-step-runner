@@ -8,6 +8,8 @@ import sh
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
+from ploigos_step_runner.utils.xml import (get_xml_element_by_path,
+                                           get_xml_element_text_by_path)
 
 
 def generate_maven_settings(working_dir, maven_servers, maven_repositories, maven_mirrors):
@@ -437,6 +439,8 @@ def write_effective_pom(
 
     profiles_arguments = ""
     if profiles:
+        if isinstance(profiles, str):
+            profiles = [profiles]
         profiles_arguments = ['-P', f"{','.join(profiles)}"]
 
     try:
@@ -452,6 +456,38 @@ def write_effective_pom(
         ) from error
 
     return output_path
+
+def get_effective_pom(
+    work_dir_path,
+    pom_file,
+    profiles
+):
+    """Writes the effective pom to a file if it does not already exist and returns the path.
+
+    Parameters
+    ----------
+    work_dir_path : str
+        Path to write the effective pom to if it does not already exist
+    pom_file : str
+        Path to pom file to create the effective pom for.
+    profiles : [str]
+        Profile(s) to use when generating the effective pom
+
+    Returns
+    -------
+    str
+        Path to the written effective pom generated from the 'pom-file' value.
+    """
+    effective_pom_path = os.path.join(work_dir_path, 'effective-pom.xml')
+
+    if not os.path.exists(effective_pom_path):
+        write_effective_pom(
+            pom_file_path=pom_file,
+            output_path=effective_pom_path,
+            profiles=profiles
+        )
+
+    return effective_pom_path
 
 def run_maven( #pylint: disable=too-many-arguments
     mvn_output_file_path,
@@ -485,6 +521,11 @@ def run_maven( #pylint: disable=too-many-arguments
         See https://maven.apache.org/ref/current/maven-embedder/cli.html
     settings_file : str (path)
         Maven settings file to use.
+
+    Returns
+    -------
+    str
+        Standard Out and Standard Error from running Maven.
 
     Raises
     ------
@@ -544,3 +585,258 @@ def run_maven( #pylint: disable=too-many-arguments
         raise StepRunnerException(
             f"Error running maven. {error}"
         ) from error
+
+def get_maven_plugin_xml_element_path(plugin_name):
+    """Create XML element path for a given maven plugin.
+
+    Parameters
+    ----------
+    plugin_name : str
+        Maven plugin name to get the XML element path for
+
+    Returns
+    -------
+    str
+        XML element path for the given maven plugin.
+    """
+    return f'./mvn:build/mvn:plugins/mvn:plugin[mvn:artifactId="{plugin_name}"]'
+
+def get_plugin_configuration_values(
+    plugin_name,
+    configuration_key,
+    work_dir_path,
+    pom_file,
+    profiles=None,
+    phases_and_goals=None,
+    require_phase_execution_config=False
+): # pylint: disable=too-many-arguments
+    """Gets the value(s) of a given configuration key for a given maven plugin.
+
+    Will create an effective pom out of the given pom so as to be able to inherit configuration
+    from parent poms.
+
+    Will search:
+    * executions for given phase, return all matches
+    * if no matching executions will search plugin non execution specific configuration
+
+    Paramters
+    ---------
+    plugin_name : str
+        Name of the maven plugin to get the configuration value(s) for.
+    configuration_key : str
+        Configuration key of the maven plugin to get the configuration value(s) for.
+    work_dir_path : str
+        A working path to use to write the effective pom to for searching.
+    pom_file : str
+        Maven pom file to create the effective pom for to then search for the plugin configuration.
+    profiles : [str]
+        List of maven profiles to activate when creating the effective pom to search.
+    phases_and_goals : [str]
+        List of phases and goals to search for specific plugin executions for for the configuration
+        value(s).
+    require_phase_execution_config : bool
+        True if the found configuration must be in a plugin execution matching one of the given
+        phases. False if the found configuration can be a default configuration.
+
+    Raises
+    ------
+    RuntimeError
+        If the given plugin can not be found in the effective pom.
+
+    Returns
+    -------
+    [str]
+        List of configuration values found, or empty list if none found.
+    """
+    # get effective pom
+    effective_pom_file = get_effective_pom(
+        work_dir_path=work_dir_path,
+        pom_file=pom_file,
+        profiles=profiles
+    )
+
+    # ensure plugin enabled
+    plugin_xml_element_path = get_maven_plugin_xml_element_path(plugin_name)
+    plugin = get_xml_element_by_path(
+        effective_pom_file,
+        xpath=plugin_xml_element_path,
+        default_namespace='mvn'
+    )
+    if plugin is None:
+        raise RuntimeError(
+            f"Expected maven plugin ({plugin_name}) not found in "
+            f" effective pom for given pom ({pom_file})."
+        )
+
+    # look for phase and/or goal specific plugin configuration
+    configuration_values = []
+    if phases_and_goals:
+        for phase_or_goal in phases_and_goals:
+            # look for phase specific plugin configuration
+            # EX:
+            #   <plugin>
+            #     <groupId>org.apache.maven.plugins</groupId>
+            #     <artifactId>maven-surefire-plugin</artifactId>
+            #     <version>${surefire-plugin.version}</version>
+            #     <configuration>
+            #       <reportsDirectory>
+            #         ${project.build.directory}/surefire-reports-unit-test
+            #       </reportsDirectory>
+            #     </configuration>
+            #     <executions>
+            #       <execution>
+            #         <id>integration-tests</id>
+            #         <phase>integration-test</phase> <!--NOTE: Matches on this-->
+            #         <goals>
+            #           <goal>test</goal>
+            #         </goals>
+            #         <configuration>
+            #           <skipTests>${skipITs}</skipTests>
+            #           <reportsDirectory>
+            #             ${project.build.directory}/surefire-reports-uat <!--NOTE: selects this-->
+            #           </reportsDirectory>
+            #           <systemProperties>
+            #             <java.util.logging.manager>
+            #               org.jboss.logmanager.LogManager
+            #             </java.util.logging.manager>
+            #           </systemProperties>
+            #           <includes>
+            #             <include>**/*IT.*</include>
+            #           </includes>
+            #         </configuration>
+            #       </execution>
+            #     </executions>
+            #   </plugin>
+            phase_config = get_xml_element_text_by_path(
+                effective_pom_file,
+                xpath=f'{plugin_xml_element_path}/mvn:executions/' \
+                    f'mvn:execution[mvn:phase="{phase_or_goal}"]/' \
+                    f'mvn:configuration/mvn:{configuration_key}',
+                default_namespace='mvn',
+                find_all=True
+            )
+            if isinstance(phase_config, list):
+                configuration_values += phase_config
+
+            # look for goals specific plugin configuration
+            # EX:
+            #   <plugin>
+            #     <groupId>org.apache.maven.plugins</groupId>
+            #     <artifactId>maven-failsafe-plugin</artifactId>
+            #     <version>2.22.2</version>
+            #     <executions>
+            #       <execution>
+            #         <goals>
+            #           <goal>integration-test</goal> <!--NOTE: Matches on this-->
+            #           <goal>verify</goal>
+            #         </goals>
+            #         <configuration>
+            #           <reportsDirectory> <!--NOTE: selects this-->
+            #             ${project.build.directory}/failsafe-reports-execution
+            #           </reportsDirectory>
+            #         </configuration>
+            #       </execution>
+            #     </executions>
+            #   </plugin>
+            goal_config = get_xml_element_text_by_path(
+                effective_pom_file,
+                xpath=f'{plugin_xml_element_path}/mvn:executions/mvn:execution/' \
+                    f'*[mvn:goal="{phase_or_goal}"]/../mvn:configuration/mvn:{configuration_key}',
+                default_namespace='mvn',
+                find_all=True
+            )
+            if isinstance(goal_config, list):
+                configuration_values += goal_config
+
+    # if didn't find any phase specific configuration, look for default configuration
+    if not require_phase_execution_config and not configuration_values:
+        default_config = get_xml_element_text_by_path(
+            effective_pom_file,
+            xpath=f'{plugin_xml_element_path}/mvn:configuration/mvn:{configuration_key}',
+            default_namespace='mvn',
+            find_all=True
+        )
+        if isinstance(default_config, list):
+            configuration_values += default_config
+
+    # de dup results and return
+    configuration_values = list(set(configuration_values))
+    configuration_values.sort()
+    return configuration_values
+
+def get_plugin_configuration_absolute_path_values(
+    plugin_name,
+    configuration_key,
+    work_dir_path,
+    pom_file,
+    profiles=None,
+    phases_and_goals=None,
+    require_phase_execution_config=False
+): # pylint: disable=too-many-arguments
+    """Gets the value(s) of a given configuration key for a given maven plugin and converts
+    them to absolute paths (if they arn't already), if they were relative paths, assumes,
+    relative to the given pom file.
+
+    Will create an effective pom out of the given pom so as to be able to inherit configuration
+    from parent poms.
+
+    Will search:
+    * executions for given phase, return all matches
+    * if no matching executions will search plugin non execution specific configuration
+
+    Paramters
+    ---------
+    plugin_name : str
+        Name of the maven plugin to get the configuration value(s) for.
+    configuration_key : str
+        Configuration key of the maven plugin to get the configuration value(s) for.
+    work_dir_path : str
+        A working path to use to write the effective pom to for searching.
+    pom_file : str
+        Maven pom file to create the effective pom for to then search for the plugin configuration.
+    profiles : [str]
+        List of maven profiles to activate when creating the effective pom to search.
+    phases_and_goals : [str]
+        List of phases and goals to search for specific plugin executions for for the configuration
+        value(s).
+    require_phase_execution_config : bool
+        True if the found configuration must be in a plugin execution matching one of the given
+        phases. False if the found configuration can be a default configuration.
+
+    Raises
+    ------
+    RuntimeError
+        If the given plugin can not be found in the effective pom.
+
+    Returns
+    -------
+    [str]
+        List of configuration values found, or empty list if none found.
+    """
+    absolute_path_config_values = []
+
+    # get the configuration values
+    config_values = get_plugin_configuration_values(
+        plugin_name=plugin_name,
+        configuration_key=configuration_key,
+        work_dir_path=work_dir_path,
+        pom_file=pom_file,
+        profiles=profiles,
+        phases_and_goals=phases_and_goals,
+        require_phase_execution_config=require_phase_execution_config
+    )
+
+    # transform that configuration into absolute paths for consistency
+    if config_values:
+        for config_value in config_values:
+            # if absolute path use as is
+            # else if relative path assume its relative to the pom and calc absolute path
+            if os.path.isabs(config_value):
+                absolute_path_config_values.append(config_value)
+            else:
+                absolute_path_config_values.append(os.path.join(
+                    os.path.dirname(os.path.abspath(pom_file)),
+                    config_value
+                ))
+
+    return absolute_path_config_values

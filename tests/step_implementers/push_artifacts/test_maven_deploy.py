@@ -65,6 +65,8 @@ class TestStepImplementerMavenDeploy_step_implementer_config_defaults(
                 'maven-additional-arguments': [
                     '-Dmaven.install.skip=true',
                     '-Dmaven.test.skip=true'
+                    '-DskipTests',
+                    '-DskipITs'
                 ]
             }
         )
