@@ -206,17 +206,14 @@ class GenerateEvidence(StepImplementer):
         #Iterate over all previous step results
         for previous_step_result in self.workflow_result.workflow_list:
             step_name = previous_step_result.step_name
-            sub_step_name = previous_step_result.sub_step_name
             if step_name not in workflow_dict:
                 workflow_dict[step_name] = {}
-            if sub_step_name not in workflow_dict[step_name]:
-                workflow_dict[step_name][sub_step_name] = {}
 
-            workflow_dict[step_name][sub_step_name][attestations_keyword] = {}
+            workflow_dict[step_name][attestations_keyword] = {}
 
             evidence = previous_step_result.evidence
             for piece_of_evidence in evidence.values():
-                workflow_dict[step_name][sub_step_name]\
+                workflow_dict[step_name]\
                 [attestations_keyword][piece_of_evidence.name]\
                  = {
                     'name': piece_of_evidence.name,
@@ -224,7 +221,7 @@ class GenerateEvidence(StepImplementer):
                     'description': piece_of_evidence.description,
                  }
                 if previous_step_result.environment:
-                    workflow_dict[step_name][sub_step_name]\
+                    workflow_dict[step_name]\
                     [attestations_keyword][piece_of_evidence.name]\
                      ['environment'] = previous_step_result.environment
 

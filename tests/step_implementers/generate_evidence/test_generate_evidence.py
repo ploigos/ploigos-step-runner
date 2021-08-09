@@ -22,21 +22,19 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
                 'kind': "WorkflowEvidence",
                 'workflow': {
                     'test-step': {
-                        'test-sub-step': {
-                            'attestations': {
-                                'test-evidence': {
-                                    'name': 'test-evidence',
-                                    'value': 'test-value',
-                                    'description': 'test-description'
-                                },
-                                'test-evidence2': {
-                                    'name': 'test-evidence2',
-                                    'value': 'test-value2',
-                                    'description': 'test-description2'
-                                }
+                        'attestations': {
+                            'test-evidence': {
+                                'name': 'test-evidence',
+                                'value': 'test-value',
+                                'description': 'test-description'
+                            },
+                            'test-evidence2': {
+                                'name': 'test-evidence2',
+                                'value': 'test-value2',
+                                'description': 'test-description2'
                             }
                         }
-                    }
+                     }
                 }
             }
 
@@ -45,7 +43,6 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
         'kind': "WorkflowEvidence",
         'workflow': {
             'test-step': {
-                'test-sub-step': {
                     'attestations': {
                         'test-evidence': {
                             'name': 'test-evidence',
@@ -60,7 +57,6 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
                             'environment': 'foo'
                         }
                     }
-                }
             }
         }
     }
@@ -71,18 +67,16 @@ class TestStepImplementerGenerateEvidenceBase(BaseStepImplementerTestCase):
     "kind": "WorkflowEvidence",
     "workflow": {
         "test-step": {
-            "test-sub-step": {
-                "attestations": {
-                    "test-evidence": {
-                        "name": "test-evidence",
-                        "value": "test-value",
-                        "description": "test-description"
-                    },
-                    "test-evidence2": {
-                        "name": "test-evidence2",
-                        "value": "test-value2",
-                        "description": "test-description2"
-                    }
+            "attestations": {
+                "test-evidence": {
+                    "name": "test-evidence",
+                    "value": "test-value",
+                    "description": "test-description"
+                },
+                "test-evidence2": {
+                    "name": "test-evidence2",
+                    "value": "test-value2",
+                    "description": "test-description2"
                 }
             }
         }
