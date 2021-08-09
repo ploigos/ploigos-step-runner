@@ -52,11 +52,17 @@ def Any(cls):
     """
 
     class Any(cls):
+        def __init__(self):
+            pass
+
         def __eq__(self, other):
             return True
 
         def __hash__(self):
             return hash(tuple(self))
+
+        def __repr__(self):
+            return 'any'
 
     return Any()
 

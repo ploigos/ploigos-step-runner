@@ -18,13 +18,15 @@ Configuration Key            | Required? | Default | Description
                             `True` to suppress the transfer progress of packages maven downloads.
                             `False` to have the transfer progress printed.\
                             See https://maven.apache.org/ref/current/maven-embedder/cli.html
-`maven-additional-arguments` | No        | `['-Dmaven.test.skip=true', \
-                                             '-Dmaven.install.skip=true']` \
+`maven-additional-arguments` | No        | `['-Dmaven.install.skip=true', \
+                                             '-Dmaven.test.skip=true' \
+                                             '-DskipTests', \
+                                             '-DskipITs']` \
                                                    | List of additional arguments to use. \
                                                      Skipping tests by default because assuming \
                                                      a previous step already ran them. \
                                                      Skipping install backs assuming this is \
-                                                     running in an ephermal environment where \
+                                                     running in an ephemeral environment where \
                                                      that would be a waist of time, and also \
                                                      that a previous step ran `package` \
                                                      and `push-artifacts` steps.
@@ -56,6 +58,8 @@ DEFAULT_CONFIG = {
     'maven-additional-arguments': [
         '-Dmaven.install.skip=true',
         '-Dmaven.test.skip=true'
+        '-DskipTests',
+        '-DskipITs'
     ]
 }
 

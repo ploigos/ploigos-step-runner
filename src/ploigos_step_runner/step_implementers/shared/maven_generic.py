@@ -19,13 +19,10 @@ Configuration Key            | Required? | Default | Description
                             `False` to have the transfer progress printed.\
                             See https://maven.apache.org/ref/current/maven-embedder/cli.html
 `maven-additional-arguments` | No        | `[]`    | List of additional arguments to use.
-`maven-servers`              | No        |         | Dictionary of dictionaries of \
-                                                     id, username, password
-`maven-repositories`         | No        |         | Dictionary of dictionaries of \
-                                                     id, url, snapshots, releases
-`maven-mirrors`              | No        |         | Dictionary of dictionaries of \
-                                                     id, url, mirror_of
-"""
+`maven-servers`              | No        |         | Dictionary of dictionaries of id, username, password
+`maven-repositories`         | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
+`maven-mirrors`              | No        |         | Dictionary of dictionaries of id, url, mirror_of
+"""# pylint: disable=line-too-long
 
 import os
 
@@ -33,7 +30,7 @@ from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.maven import (generate_maven_settings,
-                                             run_maven, write_effective_pom)
+                                            run_maven, write_effective_pom)
 from ploigos_step_runner.utils.xml import get_xml_element_by_path
 
 DEFAULT_CONFIG = {
@@ -52,12 +49,6 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 class MavenGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use Maven.
     """
-
-    SUREFIRE_PLUGIN_XML_ELEMENT_PATH = \
-        'mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId="maven-surefire-plugin"]'
-    SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH = \
-        f'{SUREFIRE_PLUGIN_XML_ELEMENT_PATH}/mvn:configuration/mvn:reportsDirectory'
-    DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR = 'target/surefire-reports'
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

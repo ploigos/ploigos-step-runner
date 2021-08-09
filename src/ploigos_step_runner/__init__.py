@@ -323,10 +323,23 @@ From least precedence to highest precedence.
       - implementer: MavenTest
         config: {
           # Optional.
-          # fail-on-no-tests: true
+          # pom_file: 'pom.xml'
 
           # Optional.
-          # pom_file: 'pom.xml'
+          # tls-verify: True
+
+          # Optional.
+          # maven-profiles: []
+
+          # Optional.
+          # maven-no-transfer-progress: True
+
+          # Optional.
+          # maven-additional-arguments: []
+
+          # Optional.
+          # NOTE: Will attempt to dynamically determine from pom if not given.
+          # test-reports-dir: 'target/surefire-reports
         }
 
       package:
@@ -503,11 +516,39 @@ From least precedence to highest precedence.
         }
 
       uat:
-      - implementer: MavenTestSeleniumCucumber
-        config: {}
+      - implementer: MavenIntegrationTest
+        config:
+          target-host-url-maven-argument-name: 'target.base.url'
+          maven-additional-arguments:
+          - -Dselenium.hub.url=http://selenium.plogios.xyz:4242
 
-      # TODO: not yet implemented
-      report: []
+          # Optional.
+          # pom_file: 'pom.xml'
+
+          # Optional.
+          # tls-verify: True
+
+          # Optional.
+          # maven-profiles: []
+
+          # Optional.
+          # maven-no-transfer-progress: True
+
+          # Optional.
+          # maven-additional-arguments: []
+
+          # Optional.
+          # NOTE: Will attempt to dynamically determine from pom if not given.
+          # test-reports-dir: 'target/surefire-reports
+
+      report:
+      - implementer: ResultArtifactsArchive
+        config:
+          results-archive-destination-url: https://artifact-repo.plogios.com/release-engineering-workflow-result-artifacts-archives/
+          results-archive-destination-username: mock-name
+
+          # NOTE: should encrypt this
+          results-archive-destination-password: mock-pass
 
 ** Example Config file for a NPM built Application **
 
@@ -819,12 +860,17 @@ From least precedence to highest precedence.
           # template variable specification
           readiness-probe-path: ''
 
-      uat:
-      - implementer: MavenTestSeleniumCucumber
-        config: {}
-
       # TODO: not yet implemented
-      report: []
+      uat: []
+
+      report:
+      - implementer: ResultArtifactsArchive
+        config:
+          results-archive-destination-url: https://artifact-repo.plogios.com/release-engineering-workflow-result-artifacts-archives/
+          results-archive-destination-username: mock-name
+
+          # NOTE: should encrypt this
+          results-archive-destination-password: mock-pass
 
 Examples
 --------

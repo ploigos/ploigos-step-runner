@@ -1,4 +1,5 @@
-"""`StepImplementer` for the `uat` step using Maven by invoking the 'test` maven phase."
+
+"""`StepImplementer` for the `uat` step using Maven by invoking the 'integration-test` maven phase.
 
 Step Configuration
 ------------------
@@ -9,14 +10,17 @@ Could come from:
 * previous step results
 
 Configuration Key            | Required? | Default | Description
------------------------------|-----------|---------|-----------
+-----------------------------|-----------|---------|------------
 `pom-file`                   | Yes       | `'pom.xml'` | pom used when executing maven.
 `tls-verify`                 | No        | `True`  | Disables TLS Verification if set to False
 `maven-profiles`             | No        | `[]`    | List of maven profiles to use.
 `maven-no-transfer-progress` | No        | `True`  | `True` to suppress the transfer progress of packages maven downloads.
                                                      `False` to have the transfer progress printed.\
                                                       See https://maven.apache.org/ref/current/maven-embedder/cli.html
-`maven-additional-arguments` | No        | `[]`    | List of additional arguments to use.
+`maven-additional-arguments` | No        | `['-DskipTests']` \
+                                                   | List of additional arguments to use. \
+                                                     Default is because when running `integration-test` phase the `test` phase will also be run, \
+                                                     so this is a "good" way to not re-run the `test` phase tests again.
 `maven-servers`              | No        |         | Dictionary of dictionaries of id, username, password
 `maven-repositories`         | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
 `maven-mirrors`              | No        |         | Dictionary of dictionaries of id, url, mirror_of
@@ -25,7 +29,11 @@ Configuration Key            | Required? | Default | Description
                                                      in all cases. \
                                                      So, this parameter provides a way for the user to specify where the test results \
                                                      are if our attempts at dynamically figuring it out are failing your unique pom.
-
+`target-host-url-maven-argument-name` \
+                             | Yes       |         | It is assumed that integration tests need to know a URL endpoint to run the tests against, \
+                                                     but there is not standardized way for integration tests to receive that information. \
+                                                     Therefor this parameter takes the name of a maven -D flag that should be set with the \
+                                                     target host url to then be read by the integration tests.
 
 Result Artifacts
 ----------------
@@ -37,18 +45,23 @@ Result Artifact Key | Description
 `test-report`       | Directory containing the test reports generated from running this step.
 """# pylint: disable=line-too-long
 
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import (
     MavenGeneric, MavenTestReportingMixin)
 
-DEFAULT_CONFIG = {}
+DEFAULT_CONFIG = {
+    'maven-additional-arguments': ['-DskipTests']
+}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'pom-file'
+    'pom-file',
+    'target-host-url-maven-argument-name'
 ]
 
-class MavenTest(MavenGeneric, MavenTestReportingMixin):
-    """`StepImplementer` for the `uat` step using Maven by invoking the 'test` maven phase.
+class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
+    """`StepImplementer` for the `uat` step using Maven by invoking the
+    'integration-test` maven phase.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -63,8 +76,9 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
             parent_work_dir_path=parent_work_dir_path,
             config=config,
             environment=environment,
-            maven_phases_and_goals=['test']
+            maven_phases_and_goals=['integration-test', 'verify']
         )
+
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -108,13 +122,32 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
         """
         step_result = StepResult.from_step_implementer(self)
 
+        # NOTE:
+        #   at some point may need to do smarter logic if a deployable has more then one deployed
+        #   host URL to do UAT against all of them, but for now, use first one as target of UAT
+        deployed_host_urls = self.get_value('deployed-host-urls')
+        if isinstance(deployed_host_urls, list):
+            target_host_url = deployed_host_urls[0]
+            if len(deployed_host_urls) > 1:
+                step_result.message = \
+                    f"Given more then one deployed host URL ({deployed_host_urls})," \
+                    f" targeting first one ({target_host_url}) for user acceptance test (UAT)."
+                print(step_result.message)
+        elif deployed_host_urls:
+            target_host_url = deployed_host_urls
+        else:
+            target_host_url = self.get_value('target-host-url')
+
         # run the tests
-        print("Run unit tests")
+        print("Run user acceptance tests (UAT)")
         mvn_output_file_path = self.write_working_file('mvn_output.txt')
         try:
             # execute maven step (params come from config)
             self._run_maven_step(
-                mvn_output_file_path=mvn_output_file_path
+                mvn_output_file_path=mvn_output_file_path,
+                step_implementer_additional_arguments=[
+                    f'-D{self.get_value("target-host-url-maven-argument-name")}={target_host_url}'
+                ]
             )
         except StepRunnerException as error:
             step_result.success = False
@@ -150,7 +183,8 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
 
         Search Priority:
         * values -> 'test-reports-dir'
-        * pom.xml -> maven-surefire-plugin -> reportsDirectory
+        * pom.xml -> maven-failsafe-plugin -> reportsDirectory
+        * pom.xml -> maven-surefire-plugin (for integration-test phase or goal) -> reportsDirectory
 
         Returns
         -------
@@ -166,21 +200,35 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
             test_report_dir = None
             try:
                 test_report_dir = self._attempt_get_test_report_directory(
-                    plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
-                    configuration_key=\
-                        MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
-                    default=MavenTestReportingMixin.SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR
+                    plugin_name=MavenTestReportingMixin.FAILSAFE_PLUGIN_NAME,
+                    configuration_key=MavenTestReportingMixin.FAILSAFE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
+                    default=MavenTestReportingMixin.FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR
                 )
             except StepRunnerException:
-                print(
-                    'WARNING: Did not find any expected test reporting plugin'
-                    f' ({MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME})'
-                    ' to read artifacts and evidence from.'
-                    ' This is not wholly unexpected because there is enumerable maven plugins,'
-                    ' and enumerable ways to configure them.'
-                    ' Rather then relying on this step implementer to try and figure out'
-                    ' where the test reports are you can configure it manually via the'
-                    ' step implementer config (test-reports-dir).'
-                )
+                # this means the failsafe plugin was not found, so try looking for the surefire plugin,
+                # configured for this phase
+                try:
+                    # NOTE: when looking for surefire plugin configuration as part of the integration
+                    #       test phase ensure that it is configured for correct phase, since its
+                    #       default phases are for test rather then integration test.
+                    test_report_dir = self._attempt_get_test_report_directory(
+                        plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
+                        configuration_key=\
+                            MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
+                        default=MavenTestReportingMixin.SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR,
+                        require_phase_execution_config=True
+                    )
+                except StepRunnerException:
+                    print(
+                        'WARNING: Did not find any expected test reporting plugin'
+                        f' ({MavenTestReportingMixin.FAILSAFE_PLUGIN_NAME},'
+                        f' {MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME})'
+                        ' to read artifacts and evidence from.'
+                        ' This is not wholly unexpected because there is enumerable maven plugins,'
+                        ' and enumerable ways to configure them.'
+                        ' Rather then relying on this step implementer to try and figure out'
+                        ' where the test reports are you can configure it manually via the'
+                        ' step implementer config (test-reports-dir).'
+                    )
 
         return test_report_dir
