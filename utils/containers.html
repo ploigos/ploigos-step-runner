@@ -403,7 +403,47 @@ def mount_container(buildah_unshare_command, container_id):
             f&#39;Error mounting container ({container_id}): {error}&#39;
         ) from error
 
-    return mount_path</code></pre>
+    return mount_path
+
+def determine_container_image_build_tag_info(
+    image_version,
+    organization,
+    application_name,
+    service_name
+):
+    &#34;&#34;&#34;Determines the full and short build tags for a new container image.
+
+    Parameters
+    ----------
+    image_version : str
+        A given image version. If none given, latest will be used.
+    organization : str
+        Organization the container image belongs to.
+    application_name : str
+        Application the container image belongs to.
+    service_name : str
+        Service the container image implements.
+
+    Returns
+    -------
+    str, str, str, str, str
+        First result is the full build tag, including registry URI.
+        Second result is the short build tag, as in no registry URI.
+        Third result is the image registry uri.
+        Forth result is the image repository name.
+        Fifth result is the used image version.
+
+    &#34;&#34;&#34;
+    if image_version is None:
+        image_version = &#39;latest&#39;
+        print(&#39;No image tag version found in metadata. Using latest&#39;)
+    image_registry_uri = &#39;localhost&#39;
+    image_registry_organization = organization
+    image_repository = f&#34;{application_name}-{service_name}&#34;
+    build_short_tag = f&#34;{image_registry_organization}/{image_repository}:{image_version}&#34;
+    build_full_tag = f&#34;{image_registry_uri}/{build_short_tag}&#34;
+
+    return build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version</code></pre>
 </details>
 </section>
 <section>
@@ -898,6 +938,76 @@ See <a href="https://github.com/containers/skopeo">https://github.com/containers
     return container_name</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.utils.containers.determine_container_image_build_tag_info"><code class="name flex">
+<span>def <span class="ident">determine_container_image_build_tag_info</span></span>(<span>image_version, organization, application_name, service_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determines the full and short build tags for a new container image.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>image_version</code></strong> :&ensp;<code>str</code></dt>
+<dd>A given image version. If none given, latest will be used.</dd>
+<dt><strong><code>organization</code></strong> :&ensp;<code>str</code></dt>
+<dd>Organization the container image belongs to.</dd>
+<dt><strong><code>application_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Application the container image belongs to.</dd>
+<dt><strong><code>service_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Service the container image implements.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str, str, str, str, str</code></dt>
+<dd>First result is the full build tag, including registry URI.
+Second result is the short build tag, as in no registry URI.
+Third result is the image registry uri.
+Forth result is the image repository name.
+Fifth result is the used image version.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def determine_container_image_build_tag_info(
+    image_version,
+    organization,
+    application_name,
+    service_name
+):
+    &#34;&#34;&#34;Determines the full and short build tags for a new container image.
+
+    Parameters
+    ----------
+    image_version : str
+        A given image version. If none given, latest will be used.
+    organization : str
+        Organization the container image belongs to.
+    application_name : str
+        Application the container image belongs to.
+    service_name : str
+        Service the container image implements.
+
+    Returns
+    -------
+    str, str, str, str, str
+        First result is the full build tag, including registry URI.
+        Second result is the short build tag, as in no registry URI.
+        Third result is the image registry uri.
+        Forth result is the image repository name.
+        Fifth result is the used image version.
+
+    &#34;&#34;&#34;
+    if image_version is None:
+        image_version = &#39;latest&#39;
+        print(&#39;No image tag version found in metadata. Using latest&#39;)
+    image_registry_uri = &#39;localhost&#39;
+    image_registry_organization = organization
+    image_repository = f&#34;{application_name}-{service_name}&#34;
+    build_short_tag = f&#34;{image_registry_organization}/{image_repository}:{image_version}&#34;
+    build_full_tag = f&#34;{image_registry_uri}/{build_short_tag}&#34;
+
+    return build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.utils.containers.mount_container"><code class="name flex">
 <span>def <span class="ident">mount_container</span></span>(<span>buildah_unshare_command, container_id)</span>
 </code></dt>
@@ -990,6 +1100,7 @@ so that this can be done "rootless".</dd>
 <li><code><a title="ploigos_step_runner.utils.containers.container_registries_login" href="#ploigos_step_runner.utils.containers.container_registries_login">container_registries_login</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.containers.container_registry_login" href="#ploigos_step_runner.utils.containers.container_registry_login">container_registry_login</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.containers.create_container_from_image" href="#ploigos_step_runner.utils.containers.create_container_from_image">create_container_from_image</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.containers.determine_container_image_build_tag_info" href="#ploigos_step_runner.utils.containers.determine_container_image_build_tag_info">determine_container_image_build_tag_info</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.containers.mount_container" href="#ploigos_step_runner.utils.containers.mount_container">mount_container</a></code></li>
 </ul>
 </li>
