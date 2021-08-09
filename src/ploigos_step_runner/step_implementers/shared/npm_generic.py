@@ -13,7 +13,7 @@ DEFAULT_CONFIG = {
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'package-file',
-    'npm-targets'
+    'npm-run-scripts'
 ]
 
 class NpmGeneric(StepImplementer):
@@ -26,9 +26,9 @@ class NpmGeneric(StepImplementer):
         parent_work_dir_path,
         config,
         environment=None,
-        npm_targets=[]
+        npm_run_scripts=[]
     ):
-        self.__npm_targets = npm_targets
+        self.__npm_run_scripts = npm_run_scripts
 
         super().__init__(
             workflow_result=workflow_result,
@@ -92,7 +92,7 @@ class NpmGeneric(StepImplementer):
                 f'Given npm package.json file (package-file) does not exist: {package_file}'
 
     @property
-    def npm_targets(self):
+    def npm_run_scripts(self):
         """Property for getting the npm phases and goals to execute which can either come
         from field set on this class via constructor, intended for use by sub classes that want
         to hard code the phases and goals for convenience, or comes from config value
@@ -103,13 +103,13 @@ class NpmGeneric(StepImplementer):
         str
             Maven phases and/or goals to execute.
         """
-        npm_targets = None
-        if self.__npm_targets:
-            npm_targets = self.__npm_targets
+        npm_run_scripts = None
+        if self.__npm_run_scripts:
+            npm_run_scripts = self.__npm_run_scripts
         else:
-            npm_targets = self.get_value('npm-targets')
+            npm_run_scripts = self.get_value('npm-run-scripts')
 
-        return npm_targets
+        return npm_run_scripts
 
     def _run_npm_step(
         self,
@@ -130,13 +130,13 @@ class NpmGeneric(StepImplementer):
             If npm returns a none 0 exit code.
         """
 
-        targets = self.npm_targets
+        run_scripts = self.npm_run_scripts
         package_file = self.get_value('package-file')
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
             package_file=package_file,
-            targets=targets
+            run_scripts=run_scripts
         )
 
     def _run_step(self): 
