@@ -426,7 +426,8 @@ def add_maven_mirror(
 
 def write_effective_pom(
     pom_file_path,
-    output_path
+    output_path,
+    profiles=None
 ):
     &#34;&#34;&#34;Generates the effective pom for a given pom and writes it to a given directory
 
@@ -436,6 +437,8 @@ def write_effective_pom(
         Path to pom file to render the effective pom for.
     output_path : str
         Path to write the effective pom to.
+    profiles : list
+        Maven profiles to use when generating the effective pom.
 
     See
     ---
@@ -461,11 +464,16 @@ def write_effective_pom(
             &#34; If you are a user seeing this, a programmer messed up somewhere, report an issue.&#34;
         )
 
+    profiles_arguments = &#34;&#34;
+    if profiles:
+        profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
+
     try:
         sh.mvn( # pylint: disable=no-member
             &#39;help:effective-pom&#39;,
             f&#39;-f={pom_file_path}&#39;,
-            f&#39;-Doutput={output_path}&#39;
+            f&#39;-Doutput={output_path}&#39;,
+            *profiles_arguments
         )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
@@ -1266,7 +1274,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.maven.write_effective_pom"><code class="name flex">
-<span>def <span class="ident">write_effective_pom</span></span>(<span>pom_file_path, output_path)</span>
+<span>def <span class="ident">write_effective_pom</span></span>(<span>pom_file_path, output_path, profiles=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generates the effective pom for a given pom and writes it to a given directory</p>
@@ -1276,6 +1284,8 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <dd>Path to pom file to render the effective pom for.</dd>
 <dt><strong><code>output_path</code></strong> :&ensp;<code>str</code></dt>
 <dd>Path to write the effective pom to.</dd>
+<dt><strong><code>profiles</code></strong> :&ensp;<code>list</code></dt>
+<dd>Maven profiles to use when generating the effective pom.</dd>
 </dl>
 <h2 id="see">See</h2>
 <ul>
@@ -1297,7 +1307,8 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 </summary>
 <pre><code class="python">def write_effective_pom(
     pom_file_path,
-    output_path
+    output_path,
+    profiles=None
 ):
     &#34;&#34;&#34;Generates the effective pom for a given pom and writes it to a given directory
 
@@ -1307,6 +1318,8 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
         Path to pom file to render the effective pom for.
     output_path : str
         Path to write the effective pom to.
+    profiles : list
+        Maven profiles to use when generating the effective pom.
 
     See
     ---
@@ -1332,11 +1345,16 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
             &#34; If you are a user seeing this, a programmer messed up somewhere, report an issue.&#34;
         )
 
+    profiles_arguments = &#34;&#34;
+    if profiles:
+        profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
+
     try:
         sh.mvn( # pylint: disable=no-member
             &#39;help:effective-pom&#39;,
             f&#39;-f={pom_file_path}&#39;,
-            f&#39;-Doutput={output_path}&#39;
+            f&#39;-Doutput={output_path}&#39;,
+            *profiles_arguments
         )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(

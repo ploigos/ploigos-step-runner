@@ -300,7 +300,8 @@ class MavenGeneric(StepImplementer):
         if not os.path.exists(effective_pom_path):
             write_effective_pom(
                 pom_file_path=self.get_value(&#39;pom-file&#39;),
-                output_path=effective_pom_path
+                output_path=effective_pom_path,
+                profiles=self.get_value(&#39;maven-profiles&#39;)
             )
 
         return effective_pom_path
@@ -558,7 +559,8 @@ class MavenGeneric(StepImplementer):
         if not os.path.exists(effective_pom_path):
             write_effective_pom(
                 pom_file_path=self.get_value(&#39;pom-file&#39;),
-                output_path=effective_pom_path
+                output_path=effective_pom_path,
+                profiles=self.get_value(&#39;maven-profiles&#39;)
             )
 
         return effective_pom_path
