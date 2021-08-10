@@ -129,13 +129,13 @@ class NpmGeneric(StepImplementer):
             If npm returns a none 0 exit code.
         """
 
-        run_scripts = self.npm_run_scripts
+        npm_run_scripts = self.npm_run_scripts
         package_file = self.get_value('package-file')
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
             package_file=package_file,
-            run_scripts=run_scripts
+            npm_run_scripts=npm_run_scripts
         )
 
     def _run_step(self): 

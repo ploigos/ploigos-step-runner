@@ -27,6 +27,25 @@ class TestStepImplementerMavenTest___init__(BaseStepImplementerTestCase):
             environment=None,
             npm_run_scripts=['test']
         )
+    def test_given_environment(self, mock_super_init):
+        workflow_result = WorkflowResult()
+        parent_work_dir_path = '/fake/path'
+        config = {}
+
+        Npm(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment='mock-env'
+        )
+
+        mock_super_init.assert_called_once_with(
+            workflow_result,
+            parent_work_dir_path,
+            config,
+            environment='mock-env',
+            npm_run_scripts=['test']
+        )
 
 class TestStepImplementerMavenTest_step_implementer_config_defaults(
     BaseStepImplementerTestCase
