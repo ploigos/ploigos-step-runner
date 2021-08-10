@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from unittest.mock import Mock, patch
 from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult, step_implementer
 from ploigos_step_runner.step_implementers.unit_test import Npm

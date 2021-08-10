@@ -1,9 +1,6 @@
 import os
-
 from ploigos_step_runner import StepResult, StepRunnerException
-from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils.xml import get_xml_element_by_path
 from ploigos_step_runner.utils.npm import run_npm
 
 DEFAULT_CONFIG = {
@@ -19,7 +16,7 @@ class NpmGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use npm.
     """
 
-    def __init__(  
+    def __init__(
         self,
         workflow_result,
         parent_work_dir_path,
@@ -138,7 +135,7 @@ class NpmGeneric(StepImplementer):
             npm_run_scripts=npm_run_scripts
         )
 
-    def _run_step(self): 
+    def _run_step(self):
         """Runs the step implemented by this StepImplementer.
 
         Returns
@@ -167,4 +164,3 @@ class NpmGeneric(StepImplementer):
             )
 
         return step_result
-
