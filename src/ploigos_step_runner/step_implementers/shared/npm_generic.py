@@ -7,8 +7,7 @@ from ploigos_step_runner.utils.xml import get_xml_element_by_path
 from ploigos_step_runner.utils.npm import run_npm
 
 DEFAULT_CONFIG = {
-    'package-file': 'package.json',
-    'tls-verify': True
+    'package-file': 'package.json'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -20,7 +19,7 @@ class NpmGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use npm.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  
         self,
         workflow_result,
         parent_work_dir_path,

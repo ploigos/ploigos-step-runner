@@ -16,13 +16,14 @@ class TestStepImplementerMavenTest___init__(BaseStepImplementerTestCase):
         Npm(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
-            config=config
+            config=config,
+            environment=None
         )
 
         mock_super_init.assert_called_once_with(
-            workflow_result=workflow_result,
-            parent_work_dir_path=parent_work_dir_path,
-            config=config,
+            workflow_result,
+            parent_work_dir_path,
+            config,
             environment=None,
             npm_run_scripts=['test']
         )
