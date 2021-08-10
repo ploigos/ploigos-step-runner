@@ -127,11 +127,9 @@ class NpmGeneric(StepImplementer):
         """
 
         npm_run_scripts = self.npm_run_scripts
-        package_file = self.get_value('package-file')
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            package_file=package_file,
             npm_run_scripts=npm_run_scripts
         )
 

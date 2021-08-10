@@ -1,4 +1,3 @@
-import os
 import sys
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -8,7 +7,6 @@ from ploigos_step_runner.utils.io import \
 
 def run_npm( 
     npm_output_file_path,
-    package_file,
     npm_run_scripts
 ):
     try:
