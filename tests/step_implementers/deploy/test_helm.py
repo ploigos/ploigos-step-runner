@@ -50,3 +50,14 @@ class TestStepImplementerDeployHelmBase(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path,
             environment=environment
         )
+
+class TestStepImplementerMavenTest_step_implementer_config_defaults(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Helm.step_implementer_config_defaults(),
+            {
+                'helm-flags': []
+            }
+        )
