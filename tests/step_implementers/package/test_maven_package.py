@@ -218,10 +218,10 @@ class TestStepImplementerMavenPackage__run_step(
                 name='packages',
                 value=[
                     {
-                        'path': os.path.join(artifact_parent_dir, 'my-app.jar')
+                        'path': os.path.join(artifact_parent_dir, 'my-app.war')
                     },
                     {
-                        'path': os.path.join(artifact_parent_dir, 'my-app.war')
+                        'path': os.path.join(artifact_parent_dir, 'my-app.jar')
                     }
                 ]
             )
