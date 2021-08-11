@@ -153,11 +153,10 @@ class MavenPackage(MavenGeneric):
              # find the artifacts
             packages = []
             pom_file_dir_name = os.path.dirname(os.path.abspath(pom_file))
-            artifact_parent_dir_full_path = \
-                os.listdir(os.path.join(
-                    pom_file_dir_name,
-                    artifact_parent_dir))
-            for filename in artifact_parent_dir_full_path:
+            files_in_artifact_parent_dir = sorted(os.listdir(os.path.join(
+                pom_file_dir_name,
+                artifact_parent_dir)))
+            for filename in files_in_artifact_parent_dir:
                 if any(filename.endswith(ext) for ext in artifact_extensions):
                     packages += [{
                         'path': os.path.join(
