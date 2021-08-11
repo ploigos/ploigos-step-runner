@@ -1,3 +1,19 @@
+"""
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
+Configuration Key            | Required? | Default | Description
+-----------------------------|-----------|---------|-----------
+`package-file`               | No        | `'package.json'` | package.json file for reference app. 
+`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run. 
+"""
+
+
 import os
 from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer
@@ -16,7 +32,7 @@ class NpmGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use npm.
     """
 
-    def __init__(
+    def __init__( # pylint: disable=too-many-arguments
         self,
         workflow_result,
         parent_work_dir_path,
