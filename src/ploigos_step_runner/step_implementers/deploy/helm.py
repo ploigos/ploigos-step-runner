@@ -87,26 +87,6 @@ class Helm(StepImplementer):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-
-    @property
-    def helm_flags(self):
-        """Gets the helm chart flags for this step.
-        """
-        return self.get_value('helm-flags')
-
-    @property
-    def helm_chart(self):
-        """Gets the helm chart name for this step.
-        """
-        return self.get_value('helm-chart')
-
-    @property
-    def helm_release(self):
-        """Gets the helm chart release version for this step.
-        """
-        return self.get_value('helm-release')
-
-
     def _run_step(self): # pylint: disable=too-many-locals
         """Runs the step implemented by this StepImplementer.
 
@@ -124,9 +104,9 @@ class Helm(StepImplementer):
             with open(helm_output_file_path, 'w') as helm_output_file:
                 sh.helm( # pylint: disable=no-member
                     'secrets', 'upgrade', '--install',
-                    self.helm_chart,
-                    self.helm_release,
-                    *self.helm_flags,
+                    self.get_value('helm-chart'),
+                    self.get_value('helm-release'),
+                    *self.get_value('helm-flags'),
                     _out=create_sh_redirect_to_multiple_streams_fn_callback([
                         sys.stdout,
                         helm_output_file
