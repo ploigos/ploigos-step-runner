@@ -15,11 +15,12 @@ Configuration Key            | Required? | Default | Description
                                                      reference('example/mariadb'), a path to a chart directory, a \
                                                      packaged chart, or a fully qualified URL.
 `helm-release`               | Yes       |         | Release tag.
-`helm-flags`                 | No        | `[]`    | Use flags to customize the installation behavior.       
+`helm-flags`                 | No        | `[]`    | Use flags to customize the installation behavior.
 """  # pylint: disable=line-too-long
 
-import sh
+
 import sys
+import sh
 
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner import StepResult, StepRunnerException
@@ -44,14 +45,8 @@ class Helm(StepImplementer):
             workflow_result,
             parent_work_dir_path,
             config,
-            environment=None,
-            helm_chart=None,
-            helm_release=None,
-            helm_flags=[]
+            environment=None
     ):
-        self.__helm_chart = helm_chart
-        self.__helm_release = helm_release
-        self.__helm_flags = helm_flags
 
         super().__init__(
             workflow_result=workflow_result,
@@ -92,39 +87,24 @@ class Helm(StepImplementer):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        """Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is provided
-        * either both helm-chart and helm-release were provided
-
-        Raises
-        ------
-        StepRunnerException
-            If step configuration or previous step result artifacts have invalid required values
-        """
-
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
     @property
     def helm_flags(self):
         """Gets the helm chart flags for this step.
         """
-        return self.__helm_release
+        return self.get_value('helm-flags')
 
     @property
     def helm_chart(self):
         """Gets the helm chart name for this step.
         """
-        return self.__helm_chart
+        return self.get_value('helm-chart')
 
     @property
     def helm_release(self):
         """Gets the helm chart release version for this step.
         """
-        return self.__helm_release
+        return self.get_value('helm-release')
 
 
     def _run_step(self): # pylint: disable=too-many-locals
