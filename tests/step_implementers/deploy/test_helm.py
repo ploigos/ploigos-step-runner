@@ -93,9 +93,9 @@ class TestStepImplementerMavenTest__required_config_or_result_keys(
             ]
         )
 
-@patch.object(Helm, '_run_maven_step')
-@patch.object(Helm, 'write_working_file', return_value='/mock/mvn_output.txt')
-class TestStepImplementerMavenPackage__run_step(
+@patch.object(Helm, '_run_step')
+@patch.object(Helm, 'write_working_file', return_value='/mock/helm_output.txt')
+class TestStepImplementerDeployHelm__run_step(
     BaseStepImplementerTestCase
 ):
     def create_step_implementer(
