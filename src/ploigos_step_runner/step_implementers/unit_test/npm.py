@@ -78,4 +78,4 @@ class Npm(NpmGeneric):
                 value=npm_output_file_path
             )
 
-            return step_result
+        return step_result

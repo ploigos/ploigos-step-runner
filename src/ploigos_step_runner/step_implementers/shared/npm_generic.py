@@ -22,7 +22,7 @@ class NpmGeneric(StepImplementer):
         parent_work_dir_path,
         config,
         environment=None,
-        npm_run_scripts=[]
+        npm_run_scripts=None
     ):
         self.__npm_run_scripts = npm_run_scripts
 
