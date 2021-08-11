@@ -840,3 +840,95 @@ class TestStepWorkflowResultTest(BaseTestCase):
         with self.assertRaises(
                 RuntimeError):
             wfr.write_to_pickle_file(None)
+
+    def test_write_to_pickle_file_with_merge(self):
+        with TempDirectory() as temp_dir:
+            pickle_file = temp_dir.path + '/test.pkl'
+            on_disk_wfr = setup_test()
+            on_disk_wfr.write_to_pickle_file(pickle_file)
+
+            in_mem_wfr1 = WorkflowResult.load_from_pickle_file(pickle_file)
+            in_mem_wfr2 = WorkflowResult.load_from_pickle_file(pickle_file)
+
+            sr1 = StepResult('compliance-scan', 'scan with stackrox', 'stackrox', 'prod')
+            sr1.add_artifact('compliance-scan-result', 'pass')
+
+            sr2 = StepResult('vulnerability-scan', 'scan with stackrox', 'stackrox', 'prod')
+            sr2.add_artifact('vulnerability-scan-result', 'fail')
+
+            in_mem_wfr1.add_step_result(sr1)
+            in_mem_wfr2.add_step_result(sr2)
+
+            in_mem_wfr1.merge_with_pickle_file(pickle_file)
+            in_mem_wfr1.write_to_pickle_file(pickle_file)
+
+            in_mem_wfr2.merge_with_pickle_file(pickle_file)
+            in_mem_wfr2.write_to_pickle_file(pickle_file)
+
+            resulting_wfr = WorkflowResult.load_from_pickle_file(pickle_file)
+
+            # ensure:
+            #   - both our new StepResults are present
+            #   - all StepResults from the original pickle file are present
+            self.assertIn(sr1, resulting_wfr.workflow_list)
+            self.assertIn(sr2, resulting_wfr.workflow_list)
+            for sr in on_disk_wfr.workflow_list:
+                self.assertIn(sr, resulting_wfr.workflow_list)
+
+    def test_merge_matching_stepresults_on_pickle(self):
+        """When we pickle to disk, make sure we merge the artifacts
+        and evidence from in-memory StepResult instances with those on disk.
+
+        Whatever is in memory wins.
+        """
+        with TempDirectory() as temp_dir:
+            pickle_file = temp_dir.path + '/test.pkl'
+
+            expected_wfr = setup_test()
+            expected_wfr.write_to_pickle_file(pickle_file)
+
+            # now adjust our expected WorkflowResult to include the
+            # amended evidence/artifacts we expect to see. All other
+            # StepResults and their artifacts/evidence are left the same.
+            expected_sr_no_env = expected_wfr.get_step_result('step1', 'sub1')
+            expected_sr_no_env.add_artifact('artifact1', 'changed-value1', 'description1')
+            expected_sr_no_env.add_evidence('evidence1', 'changed-value1', 'description1')
+
+            expected_sr_env = expected_wfr.get_step_result('deploy', 'deploy-sub', 'dev')
+            expected_sr_env.add_artifact('artifact1', 'changed-value1')
+            expected_sr_env.add_evidence('evidence1', 'changed-value1', 'description1')
+
+            # now build our 'in memory' WFR that we're going to write
+            # to disk. this has the amended evidence/artifacts.
+            # one StepResult with environment, one without.
+            in_mem_wfr = WorkflowResult()
+
+            sr_no_env = StepResult('step1', 'sub1', 'implementer1')
+            sr_no_env.add_artifact('artifact1', 'changed-value1', 'description1')
+            sr_no_env.add_evidence('evidence1', 'changed-value1', 'description1')
+
+            sr_env = StepResult('deploy', 'deploy-sub', 'helm', 'dev')
+            sr_env.add_artifact('artifact1', 'changed-value1')
+            sr_env.add_evidence('evidence1', 'changed-value1', 'description1')
+
+            in_mem_wfr.add_step_result(sr_no_env)
+            in_mem_wfr.add_step_result(sr_env)
+
+            # write in-memory to disk post-merging
+            in_mem_wfr.merge_with_pickle_file(pickle_file)
+            in_mem_wfr.write_to_pickle_file(pickle_file)
+
+            resulting_wfr = WorkflowResult.load_from_pickle_file(pickle_file)
+            resulting_workflow_list = resulting_wfr.workflow_list
+
+            for expected_result in expected_wfr.workflow_list:
+                merged_result = resulting_wfr.get_step_result(
+                                    step_name=expected_result.step_name,
+                                    sub_step_name=expected_result.sub_step_name,
+                                    environment=expected_result.environment
+                                  )
+                self.assertEqual(expected_result, merged_result)
+                resulting_workflow_list.remove(expected_result)
+
+            # nothing duplicate or extra should be in the result
+            self.assertEqual(len(resulting_workflow_list), 0)

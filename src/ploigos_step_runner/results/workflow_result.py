@@ -142,12 +142,7 @@ class WorkflowResult:
         """
 
         if isinstance(step_result, StepResult):
-            existing_step_result = self.get_step_result(
-                step_name=step_result.step_name,
-                sub_step_name=step_result.sub_step_name,
-                environment=step_result.environment
-            )
-            if existing_step_result:
+            if self.__step_result_exists(step_result):
                 raise StepRunnerException(
                     f'Can not add duplicate StepResult for step ({step_result.step_name}),'
                     f' sub step ({step_result.sub_step_name}),'
@@ -239,8 +234,52 @@ class WorkflowResult:
         except Exception as error:
             raise StepRunnerException(f'error loading {pickle_filename}: {error}') from error
 
+    def merge_with_pickle_file(self, pickle_filename):
+        """Merge our workflow list with that stored on disk.
+        When we find overlaps, our in-memory values win.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
+
+        Parameters
+        ----------
+        pickle_filename : the on-disk path to the pickle file to merge with.
+
+        """
+        on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
+        on_disk_results = on_disk_wfr.workflow_list
+        merged_workflow_list = []
+
+        for in_mem_step_result in self.__workflow_list:
+            on_disk_step_result = on_disk_wfr.get_step_result(
+                step_name=in_mem_step_result.step_name,
+                sub_step_name=in_mem_step_result.sub_step_name,
+                environment=in_mem_step_result.environment
+            )
+
+            if on_disk_step_result:
+                on_disk_results.remove(on_disk_step_result)
+
+                # in-memory values win if the two results are unequal
+                if on_disk_step_result != in_mem_step_result:
+                    on_disk_step_result.merge(in_mem_step_result)
+
+                merged_workflow_list.append(on_disk_step_result)
+
+            else:
+                merged_workflow_list.append(in_mem_step_result)
+
+        # on_disk_results at this point will only have the step results
+        # that were on disk, but not in memory.
+        merged_workflow_list += on_disk_results
+
+        self.__workflow_list = merged_workflow_list
+
     def write_to_pickle_file(self, pickle_filename):
-        """Write the workflow list in a pickle format to file
+        """Write the workflow list in a pickle format to file.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
 
         Parameters
         ----------
@@ -257,6 +296,25 @@ class WorkflowResult:
                 pickle.dump(self, file)
         except Exception as error:
             raise RuntimeError(f'error dumping {pickle_filename}: {error}') from error
+
+    def __step_result_exists(self, step_result):
+        """Return True if the provided StepResult exists in our
+        workflow list, False otherwise.
+
+        Parameters
+        ----------
+        step_result - a StepResult object to search for
+
+        Return value
+        ------------
+            True if StepResult exists, False otherwise
+        """
+        existing_step_result = self.get_step_result(
+            step_name=step_result.step_name,
+            sub_step_name=step_result.sub_step_name,
+            environment=step_result.environment
+        )
+        return existing_step_result
 
     def __get_all_step_results_dict(self):
         """Get a dictionary of all of the recorded StepResults.

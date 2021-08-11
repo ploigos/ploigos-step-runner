@@ -861,3 +861,54 @@ class TestStepResultTest(BaseTestCase):
         )
 
         self.assertNotEqual(step_result1, step_result2)
+
+    def test_merge(self):
+       sr1 = StepResult('step1', 'sub1', 'implementer1')
+       sr1.add_artifact('artifact1', 'value1', 'description1')
+       sr1.add_artifact('artifact2', 'value2', 'description2')
+       sr1.add_evidence('evidence1', 'value1', 'description1')
+       sr1.add_evidence('evidence2', 'value2', 'description2')
+
+       sr2 = StepResult('step1', 'sub1', 'implementer1')
+       sr2.add_artifact('artifact1', 'changed-value1', 'changed-description1')
+       sr2.add_evidence('evidence1', 'changed-value1', 'changed-description1')
+
+       sr1.merge(sr2)
+
+       artifact1 = sr1.get_artifact('artifact1')
+       artifact2 = sr1.get_artifact('artifact2')
+       evidence1 = sr1.get_evidence('evidence1')
+       evidence2 = sr1.get_evidence('evidence2')
+
+        # changed by SR2
+       self.assertEqual(artifact1.value, 'changed-value1')
+       self.assertEqual(artifact1.description, 'changed-description1')
+       self.assertEqual(evidence1.value, 'changed-value1')
+       self.assertEqual(evidence1.description, 'changed-description1')
+
+       # unchanged by SR2
+       self.assertEqual(artifact2.value, 'value2')
+       self.assertEqual(artifact2.description, 'description2')
+       self.assertEqual(evidence2.value, 'value2')
+       self.assertEqual(evidence2.description, 'description2')
+
+    def test_merge_raises_exception_for_mismatching_data(self):
+        sr1 = StepResult('step1', 'sub1', 'implementer1')
+        sr2 = StepResult('step2', 'sub1', 'implementer1')
+
+        with self.assertRaisesRegex(
+                StepRunnerException,
+                f'Other StepResult does not have matching ' \
+                f'step name, sub step name, or environment'
+            ):
+            sr1.merge(sr2)
+
+    def test_merge_raises_exception_on_non_stepresult_other(self):
+        sr1 = StepResult('step1', 'sub1', 'implementer1')
+        other = "string"
+
+        with self.assertRaisesRegex(
+                StepRunnerException,
+                f'expect StepResult instance type'
+             ):
+            sr1.merge(other)
