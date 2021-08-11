@@ -2,9 +2,10 @@ import os
 import re
 from io import IOBase
 
-from unittest.mock import Mock, patch
+from pathlib import Path
+from unittest.mock import patch
 
-from src.ploigos_step_runner.results.workflow_result import WorkflowResult
+# from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from testfixtures import TempDirectory
@@ -93,28 +94,28 @@ class TestStepImplementerMavenTest__required_config_or_result_keys(
             ]
         )
 
-@patch.object(Helm, '_run_step')
-@patch.object(Helm, 'write_working_file', return_value='/mock/helm_output.txt')
-class TestStepImplementerDeployHelm__run_step(
-    BaseStepImplementerTestCase
-):
-    def create_step_implementer(
-            self,
-            step_config= {
-                'helm-chart': 'mock-chart',
-                'helm-release': 'mock-release'
-            },
-            workflow_result=None,
-            parent_work_dir_path=''
-    ):
-        return self.create_given_step_implementer(
-            step_implementer=Helm,
-            step_config=step_config,
-            step_name='deploy',
-            implementer='Helm',
-            workflow_result=workflow_result,
-            parent_work_dir_path=parent_work_dir_path
-        )
+# @patch.object(Helm, '_run_step')
+# @patch.object(Helm, 'write_working_file', return_value='/mock/helm_output.txt')
+# class TestStepImplementerDeployHelm__run_step(
+#     BaseStepImplementerTestCase
+# ):
+#     def create_step_implementer(
+#             self,
+#             step_config= {
+#                 'helm-chart': 'mock-chart',
+#                 'helm-release': 'mock-release'
+#             },
+#             workflow_result=None,
+#             parent_work_dir_path=''
+#     ):
+#         return self.create_given_step_implementer(
+#             step_implementer=Helm,
+#             step_config=step_config,
+#             step_name='deploy',
+#             implementer='Helm',
+#             workflow_result=workflow_result,
+#             parent_work_dir_path=parent_work_dir_path
+#         )
 
     # def test_success_single_packaged_artifact(
     #         self,
