@@ -61,3 +61,15 @@ class TestStepImplementerMavenTest_step_implementer_config_defaults(
                 'helm-flags': []
             }
         )
+
+class TestStepImplementerMavenTest__required_config_or_result_keys(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(
+            Helm._required_config_or_result_keys(),
+            [
+                'helm-chart',
+                'helm-release'
+            ]
+        )
