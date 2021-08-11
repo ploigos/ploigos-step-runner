@@ -100,7 +100,10 @@ class TestStepImplementerDeployHelm__run_step(
 ):
     def create_step_implementer(
             self,
-            step_config={},
+            step_config= {
+                'helm-chart': 'mock-chart',
+                'helm-release': 'mock-release'
+            },
             workflow_result=None,
             parent_work_dir_path=''
     ):
@@ -135,7 +138,7 @@ class TestStepImplementerDeployHelm__run_step(
     #         package_artifact_names = [
     #             f'my-app.jar'
     #         ]
-    #         def run_maven_side_effect(mvn_output_file_path):
+    #         def run_helm_side_effect(helm_output_file_path):
     #             os.makedirs(artifact_parent_dir, exist_ok=True)
     #             for artifact_name in package_artifact_names:
     #                 artifact_path = os.path.join(
@@ -151,14 +154,14 @@ class TestStepImplementerDeployHelm__run_step(
     #
     #         # create expected step result
     #         expected_step_result = StepResult(
-    #             step_name='package',
-    #             sub_step_name='MavenPackage',
-    #             sub_step_implementer_name='MavenPackage'
+    #             step_name='deploy',
+    #             sub_step_name='Helm',
+    #             sub_step_implementer_name='Helm'
     #         )
     #         expected_step_result.add_artifact(
     #             description="Standard out and standard error from maven.",
-    #             name='maven-output',
-    #             value='/mock/mvn_output.txt'
+    #             name='helm-output',
+    #             value='/helm/mvn_output.txt'
     #         )
     #         expected_step_result.add_artifact(
     #             name='packages',
@@ -174,8 +177,8 @@ class TestStepImplementerDeployHelm__run_step(
     #         )
     #
     #         mock_write_working_file.assert_called_once()
-    #         mock_run_maven_step.assert_called_with(
-    #             mvn_output_file_path='/mock/mvn_output.txt'
+    #         mock_run_step.assert_called_with(
+    #             helm_output_file_path='/mock/helm_output.txt'
     #         )
     #
     # def test_success_multiple_packaged_artifact(
