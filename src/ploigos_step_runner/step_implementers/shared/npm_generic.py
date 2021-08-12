@@ -101,7 +101,7 @@ class NpmGeneric(StepImplementer):
         package_file = self.get_value('package-file')
         if package_file is not None:
             assert os.path.exists(package_file), \
-                f'Given npm package.json file (package-file) does not exist: {package_file}'
+                f'Given npm package file (package-file) does not exist: {package_file}'
 
     @property
     def npm_run_scripts(self):
