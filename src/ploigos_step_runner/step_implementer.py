@@ -287,11 +287,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Results of running this step.
         """
 
-        StepImplementer.__print_section_title(f"Step Start - {self.step_name}")
+        StepImplementer.__print_section_title(
+            f"Step Start - {self.step_name} ({self.sub_step_name})"
+        )
 
         # print information about the configuration
         StepImplementer.__print_section_title(
-            f"Configuration - {self.step_name} - {self.sub_step_name}",
+            f"Configuration - {self.step_name} ({self.sub_step_name})",
             div_char="-",
             indent=1
         )
@@ -334,7 +336,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             # run the step
             StepImplementer.__print_section_title(
-                f"Standard Out - {self.step_name}",
+                f"Standard Out - {self.step_name} ({self.sub_step_name})",
                 div_char="-",
                 indent=1
             )
@@ -350,6 +352,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
+                sys.stdout.flush()
+                sys.stderr.flush()
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -357,7 +361,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # print the step run results
         StepImplementer.__print_section_title(
-            f"Results - {self.step_name}",
+            f"Results - {self.step_name} ({self.sub_step_name})",
             div_char="-",
             indent=1
         )
@@ -369,8 +373,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data('Success', step_result.success)
         StepImplementer.__print_data('Message', step_result.message)
         StepImplementer.__print_data('Artifacts', step_result.artifacts_dicts)
+        StepImplementer.__print_data('Evidence', step_result.evidence_dicts)
 
-        StepImplementer.__print_section_title(f'Step End - {self.step_name}')
+        StepImplementer.__print_section_title(f'Step End - {self.step_name} ({self.sub_step_name})')
 
         return step_result
 
