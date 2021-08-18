@@ -25,6 +25,7 @@ Configuration Key         | Required? | Default  | Description
 `argocd-sync-timeout-seconds` \
                           | Yes       | 60       | Number of seconds to wait for argocd to \
                                                    sync updates
+`argocd-sync-retry-limit` | No        | 3        | Value to pass to retry limit flag for argo sync
 `deployment-config-repo`  | Yes       |          | The repo containing the helm chart definition
 `deployment-config-helm-chart-path` \
                           | Yes       | ./       | Directory containing the helm chart definition
@@ -116,6 +117,7 @@ from ploigos_step_runner import StepResult
 
 DEFAULT_CONFIG = {
     'argocd-sync-timeout-seconds': 60,
+    'argocd-sync-retry-limit': 3,
     'argocd-auto-sync': True,
     'argocd-skip-tls' : False,
     'deployment-config-helm-chart-path': './',
@@ -340,7 +342,8 @@ class ArgoCD(StepImplementer):
             print(f"Sync (and wait for) ArgoCD Application ({argocd_app_name})")
             ArgoCD.__argocd_app_sync(
                 argocd_app_name=argocd_app_name,
-                argocd_sync_timeout_seconds=self.get_value('argocd-sync-timeout-seconds')
+                argocd_sync_timeout_seconds=self.get_value('argocd-sync-timeout-seconds'),
+                argocd_sync_retry_limit=self.get_value('argocd-sync-retry-limit')
             )
 
             # get the ArgoCD app manifest that was synced
@@ -983,12 +986,14 @@ users:
     @staticmethod
     def __argocd_app_sync(
         argocd_app_name,
-        argocd_sync_timeout_seconds
+        argocd_sync_timeout_seconds,
+        argocd_sync_retry_limit
     ):
         try:
             sh.argocd.app.sync(  # pylint: disable=no-member
                 '--prune',
                 '--timeout', argocd_sync_timeout_seconds,
+                '--retry-limit', argocd_sync_retry_limit,
                 argocd_app_name,
                 _out=sys.stdout,
                 _err=sys.stderr
@@ -1001,6 +1006,7 @@ users:
         try:
             sh.argocd.app.wait(  # pylint: disable=no-member
                 '--timeout', argocd_sync_timeout_seconds,
+                '--retry-limit', argocd_sync_retry_limit,
                 '--health',
                 argocd_app_name,
                 _out=sys.stdout,
