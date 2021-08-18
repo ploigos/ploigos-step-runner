@@ -34,6 +34,7 @@ class TestStepImplementerDeployArgoCD_Other(TestStepImplementerDeployArgoCDBase)
         defaults = ArgoCD.step_implementer_config_defaults()
         expected_defaults = {
             'argocd-sync-timeout-seconds': 60,
+            'argocd-sync-retry-limit': 3,
             'argocd-auto-sync': True,
             'argocd-skip-tls' : False,
             'deployment-config-helm-chart-path': './',
@@ -369,7 +370,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
-                argocd_sync_timeout_seconds=60
+                argocd_sync_timeout_seconds=60,
+                argocd_sync_retry_limit=3
             )
             argocd_get_app_manifest_mock.assert_called_once_with(
                 argocd_app_name='test-app-name'
@@ -522,7 +524,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
-                argocd_sync_timeout_seconds=60
+                argocd_sync_timeout_seconds=60,
+                argocd_sync_retry_limit=3
             )
             argocd_get_app_manifest_mock.assert_called_once_with(
                 argocd_app_name='test-app-name'
@@ -2725,18 +2728,46 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
     def test__argocd_app_sync_success(self, argocd_mock):
         ArgoCD._ArgoCD__argocd_app_sync(
             argocd_app_name='test',
-            argocd_sync_timeout_seconds=120
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=3
         )
 
         argocd_mock.app.sync.assert_called_once_with(
             '--prune',
             '--timeout', 120,
+            '--retry-limit', 3,
             'test',
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
+            '--retry-limit', 3,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+	
+    @patch('sh.argocd', create=True)
+    def test__argocd_app_sync_success_retry(self, argocd_mock):
+        ArgoCD._ArgoCD__argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=4
+        )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--prune',
+            '--timeout', 120,
+            '--retry-limit', 4,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
+            '--retry-limit', 4,
             '--health',
             'test',
             _out=Any(IOBase),
@@ -2763,12 +2794,14 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         ):
             ArgoCD._ArgoCD__argocd_app_sync(
                 argocd_app_name='test',
-                argocd_sync_timeout_seconds=120
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3
             )
 
         argocd_mock.app.sync.assert_called_once_with(
             '--prune',
             '--timeout', 120,
+            '--retry-limit', 3,
             'test',
             _out=Any(IOBase),
             _err=Any(IOBase)
@@ -2795,18 +2828,21 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         ):
             ArgoCD._ArgoCD__argocd_app_sync(
                 argocd_app_name='test',
-                argocd_sync_timeout_seconds=120
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3
             )
 
         argocd_mock.app.sync.assert_called_once_with(
             '--prune',
             '--timeout', 120,
+            '--retry-limit', 3,
             'test',
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
+            '--retry-limit', 3,
             '--health',
             'test',
             _out=Any(IOBase),
