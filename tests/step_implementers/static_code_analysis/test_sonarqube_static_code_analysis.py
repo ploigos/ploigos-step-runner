@@ -138,7 +138,9 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 'application-name': 'app-name',
                 'service-name': 'service-name',
                 'username': 'username',
-                'password': 'password'
+                'password': 'password',
+                'token': 'token',
+                'project-key': 'project-key'
 
             }
             step_implementer = self.create_step_implementer(
