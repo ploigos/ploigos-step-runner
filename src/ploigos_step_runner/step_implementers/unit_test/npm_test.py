@@ -1,38 +1,22 @@
-"""`StepImplementer` for the `unit-test` step using npm 
+"""`StepImplementer` for the `unit-test` step using npm
 
 """
-from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
-import sh
 from ploigos_step_runner import StepResult
+from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
+from ploigos_step_runner.exceptions import StepRunnerException
 
-DEFAULT_CONFIG = {
-    'package-file': 'package.json'
-}
-
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'package-file'
-]
-class Npm(NpmGeneric):
+class NpmTest(NpmGeneric):
     """`StepImplementer` for the `unit-test` step using npm.
     """
 
     def __init__(self, workflow_result, parent_work_dir_path, config, environment):
-        super().__init__(workflow_result, parent_work_dir_path, config, environment=environment, npm_run_scripts=['test'])
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """Getter for the StepImplementer's configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        """
-        return {**NpmGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
+        super().__init__(
+            workflow_result,
+            parent_work_dir_path,
+            config,
+            environment=environment,
+            npm_run_scripts=['test']
+        )
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -49,7 +33,7 @@ class Npm(NpmGeneric):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         """
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return []
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
@@ -67,7 +51,7 @@ class Npm(NpmGeneric):
                 npm_output_file_path=npm_output_file_path
             )
 
-        except sh.ErrorReturnCode as error:
+        except StepRunnerException as error:
             step_result.message = "Unit test failures. See 'npm-output'" \
                 f" report artifacts for details: {error}"
             step_result.success = False
