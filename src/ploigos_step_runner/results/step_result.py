@@ -359,6 +359,39 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             }
         return result
 
+    def merge(self, other):
+        """Merge the artifacts and evidence from another StepResult into
+        this StepResult. The other StepResult must have the same step name,
+        sub step name and environment.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            The second StepResult instance to merge into this one
+
+        Raises
+        ------
+        StepRunnerException if the StepResult to merge does not have a
+        matching step name, sub-step name, or environment.
+        """
+
+        if not isinstance(other, StepResult):
+            raise StepRunnerException('expect StepResult instance type')
+
+        if other.step_name != self.step_name or \
+            other.sub_step_name != self.sub_step_name or \
+            other.environment != self.environment:
+            raise StepRunnerException(
+                    'Other StepResult does not have matching ' \
+                    'step name, sub step name, or environment.'
+                  )
+
+        for artifact in other.artifacts.values():
+            self.add_artifact(artifact.name, artifact.value, artifact.description)
+
+        for evidence in other.evidence.values():
+            self.add_evidence(evidence.name, evidence.value, evidence.description)
+
     def __str__(self):
         """Get string representation of the step result.
         """
