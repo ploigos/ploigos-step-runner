@@ -9,8 +9,8 @@ Could come from:
 
 Configuration Key            | Required? | Default | Description
 -----------------------------|-----------|---------|-----------
-`package-file`               | No        | `'package.json'` | package.json file for reference app. 
-`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run. 
+`package-file`               | No        | `'package.json'` | package.json file for reference app.
+`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run.
 """
 
 

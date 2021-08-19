@@ -245,7 +245,7 @@ class SonarQube(StepImplementer):
             step_result.success = False
             step_result.message = "Error running static code analysis" \
                 f" using sonar-scanner: {error}"
-        except sh.ErrorReturnCode_2 as error: # pylint: disable=no-member
+        except sh.ErrorReturnCode_2: # pylint: disable=no-member
             # Error Code 2: USER_ERROR
             # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
             step_result.success = False

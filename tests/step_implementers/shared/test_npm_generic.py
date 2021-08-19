@@ -261,33 +261,6 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
                 npm_run_scripts=['fake-phase']
                 )
 
-    # def test_yes_transfer_progress(self, mock_run_scripts, mock_run_npm):
-    #     with TempDirectory() as test_dir:
-    #         parent_work_dir_path = os.path.join(test_dir.path, 'working')
-
-    #         package_file_path = os.path.join(test_dir.path, 'package.json')
-    #         step_config = {
-    #             'package-file': package_file_path,
-    #             'npm-no-transfer-progress': False
-    #         }
-
-    #         step_implementer = self.create_step_implementer(
-    #             step_config=step_config,
-    #             parent_work_dir_path=parent_work_dir_path,
-    #         )
-
-    #         npm_output_file_path = os.path.join(test_dir.path, 'npm-output.txt')
-    #         step_implementer._run_npm_step(
-    #             npm_output_file_path=npm_output_file_path
-    #         )
-
-    #         mock_run_npm.assert_called_with(
-    #             npm_output_file_path=npm_output_file_path,
-    #             run_scripts=['fake-phase'],
-    #             package_file=package_file_path,
-    #             no_transfer_progress=False
-    #         )
-
 @patch.object(NpmGeneric, '_run_npm_step')
 @patch.object(NpmGeneric, 'write_working_file', return_value='/mock/npm_output.txt')
 class TestStepImplementerSharedNpmGeneric__run_step(
