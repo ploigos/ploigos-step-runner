@@ -299,7 +299,7 @@ class TestStepImplementerResultArtifactsArchive_run_step(TestStepImplementerResu
 
 
 class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplementerResultArtifactsArchiveBase):
-    def test___create_archive_no_results(self):
+    def test_no_results(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -317,7 +317,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
             self.assertIsNone(archive_path)
 
-    def test___create_archive_string_result(self):
+    def test_string_result(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -355,7 +355,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
                 self.assertEqual(artifact_file_contents, 'hello world')
 
-    def test___create_archive_file_result(self):
+    def test_file_result(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -400,7 +400,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
                 self.assertEqual(artifact_file_contents, 'hello world file contents')
 
-    def test___create_archive_dir_result(self):
+    def test_dir_result(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -459,7 +459,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
                 self.assertEqual(artifact_file_contents, 'hello world 1')
 
-    def test___create_archive_list_result(self):
+    def test_list_result_strings(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -508,7 +508,56 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 ]"""
                 )
 
-    def test___create_archive_dict_result(self):
+    def test_list_result_files(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-ORG',
+                'application-name': 'test-APP',
+                'service-name': 'test-SERVICE',
+                'version': '42.0-test'
+            }
+            step_result = StepResult(
+                step_name='test-step',
+                sub_step_name='test-sub-step',
+                sub_step_implementer_name='test-sub-step-implementer'
+            )
+            step_result.add_artifact(
+                name='test-step-result-str',
+                value=[
+                    'hello',
+                    'world',
+                    'foo'
+                ]
+            )
+            workflow_result = WorkflowResult()
+            workflow_result.add_step_result(step_result)
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                workflow_result=workflow_result
+            )
+
+            archive_path = step_implementer._ResultArtifactsArchive__create_archive()
+
+            archive_zip = zipfile.ZipFile(archive_path)
+
+            artifact_file_path = f"{step_config['organization']}-" \
+                f"{step_config['application-name']}-{step_config['service-name']}-" \
+                f"{step_config['version']}/test-step/test-sub-step/test-step-result-str"
+            with archive_zip.open(artifact_file_path, 'r') as artifact_file:
+                artifact_file_contents = artifact_file.read().decode('UTF-8')
+
+                self.assertEqual(
+                    artifact_file_contents,
+                    """[
+    "hello",
+    "world",
+    "foo"
+]"""
+                )
+
+    def test_dict_result_strings(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -557,7 +606,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 }"""
                 )
 
-    def test___create_archive_bool_result(self):
+    def test_bool_result(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -598,7 +647,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
                     'True'
                 )
 
-    def test___create_archive_string_result_with_env(self):
+    def test_string_result_with_env(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -637,7 +686,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
 
                 self.assertEqual(artifact_file_contents, 'hello world')
 
-    def test___create_archive_file_result_with_env(self):
+    def test_file_result_with_env(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
