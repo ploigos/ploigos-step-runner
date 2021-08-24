@@ -392,7 +392,7 @@ class ResultArtifactsArchive(StepImplementer):
                             artifact.name
                         )
 
-                        with open(results_archive_artifact_file_path, &#39;w&#39;) \
+                        with open(results_archive_artifact_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) \
                                 as results_archive_artifact_file:
                             # format the data to print to file based on its type
                             if isinstance(artifact.value, str):
@@ -614,7 +614,7 @@ class ResultArtifactsArchive(StepImplementer):
                             artifact.name
                         )
 
-                        with open(results_archive_artifact_file_path, &#39;w&#39;) \
+                        with open(results_archive_artifact_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) \
                                 as results_archive_artifact_file:
                             # format the data to print to file based on its type
                             if isinstance(artifact.value, str):

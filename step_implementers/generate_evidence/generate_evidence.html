@@ -263,7 +263,7 @@ class GenerateEvidence(StepImplementer):
         evidence_path = os.path.join(work_dir, result_evidence_name)
 
         #Format into json and write out to file in working directory
-        with open(evidence_path, &#34;w&#34;) as evidence_file:
+        with open(evidence_path, &#34;w&#34;, encoding=&#39;utf-8&#39;) as evidence_file:
             json.dump(evidence, evidence_file, indent=4)
 
         evidence_destination_url = self.get_value(&#39;evidence-destination-url&#39;)
@@ -455,7 +455,7 @@ class GenerateEvidence(StepImplementer):
         evidence_path = os.path.join(work_dir, result_evidence_name)
 
         #Format into json and write out to file in working directory
-        with open(evidence_path, &#34;w&#34;) as evidence_file:
+        with open(evidence_path, &#34;w&#34;, encoding=&#39;utf-8&#39;) as evidence_file:
             json.dump(evidence, evidence_file, indent=4)
 
         evidence_destination_url = self.get_value(&#39;evidence-destination-url&#39;)

@@ -4,9 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.step_implementers.validate_environment_configuration.configlint API documentation</title>
-<meta name="description" content="`StepImplementer` for the `validate-environment-configuration` step using config-lint against
-a given yaml file to lint …" />
+<title>ploigos_step_runner.step_implementers.shared.npm_generic API documentation</title>
+<meta name="description" content="Step Configuration
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,24 +24,9 @@ a given yaml file to lint …" />
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.step_implementers.validate_environment_configuration.configlint</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.step_implementers.shared.npm_generic</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>validate-environment-configuration</code> step using config-lint against
-a given yaml file to lint.</p>
-<p>Executes the config-lint against yml files for user-defined rules. The inputs to this step include:</p>
-<ul>
-<li>Rules defined by the user in a specified file:<ul>
-<li>Reference:
-<a href="https://stelligent.github.io/config-lint/#/">https://stelligent.github.io/config-lint/#/</a></li>
-</ul>
-</li>
-<li>File path of yml files to lint<ul>
-<li>Specify as a config value, OR</li>
-<li>Use results from previous step such as ConfilintFromArgocd</li>
-</ul>
-</li>
-</ul>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>Step configuration expected as input to this step.
 Could come from:
@@ -48,92 +37,31 @@ Could come from:
 <thead>
 <tr>
 <th>Configuration Key</th>
-<th>Required</th>
+<th>Required?</th>
 <th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>rules</code></td>
-<td>Yes</td>
-<td>./config_lint.rules</td>
-<td>File containing user-defined rules</td>
+<td><code>package-file</code></td>
+<td>No</td>
+<td><code>'package.json'</code></td>
+<td>package.json file for reference app.</td>
 </tr>
 <tr>
-<td><code>configlint-yml-file</code></td>
+<td><code>npm-run-scripts</code></td>
 <td>Yes</td>
-<td>None</td>
-<td>File to be linted</td>
+<td><code>None</code></td>
+<td>Script in package.json file to run.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="result-artifacts">Result Artifacts</h2>
-<p>Results artifacts output by this step.</p>
-<table>
-<thead>
-<tr>
-<th>Result Artifact Key</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>configlint-yml-file</code></td>
-<td>File that was linted</td>
-</tr>
-<tr>
-<td><code>configlint-result-set</code></td>
-<td>Result of configlint in a text file</td>
-</tr>
-</tbody>
-</table>
-<h2 id="examples">Examples</h2>
-<p><strong>Example: Step Configuration (minimal)</strong></p>
-<pre><code>validate-environment-configuration:
-- implementer: ConfiglintFromArgocd
-- implementer: Configlint
-  config:
-    rules: 'config_lint.rules'
-</code></pre>
-<p><strong>Example: Generated Config Lint Call (runtime)</strong></p>
-<pre><code>config-lint -verbose
-    -rules rules.yml /home/user/step-runner-working/deploy/file.yml
-</code></pre>
-<p><strong>Example: Existing Rules File (minimal)</strong></p>
-<pre><code>version: 1
-description: Rules for Kubernetes spec files
-type: Kubernetes
-files:
-  - "*.yml"
-rules:
-- id: EXAMPLE
-  severity: FAILURE
-  message: Deployment must have istio
-  resource: Deployment
-  assertions:
-    - key: spec.template.metadata.annotations
-      op: contains
-      value: '"sidecar.istio.io/inject": false'
-</code></pre>
-<div class="admonition note">
-<p class="admonition-title">Note:&ensp;The configuration examples above uses the ConfiglintFromArgocd step to provide the configlint-yml-path.</p>
-</div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `validate-environment-configuration` step using config-lint against
-a given yaml file to lint.
-
-Executes the config-lint against yml files for user-defined rules. The inputs to this step include:
-
-  - Rules defined by the user in a specified file:
-    * Reference:  https://stelligent.github.io/config-lint/#/
-  - File path of yml files to lint
-    * Specify as a config value, OR
-    * Use results from previous step such as ConfilintFromArgocd
-
+<pre><code class="python">&#34;&#34;&#34;
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
@@ -142,78 +70,47 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key       | Required | Default               | Description
-------------------------|----------|-----------------------|-----------------------------------
-`rules`                 | Yes      | ./config_lint.rules   | File containing user-defined rules
-`configlint-yml-file`   | Yes      | None                  | File to be linted
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key     | Description
-------------------------|------------
-`configlint-yml-file`   | File that was linted
-`configlint-result-set` | Result of configlint in a text file
-
-
-Examples
---------
-**Example: Step Configuration (minimal)**
-
-    validate-environment-configuration:
-    - implementer: ConfiglintFromArgocd
-    - implementer: Configlint
-      config:
-        rules: &#39;config_lint.rules&#39;
-
-**Example: Generated Config Lint Call (runtime)**
-
-    config-lint -verbose
-        -rules rules.yml /home/user/step-runner-working/deploy/file.yml
-
-**Example: Existing Rules File (minimal)**
-
-    version: 1
-    description: Rules for Kubernetes spec files
-    type: Kubernetes
-    files:
-      - &#34;*.yml&#34;
-    rules:
-    - id: EXAMPLE
-      severity: FAILURE
-      message: Deployment must have istio
-      resource: Deployment
-      assertions:
-        - key: spec.template.metadata.annotations
-          op: contains
-          value: &#39;&#34;sidecar.istio.io/inject&#34;: false&#39;
-
-.. Note:: The configuration examples above uses the ConfiglintFromArgocd step to \
-provide the configlint-yml-path.
+Configuration Key            | Required? | Default | Description
+-----------------------------|-----------|---------|-----------
+`package-file`               | No        | `&#39;package.json&#39;` | package.json file for reference app.
+`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run.
 &#34;&#34;&#34;
 
-import os
-import sys
 
-import sh
-from ploigos_step_runner import StepImplementer
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.utils.io import create_sh_redirect_to_multiple_streams_fn_callback
+import os
+from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.utils.npm import run_npm
 
 DEFAULT_CONFIG = {
-    &#39;rules&#39;: &#39;./config-lint.rules&#39;
+    &#39;package-file&#39;: &#39;package.json&#39;
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;configlint-yml-path&#39;
+    &#39;package-file&#39;,
+    &#39;npm-run-scripts&#39;
 ]
 
-
-class Configlint(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the validate-environment-configuration step using config-lint against
-    a given yaml file to lint.
+class NpmGeneric(StepImplementer):
+    &#34;&#34;&#34;Abstract parent class for StepImplementers that use npm.
     &#34;&#34;&#34;
+
+    def __init__( # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None,
+        npm_run_scripts=None
+    ):
+        self.__npm_run_scripts = npm_run_scripts
+
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
+        )
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -247,6 +144,74 @@ class Configlint(StepImplementer):
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;package-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # if package-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        package_file = self.get_value(&#39;package-file&#39;)
+        if package_file is not None:
+            assert os.path.exists(package_file), \
+                f&#39;Given npm package file (package-file) does not exist: {package_file}&#39;
+
+    @property
+    def npm_run_scripts(self):
+        &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
+        from field set on this class via constructor, intended for use by sub classes that want
+        to hard code the phases and goals for convenience, or comes from config value
+        `npm-phases-and-goals` set by the user.
+
+        Returns
+        -------
+        str
+            Maven phases and/or goals to execute.
+        &#34;&#34;&#34;
+        npm_run_scripts = None
+        if self.__npm_run_scripts:
+            npm_run_scripts = self.__npm_run_scripts
+        else:
+            npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+
+        return npm_run_scripts
+
+    def _run_npm_step(
+        self,
+        npm_output_file_path
+    ):
+        &#34;&#34;&#34;Runs npm using the configuration given to this step runner.
+
+        Parameters
+        ----------
+        npm_output_file_path : str
+            Path to file containing the npm stdout and stderr output.
+        step_implementer_additional_arguments : []
+            Additional arguments hard coded by the step implementer.
+
+        Raises
+        ------
+        StepRunnerException
+            If npm returns a none 0 exit code.
+        &#34;&#34;&#34;
+
+        npm_run_scripts = self.npm_run_scripts
+
+        run_npm(
+            npm_output_file_path=npm_output_file_path,
+            npm_run_scripts=npm_run_scripts
+        )
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -257,69 +222,24 @@ class Configlint(StepImplementer):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        # configlint-yml-path is required
-        configlint_yml_path = self.get_value(&#39;configlint-yml-path&#39;)
-
-        if not os.path.exists(configlint_yml_path):
-            step_result.success = False
-            step_result.message = &#39;File specified in &#39; \
-                                  f&#39;configlint-yml-path not found: {configlint_yml_path}&#39;
-            return step_result
-
-        # Required: rules and exists
-        rules_file = self.get_value(&#39;rules&#39;)
-        if not os.path.exists(rules_file):
-            step_result.success = False
-            step_result.message = f&#39;File specified in rules not found: {rules_file}&#39;
-            return step_result
-
-        configlint_results_file_path = self.write_working_file(&#39;configlint_results_file.txt&#39;)
+        # package the artifacts
+        npm_output_file_path = self.write_working_file(&#39;npm_output.txt&#39;)
         try:
-            # run config-lint writing stdout and stderr to the standard streams
-            # as well as to a results file.
-            with open(configlint_results_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) \
-                    as configlint_results_file:
-                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stdout,
-                    configlint_results_file
-                ])
-                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stderr,
-                    configlint_results_file
-                ])
-
-                sh.config_lint(  # pylint: disable=no-member
-                    &#34;-verbose&#34;,
-                    &#34;-debug&#34;,
-                    &#34;-rules&#34;,
-                    rules_file,
-                    configlint_yml_path,
-                    _encoding=&#39;UTF-8&#39;,
-                    _out=out_callback,
-                    _err=err_callback,
-                    _tee=&#39;err&#39;
-                )
-        except sh.ErrorReturnCode_255:  # pylint: disable=no-member
-            # NOTE: expected failure condition,
-            #       aka, the config lint run, but found an issue
-            #       stderr/stdout is captured in configlint_results_file_path
+            # execute npm step (params come from config)
+            self._run_npm_step(
+                npm_output_file_path=npm_output_file_path
+            )
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message = &#39;Failed config-lint scan.&#39;
-        except sh.ErrorReturnCode:
-            # NOTE: un-expected failure condition
-            #       aka, the config lint failed to run for some reason
-            #       stderr/stdout is captured in configlint_results_file_path
-            step_result.success = False
-            step_result.message = &#39;Unexpected Error invoking config-lint.&#39;
+            step_result.message = &#34;Error running npm. &#34; \
+                f&#34;More details maybe found in &#39;npm-output&#39; report artifact: {error}&#34;
+        finally:
+            step_result.add_artifact(
+                description=&#34;Standard out and standard error from npm.&#34;,
+                name=&#39;npm-output&#39;,
+                value=npm_output_file_path
+            )
 
-        step_result.add_artifact(
-            name=&#39;configlint-result-set&#39;,
-            value=configlint_results_file_path
-        )
-        step_result.add_artifact(
-            name=&#39;configlint-yml-path&#39;,
-            value=configlint_yml_path
-        )
         return step_result</code></pre>
 </details>
 </section>
@@ -332,21 +252,36 @@ class Configlint(StepImplementer):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint"><code class="flex name class">
-<span>class <span class="ident">Configlint</span></span>
-<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
+<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric"><code class="flex name class">
+<span>class <span class="ident">NpmGeneric</span></span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None, npm_run_scripts=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the validate-environment-configuration step using config-lint against
-a given yaml file to lint.</p></div>
+<div class="desc"><p>Abstract parent class for StepImplementers that use npm.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Configlint(StepImplementer):
-    &#34;&#34;&#34;`StepImplementer` for the validate-environment-configuration step using config-lint against
-    a given yaml file to lint.
+<pre><code class="python">class NpmGeneric(StepImplementer):
+    &#34;&#34;&#34;Abstract parent class for StepImplementers that use npm.
     &#34;&#34;&#34;
+
+    def __init__( # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None,
+        npm_run_scripts=None
+    ):
+        self.__npm_run_scripts = npm_run_scripts
+
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
+        )
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -380,6 +315,74 @@ a given yaml file to lint.</p></div>
         &#34;&#34;&#34;
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;package-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # if package-file has value verify file exists
+        # If it doesn&#39;t have value and is required function will have already failed
+        package_file = self.get_value(&#39;package-file&#39;)
+        if package_file is not None:
+            assert os.path.exists(package_file), \
+                f&#39;Given npm package file (package-file) does not exist: {package_file}&#39;
+
+    @property
+    def npm_run_scripts(self):
+        &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
+        from field set on this class via constructor, intended for use by sub classes that want
+        to hard code the phases and goals for convenience, or comes from config value
+        `npm-phases-and-goals` set by the user.
+
+        Returns
+        -------
+        str
+            Maven phases and/or goals to execute.
+        &#34;&#34;&#34;
+        npm_run_scripts = None
+        if self.__npm_run_scripts:
+            npm_run_scripts = self.__npm_run_scripts
+        else:
+            npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+
+        return npm_run_scripts
+
+    def _run_npm_step(
+        self,
+        npm_output_file_path
+    ):
+        &#34;&#34;&#34;Runs npm using the configuration given to this step runner.
+
+        Parameters
+        ----------
+        npm_output_file_path : str
+            Path to file containing the npm stdout and stderr output.
+        step_implementer_additional_arguments : []
+            Additional arguments hard coded by the step implementer.
+
+        Raises
+        ------
+        StepRunnerException
+            If npm returns a none 0 exit code.
+        &#34;&#34;&#34;
+
+        npm_run_scripts = self.npm_run_scripts
+
+        run_npm(
+            npm_output_file_path=npm_output_file_path,
+            npm_run_scripts=npm_run_scripts
+        )
+
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
 
@@ -390,69 +393,24 @@ a given yaml file to lint.</p></div>
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        # configlint-yml-path is required
-        configlint_yml_path = self.get_value(&#39;configlint-yml-path&#39;)
-
-        if not os.path.exists(configlint_yml_path):
-            step_result.success = False
-            step_result.message = &#39;File specified in &#39; \
-                                  f&#39;configlint-yml-path not found: {configlint_yml_path}&#39;
-            return step_result
-
-        # Required: rules and exists
-        rules_file = self.get_value(&#39;rules&#39;)
-        if not os.path.exists(rules_file):
-            step_result.success = False
-            step_result.message = f&#39;File specified in rules not found: {rules_file}&#39;
-            return step_result
-
-        configlint_results_file_path = self.write_working_file(&#39;configlint_results_file.txt&#39;)
+        # package the artifacts
+        npm_output_file_path = self.write_working_file(&#39;npm_output.txt&#39;)
         try:
-            # run config-lint writing stdout and stderr to the standard streams
-            # as well as to a results file.
-            with open(configlint_results_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) \
-                    as configlint_results_file:
-                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stdout,
-                    configlint_results_file
-                ])
-                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stderr,
-                    configlint_results_file
-                ])
-
-                sh.config_lint(  # pylint: disable=no-member
-                    &#34;-verbose&#34;,
-                    &#34;-debug&#34;,
-                    &#34;-rules&#34;,
-                    rules_file,
-                    configlint_yml_path,
-                    _encoding=&#39;UTF-8&#39;,
-                    _out=out_callback,
-                    _err=err_callback,
-                    _tee=&#39;err&#39;
-                )
-        except sh.ErrorReturnCode_255:  # pylint: disable=no-member
-            # NOTE: expected failure condition,
-            #       aka, the config lint run, but found an issue
-            #       stderr/stdout is captured in configlint_results_file_path
+            # execute npm step (params come from config)
+            self._run_npm_step(
+                npm_output_file_path=npm_output_file_path
+            )
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message = &#39;Failed config-lint scan.&#39;
-        except sh.ErrorReturnCode:
-            # NOTE: un-expected failure condition
-            #       aka, the config lint failed to run for some reason
-            #       stderr/stdout is captured in configlint_results_file_path
-            step_result.success = False
-            step_result.message = &#39;Unexpected Error invoking config-lint.&#39;
+            step_result.message = &#34;Error running npm. &#34; \
+                f&#34;More details maybe found in &#39;npm-output&#39; report artifact: {error}&#34;
+        finally:
+            step_result.add_artifact(
+                description=&#34;Standard out and standard error from npm.&#34;,
+                name=&#39;npm-output&#39;,
+                value=npm_output_file_path
+            )
 
-        step_result.add_artifact(
-            name=&#39;configlint-result-set&#39;,
-            value=configlint_results_file_path
-        )
-        step_result.add_artifact(
-            name=&#39;configlint-yml-path&#39;,
-            value=configlint_yml_path
-        )
         return step_result</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -460,9 +418,13 @@ a given yaml file to lint.</p></div>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest" href="../unit_test/npm_test.html#ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest">NpmTest</a></li>
+</ul>
 <h3>Static methods</h3>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint.step_implementer_config_defaults"><code class="name flex">
+<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults"><code class="name flex">
 <span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
 </code></dt>
 <dd>
@@ -492,6 +454,45 @@ def step_implementer_config_defaults():
     These are the lowest precedence configuration values.
     &#34;&#34;&#34;
     return DEFAULT_CONFIG</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts"><code class="name">var <span class="ident">npm_run_scripts</span></code></dt>
+<dd>
+<div class="desc"><p>Property for getting the npm phases and goals to execute which can either come
+from field set on this class via constructor, intended for use by sub classes that want
+to hard code the phases and goals for convenience, or comes from config value
+<code>npm-phases-and-goals</code> set by the user.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Maven phases and/or goals to execute.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npm_run_scripts(self):
+    &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
+    from field set on this class via constructor, intended for use by sub classes that want
+    to hard code the phases and goals for convenience, or comes from config value
+    `npm-phases-and-goals` set by the user.
+
+    Returns
+    -------
+    str
+        Maven phases and/or goals to execute.
+    &#34;&#34;&#34;
+    npm_run_scripts = None
+    if self.__npm_run_scripts:
+        npm_run_scripts = self.__npm_run_scripts
+    else:
+        npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+
+    return npm_run_scripts</code></pre>
 </details>
 </dd>
 </dl>
@@ -531,22 +532,21 @@ def step_implementer_config_defaults():
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
-<li><a href="#result-artifacts">Result Artifacts</a></li>
-<li><a href="#examples">Examples</a></li>
 </ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner.step_implementers.validate_environment_configuration" href="index.html">ploigos_step_runner.step_implementers.validate_environment_configuration</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared" href="index.html">ploigos_step_runner.step_implementers.shared</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint" href="#ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint">Configlint</a></code></h4>
+<h4><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></code></h4>
 <ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.validate_environment_configuration.configlint.Configlint.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts">npm_run_scripts</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 </ul>
 </li>
 </ul>

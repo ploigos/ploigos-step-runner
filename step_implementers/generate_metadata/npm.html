@@ -178,7 +178,7 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
 
         package_file = self.get_value(&#39;package-file&#39;)
 
-        with open(package_file) as package_file_object:
+        with open(package_file, encoding=&#39;utf-8&#39;) as package_file_object:
             package_file_data = json.load(package_file_object)
 
         if not &#34;version&#34; in package_file_data:
@@ -281,7 +281,7 @@ class Npm(StepImplementer): # pylint: disable=too-few-public-methods
 
         package_file = self.get_value(&#39;package-file&#39;)
 
-        with open(package_file) as package_file_object:
+        with open(package_file, encoding=&#39;utf-8&#39;) as package_file_object:
             package_file_data = json.load(package_file_object)
 
         if not &#34;version&#34; in package_file_data:

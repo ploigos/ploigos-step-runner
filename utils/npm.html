@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.step_implementers.unit_test API documentation</title>
-<meta name="description" content="`StepImplementers` for the `unit-test` step." />
+<title>ploigos_step_runner.utils.npm API documentation</title>
+<meta name="description" content="Shared utils for npm operations." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,41 +19,115 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.step_implementers.unit_test</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.utils.npm</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementers</code> for the <code>unit-test</code> step.</p>
+<p>Shared utils for npm operations.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementers` for the `unit-test` step.
+<pre><code class="python">&#34;&#34;&#34;
+Shared utils for npm operations.
 &#34;&#34;&#34;
-from ploigos_step_runner.step_implementers.unit_test.maven_test import MavenTest
-from ploigos_step_runner.step_implementers.unit_test.maven import Maven
-from ploigos_step_runner.step_implementers.unit_test.npm_test import NpmTest</code></pre>
+import sys
+import sh
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
+
+def run_npm(npm_output_file_path, npm_run_scripts):
+    &#34;&#34;&#34;
+    Use npm command to run a script in package.json
+
+    Parameters
+    ----------
+    npm_output_file_path:
+        String
+    npm_run_scripts:
+        List of scripts in package.json
+    &#34;&#34;&#34;
+    try:
+        with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                npm_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                npm_output_file
+            ])
+
+            for script in npm_run_scripts:
+                sh.npm( # pylint: disable=no-member
+                    &#39;run&#39;,
+                    script,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running npm. {error}&#34;
+        ) from error</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="ploigos_step_runner.step_implementers.unit_test.maven" href="maven.html">ploigos_step_runner.step_implementers.unit_test.maven</a></code></dt>
+<dt id="ploigos_step_runner.utils.npm.run_npm"><code class="name flex">
+<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_run_scripts)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>DEPRECATED: use ploigos_step_runner.step_implementers.unit_test.MavenTest instead …</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.step_implementers.unit_test.maven_test" href="maven_test.html">ploigos_step_runner.step_implementers.unit_test.maven_test</a></code></dt>
-<dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>unit-test</code> step using Maven with Surefire plugin …</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.step_implementers.unit_test.npm_test" href="npm_test.html">ploigos_step_runner.step_implementers.unit_test.npm_test</a></code></dt>
-<dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>unit-test</code> step using npm</p></div>
+<div class="desc"><p>Use npm command to run a script in package.json</p>
+<h2 id="parameters">Parameters</h2>
+<p>npm_output_file_path:
+String
+npm_run_scripts:
+List of scripts in package.json</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_npm(npm_output_file_path, npm_run_scripts):
+    &#34;&#34;&#34;
+    Use npm command to run a script in package.json
+
+    Parameters
+    ----------
+    npm_output_file_path:
+        String
+    npm_run_scripts:
+        List of scripts in package.json
+    &#34;&#34;&#34;
+    try:
+        with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                npm_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                npm_output_file
+            ])
+
+            for script in npm_run_scripts:
+                sh.npm( # pylint: disable=no-member
+                    &#39;run&#39;,
+                    script,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running npm. {error}&#34;
+        ) from error</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -66,14 +140,12 @@ from ploigos_step_runner.step_implementers.unit_test.npm_test import NpmTest</co
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner.step_implementers" href="../index.html">ploigos_step_runner.step_implementers</a></code></li>
+<li><code><a title="ploigos_step_runner.utils" href="index.html">ploigos_step_runner.utils</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="ploigos_step_runner.step_implementers.unit_test.maven" href="maven.html">ploigos_step_runner.step_implementers.unit_test.maven</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.unit_test.maven_test" href="maven_test.html">ploigos_step_runner.step_implementers.unit_test.maven_test</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.unit_test.npm_test" href="npm_test.html">ploigos_step_runner.step_implementers.unit_test.npm_test</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ploigos_step_runner.utils.npm.run_npm" href="#ploigos_step_runner.utils.npm.run_npm">run_npm</a></code></li>
 </ul>
 </li>
 </ul>

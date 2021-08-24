@@ -390,6 +390,39 @@ class StepResult: # pylint: disable=too-many-instance-attributes
             }
         return result
 
+    def merge(self, other):
+        &#34;&#34;&#34;Merge the artifacts and evidence from another StepResult into
+        this StepResult. The other StepResult must have the same step name,
+        sub step name and environment.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            The second StepResult instance to merge into this one
+
+        Raises
+        ------
+        StepRunnerException if the StepResult to merge does not have a
+        matching step name, sub-step name, or environment.
+        &#34;&#34;&#34;
+
+        if not isinstance(other, StepResult):
+            raise StepRunnerException(&#39;expect StepResult instance type&#39;)
+
+        if other.step_name != self.step_name or \
+            other.sub_step_name != self.sub_step_name or \
+            other.environment != self.environment:
+            raise StepRunnerException(
+                    &#39;Other StepResult does not have matching &#39; \
+                    &#39;step name, sub step name, or environment.&#39;
+                  )
+
+        for artifact in other.artifacts.values():
+            self.add_artifact(artifact.name, artifact.value, artifact.description)
+
+        for evidence in other.evidence.values():
+            self.add_evidence(evidence.name, evidence.value, evidence.description)
+
     def __str__(self):
         &#34;&#34;&#34;Get string representation of the step result.
         &#34;&#34;&#34;
@@ -822,6 +855,39 @@ if step was run against a specific environment.</dd>
                 }
             }
         return result
+
+    def merge(self, other):
+        &#34;&#34;&#34;Merge the artifacts and evidence from another StepResult into
+        this StepResult. The other StepResult must have the same step name,
+        sub step name and environment.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            The second StepResult instance to merge into this one
+
+        Raises
+        ------
+        StepRunnerException if the StepResult to merge does not have a
+        matching step name, sub-step name, or environment.
+        &#34;&#34;&#34;
+
+        if not isinstance(other, StepResult):
+            raise StepRunnerException(&#39;expect StepResult instance type&#39;)
+
+        if other.step_name != self.step_name or \
+            other.sub_step_name != self.sub_step_name or \
+            other.environment != self.environment:
+            raise StepRunnerException(
+                    &#39;Other StepResult does not have matching &#39; \
+                    &#39;step name, sub step name, or environment.&#39;
+                  )
+
+        for artifact in other.artifacts.values():
+            self.add_artifact(artifact.name, artifact.value, artifact.description)
+
+        for evidence in other.evidence.values():
+            self.add_evidence(evidence.name, evidence.value, evidence.description)
 
     def __str__(self):
         &#34;&#34;&#34;Get string representation of the step result.
@@ -1507,6 +1573,62 @@ For example:
     return result</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.results.step_result.StepResult.merge"><code class="name flex">
+<span>def <span class="ident">merge</span></span>(<span>self, other)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Merge the artifacts and evidence from another StepResult into
+this StepResult. The other StepResult must have the same step name,
+sub step name and environment.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>step_result</code></strong> :&ensp;<code><a title="ploigos_step_runner.results.step_result.StepResult" href="#ploigos_step_runner.results.step_result.StepResult">StepResult</a></code></dt>
+<dd>The second StepResult instance to merge into this one</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>StepRunnerException if the <a title="ploigos_step_runner.results.step_result.StepResult" href="#ploigos_step_runner.results.step_result.StepResult">StepResult</a> to merge does not have a</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>matching step name, sub-step name, or environment.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge(self, other):
+    &#34;&#34;&#34;Merge the artifacts and evidence from another StepResult into
+    this StepResult. The other StepResult must have the same step name,
+    sub step name and environment.
+
+    Parameters
+    ----------
+    step_result : StepResult
+        The second StepResult instance to merge into this one
+
+    Raises
+    ------
+    StepRunnerException if the StepResult to merge does not have a
+    matching step name, sub-step name, or environment.
+    &#34;&#34;&#34;
+
+    if not isinstance(other, StepResult):
+        raise StepRunnerException(&#39;expect StepResult instance type&#39;)
+
+    if other.step_name != self.step_name or \
+        other.sub_step_name != self.sub_step_name or \
+        other.environment != self.environment:
+        raise StepRunnerException(
+                &#39;Other StepResult does not have matching &#39; \
+                &#39;step name, sub step name, or environment.&#39;
+              )
+
+    for artifact in other.artifacts.values():
+        self.add_artifact(artifact.name, artifact.value, artifact.description)
+
+    for evidence in other.evidence.values():
+        self.add_evidence(evidence.name, evidence.value, evidence.description)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1542,6 +1664,7 @@ For example:
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_evidence_value" href="#ploigos_step_runner.results.step_result.StepResult.get_evidence_value">get_evidence_value</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_step_result_dict">get_step_result_dict</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict" href="#ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict">get_sub_step_result_dict</a></code></li>
+<li><code><a title="ploigos_step_runner.results.step_result.StepResult.merge" href="#ploigos_step_runner.results.step_result.StepResult.merge">merge</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.message" href="#ploigos_step_runner.results.step_result.StepResult.message">message</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.step_name" href="#ploigos_step_runner.results.step_result.StepResult.step_name">step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name" href="#ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name">sub_step_implementer_name</a></code></li>

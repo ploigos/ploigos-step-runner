@@ -171,12 +171,7 @@ class WorkflowResult:
         &#34;&#34;&#34;
 
         if isinstance(step_result, StepResult):
-            existing_step_result = self.get_step_result(
-                step_name=step_result.step_name,
-                sub_step_name=step_result.sub_step_name,
-                environment=step_result.environment
-            )
-            if existing_step_result:
+            if self.__step_result_exists(step_result):
                 raise StepRunnerException(
                     f&#39;Can not add duplicate StepResult for step ({step_result.step_name}),&#39;
                     f&#39; sub step ({step_result.sub_step_name}),&#39;
@@ -203,7 +198,7 @@ class WorkflowResult:
         &#34;&#34;&#34;
         try:
             create_parent_dir(yml_filename)
-            with open(yml_filename, &#39;w&#39;) as file:
+            with open(yml_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
                 results = self.__get_all_step_results_dict()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
@@ -223,7 +218,7 @@ class WorkflowResult:
         &#34;&#34;&#34;
         try:
             create_parent_dir(json_filename)
-            with open(json_filename, &#39;w&#39;) as file:
+            with open(json_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
                 results = self.__get_all_step_results_dict()
                 json.dump(results, file, indent=4)
         except Exception as error:
@@ -268,8 +263,52 @@ class WorkflowResult:
         except Exception as error:
             raise StepRunnerException(f&#39;error loading {pickle_filename}: {error}&#39;) from error
 
+    def merge_with_pickle_file(self, pickle_filename):
+        &#34;&#34;&#34;Merge our workflow list with that stored on disk.
+        When we find overlaps, our in-memory values win.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
+
+        Parameters
+        ----------
+        pickle_filename : the on-disk path to the pickle file to merge with.
+
+        &#34;&#34;&#34;
+        on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
+        on_disk_results = on_disk_wfr.workflow_list
+        merged_workflow_list = []
+
+        for in_mem_step_result in self.__workflow_list:
+            on_disk_step_result = on_disk_wfr.get_step_result(
+                step_name=in_mem_step_result.step_name,
+                sub_step_name=in_mem_step_result.sub_step_name,
+                environment=in_mem_step_result.environment
+            )
+
+            if on_disk_step_result:
+                on_disk_results.remove(on_disk_step_result)
+
+                # in-memory values win if the two results are unequal
+                if on_disk_step_result != in_mem_step_result:
+                    on_disk_step_result.merge(in_mem_step_result)
+
+                merged_workflow_list.append(on_disk_step_result)
+
+            else:
+                merged_workflow_list.append(in_mem_step_result)
+
+        # on_disk_results at this point will only have the step results
+        # that were on disk, but not in memory.
+        merged_workflow_list += on_disk_results
+
+        self.__workflow_list = merged_workflow_list
+
     def write_to_pickle_file(self, pickle_filename):
-        &#34;&#34;&#34;Write the workflow list in a pickle format to file
+        &#34;&#34;&#34;Write the workflow list in a pickle format to file.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
 
         Parameters
         ----------
@@ -286,6 +325,25 @@ class WorkflowResult:
                 pickle.dump(self, file)
         except Exception as error:
             raise RuntimeError(f&#39;error dumping {pickle_filename}: {error}&#39;) from error
+
+    def __step_result_exists(self, step_result):
+        &#34;&#34;&#34;Return True if the provided StepResult exists in our
+        workflow list, False otherwise.
+
+        Parameters
+        ----------
+        step_result - a StepResult object to search for
+
+        Return value
+        ------------
+            True if StepResult exists, False otherwise
+        &#34;&#34;&#34;
+        existing_step_result = self.get_step_result(
+            step_name=step_result.step_name,
+            sub_step_name=step_result.sub_step_name,
+            environment=step_result.environment
+        )
+        return existing_step_result
 
     def __get_all_step_results_dict(self):
         &#34;&#34;&#34;Get a dictionary of all of the recorded StepResults.
@@ -490,12 +548,7 @@ The WorkflowResult represents ALL previous results.</p></div>
         &#34;&#34;&#34;
 
         if isinstance(step_result, StepResult):
-            existing_step_result = self.get_step_result(
-                step_name=step_result.step_name,
-                sub_step_name=step_result.sub_step_name,
-                environment=step_result.environment
-            )
-            if existing_step_result:
+            if self.__step_result_exists(step_result):
                 raise StepRunnerException(
                     f&#39;Can not add duplicate StepResult for step ({step_result.step_name}),&#39;
                     f&#39; sub step ({step_result.sub_step_name}),&#39;
@@ -522,7 +575,7 @@ The WorkflowResult represents ALL previous results.</p></div>
         &#34;&#34;&#34;
         try:
             create_parent_dir(yml_filename)
-            with open(yml_filename, &#39;w&#39;) as file:
+            with open(yml_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
                 results = self.__get_all_step_results_dict()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
@@ -542,7 +595,7 @@ The WorkflowResult represents ALL previous results.</p></div>
         &#34;&#34;&#34;
         try:
             create_parent_dir(json_filename)
-            with open(json_filename, &#39;w&#39;) as file:
+            with open(json_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
                 results = self.__get_all_step_results_dict()
                 json.dump(results, file, indent=4)
         except Exception as error:
@@ -587,8 +640,52 @@ The WorkflowResult represents ALL previous results.</p></div>
         except Exception as error:
             raise StepRunnerException(f&#39;error loading {pickle_filename}: {error}&#39;) from error
 
+    def merge_with_pickle_file(self, pickle_filename):
+        &#34;&#34;&#34;Merge our workflow list with that stored on disk.
+        When we find overlaps, our in-memory values win.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
+
+        Parameters
+        ----------
+        pickle_filename : the on-disk path to the pickle file to merge with.
+
+        &#34;&#34;&#34;
+        on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
+        on_disk_results = on_disk_wfr.workflow_list
+        merged_workflow_list = []
+
+        for in_mem_step_result in self.__workflow_list:
+            on_disk_step_result = on_disk_wfr.get_step_result(
+                step_name=in_mem_step_result.step_name,
+                sub_step_name=in_mem_step_result.sub_step_name,
+                environment=in_mem_step_result.environment
+            )
+
+            if on_disk_step_result:
+                on_disk_results.remove(on_disk_step_result)
+
+                # in-memory values win if the two results are unequal
+                if on_disk_step_result != in_mem_step_result:
+                    on_disk_step_result.merge(in_mem_step_result)
+
+                merged_workflow_list.append(on_disk_step_result)
+
+            else:
+                merged_workflow_list.append(in_mem_step_result)
+
+        # on_disk_results at this point will only have the step results
+        # that were on disk, but not in memory.
+        merged_workflow_list += on_disk_results
+
+        self.__workflow_list = merged_workflow_list
+
     def write_to_pickle_file(self, pickle_filename):
-        &#34;&#34;&#34;Write the workflow list in a pickle format to file
+        &#34;&#34;&#34;Write the workflow list in a pickle format to file.
+
+        Note: any locking of the pickle file is the responsibility
+        of the caller.
 
         Parameters
         ----------
@@ -605,6 +702,25 @@ The WorkflowResult represents ALL previous results.</p></div>
                 pickle.dump(self, file)
         except Exception as error:
             raise RuntimeError(f&#39;error dumping {pickle_filename}: {error}&#39;) from error
+
+    def __step_result_exists(self, step_result):
+        &#34;&#34;&#34;Return True if the provided StepResult exists in our
+        workflow list, False otherwise.
+
+        Parameters
+        ----------
+        step_result - a StepResult object to search for
+
+        Return value
+        ------------
+            True if StepResult exists, False otherwise
+        &#34;&#34;&#34;
+        existing_step_result = self.get_step_result(
+            step_name=step_result.step_name,
+            sub_step_name=step_result.sub_step_name,
+            environment=step_result.environment
+        )
+        return existing_step_result
 
     def __get_all_step_results_dict(self):
         &#34;&#34;&#34;Get a dictionary of all of the recorded StepResults.
@@ -795,12 +911,7 @@ Else
     &#34;&#34;&#34;
 
     if isinstance(step_result, StepResult):
-        existing_step_result = self.get_step_result(
-            step_name=step_result.step_name,
-            sub_step_name=step_result.sub_step_name,
-            environment=step_result.environment
-        )
-        if existing_step_result:
+        if self.__step_result_exists(step_result):
             raise StepRunnerException(
                 f&#39;Can not add duplicate StepResult for step ({step_result.step_name}),&#39;
                 f&#39; sub step ({step_result.sub_step_name}),&#39;
@@ -1033,6 +1144,62 @@ from the first</p>
     return None</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.merge_with_pickle_file"><code class="name flex">
+<span>def <span class="ident">merge_with_pickle_file</span></span>(<span>self, pickle_filename)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Merge our workflow list with that stored on disk.
+When we find overlaps, our in-memory values win.</p>
+<p>Note: any locking of the pickle file is the responsibility
+of the caller.</p>
+<h2 id="parameters">Parameters</h2>
+<p>pickle_filename : the on-disk path to the pickle file to merge with.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_with_pickle_file(self, pickle_filename):
+    &#34;&#34;&#34;Merge our workflow list with that stored on disk.
+    When we find overlaps, our in-memory values win.
+
+    Note: any locking of the pickle file is the responsibility
+    of the caller.
+
+    Parameters
+    ----------
+    pickle_filename : the on-disk path to the pickle file to merge with.
+
+    &#34;&#34;&#34;
+    on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
+    on_disk_results = on_disk_wfr.workflow_list
+    merged_workflow_list = []
+
+    for in_mem_step_result in self.__workflow_list:
+        on_disk_step_result = on_disk_wfr.get_step_result(
+            step_name=in_mem_step_result.step_name,
+            sub_step_name=in_mem_step_result.sub_step_name,
+            environment=in_mem_step_result.environment
+        )
+
+        if on_disk_step_result:
+            on_disk_results.remove(on_disk_step_result)
+
+            # in-memory values win if the two results are unequal
+            if on_disk_step_result != in_mem_step_result:
+                on_disk_step_result.merge(in_mem_step_result)
+
+            merged_workflow_list.append(on_disk_step_result)
+
+        else:
+            merged_workflow_list.append(in_mem_step_result)
+
+    # on_disk_results at this point will only have the step results
+    # that were on disk, but not in memory.
+    merged_workflow_list += on_disk_results
+
+    self.__workflow_list = merged_workflow_list</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_json_file"><code class="name flex">
 <span>def <span class="ident">write_results_to_json_file</span></span>(<span>self, json_filename)</span>
 </code></dt>
@@ -1066,7 +1233,7 @@ from the first</p>
     &#34;&#34;&#34;
     try:
         create_parent_dir(json_filename)
-        with open(json_filename, &#39;w&#39;) as file:
+        with open(json_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
             results = self.__get_all_step_results_dict()
             json.dump(results, file, indent=4)
     except Exception as error:
@@ -1106,7 +1273,7 @@ from the first</p>
     &#34;&#34;&#34;
     try:
         create_parent_dir(yml_filename)
-        with open(yml_filename, &#39;w&#39;) as file:
+        with open(yml_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
             results = self.__get_all_step_results_dict()
             yaml.dump(results, file, indent=4)
     except Exception as error:
@@ -1117,7 +1284,9 @@ from the first</p>
 <span>def <span class="ident">write_to_pickle_file</span></span>(<span>self, pickle_filename)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Write the workflow list in a pickle format to file</p>
+<div class="desc"><p>Write the workflow list in a pickle format to file.</p>
+<p>Note: any locking of the pickle file is the responsibility
+of the caller.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>pickle_filename</code></strong> :&ensp;<code>str</code></dt>
@@ -1133,7 +1302,10 @@ from the first</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def write_to_pickle_file(self, pickle_filename):
-    &#34;&#34;&#34;Write the workflow list in a pickle format to file
+    &#34;&#34;&#34;Write the workflow list in a pickle format to file.
+
+    Note: any locking of the pickle file is the responsibility
+    of the caller.
 
     Parameters
     ----------
@@ -1178,6 +1350,7 @@ from the first</p>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value">get_evidence_value</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result">get_step_result</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.load_from_pickle_file" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.load_from_pickle_file">load_from_pickle_file</a></code></li>
+<li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.merge_with_pickle_file" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.merge_with_pickle_file">merge_with_pickle_file</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list">workflow_list</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_json_file" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_json_file">write_results_to_json_file</a></code></li>
 <li><code><a title="ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_yml_file" href="#ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_yml_file">write_results_to_yml_file</a></code></li>

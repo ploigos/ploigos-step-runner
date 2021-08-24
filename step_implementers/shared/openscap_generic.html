@@ -629,7 +629,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_fails = None
         try:
             oscap_chroot_command = buildah_unshare_command.bake(&#34;oscap-chroot&#34;)
-            with open(oscap_out_file_path, &#39;w&#39;) as oscap_out_file:
+            with open(oscap_out_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as oscap_out_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     oscap_eval_out_buff,
                     oscap_out_file
@@ -1164,7 +1164,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_fails = None
         try:
             oscap_chroot_command = buildah_unshare_command.bake(&#34;oscap-chroot&#34;)
-            with open(oscap_out_file_path, &#39;w&#39;) as oscap_out_file:
+            with open(oscap_out_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as oscap_out_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     oscap_eval_out_buff,
                     oscap_out_file

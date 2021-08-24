@@ -548,7 +548,7 @@ def run_maven( #pylint: disable=too-many-arguments
 
     # run maven
     try:
-        with open(mvn_output_file_path, &#39;w&#39;) as mvn_output_file:
+        with open(mvn_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
                 mvn_output_file
@@ -1246,7 +1246,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 
     # run maven
     try:
-        with open(mvn_output_file_path, &#39;w&#39;) as mvn_output_file:
+        with open(mvn_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
                 mvn_output_file
