@@ -19,7 +19,7 @@ def run_npm(npm_output_file_path, npm_run_scripts):
         List of scripts in package.json
     """
     try:
-        with open(npm_output_file_path, 'w') as npm_output_file:
+        with open(npm_output_file_path, 'w', encoding='utf-8') as npm_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
                 npm_output_file

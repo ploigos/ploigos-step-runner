@@ -152,7 +152,8 @@ class Configlint(StepImplementer):
         try:
             # run config-lint writing stdout and stderr to the standard streams
             # as well as to a results file.
-            with open(configlint_results_file_path, 'w') as configlint_results_file:
+            with open(configlint_results_file_path, 'w', encoding='utf-8') \
+                    as configlint_results_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     sys.stdout,
                     configlint_results_file
