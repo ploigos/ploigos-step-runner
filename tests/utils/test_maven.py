@@ -1097,7 +1097,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                 phases_and_goals=phases_and_goals,
             )
 
-            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
@@ -1136,7 +1136,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                 profiles=['fake-profile']
             )
 
-            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
@@ -1176,7 +1176,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                 profiles=['fake-profile1', 'fake-profile2']
             )
 
-            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
@@ -1216,7 +1216,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                 tls_verify=False
             )
 
-            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
@@ -1258,7 +1258,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                 no_transfer_progress=False
             )
 
-            mock_open.assert_called_with(mvn_output_file_path, 'w')
+            mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
@@ -1310,7 +1310,7 @@ class TestMavenUtils_run_maven(BaseTestCase):
                     phases_and_goals=phases_and_goals,
                 )
 
-                mock_open.assert_called_with(mvn_output_file_path, 'w')
+                mock_open.assert_called_with(mvn_output_file_path, 'w', encoding='utf-8')
                 redirect_mock.assert_has_calls([
                     call([
                         sys.stdout,

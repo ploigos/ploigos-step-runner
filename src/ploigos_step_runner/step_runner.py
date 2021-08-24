@@ -171,7 +171,11 @@ class StepRunner:
             )
 
             # acquire the pickle lock
-            with open(self.workflow_result_pickle_file_path + '.lock', 'w') as pickle_lock:
+            with open(
+                    self.workflow_result_pickle_file_path + '.lock',
+                    'w',
+                    encoding='utf-8'
+            ) as pickle_lock:
                 fcntl.flock(pickle_lock, fcntl.LOCK_EX)
 
                 # we are locked

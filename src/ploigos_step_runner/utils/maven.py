@@ -519,7 +519,7 @@ def run_maven( #pylint: disable=too-many-arguments
 
     # run maven
     try:
-        with open(mvn_output_file_path, 'w') as mvn_output_file:
+        with open(mvn_output_file_path, 'w', encoding='utf-8') as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
                 mvn_output_file

@@ -510,7 +510,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_fails = None
         try:
             oscap_chroot_command = buildah_unshare_command.bake("oscap-chroot")
-            with open(oscap_out_file_path, 'w') as oscap_out_file:
+            with open(oscap_out_file_path, 'w', encoding='utf-8') as oscap_out_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                     oscap_eval_out_buff,
                     oscap_out_file

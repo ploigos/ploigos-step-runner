@@ -169,7 +169,7 @@ class WorkflowResult:
         """
         try:
             create_parent_dir(yml_filename)
-            with open(yml_filename, 'w') as file:
+            with open(yml_filename, 'w', encoding='utf-8') as file:
                 results = self.__get_all_step_results_dict()
                 yaml.dump(results, file, indent=4)
         except Exception as error:
@@ -189,7 +189,7 @@ class WorkflowResult:
         """
         try:
             create_parent_dir(json_filename)
-            with open(json_filename, 'w') as file:
+            with open(json_filename, 'w', encoding='utf-8') as file:
                 results = self.__get_all_step_results_dict()
                 json.dump(results, file, indent=4)
         except Exception as error:

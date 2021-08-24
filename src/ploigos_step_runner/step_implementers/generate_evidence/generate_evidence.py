@@ -137,7 +137,7 @@ class GenerateEvidence(StepImplementer):
         evidence_path = os.path.join(work_dir, result_evidence_name)
 
         #Format into json and write out to file in working directory
-        with open(evidence_path, "w") as evidence_file:
+        with open(evidence_path, "w", encoding='utf-8') as evidence_file:
             json.dump(evidence, evidence_file, indent=4)
 
         evidence_destination_url = self.get_value('evidence-destination-url')
