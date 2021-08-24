@@ -38,7 +38,7 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     json_parse_error = None
     yaml_parse_error = None
 
-    with open(yaml_or_json_file, 'r') as open_yaml_or_json_file:
+    with open(yaml_or_json_file, 'r', encoding='utf-8') as open_yaml_or_json_file:
         file_contents = open_yaml_or_json_file.read()
 
     try:

@@ -556,7 +556,7 @@ class ArgoCD(StepImplementer):
         host_urls = []
         manifest_resources = {}
         # load the manifest
-        with open(manifest_path) as file:
+        with open(manifest_path, encoding='utf-8') as file:
             manifest_resources = yaml.load_all(file, Loader=yaml.FullLoader)
 
             # for each resource in the manfest,
