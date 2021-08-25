@@ -316,11 +316,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Results of running this step.
         &#34;&#34;&#34;
 
-        StepImplementer.__print_section_title(f&#34;Step Start - {self.step_name}&#34;)
+        StepImplementer.__print_section_title(
+            f&#34;Step Start - {self.step_name} ({self.sub_step_name})&#34;
+        )
 
         # print information about the configuration
         StepImplementer.__print_section_title(
-            f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
+            f&#34;Configuration - {self.step_name} ({self.sub_step_name})&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -363,7 +365,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             # run the step
             StepImplementer.__print_section_title(
-                f&#34;Standard Out - {self.step_name}&#34;,
+                f&#34;Standard Out - {self.step_name} ({self.sub_step_name})&#34;,
                 div_char=&#34;-&#34;,
                 indent=1
             )
@@ -379,6 +381,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
+                sys.stdout.flush()
+                sys.stderr.flush()
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -386,7 +390,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # print the step run results
         StepImplementer.__print_section_title(
-            f&#34;Results - {self.step_name}&#34;,
+            f&#34;Results - {self.step_name} ({self.sub_step_name})&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -398,8 +402,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data(&#39;Success&#39;, step_result.success)
         StepImplementer.__print_data(&#39;Message&#39;, step_result.message)
         StepImplementer.__print_data(&#39;Artifacts&#39;, step_result.artifacts_dicts)
+        StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
-        StepImplementer.__print_section_title(f&#39;Step End - {self.step_name}&#39;)
+        StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
 
         return step_result
 
@@ -1098,11 +1103,13 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Results of running this step.
         &#34;&#34;&#34;
 
-        StepImplementer.__print_section_title(f&#34;Step Start - {self.step_name}&#34;)
+        StepImplementer.__print_section_title(
+            f&#34;Step Start - {self.step_name} ({self.sub_step_name})&#34;
+        )
 
         # print information about the configuration
         StepImplementer.__print_section_title(
-            f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
+            f&#34;Configuration - {self.step_name} ({self.sub_step_name})&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -1145,7 +1152,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             # run the step
             StepImplementer.__print_section_title(
-                f&#34;Standard Out - {self.step_name}&#34;,
+                f&#34;Standard Out - {self.step_name} ({self.sub_step_name})&#34;,
                 div_char=&#34;-&#34;,
                 indent=1
             )
@@ -1161,6 +1168,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
+                sys.stdout.flush()
+                sys.stderr.flush()
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -1168,7 +1177,7 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
 
         # print the step run results
         StepImplementer.__print_section_title(
-            f&#34;Results - {self.step_name}&#34;,
+            f&#34;Results - {self.step_name} ({self.sub_step_name})&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -1180,8 +1189,9 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data(&#39;Success&#39;, step_result.success)
         StepImplementer.__print_data(&#39;Message&#39;, step_result.message)
         StepImplementer.__print_data(&#39;Artifacts&#39;, step_result.artifacts_dicts)
+        StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
-        StepImplementer.__print_section_title(f&#39;Step End - {self.step_name}&#39;)
+        StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
 
         return step_result
 
@@ -2194,11 +2204,13 @@ False otherwise.</dd>
         Results of running this step.
     &#34;&#34;&#34;
 
-    StepImplementer.__print_section_title(f&#34;Step Start - {self.step_name}&#34;)
+    StepImplementer.__print_section_title(
+        f&#34;Step Start - {self.step_name} ({self.sub_step_name})&#34;
+    )
 
     # print information about the configuration
     StepImplementer.__print_section_title(
-        f&#34;Configuration - {self.step_name} - {self.sub_step_name}&#34;,
+        f&#34;Configuration - {self.step_name} ({self.sub_step_name})&#34;,
         div_char=&#34;-&#34;,
         indent=1
     )
@@ -2241,7 +2253,7 @@ False otherwise.</dd>
 
         # run the step
         StepImplementer.__print_section_title(
-            f&#34;Standard Out - {self.step_name}&#34;,
+            f&#34;Standard Out - {self.step_name} ({self.sub_step_name})&#34;,
             div_char=&#34;-&#34;,
             indent=1
         )
@@ -2257,6 +2269,8 @@ False otherwise.</dd>
 
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
             step_result = self._run_step()
+            sys.stdout.flush()
+            sys.stderr.flush()
     except AssertionError as invalid_error:
         step_result = StepResult.from_step_implementer(self)
         step_result.success = False
@@ -2264,7 +2278,7 @@ False otherwise.</dd>
 
     # print the step run results
     StepImplementer.__print_section_title(
-        f&#34;Results - {self.step_name}&#34;,
+        f&#34;Results - {self.step_name} ({self.sub_step_name})&#34;,
         div_char=&#34;-&#34;,
         indent=1
     )
@@ -2276,8 +2290,9 @@ False otherwise.</dd>
     StepImplementer.__print_data(&#39;Success&#39;, step_result.success)
     StepImplementer.__print_data(&#39;Message&#39;, step_result.message)
     StepImplementer.__print_data(&#39;Artifacts&#39;, step_result.artifacts_dicts)
+    StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
-    StepImplementer.__print_section_title(f&#39;Step End - {self.step_name}&#39;)
+    StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
 
     return step_result</code></pre>
 </details>
