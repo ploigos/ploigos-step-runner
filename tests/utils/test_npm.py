@@ -19,13 +19,12 @@ class TestNpmUtils(BaseTestCase):
     @patch("builtins.open", new_callable=mock_open) # Given that I can open files
     def test_run_script_shell_argument(self, mock_open, redirect_callback_mock, npm_shell_command_mock):
 
-        # When I use run_npm() to run 'myscript'
-        run_npm('/my/output/file', ['myscript'])
+        # When I use run_npm() to run 'command with:args'
+        run_npm('/my/output/file', 'mycommand')
 
-        # Then it should run a shell command, `npm run myscript`
+        # Then it should run a shell command, `npm command with:args`
         npm_shell_command_mock.assert_any_call(
-            'run',
-            'myscript',
+            'mycommand',
             _out=Any(StringIO),
             _err=Any(StringIO)
         )
@@ -38,6 +37,6 @@ class TestNpmUtils(BaseTestCase):
         # Given the shell command exits with an error code
         npm_shell_command_mock.side_effect = ErrorReturnCode('npm', b'mock stdout', b'mock error')
 
-        # When I use run_npm() to run 'myscript'
+        # When I use run_npm() to run 'mycommand'
         with raises(StepRunnerException): # Then it should raise an exception
-            run_npm('/my/output/file', ['myscript'])
+            run_npm('/my/output/file', 'mycommand')
