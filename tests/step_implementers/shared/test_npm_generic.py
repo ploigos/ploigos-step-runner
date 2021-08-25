@@ -15,7 +15,7 @@ from tests.helpers.base_step_implementer_test_case import \
 @patch("ploigos_step_runner.StepImplementer.__init__")
 class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
 
-    def test_no_environment_no_npm_run_scripts(self, mock_super_init):
+    def test_no_environment_no_npm_args(self, mock_super_init):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
         config = {}
@@ -26,7 +26,7 @@ class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
             config=config
         )
 
-        self.assertIsNone(step_implementer._NpmGeneric__npm_run_scripts)
+        self.assertIsNone(step_implementer._NpmGeneric__npm_args)
         mock_super_init.assert_called_once_with(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
@@ -34,7 +34,7 @@ class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
             environment=None
         )
 
-    def test_with_environment_no_npm_run_scripts(self, mock_super_init):
+    def test_with_environment_no_npm_args(self, mock_super_init):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
         config = {}
@@ -46,7 +46,7 @@ class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
             environment='test-env'
         )
 
-        self.assertIsNone(step_implementer._NpmGeneric__npm_run_scripts)
+        self.assertIsNone(step_implementer._NpmGeneric__npm_args)
         mock_super_init.assert_called_once_with(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
@@ -54,7 +54,7 @@ class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
             environment='test-env'
         )
 
-    def test_no_environment_with_npm_run_scripts(self, mock_super_init):
+    def test_no_environment_with_npm_args(self, mock_super_init):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
         config = {}
@@ -63,12 +63,12 @@ class TestStepImplementerSharedNpmGeneric___init__(BaseStepImplementerTestCase):
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
-            npm_run_scripts=['fake-phase']
+            npm_args=['fake-arg']
         )
 
         self.assertEqual(
-            step_implementer._NpmGeneric__npm_run_scripts,
-            ['fake-phase']
+            step_implementer._NpmGeneric__npm_args,
+            ['fake-arg']
         )
         mock_super_init.assert_called_once_with(
             workflow_result=workflow_result,
@@ -96,7 +96,7 @@ class TestStepImplementerSharedNpmGeneric__required_config_or_result_keys(
             NpmGeneric._required_config_or_result_keys(),
             [
                 'package-file',
-                'npm-run-scripts'
+                'npm-args'
             ]
         )
 
@@ -147,7 +147,7 @@ class TestStepImplementerSharedNpmGeneric__validate_required_config_or_previous_
             package_file_path = '/does/not/exist/package.json'
             step_config = {
                 'package-file': package_file_path,
-                'npm-run-scripts': 'fake-phase'
+                'npm-run-scripts': 'fake-arg'
             }
 
             step_implementer = self.create_step_implementer(
@@ -162,7 +162,7 @@ class TestStepImplementerSharedNpmGeneric__validate_required_config_or_previous_
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
                 mock_super_validate.assert_called_once_with()
 
-class TestStepImplementerSharedNpmGeneric_maven_phases_and_goals(
+class TestStepImplementerSharedNpmGeneric_config(
     BaseTestStepImplementerSharedNpmGeneric
 ):
     def test_use_object_property_no_config_value(self):
@@ -174,19 +174,19 @@ class TestStepImplementerSharedNpmGeneric_maven_phases_and_goals(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
-            npm_run_scripts=['fake-phase']
+            npm_args=['run fake:script']
         )
 
         self.assertEqual(
-            step_implementer.npm_run_scripts,
-            ['fake-phase']
+            step_implementer.npm_args,
+            ['run fake:script']
         )
 
     def test_use_object_property_with_config_value(self):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
         step_config = {
-            'npm-run-scripts': ['config-value-fake-phase']
+            'npm-args': ['config-value-fake-arg']
         }
         config = Config({
             Config.CONFIG_KEY: {
@@ -204,18 +204,18 @@ class TestStepImplementerSharedNpmGeneric_maven_phases_and_goals(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
-            npm_run_scripts=['object-property-fake-phase']
+            npm_args=['object-property-fake-arg']
         )
 
         self.assertEqual(
-            step_implementer.npm_run_scripts,
-            ['object-property-fake-phase']
+            step_implementer.npm_args,
+            ['object-property-fake-arg']
         )
 
-    def test_use_config_value(self):
+    def test_use_configured_npm_args(self):
         parent_work_dir_path = '/fake/path'
         step_config = {
-            'npm-run-scripts': ['config-value-fake-script']
+            'npm-args': ['config-value-npm-args']
         }
 
         step_implementer = self.create_step_implementer(
@@ -224,20 +224,20 @@ class TestStepImplementerSharedNpmGeneric_maven_phases_and_goals(
         )
 
         self.assertEqual(
-            step_implementer.npm_run_scripts,
-            ['config-value-fake-script']
+            step_implementer.npm_args,
+            ['config-value-npm-args']
         )
 
 @patch('ploigos_step_runner.step_implementers.shared.npm_generic.run_npm')
 @patch.object(
     NpmGeneric,
-    'npm_run_scripts',
+    'npm_args',
     new_callable=PropertyMock,
-    return_value=['fake-phase']
+    return_value=['fake-arg']
 )
 
 class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerSharedNpmGeneric):
-    def test_defaults(self, mock_run_scripts, mock_run_npm):
+    def test_defaults(self, mock_args, mock_run_npm):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -258,7 +258,7 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
 
             mock_run_npm.assert_called_with(
                 npm_output_file_path=npm_output_file_path,
-                npm_run_scripts=['fake-phase']
+                npm_args=['fake-arg']
                 )
 
 @patch.object(NpmGeneric, '_run_npm_step')
