@@ -7,7 +7,7 @@ from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
-def run_npm(npm_output_file_path, npm_run_scripts):
+def run_npm(npm_output_file_path, npm_args):
     """
     Use npm command to run a script in package.json
 
@@ -15,7 +15,7 @@ def run_npm(npm_output_file_path, npm_run_scripts):
     ----------
     npm_output_file_path:
         String
-    npm_run_scripts:
+    npm_args:
         List of scripts in package.json
     """
     try:
@@ -29,7 +29,7 @@ def run_npm(npm_output_file_path, npm_run_scripts):
                 npm_output_file
             ])
 
-            for script in npm_run_scripts:
+            for script in npm_args:
                 sh.npm( # pylint: disable=no-member
                     'run',
                     script,

@@ -7,10 +7,10 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key            | Required? | Default | Description
------------------------------|-----------|---------|-----------
+Configuration Key            | Required? | Default          | Description
+-----------------------------|-----------|------------------|-----------
 `package-file`               | No        | `'package.json'` | package.json file for reference app.
-`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run.
+`npm-args`                   | Yes       | `None`           | Arguments to pass to the npm command.
 """
 
 
@@ -25,7 +25,7 @@ DEFAULT_CONFIG = {
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'package-file',
-    'npm-run-scripts'
+    'npm-args'
 ]
 
 class NpmGeneric(StepImplementer):
@@ -38,9 +38,9 @@ class NpmGeneric(StepImplementer):
         parent_work_dir_path,
         config,
         environment=None,
-        npm_run_scripts=None
+        npm_args=None
     ):
-        self.__npm_run_scripts = npm_run_scripts
+        self.__npm_args = npm_args
 
         super().__init__(
             workflow_result=workflow_result,
@@ -104,7 +104,7 @@ class NpmGeneric(StepImplementer):
                 f'Given npm package file (package-file) does not exist: {package_file}'
 
     @property
-    def npm_run_scripts(self):
+    def npm_args(self):
         """Property for getting the npm phases and goals to execute which can either come
         from field set on this class via constructor, intended for use by sub classes that want
         to hard code the phases and goals for convenience, or comes from config value
@@ -115,13 +115,13 @@ class NpmGeneric(StepImplementer):
         str
             Maven phases and/or goals to execute.
         """
-        npm_run_scripts = None
-        if self.__npm_run_scripts:
-            npm_run_scripts = self.__npm_run_scripts
+        npm_args = None
+        if self.__npm_args:
+            npm_args = self.__npm_args
         else:
-            npm_run_scripts = self.get_value('npm-run-scripts')
+            npm_args = self.get_value('npm-args')
 
-        return npm_run_scripts
+        return npm_args
 
     def _run_npm_step(
         self,
@@ -142,11 +142,11 @@ class NpmGeneric(StepImplementer):
             If npm returns a none 0 exit code.
         """
 
-        npm_run_scripts = self.npm_run_scripts
+        npm_args = self.npm_args
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            npm_run_scripts=npm_run_scripts
+            npm_args=npm_args
         )
 
     def _run_step(self):
