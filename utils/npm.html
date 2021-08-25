@@ -36,16 +36,16 @@ from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
-def run_npm(npm_output_file_path, npm_run_scripts):
+def run_npm(npm_output_file_path, npm_args):
     &#34;&#34;&#34;
-    Use npm command to run a script in package.json
+    Run an npm command
 
     Parameters
     ----------
     npm_output_file_path:
         String
-    npm_run_scripts:
-        List of scripts in package.json
+    npm_args:
+        Commandline arguments to npm
     &#34;&#34;&#34;
     try:
         with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
@@ -58,13 +58,11 @@ def run_npm(npm_output_file_path, npm_run_scripts):
                 npm_output_file
             ])
 
-            for script in npm_run_scripts:
-                sh.npm( # pylint: disable=no-member
-                    &#39;run&#39;,
-                    script,
-                    _out=out_callback,
-                    _err=err_callback
-                )
+            sh.npm( # pylint: disable=no-member
+                npm_args,
+                _out=out_callback,
+                _err=err_callback
+            )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f&#34;Error running npm. {error}&#34;
@@ -79,29 +77,29 @@ def run_npm(npm_output_file_path, npm_run_scripts):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ploigos_step_runner.utils.npm.run_npm"><code class="name flex">
-<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_run_scripts)</span>
+<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_args)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Use npm command to run a script in package.json</p>
+<div class="desc"><p>Run an npm command</p>
 <h2 id="parameters">Parameters</h2>
 <p>npm_output_file_path:
 String
-npm_run_scripts:
-List of scripts in package.json</p></div>
+npm_args:
+Commandline arguments to npm</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_npm(npm_output_file_path, npm_run_scripts):
+<pre><code class="python">def run_npm(npm_output_file_path, npm_args):
     &#34;&#34;&#34;
-    Use npm command to run a script in package.json
+    Run an npm command
 
     Parameters
     ----------
     npm_output_file_path:
         String
-    npm_run_scripts:
-        List of scripts in package.json
+    npm_args:
+        Commandline arguments to npm
     &#34;&#34;&#34;
     try:
         with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
@@ -114,13 +112,11 @@ List of scripts in package.json</p></div>
                 npm_output_file
             ])
 
-            for script in npm_run_scripts:
-                sh.npm( # pylint: disable=no-member
-                    &#39;run&#39;,
-                    script,
-                    _out=out_callback,
-                    _err=err_callback
-                )
+            sh.npm( # pylint: disable=no-member
+                npm_args,
+                _out=out_callback,
+                _err=err_callback
+            )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f&#34;Error running npm. {error}&#34;

@@ -50,10 +50,10 @@ Could come from:
 <td>package.json file for reference app.</td>
 </tr>
 <tr>
-<td><code>npm-run-scripts</code></td>
+<td><code>npm-args</code></td>
 <td>Yes</td>
 <td><code>None</code></td>
-<td>Script in package.json file to run.</td>
+<td>Arguments to pass to the npm command.</td>
 </tr>
 </tbody>
 </table>
@@ -70,10 +70,10 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key            | Required? | Default | Description
------------------------------|-----------|---------|-----------
+Configuration Key            | Required? | Default          | Description
+-----------------------------|-----------|------------------|-----------
 `package-file`               | No        | `&#39;package.json&#39;` | package.json file for reference app.
-`npm-run-scripts`            | Yes       | `None`  | Script in package.json file to run.
+`npm-args`                   | Yes       | `None`           | Arguments to pass to the npm command.
 &#34;&#34;&#34;
 
 
@@ -88,7 +88,7 @@ DEFAULT_CONFIG = {
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;package-file&#39;,
-    &#39;npm-run-scripts&#39;
+    &#39;npm-args&#39;
 ]
 
 class NpmGeneric(StepImplementer):
@@ -101,9 +101,9 @@ class NpmGeneric(StepImplementer):
         parent_work_dir_path,
         config,
         environment=None,
-        npm_run_scripts=None
+        npm_args=None
     ):
-        self.__npm_run_scripts = npm_run_scripts
+        self.__npm_args = npm_args
 
         super().__init__(
             workflow_result=workflow_result,
@@ -167,7 +167,7 @@ class NpmGeneric(StepImplementer):
                 f&#39;Given npm package file (package-file) does not exist: {package_file}&#39;
 
     @property
-    def npm_run_scripts(self):
+    def npm_args(self):
         &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
         from field set on this class via constructor, intended for use by sub classes that want
         to hard code the phases and goals for convenience, or comes from config value
@@ -178,13 +178,13 @@ class NpmGeneric(StepImplementer):
         str
             Maven phases and/or goals to execute.
         &#34;&#34;&#34;
-        npm_run_scripts = None
-        if self.__npm_run_scripts:
-            npm_run_scripts = self.__npm_run_scripts
+        npm_args = None
+        if self.__npm_args:
+            npm_args = self.__npm_args
         else:
-            npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+            npm_args = self.get_value(&#39;npm-args&#39;)
 
-        return npm_run_scripts
+        return npm_args
 
     def _run_npm_step(
         self,
@@ -205,11 +205,11 @@ class NpmGeneric(StepImplementer):
             If npm returns a none 0 exit code.
         &#34;&#34;&#34;
 
-        npm_run_scripts = self.npm_run_scripts
+        npm_args = self.npm_args
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            npm_run_scripts=npm_run_scripts
+            npm_args=npm_args
         )
 
     def _run_step(self):
@@ -254,7 +254,7 @@ class NpmGeneric(StepImplementer):
 <dl>
 <dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric"><code class="flex name class">
 <span>class <span class="ident">NpmGeneric</span></span>
-<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None, npm_run_scripts=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None, npm_args=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract parent class for StepImplementers that use npm.</p></div>
@@ -272,9 +272,9 @@ class NpmGeneric(StepImplementer):
         parent_work_dir_path,
         config,
         environment=None,
-        npm_run_scripts=None
+        npm_args=None
     ):
-        self.__npm_run_scripts = npm_run_scripts
+        self.__npm_args = npm_args
 
         super().__init__(
             workflow_result=workflow_result,
@@ -338,7 +338,7 @@ class NpmGeneric(StepImplementer):
                 f&#39;Given npm package file (package-file) does not exist: {package_file}&#39;
 
     @property
-    def npm_run_scripts(self):
+    def npm_args(self):
         &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
         from field set on this class via constructor, intended for use by sub classes that want
         to hard code the phases and goals for convenience, or comes from config value
@@ -349,13 +349,13 @@ class NpmGeneric(StepImplementer):
         str
             Maven phases and/or goals to execute.
         &#34;&#34;&#34;
-        npm_run_scripts = None
-        if self.__npm_run_scripts:
-            npm_run_scripts = self.__npm_run_scripts
+        npm_args = None
+        if self.__npm_args:
+            npm_args = self.__npm_args
         else:
-            npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+            npm_args = self.get_value(&#39;npm-args&#39;)
 
-        return npm_run_scripts
+        return npm_args
 
     def _run_npm_step(
         self,
@@ -376,11 +376,11 @@ class NpmGeneric(StepImplementer):
             If npm returns a none 0 exit code.
         &#34;&#34;&#34;
 
-        npm_run_scripts = self.npm_run_scripts
+        npm_args = self.npm_args
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            npm_run_scripts=npm_run_scripts
+            npm_args=npm_args
         )
 
     def _run_step(self):
@@ -420,6 +420,7 @@ class NpmGeneric(StepImplementer):
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.package.npm_package.NpmPackage" href="../package/npm_package.html#ploigos_step_runner.step_implementers.package.npm_package.NpmPackage">NpmPackage</a></li>
 <li><a title="ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest" href="../unit_test/npm_test.html#ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest">NpmTest</a></li>
 </ul>
 <h3>Static methods</h3>
@@ -459,7 +460,7 @@ def step_implementer_config_defaults():
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts"><code class="name">var <span class="ident">npm_run_scripts</span></code></dt>
+<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args"><code class="name">var <span class="ident">npm_args</span></code></dt>
 <dd>
 <div class="desc"><p>Property for getting the npm phases and goals to execute which can either come
 from field set on this class via constructor, intended for use by sub classes that want
@@ -475,7 +476,7 @@ to hard code the phases and goals for convenience, or comes from config value
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def npm_run_scripts(self):
+def npm_args(self):
     &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
     from field set on this class via constructor, intended for use by sub classes that want
     to hard code the phases and goals for convenience, or comes from config value
@@ -486,13 +487,13 @@ def npm_run_scripts(self):
     str
         Maven phases and/or goals to execute.
     &#34;&#34;&#34;
-    npm_run_scripts = None
-    if self.__npm_run_scripts:
-        npm_run_scripts = self.__npm_run_scripts
+    npm_args = None
+    if self.__npm_args:
+        npm_args = self.__npm_args
     else:
-        npm_run_scripts = self.get_value(&#39;npm-run-scripts&#39;)
+        npm_args = self.get_value(&#39;npm-args&#39;)
 
-    return npm_run_scripts</code></pre>
+    return npm_args</code></pre>
 </details>
 </dd>
 </dl>
@@ -545,7 +546,7 @@ def npm_run_scripts(self):
 <li>
 <h4><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></code></h4>
 <ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_run_scripts">npm_run_scripts</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args">npm_args</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 </ul>
 </li>
