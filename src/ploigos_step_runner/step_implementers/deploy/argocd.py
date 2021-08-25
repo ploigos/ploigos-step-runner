@@ -90,6 +90,7 @@ Configuration Key         | Required? | Default  | Description
                                                         /`container-image-repository`\
                                                         :`container-image-version`"
 `force-push-tags`         | No        | False    | Force push Git Tags
+`additional-helm-values-files`| No    | []       | Array of value files to add to argocd app for helm use
 
 Results
 -------
@@ -118,6 +119,7 @@ DEFAULT_CONFIG = {
     'argocd-skip-tls' : False,
     'deployment-config-helm-chart-path': './',
     'deployment-config-helm-chart-additional-values-files': [],
+    'additional-helm-values-files': [],
     'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
     'force-push-tags': False,
     'kube-api-skip-tls': False,
@@ -248,6 +250,7 @@ class ArgoCD(StepImplementer):
             self.get_value('deployment-config-helm-chart-additional-values-files')
         container_image_tag = self.get_value('container-image-tag')
         force_push_tags = self.get_value('force-push-tags')
+        additional_helm_values_files = self.get_value('additional-helm-values-files')
 
         try:
             argocd_app_name = self.__get_app_name()
@@ -321,6 +324,7 @@ class ArgoCD(StepImplementer):
             argocd_values_files = []
             argocd_values_files += deployment_config_helm_chart_additional_value_files
             argocd_values_files += [deployment_config_helm_chart_environment_values_file]
+            argocd_values_files += additional_helm_values_files
             ArgoCD.__argocd_app_create_or_update(
                 argocd_app_name=argocd_app_name,
                 repo=deployment_config_repo,

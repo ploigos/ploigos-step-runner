@@ -38,6 +38,7 @@ class TestStepImplementerDeployArgoCD_Other(TestStepImplementerDeployArgoCDBase)
             'argocd-skip-tls' : False,
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
+            'additional-helm-values-files': [],
             'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
             'force-push-tags': False,
             'kube-api-skip-tls': False,
