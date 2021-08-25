@@ -30,7 +30,6 @@ class TestNpmTest__run_step(BaseStepImplementerTestCase):
 
             # Then it should run a shell command, 'npm test'
             npm_shell_command_mock.assert_any_call(
-                'run',
                 'test',
                 _out=Any(StringIO),
                 _err=Any(StringIO)

@@ -9,14 +9,14 @@ from ploigos_step_runner.utils.io import \
 
 def run_npm(npm_output_file_path, npm_args):
     """
-    Use npm command to run a script in package.json
+    Run an npm command
 
     Parameters
     ----------
     npm_output_file_path:
         String
     npm_args:
-        List of scripts in package.json
+        Commandline arguments to npm
     """
     try:
         with open(npm_output_file_path, 'w', encoding='utf-8') as npm_output_file:
@@ -29,13 +29,11 @@ def run_npm(npm_output_file_path, npm_args):
                 npm_output_file
             ])
 
-            for script in npm_args:
-                sh.npm( # pylint: disable=no-member
-                    'run',
-                    script,
-                    _out=out_callback,
-                    _err=err_callback
-                )
+            sh.npm( # pylint: disable=no-member
+                npm_args,
+                _out=out_callback,
+                _err=err_callback
+            )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f"Error running npm. {error}"

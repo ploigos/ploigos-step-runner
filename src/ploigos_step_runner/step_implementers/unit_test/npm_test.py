@@ -15,7 +15,7 @@ class NpmTest(NpmGeneric):
             parent_work_dir_path,
             config,
             environment=environment,
-            npm_args=['test']
+            npm_args='test'
         )
 
     @staticmethod
