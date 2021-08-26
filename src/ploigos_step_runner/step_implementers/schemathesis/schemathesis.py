@@ -1,4 +1,4 @@
-"""`StepImplementer` for `hello-world` print implementation.
+"""`StepImplementer` for `schemathesis` print implementation.
  
 Step Configuration
 ------------------
