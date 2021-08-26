@@ -5,3 +5,5 @@ from ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber impo
     MavenTestSeleniumCucumber
 from ploigos_step_runner.step_implementers.uat.maven_selenium_cucumber import \
     MavenSeleniumCucumber
+from ploigos_step_runner.step_implementers.uat.schemathesis import \
+    Schemathesis
