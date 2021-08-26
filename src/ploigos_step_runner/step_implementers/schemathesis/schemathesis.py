@@ -113,7 +113,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
  
        step_result.add_artifact(
            name='schemathesis-result-set',
-           value=f'{working_direictory}/report-task.txt'
+           value=f'{working_directory}/report-task.txt'
        )
 
        step_result.add_evidence(
