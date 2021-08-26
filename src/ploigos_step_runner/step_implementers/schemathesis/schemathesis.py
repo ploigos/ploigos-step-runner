@@ -103,7 +103,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
           f"--data-urlencode", 'username=prmanager',
           f"--data-urlencode", 'password=prmanager'),
           f'-r',
-          f'.access_token')
+          f'.access_token').strip()
        print(auth_token)
 
        try:
