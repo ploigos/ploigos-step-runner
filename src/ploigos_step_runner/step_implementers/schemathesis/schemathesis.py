@@ -114,7 +114,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
                f'--stateful=links',
                f'--checks','all', 
                f'{api_endpoint}/api/v1/api-docs?group=local', 
-               f'-H', '"Authorization: Bearer {auth_token}"',
+               f'-H', f'"Authorization: Bearer {auth_token}"',
                _out=sys.stdout,
                _err=sys.stderr)
 
