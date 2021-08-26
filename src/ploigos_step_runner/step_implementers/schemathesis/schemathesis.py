@@ -21,7 +21,9 @@ Result Artifact Key | Description
 --------------------|------------
 `message` | The complete message that was printed
 """
- 
+import os
+import sys
+import sh 
 from ploigos_step_runner import StepImplementer, StepResult
  
 DEFAULT_CONFIG = {
@@ -85,10 +87,31 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
        message = f'Schemathesis Hello {name}!'
  
        print(message)
+
+       schemathesis_success = False
+
+       try:
+           sh.schemathesis(
+               f'--version',
+               _out=sys.stdout,
+               _err=sys.stderr)
+
+           schemathesis_success = True
+       except sh.ErrorReturnCode as error: 
+           # Error Code Other: unexpected
+           step_result.success = False
+           step_result.message = "Unexpected error running schemathesis analysis" \
+               f" using schemathesis: {error}"
+
  
        step_result.add_artifact(
            name='message',
            value=message
+       )
+
+       step_result.add_evidence(
+           name='schemathesis-quality-gate-pass',
+           value=schemathesis_success
        )
  
        return step_result
