@@ -27,7 +27,7 @@ import sh
 from ploigos_step_runner import StepImplementer, StepResult
  
 DEFAULT_CONFIG = {
-   'name': 'World'
+   'name': 'Schemathesis'
 }
  
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -152,7 +152,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
            value=schemathesis_success
        )
 
-       step_result.add_evidence(
+       step_result.add_artifact(
            name='schemathesis-request-responses',
            value=f'{working_directory}/schema-req-log.txt'
        )
