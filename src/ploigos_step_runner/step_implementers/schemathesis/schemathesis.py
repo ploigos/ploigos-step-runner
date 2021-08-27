@@ -112,9 +112,9 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
            print(f'token:{auth_token}')
            scan_res = sh.schemathesis(
                "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
-               "-H", f"Authorization: Bearer {auth_token}")
-#               _out=sys.stdout,
-#               _err=sys.stderr)
+               "-H", f"Authorization: Bearer {auth_token}",
+               _out=sys.stdout,
+               _err=sys.stderr)
            file = open(f'{working_directory}/report-task.txt', "w")
            file.write(scan_res)
            file.close()
