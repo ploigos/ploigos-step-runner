@@ -109,19 +109,15 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
        try:
            working_directory = self.work_dir_path
 
-#           sh.schemathesis(
-#               f'run',
-#               f'--stateful=links',
-#               f'--checks','all', 
-#               f'{api_endpoint}/api/v1/api-docs?group=local', 
-#               f'-H', f'"Authorization: Bearer {auth_token}"',
+           print(f'token:{auth_token}')
+           scan_res = sh.schemathesis(
+               "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
+               "-H", f"Authorization: Bearer {auth_token}")
 #               _out=sys.stdout,
 #               _err=sys.stderr)
-           sh.schemathesis(
-               "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
-               "-H", f"Authorization: Bearer {auth_token}",
-               _out=sys.stdout,
-               _err=sys.stderr)
+           file = open(f'{working_directory}/report-task.txt', "w")
+           file.write(scan_res)
+           file.close()
            schemathesis_success = True
        except sh.ErrorReturnCode as error: 
            # Error Code Other: unexpected
