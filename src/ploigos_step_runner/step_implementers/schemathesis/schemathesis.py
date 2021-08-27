@@ -87,25 +87,30 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
        message = f'Schemathesis Hello {name}!'
  
        print(message)
-       auth_header = self.get_value('auth_header')
+#       auth_header = self.get_value('auth_header')
 
 ## FOR NOW ADDING TOKEN HERE NEEDS TO BE MOVED
        schemathesis_success = False
        api_endpoint = self.get_value('deployed-host-urls')[0]
        print(api_endpoint)
-#       auth_token = sh.jq(sh.curl(
-#          f'-sX',
-#          f'POST',
-#          'https://keycloak-consultant360-dev.apps.tssc.rht-set.com/auth/realms/consultant360/protocol/openid-connect/token',
-#          f"--header", 'Content-Type: application/x-www-form-urlencoded',
-#          f"--data-urlencode", 'grant_type=password',
-#          f"--data-urlencode", 'client_id=consultant360',
-#          f"--data-urlencode", 'client_secret=7463e6ad-5e03-4855-877f-360cdc1ef9d6',
-#          f"--data-urlencode", 'username=prmanager',
-#          f"--data-urlencode", 'password=prmanager'),
-#          f'-r',
-#          f'.access_token').strip()
-       print(auth_header)
+     
+       if self.get_value('auth_username'):
+           auth_username = self.get_value('auth_username')
+           auth_password = self.get_value('auth_password')
+           auth_url = self.get_value('auth_url')
+           auth_token = sh.jq(sh.curl(
+              '-sX','POST',
+              f'{auth_url},
+              f"--header", 'Content-Type: application/x-www-form-urlencoded',
+              f"--data-urlencode", 'grant_type=password',
+              f"--data-urlencode", 'client_id=consultant360',
+              f"--data-urlencode", 'client_secret=7463e6ad-5e03-4855-877f-360cdc1ef9d6',
+              f"--data-urlencode", f'username={auth_username}',
+              f"--data-urlencode", f'password={auth_password}'),
+              f'-r',
+              f'.access_token').strip()
+           print(auth_token)
+           auth_header = f'Authorization: Bearer {auth_token}'
 
        try:
            working_directory = self.work_dir_path
