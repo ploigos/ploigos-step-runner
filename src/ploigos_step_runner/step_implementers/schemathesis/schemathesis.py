@@ -105,7 +105,6 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
           f'-r',
           f'.access_token').strip()
        print(auth_token)
-       auth_token='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJIM0M5WnhpVjN0QldBX1VnYzU1S3lmS1NUaGdwbzlaM2FoN0ZoQXFYT2VZIn0.eyJleHAiOjE2MzAwNzQxMjEsImlhdCI6MTYzMDA3MzgyMSwianRpIjoiODE2MTE1NjctM2ZhOS00MmMzLThiNjEtMWRlMTJkYjZlOWI5IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay1jb25zdWx0YW50MzYwLWRldi5hcHBzLnRzc2Mucmh0LXNldC5jb20vYXV0aC9yZWFsbXMvY29uc3VsdGFudDM2MCIsImF1ZCI6WyJiZWFyZXIiLCJhY2NvdW50Il0sInN1YiI6Ijk5ZDU4ODIzLTI5YjctNGIxZi1hYTU5LTc2MDRmMThlZmVmYiIsInR5cCI6IkJlYXJlciIsImF6cCI6ImNvbnN1bHRhbnQzNjAiLCJzZXNzaW9uX3N0YXRlIjoiZmEzNDEwMTMtYTE2OC00MTM3LWIyMGQtZTFjMzliZmY2YzVhIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjQxODAvKiIsImh0dHA6Ly9sb2NhbGhvc3Q6OTA4MC8qIiwiaHR0cHM6Ly9mZWVkYmFjazM2MC1jb25zdWx0YW50MzYwLWRldi5hcHBzLnRzc2Mucmh0LXNldC5jb20iLCJodHRwOi8va2V5Y2xvYWs6OTA4MC8qIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiY29uc3VsdGFudDM2MCI6eyJyb2xlcyI6WyJ1c2VyIl19LCJiZWFyZXIiOnsicm9sZXMiOlsidXNlciJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJQYW0gTWFuYWdlciIsInByZWZlcnJlZF91c2VybmFtZSI6InBybWFuYWdlciIsImdpdmVuX25hbWUiOiJQYW0iLCJmYW1pbHlfbmFtZSI6Ik1hbmFnZXIiLCJlbWFpbCI6InBybWFuYWdlckByZWRoYXQuY29tIn0.qf0NLSLT-F4RnLYdsfi4p3PLUl39_VWQTkvgb8VkM4H6FeJpJDSNYyY4psgiAd7Jknntz1Y99vZOaU7kl5IJVwg2zd0o-jBGRJ1Ni16ZvtrPUoGgs1kSOiMgEtgea24Ve_726BuadGChQ33Mr2bUfVWwbEFMI3VDQjBEj6H5UNa-NoxcdgimXg_rBnCMGg6zDd67hoeexb6GtU6U3VlYikL_awO951I4y_sS6PVgdtBQazroN1xBbIeqRnVicshbmK9PMnhBbdX_Nfhvn5h5hipFRyNEhrHjvmXIlpsUMJoDbbwyE_fJPhY_qqXx5dLsCLpenVuLAoewm0e4bBuwkw'
 
        try:
            working_directory = self.work_dir_path
@@ -114,11 +113,10 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
            scan_res = sh.schemathesis(
                "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
                "-H", f"Authorization: Bearer {auth_token}",
+               "--junit-xml", f'{working_directory}/report-task.xml',
+               "--store-network-log",f'{working_directory}/schema-req-log.txt',
                _out=sys.stdout,
                _err=sys.stderr)
-           file = open(f'{working_directory}/report-task.txt', "w")
-           file.write(scan_res)
-           file.close()
            schemathesis_success = True
        except sh.ErrorReturnCode as error: 
            # Error Code Other: unexpected
@@ -129,12 +127,17 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
  
        step_result.add_artifact(
            name='schemathesis-result-set',
-           value=f'{working_directory}/report-task.txt'
+           value=f'{working_directory}/report-task.xml'
        )
 
        step_result.add_evidence(
            name='schemathesis-quality-gate-pass',
            value=schemathesis_success
+       )
+
+       step_result.add_evidence(
+           name='schemathesis-request-responses',
+           value=f'{working_directory}/schema-req-log.txt'
        )
  
        return step_result
