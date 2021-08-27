@@ -98,7 +98,9 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
            auth_username = self.get_value('auth_username')
            auth_password = self.get_value('auth_password')
            auth_url = self.get_value('auth_url')
-           auth_token = sh.jq(sh.curl(
+           auth_client_id = self.get_value('auth_client_id')
+           auth_client_secret = self.get_value('auth_client_secret')
+           auth_token = sh.jq(sh.curl(i
               '-sX','POST',
               f'{auth_url}',
               f"--header", 'Content-Type: application/x-www-form-urlencoded',
