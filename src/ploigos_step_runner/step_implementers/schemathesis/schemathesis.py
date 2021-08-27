@@ -110,7 +110,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
        try:
            working_directory = self.work_dir_path
 
-           print(f'token:{auth_token}')
+           print(f'header:{auth_header}')
            scan_res = sh.schemathesis(
                "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
                "-H", 
