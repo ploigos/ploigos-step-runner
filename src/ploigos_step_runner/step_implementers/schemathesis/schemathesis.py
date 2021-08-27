@@ -89,11 +89,11 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
        print(message)
 #       auth_header = self.get_value('auth_header')
 
-## FOR NOW ADDING TOKEN HERE NEEDS TO BE MOVED
        schemathesis_success = False
        api_endpoint = self.get_value('deployed-host-urls')[0]
        print(api_endpoint)
-     
+
+## This could be moved to a generic auth runner      
        if self.get_value('auth_username'):
            auth_username = self.get_value('auth_username')
            auth_password = self.get_value('auth_password')
@@ -109,22 +109,29 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
               f"--data-urlencode", f'password={auth_password}'),
               f'-r',
               f'.access_token').strip()
-           print(auth_token)
            auth_header = f'Authorization: Bearer {auth_token}'
 
        try:
            working_directory = self.work_dir_path
 
-           print(f'header:{auth_header}')
-           scan_res = sh.schemathesis(
-               "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
-               "-H", 
-#               f"Authorization: Bearer {auth_token}",
-               f'{auth_header}',
-               "--junit-xml", f'{working_directory}/report-task.xml',
-               "--store-network-log",f'{working_directory}/schema-req-log.txt',
-               _out=sys.stdout,
-               _err=sys.stderr)
+           if auth_header:
+               print(f'header:{auth_header}')
+               scan_res = sh.schemathesis(
+                   "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
+                   "-H", 
+                   f'{auth_header}',
+                   "--junit-xml", f'{working_directory}/report-task.xml',
+                   "--store-network-log",f'{working_directory}/schema-req-log.txt',
+                   _out=sys.stdout,
+                   _err=sys.stderr)
+           else:
+               scan_res = sh.schemathesis(
+                   "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
+                   "--junit-xml", f'{working_directory}/report-task.xml',
+                   "--store-network-log",f'{working_directory}/schema-req-log.txt',
+                   _out=sys.stdout,
+                   _err=sys.stderr)
+
            schemathesis_success = True
        except sh.ErrorReturnCode as error: 
            # Error Code Other: unexpected
