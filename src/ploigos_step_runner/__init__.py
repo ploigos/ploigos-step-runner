@@ -114,6 +114,9 @@ From least precedence to highest precedence.
       - implementer: SampleStep1Implementer1
         config:
           sample-config-option-3: 'value for sample-config-option-3 for use in this step'
+          additional-artifacts-dirs:
+          - name: sample-user-supplied-artifact
+            path: sample/path/to/user/supplied/artifact
         environment-config:
           SAMPLE-ENV-1:
             sample-config-option-4: 'value for use in this step in SAMPLE-ENV-1 environment'

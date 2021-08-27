@@ -1,5 +1,32 @@
 """Abstract class and helper constants for StepImplementer.
-"""
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
+Configuration Key       | Required? | Default | Description
+------------------------|-----------|---------|-----------
+`additional-artifacts`  | No        | `[]`    | List of additional artifacts, or list of dicts \
+                                                of additional artifacts to add as artifacts on the \
+                                                step step result (pass or fail). \
+<br/><b>EX 1</b>: <br/>\
+<pre>additional-artifacts: <br/>\
+- randomValue1 <br/>\
+- /path/to/something/important_dir <br/>\
+- /path/to/cool/file.xml</pre> \
+<br/><b>EX 1</b>: <br/>\
+<pre>additional-artifacts: <br/>\
+- name: mock-value <br/>\
+  value: randomValue1 <br/>\
+- name: mock-dir <br/>\
+  value: /path/to/something/important_dir <br/>\
+- name: mock-file <br/>\
+  value: /path/to/cool/file.xml</pre>
+"""# pylint: disable=line-too-long
 import json
 import os
 import pprint
@@ -340,20 +367,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 div_char="-",
                 indent=1
             )
-
-            indented_stdout = TextIOIndenter(
-                parent_stream=sys.stdout,
-                indent_level=2
-            )
-            indented_stderr = TextIOIndenter(
-                parent_stream=sys.stderr,
-                indent_level=2
-            )
-
+            indented_stdout = TextIOIndenter(parent_stream=sys.stdout, indent_level=2)
+            indented_stderr = TextIOIndenter(parent_stream=sys.stderr, indent_level=2)
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
                 sys.stdout.flush()
                 sys.stderr.flush()
+
+            # add any additional artifacts
+            self.__add_additional_artifacts_to_step_result(step_result=step_result)
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -365,7 +387,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             div_char="-",
             indent=1
         )
-
         StepImplementer.__print_data('Environment', step_result.environment)
         StepImplementer.__print_data('Step', step_result.step_name)
         StepImplementer.__print_data('Sub Step', step_result.sub_step_name)
@@ -376,7 +397,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data('Evidence', step_result.evidence_dicts)
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name} ({self.sub_step_name})')
-
         return step_result
 
     def get_value(self, key):
@@ -591,10 +611,31 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 file.write(contents)
         return file_path
 
+    def __add_additional_artifacts_to_step_result(self, step_result):
+        """Adds user supplied additional artifacts to step result if given.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            StepResult to add the additional artifacts to.
+        """
+        additional_artifacts = self.get_value('additional-artifacts')
+        if isinstance(additional_artifacts, list):
+            for additional_artifact in additional_artifacts:
+                if isinstance(additional_artifact, dict):
+                    step_result.add_artifact(
+                        name=additional_artifact['name'],
+                        value=additional_artifact['value']
+                    )
+                else:
+                    step_result.add_artifact(
+                        name=os.path.basename(additional_artifact),
+                        value=additional_artifact
+                    )
+
     @staticmethod
     def __print_section_title(title, div_char="=", indent=0):
-        """
-        Utility function for pretty printing section title.
+        """Utility function for pretty printing section title.
 
         Parameters
         ----------

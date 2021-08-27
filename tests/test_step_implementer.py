@@ -1,11 +1,11 @@
 import os
 from contextlib import redirect_stdout
 from io import StringIO
+from unittest.mock import patch
 
 from ploigos_step_runner import StepResult, WorkflowResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.results import step_result_artifact
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_runner import StepRunner
 from testfixtures import TempDirectory
@@ -112,8 +112,12 @@ class TestStepImplementer(BaseStepImplementerTestCase):
             environment=environment
         )
 
+@patch.object(StepImplementer, '_StepImplementer__add_additional_artifacts_to_step_result')
 class TestStepImplementer_run_step(TestStepImplementer):
-    def test_one_step_writes_to_empty_results_file(self):
+    def test_one_step_writes_to_empty_results_file(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config1 = {
             'step-runner-config': {
                 'write-config-as-results': {
@@ -157,7 +161,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir
             )
 
-    def test_one_step_existing_results_file_bad_pickle(self):
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
+
+    def test_one_step_existing_results_file_bad_pickle(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config = {
             'step-runner-config': {
                 'write-config-as-results': {
@@ -187,7 +196,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                     test_dir
                 )
 
-    def test_boolean_false_config_variable(self):
+        mock_add_additional_artifacts_to_step_result.assert_not_called()
+
+    def test_boolean_false_config_variable(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config = {
             'step-runner-config': {
                 'write-config-as-results': {
@@ -221,7 +235,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir
             )
 
-    def test_one_step_existing_results_file_empty(self):
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
+
+    def test_one_step_existing_results_file_empty(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config = {
             'step-runner-config': {
                 'write-config-as-results': {
@@ -268,7 +287,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir
             )
 
-    def test_global_environment_default_config(self):
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
+
+    def test_global_environment_default_config(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config1 = {
             'step-runner-config': {
                 'global-environment-defaults': {
@@ -412,7 +436,9 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-1'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
+        mock_add_additional_artifacts_to_step_result.reset_mock()
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -421,8 +447,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-2'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
-    def test_step_environment_config(self):
+    def test_step_environment_config(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config1 = {
             'step-runner-config': {
                 'write-config-as-results': {
@@ -505,7 +535,9 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-1'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
+        mock_add_additional_artifacts_to_step_result.reset_mock()
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -514,8 +546,13 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-2'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
-    def test_global_environment_default_and_step_environment_config(self):
+
+    def test_global_environment_default_and_step_environment_config(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config1 = {
             'step-runner-config': {
                 'global-environment-defaults': {
@@ -624,7 +661,9 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-1'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
+        mock_add_additional_artifacts_to_step_result.reset_mock()
         with TempDirectory() as test_dir:
             self._run_step_implementer_test(
                 config1,
@@ -633,8 +672,12 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 test_dir,
                 'SAMPLE-ENV-2'
             )
+        mock_add_additional_artifacts_to_step_result.assert_called_once()
 
-    def test_missing_required_config_key(self):
+    def test_missing_required_config_key(
+        self,
+        mock_add_additional_artifacts_to_step_result
+    ):
         config = {
             'step-runner-config': {
                 'required-step-config-test': {
@@ -661,6 +704,9 @@ class TestStepImplementer_run_step(TestStepImplementer):
                 expected_results,
                 test_dir
             )
+
+        mock_add_additional_artifacts_to_step_result.assert_not_called()
+
 class TestStepImplementer_other(TestStepImplementer):
     def test_empty_constructor_params(self):
         config = Config({
@@ -1178,3 +1224,129 @@ class TestStepImplementer___print_data_string(TestStepImplementer):
             '                "service-name": "fruit"\n'
             '            }\n\n'
         )
+
+class TestStepImplementer___add_additional_artifacts_to_step_result(BaseStepImplementerTestCase):
+    def create_step_implementer(
+        self,
+        step_config={},
+        workflow_result=None,
+        parent_work_dir_path=''
+    ):
+        return self.create_given_step_implementer(
+            step_implementer=FooStepImplementer,
+            step_config=step_config,
+            step_name='mock-step',
+            implementer='FooStepImplementer',
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path
+        )
+
+    def test_no_additional_artifacts(self):
+        # setup test
+        step_config = {}
+        step_implementer = self.create_step_implementer(
+            step_config=step_config,
+            parent_work_dir_path='/mock/work-dir'
+        )
+
+        # run test
+        actual_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        step_implementer._StepImplementer__add_additional_artifacts_to_step_result(
+            step_result=actual_step_result
+        )
+
+        # verify results
+        expected_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        self.assertEqual(actual_step_result, expected_step_result)
+
+    def test_additional_artifacts_list_of_dirs(self):
+        # setup test
+        step_config = {
+            'additional-artifacts': [
+                {
+                    'name': 'mock-user-reports1',
+                    'value': 'target/mock-foo'
+                },
+                {
+                    'name': 'mock-user-reports2',
+                    'value': 'target/mock-bar'
+                }
+            ]
+        }
+        step_implementer = self.create_step_implementer(
+            step_config=step_config,
+            parent_work_dir_path='/mock/work-dir'
+        )
+
+        # run test
+        actual_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        step_implementer._StepImplementer__add_additional_artifacts_to_step_result(
+            step_result=actual_step_result
+        )
+
+        # verify results
+        expected_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        expected_step_result.add_artifact(
+            name='mock-user-reports1',
+            value='target/mock-foo'
+        )
+        expected_step_result.add_artifact(
+            name='mock-user-reports2',
+            value='target/mock-bar'
+        )
+        self.assertEqual(actual_step_result, expected_step_result)
+
+    def test_additional_artifacts_list_of_strings(self):
+        # setup test
+        step_config = {
+            'additional-artifacts': [
+                'target/mock-foo',
+                'target/mock-bar'
+            ]
+        }
+        step_implementer = self.create_step_implementer(
+            step_config=step_config,
+            parent_work_dir_path='/mock/work-dir'
+        )
+
+        # run test
+        actual_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        step_implementer._StepImplementer__add_additional_artifacts_to_step_result(
+            step_result=actual_step_result
+        )
+
+        # verify results
+        expected_step_result = StepResult(
+            step_name='mock-step',
+            sub_step_name='FooStepImplementer',
+            sub_step_implementer_name='FooStepImplementer'
+        )
+        expected_step_result.add_artifact(
+            name='mock-foo',
+            value='target/mock-foo'
+        )
+        expected_step_result.add_artifact(
+            name='mock-bar',
+            value='target/mock-bar'
+        )
+        self.assertEqual(actual_step_result, expected_step_result)
