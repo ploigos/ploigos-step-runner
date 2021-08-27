@@ -119,7 +119,7 @@ class Schemathesis(StepImplementer):  # pylint: disable=too-few-public-methods
 #               _err=sys.stderr)
            sh.schemathesis(
                "run", "--stateful=links", "--checks", "all", f"{api_endpoint}/api/v1/api-docs?group=local",
-               "-H", f"\"Authorization: Bearer {auth_token}\"",
+               "-H", f"Authorization: Bearer {auth_token}",
                _out=sys.stdout,
                _err=sys.stderr)
            schemathesis_success = True
