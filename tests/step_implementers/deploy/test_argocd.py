@@ -327,8 +327,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 repo_branch='feature/test',
                 git_email=step_config['git-email'],
                 git_name=step_config['git-name'],
-		  username=None,
-		  password=None
+                username=None,
+                password=None
             )
             update_yaml_file_value_mock.assert_called_once_with(
                 file='/does/not/matter/charts/foo/values-PROD.yaml',
@@ -366,6 +366,159 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 dest_server='https://kubernetes.default.svc',
                 auto_sync=True,
                 values_files=['values-PROD.yaml']
+            )
+            argocd_app_sync_mock.assert_called_once_with(
+                argocd_app_name='test-app-name',
+                argocd_sync_timeout_seconds=60
+            )
+            argocd_get_app_manifest_mock.assert_called_once_with(
+                argocd_app_name='test-app-name'
+            )
+            get_deployed_host_urls_mock.assert_called_once_with(
+                manifest_path='/does/not/matter/manifest.yaml'
+            )
+
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__argocd_get_app_manifest',
+        return_value='/does/not/matter/manifest.yaml'
+    )
+    @patch.object(ArgoCD, '_ArgoCD__get_app_name', return_value='test-app-name')
+    @patch.object(ArgoCD, '_ArgoCD__update_yaml_file_value')
+    @patch.object(ArgoCD, '_ArgoCD__get_deployment_config_repo_tag', return_value='v0.42.0')
+    @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push_deployment_config_repo')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_add_target_cluster')
+    @patch.object(ArgoCD, '_ArgoCD__clone_repo', return_value='/does/not/matter')
+    @patch.object(ArgoCD, '_ArgoCD__git_commit_file')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_sign_in')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_app_create_or_update')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_app_sync')
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__get_deployed_host_urls',
+        return_value=['https://fruits.ploigos.xyz']
+    )
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__get_deployment_config_helm_chart_environment_values_file',
+        return_value='values-PROD.yaml'
+    )
+    @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
+    def test_ArgoCD_run_step_success_additional_helm_values_files(
+        self,
+        get_repo_branch_mock,
+        get_deployment_config_helm_chart_environment_values_file_mock,
+        get_deployed_host_urls_mock,
+        argocd_app_sync_mock,
+        argocd_app_create_or_update_mock,
+        argocd_sign_in_mock,
+        git_commit_file_mock,
+        clone_repo_mock,
+        argocd_add_target_cluster_mock,
+        git_tag_and_push_deployment_config_repo_mock,
+        get_deployment_config_repo_tag_mock,
+        update_yaml_file_value_mock,
+        get_app_name_mock,
+        argocd_get_app_manifest_mock
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'additional-helm-values-files': ['secrets.yaml', 'extra-secrets.yaml']
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            actual_step_results = step_implementer._run_step()
+            expected_step_result = StepResult(
+                step_name='deploy',
+                sub_step_name='ArgoCD',
+                sub_step_implementer_name='ArgoCD',
+                environment='PROD'
+            )
+            expected_step_result.add_artifact(
+                name='argocd-app-name',
+                value='test-app-name'
+            )
+            expected_step_result.add_artifact(
+                name='config-repo-git-tag',
+                value='v0.42.0'
+            )
+            expected_step_result.add_artifact(
+                name='argocd-deployed-manifest',
+                value='/does/not/matter/manifest.yaml'
+            )
+            expected_step_result.add_artifact(
+                name='deployed-host-urls',
+                value=['https://fruits.ploigos.xyz']
+            )
+            self.assertEqual(actual_step_results, expected_step_result)
+
+            get_repo_branch_mock.assert_called_once_with()
+            get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
+            get_app_name_mock.assert_called_once_with()
+            deployment_config_repo_dir = os.path.join(
+                step_implementer.work_dir_path,
+                'deployment-config-repo'
+            )
+            clone_repo_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_url=step_config['deployment-config-repo'],
+                repo_branch='feature/test',
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name'],
+                username=None,
+                password=None
+            )
+            update_yaml_file_value_mock.assert_called_once_with(
+                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
+                value=step_config['container-image-tag']
+            )
+            git_commit_file_mock.assert_called_once_with(
+                git_commit_message='Updating values for deployment to PROD',
+                file_path='charts/foo/values-PROD.yaml',
+                repo_dir='/does/not/matter'
+            )
+            get_deployment_config_repo_tag_mock.assert_called_once_with()
+            git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
+                deployment_config_repo=step_config['deployment-config-repo'],
+                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_tag='v0.42.0',
+                force_push_tags=False
+            )
+            argocd_sign_in_mock.assert_called_once_with(
+                argocd_api=step_config['argocd-api'],
+                username=step_config['argocd-username'],
+                password=step_config['argocd-password'],
+                insecure=step_config['argocd-skip-tls']
+            )
+            argocd_add_target_cluster_mock.assert_called_once_with(
+                kube_api='https://kubernetes.default.svc',
+                kube_api_token=None,
+                kube_api_skip_tls=False
+            )
+            argocd_app_create_or_update_mock.assert_called_once_with(
+                argocd_app_name='test-app-name',
+                repo=step_config['deployment-config-repo'],
+                revision='feature/test',
+                path=step_config['deployment-config-helm-chart-path'],
+                dest_server='https://kubernetes.default.svc',
+                auto_sync=True,
+                values_files=['values-PROD.yaml', 'secrets.yaml', 'extra-secrets.yaml']
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
@@ -473,8 +626,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
                 repo_branch='feature/test',
                 git_email=step_config['git-email'],
                 git_name=step_config['git-name'],
-		  username=None,
-		  password=None
+                username=None,
+                password=None
             )
             update_yaml_file_value_mock.assert_not_called()
             git_commit_file_mock.assert_not_called()
@@ -494,7 +647,7 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
-                'deployment-config-helm-chart-environment-values-file': 'values-AWEOMSE.yaml'
+                'deployment-config-helm-chart-environment-values-file': 'values-AWESOME.yaml'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -505,7 +658,7 @@ class TestStepImplementerDeployArgoCD__get_deployment_config_helm_chart_environm
                 step_implementer._ArgoCD__get_deployment_config_helm_chart_environment_values_file()
             self.assertEqual(
                 deployment_config_helm_chart_env_value_file,
-                'values-AWEOMSE.yaml'
+                'values-AWESOME.yaml'
             )
 
     def test_ArgoCD__get_deployment_config_helm_chart_environment_values_file_no_config_value_no_env(self):
@@ -1331,8 +1484,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
             git_email=git_email,
             git_name=git_name,
             username=username,
-	      password=password
-            
+            password=password
         )
 
         git_mock.clone.assert_called_once_with(
@@ -1363,7 +1515,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 _err=Any(IOBase)
             )
         ])
-	
+
     @patch.object(sh, 'git')
     def test_ArgoCD__clone_repo_success_new_branch_https(self, git_mock):
         repo_dir = '/does/not/matter'
@@ -1381,8 +1533,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
             git_email=git_email,
             git_name=git_name,
             username=username,
-	      password=password
-            
+            password=password
         )
 
         git_mock.clone.assert_called_once_with(
@@ -1510,7 +1661,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
                 repo_branch=repo_branch,
                 git_email=git_email,
                 git_name=git_name,
-		  username=username,
+                username=username,
                 password=password
             )
 
@@ -1731,7 +1882,7 @@ class TestStepImplementerDeployArgoCD__clone_repo(TestStepImplementerDeployArgoC
 
 class TestStepImplementerDeployArgoCD__get_repo_branch(TestStepImplementerDeployArgoCDBase):
     @patch.object(sh, 'git')
-    def test_ArgoCD__get_repo_branch_sucecss(self, git_mock):
+    def test_ArgoCD__get_repo_branch_success(self, git_mock):
         git_mock.side_effect = create_sh_side_effect(mock_stdout="feature/test")
 
         repo_branch = ArgoCD._ArgoCD__get_repo_branch()
@@ -2672,12 +2823,12 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
                 parent_work_dir_path=parent_work_dir_path,
             )
 
-            arogcd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
+            argocd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
                 argocd_app_name='test',
                 source='live'
             )
 
-            self.assertIsNotNone(arogcd_app_manifest_file)
+            self.assertIsNotNone(argocd_app_manifest_file)
             argocd_mock.app.manifests.assert_called_once_with(
                 '--source=live',
                 'test',
@@ -2694,12 +2845,12 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
                 parent_work_dir_path=parent_work_dir_path,
             )
 
-            arogcd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
+            argocd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
                 argocd_app_name='test',
                 source='git'
             )
 
-            self.assertIsNotNone(arogcd_app_manifest_file)
+            self.assertIsNotNone(argocd_app_manifest_file)
             argocd_mock.app.manifests.assert_called_once_with(
                 '--source=git',
                 'test',
@@ -2733,12 +2884,12 @@ class TestStepImplementerDeployArgoCD__argocd_get_app_manifest(TestStepImplement
                     re.DOTALL
                 )
             ):
-                arogcd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
+                argocd_app_manifest_file = step_implementer._ArgoCD__argocd_get_app_manifest(
                     argocd_app_name='invalid',
                     source='live'
                 )
 
-                self.assertIsNotNone(arogcd_app_manifest_file)
+                self.assertIsNotNone(argocd_app_manifest_file)
                 argocd_mock.app.manifests.assert_called_once_with(
                     '--source=live',
                     'invalid',

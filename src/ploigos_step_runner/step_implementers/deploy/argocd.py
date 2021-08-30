@@ -90,7 +90,8 @@ Configuration Key         | Required? | Default  | Description
                                                         /`container-image-repository`\
                                                         :`container-image-version`"
 `force-push-tags`         | No        | False    | Force push Git Tags
-`additional-helm-values-files`| No    | []       | Array of value files to add to argocd app for helm use
+`additional-helm-values-files` \
+                          | No    | []       | Array of value files to add to argocd app for helm use
 
 Results
 -------
@@ -344,12 +345,12 @@ class ArgoCD(StepImplementer):
 
             # get the ArgoCD app manifest that was synced
             print(f"Get ArgoCD Application ({argocd_app_name}) synced manifest")
-            arogcd_app_manifest_file = self.__argocd_get_app_manifest(
+            argocd_app_manifest_file = self.__argocd_get_app_manifest(
                 argocd_app_name=argocd_app_name
             )
             step_result.add_artifact(
                 name='argocd-deployed-manifest',
-                value=arogcd_app_manifest_file
+                value=argocd_app_manifest_file
             )
 
             # determine the deployed host URLs
@@ -358,7 +359,7 @@ class ArgoCD(StepImplementer):
                 f" ArgoCD Application (({argocd_app_name})"
             )
             deployed_host_urls = ArgoCD.__get_deployed_host_urls(
-                manifest_path=arogcd_app_manifest_file
+                manifest_path=argocd_app_manifest_file
             )
             step_result.add_artifact(
                 name='deployed-host-urls',
@@ -942,7 +943,7 @@ users:
         auto_sync,
         values_files
     ):
-        """Creates or updates an ArtoCD App.
+        """Creates or updates an ArgoCD App.
 
         Raises
         ------
@@ -1032,14 +1033,14 @@ users:
         Raises
         ------
         StepRunnerException
-            If error getting ArogCD manifest.
+            If error getting ArgoCD manifest.
         """
-        arogcd_app_manifest_file = self.write_working_file('deploy_argocd_manifests.yml')
+        argocd_app_manifest_file = self.write_working_file('deploy_argocd_manifests.yml')
         try:
             sh.argocd.app.manifests(  # pylint: disable=no-member
                 f'--source={source}',
                 argocd_app_name,
-                _out=arogcd_app_manifest_file,
+                _out=argocd_app_manifest_file,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
@@ -1047,4 +1048,4 @@ users:
                 f"Error reading ArgoCD Application ({argocd_app_name}) manifest: {error}"
             ) from error
 
-        return arogcd_app_manifest_file
+        return argocd_app_manifest_file
