@@ -29,8 +29,10 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;`StepImplementers` for the `unit-test` step.
 &#34;&#34;&#34;
-from ploigos_step_runner.step_implementers.unit_test.maven_test import MavenTest
+
 from ploigos_step_runner.step_implementers.unit_test.maven import Maven
+from ploigos_step_runner.step_implementers.unit_test.maven_test import \
+    MavenTest
 from ploigos_step_runner.step_implementers.unit_test.npm_test import NpmTest</code></pre>
 </details>
 </section>
@@ -43,7 +45,7 @@ from ploigos_step_runner.step_implementers.unit_test.npm_test import NpmTest</co
 </dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.unit_test.maven_test" href="maven_test.html">ploigos_step_runner.step_implementers.unit_test.maven_test</a></code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>unit-test</code> step using Maven with Surefire plugin …</p></div>
+<div class="desc"><p><code>StepImplementer</code> for the <code>uat</code> step using Maven by invoking the 'test` maven phase." …</p></div>
 </dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.unit_test.npm_test" href="npm_test.html">ploigos_step_runner.step_implementers.unit_test.npm_test</a></code></dt>
 <dd>

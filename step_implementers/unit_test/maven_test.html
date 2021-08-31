@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>ploigos_step_runner.step_implementers.unit_test.maven_test API documentation</title>
-<meta name="description" content="`StepImplementer` for the `unit-test` step using Maven with Surefire plugin …" />
+<meta name="description" content="`StepImplementer` for the `uat` step using Maven by invoking the &#39;test` maven phase.&#34; …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,7 +22,7 @@
 <h1 class="title">Module <code>ploigos_step_runner.step_implementers.unit_test.maven_test</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>unit-test</code> step using Maven with Surefire plugin.</p>
+<p><code>StepImplementer</code> for the <code>uat</code> step using Maven by invoking the 'test` maven phase."</p>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>Step configuration expected as input to this step.
 Could come from:
@@ -80,29 +80,29 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <td><code>maven-servers</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, username, password</td>
+<td>Dictionary of dictionaries of id, username, password</td>
 </tr>
 <tr>
 <td><code>maven-repositories</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, url, snapshots, releases</td>
+<td>Dictionary of dictionaries of id, url, snapshots, releases</td>
 </tr>
 <tr>
 <td><code>maven-mirrors</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, url, mirror_of</td>
+<td>Dictionary of dictionaries of id, url, mirror_of</td>
 </tr>
 <tr>
-<td><code>fail-on-no-tests</code></td>
-<td>Yes</td>
-<td><code>True </code></td>
-<td><code>True</code> to fail if there are not tests to run.
-<code>False</code> to ignore if there are no tests to run.</td>
+<td><code>test-reports-dir</code></td>
+<td>No</td>
+<td></td>
+<td>Default is to try and dynamically determine where the test reports directory is
+based on configuration in the given <code>pom-file</code>, but it is impossible task to do
+in all cases.
+So, this parameter provides a way for the user to specify where the test results
+are if our attempts at dynamically figuring it out are failing your unique pom.</td>
 </tr>
 </tbody>
 </table>
@@ -121,8 +121,8 @@ id, url, mirror_of</td>
 <td>Path to Stdout and Stderr from invoking Maven.</td>
 </tr>
 <tr>
-<td><code>surefile-reports</code></td>
-<td>Path to Surefire reports generated from invoking Maven.</td>
+<td><code>test-report</code></td>
+<td>Directory containing the test reports generated from running this step.</td>
 </tr>
 </tbody>
 </table>
@@ -130,7 +130,7 @@ id, url, mirror_of</td>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `uat` step using Maven by invoking the &#39;test` maven phase.&#34;
 
 Step Configuration
 ------------------
@@ -145,19 +145,19 @@ Configuration Key            | Required? | Default | Description
 `pom-file`                   | Yes       | `&#39;pom.xml&#39;` | pom used when executing maven.
 `tls-verify`                 | No        | `True`  | Disables TLS Verification if set to False
 `maven-profiles`             | No        | `[]`    | List of maven profiles to use.
-`maven-no-transfer-progress` | No        | `True`  | \
-                            `True` to suppress the transfer progress of packages maven downloads.
-                            `False` to have the transfer progress printed.\
-                            See https://maven.apache.org/ref/current/maven-embedder/cli.html
+`maven-no-transfer-progress` | No        | `True`  | `True` to suppress the transfer progress of packages maven downloads.
+                                                     `False` to have the transfer progress printed.\
+                                                      See https://maven.apache.org/ref/current/maven-embedder/cli.html
 `maven-additional-arguments` | No        | `[]`    | List of additional arguments to use.
-`maven-servers`              | No        |         | Dictionary of dictionaries of \
-                                                     id, username, password
-`maven-repositories`         | No        |         | Dictionary of dictionaries of \
-                                                     id, url, snapshots, releases
-`maven-mirrors`              | No        |         | Dictionary of dictionaries of \
-                                                     id, url, mirror_of
-`fail-on-no-tests`           | Yes       | `True ` | `True` to fail if there are not tests to run. \
-                                                     `False` to ignore if there are no tests to run.
+`maven-servers`              | No        |         | Dictionary of dictionaries of id, username, password
+`maven-repositories`         | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
+`maven-mirrors`              | No        |         | Dictionary of dictionaries of id, url, mirror_of
+`test-reports-dir`           | No        |         | Default is to try and dynamically determine where the test reports directory is \
+                                                     based on configuration in the given `pom-file`, but it is impossible task to do \
+                                                     in all cases. \
+                                                     So, this parameter provides a way for the user to specify where the test results \
+                                                     are if our attempts at dynamically figuring it out are failing your unique pom.
+
 
 Result Artifacts
 ----------------
@@ -166,26 +166,23 @@ Results artifacts output by this step.
 Result Artifact Key | Description
 --------------------|------------
 `maven-output`      | Path to Stdout and Stderr from invoking Maven.
-`surefile-reports`  | Path to Surefire reports generated from invoking Maven.
-&#34;&#34;&#34;
-import os
+`test-report`       | Directory containing the test reports generated from running this step.
+&#34;&#34;&#34;# pylint: disable=line-too-long
 
 from ploigos_step_runner import StepResult, StepRunnerException
-from ploigos_step_runner.step_implementers.shared.maven_generic import \
-    MavenGeneric
+from ploigos_step_runner.step_implementers.shared import (
+    MavenGeneric, MavenTestReportingMixin)
 
-DEFAULT_CONFIG = {
-    &#39;fail-on-no-tests&#39;: True
-}
+DEFAULT_CONFIG = {}
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;pom-file&#39;,
-    &#39;fail-on-no-tests&#39;
+    &#39;pom-file&#39;
 ]
 
-class MavenTest(MavenGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
+class MavenTest(MavenGeneric, MavenTestReportingMixin):
+    &#34;&#34;&#34;`StepImplementer` for the `uat` step using Maven by invoking the &#39;test` maven phase.
     &#34;&#34;&#34;
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
@@ -243,71 +240,82 @@ class MavenTest(MavenGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        pom_file = self.get_value(&#39;pom-file&#39;)
-        fail_on_no_tests = self.get_value(&#39;fail-on-no-tests&#39;)
-
-        # ensure surefire plugin enabled
-        # NOTE: should this really be hard requirement?
-        maven_surefire_plugin = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH
-        )
-        if maven_surefire_plugin is None:
-            step_result.success = False
-            step_result.message = &#39;Unit test dependency &#34;maven-surefire-plugin&#34; &#39; \
-                f&#39;missing from effective pom ({self._get_effective_pom()}).&#39;
-            return step_result
-
-        # get surefire test results dir
-        reports_dir = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH
-        )
-        if reports_dir is not None:
-            if os.path.isabs(reports_dir.text):
-                test_results_dir = reports_dir.text
-            else:
-                test_results_dir = os.path.join(
-                    os.path.dirname(os.path.abspath(pom_file)),
-                    reports_dir.text
-                )
-        else:
-            test_results_dir = os.path.join(
-                os.path.dirname(os.path.abspath(pom_file)),
-                MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
-            )
-
         # run the tests
+        print(&#34;Run unit tests&#34;)
         mvn_output_file_path = self.write_working_file(&#39;mvn_output.txt&#39;)
         try:
             # execute maven step (params come from config)
             self._run_maven_step(
                 mvn_output_file_path=mvn_output_file_path
             )
-
-            # check if any tests were run
-            if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
-                if fail_on_no_tests:
-                    step_result.message = &#39;No unit tests defined.&#39;
-                    step_result.success = False
-                else:
-                    step_result.message = &#34;No unit tests defined, but &#39;fail-on-no-tests&#39; is False.&#34;
         except StepRunnerException as error:
             step_result.success = False
-            step_result.message = &#34;Error running &#39;maven test&#39; to run unit tests. &#34; \
-                &#34;More details maybe found in &#39;maven-output&#39; and `surefire-reports` &#34; \
-                f&#34;report artifact: {error}&#34;
+            step_result.message = &#34;Error running maven. &#34; \
+                f&#34;More details maybe found in report artifacts: {error}&#34;
         finally:
             step_result.add_artifact(
                 description=&#34;Standard out and standard error from maven.&#34;,
                 name=&#39;maven-output&#39;,
                 value=mvn_output_file_path
             )
+
+        # get test report dir
+        test_report_dir = self.__get_test_report_dir()
+        if test_report_dir:
             step_result.add_artifact(
-                description=&#34;Surefire reports generated by maven.&#34;,
-                name=&#39;surefire-reports&#39;,
-                value=test_results_dir
+                description=&#34;Test report generated when running unit tests.&#34;,
+                name=&#39;test-report&#39;,
+                value=test_report_dir
             )
 
-        return step_result</code></pre>
+            # gather test report evidence
+            self._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=step_result,
+                test_report_dir=test_report_dir
+            )
+
+        # return result
+        return step_result
+
+    def __get_test_report_dir(self):
+        &#34;&#34;&#34;Gets the test report directory.
+
+        Search Priority:
+        * values -&gt; &#39;test-reports-dir&#39;
+        * pom.xml -&gt; maven-surefire-plugin -&gt; reportsDirectory
+
+        Returns
+        -------
+        str
+            Path to the directory containing the test reports.
+        &#34;&#34;&#34;
+        # user supplied where the test reports go, just use that
+        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+
+        # else do our best to find them
+        if not test_report_dir:
+            # attempt to get failsafe test report dir, if not, try for surefire
+            test_report_dir = None
+            try:
+                test_report_dir = self._attempt_get_test_report_directory(
+                    plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
+                    configuration_key=\
+                        MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
+                    default=MavenTestReportingMixin.SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR
+                )
+            except StepRunnerException:
+                print(
+                    &#39;WARNING: Did not find any expected test reporting plugin&#39;
+                    f&#39; ({MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME})&#39;
+                    &#39; to read artifacts and evidence from.&#39;
+                    &#39; This is not wholly unexpected because there is enumerable maven plugins,&#39;
+                    &#39; and enumerable ways to configure them.&#39;
+                    &#39; Rather then relying on this step implementer to try and figure out&#39;
+                    &#39; where the test reports are you can configure it manually via the&#39;
+                    &#39; step implementer config (test-reports-dir).&#39;
+                )
+
+        return test_report_dir</code></pre>
 </details>
 </section>
 <section>
@@ -324,14 +332,15 @@ class MavenTest(MavenGeneric):
 <span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>unit-test</code> step using Maven with Surefire plugin.</p></div>
+<div class="desc"><p><code>StepImplementer</code> for the <code>uat</code> step using Maven by invoking the 'test` maven phase.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class MavenTest(MavenGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `unit-test` step using Maven with Surefire plugin.
+<pre><code class="python">class MavenTest(MavenGeneric, MavenTestReportingMixin):
+    &#34;&#34;&#34;`StepImplementer` for the `uat` step using Maven by invoking the &#39;test` maven phase.
     &#34;&#34;&#34;
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
@@ -389,77 +398,89 @@ class MavenTest(MavenGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        pom_file = self.get_value(&#39;pom-file&#39;)
-        fail_on_no_tests = self.get_value(&#39;fail-on-no-tests&#39;)
-
-        # ensure surefire plugin enabled
-        # NOTE: should this really be hard requirement?
-        maven_surefire_plugin = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH
-        )
-        if maven_surefire_plugin is None:
-            step_result.success = False
-            step_result.message = &#39;Unit test dependency &#34;maven-surefire-plugin&#34; &#39; \
-                f&#39;missing from effective pom ({self._get_effective_pom()}).&#39;
-            return step_result
-
-        # get surefire test results dir
-        reports_dir = self._get_effective_pom_element(
-            element_path=MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH
-        )
-        if reports_dir is not None:
-            if os.path.isabs(reports_dir.text):
-                test_results_dir = reports_dir.text
-            else:
-                test_results_dir = os.path.join(
-                    os.path.dirname(os.path.abspath(pom_file)),
-                    reports_dir.text
-                )
-        else:
-            test_results_dir = os.path.join(
-                os.path.dirname(os.path.abspath(pom_file)),
-                MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR
-            )
-
         # run the tests
+        print(&#34;Run unit tests&#34;)
         mvn_output_file_path = self.write_working_file(&#39;mvn_output.txt&#39;)
         try:
             # execute maven step (params come from config)
             self._run_maven_step(
                 mvn_output_file_path=mvn_output_file_path
             )
-
-            # check if any tests were run
-            if not os.path.isdir(test_results_dir) or len(os.listdir(test_results_dir)) == 0:
-                if fail_on_no_tests:
-                    step_result.message = &#39;No unit tests defined.&#39;
-                    step_result.success = False
-                else:
-                    step_result.message = &#34;No unit tests defined, but &#39;fail-on-no-tests&#39; is False.&#34;
         except StepRunnerException as error:
             step_result.success = False
-            step_result.message = &#34;Error running &#39;maven test&#39; to run unit tests. &#34; \
-                &#34;More details maybe found in &#39;maven-output&#39; and `surefire-reports` &#34; \
-                f&#34;report artifact: {error}&#34;
+            step_result.message = &#34;Error running maven. &#34; \
+                f&#34;More details maybe found in report artifacts: {error}&#34;
         finally:
             step_result.add_artifact(
                 description=&#34;Standard out and standard error from maven.&#34;,
                 name=&#39;maven-output&#39;,
                 value=mvn_output_file_path
             )
+
+        # get test report dir
+        test_report_dir = self.__get_test_report_dir()
+        if test_report_dir:
             step_result.add_artifact(
-                description=&#34;Surefire reports generated by maven.&#34;,
-                name=&#39;surefire-reports&#39;,
-                value=test_results_dir
+                description=&#34;Test report generated when running unit tests.&#34;,
+                name=&#39;test-report&#39;,
+                value=test_report_dir
             )
 
-        return step_result</code></pre>
+            # gather test report evidence
+            self._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=step_result,
+                test_report_dir=test_report_dir
+            )
+
+        # return result
+        return step_result
+
+    def __get_test_report_dir(self):
+        &#34;&#34;&#34;Gets the test report directory.
+
+        Search Priority:
+        * values -&gt; &#39;test-reports-dir&#39;
+        * pom.xml -&gt; maven-surefire-plugin -&gt; reportsDirectory
+
+        Returns
+        -------
+        str
+            Path to the directory containing the test reports.
+        &#34;&#34;&#34;
+        # user supplied where the test reports go, just use that
+        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+
+        # else do our best to find them
+        if not test_report_dir:
+            # attempt to get failsafe test report dir, if not, try for surefire
+            test_report_dir = None
+            try:
+                test_report_dir = self._attempt_get_test_report_directory(
+                    plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
+                    configuration_key=\
+                        MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
+                    default=MavenTestReportingMixin.SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR
+                )
+            except StepRunnerException:
+                print(
+                    &#39;WARNING: Did not find any expected test reporting plugin&#39;
+                    f&#39; ({MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME})&#39;
+                    &#39; to read artifacts and evidence from.&#39;
+                    &#39; This is not wholly unexpected because there is enumerable maven plugins,&#39;
+                    &#39; and enumerable ways to configure them.&#39;
+                    &#39; Rather then relying on this step implementer to try and figure out&#39;
+                    &#39; where the test reports are you can configure it manually via the&#39;
+                    &#39; step implementer config (test-reports-dir).&#39;
+                )
+
+        return test_report_dir</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric" href="../shared/maven_generic.html#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
+<li><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin" href="../shared/maven_test_reporting_mixin.html#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin">MavenTestReportingMixin</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">

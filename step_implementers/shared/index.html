@@ -30,10 +30,15 @@
 <pre><code class="python">&#34;&#34;&#34;StepImplementer parent classes that are shared accross multiple steps.
 &#34;&#34;&#34;
 
-from ploigos_step_runner.step_implementers.shared.maven_generic import MavenGeneric
-from ploigos_step_runner.step_implementers.shared.openscap_generic import OpenSCAPGeneric
-from ploigos_step_runner.step_implementers.shared.rekor_sign_generic import RekorSignGeneric
-from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric</code></pre>
+from ploigos_step_runner.step_implementers.shared.maven_generic import \
+    MavenGeneric
+from ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin import \
+    MavenTestReportingMixin
+from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
+from ploigos_step_runner.step_implementers.shared.openscap_generic import \
+    OpenSCAPGeneric
+from ploigos_step_runner.step_implementers.shared.rekor_sign_generic import \
+    RekorSignGeneric</code></pre>
 </details>
 </section>
 <section>
@@ -42,6 +47,11 @@ from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric<
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.shared.maven_generic" href="maven_generic.html">ploigos_step_runner.step_implementers.shared.maven_generic</a></code></dt>
 <dd>
 <div class="desc"><p>Abstract parent class for StepImplementers that use Maven …</p></div>
+</dd>
+<dt><code class="name"><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin" href="maven_test_reporting_mixin.html">ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin</a></code></dt>
+<dd>
+<div class="desc"><p>A mixin class designed to add Maven test reporting functionality to
+MavenGeneric based StepImplementers …</p></div>
 </dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.shared.npm_generic" href="npm_generic.html">ploigos_step_runner.step_implementers.shared.npm_generic</a></code></dt>
 <dd>
@@ -83,6 +93,7 @@ Could come from:
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic" href="maven_generic.html">ploigos_step_runner.step_implementers.shared.maven_generic</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin" href="maven_test_reporting_mixin.html">ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic" href="npm_generic.html">ploigos_step_runner.step_implementers.shared.npm_generic</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.openscap_generic" href="openscap_generic.html">ploigos_step_runner.step_implementers.shared.openscap_generic</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.rekor_sign_generic" href="rekor_sign_generic.html">ploigos_step_runner.step_implementers.shared.rekor_sign_generic</a></code></li>

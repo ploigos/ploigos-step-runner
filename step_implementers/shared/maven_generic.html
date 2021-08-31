@@ -86,22 +86,19 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <td><code>maven-servers</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, username, password</td>
+<td>Dictionary of dictionaries of id, username, password</td>
 </tr>
 <tr>
 <td><code>maven-repositories</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, url, snapshots, releases</td>
+<td>Dictionary of dictionaries of id, url, snapshots, releases</td>
 </tr>
 <tr>
 <td><code>maven-mirrors</code></td>
 <td>No</td>
 <td></td>
-<td>Dictionary of dictionaries of
-id, url, mirror_of</td>
+<td>Dictionary of dictionaries of id, url, mirror_of</td>
 </tr>
 </tbody>
 </table>
@@ -130,13 +127,10 @@ Configuration Key            | Required? | Default | Description
                             `False` to have the transfer progress printed.\
                             See https://maven.apache.org/ref/current/maven-embedder/cli.html
 `maven-additional-arguments` | No        | `[]`    | List of additional arguments to use.
-`maven-servers`              | No        |         | Dictionary of dictionaries of \
-                                                     id, username, password
-`maven-repositories`         | No        |         | Dictionary of dictionaries of \
-                                                     id, url, snapshots, releases
-`maven-mirrors`              | No        |         | Dictionary of dictionaries of \
-                                                     id, url, mirror_of
-&#34;&#34;&#34;
+`maven-servers`              | No        |         | Dictionary of dictionaries of id, username, password
+`maven-repositories`         | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
+`maven-mirrors`              | No        |         | Dictionary of dictionaries of id, url, mirror_of
+&#34;&#34;&#34;# pylint: disable=line-too-long
 
 import os
 
@@ -144,7 +138,7 @@ from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.maven import (generate_maven_settings,
-                                             run_maven, write_effective_pom)
+                                            run_maven, write_effective_pom)
 from ploigos_step_runner.utils.xml import get_xml_element_by_path
 
 DEFAULT_CONFIG = {
@@ -163,12 +157,6 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 class MavenGeneric(StepImplementer):
     &#34;&#34;&#34;Abstract parent class for StepImplementers that use Maven.
     &#34;&#34;&#34;
-
-    SUREFIRE_PLUGIN_XML_ELEMENT_PATH = \
-        &#39;mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId=&#34;maven-surefire-plugin&#34;]&#39;
-    SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH = \
-        f&#39;{SUREFIRE_PLUGIN_XML_ELEMENT_PATH}/mvn:configuration/mvn:reportsDirectory&#39;
-    DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR = &#39;target/surefire-reports&#39;
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -423,12 +411,6 @@ class MavenGeneric(StepImplementer):
     &#34;&#34;&#34;Abstract parent class for StepImplementers that use Maven.
     &#34;&#34;&#34;
 
-    SUREFIRE_PLUGIN_XML_ELEMENT_PATH = \
-        &#39;mvn:build/mvn:plugins/mvn:plugin/[mvn:artifactId=&#34;maven-surefire-plugin&#34;]&#39;
-    SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH = \
-        f&#39;{SUREFIRE_PLUGIN_XML_ELEMENT_PATH}/mvn:configuration/mvn:reportsDirectory&#39;
-    DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR = &#39;target/surefire-reports&#39;
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
@@ -668,24 +650,9 @@ class MavenGeneric(StepImplementer):
 <li><a title="ploigos_step_runner.step_implementers.create_container_image.maven_jkube_k8sbuild.MavenJKubeK8sBuild" href="../create_container_image/maven_jkube_k8sbuild.html#ploigos_step_runner.step_implementers.create_container_image.maven_jkube_k8sbuild.MavenJKubeK8sBuild">MavenJKubeK8sBuild</a></li>
 <li><a title="ploigos_step_runner.step_implementers.package.maven_package.MavenPackage" href="../package/maven_package.html#ploigos_step_runner.step_implementers.package.maven_package.MavenPackage">MavenPackage</a></li>
 <li><a title="ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy" href="../push_artifacts/maven_deploy.html#ploigos_step_runner.step_implementers.push_artifacts.maven_deploy.MavenDeploy">MavenDeploy</a></li>
-<li><a title="ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.MavenTestSeleniumCucumber" href="../uat/maven_test_selenium_cucumber.html#ploigos_step_runner.step_implementers.uat.maven_test_selenium_cucumber.MavenTestSeleniumCucumber">MavenTestSeleniumCucumber</a></li>
+<li><a title="ploigos_step_runner.step_implementers.uat.maven_integration_test.MavenIntegrationTest" href="../uat/maven_integration_test.html#ploigos_step_runner.step_implementers.uat.maven_integration_test.MavenIntegrationTest">MavenIntegrationTest</a></li>
 <li><a title="ploigos_step_runner.step_implementers.unit_test.maven_test.MavenTest" href="../unit_test/maven_test.html#ploigos_step_runner.step_implementers.unit_test.maven_test.MavenTest">MavenTest</a></li>
 </ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR"><code class="name">var <span class="ident">DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH"><code class="name">var <span class="ident">SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH"><code class="name">var <span class="ident">SUREFIRE_PLUGIN_XML_ELEMENT_PATH</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 <h3>Static methods</h3>
 <dl>
 <dt id="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_implementer_config_defaults"><code class="name flex">
@@ -842,9 +809,6 @@ def maven_settings_file(self):
 <li>
 <h4><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric">MavenGeneric</a></code></h4>
 <ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR">DEFAULT_SUREFIRE_PLUGIN_REPORTS_DIR</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH">SUREFIRE_PLUGIN_REPORTS_DIR_XML_ELEMENT_PATH</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.SUREFIRE_PLUGIN_XML_ELEMENT_PATH">SUREFIRE_PLUGIN_XML_ELEMENT_PATH</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_phases_and_goals" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_phases_and_goals">maven_phases_and_goals</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_settings_file" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.maven_settings_file">maven_settings_file</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.shared.maven_generic.MavenGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
