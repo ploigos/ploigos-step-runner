@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>ploigos_step_runner.step_implementer API documentation</title>
-<meta name="description" content="Abstract class and helper constants for StepImplementer." />
+<meta name="description" content="Abstract class and helper constants for StepImplementer …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -23,12 +23,65 @@
 </header>
 <section id="section-intro">
 <p>Abstract class and helper constants for StepImplementer.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>additional-artifacts</code></td>
+<td>No</td>
+<td><code>[]</code></td>
+<td>List of additional artifacts, or list of dicts
+of additional artifacts to add as artifacts on the
+step step result (pass or fail). <br/><b>EX 1</b>: <br/><pre>additional-artifacts: <br/>- randomValue1 <br/>- /path/to/something/important_dir <br/>- /path/to/cool/file.xml</pre> <br/><b>EX 1</b>: <br/><pre>additional-artifacts: <br/>- name: mock-value <br/>  value: randomValue1 <br/>- name: mock-dir <br/>  value: /path/to/something/important_dir <br/>- name: mock-file <br/>  value: /path/to/cool/file.xml</pre></td>
+</tr>
+</tbody>
+</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Abstract class and helper constants for StepImplementer.
-&#34;&#34;&#34;
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
+Configuration Key       | Required? | Default | Description
+------------------------|-----------|---------|-----------
+`additional-artifacts`  | No        | `[]`    | List of additional artifacts, or list of dicts \
+                                                of additional artifacts to add as artifacts on the \
+                                                step step result (pass or fail). \
+&lt;br/&gt;&lt;b&gt;EX 1&lt;/b&gt;: &lt;br/&gt;\
+&lt;pre&gt;additional-artifacts: &lt;br/&gt;\
+- randomValue1 &lt;br/&gt;\
+- /path/to/something/important_dir &lt;br/&gt;\
+- /path/to/cool/file.xml&lt;/pre&gt; \
+&lt;br/&gt;&lt;b&gt;EX 1&lt;/b&gt;: &lt;br/&gt;\
+&lt;pre&gt;additional-artifacts: &lt;br/&gt;\
+- name: mock-value &lt;br/&gt;\
+  value: randomValue1 &lt;br/&gt;\
+- name: mock-dir &lt;br/&gt;\
+  value: /path/to/something/important_dir &lt;br/&gt;\
+- name: mock-file &lt;br/&gt;\
+  value: /path/to/cool/file.xml&lt;/pre&gt;
+&#34;&#34;&#34;# pylint: disable=line-too-long
 import json
 import os
 import pprint
@@ -369,20 +422,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 div_char=&#34;-&#34;,
                 indent=1
             )
-
-            indented_stdout = TextIOIndenter(
-                parent_stream=sys.stdout,
-                indent_level=2
-            )
-            indented_stderr = TextIOIndenter(
-                parent_stream=sys.stderr,
-                indent_level=2
-            )
-
+            indented_stdout = TextIOIndenter(parent_stream=sys.stdout, indent_level=2)
+            indented_stderr = TextIOIndenter(parent_stream=sys.stderr, indent_level=2)
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
                 sys.stdout.flush()
                 sys.stderr.flush()
+
+            # add any additional artifacts
+            self.__add_additional_artifacts_to_step_result(step_result=step_result)
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -394,7 +442,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             div_char=&#34;-&#34;,
             indent=1
         )
-
         StepImplementer.__print_data(&#39;Environment&#39;, step_result.environment)
         StepImplementer.__print_data(&#39;Step&#39;, step_result.step_name)
         StepImplementer.__print_data(&#39;Sub Step&#39;, step_result.sub_step_name)
@@ -405,7 +452,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
         StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
-
         return step_result
 
     def get_value(self, key):
@@ -620,10 +666,31 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 file.write(contents)
         return file_path
 
+    def __add_additional_artifacts_to_step_result(self, step_result):
+        &#34;&#34;&#34;Adds user supplied additional artifacts to step result if given.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            StepResult to add the additional artifacts to.
+        &#34;&#34;&#34;
+        additional_artifacts = self.get_value(&#39;additional-artifacts&#39;)
+        if isinstance(additional_artifacts, list):
+            for additional_artifact in additional_artifacts:
+                if isinstance(additional_artifact, dict):
+                    step_result.add_artifact(
+                        name=additional_artifact[&#39;name&#39;],
+                        value=additional_artifact[&#39;value&#39;]
+                    )
+                else:
+                    step_result.add_artifact(
+                        name=os.path.basename(additional_artifact),
+                        value=additional_artifact
+                    )
+
     @staticmethod
     def __print_section_title(title, div_char=&#34;=&#34;, indent=0):
-        &#34;&#34;&#34;
-        Utility function for pretty printing section title.
+        &#34;&#34;&#34;Utility function for pretty printing section title.
 
         Parameters
         ----------
@@ -1156,20 +1223,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 div_char=&#34;-&#34;,
                 indent=1
             )
-
-            indented_stdout = TextIOIndenter(
-                parent_stream=sys.stdout,
-                indent_level=2
-            )
-            indented_stderr = TextIOIndenter(
-                parent_stream=sys.stderr,
-                indent_level=2
-            )
-
+            indented_stdout = TextIOIndenter(parent_stream=sys.stdout, indent_level=2)
+            indented_stderr = TextIOIndenter(parent_stream=sys.stderr, indent_level=2)
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
                 sys.stdout.flush()
                 sys.stderr.flush()
+
+            # add any additional artifacts
+            self.__add_additional_artifacts_to_step_result(step_result=step_result)
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -1181,7 +1243,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             div_char=&#34;-&#34;,
             indent=1
         )
-
         StepImplementer.__print_data(&#39;Environment&#39;, step_result.environment)
         StepImplementer.__print_data(&#39;Step&#39;, step_result.step_name)
         StepImplementer.__print_data(&#39;Sub Step&#39;, step_result.sub_step_name)
@@ -1192,7 +1253,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
         StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
-
         return step_result
 
     def get_value(self, key):
@@ -1407,10 +1467,31 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 file.write(contents)
         return file_path
 
+    def __add_additional_artifacts_to_step_result(self, step_result):
+        &#34;&#34;&#34;Adds user supplied additional artifacts to step result if given.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            StepResult to add the additional artifacts to.
+        &#34;&#34;&#34;
+        additional_artifacts = self.get_value(&#39;additional-artifacts&#39;)
+        if isinstance(additional_artifacts, list):
+            for additional_artifact in additional_artifacts:
+                if isinstance(additional_artifact, dict):
+                    step_result.add_artifact(
+                        name=additional_artifact[&#39;name&#39;],
+                        value=additional_artifact[&#39;value&#39;]
+                    )
+                else:
+                    step_result.add_artifact(
+                        name=os.path.basename(additional_artifact),
+                        value=additional_artifact
+                    )
+
     @staticmethod
     def __print_section_title(title, div_char=&#34;=&#34;, indent=0):
-        &#34;&#34;&#34;
-        Utility function for pretty printing section title.
+        &#34;&#34;&#34;Utility function for pretty printing section title.
 
         Parameters
         ----------
@@ -2258,20 +2339,15 @@ False otherwise.</dd>
             div_char=&#34;-&#34;,
             indent=1
         )
-
-        indented_stdout = TextIOIndenter(
-            parent_stream=sys.stdout,
-            indent_level=2
-        )
-        indented_stderr = TextIOIndenter(
-            parent_stream=sys.stderr,
-            indent_level=2
-        )
-
+        indented_stdout = TextIOIndenter(parent_stream=sys.stdout, indent_level=2)
+        indented_stderr = TextIOIndenter(parent_stream=sys.stderr, indent_level=2)
         with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
             step_result = self._run_step()
             sys.stdout.flush()
             sys.stderr.flush()
+
+        # add any additional artifacts
+        self.__add_additional_artifacts_to_step_result(step_result=step_result)
     except AssertionError as invalid_error:
         step_result = StepResult.from_step_implementer(self)
         step_result.success = False
@@ -2283,7 +2359,6 @@ False otherwise.</dd>
         div_char=&#34;-&#34;,
         indent=1
     )
-
     StepImplementer.__print_data(&#39;Environment&#39;, step_result.environment)
     StepImplementer.__print_data(&#39;Step&#39;, step_result.step_name)
     StepImplementer.__print_data(&#39;Sub Step&#39;, step_result.sub_step_name)
@@ -2294,7 +2369,6 @@ False otherwise.</dd>
     StepImplementer.__print_data(&#39;Evidence&#39;, step_result.evidence_dicts)
 
     StepImplementer.__print_section_title(f&#39;Step End - {self.step_name} ({self.sub_step_name})&#39;)
-
     return step_result</code></pre>
 </details>
 </dd>
@@ -2356,7 +2430,9 @@ False otherwise.</dd>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
