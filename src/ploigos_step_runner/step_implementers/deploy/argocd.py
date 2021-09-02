@@ -1006,7 +1006,6 @@ users:
         try:
             sh.argocd.app.wait(  # pylint: disable=no-member
                 '--timeout', argocd_sync_timeout_seconds,
-                '--retry-limit', argocd_sync_retry_limit,
                 '--health',
                 argocd_app_name,
                 _out=sys.stdout,
