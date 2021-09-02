@@ -1283,7 +1283,6 @@ users:
         try:
             sh.argocd.app.wait(  # pylint: disable=no-member
                 &#39;--timeout&#39;, argocd_sync_timeout_seconds,
-                &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                 &#39;--health&#39;,
                 argocd_app_name,
                 _out=sys.stdout,
@@ -2205,7 +2204,6 @@ users:
         try:
             sh.argocd.app.wait(  # pylint: disable=no-member
                 &#39;--timeout&#39;, argocd_sync_timeout_seconds,
-                &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                 &#39;--health&#39;,
                 argocd_app_name,
                 _out=sys.stdout,
