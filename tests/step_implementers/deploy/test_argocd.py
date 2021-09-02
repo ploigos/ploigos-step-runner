@@ -2742,13 +2742,12 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
-            '--retry-limit', 3,
             '--health',
             'test',
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-	
+
     @patch('sh.argocd', create=True)
     def test__argocd_app_sync_success_retry(self, argocd_mock):
         ArgoCD._ArgoCD__argocd_app_sync(
@@ -2767,7 +2766,6 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
-            '--retry-limit', 4,
             '--health',
             'test',
             _out=Any(IOBase),
@@ -2842,7 +2840,6 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
-            '--retry-limit', 3,
             '--health',
             'test',
             _out=Any(IOBase),
