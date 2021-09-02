@@ -334,6 +334,9 @@ class MavenPackage(MavenGeneric):
                 name=&#39;packages&#39;,
                 value=packages
             )
+        except FileNotFoundError as error:
+            step_result.success = False
+            step_result.message = f&#34;Error finding artifacts after running maven package: {error}&#34;
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = &#34;Error running &#39;maven package&#39; to package artifacts. &#34; \
@@ -459,6 +462,9 @@ class MavenPackage(MavenGeneric):
                 name=&#39;packages&#39;,
                 value=packages
             )
+        except FileNotFoundError as error:
+            step_result.success = False
+            step_result.message = f&#34;Error finding artifacts after running maven package: {error}&#34;
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = &#34;Error running &#39;maven package&#39; to package artifacts. &#34; \
