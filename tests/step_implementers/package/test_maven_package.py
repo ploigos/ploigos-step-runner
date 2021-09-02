@@ -285,3 +285,48 @@ class TestStepImplementerMavenPackage__run_step(
             mock_run_maven_step.assert_called_with(
                 mvn_output_file_path='/mock/mvn_output.txt'
             )
+
+    def test_fail_no_find_artifacts(
+        self,
+        mock_write_working_file,
+        mock_run_maven_step
+    ):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file,
+                'artifact-parent-dir': 'mock/does-not-exist'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run step
+            actual_step_result = step_implementer._run_step()
+
+            # create expected step result
+            expected_step_result = StepResult(
+                step_name='package',
+                sub_step_name='MavenPackage',
+                sub_step_implementer_name='MavenPackage'
+            )
+            expected_step_result.success = False
+            expected_step_result.message = \
+                "Error finding artifacts after running maven package:" \
+                f" [Errno 2] No such file or directory: '{test_dir.path}/mock/does-not-exist'"
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+
+            # verify step result
+            self.assertEqual(actual_step_result,expected_step_result)
+
+            mock_write_working_file.assert_called_once()
+            mock_run_maven_step.assert_called_with(
+                mvn_output_file_path='/mock/mvn_output.txt'
+            )
