@@ -332,7 +332,7 @@ class ArgoCD(StepImplementer):
             ArgoCD.__argocd_app_create_or_update(
                 argocd_app_name=argocd_app_name,
                 repo=deployment_config_repo,
-                revision=deployment_config_repo_branch,
+                revision=deployment_config_repo_tag,
                 path=deployment_config_helm_chart_path,
                 dest_server=deployment_config_destination_cluster_uri,
                 auto_sync=self.get_value('argocd-auto-sync'),
