@@ -189,6 +189,8 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
         * url not specified
     """
 
+    repositories_profile_id = 'custom-repositories'
+
     if maven_repositories is None:
         return
 
@@ -197,10 +199,14 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
     profiles_element = ET.Element('profiles')
     parent_element.append(profiles_element)
     profile_element = ET.Element('profile')
+    profile_id_element = ET.Element('id')
+    profile_id_element.text = repositories_profile_id
+    profile_element.append(profile_id_element)
     profiles_element.append(profile_element)
     repositories_element = ET.Element('repositories')
     profile_element.append(repositories_element)
 
+    # add the repositories to new profile
     if isinstance(maven_repositories, dict):
         for maven_repository_key, maven_repository_conf in maven_repositories.items():
             assert 'url' in maven_repository_conf, \
@@ -247,6 +253,13 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
                 releases_enabled=releases_enabled,
                 snapshots_enabled=snapshots_enabled
             )
+
+    # active the profile by default
+    active_profiles_element = ET.Element('activeProfiles')
+    parent_element.append(active_profiles_element)
+    custom_active_profile_element = ET.Element('activeProfile')
+    custom_active_profile_element.text = repositories_profile_id
+    active_profiles_element.append(custom_active_profile_element)
 
 def add_maven_repository(
     parent_element,
