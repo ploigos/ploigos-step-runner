@@ -90,6 +90,12 @@ sync updates</td>
 <td>Value to pass to retry limit flag for argo sync</td>
 </tr>
 <tr>
+<td><code>argocd-sync-prune</code></td>
+<td>No</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr>
 <td><code>deployment-config-repo</code></td>
 <td>Yes</td>
 <td></td>
@@ -303,6 +309,7 @@ Configuration Key         | Required? | Default  | Description
                           | Yes       | 60       | Number of seconds to wait for argocd to \
                                                    sync updates
 `argocd-sync-retry-limit` | No        | 3        | Value to pass to retry limit flag for argo sync
+`argocd-sync-prune`       | No        | True     |
 `deployment-config-repo`  | Yes       |          | The repo containing the helm chart definition
 `deployment-config-helm-chart-path` \
                           | Yes       | ./       | Directory containing the helm chart definition
@@ -368,8 +375,7 @@ Configuration Key         | Required? | Default  | Description
                                                         /`container-image-repository`\
                                                         :`container-image-version`&#34;
 `force-push-tags`         | No        | False    | Force push Git Tags
-`additional-helm-values-files` \
-                          | No    | []       | Array of value files to add to argocd app for helm use
+`additional-helm-values-files` | No   | []       | Array of value files to add to argocd app for helm use
 
 Results
 -------
@@ -397,6 +403,7 @@ DEFAULT_CONFIG = {
     &#39;argocd-sync-retry-limit&#39;: 3,
     &#39;argocd-auto-sync&#39;: True,
     &#39;argocd-skip-tls&#39; : False,
+    &#39;argocd-sync-prune&#39;: True,
     &#39;deployment-config-helm-chart-path&#39;: &#39;./&#39;,
     &#39;deployment-config-helm-chart-additional-values-files&#39;: [],
     &#39;additional-helm-values-files&#39;: [],
@@ -620,7 +627,8 @@ class ArgoCD(StepImplementer):
             ArgoCD.__argocd_app_sync(
                 argocd_app_name=argocd_app_name,
                 argocd_sync_timeout_seconds=self.get_value(&#39;argocd-sync-timeout-seconds&#39;),
-                argocd_sync_retry_limit=self.get_value(&#39;argocd-sync-retry-limit&#39;)
+                argocd_sync_retry_limit=self.get_value(&#39;argocd-sync-retry-limit&#39;),
+                argocd_sync_prune=self.get_value(&#39;argocd-sync-prune&#39;)
             )
 
             # get the ArgoCD app manifest that was synced
@@ -1264,11 +1272,17 @@ users:
     def __argocd_app_sync(
         argocd_app_name,
         argocd_sync_timeout_seconds,
-        argocd_sync_retry_limit
+        argocd_sync_retry_limit,
+        argocd_sync_prune=True
     ):
+        # add any additional flags
+        argocd_sync_additional_flags = []
+        if argocd_sync_prune:
+            argocd_sync_additional_flags.append(&#39;--prune&#39;)
+
         try:
             sh.argocd.app.sync(  # pylint: disable=no-member
-                &#39;--prune&#39;,
+                *argocd_sync_additional_flags,
                 &#39;--timeout&#39;, argocd_sync_timeout_seconds,
                 &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                 argocd_app_name,
@@ -1276,8 +1290,19 @@ users:
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
+            if not argocd_sync_prune:
+                prune_warning = &#34;. Sync &#39;prune&#39; option is disabled.&#34; \
+                    &#34; If sync error (see logs) was due to resource(s) that need to be pruned,&#34; \
+                    &#34; and the pruneable resources are intentionally there then see the ArgoCD&#34; \
+                    &#34; documentation for instructions for argo to ignore the resource(s).&#34; \
+                    &#34; See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources&#34; \
+                    &#34; and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous&#34;
+            else:
+                prune_warning = &#34;&#34;
+
             raise StepRunnerException(
-                f&#34;Error synchronization ArgoCD Application ({argocd_app_name}): {error}&#34;
+                f&#34;Error synchronization ArgoCD Application ({argocd_app_name})&#34;
+                f&#34;{prune_warning}: {error}&#34;
             ) from error
 
         try:
@@ -1541,7 +1566,8 @@ users:
             ArgoCD.__argocd_app_sync(
                 argocd_app_name=argocd_app_name,
                 argocd_sync_timeout_seconds=self.get_value(&#39;argocd-sync-timeout-seconds&#39;),
-                argocd_sync_retry_limit=self.get_value(&#39;argocd-sync-retry-limit&#39;)
+                argocd_sync_retry_limit=self.get_value(&#39;argocd-sync-retry-limit&#39;),
+                argocd_sync_prune=self.get_value(&#39;argocd-sync-prune&#39;)
             )
 
             # get the ArgoCD app manifest that was synced
@@ -2185,11 +2211,17 @@ users:
     def __argocd_app_sync(
         argocd_app_name,
         argocd_sync_timeout_seconds,
-        argocd_sync_retry_limit
+        argocd_sync_retry_limit,
+        argocd_sync_prune=True
     ):
+        # add any additional flags
+        argocd_sync_additional_flags = []
+        if argocd_sync_prune:
+            argocd_sync_additional_flags.append(&#39;--prune&#39;)
+
         try:
             sh.argocd.app.sync(  # pylint: disable=no-member
-                &#39;--prune&#39;,
+                *argocd_sync_additional_flags,
                 &#39;--timeout&#39;, argocd_sync_timeout_seconds,
                 &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                 argocd_app_name,
@@ -2197,8 +2229,19 @@ users:
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
+            if not argocd_sync_prune:
+                prune_warning = &#34;. Sync &#39;prune&#39; option is disabled.&#34; \
+                    &#34; If sync error (see logs) was due to resource(s) that need to be pruned,&#34; \
+                    &#34; and the pruneable resources are intentionally there then see the ArgoCD&#34; \
+                    &#34; documentation for instructions for argo to ignore the resource(s).&#34; \
+                    &#34; See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources&#34; \
+                    &#34; and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous&#34;
+            else:
+                prune_warning = &#34;&#34;
+
             raise StepRunnerException(
-                f&#34;Error synchronization ArgoCD Application ({argocd_app_name}): {error}&#34;
+                f&#34;Error synchronization ArgoCD Application ({argocd_app_name})&#34;
+                f&#34;{prune_warning}: {error}&#34;
             ) from error
 
         try:
