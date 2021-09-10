@@ -75,7 +75,7 @@ class TestMavenUtils_other(BaseTestCase):
                 "snapshots": "true"
             }
         ]
-        settings = '''<settings><profiles><profile><repositories><repository><id>repo1</id><url>repo_url1</url><releases><enabled>true</enabled></releases><snapshots><enabled>true</enabled></snapshots></repository></repositories></profile></profiles></settings>'''
+        settings = '''<settings><profiles><profile><id>custom-repositories</id><repositories><repository><id>repo1</id><url>repo_url1</url><releases><enabled>true</enabled></releases><snapshots><enabled>true</enabled></snapshots></repository></repositories></profile></profiles><activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles></settings>'''
 
         with TempDirectory() as temp_dir:
             generate_maven_settings(temp_dir.path, None, maven_repositories, None)
@@ -629,7 +629,7 @@ class TestMavenUtils_other(BaseTestCase):
             r"</profiles></settings>"
         )
 
-    def test_add_maven_servers_list(self):
+    def test_add_maven_repositories_list(self):
         root_element = ET.Element('settings')
 
         maven_repositories = [
@@ -654,10 +654,12 @@ class TestMavenUtils_other(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>server-id-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_servers_dict_with_id_elements(self):
@@ -685,10 +687,12 @@ class TestMavenUtils_other(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>server-id-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_servers_dict_no_id_elements(self):
@@ -715,10 +719,12 @@ class TestMavenUtils_other(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>use-me-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_mirror_valid(self):
