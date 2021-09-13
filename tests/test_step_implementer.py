@@ -13,7 +13,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.sample_step_implementers import (
-    FailStepImplementer, FooStepImplementer,
+    FailStepImplementer, FooStepImplementer, FooStepImplementerWithDefaults,
     RequiredStepConfigMultipleOptionsStepImplementer,
     WriteConfigAsResultsStepImplementer)
 
@@ -1047,6 +1047,36 @@ class TestStepImplementer_get_value(TestStepImplementer):
                 step.get_value(['old-param-name', 'does-not-exist']),
                 'foo42'
             )
+
+    def test_get_value_result_before_step_implementer_defaults(self):
+        step_config = {
+            'test': 'hello world'
+        }
+
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            artifact_config = {
+                'foo-config-1': {
+                    'description': '',
+                    'value': 'previous step result'
+                },
+            }
+
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+
+            step = self.create_given_step_implementer(
+                step_implementer=FooStepImplementerWithDefaults,
+                step_config=step_config,
+                step_name='foo',
+                implementer='FooStepImplementerWithDefaults',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            self.assertEqual(step.get_value('foo-config-1'), 'previous step result')
+            self.assertEqual(step.get_value('foo-config-2'), 'foo-default2')
+
 
 class TestStepImplementer_validate_required_config_or_previous_step_result_artifact_keys(TestStepImplementer):
     def test__validate_required_config_or_previous_step_result_artifact_keys_mutliple_keys_missing_config(self):

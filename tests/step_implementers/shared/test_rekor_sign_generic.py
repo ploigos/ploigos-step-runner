@@ -16,6 +16,11 @@ from ploigos_step_runner.utils.pgp import detach_sign_with_pgp_key
 from ploigos_step_runner.utils.pgp import import_pgp_key
 from ploigos_step_runner.utils.pgp import export_pgp_public_key
 
+class TestStepImplementerSharedRekorSignGeneric_step_implementer_config_defaults(
+    BaseStepImplementerTestCase
+):
+    def test_result(self):
+        self.assertEqual(RekorSignGeneric.step_implementer_config_defaults(),{})
 
 class TestStepImplementerSharedRekorSignGeneric(BaseStepImplementerTestCase):
     TEST_REKOR_ENTRY = {
