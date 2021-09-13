@@ -218,6 +218,8 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
         * url not specified
     &#34;&#34;&#34;
 
+    repositories_profile_id = &#39;custom-repositories&#39;
+
     if maven_repositories is None:
         return
 
@@ -226,10 +228,14 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
     profiles_element = ET.Element(&#39;profiles&#39;)
     parent_element.append(profiles_element)
     profile_element = ET.Element(&#39;profile&#39;)
+    profile_id_element = ET.Element(&#39;id&#39;)
+    profile_id_element.text = repositories_profile_id
+    profile_element.append(profile_id_element)
     profiles_element.append(profile_element)
     repositories_element = ET.Element(&#39;repositories&#39;)
     profile_element.append(repositories_element)
 
+    # add the repositories to new profile
     if isinstance(maven_repositories, dict):
         for maven_repository_key, maven_repository_conf in maven_repositories.items():
             assert &#39;url&#39; in maven_repository_conf, \
@@ -276,6 +282,13 @@ def add_maven_repositories(parent_element, maven_repositories): # pylint: disabl
                 releases_enabled=releases_enabled,
                 snapshots_enabled=snapshots_enabled
             )
+
+    # active the profile by default
+    active_profiles_element = ET.Element(&#39;activeProfiles&#39;)
+    parent_element.append(active_profiles_element)
+    custom_active_profile_element = ET.Element(&#39;activeProfile&#39;)
+    custom_active_profile_element.text = repositories_profile_id
+    active_profiles_element.append(custom_active_profile_element)
 
 def add_maven_repository(
     parent_element,
@@ -1076,6 +1089,8 @@ given maven repository.</p>
         * url not specified
     &#34;&#34;&#34;
 
+    repositories_profile_id = &#39;custom-repositories&#39;
+
     if maven_repositories is None:
         return
 
@@ -1084,10 +1099,14 @@ given maven repository.</p>
     profiles_element = ET.Element(&#39;profiles&#39;)
     parent_element.append(profiles_element)
     profile_element = ET.Element(&#39;profile&#39;)
+    profile_id_element = ET.Element(&#39;id&#39;)
+    profile_id_element.text = repositories_profile_id
+    profile_element.append(profile_id_element)
     profiles_element.append(profile_element)
     repositories_element = ET.Element(&#39;repositories&#39;)
     profile_element.append(repositories_element)
 
+    # add the repositories to new profile
     if isinstance(maven_repositories, dict):
         for maven_repository_key, maven_repository_conf in maven_repositories.items():
             assert &#39;url&#39; in maven_repository_conf, \
@@ -1133,7 +1152,14 @@ given maven repository.</p>
                 repository_url=repository_url,
                 releases_enabled=releases_enabled,
                 snapshots_enabled=snapshots_enabled
-            )</code></pre>
+            )
+
+    # active the profile by default
+    active_profiles_element = ET.Element(&#39;activeProfiles&#39;)
+    parent_element.append(active_profiles_element)
+    custom_active_profile_element = ET.Element(&#39;activeProfile&#39;)
+    custom_active_profile_element.text = repositories_profile_id
+    active_profiles_element.append(custom_active_profile_element)</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.maven.add_maven_repository"><code class="name flex">
