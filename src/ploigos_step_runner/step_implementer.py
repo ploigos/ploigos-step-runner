@@ -403,6 +403,17 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         """Get the value for a given key, either from given configuration or from the result
         of any previous step.
 
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Previous step result in same environment as this step
+            5. Previous step result in any environment
+            6. Step Configuration ( self.step_config)
+            7. Step Environment Configuration (self.step_environment_config)
+            8. Step Configuration Runtime Overrides (step_config_runtime_overrides)
+
         Parameters
         ----------
         key : str, array
@@ -423,8 +434,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             keys = [key]
 
         for k in keys:
-            # first try to get config value
-            config_value = self.get_config_value(k)
+            # first try to get config value (without defaults)
+            config_value = self.get_config_value(k, with_defaults=False)
             if config_value is not None:
                 return config_value
 
@@ -437,17 +448,21 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 if result_value is not None:
                     return result_value
 
-            # last try getting result value from no specific environment
+            # try getting result value from no specific environment
             result_value = self.get_result_value(
                 artifact_name=k
             )
+            if result_value is not None:
+                return result_value
 
-            if result_value:
-                break
+            # last get config from defaults
+            config_value_default = self.get_config_value(k, with_defaults=True)
+            if config_value_default is not None:
+                return config_value_default
 
-        return result_value
+        return None
 
-    def get_config_value(self, key):
+    def get_config_value(self, key, with_defaults=True):
         """Convenience function for self.config.get_config_value.
 
         Get the configuration value for a given configuration key from the
@@ -471,6 +486,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         ----------
         key : str
             Key to get the configuration value for.
+        with_defaults : bool
+            If True then consider defaults, else if False, only consider user specified config.
 
         Returns
         -------
@@ -478,10 +495,16 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Value of the given configuration key or None if one does not exist
             for this sub step in the given context with the given defaults.
         """
+        if with_defaults:
+            defaults = self.step_implementer_config_defaults()
+        else:
+            defaults = None
+
         return self.config.get_config_value(
-            key,
-            self.environment,
-            self.step_implementer_config_defaults())
+            key=key,
+            environment=self.environment,
+            defaults=defaults
+        )
 
     def get_copy_of_runtime_step_config(self):
         """Convenience function for self.config.get_copy_of_runtime_step_config
