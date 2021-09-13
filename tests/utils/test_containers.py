@@ -1,6 +1,6 @@
 import re
 from io import IOBase
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 
 import sh
 from ploigos_step_runner.config import ConfigValue
@@ -1195,4 +1195,121 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
         self.assertEqual(
             actual_image_version,
             'latest'
+        )
+
+@patch('sh.buildah', create=True)
+class Test_inspect_container_image(BaseTestCase):
+    def test_success_no_auth(self, mock_buildah):
+        # setup mock
+        def buildah_inspect_side_effect(container_image_uri, _out):
+            _out.write('''{
+  "mock-value": "mock container details"
+}''')
+        mock_buildah.inspect.side_effect = buildah_inspect_side_effect
+
+        # run test
+        actual_container_details = inspect_container_image(
+            container_image_uri='mock.io/mock/awesome-image:latest'
+        )
+
+        # validate
+        self.assertEqual(
+            actual_container_details,
+            {
+                'mock-value': 'mock container details'
+            }
+        )
+        mock_buildah.pull.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest'
+        )
+        mock_buildah.inspect.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest',
+            _out=ANY
+        )
+
+    def test_success_with_auth(self, mock_buildah):
+        # setup mock
+        def buildah_inspect_side_effect(*args, _out):
+            _out.write('''{
+  "mock-value": "mock container details"
+}''')
+        mock_buildah.inspect.side_effect = buildah_inspect_side_effect
+
+        # run test
+        actual_container_details = inspect_container_image(
+            container_image_uri='mock.io/mock/awesome-image:latest',
+            containers_config_auth_file='/mock/auth-file'
+        )
+
+        # validate
+        self.assertEqual(
+            actual_container_details,
+            {
+                'mock-value': 'mock container details'
+            }
+        )
+        mock_buildah.pull.assert_called_once_with(
+            '--authfile', '/mock/auth-file',
+            'mock.io/mock/awesome-image:latest'
+        )
+        mock_buildah.inspect.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest',
+            _out=ANY
+        )
+
+    def test_failure_pull_no_auth(self, mock_buildah):
+        # setup mock
+        mock_buildah.pull.side_effect = sh.ErrorReturnCode('buildah pull', b'mock out', b'mock error')
+
+        # run test
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                "Error pulling container image \(mock.io/mock/awesome-image:latest\) for inspection:"
+                r".*RAN: buildah pull"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            )
+        ):
+            inspect_container_image(
+                container_image_uri='mock.io/mock/awesome-image:latest'
+            )
+
+        # validate
+        mock_buildah.pull.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest'
+        )
+        mock_buildah.inspect.assert_not_called()
+
+    def test_failure_inspect_no_auth(self, mock_buildah):
+        # setup mock
+        mock_buildah.inspect.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
+
+        # run test
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                "Error inspecting container image \(mock.io/mock/awesome-image:latest\)"
+                r".*RAN: buildah"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock error",
+                re.DOTALL
+            )
+        ):
+            inspect_container_image(
+                container_image_uri='mock.io/mock/awesome-image:latest'
+            )
+
+        # validate
+        mock_buildah.pull.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest'
+        )
+        mock_buildah.inspect.assert_called_once_with(
+            'mock.io/mock/awesome-image:latest',
+            _out=ANY
         )
