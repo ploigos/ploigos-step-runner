@@ -1,6 +1,7 @@
 """Shared utils for dealing with containers.
 """
 
+import json
 import sys
 from io import StringIO
 
@@ -415,3 +416,63 @@ def determine_container_image_build_tag_info(
     build_full_tag = f"{image_registry_uri}/{build_short_tag}"
 
     return build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version
+
+def inspect_container_image(
+    container_image_uri,
+    containers_config_auth_file=None
+):
+    """Inspects a given container image for all its details. Useful for getting image labels
+    and such.
+
+    Parameters
+    ----------
+    container_image_uri : str
+        URI to the container image to inspect
+    containers_config_auth_file : str
+        Path to container image registries authentication file.
+
+    Raises
+    ------
+    RuntimeError
+        If issue running `buildah inspect`
+
+    Returns
+    -------
+    dict
+        Container image details from `buildah inspect`
+    """
+    buildah_inspect = None
+
+    # determine auth flags
+    if containers_config_auth_file:
+        buildah_authfile_flags = ['--authfile', containers_config_auth_file]
+    else:
+        buildah_authfile_flags = []
+
+    # pull container image (can't inspect remote image)
+    try:
+        sh.buildah.pull( # pylint: disable=no-member
+            *buildah_authfile_flags,
+            container_image_uri
+        )
+    except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+        raise RuntimeError(
+            f"Error pulling container image ({container_image_uri}) for inspection: {error}"
+        ) from error
+
+    # get container image information
+    try:
+
+        buildah_inspect_out_buff = StringIO()
+        sh.buildah.inspect( # pylint: disable=no-member
+            container_image_uri,
+            _out=buildah_inspect_out_buff
+        )
+        buildah_inspect_out = buildah_inspect_out_buff.getvalue().rstrip()
+        buildah_inspect = json.loads(buildah_inspect_out)
+    except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+        raise RuntimeError(
+            f"Error inspecting container image ({container_image_uri}): {error}"
+        ) from error
+
+    return buildah_inspect
