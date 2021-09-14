@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>ploigos_step_runner.step_implementers.create_container_image.source_to_image API documentation</title>
+<meta name="description" content="`StepImplementer` for the `create-container-image step` using Source-to-Image (s2i)
+to create a Containerfile that can be built by another …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ploigos_step_runner.step_implementers.create_container_image.source_to_image</code></h1>
+</header>
+<section id="section-intro">
+<p><code>StepImplementer</code> for the <code>create-container-image step</code> using Source-to-Image (s2i)
+to create a Containerfile that can be built by another <code>StepImplementer</code>, such as Buildah.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from:</p>
+<ul>
+<li>static configuration</li>
+<li>runtime configuration</li>
+<li>previous step results</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s2i-builder-image</code></td>
+<td>True</td>
+<td></td>
+<td>Container image tag to use as the s2i builder image.</td>
+</tr>
+<tr>
+<td><code>s2i-image-scripts-url</code></td>
+<td>False</td>
+<td></td>
+<td>Location of the s2i scripts in the given <code>s2i-builder-image</code>.
+If not given s2i will assume they are in <code>image:///usr/libexec/s2i</code>.
+<br/>
+EX:<br/>
+s2i-builder-image: registry.redhat.io/redhat-openjdk-18/openjdk18-openshift <br/>
+s2i-image-scripts-url: <code>image:///usr/local/s2i</code></td>
+</tr>
+<tr>
+<td><code>s2i-loglevel</code></td>
+<td>False</td>
+<td>1</td>
+<td>s2i log level to specify. See s2i docs.</td>
+</tr>
+<tr>
+<td><code>s2i-additional-arguments</code></td>
+<td>False</td>
+<td><code>[]</code></td>
+<td>List of additional arguments to append to s2i call.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>True</td>
+<td><code>'.'</code></td>
+<td>Context to build the container image in</td>
+</tr>
+<tr>
+<td><code>tls-verify</code></td>
+<td>True</td>
+<td><code>True</code></td>
+<td>Whether to verify TLS when pulling parent images</td>
+</tr>
+<tr>
+<td><code>containers-config-auth-file</code></td>
+<td>False</td>
+<td></td>
+<td>Path to the container registry authentication
+file to use for container registry authentication.
+If one is not provided one will be created in the
+working directory.</td>
+</tr>
+<tr>
+<td><code>container-registries</code></td>
+<td>False</td>
+<td></td>
+<td>Hash of container registries to authenticate with.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="result-artifacts">Result Artifacts</h2>
+<p>Results artifacts output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Artifact Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>container-image-registry-uri</code></td>
+<td>Registry URI poriton of the container image tag of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-registry-organization</code></td>
+<td>Organization portion of the container image tag of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-repository</code></td>
+<td>Repository portion of the container image tag of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-name</code></td>
+<td>Another way to reference the repository portion of the container image tag
+of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-version</code></td>
+<td>Version portion of the container image tag of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-tag</code></td>
+<td>Full container image tag of the built container, including the registry URI. <br/>
+Takes the form of:
+<code>container-image-registry-organization/container-image-repository:container-image-version</code></td>
+</tr>
+<tr>
+<td><code>container-image-short-tag</code></td>
+<td>Short container image tag of the built container image,
+excluding the registry URI. <br/>
+Takes the form of:
+<code>container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version</code></td>
+</tr>
+</tbody>
+</table>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Source-to-Image (s2i)
+to create a Containerfile that can be built by another `StepImplementer`, such as Buildah.
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+
+  * static configuration
+  * runtime configuration
+  * previous step results
+
+Configuration Key             | Required? | Default | Description
+------------------------------|-----------|---------|-----------
+`s2i-builder-image`           | True      |         | Container image tag to use as the s2i builder image.
+`s2i-image-scripts-url`       | False     |         | Location of the s2i scripts in the given `s2i-builder-image`. \
+                                                      If not given s2i will assume they are in `image:///usr/libexec/s2i`. \
+                                                      &lt;br/&gt; \
+                                                      EX:&lt;br/&gt; \
+                                                      s2i-builder-image: registry.redhat.io/redhat-openjdk-18/openjdk18-openshift &lt;br/&gt; \
+                                                      s2i-image-scripts-url: `image:///usr/local/s2i`
+`s2i-loglevel`                | False     | 1       | s2i log level to specify. See s2i docs.
+`s2i-additional-arguments`    | False     | `[]`    | List of additional arguments to append to s2i call.
+`context`                     | True      | `&#39;.&#39;`   | Context to build the container image in
+`tls-verify`                  | True      | `True`  | Whether to verify TLS when pulling parent images
+`containers-config-auth-file` | False     |         | Path to the container registry authentication \
+                                                      file to use for container registry authentication. \
+                                                      If one is not provided one will be created in the \
+                                                      working directory.
+`container-registries`        | False     |         | Hash of container registries to authenticate with.
+
+
+Result Artifacts
+----------------
+Results artifacts output by this step.
+
+Result Artifact Key                     | Description
+----------------------------------------|------------
+`container-image-registry-uri`          | Registry URI poriton of the container image tag of the built container image.
+`container-image-registry-organization` | Organization portion of the container image tag of the built container image.
+`container-image-repository`            | Repository portion of the container image tag of the built container image.
+`container-image-name`                  | Another way to reference the repository portion of the container image tag \
+                                          of the built container image.
+`container-image-version`               | Version portion of the container image tag of the built container image.
+`container-image-tag`                   | Full container image tag of the built container, including the registry URI. &lt;br/&gt; \
+                                          Takes the form of: \
+                                          `container-image-registry-organization/container-image-repository:container-image-version`
+`container-image-short-tag`             | Short container image tag of the built container image,  excluding the registry URI. &lt;br/&gt; \
+                                          Takes the form of: \
+                                          `container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version`
+
+&#34;&#34;&#34;# pylint: disable=line-too-long
+
+import os
+import sys
+from distutils import util
+
+import sh
+from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.utils.containers import (container_registries_login,
+                                                  inspect_container_image)
+
+DEFAULT_CONFIG = {
+    &#39;context&#39;: &#39;.&#39;,
+    &#39;tls-verify&#39;: True,
+    &#39;s2i-additional-arguments&#39;: [],
+    &#39;s2i-loglevel&#39;: 1
+}
+
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    &#39;context&#39;,
+    &#39;tls-verify&#39;,
+    &#39;s2i-builder-image&#39;,
+    &#39;organization&#39;,
+    &#39;service-name&#39;,
+    &#39;application-name&#39;
+]
+
+class SourceToImage(StepImplementer):
+    &#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Source-to-Image (s2i)
+    to create a Containerfile that can be built by another `StepImplementer`, such as Buildah.
+    &#34;&#34;&#34;
+
+    CONTAINER_LABEL_SCRIPTS_URL = &#39;io.openshift.s2i.scripts-url&#39;
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
+
+        # get values
+        builder_image = self.get_value(&#39;s2i-builder-image&#39;)
+
+        # determine tls flag
+        tls_verify = self.get_value(&#39;tls-verify&#39;)
+        if isinstance(tls_verify, str):
+            tls_verify = bool(util.strtobool(tls_verify))
+        if tls_verify:
+            s2i_tls_flags = [&#39;--tlsverify&#39;]
+        else:
+            s2i_tls_flags = []
+
+        # determine the generated imagespec file
+        s2i_working_dir = self.create_working_dir_sub_dir(&#39;s2i-context&#39;)
+        imagespecfile = self.write_working_file(
+            os.path.join(s2i_working_dir, &#39;Containerfile.s2i-gen&#39;)
+        )
+
+        # determine image scripts url flags
+        # use user provided url if given,
+        # else try and inspect from builder image
+        s2i_image_scripts_url = self.get_value(&#39;s2i-image-scripts-url&#39;)
+        if not s2i_image_scripts_url:
+            print(&#39;Attempt to inspect builder image for label for image scripts url&#39;)
+
+            # attempt to auth with container image registries
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
+            if not containers_config_auth_file:
+                containers_config_auth_file = os.path.join(
+                    self.work_dir_path,
+                    &#39;container-auth.json&#39;
+                )
+            try:
+                container_registries_login(
+                    registries=self.get_value(&#39;container-registries&#39;),
+                    containers_config_auth_file=containers_config_auth_file,
+                    containers_config_tls_verify=tls_verify
+                )
+            except RuntimeError as error:
+                step_result.message += &#34;WARNING: error authenticating with&#34; \
+                    &#34; container image registries to be able to pull s2i builder image&#34; \
+                    f&#34; to inspect for image scripts url: {error}\n&#34;
+
+            # if not given, attempt to get from builder image labels
+            try:
+                container_image_details = inspect_container_image(
+                    container_image_uri=builder_image,
+                    containers_config_auth_file=containers_config_auth_file
+                )
+
+                s2i_image_scripts_url = container_image_details[&#39;OCIv1&#39;][&#39;config&#39;][&#39;Labels&#39;]\
+                    [SourceToImage.CONTAINER_LABEL_SCRIPTS_URL]
+            except RuntimeError as error:
+                step_result.message += &#34;WARNING: failed to inspect s2i builder image&#34; \
+                    f&#34; ({builder_image}) to dynamically determine image scripts url.&#34; \
+                    f&#34; S2I default will be used: {error}\n&#34;
+            except KeyError as error:
+                step_result.message += &#34;WARNING: failed to find s2i scripts url label&#34; \
+                    f&#34; ({SourceToImage.CONTAINER_LABEL_SCRIPTS_URL}) on s2i builder image&#34; \
+                    f&#34; ({builder_image}) to dynamically determine image scripts url.&#34; \
+                    f&#34; S2I default will be used: Could not find key ({error}).\n&#34;
+
+        # if determined image scripts url set the flag
+        # else s2i will use its default (image:///usr/libexec/s2i)
+        if s2i_image_scripts_url:
+            s2i_image_scripts_url_flags = [&#39;--image-scripts-url&#39;, s2i_image_scripts_url]
+        else:
+            s2i_image_scripts_url_flags = []
+
+        try:
+            # perform build
+            print(&#39;Use s2i to generate imagespecfile and accompanying resources&#39;)
+            sh.s2i.build(  # pylint: disable=no-member
+                self.get_value(&#39;context&#39;),
+                builder_image,
+                &#39;--loglevel&#39;, self.get_value(&#39;s2i-loglevel&#39;),
+                *s2i_tls_flags,
+                &#39;--as-dockerfile&#39;, imagespecfile,
+                *s2i_image_scripts_url_flags,
+                *self.get_value(&#39;s2i-additional-arguments&#39;),
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            step_result.success = False
+            step_result.message += f&#39;Issue invoking s2i build: {error}&#39;
+
+        # add artifacts
+        step_result.add_artifact(
+            name=&#39;imagespecfile&#39;,
+            value=imagespecfile,
+            description=&#39;File defining the container image to build generated by s2i&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;context&#39;,
+            value=s2i_working_dir,
+            description=&#39;Context to use when building the imagespecfile generated by S2I.&#39;
+        )
+
+        return step_result</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage"><code class="flex name class">
+<span>class <span class="ident">SourceToImage</span></span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code>StepImplementer</code> for the <code>create-container-image step</code> using Source-to-Image (s2i)
+to create a Containerfile that can be built by another <code>StepImplementer</code>, such as Buildah.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SourceToImage(StepImplementer):
+    &#34;&#34;&#34;`StepImplementer` for the `create-container-image step` using Source-to-Image (s2i)
+    to create a Containerfile that can be built by another `StepImplementer`, such as Buildah.
+    &#34;&#34;&#34;
+
+    CONTAINER_LABEL_SCRIPTS_URL = &#39;io.openshift.s2i.scripts-url&#39;
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+        &#34;&#34;&#34;
+        return DEFAULT_CONFIG
+
+    @staticmethod
+    def _required_config_or_result_keys():
+        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
+        running this step.
+
+        See Also
+        --------
+        _validate_required_config_or_previous_step_result_artifact_keys
+
+        Returns
+        -------
+        array_list
+            Array of configuration keys or previous step result artifacts
+            that are required before running the step.
+        &#34;&#34;&#34;
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+
+    def _run_step(self):
+        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
+
+        Returns
+        -------
+        StepResult
+            Object containing the dictionary results of this step.
+        &#34;&#34;&#34;
+        step_result = StepResult.from_step_implementer(self)
+
+        # get values
+        builder_image = self.get_value(&#39;s2i-builder-image&#39;)
+
+        # determine tls flag
+        tls_verify = self.get_value(&#39;tls-verify&#39;)
+        if isinstance(tls_verify, str):
+            tls_verify = bool(util.strtobool(tls_verify))
+        if tls_verify:
+            s2i_tls_flags = [&#39;--tlsverify&#39;]
+        else:
+            s2i_tls_flags = []
+
+        # determine the generated imagespec file
+        s2i_working_dir = self.create_working_dir_sub_dir(&#39;s2i-context&#39;)
+        imagespecfile = self.write_working_file(
+            os.path.join(s2i_working_dir, &#39;Containerfile.s2i-gen&#39;)
+        )
+
+        # determine image scripts url flags
+        # use user provided url if given,
+        # else try and inspect from builder image
+        s2i_image_scripts_url = self.get_value(&#39;s2i-image-scripts-url&#39;)
+        if not s2i_image_scripts_url:
+            print(&#39;Attempt to inspect builder image for label for image scripts url&#39;)
+
+            # attempt to auth with container image registries
+            # login to any provider container registries
+            # NOTE: important to specify the auth file because depending on the context this is
+            #       being run in python process may not have permissions to default location
+            containers_config_auth_file = self.get_value(&#39;containers-config-auth-file&#39;)
+            if not containers_config_auth_file:
+                containers_config_auth_file = os.path.join(
+                    self.work_dir_path,
+                    &#39;container-auth.json&#39;
+                )
+            try:
+                container_registries_login(
+                    registries=self.get_value(&#39;container-registries&#39;),
+                    containers_config_auth_file=containers_config_auth_file,
+                    containers_config_tls_verify=tls_verify
+                )
+            except RuntimeError as error:
+                step_result.message += &#34;WARNING: error authenticating with&#34; \
+                    &#34; container image registries to be able to pull s2i builder image&#34; \
+                    f&#34; to inspect for image scripts url: {error}\n&#34;
+
+            # if not given, attempt to get from builder image labels
+            try:
+                container_image_details = inspect_container_image(
+                    container_image_uri=builder_image,
+                    containers_config_auth_file=containers_config_auth_file
+                )
+
+                s2i_image_scripts_url = container_image_details[&#39;OCIv1&#39;][&#39;config&#39;][&#39;Labels&#39;]\
+                    [SourceToImage.CONTAINER_LABEL_SCRIPTS_URL]
+            except RuntimeError as error:
+                step_result.message += &#34;WARNING: failed to inspect s2i builder image&#34; \
+                    f&#34; ({builder_image}) to dynamically determine image scripts url.&#34; \
+                    f&#34; S2I default will be used: {error}\n&#34;
+            except KeyError as error:
+                step_result.message += &#34;WARNING: failed to find s2i scripts url label&#34; \
+                    f&#34; ({SourceToImage.CONTAINER_LABEL_SCRIPTS_URL}) on s2i builder image&#34; \
+                    f&#34; ({builder_image}) to dynamically determine image scripts url.&#34; \
+                    f&#34; S2I default will be used: Could not find key ({error}).\n&#34;
+
+        # if determined image scripts url set the flag
+        # else s2i will use its default (image:///usr/libexec/s2i)
+        if s2i_image_scripts_url:
+            s2i_image_scripts_url_flags = [&#39;--image-scripts-url&#39;, s2i_image_scripts_url]
+        else:
+            s2i_image_scripts_url_flags = []
+
+        try:
+            # perform build
+            print(&#39;Use s2i to generate imagespecfile and accompanying resources&#39;)
+            sh.s2i.build(  # pylint: disable=no-member
+                self.get_value(&#39;context&#39;),
+                builder_image,
+                &#39;--loglevel&#39;, self.get_value(&#39;s2i-loglevel&#39;),
+                *s2i_tls_flags,
+                &#39;--as-dockerfile&#39;, imagespecfile,
+                *s2i_image_scripts_url_flags,
+                *self.get_value(&#39;s2i-additional-arguments&#39;),
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _tee=&#39;err&#39;
+            )
+        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
+            step_result.success = False
+            step_result.message += f&#39;Issue invoking s2i build: {error}&#39;
+
+        # add artifacts
+        step_result.add_artifact(
+            name=&#39;imagespecfile&#39;,
+            value=imagespecfile,
+            description=&#39;File defining the container image to build generated by s2i&#39;
+        )
+        step_result.add_artifact(
+            name=&#39;context&#39;,
+            value=s2i_working_dir,
+            description=&#39;Context to use when building the imagespecfile generated by S2I.&#39;
+        )
+
+        return step_result</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage.CONTAINER_LABEL_SCRIPTS_URL"><code class="name">var <span class="ident">CONTAINER_LABEL_SCRIPTS_URL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.environment" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.environment">environment</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.get_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_config_value">get_config_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.get_copy_of_runtime_step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_copy_of_runtime_step_config">get_copy_of_runtime_step_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.get_result_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_result_value">get_result_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.get_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.get_value">get_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.global_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.global_environment_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.has_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.run_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.run_step">run_step</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config">step_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_environment_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_implementer_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_name">step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.work_dir_path" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.work_dir_path">work_dir_path</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.workflow_result" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.workflow_result">workflow_result</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#result-artifacts">Result Artifacts</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="ploigos_step_runner.step_implementers.create_container_image" href="index.html">ploigos_step_runner.step_implementers.create_container_image</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage" href="#ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage">SourceToImage</a></code></h4>
+<ul class="">
+<li><code><a title="ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage.CONTAINER_LABEL_SCRIPTS_URL" href="#ploigos_step_runner.step_implementers.create_container_image.source_to_image.SourceToImage.CONTAINER_LABEL_SCRIPTS_URL">CONTAINER_LABEL_SCRIPTS_URL</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
