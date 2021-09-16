@@ -43,6 +43,21 @@ class FooStepImplementer2(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
         return step_result
 
+class FooStepImplementerWithDefaults(StepImplementer):
+    @staticmethod
+    def step_implementer_config_defaults():
+        return {
+            'foo-config-1': 'foo-default1',
+            'foo-config-2': 'foo-default2'
+        }
+
+    @staticmethod
+    def _required_config_or_result_keys():
+        return []
+
+    def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
+        return step_result
 
 class RequiredStepConfigStepImplementer(StepImplementer):
     @staticmethod

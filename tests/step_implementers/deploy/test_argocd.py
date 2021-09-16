@@ -37,6 +37,7 @@ class TestStepImplementerDeployArgoCD_Other(TestStepImplementerDeployArgoCDBase)
             'argocd-sync-retry-limit': 3,
             'argocd-auto-sync': True,
             'argocd-skip-tls' : False,
+            'argocd-sync-prune': True,
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
             'additional-helm-values-files': [],
@@ -362,7 +363,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_create_or_update_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
                 repo=step_config['deployment-config-repo'],
-                revision='feature/test',
+                revision='v0.42.0',
                 path=step_config['deployment-config-helm-chart-path'],
                 dest_server='https://kubernetes.default.svc',
                 auto_sync=True,
@@ -371,7 +372,163 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
                 argocd_sync_timeout_seconds=60,
-                argocd_sync_retry_limit=3
+                argocd_sync_retry_limit=3,
+                argocd_sync_prune=True
+            )
+            argocd_get_app_manifest_mock.assert_called_once_with(
+                argocd_app_name='test-app-name'
+            )
+            get_deployed_host_urls_mock.assert_called_once_with(
+                manifest_path='/does/not/matter/manifest.yaml'
+            )
+
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__argocd_get_app_manifest',
+        return_value='/does/not/matter/manifest.yaml'
+    )
+    @patch.object(ArgoCD, '_ArgoCD__get_app_name', return_value='test-app-name')
+    @patch.object(ArgoCD, '_ArgoCD__update_yaml_file_value')
+    @patch.object(ArgoCD, '_ArgoCD__get_deployment_config_repo_tag', return_value='v0.42.0')
+    @patch.object(ArgoCD, '_ArgoCD__git_tag_and_push_deployment_config_repo')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_add_target_cluster')
+    @patch.object(ArgoCD, '_ArgoCD__clone_repo', return_value='/does/not/matter')
+    @patch.object(ArgoCD, '_ArgoCD__git_commit_file')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_sign_in')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_app_create_or_update')
+    @patch.object(ArgoCD, '_ArgoCD__argocd_app_sync')
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__get_deployed_host_urls',
+        return_value=['https://fruits.ploigos.xyz']
+    )
+    @patch.object(
+        ArgoCD,
+        '_ArgoCD__get_deployment_config_helm_chart_environment_values_file',
+        return_value='values-PROD.yaml'
+    )
+    @patch.object(ArgoCD, '_ArgoCD__get_repo_branch', return_value='feature/test')
+    def test_ArgoCD_run_step_success_no_prune(
+        self,
+        get_repo_branch_mock,
+        get_deployment_config_helm_chart_environment_values_file_mock,
+        get_deployed_host_urls_mock,
+        argocd_app_sync_mock,
+        argocd_app_create_or_update_mock,
+        argocd_sign_in_mock,
+        git_commit_file_mock,
+        clone_repo_mock,
+        argocd_add_target_cluster_mock,
+        git_tag_and_push_deployment_config_repo_mock,
+        get_deployment_config_repo_tag_mock,
+        update_yaml_file_value_mock,
+        get_app_name_mock,
+        argocd_get_app_manifest_mock
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'argocd-sync-prune': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            actual_step_results = step_implementer._run_step()
+            expected_step_result = StepResult(
+                step_name='deploy',
+                sub_step_name='ArgoCD',
+                sub_step_implementer_name='ArgoCD',
+                environment='PROD'
+            )
+            expected_step_result.add_artifact(
+                name='argocd-app-name',
+                value='test-app-name'
+            )
+            expected_step_result.add_artifact(
+                name='config-repo-git-tag',
+                value='v0.42.0'
+            )
+            expected_step_result.add_artifact(
+                name='argocd-deployed-manifest',
+                value='/does/not/matter/manifest.yaml'
+            )
+            expected_step_result.add_artifact(
+                name='deployed-host-urls',
+                value=['https://fruits.ploigos.xyz']
+            )
+            self.assertEqual(actual_step_results, expected_step_result)
+
+            get_repo_branch_mock.assert_called_once_with()
+            get_deployment_config_helm_chart_environment_values_file_mock.assert_called_once_with()
+            get_app_name_mock.assert_called_once_with()
+            deployment_config_repo_dir = os.path.join(
+                step_implementer.work_dir_path,
+                'deployment-config-repo'
+            )
+            clone_repo_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_url=step_config['deployment-config-repo'],
+                repo_branch='feature/test',
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name'],
+                username=None,
+                password=None
+            )
+            update_yaml_file_value_mock.assert_called_once_with(
+                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
+                value=step_config['container-image-tag']
+            )
+            git_commit_file_mock.assert_called_once_with(
+                git_commit_message='Updating values for deployment to PROD',
+                file_path='charts/foo/values-PROD.yaml',
+                repo_dir='/does/not/matter'
+            )
+            get_deployment_config_repo_tag_mock.assert_called_once_with()
+            git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
+                deployment_config_repo=step_config['deployment-config-repo'],
+                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_tag='v0.42.0',
+                force_push_tags=False
+            )
+            argocd_sign_in_mock.assert_called_once_with(
+                argocd_api=step_config['argocd-api'],
+                username=step_config['argocd-username'],
+                password=step_config['argocd-password'],
+                insecure=step_config['argocd-skip-tls']
+            )
+            argocd_add_target_cluster_mock.assert_called_once_with(
+                kube_api='https://kubernetes.default.svc',
+                kube_api_token=None,
+                kube_api_skip_tls=False
+            )
+            argocd_app_create_or_update_mock.assert_called_once_with(
+                argocd_app_name='test-app-name',
+                repo=step_config['deployment-config-repo'],
+                revision='v0.42.0',
+                path=step_config['deployment-config-helm-chart-path'],
+                dest_server='https://kubernetes.default.svc',
+                auto_sync=True,
+                values_files=['values-PROD.yaml']
+            )
+            argocd_app_sync_mock.assert_called_once_with(
+                argocd_app_name='test-app-name',
+                argocd_sync_timeout_seconds=60,
+                argocd_sync_retry_limit=3,
+                argocd_sync_prune=False
             )
             argocd_get_app_manifest_mock.assert_called_once_with(
                 argocd_app_name='test-app-name'
@@ -516,7 +673,7 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_create_or_update_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
                 repo=step_config['deployment-config-repo'],
-                revision='feature/test',
+                revision='v0.42.0',
                 path=step_config['deployment-config-helm-chart-path'],
                 dest_server='https://kubernetes.default.svc',
                 auto_sync=True,
@@ -525,7 +682,8 @@ class TestStepImplementerDeployArgoCD_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
                 argocd_sync_timeout_seconds=60,
-                argocd_sync_retry_limit=3
+                argocd_sync_retry_limit=3,
+                argocd_sync_prune=True
             )
             argocd_get_app_manifest_mock.assert_called_once_with(
                 argocd_app_name='test-app-name'
@@ -2742,13 +2900,12 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
-            '--retry-limit', 3,
             '--health',
             'test',
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-	
+
     @patch('sh.argocd', create=True)
     def test__argocd_app_sync_success_retry(self, argocd_mock):
         ArgoCD._ArgoCD__argocd_app_sync(
@@ -2767,7 +2924,6 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
-            '--retry-limit', 4,
             '--health',
             'test',
             _out=Any(IOBase),
@@ -2800,6 +2956,46 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
 
         argocd_mock.app.sync.assert_called_once_with(
             '--prune',
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_not_called()
+
+    @patch('sh.argocd', create=True)
+    def test__argocd_app_sync_fail_sync_no_prune(self, argocd_mock):
+        argocd_mock.app.sync.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock sync error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Error synchronization ArgoCD Application \(test\)."
+                r" Sync 'prune' option is disabled."
+                r" If sync error \(see logs\) was due to resource\(s\) that need to be pruned,"
+                r" and the pruneable resources are intentionally there then see the ArgoCD"
+                r" documentation for instructions for argo to ignore the resource\(s\)."
+                " See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources"
+                " and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock sync error",
+                re.DOTALL
+            )
+        ):
+            ArgoCD._ArgoCD__argocd_app_sync(
+                argocd_app_name='test',
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3,
+                argocd_sync_prune=False
+            )
+
+        argocd_mock.app.sync.assert_called_once_with(
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -2842,7 +3038,30 @@ class TestStepImplementerDeployArgoCD__argocd_app_sync(TestStepImplementerDeploy
         )
         argocd_mock.app.wait.assert_called_once_with(
             '--timeout', 120,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def test__argocd_app_sync_success_no_prune(self, argocd_mock):
+        ArgoCD._ArgoCD__argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=3,
+            argocd_sync_prune=False
+        )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--timeout', 120,
             '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
             '--health',
             'test',
             _out=Any(IOBase),

@@ -4,8 +4,9 @@ Test for the utility for maven operations.
 """
 import re
 import xml.etree.ElementTree as ET
-from io import BytesIO, StringIO, TextIOWrapper
-from unittest.mock import patch, call, mock_open
+from io import BytesIO, StringIO
+from pathlib import Path
+from unittest.mock import call, mock_open, patch
 
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -15,7 +16,7 @@ from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import Any
 
 
-class TestMavenUtils(BaseTestCase):
+class TestMavenUtils_other(BaseTestCase):
     # def test_generate_maven_settings_maven_servers_is_none(self):
 
     def test_generate_maven_servers_exist(self):
@@ -74,7 +75,7 @@ class TestMavenUtils(BaseTestCase):
                 "snapshots": "true"
             }
         ]
-        settings = '''<settings><profiles><profile><repositories><repository><id>repo1</id><url>repo_url1</url><releases><enabled>true</enabled></releases><snapshots><enabled>true</enabled></snapshots></repository></repositories></profile></profiles></settings>'''
+        settings = '''<settings><profiles><profile><id>custom-repositories</id><repositories><repository><id>repo1</id><url>repo_url1</url><releases><enabled>true</enabled></releases><snapshots><enabled>true</enabled></snapshots></repository></repositories></profile></profiles><activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles></settings>'''
 
         with TempDirectory() as temp_dir:
             generate_maven_settings(temp_dir.path, None, maven_repositories, None)
@@ -628,7 +629,7 @@ class TestMavenUtils(BaseTestCase):
             r"</profiles></settings>"
         )
 
-    def test_add_maven_servers_list(self):
+    def test_add_maven_repositories_list(self):
         root_element = ET.Element('settings')
 
         maven_repositories = [
@@ -653,10 +654,12 @@ class TestMavenUtils(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>server-id-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_servers_dict_with_id_elements(self):
@@ -684,10 +687,12 @@ class TestMavenUtils(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>server-id-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_servers_dict_no_id_elements(self):
@@ -714,10 +719,12 @@ class TestMavenUtils(BaseTestCase):
 
         self.assertEqual(
             tree_write_out.getvalue().decode(),
-            r"<settings><profiles><profile><repositories>"
+            r"<settings><profiles><profile><id>custom-repositories</id><repositories>"
             r"<repository><id>use-me-1</id><url>url-1</url></repository>"
             r"<repository><id>server-id-2</id><url>url-2</url></repository>"
-            r"</repositories></profile></profiles></settings>"
+            r"</repositories></profile></profiles>"
+            r"<activeProfiles><activeProfile>custom-repositories</activeProfile></activeProfiles>"
+            r"</settings>"
         )
 
     def test_add_maven_mirror_valid(self):
@@ -969,8 +976,9 @@ class TestMavenUtils(BaseTestCase):
                 maven_mirrors=maven_mirrors
             )
 
-    @patch('sh.mvn', create=True)
-    def test_write_effective_pom_success(self, mvn_mock):
+@patch('sh.mvn', create=True)
+class TestMavenUtils_write_effective_pom(BaseTestCase):
+    def test_success(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = '/tmp/output/effective-pom.xml'
 
@@ -985,8 +993,24 @@ class TestMavenUtils(BaseTestCase):
             f'-Doutput={effective_pom_path}'
         )
 
-    @patch('sh.mvn', create=True)
-    def test_write_effective_pom_with_one_profile(self, mvn_mock):
+    def test_with_one_profile_string(self, mvn_mock):
+        pom_file_path = 'input/pom.xml'
+        effective_pom_path = '/tmp/output/effective-pom.xml'
+
+        actual_effective_pom_path = write_effective_pom(
+            pom_file_path=pom_file_path,
+            output_path=effective_pom_path,
+            profiles='mock-profile1'
+        )
+        self.assertEqual(actual_effective_pom_path, effective_pom_path)
+        mvn_mock.assert_any_call(
+            'help:effective-pom',
+            f'-f={pom_file_path}',
+            f'-Doutput={effective_pom_path}',
+            '-P', 'mock-profile1'
+        )
+
+    def test_with_one_profile_list(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = '/tmp/output/effective-pom.xml'
 
@@ -1003,8 +1027,7 @@ class TestMavenUtils(BaseTestCase):
             '-P', 'mock-profile1'
         )
 
-    @patch('sh.mvn', create=True)
-    def test_write_effective_pom_with_mutliple_profiles(self, mvn_mock):
+    def test_with_mutliple_profiles(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = '/tmp/output/effective-pom.xml'
 
@@ -1021,8 +1044,7 @@ class TestMavenUtils(BaseTestCase):
             '-P', 'mock-profile1,mock-profile2'
         )
 
-    @patch('sh.mvn', create=True)
-    def test_write_effective_pom_fail(self, mvn_mock):
+    def test_fail(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = '/tmp/output/effective-pom.xml'
 
@@ -1050,8 +1072,7 @@ class TestMavenUtils(BaseTestCase):
                 f'-Doutput={effective_pom_path}'
             )
 
-    @patch('sh.mvn', create=True)
-    def test_write_effective_pom_fail_not_absolute_path(self, mvn_mock):
+    def test_fail_not_absolute_path(self, mvn_mock):
         pom_file_path = 'input/pom.xml'
         effective_pom_path = 'output/effective-pom.xml'
 
@@ -1078,6 +1099,75 @@ class TestMavenUtils(BaseTestCase):
                 f'-f={pom_file_path}',
                 f'-Doutput={effective_pom_path}'
             )
+
+@patch('ploigos_step_runner.utils.maven.write_effective_pom')
+class TestMavenUtils_get_effective_pom(BaseTestCase):
+    def test_does_call_once(self, mock_write_effective_pom):
+        with TempDirectory() as temp_dir:
+            # set up mock
+            def mock_write_effective_pom_side_effect(pom_file_path, output_path, profiles):
+                Path(output_path).touch()
+            mock_write_effective_pom.side_effect = mock_write_effective_pom_side_effect
+
+            # run test
+            effective_pom = get_effective_pom(
+                work_dir_path=temp_dir.path,
+                pom_file='mock-pom.xml',
+                profiles=None
+            )
+
+            # validate
+            expected_effective_pom = os.path.join(temp_dir.path, 'effective-pom.xml')
+            self.assertEqual(effective_pom, expected_effective_pom)
+            mock_write_effective_pom.assert_called_once_with(
+                pom_file_path='mock-pom.xml',
+                output_path=expected_effective_pom,
+                profiles=None
+            )
+
+    def test_does_call_twice(self, mock_write_effective_pom):
+        with TempDirectory() as temp_dir:
+            # set up mock
+            def mock_write_effective_pom_side_effect(pom_file_path, output_path, profiles):
+                Path(output_path).touch()
+            mock_write_effective_pom.side_effect = mock_write_effective_pom_side_effect
+
+            # run test (first call)
+            effective_pom = get_effective_pom(
+                work_dir_path=temp_dir.path,
+                pom_file='mock-pom.xml',
+                profiles=None
+            )
+
+            # validate
+            expected_effective_pom = os.path.join(temp_dir.path, 'effective-pom.xml')
+            self.assertEqual(effective_pom, expected_effective_pom)
+            mock_write_effective_pom.assert_called_once_with(
+                pom_file_path='mock-pom.xml',
+                output_path=expected_effective_pom,
+                profiles=None
+            )
+
+            # run test (second call)
+            mock_write_effective_pom.reset_mock()
+            effective_pom = get_effective_pom(
+                work_dir_path=temp_dir.path,
+                pom_file='mock-pom.xml',
+                profiles=None
+            )
+
+            # validate
+            expected_effective_pom = os.path.join(temp_dir.path, 'effective-pom.xml')
+            self.assertEqual(effective_pom, expected_effective_pom)
+            mock_write_effective_pom.assert_not_called()
+
+class TestMavenUtils_get_maven_plugin_xml_element_path(BaseTestCase):
+    def test_given_plugin_name(self):
+        actual_xml_element_path = get_maven_plugin_xml_element_path('maven-surefire-plugin')
+        self.assertEqual(
+            actual_xml_element_path,
+            './mvn:build/mvn:plugins/mvn:plugin[mvn:artifactId="maven-surefire-plugin"]'
+        )
 
 class TestMavenUtils_run_maven(BaseTestCase):
     @patch('sh.mvn', create=True)
@@ -1330,3 +1420,700 @@ class TestMavenUtils_run_maven(BaseTestCase):
                     _out=Any(StringIO),
                     _err=Any(StringIO)
                 )
+
+@patch('ploigos_step_runner.utils.maven.get_xml_element_text_by_path')
+@patch('ploigos_step_runner.utils.maven.get_xml_element_by_path')
+@patch('ploigos_step_runner.utils.maven.get_maven_plugin_xml_element_path')
+@patch('ploigos_step_runner.utils.maven.get_effective_pom')
+class TestMavenUtils_get_plugin_configuration_values(BaseTestCase):
+    def test_no_profiles_no_phases(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        # set up mocks
+        mock_get_xml_element_text_by_path.return_value = ['mock-config-value-1']
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['mock-config-value-1'])
+        mock_get_xml_element_text_by_path.assert_called_once()
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_with_profile_no_phases(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        # set up mocks
+        mock_get_xml_element_text_by_path.return_value = ['mock-config-value-1']
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=['mock-profile'],
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['mock-config-value-1'])
+        mock_get_xml_element_text_by_path.assert_called_once()
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=['mock-profile']
+        )
+
+    def test_with_no_profiles_one_phase_with_one_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        mock_phases_with_values = ['mock-test-phase']
+
+        # set up mocks
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_phase in mock_phases_with_values:
+                if f'[mvn:phase="{mock_phase}"]' in xpath:
+                    return [f'{mock_phase}-mock-config-value']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-phase']
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['mock-test-phase-mock-config-value'])
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 2)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_with_no_profiles_one_phase_with_multiple_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        mock_phases_with_values = ['mock-test-phase']
+
+        # set up mocks
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_phase in mock_phases_with_values:
+                if f'[mvn:phase="{mock_phase}"]' in xpath:
+                    return [f'{mock_phase}-mock-config-value-1', f'{mock_phase}-mock-config-value-2']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-phase']
+        )
+
+        # validate
+        self.assertEqual(
+            actual_values,
+            ['mock-test-phase-mock-config-value-1', 'mock-test-phase-mock-config-value-2']
+        )
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 2)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_with_no_profiles_multiple_phases_each_with_one_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        mock_phases_with_values = ['mock-test-phase-1', 'mock-test-phase-2']
+
+        # set up mocks
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_phase in mock_phases_with_values:
+                if f'[mvn:phase="{mock_phase}"]' in xpath:
+                    return [f'{mock_phase}-mock-config-value']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-phase-1', 'mock-test-phase-2']
+        )
+
+        # validate
+        self.assertEqual(
+            actual_values,
+            ['mock-test-phase-1-mock-config-value', 'mock-test-phase-2-mock-config-value']
+        )
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 4)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_with_no_profiles_multiple_phases_each_with_multiple_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        mock_phases_with_values = ['mock-test-phase-1', 'mock-test-phase-2']
+
+        # set up mocks
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_phase in mock_phases_with_values:
+                if f'[mvn:phase="{mock_phase}"]' in xpath:
+                    return [f'{mock_phase}-mock-config-value-1', f'{mock_phase}-mock-config-value-2']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-phase-1', 'mock-test-phase-2']
+        )
+
+        # validate
+        self.assertEqual(
+            actual_values,
+            [
+                'mock-test-phase-1-mock-config-value-1',
+                'mock-test-phase-1-mock-config-value-2',
+                'mock-test-phase-2-mock-config-value-1',
+                'mock-test-phase-2-mock-config-value-2'
+            ]
+        )
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 4)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_with_no_profiles_multiple_phases_no_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        # set up mocks
+        mock_phases_without_values = ['mock-test-phase-1', 'mock-test-phase-2']
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_phase in mock_phases_without_values:
+                if f'[mvn:phase="{mock_phase}"]' in xpath:
+                    return []
+
+            return ['mock-default-value']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-phase-1', 'mock-test-phase-2']
+        )
+
+        # validate
+        self.assertEqual(
+            actual_values,
+            ['mock-default-value']
+        )
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 4)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+
+    def test_plugin_not_found(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        # set up mocks
+        mock_get_xml_element_by_path.return_value = None
+
+        # run test
+        with self.assertRaisesRegex(
+            RuntimeError,
+            r"Expected maven plugin \(mock-maven-plugin\) not found in "
+            r" effective pom for given pom \(mock-pom.xml\)."
+        ):
+            get_plugin_configuration_values(
+                plugin_name='mock-maven-plugin',
+                configuration_key='mockAwesomeConfig',
+                work_dir_path='/mock/work_dir',
+                pom_file='mock-pom.xml',
+                profiles=None,
+                phases_and_goals=['mock-test-phase-1', 'mock-test-phase-2']
+            )
+
+        # validate
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+        mock_get_xml_element_text_by_path.assert_not_called()
+
+    def test_with_no_profiles_one_goal_with_one_matching_config(
+        self,
+        mock_get_effective_pom,
+        mock_get_maven_plugin_xml_element_path,
+        mock_get_xml_element_by_path,
+        mock_get_xml_element_text_by_path
+    ):
+        mock_goals_with_values = ['mock-test-goal']
+
+        # set up mocks
+        def mock_get_xml_element_text_by_path_side_effect(
+            xml_file_path,
+            xpath,
+            default_namespace=None,
+            xml_namespace_dict=None,
+            find_all=False
+        ):
+            for mock_goal in mock_goals_with_values:
+                if f'[mvn:goal="{mock_goal}"]' in xpath:
+                    return [f'{mock_goal}-mock-config-value']
+
+        mock_get_xml_element_text_by_path.side_effect = mock_get_xml_element_text_by_path_side_effect
+
+        # run test
+        actual_values = get_plugin_configuration_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=['mock-test-goal']
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['mock-test-goal-mock-config-value'])
+        self.assertEqual(mock_get_xml_element_text_by_path.call_count, 2)
+        mock_get_effective_pom.assert_called_once_with(
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None
+        )
+# Integration Test with XML, primarly for testing xpaths
+# NOTE: isn't full integration test because mocking the effective pom so don't have to have
+#       maven installed.
+@patch('ploigos_step_runner.utils.maven.get_effective_pom')
+class TestMavenUtils_get_plugin_configuration_values_IT_XML(BaseTestCase):
+
+    def __get_test_file_path(self, file):
+        return os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'get_plugin_configuration_values_IT',
+            file
+        )
+
+    def test_no_profiles_no_phases_no_config_surefire(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-no-plugin-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-surefire-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(actual_values, [])
+
+    def test_no_profiles_no_phases_no_config_failsafe(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-no-plugin-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-failsafe-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(actual_values, [])
+
+    def test_no_profiles_no_phases_with_config_surefire(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-surefire-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/surefire-reports-unit-test']
+            )
+
+    def test_no_profiles_no_phases_with_config_failsafe(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-failsafe-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/failsafe-reports-integration-test']
+            )
+
+    def test_no_profiles_surefire_both_UT_and_IT_via_phase_get_UT_config(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-phase-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-surefire-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/surefire-reports-unit-test']
+            )
+
+    def test_no_profiles_surefire_both_UT_and_IT_via_phase_get_IT_config(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-phase-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-surefire-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=['integration-test']
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/surefire-reports-uat']
+            )
+
+    def test_failsafe_with_default_and_goal_execution_config_specify_no_goal(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-goal-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-failsafe-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=[]
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/failsafe-reports-default']
+            )
+
+    def test_failsafe_with_default_and_goal_execution_config_specify_goal(self, get_effective_pom_mock):
+        # setup
+        pom_file = self.__get_test_file_path('pom-plugin-goal-config.xml')
+        get_effective_pom_mock.return_value = pom_file
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-failsafe-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles=None,
+                phases_and_goals=['integration-test']
+            )
+
+            # validate
+            self.assertEqual(
+                actual_values,
+                ['${project.build.directory}/failsafe-reports-execution']
+            )
+
+# Integration Test with XML and Maven
+class TestMavenUtils_get_plugin_configuration_values_IT_Maven(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        maven_path = sh.which('mvn')
+        if not maven_path:
+            self.skipTest('maven is not installed')
+
+    def __get_test_file_path(self, file):
+        return os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'get_plugin_configuration_values_IT',
+            file
+        )
+
+    def test_with_profile_no_phases_with_config_surefire(self):
+        # setup
+        pom_file = self.__get_test_file_path('pom-no-plugin-config.xml')
+
+        with TempDirectory() as temp_dir:
+            # run test
+            actual_values = get_plugin_configuration_values(
+                plugin_name='maven-surefire-plugin',
+                configuration_key='reportsDirectory',
+                work_dir_path=temp_dir.path,
+                pom_file=pom_file,
+                profiles='integration-test',
+                phases_and_goals=None
+            )
+
+            # validate
+            self.assertEqual(len(actual_values), 1)
+            self.assertEqual(
+                actual_values[0],
+                os.path.join(
+                    os.path.dirname(os.path.abspath(pom_file)),
+                    'target',
+                    'surefire-reports-integration-test'
+                )
+            )
+
+@patch('ploigos_step_runner.utils.maven.get_plugin_configuration_values')
+class TestMavenUtils_get_plugin_configuration_absolute_path_values(BaseTestCase):
+    def test_one_relative_result_with_relative_pom(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = ['mock/relative/path/foo1']
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, [os.path.join(os.getcwd(), 'mock/relative/path/foo1')])
+
+    def test_one_relative_result_with_absolute_pom(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = ['mock/relative/path/foo1']
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='/mock/absolute/path/mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['/mock/absolute/path/mock/relative/path/foo1'])
+
+    def test_one_abslute_result_with_relative_pom(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = ['/mock/absolute/path/foo1']
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['/mock/absolute/path/foo1'])
+
+    def test_one_abslute_result_with_absolute_pom(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = ['/mock/absolute/path/foo1']
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='/mock/awesome/different/aboslute/path/mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, ['/mock/absolute/path/foo1'])
+
+    def test_no_config_values_found_none_returned(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = None
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, [])
+
+    def test_no_config_values_found_empty_list_returned(self, mock_get_plugin_configuration_values):
+        # set up mock
+        mock_get_plugin_configuration_values.return_value = []
+
+        # run test
+        actual_values = get_plugin_configuration_absolute_path_values(
+            plugin_name='mock-maven-plugin',
+            configuration_key='mockAwesomeConfig',
+            work_dir_path='/mock/work_dir',
+            pom_file='mock-pom.xml',
+            profiles=None,
+            phases_and_goals=None
+        )
+
+        # validate
+        self.assertEqual(actual_values, [])

@@ -1,5 +1,32 @@
 """Abstract class and helper constants for StepImplementer.
-"""
+
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
+Configuration Key       | Required? | Default | Description
+------------------------|-----------|---------|-----------
+`additional-artifacts`  | No        | `[]`    | List of additional artifacts, or list of dicts \
+                                                of additional artifacts to add as artifacts on the \
+                                                step step result (pass or fail). \
+<br/><b>EX 1</b>: <br/>\
+<pre>additional-artifacts: <br/>\
+- randomValue1 <br/>\
+- /path/to/something/important_dir <br/>\
+- /path/to/cool/file.xml</pre> \
+<br/><b>EX 1</b>: <br/>\
+<pre>additional-artifacts: <br/>\
+- name: mock-value <br/>\
+  value: randomValue1 <br/>\
+- name: mock-dir <br/>\
+  value: /path/to/something/important_dir <br/>\
+- name: mock-file <br/>\
+  value: /path/to/cool/file.xml</pre>
+"""# pylint: disable=line-too-long
 import json
 import os
 import pprint
@@ -340,20 +367,15 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 div_char="-",
                 indent=1
             )
-
-            indented_stdout = TextIOIndenter(
-                parent_stream=sys.stdout,
-                indent_level=2
-            )
-            indented_stderr = TextIOIndenter(
-                parent_stream=sys.stderr,
-                indent_level=2
-            )
-
+            indented_stdout = TextIOIndenter(parent_stream=sys.stdout, indent_level=2)
+            indented_stderr = TextIOIndenter(parent_stream=sys.stderr, indent_level=2)
             with redirect_stdout(indented_stdout), redirect_stderr(indented_stderr):
                 step_result = self._run_step()
                 sys.stdout.flush()
                 sys.stderr.flush()
+
+            # add any additional artifacts
+            self.__add_additional_artifacts_to_step_result(step_result=step_result)
         except AssertionError as invalid_error:
             step_result = StepResult.from_step_implementer(self)
             step_result.success = False
@@ -365,7 +387,6 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             div_char="-",
             indent=1
         )
-
         StepImplementer.__print_data('Environment', step_result.environment)
         StepImplementer.__print_data('Step', step_result.step_name)
         StepImplementer.__print_data('Sub Step', step_result.sub_step_name)
@@ -376,12 +397,22 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         StepImplementer.__print_data('Evidence', step_result.evidence_dicts)
 
         StepImplementer.__print_section_title(f'Step End - {self.step_name} ({self.sub_step_name})')
-
         return step_result
 
     def get_value(self, key):
         """Get the value for a given key, either from given configuration or from the result
         of any previous step.
+
+        From least precedence to highest precedence.
+
+            1. defaults
+            2. Global Configuration Defaults (self.global_config_defaults)
+            3. Global Environment Configuration Defaults (self.global_environment_config_defaults)
+            4. Previous step result in same environment as this step
+            5. Previous step result in any environment
+            6. Step Configuration ( self.step_config)
+            7. Step Environment Configuration (self.step_environment_config)
+            8. Step Configuration Runtime Overrides (step_config_runtime_overrides)
 
         Parameters
         ----------
@@ -403,8 +434,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             keys = [key]
 
         for k in keys:
-            # first try to get config value
-            config_value = self.get_config_value(k)
+            # first try to get config value (without defaults)
+            config_value = self.get_config_value(k, with_defaults=False)
             if config_value is not None:
                 return config_value
 
@@ -417,17 +448,21 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 if result_value is not None:
                     return result_value
 
-            # last try getting result value from no specific environment
+            # try getting result value from no specific environment
             result_value = self.get_result_value(
                 artifact_name=k
             )
+            if result_value is not None:
+                return result_value
 
-            if result_value:
-                break
+            # last get config from defaults
+            config_value_default = self.get_config_value(k, with_defaults=True)
+            if config_value_default is not None:
+                return config_value_default
 
-        return result_value
+        return None
 
-    def get_config_value(self, key):
+    def get_config_value(self, key, with_defaults=True):
         """Convenience function for self.config.get_config_value.
 
         Get the configuration value for a given configuration key from the
@@ -451,6 +486,8 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         ----------
         key : str
             Key to get the configuration value for.
+        with_defaults : bool
+            If True then consider defaults, else if False, only consider user specified config.
 
         Returns
         -------
@@ -458,10 +495,16 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             Value of the given configuration key or None if one does not exist
             for this sub step in the given context with the given defaults.
         """
+        if with_defaults:
+            defaults = self.step_implementer_config_defaults()
+        else:
+            defaults = None
+
         return self.config.get_config_value(
-            key,
-            self.environment,
-            self.step_implementer_config_defaults())
+            key=key,
+            environment=self.environment,
+            defaults=defaults
+        )
 
     def get_copy_of_runtime_step_config(self):
         """Convenience function for self.config.get_copy_of_runtime_step_config
@@ -591,10 +634,31 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
                 file.write(contents)
         return file_path
 
+    def __add_additional_artifacts_to_step_result(self, step_result):
+        """Adds user supplied additional artifacts to step result if given.
+
+        Parameters
+        ----------
+        step_result : StepResult
+            StepResult to add the additional artifacts to.
+        """
+        additional_artifacts = self.get_value('additional-artifacts')
+        if isinstance(additional_artifacts, list):
+            for additional_artifact in additional_artifacts:
+                if isinstance(additional_artifact, dict):
+                    step_result.add_artifact(
+                        name=additional_artifact['name'],
+                        value=additional_artifact['value']
+                    )
+                else:
+                    step_result.add_artifact(
+                        name=os.path.basename(additional_artifact),
+                        value=additional_artifact
+                    )
+
     @staticmethod
     def __print_section_title(title, div_char="=", indent=0):
-        """
-        Utility function for pretty printing section title.
+        """Utility function for pretty printing section title.
 
         Parameters
         ----------
