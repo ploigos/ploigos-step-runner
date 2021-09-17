@@ -155,7 +155,8 @@ class SonarQube(StepImplementer):
         are set and have valid values.
         Validates that:
         * required configuration is given
-        * either both username and password are set or neither if no token.
+        * either username and password are set but not token, token is set but not username
+        and password, or none are set.
         Raises
         ------
         StepRunnerException
@@ -164,23 +165,16 @@ class SonarQube(StepImplementer):
         super()._validate_required_config_or_previous_step_result_artifact_keys()
 
         # if token ensure no username and password
-        if (self.get_value('token')):
-           if (self.get_value('username')
-                        or self.get_value('password')):
-               raise StepRunnerException(
+        if self.get_value('token'):
+            if (self.get_value('username')
+                    or self.get_value('password')):
+                raise StepRunnerException(
                     "Either 'username' or 'password 'is set. Neither can be set with a token."
                 )
         # if no token present, ensure either both git-username and git-password are set or neither
         else:
-            runtime_auth_config = {}
-            for auth_config_key in AUTHENTICATION_CONFIG:
-                runtime_auth_config_value = self.get_value(auth_config_key)
-
-                if runtime_auth_config_value is not None:
-                    runtime_auth_config[auth_config_key] = runtime_auth_config_value
-
-            if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
-                    (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
+            if (self.get_value('username') and self.get_value('password') is None
+                        or self.get_value('username') is None and self.get_value('password')):
                 raise StepRunnerException(
                     "Either 'username' or 'password 'is not set. Neither or both must be set."
                 )
@@ -195,29 +189,30 @@ class SonarQube(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        # Optional: token
         username = None
         password = None
         token = None
-        if (self.get_value('token')):
-            token = self.get_value('token')
-        # Optional: username and password
-        else:
-            if self.has_config_value(AUTHENTICATION_CONFIG):
+
+        if self.has_config_value(AUTHENTICATION_CONFIG, True):
+            # Optional: token
+            if self.get_value('token'):
+                token = self.get_value('token')
+            # Optional: username and password
+            else:
                 if (self.get_value('username')
                         and self.get_value('password')):
                     username = self.get_value('username')
                     password = self.get_value('password')
-            
+
         application_name = self.get_value('application-name')
         service_name = self.get_value('service-name')
         url = self.get_value('url')
         version = self.get_value('version')
         properties_file = self.get_value('properties')
         java_truststore = self.get_value('java-truststore')
-        
+
         # Optional: project-key
-        if (self.get_value('project-key')):
+        if self.get_value('project-key'):
             project_key = self.get_value('project-key')
         # Default
         else:
