@@ -5,6 +5,7 @@ import base64
 import bz2
 import hashlib
 import json
+import locale
 import os
 import re
 import shutil
@@ -210,8 +211,11 @@ def base64_encode(file_path):
     Base64Contents
         base64 encoded string of file contents
     """
-    encoding = Path(file_path).read_text().encode('utf-8')
-    return base64.b64encode(encoding).decode('utf-8')
+    # Get preferred encoding; see https://www.python.org/dev/peps/pep-0597/
+    encoding = locale.getpreferredencoding(False)
+
+    encoded_text = Path(file_path).read_text(encoding=encoding).encode(encoding=encoding)
+    return base64.b64encode(encoded_text).decode(encoding)
 
 def get_file_hash(file_path):
     """Returns file hash of given file.
