@@ -104,7 +104,7 @@ def deep_merge(dest, source, overwrite_duplicate_keys=False, _path=None):
                 if overwrite_duplicate_keys:
                     dest[key] = source[key]
                 else:
-                    raise ValueError(&#39;Conflict at %s&#39; % &#39;.&#39;.join(_path + [str(key)]))
+                    raise ValueError(f&#39;Conflict at {&#34;.&#34;.join(_path + [str(key)])}&#39;)
         else:
             dest[key] = source[key]
     return dest</code></pre>
@@ -246,7 +246,7 @@ expected_answer = {
                 if overwrite_duplicate_keys:
                     dest[key] = source[key]
                 else:
-                    raise ValueError(&#39;Conflict at %s&#39; % &#39;.&#39;.join(_path + [str(key)]))
+                    raise ValueError(f&#39;Conflict at {&#34;.&#34;.join(_path + [str(key)])}&#39;)
         else:
             dest[key] = source[key]
     return dest</code></pre>

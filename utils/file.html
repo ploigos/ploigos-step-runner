@@ -34,6 +34,7 @@ import base64
 import bz2
 import hashlib
 import json
+import locale
 import os
 import re
 import shutil
@@ -239,8 +240,11 @@ def base64_encode(file_path):
     Base64Contents
         base64 encoded string of file contents
     &#34;&#34;&#34;
-    encoding = Path(file_path).read_text().encode(&#39;utf-8&#39;)
-    return base64.b64encode(encoding).decode(&#39;utf-8&#39;)
+    # Get preferred encoding; see https://www.python.org/dev/peps/pep-0597/
+    encoding = locale.getpreferredencoding(False)
+
+    encoded_text = Path(file_path).read_text(encoding=encoding).encode(encoding=encoding)
+    return base64.b64encode(encoded_text).decode(encoding)
 
 def get_file_hash(file_path):
     &#34;&#34;&#34;Returns file hash of given file.
@@ -393,8 +397,11 @@ Returns</p>
     Base64Contents
         base64 encoded string of file contents
     &#34;&#34;&#34;
-    encoding = Path(file_path).read_text().encode(&#39;utf-8&#39;)
-    return base64.b64encode(encoding).decode(&#39;utf-8&#39;)</code></pre>
+    # Get preferred encoding; see https://www.python.org/dev/peps/pep-0597/
+    encoding = locale.getpreferredencoding(False)
+
+    encoded_text = Path(file_path).read_text(encoding=encoding).encode(encoding=encoding)
+    return base64.b64encode(encoded_text).decode(encoding)</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.file.create_parent_dir"><code class="name flex">
