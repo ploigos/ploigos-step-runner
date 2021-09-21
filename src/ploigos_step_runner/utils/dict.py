@@ -75,7 +75,7 @@ def deep_merge(dest, source, overwrite_duplicate_keys=False, _path=None):
                 if overwrite_duplicate_keys:
                     dest[key] = source[key]
                 else:
-                    raise ValueError('Conflict at %s' % '.'.join(_path + [str(key)]))
+                    raise ValueError(f'Conflict at {".".join(_path + [str(key)])}')
         else:
             dest[key] = source[key]
     return dest

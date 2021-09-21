@@ -17,10 +17,12 @@ Key               | Required | Default                     | Description
 `url`             | Yes      |                             | SonarQube host url (sonar.host.url)
 `username`        | No       |                             | SonarQube username id (sonar.login)
 `password`        | No       |                             | SonarQube password
+`token`           | No       |                             | SonarQube token
 `version`         | Yes      |                             | Version to use for the SonarQube \
                                                              project version (sonar.projectVersion)
 `java-truststore` | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
                                                              to System.
+`project-key`     | No       |                             | SonarQube project key
 
 Result Artifacts
 ----------------
@@ -98,7 +100,8 @@ DEFAULT_CONFIG = {
 
 AUTHENTICATION_CONFIG = {
     'username': None,
-    'password': None
+    'password': None,
+    'token': None
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -150,11 +153,10 @@ class SonarQube(StepImplementer):
     def _validate_required_config_or_previous_step_result_artifact_keys(self):
         """Validates that the required configuration keys or previous step result artifacts
         are set and have valid values.
-
         Validates that:
         * required configuration is given
-        * either both username and password are set or neither.
-
+        * either username and password are set but not token, token is set but not username
+        and password, or none are set.
         Raises
         ------
         StepRunnerException
@@ -162,19 +164,20 @@ class SonarQube(StepImplementer):
         """
         super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        # ensure either both git-username and git-password are set or neither
-        runtime_auth_config = {}
-        for auth_config_key in AUTHENTICATION_CONFIG:
-            runtime_auth_config_value = self.get_value(auth_config_key)
-
-            if runtime_auth_config_value is not None:
-                runtime_auth_config[auth_config_key] = runtime_auth_config_value
-
-        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
-                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
-            raise StepRunnerException(
-                "Either 'username' or 'password 'is not set. Neither or both must be set."
-            )
+        # if token ensure no username and password
+        if self.get_value('token'):
+            if (self.get_value('username')
+                    or self.get_value('password')):
+                raise StepRunnerException(
+                    "Either 'username' or 'password 'is set. Neither can be set with a token."
+                )
+        # if no token present, ensure either both git-username and git-password are set or neither
+        else:
+            if (self.get_value('username') and self.get_value('password') is None
+                        or self.get_value('username') is None and self.get_value('password')):
+                raise StepRunnerException(
+                    "Either 'username' or 'password 'is not set. Neither or both must be set."
+                )
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
@@ -186,22 +189,34 @@ class SonarQube(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        # Optional: username and password
         username = None
         password = None
-        if self.has_config_value(AUTHENTICATION_CONFIG):
-            if (self.get_value('username')
-                    and self.get_value('password')):
-                username = self.get_value('username')
-                password = self.get_value('password')
+        token = None
+
+        if self.has_config_value(AUTHENTICATION_CONFIG, True):
+            # Optional: token
+            if self.get_value('token'):
+                token = self.get_value('token')
+            # Optional: username and password
+            else:
+                if (self.get_value('username')
+                        and self.get_value('password')):
+                    username = self.get_value('username')
+                    password = self.get_value('password')
 
         application_name = self.get_value('application-name')
         service_name = self.get_value('service-name')
-        project_key = f'{application_name}:{service_name}'
         url = self.get_value('url')
         version = self.get_value('version')
         properties_file = self.get_value('properties')
         java_truststore = self.get_value('java-truststore')
+
+        # Optional: project-key
+        if self.get_value('project-key'):
+            project_key = self.get_value('project-key')
+        # Default
+        else:
+            project_key = f'{application_name}:{service_name}'
 
         if not os.path.exists(properties_file):
             step_result.success = False
@@ -213,7 +228,19 @@ class SonarQube(StepImplementer):
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
             working_directory = self.work_dir_path
-            if username:
+            if token:
+                sh.sonar_scanner(  # pylint: disable=no-member
+                    f'-Dproject.settings={properties_file}',
+                    f'-Dsonar.host.url={url}',
+                    f'-Dsonar.projectVersion={version}',
+                    f'-Dsonar.projectKey={project_key}',
+                    f'-Dsonar.login={token}',
+                    f'-Dsonar.working.directory={working_directory}',
+                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
+            elif username:
                 sh.sonar_scanner(  # pylint: disable=no-member
                     f'-Dproject.settings={properties_file}',
                     f'-Dsonar.host.url={url}',
