@@ -8,7 +8,7 @@ from ploigos_step_runner import StepResult
 from ploigos_step_runner.step_implementers.shared.argocd_generic import ArgoCDGeneric
 
 class ArgoCDDeploy(ArgoCDGeneric):
-    """`StepImplementer` for the `package` step using npm.
+    """`StepImplementer` for the `deploy` step using ArgoCD.
     """
 
     def _run_step(self):  # pylint: disable=too-many-locals

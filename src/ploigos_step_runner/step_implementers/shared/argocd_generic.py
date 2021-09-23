@@ -925,3 +925,45 @@ users:
             ) from error
 
         return argocd_app_manifest_file
+
+    def _get_kube_api_uri(self):
+        """
+        :return: the k8s API endpoint
+        """
+        return self.get_value('kube-api-uri')
+
+    def _get_kube_api_token(self):
+        """
+        :return: true if the kube api token should be persistent
+        """
+        return self.get_value('kube-api-token')
+
+    def _get_kube_api_skip_tls(self):
+        """
+        :return: true if skipping tls verification
+        """
+        return self.get_value('kube-api-skip-tls')
+
+    def _get_argocd_api(self):
+        """
+        :return: the ArgoCD API endpoint
+        """
+        return self.get_value('argocd-api')
+
+    def _get_argocd_username(self):
+        """
+        :return: the username for accessing the ArgoCD API
+        """
+        return self.get_value('argocd-username')
+
+    def _get_argocd_password(self):
+        """
+        :return: the password for accessing the ArgoCD API
+        """
+        return self.get_value('argocd-password')
+
+    def _get_argocd_skip_tls(self):
+        """
+        :return: should TLS issues be ignored when authenticating with ArgoCD
+        """
+        return self.get_value('argocd-skip-tls')
