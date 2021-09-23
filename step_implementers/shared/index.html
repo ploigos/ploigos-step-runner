@@ -30,6 +30,8 @@
 <pre><code class="python">&#34;&#34;&#34;StepImplementer parent classes that are shared accross multiple steps.
 &#34;&#34;&#34;
 
+from ploigos_step_runner.step_implementers.shared.argocd_generic import \
+    ArgoCDGeneric
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 from ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin import \
@@ -44,6 +46,10 @@ from ploigos_step_runner.step_implementers.shared.rekor_sign_generic import \
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="ploigos_step_runner.step_implementers.shared.argocd_generic" href="argocd_generic.html">ploigos_step_runner.step_implementers.shared.argocd_generic</a></code></dt>
+<dd>
+<div class="desc"><p><code>StepImplementer</code> for the <code>deploy</code> step using ArgoCD …</p></div>
+</dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.shared.maven_generic" href="maven_generic.html">ploigos_step_runner.step_implementers.shared.maven_generic</a></code></dt>
 <dd>
 <div class="desc"><p>Abstract parent class for StepImplementers that use Maven …</p></div>
@@ -92,6 +98,7 @@ Could come from:
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic" href="argocd_generic.html">ploigos_step_runner.step_implementers.shared.argocd_generic</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_generic" href="maven_generic.html">ploigos_step_runner.step_implementers.shared.maven_generic</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin" href="maven_test_reporting_mixin.html">ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic" href="npm_generic.html">ploigos_step_runner.step_implementers.shared.npm_generic</a></code></li>
