@@ -2,13 +2,17 @@ import os
 import re
 from io import IOBase
 from unittest.mock import call, patch
-from testfixtures import TempDirectory
+
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.deploy.argocd_deploy import \
+    ArgoCDDeploy
+from ploigos_step_runner.step_implementers.shared.argocd_generic import \
+    ArgoCDGeneric
+from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from ploigos_step_runner.step_implementers.shared.argocd_generic import ArgoCDGeneric
-from ploigos_step_runner.step_implementers.deploy.argocd_deploy import ArgoCDDeploy
+
 
 class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
     def create_step_implementer(
@@ -26,6 +30,199 @@ class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
             environment=environment
         )
 
+class TestStepImplementerSharedArgoCDGeneric_Other(TestStepImplementerDeployArgoCDBase):
+    def test_step_implementer_config_defaults(self):
+        defaults = ArgoCDDeploy.step_implementer_config_defaults()
+        expected_defaults = {
+            'argocd-sync-timeout-seconds': 60,
+            'argocd-sync-retry-limit': 3,
+            'argocd-auto-sync': True,
+            'argocd-skip-tls' : False,
+            'argocd-sync-prune': True,
+            'deployment-config-helm-chart-path': './',
+            'deployment-config-helm-chart-additional-values-files': [],
+            'additional-helm-values-files': [],
+            'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
+            'force-push-tags': False,
+            'kube-api-skip-tls': False,
+            'kube-api-uri': 'https://kubernetes.default.svc',
+            'git-name': 'Ploigos Robot'
+        }
+        self.assertEqual(defaults, expected_defaults)
+
+    def test_required_config_or_result_keys(self):
+        required_keys = ArgoCDDeploy._required_config_or_result_keys()
+        expected_required_keys = [
+            'argocd-username',
+            'argocd-password',
+            'argocd-api',
+            'argocd-skip-tls',
+            'deployment-config-repo',
+            'deployment-config-helm-chart-path',
+            'deployment-config-helm-chart-values-file-image-tag-yq-path',
+            'git-email',
+            'git-name',
+            'container-image-tag'
+        ]
+        self.assertEqual(required_keys, expected_required_keys)
+class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_result_artifact_keys(
+    TestStepImplementerDeployArgoCDBase
+):
+    def test__validate_required_config_or_previous_step_result_artifact_keys_success_ssh(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_success_https(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-username': 'test-git-username',
+                'git-password': 'test-secret'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_username(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-password': 'test-secret'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                "Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_password(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-username': 'test-git-username'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                "Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_creds(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Since provided 'deployment-config-repo'"
+                rf" \({step_config['deployment-config-repo']}\) uses"
+                r" http/https protical both 'git-username' and 'git-password' must be provided."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_http_no_git_creds(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'http://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Since provided 'deployment-config-repo'"
+                rf" \({step_config['deployment-config-repo']}\) uses"
+                r" http/https protical both 'git-username' and 'git-password' must be provided."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
 # NOTE:
 #   Could definitely do some more negative testing of _run_step testing what happens when each
