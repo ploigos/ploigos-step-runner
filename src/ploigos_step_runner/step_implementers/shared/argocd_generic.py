@@ -1,110 +1,6 @@
 # pylint: disable=too-many-lines
-"""`StepImplementer` for the `deploy` step using ArgoCD.
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-
-  * static configuration
-  * runtime configuration
-  * previous step results
-
-Configuration Key         | Required? | Default  | Description
---------------------------|-----------|----------|---------------------------
-`argocd-username`         | Yes       |          | Username for accessing the ArgoCD API
-`argocd-password`         | Yes       |          | Password for accessing the ArgoCD API
-`argocd-api`              | Yes       |          | The ArgoCD API endpoint
-`argocd-auto-sync`        | Yes       | True     | If set to false, argo cd will sync only if \
-                                                   explicitly told to do so via the UI or CLI. \
-                                                   Otherwise it will sync if the repo contents \
-                                                   have changed
-`argocd-skip-tls`         | Yes       | False    | `False` to not ignore TLS issues when \
-                                                   authenticating with ArgoCD. True` to ignore TLS \
-                                                   issues when authenticating with ArgoCD.
-`argocd-sync-timeout-seconds` \
-                          | Yes       | 60       | Number of seconds to wait for argocd to \
-                                                   sync updates
-`argocd-sync-retry-limit` | No        | 3        | Value to pass to retry limit flag for argo sync
-`argocd-sync-prune`       | No        | True     |
-`deployment-config-repo`  | Yes       |          | The repo containing the helm chart definition
-`deployment-config-helm-chart-path` \
-                          | Yes       | ./       | Directory containing the helm chart definition
-`deployment-config-helm-chart-environment-values-file` \
-                          | No        | values-{ENV}.yaml | File to update with environment \
-                                                            deployment specific information. \
-                                                            <br/>\
-                                                            Default value uses `environment` \
-                                                            configuration option to calculate file \
-                                                            name.
-`deployment-config-helm-chart-additional-values-files` \
-                          | No        |          | Array of additional values files. \
-                                                   Paths must be relative to the given \
-                                                   Helm Chart path (`deployment-config-helm-chart-path`). \
-                                                   <br/>\
-                                                   Does not need to include \
-                                                   `deployment-config-helm-chart-environment-values-file` \
-                                                   as it will be automatically included as the \
-                                                   last `--values` flag.
-                                                   <br/>\
-                                                   Used when createing the ArgoCD Application.\
-                                                   <br/><br/>\
-                                                   **NOTE:** Helm will always pick up `values.yaml`\
-                                                   by default whether or not additional values \
-                                                   files are provided, therefor no need to \
-                                                   explicitly provide.
-`deployment-config-helm-chart-values-file-image-tag-yq-path` \
-                          | Yes       | `image_tag` | YQ path to value in `deployment-config-helm-chart-environment-values-file` \
-                                                      to update with the `container-image-tag` \
-                                                      before deployment. \
-                                                      <br/>\
-                                                      **SEE:**: https://github.com/mikefarah/yq \
-                                                      for documentation on valid yq paths.
-`kube-api-uri`            | Yes       | https://kubernetes.default.svc | k8s API endpoint
-`kube-api-token`          | No        |          | k8s API token. This is used to add an external \
-                                                   k8s cluster into argocd. It is required if the \
-                                                   cluster has not already been added to ArgoCD. \
-                                                   The token should be persistent \
-                                                   (.e.g, a service account token) and have cluster \
-                                                   admin access.
-`kube-api-skip-tls`       | Yes       | False    | Whether or not to skip tls verification when \
-                                                   authenticating to an external k8s cluster. \
-                                                   Used when a new cluster is registered with \
-                                                   argocd.
-`git-email`               | Yes       |          | Git email for commit
-`git-name`                | Yes       | `Ploigos Robot` | Git name for commit
-`git-username`            | No        |          | If the helm config repo s accessed via http(s) \
-                                                   this must be supplied
-`git-password`            | No        |          | If the helm config repo is accessed via http(s) \
-                                                   this must be supplied
-`tag`                     | No        | latest   | The git tag to apply to the config repo. \
-                                                   If not supplied `version` will be used. \
-                                                   If `version` not supplied `latest` will be used.
-`version`                 | No        | latest   | Ignored if `tag` is provided. \
-                                                   The git tag to apply to the config repo if `tag` \
-                                                   is not supplied. \
-                                                   If `tag` and `version` not supplied `latest` \
-                                                   will be used.
-`container-image-tag`     | Yes       |          | Tag container image was pushed with. <br/>\
-                                                   Takes the form of: \
-                                                     "`container-image-registry-uri`\
-                                                        /`container-image-registry-organization`\
-                                                        /`container-image-repository`\
-                                                        :`container-image-version`"
-`force-push-tags`         | No        | False    | Force push Git Tags
-`additional-helm-values-files` | No   | []       | Array of value files to add to argocd app for helm use
-
-Results
--------
-Results output by this step.
-
-Result Key                 | Description
----------------------------|------------
-`argocd-app-name`          | The argocd app name that was created or updated
-`deployed-host-urls`       | The host URLs deployed by ArgoCD (Ingress/Route resources)
-`config-repo-git-tag`      | The git tag applied to the configuration repo for deployment
-`argocd-deployed-manifest` | The generated yml file used for deployment.
-""" # pylint: disable=line-too-long
+"""Abstract parent class for StepImplementers that use ArgoCD.
+"""
 
 import re
 import sys
@@ -114,40 +10,6 @@ import yaml
 from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
 
-DEFAULT_CONFIG = {
-    'argocd-sync-timeout-seconds': 60,
-    'argocd-sync-retry-limit': 3,
-    'argocd-auto-sync': True,
-    'argocd-skip-tls' : False,
-    'argocd-sync-prune': True,
-    'deployment-config-helm-chart-path': './',
-    'deployment-config-helm-chart-additional-values-files': [],
-    'additional-helm-values-files': [],
-    'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
-    'force-push-tags': False,
-    'kube-api-skip-tls': False,
-    'kube-api-uri': 'https://kubernetes.default.svc',
-    'git-name': 'Ploigos Robot'
-}
-
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'argocd-username',
-    'argocd-password',
-    'argocd-api',
-    'argocd-skip-tls',
-    'deployment-config-repo',
-    'deployment-config-helm-chart-path',
-    'deployment-config-helm-chart-values-file-image-tag-yq-path',
-    'git-email',
-    'git-name',
-    'container-image-tag'
-]
-
-GIT_AUTHENTICATION_CONFIG = {
-    'git-username': None,
-    'git-password': None
-}
-
 KUBE_LABEL_NOT_SAFE_CHARS_REGEX = r"[^a-zA-Z0-9\-_\.]"
 KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$"
 KUBE_LABEL_MAX_LENGTH = 52
@@ -155,79 +17,10 @@ KUBE_LABEL_REPLACEMENT_CHAR = '-'
 
 
 class ArgoCDGeneric(StepImplementer):
-    """`StepImplementer` for using ArgoCD.
+    """Abstract parent class for StepImplementers that use ArgoCD.
     """
 
     GIT_REPO_REGEX = re.compile(r"(?P<protocol>^https:\/\/|^http:\/\/)?(?P<address>.*$)")
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        """Getter for the StepImplementer's configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        """
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        """Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        """
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        """Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-        * either both git-username and git-password are set or neither.
-
-        Raises
-        ------
-        StepRunnerException
-            If step configuration or previous step result artifacts have invalid required values
-        """
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        # ensure either both git-username and git-password are set or neither
-        runtime_auth_config = {}
-        for auth_config_key in GIT_AUTHENTICATION_CONFIG:
-            runtime_auth_config_value = self.get_value(auth_config_key)
-
-            if runtime_auth_config_value is not None:
-                runtime_auth_config[auth_config_key] = runtime_auth_config_value
-
-        if (any(element in runtime_auth_config for element in GIT_AUTHENTICATION_CONFIG)) and \
-                (not all(element in runtime_auth_config for element in GIT_AUTHENTICATION_CONFIG)):
-            raise StepRunnerException(
-                "Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
-            )
-
-        # ensure if deployment config repo is using http/https that user/pass is provided
-        deployment_config_repo_uri = self.get_value('deployment-config-repo')
-        if re.match(r'^http://|^https://', deployment_config_repo_uri) and not runtime_auth_config:
-            raise StepRunnerException(
-                f"Since provided 'deployment-config-repo' ({deployment_config_repo_uri}) uses"
-                f" http/https protical both 'git-username' and 'git-password' must be provided."
-            )
 
     def _get_deployment_config_helm_chart_environment_values_file(self):
         """Get the deployment configuration Helm Chart environment specific value file.
@@ -749,9 +542,9 @@ class ArgoCDGeneric(StepImplementer):
         StepRunnerException
             If error adding cluster to ArgoCD
         """
-        # If the cluster is an external cluster and an api token was provided,
+        # If the cluster not the default ArgoCD cluster installed by default
         # add the cluster to ArgoCD
-        if kube_api != DEFAULT_CONFIG['kube-api-uri']:
+        if kube_api != 'https://kubernetes.default.svc':
             context_name = f'{kube_api}-context'
             kubeconfig = f"""---
 apiVersion: v1
@@ -843,7 +636,7 @@ users:
         argocd_sync_timeout_seconds,
         argocd_sync_retry_limit,
         argocd_sync_prune=True
-    ):
+    ): # pylint: disable=line-too-long
         # add any additional flags
         argocd_sync_additional_flags = []
         if argocd_sync_prune:
