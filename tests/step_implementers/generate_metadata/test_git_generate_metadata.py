@@ -62,9 +62,16 @@ class TestStepImplementerGitGenerateMetadata_misc(TestStepImplementerGitGenerate
         self.assertEqual(required_keys, expected_required_keys)
 
 
+@patch.object(Git, 'git_commit_utc_timestamp')
+@patch.object(Git, 'git_url', new_callable=PropertyMock)
+@patch.object(Git, 'git_repo', new_callable=PropertyMock)
 class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGenerateMetadataBase):
-    @patch.object(Git, 'git_repo')
-    def test_success_release_branch_default_release_branch_regexes(self, mock_repo):
+    def test_success_release_branch_default_release_branch_regexes(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -77,10 +84,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'main'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'main'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -103,15 +111,18 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_url', new_callable=PropertyMock)
-    @patch.object(Git, 'git_repo')
     def test_success_release_branch_default_prerelease_branch_regexes_commit_and_push_always(
-            self,
-            mock_repo,
-            git_url_mock
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
     ):
         # Test data setup
         branch_name = "not-main"
@@ -129,11 +140,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = branch_name
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
-            git_url_mock.return_value = "value doesn't matter"
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = branch_name
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_url.return_value = "value doesn't matter"
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -156,15 +168,18 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_url', new_callable=PropertyMock)
-    @patch.object(Git, 'git_repo')
     def test_success_release_branch_default_prerelease_branch_regexes_commit_and_push_always_not_dirty(
-            self,
-            mock_repo,
-            git_url_mock
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
     ):
         # Test data setup
         branch_name = "not-main"
@@ -182,12 +197,13 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.is_dirty.return_value = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = branch_name
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
-            git_url_mock.return_value = "value doesn't matter"
+            mock_repo().bare = False
+            mock_repo().is_dirty.return_value = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = branch_name
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_url.return_value = "value doesn't matter"
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -210,15 +226,18 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_url', new_callable=PropertyMock)
-    @patch.object(Git, 'git_repo')
     def test_success_release_branch_default_release_branch_regexes_commit_and_push_always(
-            self,
-            mock_repo,
-            git_url_mock
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
     ):
         # Test data setup
         branch_name = "main"
@@ -236,11 +255,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = branch_name
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
-            git_url_mock.return_value = "value doesn't matter"
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = branch_name
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_url.return_value = "value doesn't matter"
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -263,11 +283,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_release_branch_custom_release_branch_regexes_list(self, mock_repo):
+    def test_success_release_branch_custom_release_branch_regexes_list(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -283,10 +311,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'release/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'release/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -309,11 +338,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_release_branch_custom_release_branch_regexes_string(self, mock_repo):
+    def test_success_release_branch_custom_release_branch_regexes_string(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -327,10 +364,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'release/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'release/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -353,11 +391,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_pre_release_branch_default_release_branch_regexes(self, mock_repo):
+    def test_success_pre_release_branch_default_release_branch_regexes(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -370,10 +416,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'feature/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'feature/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -396,11 +443,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_pre_release_branch_custom_release_branch_regexes_list(self, mock_repo):
+    def test_success_pre_release_branch_custom_release_branch_regexes_list(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -416,10 +471,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'feature/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'feature/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -442,11 +498,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_pre_release_branch_custom_release_branch_regexes_string(self, mock_repo):
+    def test_success_pre_release_branch_custom_release_branch_regexes_string(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -460,10 +524,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'feature/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'feature/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -486,11 +551,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_success_pre_release_branch_custom_release_branch_regexes_empty(self, mock_repo):
+    def test_success_pre_release_branch_custom_release_branch_regexes_empty(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -504,10 +577,11 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = 'feature/mock1'
-            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = 'feature/mock1'
+            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_git_commit_utc_timestamp.return_value = '42'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -530,11 +604,19 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
+            expected_step_result.add_artifact(
+                name='commit-utc-timestamp',
+                value='42'
+            )
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo', new_callable=PropertyMock)
-    def test_fail_getting_git_repo(self, mock_git_repo):
+    def test_fail_getting_git_repo(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -547,7 +629,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_git_repo.side_effect = StepRunnerException('mock error')
+            mock_repo.side_effect = StepRunnerException('mock error')
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -563,8 +645,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_fail_git_repo_bare(self, mock_repo):
+    def test_fail_git_repo_bare(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -577,7 +663,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = True
+            mock_repo().bare = True
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -593,8 +679,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_fail_is_detached(self, mock_repo):
+    def test_fail_is_detached(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -607,8 +697,8 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = True
+            mock_repo().bare = False
+            mock_repo().head.is_detached = True
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -625,8 +715,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_fail_no_commit_history(self, mock_repo):
+    def test_fail_no_commit_history(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         # Data setup
         git_branch = 'main'
 
@@ -642,10 +736,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = git_branch
-            type(mock_repo.head.reference).commit = PropertyMock(side_effect=ValueError)
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = git_branch
+            type(mock_repo().head.reference).commit = PropertyMock(side_effect=ValueError)
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -670,8 +764,12 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch.object(Git, 'git_repo')
-    def test_run_step_fail_commit_changes_and_push(self, mock_repo):
+    def test_run_step_fail_commit_changes_and_push(
+        self,
+        mock_repo,
+        mock_git_url,
+        mock_git_commit_utc_timestamp
+    ):
         # Data setup
         git_branch = 'main'
         error = 'Holy guacamole..!'
@@ -689,10 +787,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.bare = False
-            mock_repo.head.is_detached = False
-            mock_repo.active_branch.name = git_branch
-            mock_repo.git.commit.side_effect = Exception(error)
+            mock_repo().bare = False
+            mock_repo().head.is_detached = False
+            mock_repo().active_branch.name = git_branch
+            mock_repo().git.commit.side_effect = Exception(error)
 
             # run test
             actual_step_result = step_implementer._run_step()

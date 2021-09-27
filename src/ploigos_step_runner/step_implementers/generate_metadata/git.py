@@ -44,12 +44,13 @@ Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key | Description
---------------------|------------
-`branch`            | Current branch name.
-`is-pre-release`    | `True` if this build should be considered a pre-release, \
-                      `False` if should be considered a release.
-`commit-hash`       | Current commit hash.
+Result Artifact Key    | Description
+-----------------------|------------
+`branch`               | Current branch name.
+`is-pre-release`       | `True` if this build should be considered a pre-release, \
+                         `False` if should be considered a release.
+`commit-hash`          | Current commit hash.
+`commit-utc-timestamp` | Current commit UTC POSIX timestamp.
 """# pylint: disable=line-too-long
 
 import re
@@ -211,6 +212,12 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
             step_result.message = f'Given Git repository root is a' \
                 f' git branch ({git_branch}) with no commit history.'
             return step_result
+
+        # add commit timestamp
+        step_result.add_artifact(
+            name='commit-utc-timestamp',
+            value=self.git_commit_utc_timestamp()
+        )
 
         return step_result
 

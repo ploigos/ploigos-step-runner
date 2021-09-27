@@ -30,6 +30,7 @@ Configuration Key    | Required? | Default              | Description
                                                         | Git commit message to use when/if creating an automated git commit.
 """# pylint: disable=line-too-long
 
+from datetime import timezone
 from urllib.parse import urlsplit, urlunsplit
 
 from git import InvalidGitRepositoryError, Repo
@@ -329,3 +330,16 @@ class GitMixin:
             raise StepRunnerException(
                 f"Error creating git tag ({git_tag_value}): {error}"
             ) from error
+
+    def git_commit_utc_timestamp(self):
+        """Get the Git commit UTC timestamp.
+
+        Returns
+        -------
+        str
+            Git commit POSIX timestamp in UTC timezone.
+        """
+        commit_datetime = self.git_repo.commit().committed_datetime
+        commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
+
+        return commit_utc_timestamp
