@@ -1,10 +1,11 @@
 import os
 import unittest
-from unittest.mock import MagicMock, patch, PropertyMock, call
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, PropertyMock, call, patch
 
-from git import InvalidGitRepositoryError, GitCommandError
-from ploigos_step_runner.step_implementer import StepImplementer
+from git import GitCommandError, InvalidGitRepositoryError
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_implementers.shared import GitMixin
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -634,3 +635,35 @@ class TestGitMixin_git_tag(unittest.TestCase):
 
         # validate
         mock_git_repo.create_tag.assert_called_once_with('v0.42.0-mock', force=True)
+
+@patch.object(GitMixin, 'git_repo')
+class TestGitMixin_git_commit_utc_timestamp(unittest.TestCase):
+    def test_success_est_timezone(self, mock_git_repo):
+        # setup
+        step_implementer = GitMixin()
+
+        # setup mock
+        mock_git_repo.commit().committed_datetime = datetime(
+            2022, 1, 18, 11, 12, 5, tzinfo=timezone(timedelta(hours = -5))
+        )
+
+        # run test
+        actual_timestamp = step_implementer.git_commit_utc_timestamp()
+
+        # validate
+        self.assertEqual(actual_timestamp, 1642522325.0)
+
+    def test_success_utc_timezone(self, mock_git_repo):
+        # setup
+        step_implementer = GitMixin()
+
+        # setup mock
+        mock_git_repo.commit().committed_datetime = datetime(
+            2022, 1, 18, 16, 12, 5, tzinfo=timezone.utc
+        )
+
+        # run test
+        actual_timestamp = step_implementer.git_commit_utc_timestamp()
+
+        # validate
+        self.assertEqual(actual_timestamp, 1642522325.0)
