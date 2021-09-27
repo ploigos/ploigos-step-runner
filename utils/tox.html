@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.utils API documentation</title>
-<meta name="description" content="Useful utilities." />
+<title>ploigos_step_runner.utils.tox API documentation</title>
+<meta name="description" content="Shared utils for tox operations." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,66 +19,113 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.utils</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.utils.tox</code></h1>
 </header>
 <section id="section-intro">
-<p>Useful utilities.</p>
+<p>Shared utils for tox operations.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Useful utilities.
-&#34;&#34;&#34;</code></pre>
+<pre><code class="python">&#34;&#34;&#34;Shared utils for tox operations.
+&#34;&#34;&#34;
+import sys
+import sh
+
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
+
+def run_tox(tox_output_file_path, tox_args):
+    &#34;&#34;&#34;
+    Run a tox command
+
+    Paramters
+    ---------
+    tox_output_file_path:
+        String
+    tox_args:
+        Commandline arguments to tox
+    &#34;&#34;&#34;
+
+    try:
+        with open(tox_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as tox_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                tox_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                tox_output_file
+            ])
+
+            sh.tox( # pylint: disable=no-member
+                tox_args,
+                _out=out_callback,
+                _err=err_callback
+            )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running tox. {error}&#34;
+        ) from error</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="ploigos_step_runner.utils.containers" href="containers.html">ploigos_step_runner.utils.containers</a></code></dt>
+<dt id="ploigos_step_runner.utils.tox.run_tox"><code class="name flex">
+<span>def <span class="ident">run_tox</span></span>(<span>tox_output_file_path, tox_args)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Shared utils for dealing with containers.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.dict" href="dict.html">ploigos_step_runner.utils.dict</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with dictionaries.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.file" href="file.html">ploigos_step_runner.utils.file</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with files.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.io" href="io.html">ploigos_step_runner.utils.io</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utilities for dealing with IO</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.maven" href="maven.html">ploigos_step_runner.utils.maven</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for maven operations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.npm" href="npm.html">ploigos_step_runner.utils.npm</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for npm operations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.pgp" href="pgp.html">ploigos_step_runner.utils.pgp</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with PGP keys …</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.reflection" href="reflection.html">ploigos_step_runner.utils.reflection</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utilities for dealing with Python reflection.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.tox" href="tox.html">ploigos_step_runner.utils.tox</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for tox operations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.xml" href="xml.html">ploigos_step_runner.utils.xml</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with XML.</p></div>
+<div class="desc"><p>Run a tox command</p>
+<h2 id="paramters">Paramters</h2>
+<p>tox_output_file_path:
+String
+tox_args:
+Commandline arguments to tox</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_tox(tox_output_file_path, tox_args):
+    &#34;&#34;&#34;
+    Run a tox command
+
+    Paramters
+    ---------
+    tox_output_file_path:
+        String
+    tox_args:
+        Commandline arguments to tox
+    &#34;&#34;&#34;
+
+    try:
+        with open(tox_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as tox_output_file:
+            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stdout,
+                tox_output_file
+            ])
+            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                sys.stderr,
+                tox_output_file
+            ])
+
+            sh.tox( # pylint: disable=no-member
+                tox_args,
+                _out=out_callback,
+                _err=err_callback
+            )
+    except sh.ErrorReturnCode as error:
+        raise StepRunnerException(
+            f&#34;Error running tox. {error}&#34;
+        ) from error</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -91,21 +138,12 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner" href="../index.html">ploigos_step_runner</a></code></li>
+<li><code><a title="ploigos_step_runner.utils" href="index.html">ploigos_step_runner.utils</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="ploigos_step_runner.utils.containers" href="containers.html">ploigos_step_runner.utils.containers</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.dict" href="dict.html">ploigos_step_runner.utils.dict</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.file" href="file.html">ploigos_step_runner.utils.file</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.io" href="io.html">ploigos_step_runner.utils.io</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.maven" href="maven.html">ploigos_step_runner.utils.maven</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.npm" href="npm.html">ploigos_step_runner.utils.npm</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.pgp" href="pgp.html">ploigos_step_runner.utils.pgp</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.reflection" href="reflection.html">ploigos_step_runner.utils.reflection</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.tox" href="tox.html">ploigos_step_runner.utils.tox</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.xml" href="xml.html">ploigos_step_runner.utils.xml</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ploigos_step_runner.utils.tox.run_tox" href="#ploigos_step_runner.utils.tox.run_tox">run_tox</a></code></li>
 </ul>
 </li>
 </ul>
