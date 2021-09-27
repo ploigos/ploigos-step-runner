@@ -15,6 +15,7 @@ from tests.helpers.base_step_implementer_test_case import \
 from tests.helpers.sample_step_implementers import (
     FailStepImplementer, FooStepImplementer, FooStepImplementerWithDefaults,
     RequiredStepConfigMultipleOptionsStepImplementer,
+    RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
     WriteConfigAsResultsStepImplementer)
 
 
@@ -1077,6 +1078,115 @@ class TestStepImplementer_get_value(TestStepImplementer):
             self.assertEqual(step.get_value('foo-config-1'), 'previous step result')
             self.assertEqual(step.get_value('foo-config-2'), 'foo-default2')
 
+    def test_multiple_options_with_default_no_config(self):
+        step_config = {
+        }
+
+        step = self.create_given_step_implementer(
+            step_implementer=RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
+            step_config=step_config,
+            step_name='foo',
+            implementer='RequiredStepConfigMultipleOptionsWithDefaultStepImplementer'
+        )
+
+        self.assertEqual(
+            step.get_value(['new-required-key', 'old-required-key']),
+            'mock-default-value'
+        )
+
+    def test_multiple_options_with_default_with_new_value_config_given(self):
+        step_config = {
+            'new-required-key': 'mock-given-value-to-new-config'
+        }
+
+        step = self.create_given_step_implementer(
+            step_implementer=RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
+            step_config=step_config,
+            step_name='foo',
+            implementer='RequiredStepConfigMultipleOptionsWithDefaultStepImplementer'
+        )
+
+        self.assertEqual(
+            step.get_value(['new-required-key', 'old-required-key']),
+            'mock-given-value-to-new-config'
+        )
+
+    def test_multiple_options_with_default_with_old_value_config_given(self):
+        step_config = {
+            'old-required-key': 'mock-given-value-to-old-config'
+        }
+
+        step = self.create_given_step_implementer(
+            step_implementer=RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
+            step_config=step_config,
+            step_name='foo',
+            implementer='RequiredStepConfigMultipleOptionsWithDefaultStepImplementer'
+        )
+
+        self.assertEqual(
+            step.get_value(['new-required-key', 'old-required-key']),
+            'mock-given-value-to-old-config'
+        )
+
+    def test_multiple_options_with_default_with_new_value_config_given_with_previous_step_results_for_new_value(self):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            artifact_config = {
+                'new-required-key': {
+                    'description': '',
+                    'value': 'mock previous step result'
+                },
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+
+            step_config = {
+                'new-required-key': 'mock-given-value-to-new-config'
+            }
+
+            step = self.create_given_step_implementer(
+                step_implementer=RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
+                step_config=step_config,
+                step_name='foo',
+                implementer='RequiredStepConfigMultipleOptionsWithDefaultStepImplementer',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            self.assertEqual(
+                step.get_value(['new-required-key', 'old-required-key']),
+                'mock-given-value-to-new-config'
+            )
+
+    def test_multiple_options_with_default_with_old_value_config_given_with_previous_step_results_for_new_value(self):
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+
+            artifact_config = {
+                'new-required-key': {
+                    'description': '',
+                    'value': 'mock previous step result'
+                },
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+
+            step_config = {
+                'old-required-key': 'mock-given-value-to-old-config'
+            }
+
+            step = self.create_given_step_implementer(
+                step_implementer=RequiredStepConfigMultipleOptionsWithDefaultStepImplementer,
+                step_config=step_config,
+                step_name='foo',
+                implementer='RequiredStepConfigMultipleOptionsWithDefaultStepImplementer',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            self.assertEqual(
+                step.get_value(['new-required-key', 'old-required-key']),
+                'mock-given-value-to-old-config'
+            )
 
 class TestStepImplementer_validate_required_config_or_previous_step_result_artifact_keys(TestStepImplementer):
     def test__validate_required_config_or_previous_step_result_artifact_keys_mutliple_keys_missing_config(self):
