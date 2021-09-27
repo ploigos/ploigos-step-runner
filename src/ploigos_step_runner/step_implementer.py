@@ -433,12 +433,16 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
         else:
             keys = [key]
 
+        # first try to get config value (without defaults) from any of the keys (in order)
+        # NOTE: do this in its own loop so user config values for any given key are always
+        #       prioritized over result values from any of the keys
         for k in keys:
-            # first try to get config value (without defaults)
             config_value = self.get_config_value(k, with_defaults=False)
             if config_value is not None:
                 return config_value
 
+        # second try to get result value from any of the given keys (in order)
+        for k in keys:
             # if not found config value try to get result value specific to current environment
             if self.environment:
                 result_value = self.get_result_value(
@@ -455,7 +459,10 @@ class StepImplementer(ABC):  # pylint: disable=too-many-instance-attributes
             if result_value is not None:
                 return result_value
 
-            # last get config from defaults
+        # last get config from defaults
+        # NOTE: do this in separate loop so none default values are prioritized for all keys
+        #       over any default values for any of the keys
+        for k in keys:
             config_value_default = self.get_config_value(k, with_defaults=True)
             if config_value_default is not None:
                 return config_value_default
