@@ -1,6 +1,8 @@
 """StepImplementer parent classes that are shared accross multiple steps.
 """
 
+from ploigos_step_runner.step_implementers.shared.argocd_generic import \
+    ArgoCDGeneric
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 from ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin import \

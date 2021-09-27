@@ -1,0 +1,2580 @@
+import os
+import re
+from io import IOBase
+from unittest.mock import call, patch
+
+import sh
+from testfixtures import TempDirectory
+from tests.helpers.base_step_implementer_test_case import \
+    BaseStepImplementerTestCase
+from tests.helpers.test_utils import Any, create_sh_side_effect
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.shared.argocd_generic import ArgoCDGeneric
+
+class MockArgoCDGenericImpl(ArgoCDGeneric):
+    def _run_step(self):
+        pass
+
+class TestStepImplementerSharedArgoCDBase(BaseStepImplementerTestCase):
+    def create_step_implementer(
+        self,
+        step_config={},
+        parent_work_dir_path='',
+        environment=None
+    ):
+        return self.create_given_step_implementer(
+            step_implementer=MockArgoCDGenericImpl,
+            step_config=step_config,
+            step_name='deploy',
+            implementer='MockArgoCDGenericImpl',
+            parent_work_dir_path=parent_work_dir_path,
+            environment=environment
+        )
+
+class TestStepImplementerSharedArgoCDGeneric_Other(TestStepImplementerSharedArgoCDBase):
+    def test_step_implementer_config_defaults(self):
+        defaults = ArgoCDGeneric.step_implementer_config_defaults()
+        expected_defaults = {
+            'argocd-sync-timeout-seconds': 60,
+            'argocd-sync-retry-limit': 3,
+            'argocd-auto-sync': True,
+            'argocd-skip-tls' : False,
+            'argocd-sync-prune': True,
+            'deployment-config-helm-chart-path': './',
+            'deployment-config-helm-chart-additional-values-files': [],
+            'additional-helm-values-files': [],
+            'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
+            'force-push-tags': False,
+            'kube-api-skip-tls': False,
+            'kube-api-uri': 'https://kubernetes.default.svc',
+            'git-name': 'Ploigos Robot'
+        }
+        self.assertEqual(defaults, expected_defaults)
+
+    def testrequired_config_or_result_keys(self):
+        required_keys = ArgoCDGeneric._required_config_or_result_keys()
+        expected_required_keys = [
+            'argocd-username',
+            'argocd-password',
+            'argocd-api',
+            'argocd-skip-tls',
+            'deployment-config-repo',
+            'deployment-config-helm-chart-path',
+            'deployment-config-helm-chart-values-file-image-tag-yq-path',
+            'git-email',
+            'git-name',
+            'container-image-tag'
+        ]
+        self.assertEqual(required_keys, expected_required_keys)
+
+class TestStepImplementerSharedArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys(
+    TestStepImplementerSharedArgoCDBase
+):
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_success_ssh(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_success_https(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-username': 'test-git-username',
+                'git-password': 'test-secret'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_username(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-password': 'test-secret'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                "Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_password(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'git-username': 'test-git-username'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                "Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_creds(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Since provided 'deployment-config-repo'"
+                rf" \({step_config['deployment-config-repo']}\) uses"
+                r" http/https protical both 'git-username' and 'git-password' must be provided."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_http_no_git_creds(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'http://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                r"Since provided 'deployment-config-repo'"
+                rf" \({step_config['deployment-config-repo']}\) uses"
+                r" http/https protical both 'git-username' and 'git-password' must be provided."
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+class TestStepImplementerSharedArgoCDGenericget_deployment_config_helm_chart_environment_values_file(
+    TestStepImplementerSharedArgoCDBase
+):
+    def test_get_deployment_config_helm_chart_environment_values_file_config_value(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'deployment-config-helm-chart-environment-values-file': 'values-AWESOME.yaml'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_helm_chart_env_value_file = \
+                step_implementer._get_deployment_config_helm_chart_environment_values_file()
+            self.assertEqual(
+                deployment_config_helm_chart_env_value_file,
+                'values-AWESOME.yaml'
+            )
+
+    def test_get_deployment_config_helm_chart_environment_values_file_no_config_value_no_env(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            deployment_config_helm_chart_env_value_file = \
+                step_implementer._get_deployment_config_helm_chart_environment_values_file()
+            self.assertEqual(
+                deployment_config_helm_chart_env_value_file,
+                'values.yaml'
+            )
+
+    def test_get_deployment_config_helm_chart_environment_values_file_no_config_value_with_env(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            deployment_config_helm_chart_env_value_file = \
+                step_implementer._get_deployment_config_helm_chart_environment_values_file()
+            self.assertEqual(
+                deployment_config_helm_chart_env_value_file,
+                'values-PROD.yaml'
+            )
+
+class TestStepImplementerSharedArgoCDGenericupdate_yaml_file_value(TestStepImplementerSharedArgoCDBase):
+    @patch('sh.yq', create=True)
+    def test_update_yaml_file_value_success(self, yq_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            updated_file_path = step_implementer._update_yaml_file_value(
+                file='/does/not/matter/chart/values-PROD.yaml',
+                yq_path='image.tag',
+                value='v0.42.0-abc123'
+            )
+            self.assertEqual(updated_file_path, '/does/not/matter/chart/values-PROD.yaml')
+            yq_script_file_path = os.path.join(
+                step_implementer.work_dir_path,
+                'update-yaml-file-yq-script.yaml'
+            )
+            yq_mock.write.assert_called_once_with(
+                '/does/not/matter/chart/values-PROD.yaml',
+                f'--script={yq_script_file_path}',
+                '--inplace'
+            )
+            with open(yq_script_file_path, 'r') as yq_script_file:
+                actual_yq_script = yq_script_file.read()
+
+                self.assertEqual(
+                    actual_yq_script,
+                    f"- command: update\n"
+                    f"  path: image.tag\n"
+                    f"  value:\n"
+                    f"    v0.42.0-abc123 # written by ploigos-step-runner\n",
+                )
+
+    @patch('sh.yq', create=True)
+    def test_update_yaml_file_value_fail(self, yq_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            yq_mock.write.side_effect = create_sh_side_effect(
+                exception=sh.ErrorReturnCode('yq', b'mock out', b'mock yq write error')
+            )
+
+            file = '/does/not/matter/chart/values-PROD.yaml'
+            yq_path = 'image.tag'
+            value = 'v0.42.0-abc123'
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                re.compile(
+                    rf"Error updating YAML file \({file}\) target \({yq_path}\)"
+                    rf" with value \({value}\):"
+                    r".*RAN: yq"
+                    r".*STDOUT:"
+                    r".*mock out"
+                    r".*STDERR:"
+                    r".*mock yq write error",
+                    re.DOTALL
+                )
+            ):
+                step_implementer._update_yaml_file_value(
+                    file=file,
+                    yq_path=yq_path,
+                    value=value
+                )
+                yq_script_file_path = os.path.join(
+                    step_implementer.work_dir_path,
+                    'update-yaml-file-yq-script.yaml'
+                )
+                yq_mock.write.assert_called_once_with(
+                    '/does/not/matter/chart/values-PROD.yaml',
+                    f'--script={yq_script_file_path}',
+                    '--inplace'
+                )
+                with open(yq_script_file_path, 'r') as yq_script_file:
+                    actual_yq_script = yq_script_file.read()
+
+                    self.assertEqual(
+                        actual_yq_script,
+                        f"- command: update\n"
+                        f"  path: image.tag\n"
+                        f"  value:\n"
+                        f"    v0.42.0-abc123 # written by ploigos-step-runner\n",
+                    )
+
+class TestStepImplementerSharedArgoCDGenericgit_tag_and_push_deployment_config_repo(TestStepImplementerSharedArgoCDBase):
+    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    def test_git_tag_and_push_deployment_config_repo_http(self, git_tag_and_push_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'git-username': 'test-username',
+                'git-password': 'test-password'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._git_tag_and_push_deployment_config_repo(
+                deployment_config_repo='http://git.ploigos.xys/foo',
+                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
+            )
+            git_tag_and_push_mock.assert_called_once_with(
+                repo_dir='/does/not/matter',
+                tag='test-tag',
+                url='http://test-username:test-password@git.ploigos.xys/foo',
+                force_push_tags=False
+            )
+
+    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    def test_git_tag_and_push_deployment_config_repo_https(self, git_tag_and_push_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'git-username': 'test-username',
+                'git-password': 'test-password'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._git_tag_and_push_deployment_config_repo(
+                deployment_config_repo='https://git.ploigos.xys/foo',
+                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
+            )
+            git_tag_and_push_mock.assert_called_once_with(
+                repo_dir='/does/not/matter',
+                tag='test-tag',
+                url='https://test-username:test-password@git.ploigos.xys/foo',
+                force_push_tags=False
+            )
+
+    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    def test_git_tag_and_push_deployment_config_repo_ssh(self, git_tag_and_push_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'git-username': 'test-username',
+                'git-password': 'test-password'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._git_tag_and_push_deployment_config_repo(
+                deployment_config_repo='git@git.ploigos.xys:foo/bar',
+                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_tag='test-tag',
+                force_push_tags=False
+            )
+            git_tag_and_push_mock.assert_called_once_with(
+                repo_dir='/does/not/matter',
+                tag='test-tag',
+                force_push_tags=False
+            )
+
+
+class TestStepImplementerSharedArgoCDGenericget_app_name(TestStepImplementerSharedArgoCDBase):
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
+    def test_get_app_name_no_env_less_then_max_length(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'test-org-test-app-test-service-feature-test')
+
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/TEST')
+    def test_get_app_name_no_env_less_then_max_length_caps(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-ORG',
+                'application-name': 'test-APP',
+                'service-name': 'test-SERVICE'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'test-org-test-app-test-service-feature-test')
+
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
+    def test_get_app_name_no_env_more_then_max_length(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service-this-is-really-long-hello-world-foo'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'ice-this-is-really-long-hello-world-foo-feature-test')
+
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
+    def test_get_app_name_with_env_less_then_max_length(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'test-org-test-app-test-service-feature-test-prod')
+
+class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestStepImplementerSharedArgoCDBase):
+    def test_get_deployment_config_repo_tag_use_tag(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'tag': 'v0.42.0-abc123',
+                'version': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0-abc123')
+
+    def test_get_deployment_config_repo_tag_use_version(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'version': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0')
+
+
+    def test_get_deployment_config_repo_tag_use_latest(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'latest')
+
+    def test_get_deployment_config_repo_tag_use_tag_with_env(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'tag': 'v0.42.0-main+abc123',
+                'version': 'v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0-main+abc123.PROD')
+
+class TestStepImplementerSharedArgoCDGenericget_deployed_host_urls(TestStepImplementerSharedArgoCDBase):
+    def __run__get_deployed_host_urls_test(
+        self,
+        manifest_contents,
+        expected_host_urls
+    ):
+        with TempDirectory() as temp_dir:
+            temp_dir.write('manifest.yaml', bytes(manifest_contents, 'utf-8'))
+            manifest_path = os.path.join(temp_dir.path, 'manifest.yaml')
+
+            actual_host_urls = ArgoCDGeneric._get_deployed_host_urls(
+                manifest_path=manifest_path
+            )
+
+            self.assertEqual(actual_host_urls, expected_host_urls)
+
+    def test_get_deployed_host_urls_empty_file(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="",
+            expected_host_urls=[]
+        )
+
+    def test_get_deployed_host_urls_empty_yaml_doc(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="---",
+            expected_host_urls=[]
+        )
+
+    def test_get_deployed_host_urls_yaml_doc_no_kind(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+foo: test"
+""",
+            expected_host_urls=[]
+        )
+
+    def test_get_deployed_host_urls_1_http_routes_no_ingress(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"route.openshift.io/v1","kind":"Route","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"name":"fruit","namespace":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"spec":{"path":"/","port":{"targetPort":"http"},"to":{"kind":"Service","name":"fruit"}}}
+    openshift.io/host.generated: "true"
+  creationTimestamp: "2020-12-16T22:14:46Z"
+  labels:
+    app.kubernetes.io/instance: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  managedFields:
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/instance: {}
+      f:spec:
+        f:path: {}
+        f:port:
+          .: {}
+          f:targetPort: {}
+        f:to:
+          f:kind: {}
+          f:name: {}
+          f:weight: {}
+        f:wildcardPolicy: {}
+    manager: argocd-application-controller
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:ingress: {}
+    manager: openshift-router
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  name: fruit
+  namespace: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  resourceVersion: "92938959"
+  selfLink: /apis/route.openshift.io/v1/namespaces/s-mvn-jenkins-std-fruit-feature-results-refactor-dev/routes/fruit
+  uid: f5d36e42-b894-49d9-9885-64ed7bc438db
+spec:
+  host: fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz
+  path: /
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: fruit
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2020-12-16T22:14:46Z"
+      status: "True"
+      type: Admitted
+    host: fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz
+    routerCanonicalHostname: apps.ploigos.xyz
+    routerName: default
+    wildcardPolicy: None
+""",
+            expected_host_urls=[
+                'http://fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz'
+            ]
+        )
+
+    def test_get_deployed_host_urls_1_https_routes_no_ingress(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"route.openshift.io/v1","kind":"Route","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"name":"fruit","namespace":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"spec":{"path":"/","port":{"targetPort":"http"},"to":{"kind":"Service","name":"fruit"}}}
+    openshift.io/host.generated: "true"
+  creationTimestamp: "2020-12-16T22:14:46Z"
+  labels:
+    app.kubernetes.io/instance: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  managedFields:
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/instance: {}
+      f:spec:
+        f:path: {}
+        f:port:
+          .: {}
+          f:targetPort: {}
+        f:to:
+          f:kind: {}
+          f:name: {}
+          f:weight: {}
+        f:wildcardPolicy: {}
+    manager: argocd-application-controller
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:ingress: {}
+    manager: openshift-router
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  name: fruit
+  namespace: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  resourceVersion: "92938959"
+  selfLink: /apis/route.openshift.io/v1/namespaces/s-mvn-jenkins-std-fruit-feature-results-refactor-dev/routes/fruit
+  uid: f5d36e42-b894-49d9-9885-64ed7bc438db
+spec:
+  host: fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz
+  path: /
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: fruit
+    weight: 100
+  tls:
+    termination: edge
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2020-12-16T22:14:46Z"
+      status: "True"
+      type: Admitted
+    host: fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz
+    routerCanonicalHostname: apps.ploigos.xyz
+    routerName: default
+    wildcardPolicy: None
+""",
+            expected_host_urls=[
+                'https://fruit-s-mvn-jenkins-std-fruit-feature-results-refactor-dev.apps.ploigos.xyz'
+            ]
+        )
+
+    def test_get_deployed_host_urls_no_routes_1_http_ingress(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: test
+spec:
+  rules:
+  - host: foo.apps.ploigos.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              name: http-listener
+""",
+            expected_host_urls=[
+                'http://foo.apps.ploigos.xyz'
+            ]
+        )
+
+    def test_get_deployed_host_urls_no_routes_1_http_ingress_with_tls_list(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: test
+spec:
+  tls:
+  - hosts:
+    - does-not-match.apps.ploigos.xyz
+  rules:
+  - host: foo.apps.ploigos.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              name: http-listener
+""",
+            expected_host_urls=[
+                'http://foo.apps.ploigos.xyz'
+            ]
+        )
+
+    def test_get_deployed_host_urls_no_routes_1_https_ingress(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: test
+  annotations:
+    route.openshift.io/termination: "edge"
+spec:
+  tls:
+  - hosts:
+    - foo.apps.ploigos.xyz
+  rules:
+  - host: foo.apps.ploigos.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              name: http-listener
+""",
+            expected_host_urls=[
+                'https://foo.apps.ploigos.xyz'
+            ]
+        )
+
+    def test_get_deployed_host_urls_1_http_route_1_https_route_1_http_ingress_1_https_ingress(self):
+        self.__run__get_deployed_host_urls_test(
+            manifest_contents="""
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: test
+spec:
+  rules:
+  - host: ingress1.apps.ploigos.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              name: http-listener
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: test
+  annotations:
+    route.openshift.io/termination: "edge"
+spec:
+  tls:
+  - hosts:
+    - ingress2.apps.ploigos.xyz
+  rules:
+  - host: ingress2.apps.ploigos.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foo
+            port:
+              name: http-listener
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"route.openshift.io/v1","kind":"Route","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"name":"fruit","namespace":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"spec":{"path":"/","port":{"targetPort":"http"},"to":{"kind":"Service","name":"fruit"}}}
+    openshift.io/host.generated: "true"
+  creationTimestamp: "2020-12-16T22:14:46Z"
+  labels:
+    app.kubernetes.io/instance: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  managedFields:
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/instance: {}
+      f:spec:
+        f:path: {}
+        f:port:
+          .: {}
+          f:targetPort: {}
+        f:to:
+          f:kind: {}
+          f:name: {}
+          f:weight: {}
+        f:wildcardPolicy: {}
+    manager: argocd-application-controller
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:ingress: {}
+    manager: openshift-router
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  name: fruit
+  namespace: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  resourceVersion: "92938959"
+  selfLink: /apis/route.openshift.io/v1/namespaces/s-mvn-jenkins-std-fruit-feature-results-refactor-dev/routes/fruit
+  uid: f5d36e42-b894-49d9-9885-64ed7bc438db
+spec:
+  host: route1.apps.ploigos.xyz
+  path: /
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: fruit
+    weight: 100
+  tls:
+    termination: edge
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2020-12-16T22:14:46Z"
+      status: "True"
+      type: Admitted
+    host: route1.apps.ploigos.xyz
+    routerCanonicalHostname: apps.ploigos.xyz
+    routerName: default
+    wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"route.openshift.io/v1","kind":"Route","metadata":{"annotations":{},"labels":{"app.kubernetes.io/instance":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"name":"fruit","namespace":"s-mvn-jenkins-std-fruit-feature-results-refactor-dev"},"spec":{"path":"/","port":{"targetPort":"http"},"to":{"kind":"Service","name":"fruit"}}}
+    openshift.io/host.generated: "true"
+  creationTimestamp: "2020-12-16T22:14:46Z"
+  labels:
+    app.kubernetes.io/instance: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  managedFields:
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/instance: {}
+      f:spec:
+        f:path: {}
+        f:port:
+          .: {}
+          f:targetPort: {}
+        f:to:
+          f:kind: {}
+          f:name: {}
+          f:weight: {}
+        f:wildcardPolicy: {}
+    manager: argocd-application-controller
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  - apiVersion: route.openshift.io/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:ingress: {}
+    manager: openshift-router
+    operation: Update
+    time: "2020-12-16T22:14:46Z"
+  name: fruit
+  namespace: s-mvn-jenkins-std-fruit-feature-results-refactor-dev
+  resourceVersion: "92938959"
+  selfLink: /apis/route.openshift.io/v1/namespaces/s-mvn-jenkins-std-fruit-feature-results-refactor-dev/routes/fruit
+  uid: f5d36e42-b894-49d9-9885-64ed7bc438db
+spec:
+  host: route2.apps.ploigos.xyz
+  path: /
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: fruit
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress:
+  - conditions:
+    - lastTransitionTime: "2020-12-16T22:14:46Z"
+      status: "True"
+      type: Admitted
+    host: route2.apps.ploigos.xyz.apps.ploigos.xyz
+    routerCanonicalHostname: apps.ploigos.xyz
+    routerName: default
+    wildcardPolicy: None
+""",
+            expected_host_urls=[
+                'http://ingress1.apps.ploigos.xyz',
+                'https://ingress2.apps.ploigos.xyz',
+                'https://route1.apps.ploigos.xyz',
+                'http://route2.apps.ploigos.xyz'
+            ]
+        )
+
+class TestStepImplementerSharedArgoCDGenericclone_repo(TestStepImplementerSharedArgoCDBase):
+    @patch.object(sh, 'git')
+    def test_clone_repo_success_new_branch(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'Password'
+        ArgoCDGeneric._clone_repo(
+            repo_dir=repo_dir,
+            repo_url=repo_url,
+            repo_branch=repo_branch,
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+            password=password
+        )
+
+        git_mock.clone.assert_called_once_with(
+            repo_url,
+            repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.checkout.assert_called_once_with(
+            repo_branch,
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.config.assert_has_calls([
+            call(
+                'user.email',
+                git_email,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                'user.name',
+                git_name,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_success_new_branch_https(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'https://Test:Password@git.ploigos.xyz'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'Password'
+        repo_url_with_auth = 'https://git.ploigos.xyz'
+        ArgoCDGeneric._clone_repo(
+            repo_dir=repo_dir,
+            repo_url=repo_url_with_auth,
+            repo_branch=repo_branch,
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+            password=password
+        )
+
+        git_mock.clone.assert_called_once_with(
+            repo_url,
+            repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.checkout.assert_called_once_with(
+            repo_branch,
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.config.assert_has_calls([
+            call(
+                'user.email',
+                git_email,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                'user.name',
+                git_name,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_success_existing_branch(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
+
+        git_mock.checkout.side_effect = [
+            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
+            None
+        ]
+
+        ArgoCDGeneric._clone_repo(
+            repo_dir=repo_dir,
+            repo_url=repo_url,
+            repo_branch=repo_branch,
+            git_email=git_email,
+            git_name=git_name,
+            username=username,
+            password=password
+        )
+
+        git_mock.clone.assert_called_once_with(
+            repo_url,
+            repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        git_mock.checkout.assert_has_calls([
+            call(
+                repo_branch,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                '-b',
+                repo_branch,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+        git_mock.config.assert_has_calls([
+            call(
+                'user.email',
+                git_email,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                'user.name',
+                git_name,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_fail_clone(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
+
+        git_mock.clone.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git clone error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error cloning repository \({repo_url}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git clone error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._clone_repo(
+                repo_dir=repo_dir,
+                repo_url=repo_url,
+                repo_branch=repo_branch,
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
+            )
+
+            git_mock.clone.assert_called_once_with(
+                repo_url,
+                repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+            git_mock.checkout.assert_not_called()
+            git_mock.config.assert_not_called()
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_fail_existing_branch(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
+
+        git_mock.checkout.side_effect = [
+            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
+            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout new branch error'),
+        ]
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Unexpected error checking out new or existing branch \({repo_branch}\)"
+                rf" from repository \({repo_url}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git checkout new branch error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._clone_repo(
+                repo_dir=repo_dir,
+                repo_url=repo_url,
+                repo_branch=repo_branch,
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
+            )
+
+            git_mock.clone.assert_called_once_with(
+                repo_url,
+                repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+            git_mock.checkout.assert_has_calls([
+                call(
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                ),
+                call(
+                    '-b',
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+            ])
+            git_mock.config.assert_not_called()
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_fail_config_email(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
+
+        git_mock.config.side_effect = [
+            sh.ErrorReturnCode('git', b'mock out', b'mock git config email error'),
+            None
+        ]
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Unexpected error configuring git user.email \({git_email}\)"
+                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
+                rf" in directory \({repo_dir}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git config email error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._clone_repo(
+                repo_dir=repo_dir,
+                repo_url=repo_url,
+                repo_branch=repo_branch,
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
+            )
+
+            git_mock.clone.assert_called_once_with(
+                repo_url,
+                repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+            git_mock.checkout.assert_has_calls([
+                call(
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                ),
+                call(
+                    '-b',
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+            ])
+            git_mock.config.assert_called_once_with(
+                'user.email',
+                git_email,
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+    @patch.object(sh, 'git')
+    def test_clone_repo_fail_config_name(self, git_mock):
+        repo_dir = '/does/not/matter'
+        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
+        repo_branch = 'feature/test'
+        git_email = 'test@ploigos.xyz'
+        git_name = 'Test Robot'
+        username = 'Test'
+        password = 'password'
+
+        git_mock.config.side_effect = [
+            None,
+            sh.ErrorReturnCode('git', b'mock out', b'mock git config name error')
+        ]
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Unexpected error configuring git user.email \({git_email}\)"
+                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
+                rf" in directory \({repo_dir}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git config name error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._clone_repo(
+                repo_dir=repo_dir,
+                repo_url=repo_url,
+                repo_branch=repo_branch,
+                git_email=git_email,
+                git_name=git_name,
+                username=username,
+                password=password
+            )
+
+            git_mock.clone.assert_called_once_with(
+                repo_url,
+                repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+            git_mock.checkout.assert_has_calls([
+                call(
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                ),
+                call(
+                    '-b',
+                    repo_branch,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+            ])
+            git_mock.config.assert_has_calls([
+                call(
+                    'user.email',
+                    git_email,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                ),
+                call(
+                    'user.name',
+                    git_name,
+                    _cwd=repo_dir,
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+            ])
+
+class TestStepImplementerSharedArgoCDGenericget_repo_branch(TestStepImplementerSharedArgoCDBase):
+    @patch.object(sh, 'git')
+    def test_get_repo_branch_success(self, git_mock):
+        git_mock.side_effect = create_sh_side_effect(mock_stdout="feature/test")
+
+        repo_branch = ArgoCDGeneric._get_repo_branch()
+        self.assertEqual(repo_branch, 'feature/test')
+        git_mock.assert_called_once_with(
+            'rev-parse',
+            '--abbrev-ref',
+            'HEAD'
+        )
+
+    @patch.object(sh, 'git')
+    def test_get_repo_branch_fail(self, git_mock):
+        git_mock.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git rev-parse error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Unexpected error getting checkedout git repository branch"
+                r" of the working directory."
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git rev-parse error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._get_repo_branch()
+            git_mock.assert_called_once_with(
+                'rev-parse',
+                '--abbrev-ref',
+                'HEAD'
+            )
+
+class TestStepImplementerSharedArgoCDGenericgit_tag_and_push(TestStepImplementerSharedArgoCDBase):
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_success_ssh(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+        ArgoCDGeneric._git_tag_and_push(
+            repo_dir=repo_dir,
+            tag=tag,
+            url=url
+        )
+
+        git_mock.push.assert_has_calls([
+            call(
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            ),
+            call(
+                '--tag',
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            )
+        ])
+        git_mock.tag.assert_called_once_with(
+            tag,
+            '-f',
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_success_https_url(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = 'https://user:pass@git.ploigos.xyz'
+        ArgoCDGeneric._git_tag_and_push(
+            repo_dir=repo_dir,
+            tag=tag,
+            url=url
+        )
+
+        git_mock.push.bake().assert_has_calls([
+            call(
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            ),
+            call(
+                '--tag',
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            )
+        ])
+        git_mock.tag.assert_called_once_with(
+            tag,
+            '-f',
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_fail_commit(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+
+        git_mock.push.side_effect = [
+            sh.ErrorReturnCode('git', b'mock out', b'mock git push error'),
+            create_sh_side_effect()
+        ]
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error pushing commits from repository directory \({repo_dir}\) to"
+                rf" repository \({url}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git push error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._git_tag_and_push(
+                repo_dir=repo_dir,
+                tag=tag,
+                url=url
+            )
+
+            git_mock.push.assert_has_calls([
+                call(
+                    _cwd=repo_dir,
+                    _out=Any(IOBase)
+                )
+            ])
+
+            git_mock.tag.assert_not_called()
+
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_fail_tag(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+
+        git_mock.tag.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock git tag error')
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error tagging repository \({repo_dir}\) with tag \({tag}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git tag error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._git_tag_and_push(
+                repo_dir=repo_dir,
+                tag=tag,
+                url=url
+            )
+
+            git_mock.push.assert_called_once_with(
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            )
+
+            git_mock.tag.assert_called_once_with(
+                tag,
+                '-f',
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_fail_push_tag(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+
+        git_mock.push.side_effect = [
+            create_sh_side_effect(),
+            sh.ErrorReturnCode('git', b'mock out', b'mock git push tag error')
+        ]
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error pushing tags from repository directory \({repo_dir}\) to"
+                rf" repository \({url}\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git push tag error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._git_tag_and_push(
+                repo_dir=repo_dir,
+                tag=tag,
+                url=url
+            )
+
+            git_mock.push.bake().assert_has_calls([
+                call(
+                    _cwd=repo_dir,
+                    _out=Any(IOBase)
+                ),
+                call(
+                    '--tag',
+                    _cwd=repo_dir,
+                    _out=Any(IOBase)
+                )
+            ])
+
+            git_mock.tag.assert_called_once_with(
+                tag,
+                '-f',
+                _cwd=repo_dir,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+    @patch.object(sh, 'git')
+    def test_git_tag_and_push_override_tls(self, git_mock):
+        repo_dir = '/does/not/matter'
+        tag = 'v0.42.0'
+        url = None
+        ArgoCDGeneric._git_tag_and_push(
+            repo_dir=repo_dir,
+            tag=tag,
+            url=url,
+            force_push_tags=True
+        )
+
+        git_mock.push.assert_has_calls([
+            call(
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            ),
+            call(
+                '--tag',
+                '--force',
+                _cwd=repo_dir,
+                _out=Any(IOBase)
+            )
+        ])
+        git_mock.tag.assert_called_once_with(
+            tag,
+            '-f',
+            _cwd=repo_dir,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+
+class TestStepImplementerSharedArgoCDGenericgit_commit_file(TestStepImplementerSharedArgoCDBase):
+    @patch.object(sh, 'git')
+    def test_git_commit_file_success(self, git_mock):
+        ArgoCDGeneric._git_commit_file(
+            git_commit_message='hello world',
+            file_path='charts/foo/values-DEV.yaml',
+            repo_dir='/does/not/matter'
+        )
+
+        git_mock.add.assert_called_once_with(
+            'charts/foo/values-DEV.yaml',
+            _cwd='/does/not/matter',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+        git_mock.commit.assert_called_once_with(
+            '--allow-empty',
+            '--all',
+            '--message', 'hello world',
+            _cwd='/does/not/matter',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch.object(sh, 'git')
+    def test_git_commit_file_fail_add(self, git_mock):
+        git_mock.add.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git add error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Unexpected error adding file \(charts/foo/values-DEV.yaml\) to commit"
+                r" in git repository \(/does/not/matter\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git add error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._git_commit_file(
+                git_commit_message='hello world',
+                file_path='charts/foo/values-DEV.yaml',
+                repo_dir='/does/not/matter'
+            )
+
+            git_mock.add.assert_called_once_with(
+                'charts/foo/values-DEV.yaml',
+                _cwd='/does/not/matter',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+            git_mock.commit.assert_not_called()
+
+    @patch.object(sh, 'git')
+    def test_git_commit_file_fail_commit(self, git_mock):
+        git_mock.commit.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git commit error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Unexpected error commiting file \(charts/foo/values-DEV.yaml\)"
+                r" in git repository \(/does/not/matter\):"
+                r".*RAN: git"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock git commit error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._git_commit_file(
+                git_commit_message='hello world',
+                file_path='charts/foo/values-DEV.yaml',
+                repo_dir='/does/not/matter'
+            )
+
+            git_mock.add.assert_called_once_with(
+                'charts/foo/values-DEV.yaml',
+                _cwd='/does/not/matter',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+            git_mock.commit.assert_called_once_with(
+                '--allow-empty',
+                '--all',
+                '--message', 'hello world',
+                _cwd='/does/not/matter',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+class TestStepImplementerSharedArgoCDGenericargocd_sign_in(TestStepImplementerSharedArgoCDBase):
+    @patch('sh.argocd', create=True)
+    def test_argocd_sign_in_success_not_insecure(self, argocd_mock):
+        argocd_api='argo.dev.ploigos.xyz'
+        username='test'
+        password='secrettest'
+        ArgoCDGeneric._argocd_sign_in(
+            argocd_api=argocd_api,
+            username=username,
+            password=password,
+            insecure=False
+        )
+
+        argocd_mock.login.assert_called_once_with(
+            argocd_api,
+            f'--username={username}',
+            f'--password={password}',
+            None,
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_sign_in_success_insecure(self, argocd_mock):
+        argocd_api='argo.dev.ploigos.xyz'
+        username='test'
+        password='secrettest'
+        ArgoCDGeneric._argocd_sign_in(
+            argocd_api=argocd_api,
+            username=username,
+            password=password,
+            insecure=True
+        )
+
+        argocd_mock.login.assert_called_once_with(
+            argocd_api,
+            f'--username={username}',
+            f'--password={password}',
+            '--insecure',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_sign_in_fail_not_insecure(self, argocd_mock):
+        argocd_api='argo.dev.ploigos.xyz'
+        username='test'
+        password='secrettest'
+
+        argocd_mock.login.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock login error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error logging in to ArgoCD:"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock login error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_sign_in(
+                argocd_api=argocd_api,
+                username=username,
+                password=password,
+                insecure=False
+            )
+
+            argocd_mock.login.assert_called_once_with(
+                argocd_api,
+                f'--username={username}',
+                f'--password={password}',
+                None,
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+class TestStepImplementerSharedArgoCDGenericargocd_add_target_cluster(TestStepImplementerSharedArgoCDBase):
+    @patch('sh.argocd', create=True)
+    def test_argocd_add_target_cluster_default_cluster(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._argocd_add_target_cluster(
+                kube_api='https://kubernetes.default.svc',
+                kube_api_skip_tls=False
+            )
+
+            argocd_mock.cluster.add.assert_not_called()
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_add_target_cluster_custom_cluster_kube_skip_tls_true(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+            expected_config_argocd_cluster_context_file_contents = """---
+apiVersion: v1
+kind: Config
+current-context: https://api.dev.ploigos.xyz-context
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://api.dev.ploigos.xyz
+  name: default-cluster
+contexts:
+- context:
+    cluster: default-cluster
+    user: default-user
+  name: https://api.dev.ploigos.xyz-context
+preferences:
+users:
+- name: default-user
+  user:
+    token: abc123
+"""
+
+            step_implementer._argocd_add_target_cluster(
+                kube_api='https://api.dev.ploigos.xyz',
+                kube_api_token='abc123',
+                kube_api_skip_tls=True
+            )
+
+            config_argocd_cluster_context_file_path = os.path.join(
+                step_implementer.work_dir_path,
+                'config-argocd-cluster-context.yaml'
+            )
+            argocd_mock.cluster.add.assert_called_once_with(
+                '--kubeconfig', config_argocd_cluster_context_file_path,
+                'https://api.dev.ploigos.xyz-context',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+            with open(config_argocd_cluster_context_file_path, 'r') as \
+                    config_argocd_cluster_context_file:
+                config_argocd_cluster_context_file_contents = \
+                    config_argocd_cluster_context_file.read()
+
+
+                self.assertEqual(
+                    config_argocd_cluster_context_file_contents,
+                    expected_config_argocd_cluster_context_file_contents
+                )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_add_target_cluster_custom_cluster_kube_skip_tls_false(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+            expected_config_argocd_cluster_context_file_contents = """---
+apiVersion: v1
+kind: Config
+current-context: https://api.dev.ploigos.xyz-context
+clusters:
+- cluster:
+    insecure-skip-tls-verify: false
+    server: https://api.dev.ploigos.xyz
+  name: default-cluster
+contexts:
+- context:
+    cluster: default-cluster
+    user: default-user
+  name: https://api.dev.ploigos.xyz-context
+preferences:
+users:
+- name: default-user
+  user:
+    token: abc123
+"""
+
+            step_implementer._argocd_add_target_cluster(
+                kube_api='https://api.dev.ploigos.xyz',
+                kube_api_token='abc123',
+                kube_api_skip_tls=False
+            )
+
+            config_argocd_cluster_context_file_path = os.path.join(
+                step_implementer.work_dir_path,
+                'config-argocd-cluster-context.yaml'
+            )
+            argocd_mock.cluster.add.assert_called_once_with(
+                '--kubeconfig', config_argocd_cluster_context_file_path,
+                'https://api.dev.ploigos.xyz-context',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+            with open(config_argocd_cluster_context_file_path, 'r') as \
+                    config_argocd_cluster_context_file:
+                config_argocd_cluster_context_file_contents = \
+                    config_argocd_cluster_context_file.read()
+
+
+                self.assertEqual(
+                    config_argocd_cluster_context_file_contents,
+                    expected_config_argocd_cluster_context_file_contents
+                )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_add_target_cluster_fail_custom_cluster_kube_skip_tls_true(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+            expected_config_argocd_cluster_context_file_contents = """---
+apiVersion: v1
+kind: Config
+current-context: https://api.dev.ploigos.xyz-context
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://api.dev.ploigos.xyz
+  name: default-cluster
+contexts:
+- context:
+    cluster: default-cluster
+    user: default-user
+  name: https://api.dev.ploigos.xyz-context
+preferences:
+users:
+- name: default-user
+  user:
+    token: abc123
+"""
+
+            argocd_mock.cluster.add.side_effect = create_sh_side_effect(
+                exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock cluster add error')
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                re.compile(
+                    rf"Error adding cluster \(https://api.dev.ploigos.xyz\) to ArgoCD:"
+                    r".*RAN: argocd"
+                    r".*STDOUT:"
+                    r".*mock out"
+                    r".*STDERR:"
+                    r".*mock cluster add error",
+                    re.DOTALL
+                )
+            ):
+                step_implementer._argocd_add_target_cluster(
+                    kube_api='https://api.dev.ploigos.xyz',
+                    kube_api_token='abc123',
+                    kube_api_skip_tls=True
+                )
+
+                config_argocd_cluster_context_file_path = os.path.join(
+                    step_implementer.work_dir_path,
+                    'config-argocd-cluster-context.yaml'
+                )
+                argocd_mock.cluster.add.assert_called_once_with(
+                    '--kubeconfig', config_argocd_cluster_context_file_path,
+                    'https://api.dev.ploigos.xyz-context',
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
+
+                with open(config_argocd_cluster_context_file_path, 'r') as \
+                        config_argocd_cluster_context_file:
+                    config_argocd_cluster_context_file_contents = \
+                        config_argocd_cluster_context_file.read()
+
+
+                    self.assertEqual(
+                        config_argocd_cluster_context_file_contents,
+                        expected_config_argocd_cluster_context_file_contents
+                    )
+
+
+class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStepImplementerSharedArgoCDBase):
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_success_sync_auto_no_extra_values_files(self, argocd_mock):
+        argocd_app_name = 'test'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        auto_sync = True
+        values_files = []
+        ArgoCDGeneric._argocd_app_create_or_update(
+            argocd_app_name=argocd_app_name,
+            repo=repo,
+            revision=revision,
+            path=path,
+            dest_server=dest_server,
+            auto_sync=auto_sync,
+            values_files=values_files
+        )
+
+        sync_policy = 'automated'
+        values_params = None
+        argocd_mock.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={argocd_app_name}',
+            f'--sync-policy={sync_policy}',
+            values_params,
+            '--upsert',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_success_sync_none_no_extra_values_files(self, argocd_mock):
+        argocd_app_name = 'test'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        auto_sync = False
+        values_files = []
+        ArgoCDGeneric._argocd_app_create_or_update(
+            argocd_app_name=argocd_app_name,
+            repo=repo,
+            revision=revision,
+            path=path,
+            dest_server=dest_server,
+            auto_sync=auto_sync,
+            values_files=values_files
+        )
+
+        sync_policy = 'none'
+        values_params = None
+        argocd_mock.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={argocd_app_name}',
+            f'--sync-policy={sync_policy}',
+            values_params,
+            '--upsert',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_success_sync_auto_1_values_files(self, argocd_mock):
+        argocd_app_name = 'test'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        auto_sync = True
+        values_files = ['values-foo.yaml']
+        ArgoCDGeneric._argocd_app_create_or_update(
+            argocd_app_name=argocd_app_name,
+            repo=repo,
+            revision=revision,
+            path=path,
+            dest_server=dest_server,
+            auto_sync=auto_sync,
+            values_files=values_files
+        )
+
+        sync_policy = 'automated'
+        values_params = ['--values=values-foo.yaml']
+        argocd_mock.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={argocd_app_name}',
+            f'--sync-policy={sync_policy}',
+            values_params,
+            '--upsert',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_success_sync_auto_2_values_files(self, argocd_mock):
+        argocd_app_name = 'test'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        auto_sync = True
+        values_files = ['values-foo.yaml', 'values-DEV.yaml']
+        ArgoCDGeneric._argocd_app_create_or_update(
+            argocd_app_name=argocd_app_name,
+            repo=repo,
+            revision=revision,
+            path=path,
+            dest_server=dest_server,
+            auto_sync=auto_sync,
+            values_files=values_files
+        )
+
+        sync_policy = 'automated'
+        values_params = ['--values=values-foo.yaml', '--values=values-DEV.yaml']
+        argocd_mock.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={argocd_app_name}',
+            f'--sync-policy={sync_policy}',
+            values_params,
+            '--upsert',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_fail_sync_auto_1_values_files(self, argocd_mock):
+        argocd_mock.app.create.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock create error')
+        )
+
+        argocd_app_name = 'test'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        auto_sync = True
+        values_files = ['values-foo.yaml']
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                rf"Error creating or updating ArgoCD app \({argocd_app_name}\):"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock create error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_app_create_or_update(
+                argocd_app_name=argocd_app_name,
+                repo=repo,
+                revision=revision,
+                path=path,
+                dest_server=dest_server,
+                auto_sync=auto_sync,
+                values_files=values_files
+            )
+
+        sync_policy = 'automated'
+        values_params = ['--values=values-foo.yaml']
+        argocd_mock.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={argocd_app_name}',
+            f'--sync-policy={sync_policy}',
+            values_params,
+            '--upsert',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerSharedArgoCDBase):
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_success(self, argocd_mock):
+        ArgoCDGeneric._argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=3
+        )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--prune',
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_success_retry(self, argocd_mock):
+        ArgoCDGeneric._argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=4
+        )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--prune',
+            '--timeout', 120,
+            '--retry-limit', 4,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_fail_sync(self, argocd_mock):
+        argocd_mock.app.sync.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock sync error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Error synchronization ArgoCD Application \(test\):"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock sync error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_app_sync(
+                argocd_app_name='test',
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3
+            )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--prune',
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_not_called()
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_fail_sync_no_prune(self, argocd_mock):
+        argocd_mock.app.sync.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock sync error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Error synchronization ArgoCD Application \(test\)."
+                r" Sync 'prune' option is disabled."
+                r" If sync error \(see logs\) was due to resource\(s\) that need to be pruned,"
+                r" and the pruneable resources are intentionally there then see the ArgoCD"
+                r" documentation for instructions for argo to ignore the resource\(s\)."
+                " See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources"
+                " and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock sync error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_app_sync(
+                argocd_app_name='test',
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3,
+                argocd_sync_prune=False
+            )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_not_called()
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_fail_wait(self, argocd_mock):
+        argocd_mock.app.wait.side_effect = create_sh_side_effect(
+            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock wait error')
+        )
+
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Error waiting for ArgoCD Application \(test\) synchronization:"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock wait error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_app_sync(
+                argocd_app_name='test',
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3
+            )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--prune',
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+    @patch('sh.argocd', create=True)
+    def testargocd_app_sync_success_no_prune(self, argocd_mock):
+        ArgoCDGeneric._argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=3,
+            argocd_sync_prune=False
+        )
+
+        argocd_mock.app.sync.assert_called_once_with(
+            '--timeout', 120,
+            '--retry-limit', 3,
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+        argocd_mock.app.wait.assert_called_once_with(
+            '--timeout', 120,
+            '--health',
+            'test',
+            _out=Any(IOBase),
+            _err=Any(IOBase)
+        )
+
+class TestStepImplementerSharedArgoCDGenericargocd_get_app_manifest(TestStepImplementerSharedArgoCDBase):
+
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_get_app_manifest_success_live(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            argocd_app_manifest_file = step_implementer._argocd_get_app_manifest(
+                argocd_app_name='test',
+                source='live'
+            )
+
+            self.assertIsNotNone(argocd_app_manifest_file)
+            argocd_mock.app.manifests.assert_called_once_with(
+                '--source=live',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_get_app_manifest_success_git(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            argocd_app_manifest_file = step_implementer._argocd_get_app_manifest(
+                argocd_app_name='test',
+                source='git'
+            )
+
+            self.assertIsNotNone(argocd_app_manifest_file)
+            argocd_mock.app.manifests.assert_called_once_with(
+                '--source=git',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+
+    @patch('sh.argocd', create=True)
+    def test_argocd_get_app_manifest_fail(self, argocd_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config={},
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            argocd_mock.app.manifests.side_effect = create_sh_side_effect(
+                exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock error')
+            )
+
+            with self.assertRaisesRegex(
+                StepRunnerException,
+                re.compile(
+                    r"Error reading ArgoCD Application \(invalid\) manifest:"
+                    r".*RAN: argocd"
+                    r".*STDOUT:"
+                    r".*mock out"
+                    r".*STDERR:"
+                    r".*mock error",
+                    re.DOTALL
+                )
+            ):
+                argocd_app_manifest_file = step_implementer._argocd_get_app_manifest(
+                    argocd_app_name='invalid',
+                    source='live'
+                )
+
+                self.assertIsNotNone(argocd_app_manifest_file)
+                argocd_mock.app.manifests.assert_called_once_with(
+                    '--source=live',
+                    'invalid',
+                    _out=Any(IOBase),
+                    _err=Any(IOBase)
+                )
