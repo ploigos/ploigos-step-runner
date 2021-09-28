@@ -43,7 +43,7 @@ Result Artifact Key | Description
 --------------------|------------
 `maven-output`      | Path to Stdout and Stderr from invoking Maven.
 `test-report`       | Directory containing the test reports generated from running this step.
-"""# pylint: disable=line-too-long
+"""  # pylint: disable=line-too-long
 
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -58,6 +58,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'pom-file',
     'target-host-url-maven-argument-name'
 ]
+
 
 class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
     """`StepImplementer` for the `uat` step using Maven by invoking the
@@ -78,7 +79,6 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
             environment=environment,
             maven_phases_and_goals=['integration-test', 'verify']
         )
-
 
     @staticmethod
     def step_implementer_config_defaults():
@@ -213,8 +213,7 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
                     #       default phases are for test rather then integration test.
                     test_report_dir = self._attempt_get_test_report_directory(
                         plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
-                        configuration_key=\
-                            MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
+                        configuration_key=MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
                         default=MavenTestReportingMixin.SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR,
                         require_phase_execution_config=True
                     )

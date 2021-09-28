@@ -714,9 +714,24 @@ From least precedence to highest precedence.
         config: {}
 
       unit-test:
-      # WARNING: not yet implemented
-      - implementer: NPM
-        config: {}
+      - implementer: NpmXunitTest
+        config:
+          test-reports-dir: test_results
+
+          # Optional.
+          # npm-envs:
+          #   ENV_VAR1: VALUE1
+          #   ENV_VAR2: VALUE2
+
+          # Optional.
+          #npm-test-script: test
+
+      - implementer: NpmTest
+        config:
+          # Optional.
+          # npm-envs:
+          #   ENV_VAR1: VALUE1
+          #   ENV_VAR2: VALUE2
 
       push-artifacts:
       # WARNING: not yet implemented
@@ -863,8 +878,21 @@ From least precedence to highest precedence.
           # template variable specification
           readiness-probe-path: ''
 
-      # TODO: not yet implemented
-      uat: []
+      uat:
+      - implementer: NpmXunitIntegrationTest
+        config:
+          target-host-env-var-name: APP_ROUTE
+          test-reports-dir: uat-reports
+
+          # Optional.
+          # npm-test-script: test:uat
+
+          # Optional.
+          # npm-envs:
+          #   WEB_DRIVER_URL: http://selenium-grid.devsecops:4444/wd/hub
+          #   BROWSER: chrome
+          #   USER1: test1
+          #   USER2: test2
 
       report:
       - implementer: ResultArtifactsArchive
