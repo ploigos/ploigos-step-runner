@@ -98,6 +98,28 @@ class RequiredStepConfigMultipleOptionsStepImplementer(StepImplementer):
         for n, v in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
             step_result.add_artifact(name=n, value=v)
         return step_result
+
+class RequiredStepConfigMultipleOptionsWithDefaultStepImplementer(StepImplementer):
+    @staticmethod
+    def step_implementer_config_defaults():
+        return {
+            'new-required-key': 'mock-default-value'
+        }
+
+    @staticmethod
+    def _required_config_or_result_keys():
+        return [
+            ['new-required-key', 'old-required-key']
+        ]
+
+    def _run_step(self):
+        step_result = StepResult.from_step_implementer(self)
+        runtime_step_config = self.config.get_copy_of_runtime_step_config(
+            self.environment,
+            self.step_implementer_config_defaults())
+        for n, v in ConfigValue.convert_leaves_to_values(runtime_step_config).items():
+            step_result.add_artifact(name=n, value=v)
+        return step_result
 class WriteConfigAsResultsStepImplementer(StepImplementer):
     @staticmethod
     def step_implementer_config_defaults():
