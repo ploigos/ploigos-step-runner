@@ -3,6 +3,7 @@ import re
 from io import IOBase
 from unittest.mock import call, patch
 
+import mock
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.argocd_generic import \
@@ -2124,9 +2125,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             _err=Any(IOBase)
         )
 
+@patch('sh.argocd', create=True)
 class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerSharedArgoCDBase):
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_success(self, argocd_mock):
+    def test_success(self, argocd_mock):
         ArgoCDGeneric._argocd_app_sync(
             argocd_app_name='test',
             argocd_sync_timeout_seconds=120,
@@ -2141,16 +2142,24 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-        argocd_mock.app.wait.assert_called_once_with(
-            '--timeout', 120,
-            '--health',
-            'test',
-            _out=Any(IOBase),
-            _err=Any(IOBase)
-        )
+        argocd_mock.app.wait.assert_has_calls([
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            ),
+            call(
+                '--timeout', 120,
+                '--health',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_success_retry(self, argocd_mock):
+    def test_success_retry(self, argocd_mock):
         ArgoCDGeneric._argocd_app_sync(
             argocd_app_name='test',
             argocd_sync_timeout_seconds=120,
@@ -2165,16 +2174,24 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-        argocd_mock.app.wait.assert_called_once_with(
-            '--timeout', 120,
-            '--health',
-            'test',
-            _out=Any(IOBase),
-            _err=Any(IOBase)
-        )
+        argocd_mock.app.wait.assert_has_calls([
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            ),
+            call(
+                '--timeout', 120,
+                '--health',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_fail_sync(self, argocd_mock):
+    def test_fail_sync(self, argocd_mock):
         argocd_mock.app.sync.side_effect = create_sh_side_effect(
             exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock sync error')
         )
@@ -2205,10 +2222,15 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-        argocd_mock.app.wait.assert_not_called()
+        argocd_mock.app.wait.assert_called_once_with(
+            'test',
+            '--operation',
+            '--timeout', 120,
+            _out=mock.ANY,
+            _err=mock.ANY
+        )
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_fail_sync_no_prune(self, argocd_mock):
+    def test_fail_sync_no_prune(self, argocd_mock):
         argocd_mock.app.sync.side_effect = create_sh_side_effect(
             exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock sync error')
         )
@@ -2245,14 +2267,22 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-        argocd_mock.app.wait.assert_not_called()
-
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_fail_wait(self, argocd_mock):
-        argocd_mock.app.wait.side_effect = create_sh_side_effect(
-            exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock wait error')
+        argocd_mock.app.wait.assert_called_once_with(
+            'test',
+            '--operation',
+            '--timeout', 120,
+            _out=mock.ANY,
+            _err=mock.ANY
         )
 
+    def test_fail_wait_after_sync(self, argocd_mock):
+        # setup mocks
+        def sh_argocd_wait_side_effect(*args, **kwargs):
+            if '--health' in args:
+                raise sh.ErrorReturnCode('argocd', b'mock out', b'mock wait error')
+        argocd_mock.app.wait.side_effect = sh_argocd_wait_side_effect
+
+        # run test
         with self.assertRaisesRegex(
             StepRunnerException,
             re.compile(
@@ -2271,6 +2301,7 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
                 argocd_sync_retry_limit=3
             )
 
+        # verify
         argocd_mock.app.sync.assert_called_once_with(
             '--prune',
             '--timeout', 120,
@@ -2279,16 +2310,61 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
+        argocd_mock.app.wait.assert_has_calls([
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            ),
+            call(
+                '--timeout', 120,
+                '--health',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+
+    def test_fail_wait_before_sync(self, argocd_mock):
+        # setup mocks
+        def sh_argocd_wait_side_effect(*args, **kwargs):
+            if '--operation' in args:
+                raise sh.ErrorReturnCode('argocd', b'mock out', b'mock wait error')
+        argocd_mock.app.wait.side_effect = sh_argocd_wait_side_effect
+
+        # run test
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                "Error waiting for ArgoCD Application \(test\) existing operation"
+                " before requesting new synchronization:"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock out"
+                r".*STDERR:"
+                r".*mock wait error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_app_sync(
+                argocd_app_name='test',
+                argocd_sync_timeout_seconds=120,
+                argocd_sync_retry_limit=3
+            )
+
+        # verify
+        argocd_mock.app.sync.assert_not_called()
         argocd_mock.app.wait.assert_called_once_with(
-            '--timeout', 120,
-            '--health',
             'test',
-            _out=Any(IOBase),
-            _err=Any(IOBase)
+            '--operation',
+            '--timeout', 120,
+            _out=mock.ANY,
+            _err=mock.ANY
         )
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_sync_success_no_prune(self, argocd_mock):
+    def test_success_no_prune(self, argocd_mock):
         ArgoCDGeneric._argocd_app_sync(
             argocd_app_name='test',
             argocd_sync_timeout_seconds=120,
@@ -2303,17 +2379,24 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=Any(IOBase),
             _err=Any(IOBase)
         )
-        argocd_mock.app.wait.assert_called_once_with(
-            '--timeout', 120,
-            '--health',
-            'test',
-            _out=Any(IOBase),
-            _err=Any(IOBase)
-        )
+        argocd_mock.app.wait.assert_has_calls([
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            ),
+            call(
+                '--timeout', 120,
+                '--health',
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
 
 class TestStepImplementerSharedArgoCDGenericargocd_get_app_manifest(TestStepImplementerSharedArgoCDBase):
-
-
     @patch('sh.argocd', create=True)
     def test_argocd_get_app_manifest_success_live(self, argocd_mock):
         with TempDirectory() as temp_dir:
