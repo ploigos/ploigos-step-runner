@@ -642,7 +642,32 @@ users:
         if argocd_sync_prune:
             argocd_sync_additional_flags.append('--prune')
 
+        # wait for any existing operations before requesting new synchronization
+        #
+        # NOTE: attempted work around for 'FailedPrecondition desc = another operation is
+        #       already in progress' error
+        # SEE: https://github.com/argoproj/argo-cd/issues/4505
         try:
+            print(
+                f"Wait for existing ArgoCD operations on app ({argocd_app_name})"
+                " before requesting synchronization."
+            )
+            sh.argocd.app.wait( # pylint: disable=no-member
+                argocd_app_name,
+                '--operation',
+                '--timeout', argocd_sync_timeout_seconds,
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
+        except sh.ErrorReturnCode as error:
+            raise StepRunnerException(
+                f"Error waiting for ArgoCD Application ({argocd_app_name}) existing operation"
+                f" before requesting new synchronization: {error}"
+            ) from error
+
+        # sync app
+        try:
+            print(f"Request synchronization of ArgoCD app ({argocd_app_name}).")
             sh.argocd.app.sync(  # pylint: disable=no-member
                 *argocd_sync_additional_flags,
                 '--timeout', argocd_sync_timeout_seconds,
@@ -667,7 +692,9 @@ users:
                 f"{prune_warning}: {error}"
             ) from error
 
+        # wait for sync to finish
         try:
+            print(f"Wait for synchronization of ArgoCD app ({argocd_app_name}) to finish.")
             sh.argocd.app.wait(  # pylint: disable=no-member
                 '--timeout', argocd_sync_timeout_seconds,
                 '--health',
