@@ -53,7 +53,11 @@ Results artifacts output by this step.
 Result Artifact Key       | Description
 --------------------------|------------
 `version`                 | Constructed semantic version (https://semver.org/).
-`container-image-version` | Constructed semantic version (https://semver.org/) without build number
+`container-image-tag`     | Constructed semantic version (https://semver.org/) without build number\
+                            since container tags don't support + symbol.
+`container-image-version` | DEPRECIATED. See `container-image-tag`.\
+                            Constructed semantic version (https://semver.org/) without build number\
+                            since container tags don't support + symbol.
 """
 
 from ploigos_step_runner import StepImplementer
@@ -133,22 +137,23 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             version = f'{app_version}-{pre_release}+{build}'
             image_tag = f'{app_version}-{pre_release}'
 
+        # add artifacts
         step_result.add_artifact(
             name='version',
             value=version
         )
-
         step_result.add_artifact(
-            name='container-image-version',
+            name='container-image-tag',
             value=image_tag
         )
 
+        # add evidence
         step_result.add_evidence(
             name='version',
             value=version
         )
         step_result.add_evidence(
-            name='container-image-version',
+            name='container-image-tag',
             value=image_tag
         )
 

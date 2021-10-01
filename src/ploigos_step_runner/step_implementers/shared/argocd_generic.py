@@ -15,7 +15,6 @@ KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$"
 KUBE_LABEL_MAX_LENGTH = 52
 KUBE_LABEL_REPLACEMENT_CHAR = '-'
 
-
 class ArgoCDGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use ArgoCD.
     """

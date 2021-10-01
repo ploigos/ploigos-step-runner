@@ -3,12 +3,11 @@ import re
 from io import IOBase
 from unittest.mock import call, patch
 
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.deploy.argocd_deploy import \
-    ArgoCDDeploy
-from ploigos_step_runner.step_implementers.shared.argocd_generic import \
-    ArgoCDGeneric
+from ploigos_step_runner.step_implementers.deploy import ArgoCDDeploy
+from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,
+                                                          ContainerDeployMixin)
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -30,8 +29,12 @@ class TestStepImplementerDeployArgoCDBase(BaseStepImplementerTestCase):
             environment=environment
         )
 
-class TestStepImplementerSharedArgoCDGeneric_Other(TestStepImplementerDeployArgoCDBase):
-    def test_step_implementer_config_defaults(self):
+class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoCDBase):
+    @patch.object(ContainerDeployMixin, 'step_implementer_config_defaults', return_value={})
+    def test_step_implementer_config_defaults(
+        self,
+        mock_container_deploy_mixin_step_implementer_config_defaults
+    ):
         defaults = ArgoCDDeploy.step_implementer_config_defaults()
         expected_defaults = {
             'argocd-sync-timeout-seconds': 60,
@@ -42,15 +45,20 @@ class TestStepImplementerSharedArgoCDGeneric_Other(TestStepImplementerDeployArgo
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
             'additional-helm-values-files': [],
-            'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image_tag',
+            'deployment-config-helm-chart-values-file-container-image-address-yq-path': 'image',
             'force-push-tags': False,
             'kube-api-skip-tls': False,
             'kube-api-uri': 'https://kubernetes.default.svc',
             'git-name': 'Ploigos Robot'
         }
         self.assertEqual(defaults, expected_defaults)
+        mock_container_deploy_mixin_step_implementer_config_defaults.assert_called_once()
 
-    def test_required_config_or_result_keys(self):
+    @patch.object(ContainerDeployMixin, '_required_config_or_result_keys', return_value=[])
+    def test_required_config_or_result_keys(
+        self,
+        mock_container_deploy_mixin_required_config_or_result_keys
+    ):
         required_keys = ArgoCDDeploy._required_config_or_result_keys()
         expected_required_keys = [
             'argocd-username',
@@ -59,16 +67,23 @@ class TestStepImplementerSharedArgoCDGeneric_Other(TestStepImplementerDeployArgo
             'argocd-skip-tls',
             'deployment-config-repo',
             'deployment-config-helm-chart-path',
-            'deployment-config-helm-chart-values-file-image-tag-yq-path',
+            [
+                'deployment-config-helm-chart-values-file-container-image-address-yq-path',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path'
+            ],
             'git-email',
-            'git-name',
-            'container-image-tag'
+            'git-name'
         ]
         self.assertEqual(required_keys, expected_required_keys)
+        mock_container_deploy_mixin_required_config_or_result_keys.assert_called_once()
+@patch.object(ContainerDeployMixin, '_validate_required_config_or_previous_step_result_artifact_keys')
 class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_result_artifact_keys(
     TestStepImplementerDeployArgoCDBase
 ):
-    def test__validate_required_config_or_previous_step_result_artifact_keys_success_ssh(self):
+    def test_success_ssh_deploy_tag(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -81,7 +96,10 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
-                'container-image-tag': 'v0.42.0'
+                'use-container-image-digest': False,
+                'container-image-tag': 'v0.42.0',
+                'container-image-pull-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -89,8 +107,131 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+            mock_super_validate.assert_called_once()
 
-    def test__validate_required_config_or_previous_step_result_artifact_keys_success_https(self):
+    def test_success_ssh_deploy_digest(
+        self,
+        mock_super_validate
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'use-container-image-digest': True,
+                'container-image-digest': 'sha256:mockabc123',
+                'container-image-pull-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+            mock_super_validate.assert_called_once()
+
+    def test_success_deploy_using_container_image_pull_registry_true_provided_container_image_pull_registry_deploy_tag(
+        self,
+        mock_super_validate
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'use-container-image-digest': False,
+                'use-container-image-short-address': False,
+                'container-image-pull-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+            mock_super_validate.assert_called_once()
+
+    def test_success_deploy_using_container_image_pull_registry_true_provided_container_image_registry_deploy_tag(
+        self,
+        mock_super_validate
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'use-container-image-digest': False,
+                'use-container-image-short-address': False,
+                'container-image-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+            mock_super_validate.assert_called_once()
+
+    def test_success_deploy_using_container_image_pull_registry_true_provided_container_image_push_registry_deploy_tag(
+        self,
+        mock_super_validate
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'git@git.ploigos.xyz:foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-tag': 'v0.42.0',
+                'use-container-image-digest': False,
+                'use-container-image-short-address': False,
+                'container-image-push-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+            mock_super_validate.assert_called_once()
+
+    def test_success_https_deploy_tag(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -105,7 +246,10 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'git-name': 'Ploigos',
                 'container-image-tag': 'v0.42.0',
                 'git-username': 'test-git-username',
-                'git-password': 'test-secret'
+                'git-password': 'test-secret',
+                'use-container-image-digest': False,
+                'container-image-pull-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -114,7 +258,44 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    def test__validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_username(self):
+            mock_super_validate.assert_called_once()
+
+    def test_success_https_deploy_digest(
+        self,
+        mock_super_validate
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'argocd-username': 'argo-username',
+                'argocd-password': 'argo-password',
+                'argocd-api': 'https://argo.ploigos.xyz',
+                'argocd-skip-tls': False,
+                'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
+                'deployment-config-helm-chart-path': 'charts/foo',
+                'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'git-email': 'git@ploigos.xyz',
+                'git-name': 'Ploigos',
+                'container-image-digest': 'sha256:mockabc123',
+                'git-username': 'test-git-username',
+                'git-password': 'test-secret',
+                'use-container-image-digest': True,
+                'container-image-pull-registry': 'mock-pull-registry.xyz',
+                'container-image-pull-repository': 'mock-pull-repository'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+            mock_super_validate.assert_called_once()
+
+    def test_fail_https_no_git_username(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -128,7 +309,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
                 'container-image-tag': 'v0.42.0',
-                'git-password': 'test-secret'
+                'git-password': 'test-secret',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -141,7 +323,12 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    def test__validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_password(self):
+            mock_super_validate.assert_called_once()
+
+    def test_fail_https_no_git_password(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -155,7 +342,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
                 'container-image-tag': 'v0.42.0',
-                'git-username': 'test-git-username'
+                'git-username': 'test-git-username',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -168,7 +356,12 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_https_no_git_creds(self):
+            mock_super_validate.assert_called_once()
+
+    def test_fail_https_no_git_creds(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -181,7 +374,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
-                'container-image-tag': 'v0.42.0'
+                'container-image-tag': 'v0.42.0',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -196,7 +390,12 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
-    def test_ArgoCDGeneric_validate_required_config_or_previous_step_result_artifact_keys_fail_http_no_git_creds(self):
+            mock_super_validate.assert_called_once()
+
+    def test_fail_http_no_git_creds(
+        self,
+        mock_super_validate
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
@@ -209,7 +408,8 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
                 'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
-                'container-image-tag': 'v0.42.0'
+                'container-image-tag': 'v0.42.0',
+                'container-image-pull-repository': 'mock-pull-repository'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -224,36 +424,43 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
+            mock_super_validate.assert_called_once()
+
 # NOTE:
 #   Could definitely do some more negative testing of _run_step testing what happens when each
 #   and every mocked function throws an error (that can throw an error)
-class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBase):
-    @patch.object(
-        ArgoCDDeploy,
-        '_argocd_get_app_manifest',
-        return_value='/does/not/matter/manifest.yaml'
-    )
-    @patch.object(ArgoCDDeploy, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDeploy, '_update_yaml_file_value')
-    @patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
-    @patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
-    @patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
-    @patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
-    @patch.object(ArgoCDGeneric, '_git_commit_file')
-    @patch.object(ArgoCDGeneric, '_argocd_sign_in')
-    @patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
-    @patch.object(ArgoCDGeneric, '_argocd_app_sync')
-    @patch.object(
-        ArgoCDGeneric,
-        '_get_deployed_host_urls',
-        return_value=['https://fruits.ploigos.xyz']
-    )
-    @patch.object(
-        ArgoCDDeploy,
-        '_get_deployment_config_helm_chart_environment_values_file',
-        return_value='values-PROD.yaml'
-    )
-    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
+@patch.object(
+    ArgoCDDeploy,
+    '_get_deploy_time_container_image_address',
+    return_value='mock-deploy-time-container-image-address'
+)
+@patch.object(
+    ArgoCDDeploy,
+    '_argocd_get_app_manifest',
+    return_value='/does/not/matter/manifest.yaml'
+)
+@patch.object(ArgoCDDeploy, '_get_app_name', return_value='test-app-name')
+@patch.object(ArgoCDDeploy, '_update_yaml_file_value')
+@patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
+@patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
+@patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
+@patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
+@patch.object(ArgoCDGeneric, '_git_commit_file')
+@patch.object(ArgoCDGeneric, '_argocd_sign_in')
+@patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
+@patch.object(ArgoCDGeneric, '_argocd_app_sync')
+@patch.object(
+    ArgoCDGeneric,
+    '_get_deployed_host_urls',
+    return_value=['https://fruits.ploigos.xyz']
+)
+@patch.object(
+    ArgoCDDeploy,
+    '_get_deployment_config_helm_chart_environment_values_file',
+    return_value='values-PROD.yaml'
+)
+@patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
+class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBase):
     def test_run_step_success(
             self,
             get_repo_branch_mock,
@@ -269,7 +476,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployment_config_repo_tag_mock,
             update_yaml_file_value_mock,
             get_app_name_mock,
-            argocd_get_app_manifest_mock
+            argocd_get_app_manifest_mock,
+            get_deploy_time_container_image_address_mock
     ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -283,6 +491,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
                 'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
+                'container-image-pull-repository': 'mock-org/mock-app/mock-service',
+                'container-image-pull-digest': 'sha256:mockabc123',
                 'container-image-tag': 'v0.42.0'
             }
             step_implementer = self.create_step_implementer(
@@ -301,6 +511,11 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             expected_step_result.add_artifact(
                 name='argocd-app-name',
                 value='test-app-name'
+            )
+            expected_step_result.add_artifact(
+                name='container-image-deployed-address',
+                value='mock-deploy-time-container-image-address',
+                description='Container image address used to deploy the container.'
             )
             expected_step_result.add_artifact(
                 name='config-repo-git-tag',
@@ -335,7 +550,7 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             update_yaml_file_value_mock.assert_called_once_with(
                 file='/does/not/matter/charts/foo/values-PROD.yaml',
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
-                value=step_config['container-image-tag']
+                value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
@@ -381,33 +596,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployed_host_urls_mock.assert_called_once_with(
                 manifest_path='/does/not/matter/manifest.yaml'
             )
+            get_deploy_time_container_image_address_mock.assert_called_once_with()
 
-    @patch.object(
-        ArgoCDDeploy,
-        '_argocd_get_app_manifest',
-        return_value='/does/not/matter/manifest.yaml'
-    )
-    @patch.object(ArgoCDDeploy, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDeploy, '_update_yaml_file_value')
-    @patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
-    @patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
-    @patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
-    @patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
-    @patch.object(ArgoCDGeneric, '_git_commit_file')
-    @patch.object(ArgoCDGeneric, '_argocd_sign_in')
-    @patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
-    @patch.object(ArgoCDGeneric, '_argocd_app_sync')
-    @patch.object(
-        ArgoCDGeneric,
-        '_get_deployed_host_urls',
-        return_value=['https://fruits.ploigos.xyz']
-    )
-    @patch.object(
-        ArgoCDDeploy,
-        '_get_deployment_config_helm_chart_environment_values_file',
-        return_value='values-PROD.yaml'
-    )
-    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
     def test_run_step_success_no_prune(
             self,
             get_repo_branch_mock,
@@ -423,7 +613,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployment_config_repo_tag_mock,
             update_yaml_file_value_mock,
             get_app_name_mock,
-            argocd_get_app_manifest_mock
+            argocd_get_app_manifest_mock,
+            get_deploy_time_container_image_address_mock
     ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -458,6 +649,11 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
                 value='test-app-name'
             )
             expected_step_result.add_artifact(
+                name='container-image-deployed-address',
+                value='mock-deploy-time-container-image-address',
+                description='Container image address used to deploy the container.'
+            )
+            expected_step_result.add_artifact(
                 name='config-repo-git-tag',
                 value='v0.42.0'
             )
@@ -490,7 +686,7 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             update_yaml_file_value_mock.assert_called_once_with(
                 file='/does/not/matter/charts/foo/values-PROD.yaml',
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
-                value=step_config['container-image-tag']
+                value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
@@ -536,33 +732,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployed_host_urls_mock.assert_called_once_with(
                 manifest_path='/does/not/matter/manifest.yaml'
             )
+            get_deploy_time_container_image_address_mock.assert_called_once_with()
 
-    @patch.object(
-        ArgoCDDeploy,
-        '_argocd_get_app_manifest',
-        return_value='/does/not/matter/manifest.yaml'
-    )
-    @patch.object(ArgoCDDeploy, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDeploy, '_update_yaml_file_value')
-    @patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
-    @patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
-    @patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
-    @patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
-    @patch.object(ArgoCDGeneric, '_git_commit_file')
-    @patch.object(ArgoCDGeneric, '_argocd_sign_in')
-    @patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
-    @patch.object(ArgoCDGeneric, '_argocd_app_sync')
-    @patch.object(
-        ArgoCDGeneric,
-        '_get_deployed_host_urls',
-        return_value=['https://fruits.ploigos.xyz']
-    )
-    @patch.object(
-        ArgoCDDeploy,
-        '_get_deployment_config_helm_chart_environment_values_file',
-        return_value='values-PROD.yaml'
-    )
-    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
     def test_run_step_success_additional_helm_values_files(
             self,
             get_repo_branch_mock,
@@ -578,7 +749,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployment_config_repo_tag_mock,
             update_yaml_file_value_mock,
             get_app_name_mock,
-            argocd_get_app_manifest_mock
+            argocd_get_app_manifest_mock,
+            get_deploy_time_container_image_address_mock
     ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -613,6 +785,11 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
                 value='test-app-name'
             )
             expected_step_result.add_artifact(
+                name='container-image-deployed-address',
+                value='mock-deploy-time-container-image-address',
+                description='Container image address used to deploy the container.'
+            )
+            expected_step_result.add_artifact(
                 name='config-repo-git-tag',
                 value='v0.42.0'
             )
@@ -645,7 +822,7 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             update_yaml_file_value_mock.assert_called_once_with(
                 file='/does/not/matter/charts/foo/values-PROD.yaml',
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
-                value=step_config['container-image-tag']
+                value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
@@ -691,33 +868,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployed_host_urls_mock.assert_called_once_with(
                 manifest_path='/does/not/matter/manifest.yaml'
             )
+            get_deploy_time_container_image_address_mock.assert_called_once_with()
 
-    @patch.object(
-        ArgoCDDeploy,
-        '_argocd_get_app_manifest',
-        return_value='/does/not/matter/manifest.yaml'
-    )
-    @patch.object(ArgoCDDeploy, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDeploy, '_update_yaml_file_value')
-    @patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
-    @patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
-    @patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
-    @patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
-    @patch.object(ArgoCDGeneric, '_git_commit_file')
-    @patch.object(ArgoCDGeneric, '_argocd_sign_in')
-    @patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
-    @patch.object(ArgoCDGeneric, '_argocd_app_sync')
-    @patch.object(
-        ArgoCDGeneric,
-        '_get_deployed_host_urls',
-        return_value=['https://fruits.ploigos.xyz']
-    )
-    @patch.object(
-        ArgoCDDeploy,
-        '_get_deployment_config_helm_chart_environment_values_file',
-        return_value='values-PROD.yaml'
-    )
-    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/test')
     def test_run_step_fail_clone_config_repo(
             self,
             get_repo_branch_mock,
@@ -733,7 +885,8 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             get_deployment_config_repo_tag_mock,
             update_yaml_file_value_mock,
             get_app_name_mock,
-            argocd_get_app_manifest_mock
+            argocd_get_app_manifest_mock,
+            get_deploy_time_container_image_address_mock
     ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -800,3 +953,4 @@ class TestStepImplementerSharedArgoCDDeploy_run_step(TestStepImplementerDeployAr
             argocd_app_sync_mock.assert_not_called()
             argocd_get_app_manifest_mock.assert_not_called()
             get_deployed_host_urls_mock.assert_not_called()
+            get_deploy_time_container_image_address_mock.assert_not_called()

@@ -162,7 +162,9 @@ class TestStepImplementerCreateContainerImageBuildah___required_config_or_result
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-@patch('ploigos_step_runner.step_implementers.create_container_image.buildah.determine_container_image_build_tag_info')
+@patch('ploigos_step_runner.step_implementers.create_container_image.buildah.add_container_build_step_result_artifacts')
+@patch('ploigos_step_runner.step_implementers.create_container_image.buildah.get_container_image_digest')
+@patch('ploigos_step_runner.step_implementers.create_container_image.buildah.determine_container_image_address_info')
 @patch('sh.buildah', create=True)
 class TestStepImplementerCreateContainerImageBuildah___run_step(
     BaseTestStepImplementerCreateContainerImageBuildah
@@ -170,7 +172,9 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
     def test_pass(
         self,
         buildah_mock,
-        mock_determine_container_image_build_tag_info
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
     ):
         with TempDirectory() as temp_dir:
             # setup test
@@ -200,71 +204,36 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
             )
 
             # set up mocks
-            mock_determine_container_image_build_tag_info.return_value=[
-                'localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                'mock-org/mock-app-mock-service:1.0-123abc',
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                'mock-org/mock-app/mock-service:1.0-123abc',
                 'localhost',
-                'mock-app-mock-service',
+                'mock-app/mock-service',
                 '1.0-123abc'
             ]
+            mock_get_container_image_digest.return_value = 'sha256:mockabc123'
 
             # run test
-            result = step_implementer._run_step()
+            actual_step_result = step_implementer._run_step()
 
             # verify results
-            expected_step_result = StepResult(
-                step_name='create-container-image',
-                sub_step_name='Buildah',
-                sub_step_implementer_name='Buildah'
+            mock_get_container_image_digest.assert_called_once_with(
+                container_image_address='localhost/mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-uri',
-                value='localhost',
-                description='Registry URI poriton of the container image tag' \
-                    ' of the built container image.'
+            mock_add_container_build_step_result_artifacts.assert_called_once_with(
+                step_result=actual_step_result,
+                contaimer_image_registry='localhost',
+                container_image_repository='mock-app/mock-service',
+                container_image_tag='1.0-123abc',
+                container_image_digest='sha256:mockabc123',
+                container_image_build_address='localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                container_image_build_short_address='mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-organization',
-                value='mock-org',
-                description='Organization portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-repository',
-                value='mock-app-mock-service',
-                description='Repository portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-name',
-                value='mock-app-mock-service',
-                description='Another way to reference the' \
-                    ' repository portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-version',
-                value='1.0-123abc',
-                description='Version portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-tag',
-                value='localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                description='Full container image tag of the built container,' \
-                    ' including the registry URI.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-short-tag',
-                value='mock-org/mock-app-mock-service:1.0-123abc',
-                description='Short container image tag of the built container image,' \
-                    ' excluding the registry URI.'
-            )
-            self.assertEqual(result, expected_step_result)
-
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
-                '-t', 'localhost/mock-org/mock-app-mock-service:1.0-123abc',
+                '-t', 'localhost/mock-org/mock-app/mock-service:1.0-123abc',
                 '--authfile', os.path.join(step_implementer.work_dir_path, 'container-auth.json'),
                 temp_dir.path,
                 _out=sys.stdout,
@@ -272,7 +241,13 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 _tee='err'
             )
 
-    def test_pass_custom_auth_file(self, buildah_mock, mock_determine_container_image_build_tag_info):
+    def test_pass_custom_auth_file(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
         with TempDirectory() as temp_dir:
             # setup test
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -302,71 +277,36 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
             )
 
             # set up mocks
-            mock_determine_container_image_build_tag_info.return_value=[
-                'localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                'mock-org/mock-app-mock-service:1.0-123abc',
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                'mock-org/mock-app/mock-service:1.0-123abc',
                 'localhost',
-                'mock-app-mock-service',
+                'mock-app/mock-service',
                 '1.0-123abc'
             ]
+            mock_get_container_image_digest.return_value = 'sha256:mockabc123'
 
             # run test
-            result = step_implementer._run_step()
+            actual_step_result = step_implementer._run_step()
 
             # verify results
-            expected_step_result = StepResult(
-                step_name='create-container-image',
-                sub_step_name='Buildah',
-                sub_step_implementer_name='Buildah'
+            mock_get_container_image_digest.assert_called_once_with(
+                container_image_address='localhost/mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-uri',
-                value='localhost',
-                description='Registry URI poriton of the container image tag' \
-                    ' of the built container image.'
+            mock_add_container_build_step_result_artifacts.assert_called_once_with(
+                step_result=actual_step_result,
+                contaimer_image_registry='localhost',
+                container_image_repository='mock-app/mock-service',
+                container_image_tag='1.0-123abc',
+                container_image_digest='sha256:mockabc123',
+                container_image_build_address='localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                container_image_build_short_address='mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-organization',
-                value='mock-org',
-                description='Organization portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-repository',
-                value='mock-app-mock-service',
-                description='Repository portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-name',
-                value='mock-app-mock-service',
-                description='Another way to reference the' \
-                    ' repository portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-version',
-                value='1.0-123abc',
-                description='Version portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-tag',
-                value='localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                description='Full container image tag of the built container,' \
-                    ' including the registry URI.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-short-tag',
-                value='mock-org/mock-app-mock-service:1.0-123abc',
-                description='Short container image tag of the built container image,' \
-                    ' excluding the registry URI.'
-            )
-            self.assertEqual(result, expected_step_result)
-
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
-                '-t', 'localhost/mock-org/mock-app-mock-service:1.0-123abc',
+                '-t', 'localhost/mock-org/mock-app/mock-service:1.0-123abc',
                 '--authfile', 'mock-auth.json',
                 temp_dir.path,
                 _out=sys.stdout,
@@ -374,7 +314,13 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 _tee='err'
             )
 
-    def test_pass_string_tls_verify(self, buildah_mock, mock_determine_container_image_build_tag_info):
+    def test_pass_string_tls_verify_true(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
         with TempDirectory() as temp_dir:
             # setup test
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -402,72 +348,44 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 parent_work_dir_path=parent_work_dir_path
             )
 
-            # setup sideeffects
-            mock_determine_container_image_build_tag_info.return_value=[
-                'localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                'mock-org/mock-app-mock-service:1.0-123abc',
+            # set up mocks
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                'mock-org/mock-app/mock-service:1.0-123abc',
                 'localhost',
-                'mock-app-mock-service',
+                'mock-app/mock-service',
                 '1.0-123abc'
             ]
+            mock_get_container_image_digest.return_value = 'sha256:mockabc123'
 
             # run test
-            result = step_implementer._run_step()
+            actual_step_result = step_implementer._run_step()
 
             # verify results
-            expected_step_result = StepResult(
-                step_name='create-container-image',
-                sub_step_name='Buildah',
-                sub_step_implementer_name='Buildah'
+            mock_get_container_image_digest.assert_called_once_with(
+                container_image_address='localhost/mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-uri',
-                value='localhost',
-                description='Registry URI poriton of the container image tag' \
-                    ' of the built container image.'
+            mock_determine_container_image_address_info.assert_called_once_with(
+                contaimer_image_registry='localhost',
+                container_image_tag='1.0-123abc',
+                organization='mock-org',
+                application_name='mock-app',
+                service_name='mock-service'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-organization',
-                value='mock-org',
-                description='Organization portion of the container image tag' \
-                    ' of the built container image.'
+            mock_add_container_build_step_result_artifacts.assert_called_once_with(
+                step_result=actual_step_result,
+                contaimer_image_registry='localhost',
+                container_image_repository='mock-app/mock-service',
+                container_image_tag='1.0-123abc',
+                container_image_digest='sha256:mockabc123',
+                container_image_build_address='localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                container_image_build_short_address='mock-org/mock-app/mock-service:1.0-123abc'
             )
-            expected_step_result.add_artifact(
-                name='container-image-repository',
-                value='mock-app-mock-service',
-                description='Repository portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-name',
-                value='mock-app-mock-service',
-                description='Another way to reference the' \
-                    ' repository portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-version',
-                value='1.0-123abc',
-                description='Version portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-tag',
-                value='localhost/mock-org/mock-app-mock-service:1.0-123abc',
-                description='Full container image tag of the built container,' \
-                    ' including the registry URI.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-short-tag',
-                value='mock-org/mock-app-mock-service:1.0-123abc',
-                description='Short container image tag of the built container image,' \
-                    ' excluding the registry URI.'
-            )
-            self.assertEqual(result, expected_step_result)
-
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
-                '-t', 'localhost/mock-org/mock-app-mock-service:1.0-123abc',
+                '-t', 'localhost/mock-org/mock-app/mock-service:1.0-123abc',
                 '--authfile', os.path.join(step_implementer.work_dir_path, 'container-auth.json'),
                 temp_dir.path,
                 _out=sys.stdout,
@@ -475,7 +393,92 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 _tee='err'
             )
 
-    def test_pass_no_container_image_version(self, buildah_mock, mock_determine_container_image_build_tag_info):
+    def test_pass_string_tls_verify_false(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
+        with TempDirectory() as temp_dir:
+            # setup test
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('Containerfile',b'''testing''')
+
+            artifact_config = {
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+
+            step_config = {
+                'imagespecfile': 'Containerfile',
+                'context': temp_dir.path,
+                'tls-verify': 'false',
+                'format': 'oci',
+                'organization': 'mock-org',
+                'service-name': 'mock-service',
+                'application-name': 'mock-app'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='create-container-image',
+                implementer='Buildah',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            # set up mocks
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                'mock-org/mock-app/mock-service:1.0-123abc',
+                'localhost',
+                'mock-app/mock-service',
+                '1.0-123abc'
+            ]
+            mock_get_container_image_digest.return_value = 'sha256:mockabc123'
+
+            # run test
+            actual_step_result = step_implementer._run_step()
+
+            # verify results
+            mock_get_container_image_digest.assert_called_once_with(
+                container_image_address='localhost/mock-org/mock-app/mock-service:1.0-123abc'
+            )
+            mock_determine_container_image_address_info.assert_called_once_with(
+                contaimer_image_registry='localhost',
+                container_image_tag='1.0-123abc',
+                organization='mock-org',
+                application_name='mock-app',
+                service_name='mock-service'
+            )
+            mock_add_container_build_step_result_artifacts.assert_called_once_with(
+                step_result=actual_step_result,
+                contaimer_image_registry='localhost',
+                container_image_repository='mock-app/mock-service',
+                container_image_tag='1.0-123abc',
+                container_image_digest='sha256:mockabc123',
+                container_image_build_address='localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                container_image_build_short_address='mock-org/mock-app/mock-service:1.0-123abc'
+            )
+            buildah_mock.bud.assert_called_once_with(
+                '--format=oci',
+                '--tls-verify=false',
+                '--layers', '-f', 'Containerfile',
+                '-t', 'localhost/mock-org/mock-app/mock-service:1.0-123abc',
+                '--authfile', os.path.join(step_implementer.work_dir_path, 'container-auth.json'),
+                temp_dir.path,
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _tee='err'
+            )
+
+    def test_pass_no_container_image_version(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
         with TempDirectory() as temp_dir:
             # setup test
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -496,72 +499,44 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 parent_work_dir_path=parent_work_dir_path,
             )
 
-            # setup sideeffects
-            mock_determine_container_image_build_tag_info.return_value=[
-                'localhost/mock-org/mock-app-mock-service:mock-default-version',
-                'mock-org/mock-app-mock-service:mock-default-version',
+            # set up mocks
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app/mock-service:latest',
+                'mock-org/mock-app/mock-service:latest',
                 'localhost',
-                'mock-app-mock-service',
-                'mock-default-version'
+                'mock-app/mock-service',
+                'latest'
             ]
+            mock_get_container_image_digest.return_value = 'sha256:mockabc123'
 
             # run test
-            result = step_implementer._run_step()
+            actual_step_result = step_implementer._run_step()
 
             # verify results
-            expected_step_result = StepResult(
-                step_name='create-container-image',
-                sub_step_name='Buildah',
-                sub_step_implementer_name='Buildah'
+            mock_get_container_image_digest.assert_called_once_with(
+                container_image_address='localhost/mock-org/mock-app/mock-service:latest'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-uri',
-                value='localhost',
-                description='Registry URI poriton of the container image tag' \
-                    ' of the built container image.'
+            mock_determine_container_image_address_info.assert_called_once_with(
+                contaimer_image_registry='localhost',
+                container_image_tag=None,
+                organization='mock-org',
+                application_name='mock-app',
+                service_name='mock-service'
             )
-            expected_step_result.add_artifact(
-                name='container-image-registry-organization',
-                value='mock-org',
-                description='Organization portion of the container image tag' \
-                    ' of the built container image.'
+            mock_add_container_build_step_result_artifacts.assert_called_once_with(
+                step_result=actual_step_result,
+                contaimer_image_registry='localhost',
+                container_image_repository='mock-app/mock-service',
+                container_image_tag='latest',
+                container_image_digest='sha256:mockabc123',
+                container_image_build_address='localhost/mock-org/mock-app/mock-service:latest',
+                container_image_build_short_address='mock-org/mock-app/mock-service:latest'
             )
-            expected_step_result.add_artifact(
-                name='container-image-repository',
-                value='mock-app-mock-service',
-                description='Repository portion of the container image tag' \
-                    ' of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-name',
-                value='mock-app-mock-service',
-                description='Another way to reference the' \
-                    ' repository portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-version',
-                value='mock-default-version',
-                description='Version portion of the container image tag of the built container image.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-tag',
-                value='localhost/mock-org/mock-app-mock-service:mock-default-version',
-                description='Full container image tag of the built container,' \
-                    ' including the registry URI.'
-            )
-            expected_step_result.add_artifact(
-                name='container-image-short-tag',
-                value='mock-org/mock-app-mock-service:mock-default-version',
-                description='Short container image tag of the built container image,' \
-                    ' excluding the registry URI.'
-            )
-            self.assertEqual(result, expected_step_result)
-
             buildah_mock.bud.assert_called_once_with(
                 '--format=oci',
                 '--tls-verify=true',
                 '--layers', '-f', 'Containerfile',
-                '-t', 'localhost/mock-org/mock-app-mock-service:mock-default-version',
+                '-t', 'localhost/mock-org/mock-app/mock-service:latest',
                 '--authfile', os.path.join(step_implementer.work_dir_path, 'container-auth.json'),
                 temp_dir.path,
                 _out=sys.stdout,
@@ -569,7 +544,13 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                 _tee='err'
             )
 
-    def test_fail_buildah_bud_error(self, buildah_mock, mock_determine_container_image_build_tag_info):
+    def test_fail_buildah_bud_error(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('Containerfile',b'''testing''')
@@ -597,7 +578,7 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
             )
 
             # setup sideeffects
-            mock_determine_container_image_build_tag_info.return_value=[
+            mock_determine_container_image_address_info.return_value=[
                 'localhost/mock-org/mock-app-mock-service:1.0-123abc',
                 'mock-org/mock-app-mock-service:1.0-123abc',
                 'localhost',
@@ -621,6 +602,63 @@ class TestStepImplementerCreateContainerImageBuildah___run_step(
                     r'.*mock out'
                     r'.*STDERR:'
                     r'.*mock error',
+                    re.DOTALL
+                )
+            )
+            mock_get_container_image_digest.assert_not_called()
+
+    def test_fail_getting_digest(
+        self,
+        buildah_mock,
+        mock_determine_container_image_address_info,
+        mock_get_container_image_digest,
+        mock_add_container_build_step_result_artifacts
+    ):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('Containerfile',b'''testing''')
+
+            artifact_config = {
+                'container-image-version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+
+            image_spec_file = 'Containerfile'
+            step_config = {
+                'imagespecfile': image_spec_file,
+                'context': temp_dir.path,
+                'tls-verify': True,
+                'format': 'oci',
+                'service-name': 'mock-service',
+                'application-name': 'mock-app'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='create-container-image',
+                implementer='Buildah',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            # setup sideeffects
+            mock_determine_container_image_address_info.return_value=[
+                'localhost/mock-org/mock-app-mock-service:1.0-123abc',
+                'mock-org/mock-app-mock-service:1.0-123abc',
+                'localhost',
+                'mock-app-mock-service',
+                '1.0-123abc'
+            ]
+            mock_get_container_image_digest.side_effect = RuntimeError('mock error getting digest')
+
+            # run step
+            result = step_implementer._run_step()
+
+             # verify step result
+            self.assertFalse(result.success)
+            self.assertRegex(
+                result.message,
+                re.compile(
+                    r'Error getting built container image digest: mock error getting digest',
                     re.DOTALL
                 )
             )

@@ -282,14 +282,14 @@ def container_registry_login( #pylint: disable=too-many-arguments,too-many-branc
         ) from error
 
 def create_container_from_image(
-    image_tag,
+    image_address,
     repository_type='container-storage:'
 ):
     """Import a container image using buildah form a TAR file.
 
     Parameters
     ----------
-    image_tag : str
+    image_address : str
         Image tag to create a container from.
         ex:
         * localhost/my-app:latest
@@ -320,7 +320,7 @@ def create_container_from_image(
         ])
         sh.buildah(  # pylint: disable=no-member
             'from',
-            f"{repository_type}{image_tag}",
+            f"{repository_type}{image_address}",
             _out=buildah_from_out_callback,
             _err=sys.stderr,
             _tee='err'
@@ -328,7 +328,7 @@ def create_container_from_image(
         container_name = buildah_from_out_buff.getvalue().rstrip()
     except sh.ErrorReturnCode as error:
         raise RuntimeError(
-            f'Error creating container from image ({image_tag}): {error}'
+            f'Error creating container from image ({image_address}): {error}'
         ) from error
 
     return container_name
@@ -377,8 +377,9 @@ def mount_container(buildah_unshare_command, container_id):
 
     return mount_path
 
-def determine_container_image_build_tag_info(
-    image_version,
+def determine_container_image_address_info(
+    contaimer_image_registry,
+    container_image_tag,
     organization,
     application_name,
     service_name
@@ -387,7 +388,7 @@ def determine_container_image_build_tag_info(
 
     Parameters
     ----------
-    image_version : str
+    container_image_tag : str
         A given image version. If none given, latest will be used.
     organization : str
         Organization the container image belongs to.
@@ -406,19 +407,23 @@ def determine_container_image_build_tag_info(
         Fifth result is the used image version.
 
     """
-    if image_version is None:
-        image_version = 'latest'
+    if container_image_tag is None:
+        container_image_tag = 'latest'
         print('No image tag version found in metadata. Using latest')
-    image_registry_uri = 'localhost'
-    image_registry_organization = organization
-    image_repository = f"{application_name}-{service_name}"
-    build_short_tag = f"{image_registry_organization}/{image_repository}:{image_version}"
-    build_full_tag = f"{image_registry_uri}/{build_short_tag}"
 
-    return build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version
+    container_image_repository = f"{organization}/{application_name}"
+    if service_name:
+        container_image_repository += f"/{service_name}"
+
+    container_image_build_short_address = f"{container_image_repository}:{container_image_tag}"
+    container_image_build_address = \
+        f"{contaimer_image_registry}/{container_image_build_short_address}"
+
+    return container_image_build_address, container_image_build_short_address,\
+        contaimer_image_registry, container_image_repository, container_image_tag
 
 def inspect_container_image(
-    container_image_uri,
+    container_image_address,
     containers_config_auth_file=None
 ):
     """Inspects a given container image for all its details. Useful for getting image labels
@@ -426,7 +431,7 @@ def inspect_container_image(
 
     Parameters
     ----------
-    container_image_uri : str
+    container_image_address : str
         URI to the container image to inspect
     containers_config_auth_file : str
         Path to container image registries authentication file.
@@ -453,11 +458,11 @@ def inspect_container_image(
     try:
         sh.buildah.pull( # pylint: disable=no-member
             *buildah_authfile_flags,
-            container_image_uri
+            container_image_address
         )
     except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
         raise RuntimeError(
-            f"Error pulling container image ({container_image_uri}) for inspection: {error}"
+            f"Error pulling container image ({container_image_address}) for inspection: {error}"
         ) from error
 
     # get container image information
@@ -465,14 +470,130 @@ def inspect_container_image(
 
         buildah_inspect_out_buff = StringIO()
         sh.buildah.inspect( # pylint: disable=no-member
-            container_image_uri,
+            container_image_address,
             _out=buildah_inspect_out_buff
         )
         buildah_inspect_out = buildah_inspect_out_buff.getvalue().rstrip()
         buildah_inspect = json.loads(buildah_inspect_out)
     except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
         raise RuntimeError(
-            f"Error inspecting container image ({container_image_uri}): {error}"
+            f"Error inspecting container image ({container_image_address}): {error}"
         ) from error
 
     return buildah_inspect
+
+def get_container_image_digest(
+    container_image_address,
+    containers_config_auth_file=None
+):
+    """Get the container image digest for a given container image.
+
+    Will pull the given container image if needed.
+
+    Parameters
+    ----------
+    container_image_address : str
+        URI to the container image to get the container image digest for.
+    containers_config_auth_file : str
+        Path to container image registries authentication file.
+
+    Raises
+    ------
+    RuntimeError
+        If error inspecting container image to get digest.
+        If error finding digest on container image inspection results.
+
+    Returns
+    -------
+    str
+        Container image digest for given container image.
+    """
+    try:
+        container_image_details = inspect_container_image(
+            container_image_address=container_image_address,
+            containers_config_auth_file=containers_config_auth_file
+        )
+
+        return container_image_details['FromImageDigest']
+    except RuntimeError as error:
+        raise RuntimeError(
+            f"Error getting container image ({container_image_address}) image digest: {error}"
+        ) from error
+    except KeyError as error:
+        raise RuntimeError(
+            f"Error finding container image ({container_image_address}) image digest from" \
+            f" container image inspection."
+        ) from error
+
+def add_container_build_step_result_artifacts(
+    step_result,
+    contaimer_image_registry,
+    container_image_repository,
+    container_image_tag,
+    container_image_digest,
+    container_image_build_address,
+    container_image_build_short_address
+): # pylint: disable=too-many-arguments
+    """Helper function to consistently add step results when building a container image.
+
+    NOTE: long term probably should move this into some mixin class that all container build
+    StepImplementers also inherit from, but thats another pattern don't want to introduce right now.
+
+    Parameters
+    ----------
+    step_result : StepResult
+        Step result to add the container build artifacts to.
+    contaimer_image_registry : str
+        Container image registry the image was built into.
+    container_image_repository : str
+        Container image repository the image was built into.
+    container_image_tag : str
+        Container image tag the built image was tagged with.
+    container_image_digest : str
+        Container image digest of built image.
+    container_image_build_address : str
+        Container image full address (with registry) the image was built into and can
+        be referenced by to push somewhere else.
+    container_image_build_short_address : str
+        Container image short address (without registry) the image was built into and can
+        be referenced by to push somewhere else, assuming the registry is on the local container
+        search path.
+
+    Results
+    -------
+    step_result : StepResult
+        The given StepResult which was modified in place.
+        Returned for convenience / and clarity.
+    """
+    step_result.add_artifact(
+        name='container-image-registry',
+        value=contaimer_image_registry,
+        description='Container image registry of the built container image address.'
+    )
+    step_result.add_artifact(
+        name='container-image-repository',
+        value=container_image_repository,
+        description='Container image repository of the built container image address.'
+    )
+    step_result.add_artifact(
+        name='container-image-tag',
+        value=container_image_tag,
+        description='Container image tag of the built container image address.'
+    )
+    step_result.add_artifact(
+        name='container-image-build-digest',
+        value=container_image_digest,
+        description='Container image digest of the built container image address.'
+    )
+    step_result.add_artifact(
+        name='container-image-build-address',
+        value=container_image_build_address,
+        description='Container image address of the built container image.'
+    )
+    step_result.add_artifact(
+        name='container-image-build-short-address',
+        value=container_image_build_short_address,
+        description='Container image short address (no registry) of the built container image.'
+    )
+
+    return step_result

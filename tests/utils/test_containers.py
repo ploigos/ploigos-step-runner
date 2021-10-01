@@ -3,6 +3,7 @@ from io import IOBase
 from unittest.mock import ANY, call, patch
 
 import sh
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.config import ConfigValue
 from ploigos_step_runner.utils.containers import *
 from tests.helpers.base_test_case import BaseTestCase
@@ -996,14 +997,14 @@ class Test_create_container_from_image(BaseTestCase):
     @patch('sh.buildah', create=True)
     def test_success_default_repository_type(self, buildah_mock):
         # setup test
-        image_tag = "localhost/mock-org/mock-image:v0.42.0-mock"
+        image_address = "localhost/mock-org/mock-image:v0.42.0-mock"
 
         # run test
         buildah_mock.side_effect = create_sh_side_effect(
             mock_stdout='mock-image-working-container-mock'
         )
         actual_container_name = create_container_from_image(
-            image_tag=image_tag
+            image_address=image_address
         )
 
         # verify
@@ -1011,7 +1012,7 @@ class Test_create_container_from_image(BaseTestCase):
 
         buildah_mock.assert_called_once_with(
             'from',
-            f"container-storage:{image_tag}",
+            f"container-storage:{image_address}",
             _out=Any(IOBase),
             _err=Any(IOBase),
             _tee='err'
@@ -1020,14 +1021,14 @@ class Test_create_container_from_image(BaseTestCase):
     @patch('sh.buildah', create=True)
     def test_success_remote_repository_type(self, buildah_mock):
         # setup test
-        image_tag = "quay.io/mock-org/mock-image:v0.42.0-mock"
+        image_address = "quay.io/mock-org/mock-image:v0.42.0-mock"
 
         # run test
         buildah_mock.side_effect = create_sh_side_effect(
             mock_stdout='mock-image-working-container-mock'
         )
         actual_container_name = create_container_from_image(
-            image_tag=image_tag,
+            image_address=image_address,
             repository_type='docker://'
         )
 
@@ -1036,7 +1037,7 @@ class Test_create_container_from_image(BaseTestCase):
 
         buildah_mock.assert_called_once_with(
             'from',
-            f"docker://{image_tag}",
+            f"docker://{image_address}",
             _out=Any(IOBase),
             _err=Any(IOBase),
             _tee='err'
@@ -1045,13 +1046,13 @@ class Test_create_container_from_image(BaseTestCase):
     @patch('sh.buildah', create=True)
     def test_error(self, buildah_mock):
         # setup test
-        image_tag = "localhost/mock-org/mock-image:v0.42.0-mock"
+        image_address = "localhost/mock-org/mock-image:v0.42.0-mock"
 
         # run test with mock error
         with self.assertRaisesRegex(
             RuntimeError,
             re.compile(
-                rf"Error creating container from image \({image_tag}\):"
+                rf"Error creating container from image \({image_address}\):"
                 r".*RAN: buildah"
                 r".*STDOUT:"
                 r".*mock out"
@@ -1062,13 +1063,13 @@ class Test_create_container_from_image(BaseTestCase):
         ):
             buildah_mock.side_effect = sh.ErrorReturnCode('buildah', b'mock out', b'mock error')
             create_container_from_image(
-                image_tag=image_tag
+                image_address=image_address
             )
 
         # verify
         buildah_mock.assert_called_once_with(
             'from',
-            f"container-storage:{image_tag}",
+            f"container-storage:{image_address}",
             _out=Any(IOBase),
             _err=Any(IOBase),
             _tee='err'
@@ -1134,12 +1135,13 @@ class Test_mount_container(BaseTestCase):
             _tee='err'
         )
 
-class Test_determine_container_image_build_tag_info(BaseTestCase):
-    def test_given_image_version(self):
+class Test_determine_container_image_address_info(BaseTestCase):
+    def test_given_container_image_tag(self):
         actual_build_full_tag, actual_build_short_tag, actual_image_registry_uri, \
-            actual_image_repository, actual_image_version = \
-            determine_container_image_build_tag_info(
-                image_version='1.0-123abc',
+            actual_image_repository, actual_container_image_tag = \
+            determine_container_image_address_info(
+                contaimer_image_registry='localhost',
+                container_image_tag='1.0-123abc',
                 organization='mock-org',
                 application_name='mock-app',
                 service_name='mock-service'
@@ -1147,11 +1149,11 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
 
         self.assertEqual(
             actual_build_full_tag,
-            'localhost/mock-org/mock-app-mock-service:1.0-123abc'
+            'localhost/mock-org/mock-app/mock-service:1.0-123abc'
         )
         self.assertEqual(
             actual_build_short_tag,
-            'mock-org/mock-app-mock-service:1.0-123abc'
+            'mock-org/mock-app/mock-service:1.0-123abc'
         )
         self.assertEqual(
             actual_image_registry_uri,
@@ -1159,18 +1161,19 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
         )
         self.assertEqual(
             actual_image_repository,
-            'mock-app-mock-service'
+            'mock-org/mock-app/mock-service'
         )
         self.assertEqual(
-            actual_image_version,
+            actual_container_image_tag,
             '1.0-123abc'
         )
 
-    def test_default_image_version(self):
+    def test_default_container_image_tag(self):
         actual_build_full_tag, actual_build_short_tag, actual_image_registry_uri, \
-            actual_image_repository, actual_image_version = \
-            determine_container_image_build_tag_info(
-                image_version=None,
+            actual_image_repository, actual_container_image_tag = \
+            determine_container_image_address_info(
+                contaimer_image_registry='localhost',
+                container_image_tag=None,
                 organization='mock-org',
                 application_name='mock-app',
                 service_name='mock-service'
@@ -1178,11 +1181,11 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
 
         self.assertEqual(
             actual_build_full_tag,
-            'localhost/mock-org/mock-app-mock-service:latest'
+            'localhost/mock-org/mock-app/mock-service:latest'
         )
         self.assertEqual(
             actual_build_short_tag,
-            'mock-org/mock-app-mock-service:latest'
+            'mock-org/mock-app/mock-service:latest'
         )
         self.assertEqual(
             actual_image_registry_uri,
@@ -1190,10 +1193,10 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
         )
         self.assertEqual(
             actual_image_repository,
-            'mock-app-mock-service'
+            'mock-org/mock-app/mock-service'
         )
         self.assertEqual(
-            actual_image_version,
+            actual_container_image_tag,
             'latest'
         )
 
@@ -1201,7 +1204,7 @@ class Test_determine_container_image_build_tag_info(BaseTestCase):
 class Test_inspect_container_image(BaseTestCase):
     def test_success_no_auth(self, mock_buildah):
         # setup mock
-        def buildah_inspect_side_effect(container_image_uri, _out):
+        def buildah_inspect_side_effect(container_image_address, _out):
             _out.write('''{
   "mock-value": "mock container details"
 }''')
@@ -1209,7 +1212,7 @@ class Test_inspect_container_image(BaseTestCase):
 
         # run test
         actual_container_details = inspect_container_image(
-            container_image_uri='mock.io/mock/awesome-image:latest'
+            container_image_address='mock.io/mock/awesome-image:latest'
         )
 
         # validate
@@ -1237,7 +1240,7 @@ class Test_inspect_container_image(BaseTestCase):
 
         # run test
         actual_container_details = inspect_container_image(
-            container_image_uri='mock.io/mock/awesome-image:latest',
+            container_image_address='mock.io/mock/awesome-image:latest',
             containers_config_auth_file='/mock/auth-file'
         )
 
@@ -1275,7 +1278,7 @@ class Test_inspect_container_image(BaseTestCase):
             )
         ):
             inspect_container_image(
-                container_image_uri='mock.io/mock/awesome-image:latest'
+                container_image_address='mock.io/mock/awesome-image:latest'
             )
 
         # validate
@@ -1302,7 +1305,7 @@ class Test_inspect_container_image(BaseTestCase):
             )
         ):
             inspect_container_image(
-                container_image_uri='mock.io/mock/awesome-image:latest'
+                container_image_address='mock.io/mock/awesome-image:latest'
             )
 
         # validate
@@ -1312,4 +1315,136 @@ class Test_inspect_container_image(BaseTestCase):
         mock_buildah.inspect.assert_called_once_with(
             'mock.io/mock/awesome-image:latest',
             _out=ANY
+        )
+
+@patch('ploigos_step_runner.utils.containers.inspect_container_image')
+class Test_get_container_image_digest(BaseTestCase):
+    def test_success_no_auth(self, mock_inspect_container_image):
+        # setup mock
+        mock_inspect_container_image.return_value = {
+            'FromImageDigest': 'sha256:mockabc123'
+        }
+
+        # run test
+        actual_digest = get_container_image_digest(
+            container_image_address='mock-reg.xyz/mock-repo:v42'
+        )
+
+        # validate
+        self.assertEqual(actual_digest, 'sha256:mockabc123')
+        mock_inspect_container_image.assert_called_once_with(
+            container_image_address='mock-reg.xyz/mock-repo:v42',
+            containers_config_auth_file=None
+        )
+
+    def test_success_with_auth(self, mock_inspect_container_image):
+        # setup mock
+        mock_inspect_container_image.return_value = {
+            'FromImageDigest': 'sha256:mockabc123'
+        }
+
+        # run test
+        actual_digest = get_container_image_digest(
+            container_image_address='mock-reg.xyz/mock-repo:v42',
+            containers_config_auth_file='mock/mock-auth'
+        )
+
+        # validate
+        self.assertEqual(actual_digest, 'sha256:mockabc123')
+        mock_inspect_container_image.assert_called_once_with(
+            container_image_address='mock-reg.xyz/mock-repo:v42',
+            containers_config_auth_file='mock/mock-auth'
+        )
+
+    def test_error_inspecting_image(self, mock_inspect_container_image):
+        # setup mock
+        mock_inspect_container_image.side_effect = RuntimeError('mock error inspecting image')
+
+        # run test
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                "Error getting container image \(mock-reg.xyz/mock-repo:v42\) image digest:"
+                " mock error inspecting image",
+                re.DOTALL
+            )
+        ):
+            get_container_image_digest(
+                container_image_address='mock-reg.xyz/mock-repo:v42'
+            )
+
+        # validate
+        mock_inspect_container_image.assert_called_once_with(
+            container_image_address='mock-reg.xyz/mock-repo:v42',
+            containers_config_auth_file=None
+        )
+
+    def test_error_finding_digest_key(self, mock_inspect_container_image):
+        # setup mock
+        mock_inspect_container_image.return_value = {
+        }
+
+        # run test
+        with self.assertRaisesRegex(
+            RuntimeError,
+            re.compile(
+                "Error finding container image \(mock-reg.xyz/mock-repo:v42\) image digest from"
+                " container image inspection.",
+                re.DOTALL
+            )
+        ):
+            get_container_image_digest(
+                container_image_address='mock-reg.xyz/mock-repo:v42'
+            )
+
+        # validate
+        mock_inspect_container_image.assert_called_once_with(
+            container_image_address='mock-reg.xyz/mock-repo:v42',
+            containers_config_auth_file=None
+        )
+
+class Test_add_container_build_step_result_artifacts(BaseTestCase):
+    def test_success(self):
+        # run test
+        given_step_result = StepResult(
+            step_name='mock',
+            sub_step_name='mock-sub',
+            sub_step_implementer_name='MockStepImpl'
+        )
+        actual_result = add_container_build_step_result_artifacts(
+            step_result=given_step_result,
+            contaimer_image_registry='mock-registry.xyz',
+            container_image_repository='mock-repository',
+            container_image_tag='mock-tag',
+            container_image_digest='mockabc123',
+            container_image_build_address='mock-registry.xyz/mock-repository:mock-tag',
+            container_image_build_short_address='mock-repository:mock-tag'
+        )
+
+        # validate
+        self.assertEqual(actual_result, given_step_result)
+
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-registry'),
+            'mock-registry.xyz'
+        )
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-repository'),
+            'mock-repository'
+        )
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-tag'),
+            'mock-tag'
+        )
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-build-digest'),
+            'mockabc123'
+        )
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-build-address'),
+            'mock-registry.xyz/mock-repository:mock-tag'
+        )
+        self.assertEqual(
+            actual_result.get_artifact_value('container-image-build-short-address'),
+            'mock-repository:mock-tag'
         )

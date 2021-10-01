@@ -35,13 +35,12 @@ class BaseTestStepImplementerSharedOpenSCAPGeneric(BaseStepImplementerTestCase):
 class TestStepImplementerSharedOpenSCAPGeneric_step_implementer_config_defaults(
     BaseTestStepImplementerSharedOpenSCAPGeneric
 ):
-
     def test_result(self):
         defaults = OpenSCAPGeneric.step_implementer_config_defaults()
         expected_defaults = {
             'oscap-fetch-remote-resources': True,
-            'container-image-pull-repository-type': 'containers-storage:',
-            'container-image-repository-type': 'containers-storage:'
+            'container-image-pull-registry-type': 'containers-storage:',
+            'container-image-registry-type': 'containers-storage:'
         }
         self.assertEqual(defaults, expected_defaults)
 
@@ -52,9 +51,15 @@ class TestStepImplementerSharedOpenSCAPGeneric__required_config_or_result_keys(
         required_keys = OpenSCAPGeneric._required_config_or_result_keys()
         expected_required_keys = [
             'oscap-input-definitions-uri',
-            'container-image-tag',
-            'container-image-pull-repository-type',
-            ['container-image-pull-repository-type', 'container-image-repository-type']
+            [
+                'container-image-build-address',
+                'container-image-push-address',
+                'container-image-pull-address',
+                'container-image-address',
+                'container-image-tag'
+            ],
+            'container-image-pull-registry-type',
+            ['container-image-pull-registry-type', 'container-image-registry-type']
         ]
         self.assertEqual(required_keys, expected_required_keys)
 

@@ -33,7 +33,7 @@ Could come from:
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
-`[container-image-pull-repository-type, container-image-repository-type]` \
+`[container-image-pull-registry-type, container-image-registry-type]` \
                                | Yes       | 'containers-storage:' \
                                                      | \
                                            Container repository type for the pull image source. \
