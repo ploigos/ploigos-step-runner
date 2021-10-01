@@ -174,7 +174,7 @@ class SourceToImage(StepImplementer):
             # if not given, attempt to get from builder image labels
             try:
                 container_image_details = inspect_container_image(
-                    container_image_uri=builder_image,
+                    container_image_address=builder_image,
                     containers_config_auth_file=containers_config_auth_file
                 )
 

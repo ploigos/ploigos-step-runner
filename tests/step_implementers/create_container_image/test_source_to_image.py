@@ -118,7 +118,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_container_registries_login.assert_called_once_with(
@@ -188,7 +188,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='/mock/mock-regs-auths.json'
         )
         mock_container_registries_login.assert_called_once_with(
@@ -252,7 +252,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_s2i.build.assert_called_once_with(
@@ -311,7 +311,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_s2i.build.assert_called_once_with(
@@ -375,7 +375,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_s2i.build.assert_called_once_with(
@@ -439,7 +439,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_s2i.build.assert_called_once_with(
@@ -568,7 +568,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_s2i.build.assert_called_once_with(
@@ -636,7 +636,7 @@ class TestStepImplementerSourceToImage__run_step(
         self.assertEqual(actual_step_result, expected_step_result)
 
         mock_inspect_container_image.assert_called_once_with(
-            container_image_uri='mock.io/awesome-image:v42',
+            container_image_address='mock.io/awesome-image:v42',
             containers_config_auth_file='create-container-image/container-auth.json'
         )
         mock_container_registries_login.assert_called_once_with(

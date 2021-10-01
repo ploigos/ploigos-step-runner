@@ -1,14 +1,11 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
 import os
 
+from ploigos_step_runner import StepResult
+from ploigos_step_runner.step_implementers.generate_metadata import \
+    SemanticVersion
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-
-from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.generate_metadata import SemanticVersion
 
 
 class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTestCase):
@@ -75,10 +72,10 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
                 sub_step_implementer_name='SemanticVersion'
             )
             expected_step_result.add_artifact(name='version', value='42.1.0+abc123')
-            expected_step_result.add_artifact(name='container-image-version', value='42.1.0')
+            expected_step_result.add_artifact(name='container-image-tag', value='42.1.0')
 
             expected_step_result.add_evidence(name='version', value='42.1.0+abc123')
-            expected_step_result.add_evidence(name='container-image-version', value='42.1.0')
+            expected_step_result.add_evidence(name='container-image-tag', value='42.1.0')
 
             self.assertEqual(result, expected_step_result)
 
@@ -113,9 +110,9 @@ class TestStepImplementerSemanticVersionGenerateMetadata(BaseStepImplementerTest
                 sub_step_implementer_name='SemanticVersion'
             )
             expected_step_result.add_artifact(name='version', value='42.1.0-feature123+abc123')
-            expected_step_result.add_artifact(name='container-image-version', value='42.1.0-feature123')
-            
+            expected_step_result.add_artifact(name='container-image-tag', value='42.1.0-feature123')
+
             expected_step_result.add_evidence(name='version', value='42.1.0-feature123+abc123')
-            expected_step_result.add_evidence(name='container-image-version', value='42.1.0-feature123')
+            expected_step_result.add_evidence(name='container-image-tag', value='42.1.0-feature123')
 
             self.assertEqual(result, expected_step_result)

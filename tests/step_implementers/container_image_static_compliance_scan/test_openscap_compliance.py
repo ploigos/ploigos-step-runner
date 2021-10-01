@@ -41,9 +41,15 @@ class TestStepImplementerContainerImageStaticComplianceScanOpenSCAP__required_co
         expected_required_keys = [
             'oscap-profile',
             'oscap-input-definitions-uri',
-            'container-image-tag',
-            'container-image-pull-repository-type',
-            ['container-image-pull-repository-type', 'container-image-repository-type']
+            [
+                'container-image-build-address',
+                'container-image-push-address',
+                'container-image-pull-address',
+                'container-image-address',
+                'container-image-tag'
+            ],
+            'container-image-pull-registry-type',
+            ['container-image-pull-registry-type', 'container-image-registry-type']
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
