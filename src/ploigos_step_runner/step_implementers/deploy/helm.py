@@ -28,13 +28,17 @@ from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
 DEFAULT_CONFIG = {
-    'helm-flags': []
+    'helm-release-name': "",
+    'helm-additional-arguments': []
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'helm-chart',
-    'helm-release'
+    'helm-chart'
 ]
+
+DEFAULT_RELEASE_FORMAT = "{org}-{app}-{service}"
+DEFAULT_CHART_FORMAT = "{service}"
+
 
 class Helm(StepImplementer):
     """`StepImplementer` for the `deploy` step using Helm.
@@ -47,7 +51,6 @@ class Helm(StepImplementer):
             config,
             environment=None
     ):
-
         super().__init__(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
@@ -68,6 +71,7 @@ class Helm(StepImplementer):
         -----
         These are the lowest precedence configuration values.
         """
+
         return DEFAULT_CONFIG
 
     @staticmethod
@@ -97,16 +101,21 @@ class Helm(StepImplementer):
         """
         step_result = StepResult.from_step_implementer(self)
 
+        if not self.get_value("helm-release-name"):
+            self.__setattr__("helm-release-name", DEFAULT_RELEASE_FORMAT)
+            # TODO:: fill in placeholders in DEFAULT_RELEASE_FORMAT before setting
+
         # install the helm chart
         helm_output_file_path = self.write_working_file('helm_output.txt')
         try:
             # execute helm step (params come from config)
             with open(helm_output_file_path, 'w') as helm_output_file:
-                sh.helm( # pylint: disable=no-member
+                # pylint: disable=no-member
+                sh.helm(
                     'secrets', 'upgrade', '--install',
+                    self.get_value('helm-release-name'),
                     self.get_value('helm-chart'),
-                    self.get_value('helm-release'),
-                    *self.get_value('helm-flags'),
+                    *self.get_value('helm-additional-arguments'),
                     _out=create_sh_redirect_to_multiple_streams_fn_callback([
                         sys.stdout,
                         helm_output_file
@@ -126,5 +135,6 @@ class Helm(StepImplementer):
                 name='helm-output',
                 value=helm_output_file_path
             )
+        # TODO:: run helm test to ensure success
 
         return step_result
