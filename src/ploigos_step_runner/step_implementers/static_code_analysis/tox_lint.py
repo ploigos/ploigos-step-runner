@@ -1,4 +1,4 @@
-"""`StepImplementer` for the `unit-test` step using tox
+"""`StepImplementer` for the `static-code-analysis` step using tox and pylint
 
 Step Configuration
 ------------------
@@ -28,8 +28,8 @@ from ploigos_step_runner.step_implementers.shared.tox_generic import ToxGeneric
 from ploigos_step_runner.exceptions import StepRunnerException
 
 
-class ToxTest(ToxGeneric):
-    """`StepImplementer` for the `unit-test` step using tox.
+class ToxLint(ToxGeneric):
+    """`StepImplementer` for the `lint` step using tox and pylint.
     """
 
     def __init__(self, workflow_result, parent_work_dir_path, config, environment):
@@ -38,7 +38,7 @@ class ToxTest(ToxGeneric):
             parent_work_dir_path,
             config,
             environment=environment,
-            tox_env='test'
+            tox_env='lint'
         )
 
     @staticmethod
@@ -68,7 +68,7 @@ class ToxTest(ToxGeneric):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        tox_output_file_path = self.write_working_file('tox_test_output.txt')
+        tox_output_file_path = self.write_working_file('tox_lint_output.txt')
 
         try:
             self._run_tox_step(
@@ -76,12 +76,12 @@ class ToxTest(ToxGeneric):
             )
 
         except StepRunnerException as error:
-            step_result.message = "Unit test failures. See 'tox-output'" \
+            step_result.message = "Lint failures. See 'tox-output'" \
                 f" report artifacts for details: {error}"
             step_result.success = False
         finally:
             step_result.add_artifact(
-                description="Standard out and standard error from 'tox test'.",
+                description="Standard out and standard error from 'tox lint'.",
                 name='tox-output',
                 value=tox_output_file_path
             )
