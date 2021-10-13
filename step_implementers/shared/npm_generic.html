@@ -50,6 +50,12 @@ Could come from:
 <td>package.json file for reference app.</td>
 </tr>
 <tr>
+<td><code>npm-envs</code></td>
+<td>No</td>
+<td></td>
+<td>Environment vars to pass to NPM.</td>
+</tr>
+<tr>
 <td><code>npm-args</code></td>
 <td>Yes</td>
 <td><code>None</code></td>
@@ -73,6 +79,7 @@ Could come from:
 Configuration Key            | Required? | Default          | Description
 -----------------------------|-----------|------------------|-----------
 `package-file`               | No        | `&#39;package.json&#39;` | package.json file for reference app.
+`npm-envs`                   | No        |                  | Environment vars to pass to NPM.
 `npm-args`                   | Yes       | `None`           | Arguments to pass to the npm command.
 &#34;&#34;&#34;
 
@@ -91,19 +98,23 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;npm-args&#39;
 ]
 
+
 class NpmGeneric(StepImplementer):
     &#34;&#34;&#34;Abstract parent class for StepImplementers that use npm.
     &#34;&#34;&#34;
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
         parent_work_dir_path,
         config,
         environment=None,
-        npm_args=None
+        npm_args=None,
+        npm_envs=None
     ):
+        #self.__npm_args = npm_args
         self.__npm_args = npm_args
+        self.__npm_envs = npm_envs
 
         super().__init__(
             workflow_result=workflow_result,
@@ -168,15 +179,12 @@ class NpmGeneric(StepImplementer):
 
     @property
     def npm_args(self):
-        &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
-        from field set on this class via constructor, intended for use by sub classes that want
-        to hard code the phases and goals for convenience, or comes from config value
-        `npm-phases-and-goals` set by the user.
+        &#34;&#34;&#34;Property for getting the npm arguments to be passed to the npm command.
 
         Returns
         -------
         str
-            Maven phases and/or goals to execute.
+            npm arguments
         &#34;&#34;&#34;
         npm_args = None
         if self.__npm_args:
@@ -186,9 +194,32 @@ class NpmGeneric(StepImplementer):
 
         return npm_args
 
+    @npm_args.setter
+    def npm_args(self, value):
+        self.__npm_args = value
+
+    @property
+    def npm_envs(self):
+        &#34;&#34;&#34;Property for getting option environment variables that should be accessible to the npm
+        command
+
+        Returns
+        -------
+        dict
+            Key value pairs representing environment variables
+        &#34;&#34;&#34;
+        npm_envs = None
+        if self.__npm_envs:
+            npm_envs = self.__npm_envs
+        else:
+            npm_envs = self.get_value(&#39;npm-envs&#39;)
+
+        return npm_envs
+
     def _run_npm_step(
         self,
-        npm_output_file_path
+        npm_output_file_path,
+        step_implementer_additional_envs=None
     ):
         &#34;&#34;&#34;Runs npm using the configuration given to this step runner.
 
@@ -196,20 +227,31 @@ class NpmGeneric(StepImplementer):
         ----------
         npm_output_file_path : str
             Path to file containing the npm stdout and stderr output.
-        step_implementer_additional_arguments : []
-            Additional arguments hard coded by the step implementer.
+        step_implementer_additional_envs : {}
+            Additional environment variables injected by the step implementer.
 
         Raises
         ------
         StepRunnerException
-            If npm returns a none 0 exit code.
+            If npm returns a non 0 exit code.
         &#34;&#34;&#34;
 
         npm_args = self.npm_args
+        npm_envs = None
+
+        if step_implementer_additional_envs:
+            npm_envs = step_implementer_additional_envs
+
+        if self.npm_envs:
+            if npm_envs:
+                npm_envs.update(self.npm_envs)
+            else:
+                npm_envs = self.npm_envs
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            npm_args=npm_args
+            npm_args=npm_args,
+            npm_envs=npm_envs
         )
 
     def _run_step(self):
@@ -254,7 +296,7 @@ class NpmGeneric(StepImplementer):
 <dl>
 <dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric"><code class="flex name class">
 <span>class <span class="ident">NpmGeneric</span></span>
-<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None, npm_args=None)</span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None, npm_args=None, npm_envs=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract parent class for StepImplementers that use npm.</p></div>
@@ -266,15 +308,18 @@ class NpmGeneric(StepImplementer):
     &#34;&#34;&#34;Abstract parent class for StepImplementers that use npm.
     &#34;&#34;&#34;
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         workflow_result,
         parent_work_dir_path,
         config,
         environment=None,
-        npm_args=None
+        npm_args=None,
+        npm_envs=None
     ):
+        #self.__npm_args = npm_args
         self.__npm_args = npm_args
+        self.__npm_envs = npm_envs
 
         super().__init__(
             workflow_result=workflow_result,
@@ -339,15 +384,12 @@ class NpmGeneric(StepImplementer):
 
     @property
     def npm_args(self):
-        &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
-        from field set on this class via constructor, intended for use by sub classes that want
-        to hard code the phases and goals for convenience, or comes from config value
-        `npm-phases-and-goals` set by the user.
+        &#34;&#34;&#34;Property for getting the npm arguments to be passed to the npm command.
 
         Returns
         -------
         str
-            Maven phases and/or goals to execute.
+            npm arguments
         &#34;&#34;&#34;
         npm_args = None
         if self.__npm_args:
@@ -357,9 +399,32 @@ class NpmGeneric(StepImplementer):
 
         return npm_args
 
+    @npm_args.setter
+    def npm_args(self, value):
+        self.__npm_args = value
+
+    @property
+    def npm_envs(self):
+        &#34;&#34;&#34;Property for getting option environment variables that should be accessible to the npm
+        command
+
+        Returns
+        -------
+        dict
+            Key value pairs representing environment variables
+        &#34;&#34;&#34;
+        npm_envs = None
+        if self.__npm_envs:
+            npm_envs = self.__npm_envs
+        else:
+            npm_envs = self.get_value(&#39;npm-envs&#39;)
+
+        return npm_envs
+
     def _run_npm_step(
         self,
-        npm_output_file_path
+        npm_output_file_path,
+        step_implementer_additional_envs=None
     ):
         &#34;&#34;&#34;Runs npm using the configuration given to this step runner.
 
@@ -367,20 +432,31 @@ class NpmGeneric(StepImplementer):
         ----------
         npm_output_file_path : str
             Path to file containing the npm stdout and stderr output.
-        step_implementer_additional_arguments : []
-            Additional arguments hard coded by the step implementer.
+        step_implementer_additional_envs : {}
+            Additional environment variables injected by the step implementer.
 
         Raises
         ------
         StepRunnerException
-            If npm returns a none 0 exit code.
+            If npm returns a non 0 exit code.
         &#34;&#34;&#34;
 
         npm_args = self.npm_args
+        npm_envs = None
+
+        if step_implementer_additional_envs:
+            npm_envs = step_implementer_additional_envs
+
+        if self.npm_envs:
+            if npm_envs:
+                npm_envs.update(self.npm_envs)
+            else:
+                npm_envs = self.npm_envs
 
         run_npm(
             npm_output_file_path=npm_output_file_path,
-            npm_args=npm_args
+            npm_args=npm_args,
+            npm_envs=npm_envs
         )
 
     def _run_step(self):
@@ -421,6 +497,7 @@ class NpmGeneric(StepImplementer):
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementers.package.npm_package.NpmPackage" href="../package/npm_package.html#ploigos_step_runner.step_implementers.package.npm_package.NpmPackage">NpmPackage</a></li>
+<li><a title="ploigos_step_runner.step_implementers.shared.npm_xunit_generic.NpmXunitGeneric" href="npm_xunit_generic.html#ploigos_step_runner.step_implementers.shared.npm_xunit_generic.NpmXunitGeneric">NpmXunitGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest" href="../unit_test/npm_test.html#ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest">NpmTest</a></li>
 </ul>
 <h3>Static methods</h3>
@@ -462,14 +539,11 @@ def step_implementer_config_defaults():
 <dl>
 <dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args"><code class="name">var <span class="ident">npm_args</span></code></dt>
 <dd>
-<div class="desc"><p>Property for getting the npm phases and goals to execute which can either come
-from field set on this class via constructor, intended for use by sub classes that want
-to hard code the phases and goals for convenience, or comes from config value
-<code>npm-phases-and-goals</code> set by the user.</p>
+<div class="desc"><p>Property for getting the npm arguments to be passed to the npm command.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
-<dd>Maven phases and/or goals to execute.</dd>
+<dd>npm arguments</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -477,15 +551,12 @@ to hard code the phases and goals for convenience, or comes from config value
 </summary>
 <pre><code class="python">@property
 def npm_args(self):
-    &#34;&#34;&#34;Property for getting the npm phases and goals to execute which can either come
-    from field set on this class via constructor, intended for use by sub classes that want
-    to hard code the phases and goals for convenience, or comes from config value
-    `npm-phases-and-goals` set by the user.
+    &#34;&#34;&#34;Property for getting the npm arguments to be passed to the npm command.
 
     Returns
     -------
     str
-        Maven phases and/or goals to execute.
+        npm arguments
     &#34;&#34;&#34;
     npm_args = None
     if self.__npm_args:
@@ -494,6 +565,38 @@ def npm_args(self):
         npm_args = self.get_value(&#39;npm-args&#39;)
 
     return npm_args</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs"><code class="name">var <span class="ident">npm_envs</span></code></dt>
+<dd>
+<div class="desc"><p>Property for getting option environment variables that should be accessible to the npm
+command</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Key value pairs representing environment variables</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def npm_envs(self):
+    &#34;&#34;&#34;Property for getting option environment variables that should be accessible to the npm
+    command
+
+    Returns
+    -------
+    dict
+        Key value pairs representing environment variables
+    &#34;&#34;&#34;
+    npm_envs = None
+    if self.__npm_envs:
+        npm_envs = self.__npm_envs
+    else:
+        npm_envs = self.get_value(&#39;npm-envs&#39;)
+
+    return npm_envs</code></pre>
 </details>
 </dd>
 </dl>
@@ -547,6 +650,7 @@ def npm_args(self):
 <h4><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></code></h4>
 <ul class="">
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args">npm_args</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs">npm_envs</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 </ul>
 </li>

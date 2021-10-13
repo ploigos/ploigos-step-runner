@@ -30,13 +30,15 @@
 <pre><code class="python">&#34;&#34;&#34;
 Shared utils for npm operations.
 &#34;&#34;&#34;
+import os
 import sys
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
-def run_npm(npm_output_file_path, npm_args):
+
+def run_npm(npm_output_file_path, npm_args, npm_envs=None):
     &#34;&#34;&#34;
     Run an npm command
 
@@ -46,6 +48,8 @@ def run_npm(npm_output_file_path, npm_args):
         String
     npm_args:
         Commandline arguments to npm
+    npm_envs:
+        Dictionary representing additional environment variables
     &#34;&#34;&#34;
     try:
         with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
@@ -58,11 +62,22 @@ def run_npm(npm_output_file_path, npm_args):
                 npm_output_file
             ])
 
-            sh.npm( # pylint: disable=no-member
-                npm_args,
-                _out=out_callback,
-                _err=err_callback
-            )
+            if npm_envs:
+                new_env = os.environ.copy()
+                new_env.update(npm_envs)
+
+                sh.npm(  # pylint: disable=no-member
+                    npm_args,
+                    _env=new_env,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+            else:
+                sh.npm(  # pylint: disable=no-member
+                    npm_args,
+                    _out=out_callback,
+                    _err=err_callback
+                )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f&#34;Error running npm. {error}&#34;
@@ -77,7 +92,7 @@ def run_npm(npm_output_file_path, npm_args):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="ploigos_step_runner.utils.npm.run_npm"><code class="name flex">
-<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_args)</span>
+<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_args, npm_envs=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Run an npm command</p>
@@ -85,12 +100,14 @@ def run_npm(npm_output_file_path, npm_args):
 <p>npm_output_file_path:
 String
 npm_args:
-Commandline arguments to npm</p></div>
+Commandline arguments to npm
+npm_envs:
+Dictionary representing additional environment variables</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_npm(npm_output_file_path, npm_args):
+<pre><code class="python">def run_npm(npm_output_file_path, npm_args, npm_envs=None):
     &#34;&#34;&#34;
     Run an npm command
 
@@ -100,6 +117,8 @@ Commandline arguments to npm</p></div>
         String
     npm_args:
         Commandline arguments to npm
+    npm_envs:
+        Dictionary representing additional environment variables
     &#34;&#34;&#34;
     try:
         with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
@@ -112,11 +131,22 @@ Commandline arguments to npm</p></div>
                 npm_output_file
             ])
 
-            sh.npm( # pylint: disable=no-member
-                npm_args,
-                _out=out_callback,
-                _err=err_callback
-            )
+            if npm_envs:
+                new_env = os.environ.copy()
+                new_env.update(npm_envs)
+
+                sh.npm(  # pylint: disable=no-member
+                    npm_args,
+                    _env=new_env,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+            else:
+                sh.npm(  # pylint: disable=no-member
+                    npm_args,
+                    _out=out_callback,
+                    _err=err_callback
+                )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f&#34;Error running npm. {error}&#34;

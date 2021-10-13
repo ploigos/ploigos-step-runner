@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.step_implementers.unit_test.npm_test API documentation</title>
-<meta name="description" content="`StepImplementer` for the `unit-test` step using npm" />
+<title>ploigos_step_runner.step_implementers.shared.npm_xunit_generic API documentation</title>
+<meta name="description" content="`StepImplementer` for a generic NPM step for testing. It supports the parsing of xunit style results …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,33 +19,178 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.step_implementers.unit_test.npm_test</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.step_implementers.shared.npm_xunit_generic</code></h1>
 </header>
 <section id="section-intro">
-<p><code>StepImplementer</code> for the <code>unit-test</code> step using npm</p>
+<p><code>StepImplementer</code> for a generic NPM step for testing. It supports the parsing of xunit style results.</p>
+<h2 id="step-configuration">Step Configuration</h2>
+<p>Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results</p>
+<table>
+<thead>
+<tr>
+<th>Configuration Key</th>
+<th>Required?</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test-reports-dir</code></td>
+<td>Yes</td>
+<td></td>
+<td>Location of test result files</td>
+</tr>
+<tr>
+<td><code>npm-test-script</code></td>
+<td>Yes</td>
+<td></td>
+<td>NPM script to run the test</td>
+</tr>
+<tr>
+<td><code>target-host-env-var-name</code></td>
+<td>No</td>
+<td></td>
+<td>It is assumed that integration tests need to know a URL</td>
+</tr>
+<tr>
+<td>endpoint to run the tests against,</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>and we are standardizing on passing this in via an</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>environment variable. There is no standard name for this</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>environment variable, so it is user defined.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>npm-envs</code></td>
+<td>No</td>
+<td></td>
+<td>Additional environment variable key value pairs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="result-artifacts">Result Artifacts</h2>
+<p>Results artifacts output by this step.</p>
+<table>
+<thead>
+<tr>
+<th>Result Artifact Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npm-output</code></td>
+<td>Path to Stdout and Stderr from invoking NPM.</td>
+</tr>
+<tr>
+<td><code>test-report</code></td>
+<td>Directory containing the test reports generated from running this step.</td>
+</tr>
+</tbody>
+</table>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `unit-test` step using npm
+<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for a generic NPM step for testing. It supports the parsing of xunit style results.
 
-&#34;&#34;&#34;
+Step Configuration
+------------------
+Step configuration expected as input to this step.
+Could come from:
+* static configuration
+* runtime configuration
+* previous step results
+
+Configuration Key            | Required? | Default    | Description
+-----------------------------|-----------|------------|------------
+`test-reports-dir`           | Yes       |            | Location of test result files
+`npm-test-script`            | Yes       |            | NPM script to run the test
+`target-host-env-var-name`   | No        |            | It is assumed that integration tests need to know a URL
+                                                         endpoint to run the tests against,
+                                                         and we are standardizing on passing this in via an
+                                                         environment variable. There is no standard name for this
+                                                         environment variable, so it is user defined.
+`npm-envs`                   | No        |            | Additional environment variable key value pairs
+
+Result Artifacts
+----------------
+Results artifacts output by this step.
+
+Result Artifact Key | Description
+--------------------|------------
+`npm-output`        | Path to Stdout and Stderr from invoking NPM.
+`test-report`       | Directory containing the test reports generated from running this step.
+&#34;&#34;&#34;  # pylint: disable=line-too-long
+
 from ploigos_step_runner import StepResult
-from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.shared import NpmGeneric
+from ploigos_step_runner.step_implementers.shared import MavenTestReportingMixin
 
-class NpmTest(NpmGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `unit-test` step using npm.
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    &#39;test-reports-dir&#39;,
+    &#39;target-host-env-var-name&#39;,
+    &#39;npm-test-script&#39;
+]
+
+DEFAULT_CONFIG = {}
+
+
+class NpmXunitGeneric(NpmGeneric, MavenTestReportingMixin):
+    &#34;&#34;&#34;`StepImplementer` for the `uat` step using npm by invoking a
+    use specified npm script.
     &#34;&#34;&#34;
 
-    def __init__(self, workflow_result, parent_work_dir_path, config, environment):
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
         super().__init__(
-            workflow_result,
-            parent_work_dir_path,
-            config,
-            environment=environment,
-            npm_args=&#39;test&#39;
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
         )
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+        &#34;&#34;&#34;
+        return {**NpmGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -62,7 +207,7 @@ class NpmTest(NpmGeneric):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return []
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -74,23 +219,63 @@ class NpmTest(NpmGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        npm_output_file_path = self.write_working_file(&#39;npm_test_output.txt&#39;)
-        try:
-            self._run_npm_step(
-                npm_output_file_path=npm_output_file_path
-            )
+        # NOTE:
+        #   at some point may need to do smarter logic if a deployable has more then one deployed
+        #   host URL to do UAT against all of them, but for now, use first one as target of UAT
+        deployed_host_urls = self.get_value(&#39;deployed-host-urls&#39;)
+        target_host_url = &#34;unset&#34;
+        if isinstance(deployed_host_urls, list):
+            target_host_url = deployed_host_urls[0]
+            if len(deployed_host_urls) &gt; 1:
+                step_result.message = \
+                    f&#34;Given more than one deployed host URL ({deployed_host_urls}),&#34; \
+                    f&#34; targeting first one ({target_host_url}) for test.&#34;
+                print(step_result.message)
+        elif deployed_host_urls:
+            target_host_url = deployed_host_urls
+        else:
+            target_host_url = self.get_value(&#39;target-host-url&#39;)
 
+        # run the tests
+        npm_output_file_path = self.write_working_file(&#39;npm_output.txt&#39;)
+        try:
+            self.npm_args = [&#39;run&#39;, self.get_value(&#39;npm-test-script&#39;)]
+
+            additional_envs = None
+            if self.get_value(&#34;target-host-env-var-name&#34;):
+                additional_envs = {self.get_value(
+                    &#34;target-host-env-var-name&#34;): target_host_url}
+
+            # execute npm step
+            self._run_npm_step(
+                npm_output_file_path=npm_output_file_path,
+                step_implementer_additional_envs=additional_envs
+            )
         except StepRunnerException as error:
-            step_result.message = &#34;Unit test failures. See &#39;npm-output&#39;&#34; \
-                f&#34; report artifacts for details: {error}&#34;
             step_result.success = False
+            step_result.message = f&#34;Error running npm. More details maybe found in report artifacts: {error}&#34;
         finally:
             step_result.add_artifact(
-                description=&#34;Standard out and standard error from &#39;npm test&#39;.&#34;,
+                description=&#34;Standard out and standard error from npm.&#34;,
                 name=&#39;npm-output&#39;,
                 value=npm_output_file_path
             )
 
+        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+        if test_report_dir:
+            step_result.add_artifact(
+                description=&#34;Test report generated when running tests.&#34;,
+                name=&#39;test-report&#39;,
+                value=test_report_dir
+            )
+
+            # gather test report evidence
+            self._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=step_result,
+                test_report_dir=test_report_dir
+            )
+
+        # return result
         return step_result</code></pre>
 </details>
 </section>
@@ -103,28 +288,50 @@ class NpmTest(NpmGeneric):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest"><code class="flex name class">
-<span>class <span class="ident">NpmTest</span></span>
-<span>(</span><span>workflow_result, parent_work_dir_path, config, environment)</span>
+<dt id="ploigos_step_runner.step_implementers.shared.npm_xunit_generic.NpmXunitGeneric"><code class="flex name class">
+<span>class <span class="ident">NpmXunitGeneric</span></span>
+<span>(</span><span>workflow_result, parent_work_dir_path, config, environment=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p><code>StepImplementer</code> for the <code>unit-test</code> step using npm.</p></div>
+<div class="desc"><p><code>StepImplementer</code> for the <code>uat</code> step using npm by invoking a
+use specified npm script.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class NpmTest(NpmGeneric):
-    &#34;&#34;&#34;`StepImplementer` for the `unit-test` step using npm.
+<pre><code class="python">class NpmXunitGeneric(NpmGeneric, MavenTestReportingMixin):
+    &#34;&#34;&#34;`StepImplementer` for the `uat` step using npm by invoking a
+    use specified npm script.
     &#34;&#34;&#34;
 
-    def __init__(self, workflow_result, parent_work_dir_path, config, environment):
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
         super().__init__(
-            workflow_result,
-            parent_work_dir_path,
-            config,
-            environment=environment,
-            npm_args=&#39;test&#39;
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
         )
+
+    @staticmethod
+    def step_implementer_config_defaults():
+        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
+
+        Returns
+        -------
+        dict
+            Default values to use for step configuration values.
+
+        Notes
+        -----
+        These are the lowest precedence configuration values.
+        &#34;&#34;&#34;
+        return {**NpmGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -141,7 +348,7 @@ class NpmTest(NpmGeneric):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return []
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -153,34 +360,80 @@ class NpmTest(NpmGeneric):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        npm_output_file_path = self.write_working_file(&#39;npm_test_output.txt&#39;)
-        try:
-            self._run_npm_step(
-                npm_output_file_path=npm_output_file_path
-            )
+        # NOTE:
+        #   at some point may need to do smarter logic if a deployable has more then one deployed
+        #   host URL to do UAT against all of them, but for now, use first one as target of UAT
+        deployed_host_urls = self.get_value(&#39;deployed-host-urls&#39;)
+        target_host_url = &#34;unset&#34;
+        if isinstance(deployed_host_urls, list):
+            target_host_url = deployed_host_urls[0]
+            if len(deployed_host_urls) &gt; 1:
+                step_result.message = \
+                    f&#34;Given more than one deployed host URL ({deployed_host_urls}),&#34; \
+                    f&#34; targeting first one ({target_host_url}) for test.&#34;
+                print(step_result.message)
+        elif deployed_host_urls:
+            target_host_url = deployed_host_urls
+        else:
+            target_host_url = self.get_value(&#39;target-host-url&#39;)
 
+        # run the tests
+        npm_output_file_path = self.write_working_file(&#39;npm_output.txt&#39;)
+        try:
+            self.npm_args = [&#39;run&#39;, self.get_value(&#39;npm-test-script&#39;)]
+
+            additional_envs = None
+            if self.get_value(&#34;target-host-env-var-name&#34;):
+                additional_envs = {self.get_value(
+                    &#34;target-host-env-var-name&#34;): target_host_url}
+
+            # execute npm step
+            self._run_npm_step(
+                npm_output_file_path=npm_output_file_path,
+                step_implementer_additional_envs=additional_envs
+            )
         except StepRunnerException as error:
-            step_result.message = &#34;Unit test failures. See &#39;npm-output&#39;&#34; \
-                f&#34; report artifacts for details: {error}&#34;
             step_result.success = False
+            step_result.message = f&#34;Error running npm. More details maybe found in report artifacts: {error}&#34;
         finally:
             step_result.add_artifact(
-                description=&#34;Standard out and standard error from &#39;npm test&#39;.&#34;,
+                description=&#34;Standard out and standard error from npm.&#34;,
                 name=&#39;npm-output&#39;,
                 value=npm_output_file_path
             )
 
+        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+        if test_report_dir:
+            step_result.add_artifact(
+                description=&#34;Test report generated when running tests.&#34;,
+                name=&#39;test-report&#39;,
+                value=test_report_dir
+            )
+
+            # gather test report evidence
+            self._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=step_result,
+                test_report_dir=test_report_dir
+            )
+
+        # return result
         return step_result</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="../shared/npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></li>
+<li><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
+<li><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin" href="maven_test_reporting_mixin.html#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin">MavenTestReportingMixin</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.uat.npm_xunit_integration_test.NpmXunitIntegrationTest" href="../uat/npm_xunit_integration_test.html#ploigos_step_runner.step_implementers.uat.npm_xunit_integration_test.NpmXunitIntegrationTest">NpmXunitIntegrationTest</a></li>
+<li><a title="ploigos_step_runner.step_implementers.unit_test.npm_xunit_test.NpmXunitTest" href="../unit_test/npm_xunit_test.html#ploigos_step_runner.step_implementers.unit_test.npm_xunit_test.NpmXunitTest">NpmXunitTest</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
-<li><code><b><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="../shared/npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></b></code>:
+<li><code><b><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric" href="npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric">NpmGeneric</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.create_working_dir_sub_dir" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.create_working_dir_sub_dir">create_working_dir_sub_dir</a></code></li>
@@ -192,13 +445,13 @@ class NpmTest(NpmGeneric):
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.global_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_config_defaults">global_config_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.global_environment_config_defaults" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.global_environment_config_defaults">global_environment_config_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.has_config_value" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.has_config_value">has_config_value</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args" href="../shared/npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args">npm_args</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs" href="../shared/npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs">npm_envs</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args" href="npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_args">npm_args</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs" href="npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.npm_envs">npm_envs</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.run_step" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.run_step">run_step</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config">step_config</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_config_overrides" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_config_overrides">step_config_overrides</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_environment_config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_environment_config">step_environment_config</a></code></li>
-<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults" href="../shared/npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults" href="npm_generic.html#ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.step_name">step_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.sub_step_implementer_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_implementer_name">sub_step_implementer_name</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.npm_generic.NpmGeneric.sub_step_name" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.sub_step_name">sub_step_name</a></code></li>
@@ -215,18 +468,21 @@ class NpmTest(NpmGeneric):
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#step-configuration">Step Configuration</a></li>
+<li><a href="#result-artifacts">Result Artifacts</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner.step_implementers.unit_test" href="index.html">ploigos_step_runner.step_implementers.unit_test</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared" href="index.html">ploigos_step_runner.step_implementers.shared</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest" href="#ploigos_step_runner.step_implementers.unit_test.npm_test.NpmTest">NpmTest</a></code></h4>
+<h4><code><a title="ploigos_step_runner.step_implementers.shared.npm_xunit_generic.NpmXunitGeneric" href="#ploigos_step_runner.step_implementers.shared.npm_xunit_generic.NpmXunitGeneric">NpmXunitGeneric</a></code></h4>
 </li>
 </ul>
 </li>
