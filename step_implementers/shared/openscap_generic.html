@@ -80,7 +80,7 @@ For disconnected environments the remote
 internal mirror.</td>
 </tr>
 <tr>
-<td><code>[container-image-pull-repository-type, container-image-repository-type]</code></td>
+<td><code>[container-image-pull-registry-type, container-image-registry-type]</code></td>
 <td>Yes</td>
 <td>'containers-storage:'</td>
 <td>Container repository type for the pull image source.
@@ -147,7 +147,7 @@ from runtime configuration.
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
-`[container-image-pull-repository-type, container-image-repository-type]` \
+`[container-image-pull-registry-type, container-image-registry-type]` \
                                | Yes       | &#39;containers-storage:&#39; \
                                                      | \
                                            Container repository type for the pull image source. \
@@ -183,17 +183,23 @@ from ploigos_step_runner.utils.io import \
 
 DEFAULT_CONFIG = {
     &#39;oscap-fetch-remote-resources&#39;: True,
-    &#39;container-image-pull-repository-type&#39;: &#39;containers-storage:&#39;,
-    &#39;container-image-repository-type&#39;: &#39;containers-storage:&#39;
+    &#39;container-image-pull-registry-type&#39;: &#39;containers-storage:&#39;,
+    &#39;container-image-registry-type&#39;: &#39;containers-storage:&#39;
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;oscap-input-definitions-uri&#39;,
-    &#39;container-image-tag&#39;,
-    &#39;container-image-pull-repository-type&#39;,
+    [
+        &#39;container-image-build-address&#39;,
+        &#39;container-image-push-address&#39;,
+        &#39;container-image-pull-address&#39;,
+        &#39;container-image-address&#39;,
+        &#39;container-image-tag&#39;
+    ],
+    &#39;container-image-pull-registry-type&#39;,
 
     # being flexible for different use cases of proceeding steps
-    [&#39;container-image-pull-repository-type&#39;, &#39;container-image-repository-type&#39;]
+    [&#39;container-image-pull-registry-type&#39;, &#39;container-image-registry-type&#39;]
 ]
 
 
@@ -352,22 +358,28 @@ class OpenSCAPGeneric(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # get config
-        image_tag = self.get_value(&#39;container-image-tag&#39;)
+        image_address = self.get_value([
+            &#39;container-image-build-address&#39;,
+            &#39;container-image-push-address&#39;,
+            &#39;container-image-pull-address&#39;,
+            &#39;container-image-address&#39;,
+            &#39;container-image-tag&#39;
+        ])
         oscap_profile = self.get_value(&#39;oscap-profile&#39;)
         oscap_fetch_remote_resources = self.get_value(&#39;oscap-fetch-remote-resources&#39;)
         pull_repository_type = self.get_value([
-            &#39;container-image-pull-repository-type&#39;,
-            &#39;container-image-repository-type&#39;
+            &#39;container-image-pull-registry-type&#39;,
+            &#39;container-image-registry-type&#39;
         ])
 
         try:
             # create container from image that can be mounted
-            print(f&#34;\nCreate container from image ({image_tag})&#34;)
+            print(f&#34;\nCreate container from image ({image_address})&#34;)
             container_name = create_container_from_image(
-                image_tag=image_tag,
+                image_address=image_address,
                 repository_type=pull_repository_type
             )
-            print(f&#34;Created container ({container_name}) from image ({image_tag})&#34;)
+            print(f&#34;Created container ({container_name}) from image ({image_address})&#34;)
 
             # baking `buildah unshare` command to wrap other buildah commands with
             # so that container does not need to be running in a privileged mode to be able
@@ -887,22 +899,28 @@ class OpenSCAPGeneric(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # get config
-        image_tag = self.get_value(&#39;container-image-tag&#39;)
+        image_address = self.get_value([
+            &#39;container-image-build-address&#39;,
+            &#39;container-image-push-address&#39;,
+            &#39;container-image-pull-address&#39;,
+            &#39;container-image-address&#39;,
+            &#39;container-image-tag&#39;
+        ])
         oscap_profile = self.get_value(&#39;oscap-profile&#39;)
         oscap_fetch_remote_resources = self.get_value(&#39;oscap-fetch-remote-resources&#39;)
         pull_repository_type = self.get_value([
-            &#39;container-image-pull-repository-type&#39;,
-            &#39;container-image-repository-type&#39;
+            &#39;container-image-pull-registry-type&#39;,
+            &#39;container-image-registry-type&#39;
         ])
 
         try:
             # create container from image that can be mounted
-            print(f&#34;\nCreate container from image ({image_tag})&#34;)
+            print(f&#34;\nCreate container from image ({image_address})&#34;)
             container_name = create_container_from_image(
-                image_tag=image_tag,
+                image_address=image_address,
                 repository_type=pull_repository_type
             )
-            print(f&#34;Created container ({container_name}) from image ({image_tag})&#34;)
+            print(f&#34;Created container ({container_name}) from image ({image_address})&#34;)
 
             # baking `buildah unshare` command to wrap other buildah commands with
             # so that container does not need to be running in a privileged mode to be able

@@ -43,31 +43,31 @@ Could come from:</p>
 <tbody>
 <tr>
 <td><code>imagespecfile</code></td>
-<td>True</td>
+<td>Yes</td>
 <td><code>'Containerfile'</code></td>
 <td>File defining the container image</td>
 </tr>
 <tr>
 <td><code>context</code></td>
-<td>True</td>
+<td>Yes</td>
 <td><code>'.'</code></td>
 <td>Context to build the container image in</td>
 </tr>
 <tr>
 <td><code>tls-verify</code></td>
-<td>True</td>
+<td>Yes</td>
 <td><code>True</code></td>
 <td>Whether to verify TLS when pulling parent images</td>
 </tr>
 <tr>
 <td><code>format</code></td>
-<td>True</td>
+<td>Yes</td>
 <td><code>'oci'</code></td>
 <td>format of the built image's manifest and metadata</td>
 </tr>
 <tr>
 <td><code>containers-config-auth-file</code></td>
-<td>False</td>
+<td>No</td>
 <td></td>
 <td>Path to the container registry authentication
 file to use for container registry authentication.
@@ -75,32 +75,33 @@ If one is not provided one will be created in the
 working directory.</td>
 </tr>
 <tr>
-<td><code>container-image-version</code></td>
-<td>True</td>
+<td><code>[container-image-tag,
+container-image-version]</code></td>
+<td>Yes</td>
 <td></td>
-<td>Version to use when building the container image</td>
+<td>Container image tag to use when building the container image.</td>
 </tr>
 <tr>
 <td><code>organization</code></td>
-<td>True</td>
+<td>Yes</td>
 <td></td>
 <td>Used in built container image tag</td>
 </tr>
 <tr>
 <td><code>application_name</code></td>
-<td>True</td>
+<td>Yes</td>
 <td></td>
 <td>Used in built container image tag</td>
 </tr>
 <tr>
 <td><code>service_name</code></td>
-<td>True</td>
+<td>No</td>
 <td></td>
 <td>Used in built container image tag</td>
 </tr>
 <tr>
 <td><code>container-registries</code></td>
-<td>False</td>
+<td>No</td>
 <td></td>
 <td>Hash of container registries to authenticate with.</td>
 </tr>
@@ -117,38 +118,28 @@ working directory.</td>
 </thead>
 <tbody>
 <tr>
-<td><code>container-image-registry-uri</code></td>
-<td>Registry URI poriton of the container image tag of the built container image.</td>
-</tr>
-<tr>
-<td><code>container-image-registry-organization</code></td>
-<td>Organization portion of the container image tag of the built container image.</td>
+<td><code>container-image-registry</code></td>
+<td>Container image registry of the built container image address.</td>
 </tr>
 <tr>
 <td><code>container-image-repository</code></td>
-<td>Repository portion of the container image tag of the built container image.</td>
-</tr>
-<tr>
-<td><code>container-image-name</code></td>
-<td>Another way to reference the repository portion of the container image tag
-of the built container image.</td>
-</tr>
-<tr>
-<td><code>container-image-version</code></td>
-<td>Version portion of the container image tag of the built container image.</td>
+<td>Container image repository of the built container image address.</td>
 </tr>
 <tr>
 <td><code>container-image-tag</code></td>
-<td>Full container image tag of the built container, including the registry URI. <br/>
-Takes the form of:
-<code>container-image-registry-organization/container-image-repository:container-image-version</code></td>
+<td>Container image tag of the built container image address.</td>
 </tr>
 <tr>
-<td><code>container-image-short-tag</code></td>
-<td>Short container image tag of the built container image,
-excluding the registry URI. <br/>
-Takes the form of:
-<code>container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version</code></td>
+<td><code>container-image-build-digest</code></td>
+<td>Container image digest of the built container image address.</td>
+</tr>
+<tr>
+<td><code>container-image-build-address</code></td>
+<td>Container image address of the built container image.</td>
+</tr>
+<tr>
+<td><code>container-image-build-short-address</code></td>
+<td>Container image short address (no registry) of the built container image.</td>
 </tr>
 </tbody>
 </table>
@@ -167,45 +158,35 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key  | Required? | Default | Description
--------------------|-----------|---------|-----------
-`imagespecfile`    | True      | `&#39;Containerfile&#39;` \
-                                         | File defining the container image
-`context`          | True      | `&#39;.&#39;`   | Context to build the container image in
-`tls-verify`       | True      | `True`  | Whether to verify TLS when pulling parent images
-`format`           | True      | `&#39;oci&#39;` | format of the built image&#39;s manifest and metadata
-`containers-config-auth-file` \
-                   | False     |         | Path to the container registry authentication \
-                                           file to use for container registry authentication. \
-                                           If one is not provided one will be created in the \
-                                           working directory.
-`container-image-version` \
-                   | True      |         | Version to use when building the container image
-`organization`     | True      |         | Used in built container image tag
-`application_name` | True      |         | Used in built container image tag
-`service_name`     | True      |         | Used in built container image tag
-`container-registries` \
-                   | False     |         | Hash of container registries to authenticate with.
+Configuration Key             | Required? | Default           | Description
+------------------------------|-----------|-------------------|-----------
+`imagespecfile`               | Yes       | `&#39;Containerfile&#39;` | File defining the container image
+`context`                     | Yes       | `&#39;.&#39;`             | Context to build the container image in
+`tls-verify`                  | Yes       | `True`            | Whether to verify TLS when pulling parent images
+`format`                      | Yes       | `&#39;oci&#39;`           | format of the built image&#39;s manifest and metadata
+`containers-config-auth-file` | No        |                   | Path to the container registry authentication \
+                                                                file to use for container registry authentication. \
+                                                                If one is not provided one will be created in the \
+                                                                working directory.
+`[container-image-tag, \
+  container-image-version]`   | Yes       |                   | Container image tag to use when building the container image.
+`organization`                | Yes       |                   | Used in built container image tag
+`application_name`            | Yes       |                   | Used in built container image tag
+`service_name`                | No        |                   | Used in built container image tag
+`container-registries`        | No        |                   | Hash of container registries to authenticate with.
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key                     | Description
-----------------------------------------|------------
-`container-image-registry-uri`          | Registry URI poriton of the container image tag of the built container image.
-`container-image-registry-organization` | Organization portion of the container image tag of the built container image.
-`container-image-repository`            | Repository portion of the container image tag of the built container image.
-`container-image-name`                  | Another way to reference the repository portion of the container image tag \
-                                          of the built container image.
-`container-image-version`               | Version portion of the container image tag of the built container image.
-`container-image-tag`                   | Full container image tag of the built container, including the registry URI. &lt;br/&gt; \
-                                          Takes the form of: \
-                                          `container-image-registry-organization/container-image-repository:container-image-version`
-`container-image-short-tag`             | Short container image tag of the built container image,  excluding the registry URI. &lt;br/&gt; \
-                                          Takes the form of: \
-                                          `container-image-registry-uri/container-image-registry-organization/container-image-repository:container-image-version`
-
+Result Artifact Key                   | Description
+--------------------------------------|------------
+`container-image-registry`            | Container image registry of the built container image address.
+`container-image-repository`          | Container image repository of the built container image address.
+`container-image-tag`                 | Container image tag of the built container image address.
+`container-image-build-digest`        | Container image digest of the built container image address.
+`container-image-build-address`       | Container image address of the built container image.
+`container-image-build-short-address` | Container image short address (no registry) of the built container image.
 &#34;&#34;&#34; # pylint: disable=line-too-long
 
 import os
@@ -215,7 +196,8 @@ from distutils import util
 import sh
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.utils.containers import (
-    container_registries_login, determine_container_image_build_tag_info)
+    add_container_build_step_result_artifacts, container_registries_login,
+    determine_container_image_address_info, get_container_image_digest)
 
 DEFAULT_CONFIG = {
     # Image specification file name
@@ -317,11 +299,15 @@ class Buildah(StepImplementer):
             tls_verify = bool(util.strtobool(tls_verify))
 
         # create local build tag
-        image_registry_organization = self.get_value(&#39;organization&#39;)
-        build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version = \
-            determine_container_image_build_tag_info(
-                image_version=self.get_value(&#39;container-image-version&#39;),
-                organization=image_registry_organization,
+        container_image_build_address, container_image_build_short_address, \
+        contaimer_image_registry, container_image_repository, container_image_tag = \
+            determine_container_image_address_info(
+                contaimer_image_registry=&#39;localhost&#39;,
+                container_image_tag=self.get_value([
+                    &#39;container-image-tag&#39;,
+                    &#39;container-image-version&#39;
+                ]),
+                organization=self.get_value(&#39;organization&#39;),
                 application_name=self.get_value(&#39;application-name&#39;),
                 service_name=self.get_value(&#39;service-name&#39;)
             )
@@ -347,7 +333,7 @@ class Buildah(StepImplementer):
                 &#39;--format=&#39; + self.get_value(&#39;format&#39;),
                 &#39;--tls-verify=&#39; + str(tls_verify).lower(),
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, build_full_tag,
+                &#39;-t&#39;, container_image_build_address,
                 &#39;--authfile&#39;, containers_config_auth_file,
                 self.get_value(&#39;context&#39;),
                 _out=sys.stdout,
@@ -359,49 +345,28 @@ class Buildah(StepImplementer):
             step_result.success = False
             step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
                 f&#39;specification file ({image_spec_file}): {error}&#39;
-            return step_result
+
+        # get image digest
+        container_image_digest = None
+        if step_result.success:
+            try:
+                print(&#34;Get container image digest&#34;)
+                container_image_digest = get_container_image_digest(
+                    container_image_address=container_image_build_address
+                )
+            except RuntimeError as error:
+                step_result.success = False
+                step_result.message = f&#34;Error getting built container image digest: {error}&#34;
 
         # add artifacts
-        step_result.add_artifact(
-            name=&#39;container-image-registry-uri&#39;,
-            value=image_registry_uri,
-            description=&#39;Registry URI poriton of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-registry-organization&#39;,
-            value=image_registry_organization,
-            description=&#39;Organization portion of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-repository&#39;,
-            value=image_repository,
-            description=&#39;Repository portion of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-name&#39;,
-            value=image_repository,
-            description=&#39;Another way to reference the&#39; \
-                &#39; repository portion of the container image tag of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-version&#39;,
-            value=image_version,
-            description=&#39;Version portion of the container image tag of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-tag&#39;,
-            value=build_full_tag,
-            description=&#39;Full container image tag of the built container,&#39; \
-                &#39; including the registry URI.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-short-tag&#39;,
-            value=build_short_tag,
-            description=&#39;Short container image tag of the built container image,&#39; \
-                &#39; excluding the registry URI.&#39;
+        add_container_build_step_result_artifacts(
+            step_result=step_result,
+            contaimer_image_registry=contaimer_image_registry,
+            container_image_repository=container_image_repository,
+            container_image_tag=container_image_tag,
+            container_image_digest=container_image_digest,
+            container_image_build_address=container_image_build_address,
+            container_image_build_short_address=container_image_build_short_address
         )
 
         return step_result</code></pre>
@@ -502,11 +467,15 @@ class Buildah(StepImplementer):
             tls_verify = bool(util.strtobool(tls_verify))
 
         # create local build tag
-        image_registry_organization = self.get_value(&#39;organization&#39;)
-        build_full_tag, build_short_tag, image_registry_uri, image_repository, image_version = \
-            determine_container_image_build_tag_info(
-                image_version=self.get_value(&#39;container-image-version&#39;),
-                organization=image_registry_organization,
+        container_image_build_address, container_image_build_short_address, \
+        contaimer_image_registry, container_image_repository, container_image_tag = \
+            determine_container_image_address_info(
+                contaimer_image_registry=&#39;localhost&#39;,
+                container_image_tag=self.get_value([
+                    &#39;container-image-tag&#39;,
+                    &#39;container-image-version&#39;
+                ]),
+                organization=self.get_value(&#39;organization&#39;),
                 application_name=self.get_value(&#39;application-name&#39;),
                 service_name=self.get_value(&#39;service-name&#39;)
             )
@@ -532,7 +501,7 @@ class Buildah(StepImplementer):
                 &#39;--format=&#39; + self.get_value(&#39;format&#39;),
                 &#39;--tls-verify=&#39; + str(tls_verify).lower(),
                 &#39;--layers&#39;, &#39;-f&#39;, image_spec_file,
-                &#39;-t&#39;, build_full_tag,
+                &#39;-t&#39;, container_image_build_address,
                 &#39;--authfile&#39;, containers_config_auth_file,
                 self.get_value(&#39;context&#39;),
                 _out=sys.stdout,
@@ -544,49 +513,28 @@ class Buildah(StepImplementer):
             step_result.success = False
             step_result.message = &#39;Issue invoking buildah bud with given image &#39; \
                 f&#39;specification file ({image_spec_file}): {error}&#39;
-            return step_result
+
+        # get image digest
+        container_image_digest = None
+        if step_result.success:
+            try:
+                print(&#34;Get container image digest&#34;)
+                container_image_digest = get_container_image_digest(
+                    container_image_address=container_image_build_address
+                )
+            except RuntimeError as error:
+                step_result.success = False
+                step_result.message = f&#34;Error getting built container image digest: {error}&#34;
 
         # add artifacts
-        step_result.add_artifact(
-            name=&#39;container-image-registry-uri&#39;,
-            value=image_registry_uri,
-            description=&#39;Registry URI poriton of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-registry-organization&#39;,
-            value=image_registry_organization,
-            description=&#39;Organization portion of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-repository&#39;,
-            value=image_repository,
-            description=&#39;Repository portion of the container image tag&#39; \
-                &#39; of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-name&#39;,
-            value=image_repository,
-            description=&#39;Another way to reference the&#39; \
-                &#39; repository portion of the container image tag of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-version&#39;,
-            value=image_version,
-            description=&#39;Version portion of the container image tag of the built container image.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-tag&#39;,
-            value=build_full_tag,
-            description=&#39;Full container image tag of the built container,&#39; \
-                &#39; including the registry URI.&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-short-tag&#39;,
-            value=build_short_tag,
-            description=&#39;Short container image tag of the built container image,&#39; \
-                &#39; excluding the registry URI.&#39;
+        add_container_build_step_result_artifacts(
+            step_result=step_result,
+            contaimer_image_registry=contaimer_image_registry,
+            container_image_repository=container_image_repository,
+            container_image_tag=container_image_tag,
+            container_image_digest=container_image_digest,
+            container_image_build_address=container_image_build_address,
+            container_image_build_short_address=container_image_build_short_address
         )
 
         return step_result</code></pre>

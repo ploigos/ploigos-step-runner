@@ -54,12 +54,6 @@ Could come from:</p>
 <td>PGP Private Key used to sign the image</td>
 </tr>
 <tr>
-<td><code>container-image-tag</code></td>
-<td>Yes</td>
-<td></td>
-<td>Tag of the container image to sign</td>
-</tr>
-<tr>
 <td><code>container-image-signature-destination-url</code></td>
 <td>No</td>
 <td></td>
@@ -86,13 +80,48 @@ upload via a <code>PUT</code> to a remote location.</td>
 <td>Password to use when doing upload via http(s).</td>
 </tr>
 <tr>
-<td>``</td>
+<td><code>[container-image-pull-registry,
+container-image-push-registry,
+container-image-registry]</code></td>
+<td>Maybe</td>
 <td></td>
-<td></td>
-<td></td>
+<td>If <code>use-container-image-short-addres</code> is <code>True</code>,
+container image registry to pull container image from when deploying.</td>
 </tr>
 </tbody>
 </table>
+<p><code>[container-image-pull-repository,
+container-image-push-repository,
+container-image-repository]</code>
+| Yes
+|
+| Container image repository within the given container image registry
+to pull container image from when deploying.
+<code>[container-image-pull-digest,
+container-image-push-digest,
+container-image-digest]
+| Maybe
+|
+| If</code>use-container-image-digest<code>is &lt;code&gt;True&lt;/code&gt;,
+container image digest to pull container image with when deploying.</code>[container-image-pull-tag,
+container-image-push-tag,
+container-image-tag]
+| Maybe
+|
+| If <code>use-container-image-digest</code> is <code>False</code>,
+container image tag to pull container image with when deploying.
+<code>use-container-image-short-addres</code>
+| No
+| <code>False</code>
+| If <code>True</code> then use container image short address (no registry).
+If <code>False</code> then use container image full address (including registry).
+<code>use-container-image-digest</code>
+| No
+| <code>True</code>
+| If <code>True</code> then use container image digest in container image address when
+pulling container image for deployment.<br/>
+If <code>False</code> then use container image tag in container image address when
+pulling container image for deployment.</p>
 <h2 id="result-artifacts">Result Artifacts</h2>
 <p>Results artifacts output by this step.</p>
 <table>
@@ -109,8 +138,8 @@ upload via a <code>PUT</code> to a remote location.</td>
 the container image.</td>
 </tr>
 <tr>
-<td><code>container-image-signed-tag</code></td>
-<td>TODO</td>
+<td><code>container-image-signed-address</code></td>
+<td>Container image address that was signed since container image signature includes the address.</td>
 </tr>
 <tr>
 <td><code>container-image-signature-file-path</code></td>
@@ -153,28 +182,45 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key      | Required? | Default | Description
------------------------|-----------|---------|-------------
-`signer-pgp-private-key` \
-                       | Yes       |         | PGP Private Key used to sign the image
+Configuration Key                                | Required? | Default | Description
+-------------------------------------------------|-----------|---------|-------------
+`signer-pgp-private-key`                         | Yes       |         | PGP Private Key used to sign the image
 `container-image-signer-pgp-private-key` (deprecated)\
-                       | Yes       |         | PGP Private Key used to sign the image
-`container-image-tag`  | Yes       |         | Tag of the container image to sign
-`container-image-signature-destination-url` \
-                       | No        |         | URL to upload the container image signature to.\
-                                               The container image signature name will be appended \
-                                               to form the container image signature URI. \
-                                               &lt;br /&gt;&lt;br /&gt;\
-                                               Must start with `/` or `file://` to upload \
-                                               to local file path. \
-                                               &lt;br /&gt;&lt;br /&gt;\
-                                               Or must start with `http://` or `https://` to \
-                                               upload via a `PUT` to a remote location.
-`container-image-signature-destination-username` \
-                       | No        |         | Username to use when doing upload via http(s).
-`container-image-signature-destination-password` \
-                       | No        |         | Password to use when doing upload via http(s).
-``
+                                                 | Yes       |         | PGP Private Key used to sign the image
+`container-image-signature-destination-url`      | No        |         | URL to upload the container image signature to.\
+                                                                         The container image signature name will be appended \
+                                                                         to form the container image signature URI. \
+                                                                         &lt;br /&gt;&lt;br /&gt;\
+                                                                         Must start with `/` or `file://` to upload \
+                                                                         to local file path. \
+                                                                         &lt;br /&gt;&lt;br /&gt;\
+                                                                         Or must start with `http://` or `https://` to \
+                                                                         upload via a `PUT` to a remote location.
+`container-image-signature-destination-username` | No        |         | Username to use when doing upload via http(s).
+`container-image-signature-destination-password` | No        |         | Password to use when doing upload via http(s).
+`[container-image-pull-registry, \
+  container-image-push-registry, \
+  container-image-registry]`                     | Maybe    |          | If `use-container-image-short-addres` is `True`, \
+                                                                         container image registry to pull container image from when deploying.
+
+`[container-image-pull-repository, \
+  container-image-push-repository, \
+  container-image-repository]`                   | Yes      |          | Container image repository within the given container image registry \
+                                                                         to pull container image from when deploying.
+`[container-image-pull-digest,
+  container-image-push-digest,
+  container-image-digest]                        | Maybe    |          | If `use-container-image-digest` is `True`,
+                                                                         container image digest to pull container image with when deploying.
+`[container-image-pull-tag,
+  container-image-push-tag,
+  container-image-tag]                           | Maybe    |          | If `use-container-image-digest` is `False`,
+                                                                         container image tag to pull container image with when deploying.
+`use-container-image-short-addres`               | No        | `False`  | If `True` then use container image short address (no registry).\
+                                                                          If `False` then use container image full address (including registry).
+`use-container-image-digest`                     | No       | `True`   | If `True` then use container image digest in container image address when \
+                                                                         pulling container image for deployment.&lt;br/&gt;\
+                                                                         If `False` then use container image tag in container image address when \
+                                                                         pulling container image for deployment.
 
 Result Artifacts
 ----------------
@@ -185,7 +231,7 @@ Result Artifact Key                        | Description
 `container-image-signature-signer-private-key-fingerprint` \
                                            | Fingerprint for the private key used to sign \
                                              the container image.
-`container-image-signed-tag`               | TODO
+`container-image-signed-address`           | Container image address that was signed since container image signature includes the address.
 `container-image-signature-file-path`      | File path to created image signature.
 `container-image-signature-name`           | Fully qualified name of the \
                                              name of the image signature, \
@@ -198,8 +244,7 @@ Result Artifact Key                        | Description
 `container-image-signature-uri`            | URI of the uploaded container image signature.
 `container-image-signature-upload-results` | Results of uploading the container image \
                                              signature to the given destination.
-
-&#34;&#34;&#34;
+&#34;&#34;&#34;# pylint: disable=line-too-long
 import glob
 import os
 import sys
@@ -208,6 +253,7 @@ from distutils import util
 import sh
 from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementers.shared import ContainerDeployMixin
 from ploigos_step_runner.utils.containers import container_registries_login
 from ploigos_step_runner.utils.file import upload_file
 from ploigos_step_runner.utils.pgp import import_pgp_key
@@ -219,13 +265,10 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     # signer-pgp-private-key - new key name
     # container-image-signer-pgp-private-key - old key name
-    [&#39;signer-pgp-private-key&#39;, &#39;container-image-signer-pgp-private-key&#39;],
-
-    # being flexible for different use cases of proceeding steps
-    [&#39;container-image-push-tag&#39;, &#39;container-image-tag&#39;]
+    [&#39;signer-pgp-private-key&#39;, &#39;container-image-signer-pgp-private-key&#39;]
 ]
 
-class PodmanSign(StepImplementer):
+class PodmanSign(ContainerDeployMixin, StepImplementer):
     &#34;&#34;&#34;`StepImplementer` for the `sign-container-image` step using Podman to create
     an image signature.
     &#34;&#34;&#34;
@@ -243,7 +286,7 @@ class PodmanSign(StepImplementer):
         -----
         These are the lowest precedence configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**ContainerDeployMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -260,7 +303,8 @@ class PodmanSign(StepImplementer):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            ContainerDeployMixin._required_config_or_result_keys()
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -278,7 +322,7 @@ class PodmanSign(StepImplementer):
         )
 
         # get the uri to the image to sign
-        container_image_tag = self.get_value([&#39;container-image-push-tag&#39;, &#39;container-image-tag&#39;])
+        container_image_address = self._get_deploy_time_container_image_address()
 
         image_signatures_directory = self.create_working_dir_sub_dir(
             sub_dir_relative_path=&#39;image-signature&#39;
@@ -310,11 +354,11 @@ class PodmanSign(StepImplementer):
             signature_file_path = PodmanSign.__sign_image(
                 pgp_private_key_fingerprint=signer_pgp_private_key_fingerprint,
                 image_signatures_directory=image_signatures_directory,
-                container_image_tag=container_image_tag
+                container_image_address=container_image_address
             )
             step_result.add_artifact(
-                name=&#39;container-image-signed-tag&#39;,
-                value=container_image_tag,
+                name=&#39;container-image-signed-address&#39;,
+                value=container_image_address,
             )
             step_result.add_artifact(
                 name=&#39;container-image-signature-file-path&#39;,
@@ -361,11 +405,11 @@ class PodmanSign(StepImplementer):
     def __sign_image(
         pgp_private_key_fingerprint,
         image_signatures_directory,
-        container_image_tag
+        container_image_address
     ):
         # sign image
         print(
-            f&#34;Sign image ({container_image_tag}) &#34;
+            f&#34;Sign image ({container_image_address}) &#34;
             f&#34;with PGP private key ({pgp_private_key_fingerprint})&#34;
         )
         try:
@@ -375,14 +419,14 @@ class PodmanSign(StepImplementer):
                 &#34;sign&#34;,
                 f&#34;--sign-by={pgp_private_key_fingerprint}&#34;,
                 f&#34;--directory={image_signatures_directory}&#34;,
-                f&#34;docker://{container_image_tag}&#34;,
+                f&#34;docker://{container_image_address}&#34;,
                 _out=sys.stdout,
                 _err_to_out=True,
                 _tee=&#39;out&#39;
             )
         except sh.ErrorReturnCode as error:
             raise StepRunnerException(
-                f&#34;Error signing image ({container_image_tag}): {error}&#34;
+                f&#34;Error signing image ({container_image_address}): {error}&#34;
             ) from error
 
         # get image signature file path
@@ -398,7 +442,7 @@ class PodmanSign(StepImplementer):
 
         signature_file_path = signature_file_paths[0]
         print(
-            f&#34;Signed image ({container_image_tag}) with PGP private key &#34;
+            f&#34;Signed image ({container_image_address}) with PGP private key &#34;
             f&#34;({pgp_private_key_fingerprint}): &#39;{signature_file_path}&#39;&#34;
         )
 
@@ -425,7 +469,7 @@ an image signature.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class PodmanSign(StepImplementer):
+<pre><code class="python">class PodmanSign(ContainerDeployMixin, StepImplementer):
     &#34;&#34;&#34;`StepImplementer` for the `sign-container-image` step using Podman to create
     an image signature.
     &#34;&#34;&#34;
@@ -443,7 +487,7 @@ an image signature.</p></div>
         -----
         These are the lowest precedence configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**ContainerDeployMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -460,7 +504,8 @@ an image signature.</p></div>
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            ContainerDeployMixin._required_config_or_result_keys()
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -478,7 +523,7 @@ an image signature.</p></div>
         )
 
         # get the uri to the image to sign
-        container_image_tag = self.get_value([&#39;container-image-push-tag&#39;, &#39;container-image-tag&#39;])
+        container_image_address = self._get_deploy_time_container_image_address()
 
         image_signatures_directory = self.create_working_dir_sub_dir(
             sub_dir_relative_path=&#39;image-signature&#39;
@@ -510,11 +555,11 @@ an image signature.</p></div>
             signature_file_path = PodmanSign.__sign_image(
                 pgp_private_key_fingerprint=signer_pgp_private_key_fingerprint,
                 image_signatures_directory=image_signatures_directory,
-                container_image_tag=container_image_tag
+                container_image_address=container_image_address
             )
             step_result.add_artifact(
-                name=&#39;container-image-signed-tag&#39;,
-                value=container_image_tag,
+                name=&#39;container-image-signed-address&#39;,
+                value=container_image_address,
             )
             step_result.add_artifact(
                 name=&#39;container-image-signature-file-path&#39;,
@@ -561,11 +606,11 @@ an image signature.</p></div>
     def __sign_image(
         pgp_private_key_fingerprint,
         image_signatures_directory,
-        container_image_tag
+        container_image_address
     ):
         # sign image
         print(
-            f&#34;Sign image ({container_image_tag}) &#34;
+            f&#34;Sign image ({container_image_address}) &#34;
             f&#34;with PGP private key ({pgp_private_key_fingerprint})&#34;
         )
         try:
@@ -575,14 +620,14 @@ an image signature.</p></div>
                 &#34;sign&#34;,
                 f&#34;--sign-by={pgp_private_key_fingerprint}&#34;,
                 f&#34;--directory={image_signatures_directory}&#34;,
-                f&#34;docker://{container_image_tag}&#34;,
+                f&#34;docker://{container_image_address}&#34;,
                 _out=sys.stdout,
                 _err_to_out=True,
                 _tee=&#39;out&#39;
             )
         except sh.ErrorReturnCode as error:
             raise StepRunnerException(
-                f&#34;Error signing image ({container_image_tag}): {error}&#34;
+                f&#34;Error signing image ({container_image_address}): {error}&#34;
             ) from error
 
         # get image signature file path
@@ -598,7 +643,7 @@ an image signature.</p></div>
 
         signature_file_path = signature_file_paths[0]
         print(
-            f&#34;Signed image ({container_image_tag}) with PGP private key &#34;
+            f&#34;Signed image ({container_image_address}) with PGP private key &#34;
             f&#34;({pgp_private_key_fingerprint}): &#39;{signature_file_path}&#39;&#34;
         )
 
@@ -606,46 +651,17 @@ an image signature.</p></div>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin">ContainerDeployMixin</a></li>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="ploigos_step_runner.step_implementers.sign_container_image.podman_sign.PodmanSign.step_implementer_config_defaults"><code class="name flex">
-<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>Default values to use for step configuration values.</dd>
-</dl>
-<h2 id="notes">Notes</h2>
-<p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
+<li><code><b><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin">ContainerDeployMixin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin.step_implementer_config_defaults" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+</ul>
+</li>
 <li><code><b><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
@@ -693,9 +709,6 @@ def step_implementer_config_defaults():
 <ul>
 <li>
 <h4><code><a title="ploigos_step_runner.step_implementers.sign_container_image.podman_sign.PodmanSign" href="#ploigos_step_runner.step_implementers.sign_container_image.podman_sign.PodmanSign">PodmanSign</a></code></h4>
-<ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.sign_container_image.podman_sign.PodmanSign.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.sign_container_image.podman_sign.PodmanSign.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

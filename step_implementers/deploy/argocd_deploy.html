@@ -65,8 +65,7 @@ Could come from:</p>
 <td>True</td>
 <td>If set to false, argo cd will sync only if
 explicitly told to do so via the UI or CLI.
-Otherwise it will sync if the repo contents
-have changed</td>
+Otherwise it will sync if the repo contents have changed.</td>
 </tr>
 <tr>
 <td><code>argocd-skip-tls</code></td>
@@ -80,8 +79,7 @@ issues when authenticating with ArgoCD.</td>
 <td><code>argocd-sync-timeout-seconds</code></td>
 <td>Yes</td>
 <td>60</td>
-<td>Number of seconds to wait for argocd to
-sync updates</td>
+<td>Number of seconds to wait for argocd to sync updates</td>
 </tr>
 <tr>
 <td><code>argocd-sync-retry-limit</code></td>
@@ -111,25 +109,19 @@ sync updates</td>
 <td><code>deployment-config-helm-chart-environment-values-file</code></td>
 <td>No</td>
 <td>values-{ENV}.yaml</td>
-<td>File to update with environment
-deployment specific information.
+<td>File to update with environment deployment specific information.
 <br/>
-Default value uses <code>environment</code>
-configuration option to calculate file
-name.</td>
+Default value uses <code>environment</code> configuration option to calculate file name.</td>
 </tr>
 <tr>
 <td><code>deployment-config-helm-chart-additional-values-files</code></td>
 <td>No</td>
 <td></td>
 <td>Array of additional values files.
-Paths must be relative to the given
-Helm Chart path (<code>deployment-config-helm-chart-path</code>).
+Paths must be relative to the given Helm Chart path (<code>deployment-config-helm-chart-path</code>).
 <br/>
-Does not need to include
-<code>deployment-config-helm-chart-environment-values-file</code>
-as it will be automatically included as the
-last <code>--values</code> flag.</td>
+Does not need to include <code>deployment-config-helm-chart-environment-values-file</code>
+as it will be automatically included as the last <code>--values</code> flag.</td>
 </tr>
 <tr>
 <td><br/>
@@ -144,15 +136,14 @@ explicitly provide.</td>
 <td></td>
 </tr>
 <tr>
-<td><code>deployment-config-helm-chart-values-file-image-tag-yq-path</code></td>
+<td><code>[deployment-config-helm-chart-values-file-container-image-address-yq-path,
+deployment-config-helm-chart-values-file-image-tag-yq-path]</code></td>
 <td>Yes</td>
-<td><code>image_tag</code></td>
+<td><code>image</code></td>
 <td>YQ path to value in <code>deployment-config-helm-chart-environment-values-file</code>
-to update with the <code>container-image-tag</code>
-before deployment.
+to update with the latest container image address before deployment.
 <br/>
-<strong>SEE:</strong>: <a href="https://github.com/mikefarah/yq">https://github.com/mikefarah/yq</a>
-for documentation on valid yq paths.</td>
+<strong>SEE:</strong>: <a href="https://github.com/mikefarah/yq">https://github.com/mikefarah/yq</a> for documentation on valid yq paths.</td>
 </tr>
 <tr>
 <td><code>kube-api-uri</code></td>
@@ -196,15 +187,13 @@ argocd.</td>
 <td><code>git-username</code></td>
 <td>No</td>
 <td></td>
-<td>If the helm config repo s accessed via http(s)
-this must be supplied</td>
+<td>If the helm config repo s accessed via http(s) this must be supplied</td>
 </tr>
 <tr>
 <td><code>git-password</code></td>
 <td>No</td>
 <td></td>
-<td>If the helm config repo is accessed via http(s)
-this must be supplied</td>
+<td>If the helm config repo is accessed via http(s) this must be supplied</td>
 </tr>
 <tr>
 <td><code>tag</code></td>
@@ -219,21 +208,8 @@ If <code>version</code> not supplied <code>latest</code> will be used.</td>
 <td>No</td>
 <td>latest</td>
 <td>Ignored if <code>tag</code> is provided.
-The git tag to apply to the config repo if <code>tag</code>
-is not supplied.
-If <code>tag</code> and <code>version</code> not supplied <code>latest</code>
-will be used.</td>
-</tr>
-<tr>
-<td><code>container-image-tag</code></td>
-<td>Yes</td>
-<td></td>
-<td>Tag container image was pushed with. <br/>
-Takes the form of:
-"<code>container-image-registry-uri</code>
-/<code>container-image-registry-organization</code>
-/<code>container-image-repository</code>
-:<code>container-image-version</code>"</td>
+The git tag to apply to the config repo if <code>tag</code> is not supplied.
+If <code>tag</code> and <code>version</code> not supplied <code>latest</code> will be used.</td>
 </tr>
 <tr>
 <td><code>force-push-tags</code></td>
@@ -247,8 +223,49 @@ Takes the form of:
 <td>[]</td>
 <td>Array of value files to add to argocd app for helm use</td>
 </tr>
+<tr>
+<td><code>[container-image-pull-registry,
+container-image-push-registry,
+container-image-registry]</code></td>
+<td>Maybe</td>
+<td></td>
+<td>If <code>use-container-image-short-addres</code> is <code>True</code>,
+container image registry to pull container image from when deploying.</td>
+</tr>
 </tbody>
 </table>
+<p><code>[container-image-pull-repository,
+container-image-push-repository,
+container-image-repository]</code>
+| Yes
+|
+| Container image repository within the given container image registry
+to pull container image from when deploying.
+<code>[container-image-pull-digest,
+container-image-push-digest,
+container-image-digest]
+| Maybe
+|
+| If</code>use-container-image-digest<code>is &lt;code&gt;True&lt;/code&gt;,
+container image digest to pull container image with when deploying.</code>[container-image-pull-tag,
+container-image-push-tag,
+container-image-tag]
+| Maybe
+|
+| If <code>use-container-image-digest</code> is <code>False</code>,
+container image tag to pull container image with when deploying.
+<code>use-container-image-short-addres</code>
+| No
+| <code>False</code>
+| If <code>True</code> then use container image short address (no registry).
+If <code>False</code> then use container image full address (including registry).
+<code>use-container-image-digest</code>
+| No
+| <code>True</code>
+| If <code>True</code> then use container image digest in container image address when
+pulling container image for deployment.<br/>
+If <code>False</code> then use container image tag in container image address when
+pulling container image for deployment.</p>
 <h2 id="results">Results</h2>
 <p>Results output by this step.</p>
 <table>
@@ -275,6 +292,10 @@ Takes the form of:
 <td><code>argocd-deployed-manifest</code></td>
 <td>The generated yml file used for deployment.</td>
 </tr>
+<tr>
+<td><code>container-image-deployed-address</code></td>
+<td>Container image address that was deployed.</td>
+</tr>
 </tbody>
 </table>
 <details class="source">
@@ -292,108 +313,112 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key         | Required? | Default  | Description
---------------------------|-----------|----------|---------------------------
-`argocd-username`         | Yes       |          | Username for accessing the ArgoCD API
-`argocd-password`         | Yes       |          | Password for accessing the ArgoCD API
-`argocd-api`              | Yes       |          | The ArgoCD API endpoint
-`argocd-auto-sync`        | Yes       | True     | If set to false, argo cd will sync only if \
-                                                   explicitly told to do so via the UI or CLI. \
-                                                   Otherwise it will sync if the repo contents \
-                                                   have changed
-`argocd-skip-tls`         | Yes       | False    | `False` to not ignore TLS issues when \
-                                                   authenticating with ArgoCD. True` to ignore TLS \
-                                                   issues when authenticating with ArgoCD.
-`argocd-sync-timeout-seconds` \
-                          | Yes       | 60       | Number of seconds to wait for argocd to \
-                                                   sync updates
-`argocd-sync-retry-limit` | No        | 3        | Value to pass to retry limit flag for argo sync
-`argocd-sync-prune`       | No        | True     |
-`deployment-config-repo`  | Yes       |          | The repo containing the helm chart definition
-`deployment-config-helm-chart-path` \
-                          | Yes       | ./       | Directory containing the helm chart definition
+Configuration Key                       | Required? | Default  | Description
+----------------------------------------|-----------|----------|---------------------------
+`argocd-username`                       | Yes       |          | Username for accessing the ArgoCD API
+`argocd-password`                       | Yes       |          | Password for accessing the ArgoCD API
+`argocd-api`                            | Yes       |          | The ArgoCD API endpoint
+`argocd-auto-sync`                      | Yes       | True     | If set to false, argo cd will sync only if \
+                                                                 explicitly told to do so via the UI or CLI. \
+                                                                 Otherwise it will sync if the repo contents have changed.
+`argocd-skip-tls`                       | Yes       | False    | `False` to not ignore TLS issues when \
+                                                                  authenticating with ArgoCD. True` to ignore TLS \
+                                                                  issues when authenticating with ArgoCD.
+`argocd-sync-timeout-seconds`           | Yes       | 60       | Number of seconds to wait for argocd to sync updates
+`argocd-sync-retry-limit`               | No        | 3        | Value to pass to retry limit flag for argo sync
+`argocd-sync-prune`                     | No        | True     |
+`deployment-config-repo`                | Yes       |          | The repo containing the helm chart definition
+`deployment-config-helm-chart-path`     | Yes       | ./       | Directory containing the helm chart definition
 `deployment-config-helm-chart-environment-values-file` \
-                          | No        | values-{ENV}.yaml | File to update with environment \
-                                                            deployment specific information. \
-                                                            &lt;br/&gt;\
-                                                            Default value uses `environment` \
-                                                            configuration option to calculate file \
-                                                            name.
+                                        | No        | values-{ENV}.yaml \
+                                                               | File to update with environment deployment specific information. \
+                                                                 &lt;br/&gt;\
+                                                                 Default value uses `environment` configuration option to calculate file name.
 `deployment-config-helm-chart-additional-values-files` \
-                          | No        |          | Array of additional values files. \
-                                                   Paths must be relative to the given \
-                                                   Helm Chart path (`deployment-config-helm-chart-path`). \
-                                                   &lt;br/&gt;\
-                                                   Does not need to include \
-                                                   `deployment-config-helm-chart-environment-values-file` \
-                                                   as it will be automatically included as the \
-                                                   last `--values` flag.
-                                                   &lt;br/&gt;\
-                                                   Used when createing the ArgoCD Application.\
-                                                   &lt;br/&gt;&lt;br/&gt;\
-                                                   **NOTE:** Helm will always pick up `values.yaml`\
-                                                   by default whether or not additional values \
-                                                   files are provided, therefor no need to \
-                                                   explicitly provide.
-`deployment-config-helm-chart-values-file-image-tag-yq-path` \
-                          | Yes       | `image_tag` | YQ path to value in `deployment-config-helm-chart-environment-values-file` \
-                                                      to update with the `container-image-tag` \
-                                                      before deployment. \
-                                                      &lt;br/&gt;\
-                                                      **SEE:**: https://github.com/mikefarah/yq \
-                                                      for documentation on valid yq paths.
-`kube-api-uri`            | Yes       | https://kubernetes.default.svc | k8s API endpoint
-`kube-api-token`          | No        |          | k8s API token. This is used to add an external \
-                                                   k8s cluster into argocd. It is required if the \
-                                                   cluster has not already been added to ArgoCD. \
-                                                   The token should be persistent \
-                                                   (.e.g, a service account token) and have cluster \
-                                                   admin access.
-`kube-api-skip-tls`       | Yes       | False    | Whether or not to skip tls verification when \
-                                                   authenticating to an external k8s cluster. \
-                                                   Used when a new cluster is registered with \
-                                                   argocd.
-`git-email`               | Yes       |          | Git email for commit
-`git-name`                | Yes       | `Ploigos Robot` | Git name for commit
-`git-username`            | No        |          | If the helm config repo s accessed via http(s) \
-                                                   this must be supplied
-`git-password`            | No        |          | If the helm config repo is accessed via http(s) \
-                                                   this must be supplied
-`tag`                     | No        | latest   | The git tag to apply to the config repo. \
-                                                   If not supplied `version` will be used. \
-                                                   If `version` not supplied `latest` will be used.
-`version`                 | No        | latest   | Ignored if `tag` is provided. \
-                                                   The git tag to apply to the config repo if `tag` \
-                                                   is not supplied. \
-                                                   If `tag` and `version` not supplied `latest` \
-                                                   will be used.
-`container-image-tag`     | Yes       |          | Tag container image was pushed with. &lt;br/&gt;\
-                                                   Takes the form of: \
-                                                     &#34;`container-image-registry-uri`\
-                                                        /`container-image-registry-organization`\
-                                                        /`container-image-repository`\
-                                                        :`container-image-version`&#34;
-`force-push-tags`         | No        | False    | Force push Git Tags
-`additional-helm-values-files` | No   | []       | Array of value files to add to argocd app for helm use
+                                        | No        |          | Array of additional values files. \
+                                                                 Paths must be relative to the given Helm Chart path (`deployment-config-helm-chart-path`). \
+                                                                 &lt;br/&gt;\
+                                                                 Does not need to include `deployment-config-helm-chart-environment-values-file` \
+                                                                 as it will be automatically included as the last `--values` flag.
+                                                                 &lt;br/&gt;\
+                                                                 Used when createing the ArgoCD Application.\
+                                                                 &lt;br/&gt;&lt;br/&gt;\
+                                                                 **NOTE:** Helm will always pick up `values.yaml`\
+                                                                 by default whether or not additional values \
+                                                                 files are provided, therefor no need to \
+                                                                 explicitly provide.
+`[deployment-config-helm-chart-values-file-container-image-address-yq-path, \
+  deployment-config-helm-chart-values-file-image-tag-yq-path]` \
+                                        | Yes       | `image` | YQ path to value in `deployment-config-helm-chart-environment-values-file` \
+                                                                to update with the latest container image address before deployment. \
+                                                                &lt;br/&gt;\
+                                                                **SEE:**: https://github.com/mikefarah/yq for documentation on valid yq paths.
+`kube-api-uri`                          | Yes       | https://kubernetes.default.svc | k8s API endpoint
+`kube-api-token`                        | No        |          | k8s API token. This is used to add an external \
+                                                                 k8s cluster into argocd. It is required if the \
+                                                                 cluster has not already been added to ArgoCD. \
+                                                                 The token should be persistent \
+                                                                 (.e.g, a service account token) and have cluster \
+                                                                 admin access.
+`kube-api-skip-tls`                     | Yes       | False    | Whether or not to skip tls verification when \
+                                                                 authenticating to an external k8s cluster. \
+                                                                 Used when a new cluster is registered with \
+                                                                 argocd.
+`git-email`                             | Yes       |          | Git email for commit
+`git-name`                              | Yes       | `Ploigos Robot` | Git name for commit
+`git-username`                          | No        |          | If the helm config repo s accessed via http(s) this must be supplied
+`git-password`                          | No        |          | If the helm config repo is accessed via http(s) this must be supplied
+`tag`                                   | No        | latest   | The git tag to apply to the config repo. \
+                                                                 If not supplied `version` will be used. \
+                                                                 If `version` not supplied `latest` will be used.
+`version`                               | No        | latest   | Ignored if `tag` is provided. \
+                                                                 The git tag to apply to the config repo if `tag` is not supplied. \
+                                                                 If `tag` and `version` not supplied `latest` will be used.
+`force-push-tags`                       | No        | False    | Force push Git Tags
+`additional-helm-values-files`          | No        | []       | Array of value files to add to argocd app for helm use
+`[container-image-pull-registry, \
+  container-image-push-registry, \
+  container-image-registry]`            | Maybe     |          | If `use-container-image-short-addres` is `True`, \
+                                                                 container image registry to pull container image from when deploying.
+
+`[container-image-pull-repository, \
+  container-image-push-repository, \
+  container-image-repository]`          | Yes       |          | Container image repository within the given container image registry \
+                                                                 to pull container image from when deploying.
+`[container-image-pull-digest,
+  container-image-push-digest,
+  container-image-digest]               | Maybe     |          | If `use-container-image-digest` is `True`,
+                                                                 container image digest to pull container image with when deploying.
+`[container-image-pull-tag,
+  container-image-push-tag,
+  container-image-tag]                  | Maybe     |          | If `use-container-image-digest` is `False`,
+                                                                 container image tag to pull container image with when deploying.
+`use-container-image-short-addres`      | No        | `False`  | If `True` then use container image short address (no registry).\
+                                                                 If `False` then use container image full address (including registry).
+`use-container-image-digest`            | No        | `True`   | If `True` then use container image digest in container image address when \
+                                                                 pulling container image for deployment.&lt;br/&gt;\
+                                                                 If `False` then use container image tag in container image address when \
+                                                                 pulling container image for deployment.
 
 Results
 -------
 Results output by this step.
 
-Result Key                 | Description
----------------------------|------------
-`argocd-app-name`          | The argocd app name that was created or updated
-`deployed-host-urls`       | The host URLs deployed by ArgoCD (Ingress/Route resources)
-`config-repo-git-tag`      | The git tag applied to the configuration repo for deployment
-`argocd-deployed-manifest` | The generated yml file used for deployment.
+Result Key                         | Description
+-----------------------------------|------------
+`argocd-app-name`                  | The argocd app name that was created or updated
+`deployed-host-urls`               | The host URLs deployed by ArgoCD (Ingress/Route resources)
+`config-repo-git-tag`              | The git tag applied to the configuration repo for deployment
+`argocd-deployed-manifest`         | The generated yml file used for deployment.
+`container-image-deployed-address` | Container image address that was deployed.
 &#34;&#34;&#34;# pylint: disable=line-too-long
 import os
 import re
 
 from ploigos_step_runner import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.shared.argocd_generic import \
-    ArgoCDGeneric
+from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,
+                                                          ContainerDeployMixin)
 
 DEFAULT_CONFIG = {
     &#39;argocd-sync-timeout-seconds&#39;: 60,
@@ -404,7 +429,7 @@ DEFAULT_CONFIG = {
     &#39;deployment-config-helm-chart-path&#39;: &#39;./&#39;,
     &#39;deployment-config-helm-chart-additional-values-files&#39;: [],
     &#39;additional-helm-values-files&#39;: [],
-    &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;: &#39;image_tag&#39;,
+    &#39;deployment-config-helm-chart-values-file-container-image-address-yq-path&#39;: &#39;image&#39;,
     &#39;force-push-tags&#39;: False,
     &#39;kube-api-skip-tls&#39;: False,
     &#39;kube-api-uri&#39;: &#39;https://kubernetes.default.svc&#39;,
@@ -418,10 +443,12 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;argocd-skip-tls&#39;,
     &#39;deployment-config-repo&#39;,
     &#39;deployment-config-helm-chart-path&#39;,
-    &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;,
+    [
+        &#39;deployment-config-helm-chart-values-file-container-image-address-yq-path&#39;,
+        &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;
+    ],
     &#39;git-email&#39;,
-    &#39;git-name&#39;,
-    &#39;container-image-tag&#39;
+    &#39;git-name&#39;
 ]
 
 GIT_AUTHENTICATION_CONFIG = {
@@ -429,7 +456,7 @@ GIT_AUTHENTICATION_CONFIG = {
     &#39;git-password&#39;: None
 }
 
-class ArgoCDDeploy(ArgoCDGeneric):
+class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
     &#34;&#34;&#34;`StepImplementer` for the `deploy` step using ArgoCD.
     &#34;&#34;&#34;
 
@@ -446,7 +473,7 @@ class ArgoCDDeploy(ArgoCDGeneric):
         -----
         These are the lowest precedence configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**ContainerDeployMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -463,7 +490,8 @@ class ArgoCDDeploy(ArgoCDGeneric):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            ContainerDeployMixin._required_config_or_result_keys()
 
     def _validate_required_config_or_previous_step_result_artifact_keys(self):
         &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
@@ -520,11 +548,12 @@ class ArgoCDDeploy(ArgoCDGeneric):
         deployment_config_destination_cluster_token = self.get_value(&#39;kube-api-token&#39;)
         deployment_config_helm_chart_environment_values_file = \
             self._get_deployment_config_helm_chart_environment_values_file()
-        deployment_config_helm_chart_values_file_image_tag_yq_path = \
-            self.get_value(&#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;)
+        deployment_config_helm_chart_values_file_container_image_address_yq_path = self.get_value([
+            &#39;deployment-config-helm-chart-values-file-container-image-address-yq-path&#39;,
+            &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;
+        ])
         deployment_config_helm_chart_additional_value_files = \
             self.get_value(&#39;deployment-config-helm-chart-additional-values-files&#39;)
-        container_image_tag = self.get_value(&#39;container-image-tag&#39;)
         force_push_tags = self.get_value(&#39;force-push-tags&#39;)
         additional_helm_values_files = self.get_value(&#39;additional-helm-values-files&#39;)
 
@@ -555,11 +584,18 @@ class ArgoCDDeploy(ArgoCDGeneric):
                 deployment_config_helm_chart_path,
                 deployment_config_helm_chart_environment_values_file
             )
+            container_image_address = self._get_deploy_time_container_image_address()
             self._update_yaml_file_value(
                 file=deployment_config_helm_chart_environment_values_file_path,
-                yq_path=deployment_config_helm_chart_values_file_image_tag_yq_path,
-                value=container_image_tag
+                yq_path=deployment_config_helm_chart_values_file_container_image_address_yq_path,
+                value=container_image_address
             )
+            step_result.add_artifact(
+                name=&#39;container-image-deployed-address&#39;,
+                value=container_image_address,
+                description=&#39;Container image address used to deploy the container.&#39;
+            )
+
             print(&#34;Commit the updated environment values file&#34;)
             self._git_commit_file(
                 git_commit_message=f&#39;Updating values for deployment to {self.environment}&#39;,
@@ -669,7 +705,7 @@ class ArgoCDDeploy(ArgoCDGeneric):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ArgoCDDeploy(ArgoCDGeneric):
+<pre><code class="python">class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
     &#34;&#34;&#34;`StepImplementer` for the `deploy` step using ArgoCD.
     &#34;&#34;&#34;
 
@@ -686,7 +722,7 @@ class ArgoCDDeploy(ArgoCDGeneric):
         -----
         These are the lowest precedence configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**ContainerDeployMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -703,7 +739,8 @@ class ArgoCDDeploy(ArgoCDGeneric):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            ContainerDeployMixin._required_config_or_result_keys()
 
     def _validate_required_config_or_previous_step_result_artifact_keys(self):
         &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
@@ -760,11 +797,12 @@ class ArgoCDDeploy(ArgoCDGeneric):
         deployment_config_destination_cluster_token = self.get_value(&#39;kube-api-token&#39;)
         deployment_config_helm_chart_environment_values_file = \
             self._get_deployment_config_helm_chart_environment_values_file()
-        deployment_config_helm_chart_values_file_image_tag_yq_path = \
-            self.get_value(&#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;)
+        deployment_config_helm_chart_values_file_container_image_address_yq_path = self.get_value([
+            &#39;deployment-config-helm-chart-values-file-container-image-address-yq-path&#39;,
+            &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;
+        ])
         deployment_config_helm_chart_additional_value_files = \
             self.get_value(&#39;deployment-config-helm-chart-additional-values-files&#39;)
-        container_image_tag = self.get_value(&#39;container-image-tag&#39;)
         force_push_tags = self.get_value(&#39;force-push-tags&#39;)
         additional_helm_values_files = self.get_value(&#39;additional-helm-values-files&#39;)
 
@@ -795,11 +833,18 @@ class ArgoCDDeploy(ArgoCDGeneric):
                 deployment_config_helm_chart_path,
                 deployment_config_helm_chart_environment_values_file
             )
+            container_image_address = self._get_deploy_time_container_image_address()
             self._update_yaml_file_value(
                 file=deployment_config_helm_chart_environment_values_file_path,
-                yq_path=deployment_config_helm_chart_values_file_image_tag_yq_path,
-                value=container_image_tag
+                yq_path=deployment_config_helm_chart_values_file_container_image_address_yq_path,
+                value=container_image_address
             )
+            step_result.add_artifact(
+                name=&#39;container-image-deployed-address&#39;,
+                value=container_image_address,
+                description=&#39;Container image address used to deploy the container.&#39;
+            )
+
             print(&#34;Commit the updated environment values file&#34;)
             self._git_commit_file(
                 git_commit_message=f&#39;Updating values for deployment to {self.environment}&#39;,
@@ -891,6 +936,7 @@ class ArgoCDDeploy(ArgoCDGeneric):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin">ContainerDeployMixin</a></li>
 <li><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric" href="../shared/argocd_generic.html#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric">ArgoCDGeneric</a></li>
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
@@ -899,43 +945,13 @@ class ArgoCDDeploy(ArgoCDGeneric):
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementers.deploy.argocd.ArgoCD" href="argocd.html#ploigos_step_runner.step_implementers.deploy.argocd.ArgoCD">ArgoCD</a></li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy.step_implementer_config_defaults"><code class="name flex">
-<span>def <span class="ident">step_implementer_config_defaults</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Getter for the StepImplementer's configuration defaults.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>Default values to use for step configuration values.</dd>
-</dl>
-<h2 id="notes">Notes</h2>
-<p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
+<li><code><b><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin">ContainerDeployMixin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin.step_implementer_config_defaults" href="../shared/container_deploy_mixin.html#ploigos_step_runner.step_implementers.shared.container_deploy_mixin.ContainerDeployMixin.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
+</ul>
+</li>
 <li><code><b><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric" href="../shared/argocd_generic.html#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric">ArgoCDGeneric</a></b></code>:
 <ul class="hlist">
 <li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.config" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.config">config</a></code></li>
@@ -983,9 +999,6 @@ def step_implementer_config_defaults():
 <ul>
 <li>
 <h4><code><a title="ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy" href="#ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy">ArgoCDDeploy</a></code></h4>
-<ul class="">
-<li><code><a title="ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy.step_implementer_config_defaults" href="#ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy.step_implementer_config_defaults">step_implementer_config_defaults</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

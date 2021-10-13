@@ -104,8 +104,15 @@ of semantic version (<a href="https://semver.org/">https://semver.org/</a>). <co
 <td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
 </tr>
 <tr>
+<td><code>container-image-tag</code></td>
+<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build number
+since container tags don't support + symbol.</td>
+</tr>
+<tr>
 <td><code>container-image-version</code></td>
-<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build number</td>
+<td>DEPRECIATED. See <code>container-image-tag</code>.
+Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build number
+since container tags don't support + symbol.</td>
 </tr>
 </tbody>
 </table>
@@ -168,7 +175,11 @@ Results artifacts output by this step.
 Result Artifact Key       | Description
 --------------------------|------------
 `version`                 | Constructed semantic version (https://semver.org/).
-`container-image-version` | Constructed semantic version (https://semver.org/) without build number
+`container-image-tag`     | Constructed semantic version (https://semver.org/) without build number\
+                            since container tags don&#39;t support + symbol.
+`container-image-version` | DEPRECIATED. See `container-image-tag`.\
+                            Constructed semantic version (https://semver.org/) without build number\
+                            since container tags don&#39;t support + symbol.
 &#34;&#34;&#34;
 
 from ploigos_step_runner import StepImplementer
@@ -248,22 +259,23 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
             version = f&#39;{app_version}-{pre_release}+{build}&#39;
             image_tag = f&#39;{app_version}-{pre_release}&#39;
 
+        # add artifacts
         step_result.add_artifact(
             name=&#39;version&#39;,
             value=version
         )
-
         step_result.add_artifact(
-            name=&#39;container-image-version&#39;,
+            name=&#39;container-image-tag&#39;,
             value=image_tag
         )
 
+        # add evidence
         step_result.add_evidence(
             name=&#39;version&#39;,
             value=version
         )
         step_result.add_evidence(
-            name=&#39;container-image-version&#39;,
+            name=&#39;container-image-tag&#39;,
             value=image_tag
         )
 
@@ -353,22 +365,23 @@ semantic version from given input.</p></div>
             version = f&#39;{app_version}-{pre_release}+{build}&#39;
             image_tag = f&#39;{app_version}-{pre_release}&#39;
 
+        # add artifacts
         step_result.add_artifact(
             name=&#39;version&#39;,
             value=version
         )
-
         step_result.add_artifact(
-            name=&#39;container-image-version&#39;,
+            name=&#39;container-image-tag&#39;,
             value=image_tag
         )
 
+        # add evidence
         step_result.add_evidence(
             name=&#39;version&#39;,
             value=version
         )
         step_result.add_evidence(
-            name=&#39;container-image-version&#39;,
+            name=&#39;container-image-tag&#39;,
             value=image_tag
         )
 
