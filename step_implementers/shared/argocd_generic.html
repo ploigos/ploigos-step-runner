@@ -614,10 +614,12 @@ users:
     @staticmethod
     def _argocd_app_create_or_update( # pylint: disable=too-many-arguments
         argocd_app_name,
+        project,
         repo,
         revision,
         path,
         dest_server,
+        dest_namespace,
         auto_sync,
         values_files
     ):
@@ -646,8 +648,9 @@ users:
                 f&#39;--revision={revision}&#39;,
                 f&#39;--path={path}&#39;,
                 f&#39;--dest-server={dest_server}&#39;,
-                f&#39;--dest-namespace={argocd_app_name}&#39;,
+                f&#39;--dest-namespace={dest_namespace}&#39;,
                 f&#39;--sync-policy={sync_policy}&#39;,
+                f&#39;--project={project}&#39;,
                 values_params,
                 &#39;--upsert&#39;,
                 _out=sys.stdout,
@@ -1364,10 +1367,12 @@ users:
     @staticmethod
     def _argocd_app_create_or_update( # pylint: disable=too-many-arguments
         argocd_app_name,
+        project,
         repo,
         revision,
         path,
         dest_server,
+        dest_namespace,
         auto_sync,
         values_files
     ):
@@ -1396,8 +1401,9 @@ users:
                 f&#39;--revision={revision}&#39;,
                 f&#39;--path={path}&#39;,
                 f&#39;--dest-server={dest_server}&#39;,
-                f&#39;--dest-namespace={argocd_app_name}&#39;,
+                f&#39;--dest-namespace={dest_namespace}&#39;,
                 f&#39;--sync-policy={sync_policy}&#39;,
+                f&#39;--project={project}&#39;,
                 values_params,
                 &#39;--upsert&#39;,
                 _out=sys.stdout,
