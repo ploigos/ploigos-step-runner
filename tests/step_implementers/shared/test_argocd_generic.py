@@ -1936,18 +1936,22 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
     @patch('sh.argocd', create=True)
     def testargocd_app_create_or_update_success_sync_auto_no_extra_values_files(self, argocd_mock):
         argocd_app_name = 'test'
+        project = 'myproject'
         repo = 'https://git.test.xyz'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
         auto_sync = True
         values_files = []
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
+            project=project,
             repo=repo,
             revision=revision,
             path=path,
             dest_server=dest_server,
+            dest_namespace=dest_namespace,
             auto_sync=auto_sync,
             values_files=values_files
         )
@@ -1960,8 +1964,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             f'--revision={revision}',
             f'--path={path}',
             f'--dest-server={dest_server}',
-            f'--dest-namespace={argocd_app_name}',
+            f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--project={project}',
             values_params,
             '--upsert',
             _out=Any(IOBase),
@@ -1971,18 +1976,22 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
     @patch('sh.argocd', create=True)
     def testargocd_app_create_or_update_success_sync_none_no_extra_values_files(self, argocd_mock):
         argocd_app_name = 'test'
+        project = 'myproject'
         repo = 'https://git.test.xyz'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
         auto_sync = False
         values_files = []
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
+            project=project,
             repo=repo,
             revision=revision,
             path=path,
             dest_server=dest_server,
+            dest_namespace=dest_namespace,
             auto_sync=auto_sync,
             values_files=values_files
         )
@@ -1995,8 +2004,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             f'--revision={revision}',
             f'--path={path}',
             f'--dest-server={dest_server}',
-            f'--dest-namespace={argocd_app_name}',
+            f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--project={project}',
             values_params,
             '--upsert',
             _out=Any(IOBase),
@@ -2006,18 +2016,22 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
     @patch('sh.argocd', create=True)
     def testargocd_app_create_or_update_success_sync_auto_1_values_files(self, argocd_mock):
         argocd_app_name = 'test'
+        project = 'myproject'
         repo = 'https://git.test.xyz'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
         auto_sync = True
         values_files = ['values-foo.yaml']
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
+            project=project,
             repo=repo,
             revision=revision,
             path=path,
             dest_server=dest_server,
+            dest_namespace=dest_namespace,
             auto_sync=auto_sync,
             values_files=values_files
         )
@@ -2030,8 +2044,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             f'--revision={revision}',
             f'--path={path}',
             f'--dest-server={dest_server}',
-            f'--dest-namespace={argocd_app_name}',
+            f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--project={project}',
             values_params,
             '--upsert',
             _out=Any(IOBase),
@@ -2041,18 +2056,22 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
     @patch('sh.argocd', create=True)
     def testargocd_app_create_or_update_success_sync_auto_2_values_files(self, argocd_mock):
         argocd_app_name = 'test'
+        project = 'myproject'
         repo = 'https://git.test.xyz'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
         auto_sync = True
         values_files = ['values-foo.yaml', 'values-DEV.yaml']
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
+            project=project,
             repo=repo,
             revision=revision,
             path=path,
             dest_server=dest_server,
+            dest_namespace=dest_namespace,
             auto_sync=auto_sync,
             values_files=values_files
         )
@@ -2065,8 +2084,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             f'--revision={revision}',
             f'--path={path}',
             f'--dest-server={dest_server}',
-            f'--dest-namespace={argocd_app_name}',
+            f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--project={project}',
             values_params,
             '--upsert',
             _out=Any(IOBase),
@@ -2080,10 +2100,12 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
         )
 
         argocd_app_name = 'test'
+        project = 'myproject'
         repo = 'https://git.test.xyz'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
         auto_sync = True
         values_files = ['values-foo.yaml']
 
@@ -2101,10 +2123,12 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
         ):
             ArgoCDGeneric._argocd_app_create_or_update(
                 argocd_app_name=argocd_app_name,
+                project=project,
                 repo=repo,
                 revision=revision,
                 path=path,
                 dest_server=dest_server,
+                dest_namespace=dest_namespace,
                 auto_sync=auto_sync,
                 values_files=values_files
             )
@@ -2117,8 +2141,9 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_create_or_update(TestStep
             f'--revision={revision}',
             f'--path={path}',
             f'--dest-server={dest_server}',
-            f'--dest-namespace={argocd_app_name}',
+            f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--project={project}',
             values_params,
             '--upsert',
             _out=Any(IOBase),
