@@ -23,6 +23,10 @@ Configuration Key                       | Required? | Default  | Description
 `argocd-sync-timeout-seconds`           | Yes       | 60       | Number of seconds to wait for argocd to sync updates
 `argocd-sync-retry-limit`               | No        | 3        | Value to pass to retry limit flag for argo sync
 `argocd-sync-prune`                     | No        | True     |
+`argocd-project`                        | Yes       | default  | ArgoCD Project to create/update the ArogCD Application in
+`argocd-add-or-update-target-cluster`   | No        | True     | `True` to automatically add or update target cluster information.\
+                                                                 `False` to assume target cluster already in place.
+`deployment-namespace`                  | No        |          | If not provided namespace name will be automatically generated
 `deployment-config-repo`                | Yes       |          | The repo containing the helm chart definition
 `deployment-config-helm-chart-path`     | Yes       | ./       | Directory containing the helm chart definition
 `deployment-config-helm-chart-environment-values-file` \
@@ -122,6 +126,7 @@ DEFAULT_CONFIG = {
     'argocd-auto-sync': True,
     'argocd-skip-tls' : False,
     'argocd-sync-prune': True,
+    'argocd-project': 'default',
     'deployment-config-helm-chart-path': './',
     'deployment-config-helm-chart-additional-values-files': [],
     'additional-helm-values-files': [],
@@ -129,7 +134,8 @@ DEFAULT_CONFIG = {
     'force-push-tags': False,
     'kube-api-skip-tls': False,
     'kube-api-uri': 'https://kubernetes.default.svc',
-    'git-name': 'Ploigos Robot'
+    'git-name': 'Ploigos Robot',
+    'argocd-add-or-update-target-cluster': True
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -137,6 +143,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'argocd-password',
     'argocd-api',
     'argocd-skip-tls',
+    'argocd-project',
     'deployment-config-repo',
     'deployment-config-helm-chart-path',
     [
@@ -226,7 +233,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 f" http/https protical both 'git-username' and 'git-password' must be provided."
             )
 
-    def _run_step(self):  # pylint: disable=too-many-locals
+    def _run_step(self):  # pylint: disable=too-many-locals, too-many-statements
         """Runs the step implemented by this StepImplementer.
 
         Returns
@@ -322,12 +329,24 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 password=self.get_value('argocd-password'),
                 insecure=self.get_value('argocd-skip-tls')
             )
-            print("Add target cluster to ArgoCD")
-            self._argocd_add_target_cluster(
-                kube_api=deployment_config_destination_cluster_uri,
-                kube_api_token=deployment_config_destination_cluster_token,
-                kube_api_skip_tls=self.get_value('kube-api-skip-tls')
-            )
+
+            add_or_update_target_cluster = self.get_value('argocd-add-or-update-target-cluster')
+            if add_or_update_target_cluster:
+                print("Add target cluster to ArgoCD")
+                self._argocd_add_target_cluster(
+                    kube_api=deployment_config_destination_cluster_uri,
+                    kube_api_token=deployment_config_destination_cluster_token,
+                    kube_api_skip_tls=self.get_value('kube-api-skip-tls')
+                )
+
+            print("Determine deployment namespace")
+            deployment_namespace = self.get_value('deployment-namespace')
+            if deployment_namespace:
+                print(f"  Using user provided namespace name: {deployment_namespace}")
+            else:
+                deployment_namespace = argocd_app_name
+                print(f"  Using auto generated namespace name: {deployment_namespace}")
+
             print(f"Create or update ArgoCD Application ({argocd_app_name})")
             argocd_values_files = []
             argocd_values_files += deployment_config_helm_chart_additional_value_files
@@ -339,8 +358,10 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 revision=deployment_config_repo_tag,
                 path=deployment_config_helm_chart_path,
                 dest_server=deployment_config_destination_cluster_uri,
+                dest_namespace=deployment_namespace,
                 auto_sync=self.get_value('argocd-auto-sync'),
-                values_files=argocd_values_files
+                values_files=argocd_values_files,
+                project=self.get_value('argocd-project')
             )
 
             # sync and wait for the sync of the ArgoCD app
