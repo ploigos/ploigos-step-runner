@@ -23,7 +23,7 @@ Configuration Key                       | Required? | Default  | Description
 `argocd-sync-timeout-seconds`           | Yes       | 60       | Number of seconds to wait for argocd to sync updates
 `argocd-sync-retry-limit`               | No        | 3        | Value to pass to retry limit flag for argo sync
 `argocd-sync-prune`                     | No        | True     |
-`argocd-project`                        | Yes       | default  | ArgoCD Project to create/update the ArogCD Application in
+`argocd-project`                        | Yes       | default  | ArgoCD Project to create/update the ArgoCD Application in
 `argocd-add-or-update-target-cluster`   | No        | True     | `True` to automatically add or update target cluster information.\
                                                                  `False` to assume target cluster already in place.
 `deployment-namespace`                  | No        |          | If not provided namespace name will be automatically generated

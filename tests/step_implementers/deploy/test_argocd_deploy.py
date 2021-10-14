@@ -42,6 +42,7 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
             'argocd-auto-sync': True,
             'argocd-skip-tls' : False,
             'argocd-sync-prune': True,
+            'argocd-project': 'default',
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
             'additional-helm-values-files': [],
@@ -49,7 +50,8 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
             'force-push-tags': False,
             'kube-api-skip-tls': False,
             'kube-api-uri': 'https://kubernetes.default.svc',
-            'git-name': 'Ploigos Robot'
+            'git-name': 'Ploigos Robot',
+            'argocd-add-or-update-target-cluster': True
         }
         self.assertEqual(defaults, expected_defaults)
         mock_container_deploy_mixin_step_implementer_config_defaults.assert_called_once()
@@ -65,6 +67,7 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
             'argocd-password',
             'argocd-api',
             'argocd-skip-tls',
+            'argocd-project',
             'deployment-config-repo',
             'deployment-config-helm-chart-path',
             [
@@ -581,8 +584,10 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 revision='v0.42.0',
                 path=step_config['deployment-config-helm-chart-path'],
                 dest_server='https://kubernetes.default.svc',
+                dest_namespace='test-app-name',
                 auto_sync=True,
-                values_files=['values-PROD.yaml']
+                values_files=['values-PROD.yaml'],
+                project='default'
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
@@ -627,6 +632,7 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 'deployment-config-repo': 'https://git.ploigos.xyz/foo/deploy-config',
                 'deployment-config-helm-chart-path': 'charts/foo',
                 'deployment-config-helm-chart-values-file-image-tag-yq-path': 'image.tag',
+                'deployment-namespace': 'best-namespace',
                 'git-email': 'git@ploigos.xyz',
                 'git-name': 'Ploigos',
                 'container-image-tag': 'v0.42.0'
@@ -717,8 +723,10 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 revision='v0.42.0',
                 path=step_config['deployment-config-helm-chart-path'],
                 dest_server='https://kubernetes.default.svc',
+                dest_namespace='best-namespace',
                 auto_sync=True,
-                values_files=['values-PROD.yaml']
+                values_files=['values-PROD.yaml'],
+                project='default'
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
@@ -853,8 +861,10 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 revision='v0.42.0',
                 path=step_config['deployment-config-helm-chart-path'],
                 dest_server='https://kubernetes.default.svc',
+                dest_namespace='test-app-name',
                 auto_sync=True,
-                values_files=['values-PROD.yaml', 'secrets.yaml', 'extra-secrets.yaml']
+                values_files=['values-PROD.yaml', 'secrets.yaml', 'extra-secrets.yaml'],
+                project='default'
             )
             argocd_app_sync_mock.assert_called_once_with(
                 argocd_app_name='test-app-name',
