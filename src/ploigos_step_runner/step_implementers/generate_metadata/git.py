@@ -9,13 +9,15 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key     | Required? | Default | Description
-----------------------|-----------|---------|-----------
-`repo-root`           | Yes       | `./`    | Directory path to the Git repo to generate \
-                                            metadata from. Must not be in a detached head state \
-                                            so that `pre-release` value can be determined.
-`build-string-length` | Yes       | `7`     | Length of the Git hash to use for the \
-                                              `build` portion of the semantic version.
+Configuration Key        | Required? | Default                  | Description
+-------------------------|-----------|--------------------------|-----------
+`repo-root`              | Yes       | `./`                     | Directory path to the Git repo to generate \
+                                                                  metadata from. Must not be in a detached head state \
+                                                                  so that `pre-release` value can be determined.
+`release-branch-regexes` | No        | `['^main$', '^master$']` | If current git branch matches any of the given regex patterns, \
+                                                                  then this will be considered a release else \
+                                                                  will be considered a pre-release. \
+                                                                  If no patterns given then will be considered a pre-release.
 
 Result Artifacts
 ----------------
@@ -23,11 +25,12 @@ Results artifacts output by this step.
 
 Result Artifact Key | Description
 --------------------|------------
-`pre-release` | Value to use for `pre-release` portion of semantic version \
-                (https://semver.org/). Uses the Git branch name.
-`build`       | Value to use for `build` portion of semantic version (https://semver.org/). \
-                Uses a portion of the latest Git commit hash.
-"""
+`branch`            | Current branch name.
+`is-pre-release`    | `True` if this build should be considered a pre-release, \
+                      `False` if should be considered a release.
+`sha`               | Current commit sha.
+
+"""# pylint: disable=line-too-long
 
 import re
 
@@ -37,12 +40,11 @@ from ploigos_step_runner import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
     'repo-root': './',
-    'build-string-length': 7
+    'release-branch-regexes': ['^main$', '^master$']
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'repo-root',
-    'build-string-length'
+    'repo-root'
 ]
 
 class Git(StepImplementer):  # pylint: disable=too-few-public-methods
@@ -94,49 +96,62 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         step_result = StepResult.from_step_implementer(self)
 
         repo_root = self.get_value('repo-root')
-        build_string_length = self.get_value('build-string-length')
-
         try:
             repo = Repo(repo_root)
         except InvalidGitRepositoryError:
             step_result.success = False
-            step_result.message = 'Given directory (repo_root) is not a Git repository'
+            step_result.message = f'Given repo-root ({repo_root}) is not a Git repository'
             return step_result
 
         if repo.bare:
             step_result.success = False
-            step_result.message = 'Given directory (repo_root) is a bare Git repository'
+            step_result.message = f'Given repo-root ({repo_root}) is not a Git repository'
             return step_result
 
-        # The SemanticVersion StepImplementer uses the branch name (as stored by 'pre-release'
-        # below), so this step requires the git repository to not be in a detached head state. If
-        # there are any brilliant ideas for specifying an appropriate pre-release value while in a
-        # detached head state, pull requests are welcome!
+        # Need to be able to determine the branch name to determine if is a pre-release build or not
         if repo.head.is_detached:
             step_result.success = False
-            step_result.message = 'Expected a Git branch in given directory (repo_root) but has' \
-                                  ' a detached head'
+            step_result.message = f'Expected a Git branch in given repo_root ({repo_root})' \
+                ' but has a detached head'
             return step_result
 
-        git_branch = str(repo.head.reference)
-        pre_release_regex = re.compile(r"/", re.IGNORECASE)
-        pre_release = re.sub(pre_release_regex, '_', git_branch)
+        # add branch artifact
+        git_branch = repo.head.reference.name
         step_result.add_artifact(
-            name='pre-release',
-            value=pre_release
+            name='branch',
+            value=git_branch
         )
 
-        try:
-            git_branch_last_commit_hash = str(repo.head.reference.commit)[:build_string_length]
+        # determine if pre-release
+        release_branch_regexes = self.get_value('release-branch-regexes')
+        if release_branch_regexes:
+            is_pre_release = True
+            if not isinstance(release_branch_regexes, list):
+                release_branch_regexes = [release_branch_regexes]
+            for release_branch_regex in release_branch_regexes:
+                if re.match(release_branch_regex, git_branch):
+                    is_pre_release = False
+                    break
+        else:
+            is_pre_release = True
 
+        # add pre-release artifact
+        step_result.add_artifact(
+            name='is-pre-release',
+            value=is_pre_release
+        )
+
+        # add commit sha artifact
+        try:
+            git_branch_last_commit_sha = str(repo.head.reference.commit)
             step_result.add_artifact(
-                name='build',
-                value=git_branch_last_commit_hash
+                name='sha',
+                value=git_branch_last_commit_sha
             )
         except ValueError:
             step_result.success = False
-            step_result.message = 'Given directory (repo_root) is a git branch (git_branch) with' \
-                                  ' no commit history'
+            step_result.message = f'Given repo-root ({repo_root}) is a' \
+                f' git branch ({git_branch}) with no commit history'
             return step_result
 
         return step_result
