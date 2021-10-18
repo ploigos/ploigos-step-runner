@@ -77,15 +77,68 @@ Could come from:</p>
 <td><code>app-version</code></td>
 <td>Yes</td>
 <td></td>
-<td>Value to use for <code>version</code> portion of
-semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
+<td>Value to use for <code>version</code> portion of semantic version (<a href="https://semver.org/">https://semver.org/</a>).
+EX: <code>&lt;app-version&gt;</code></td>
 </tr>
 <tr>
-<td><code>pre-release</code></td>
+<td><code>is-pre-release</code></td>
+<td>Yes</td>
+<td><code>False</code></td>
+<td>If <code>True</code> then will add any relevant <code>pre-release</code> identifiers to semantic version (<a href="https://semver.org/">https://semver.org/</a>),
+such as the branch name.
+If <code>False</code> then assumed to be a release build and all <code>pre-release</code> identifiers will
+be ignored from version as per the semantic version spec (<a href="https://semver.org/">https://semver.org/</a>).</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
 <td>No</td>
 <td></td>
-<td>Value to use for <code>pre-release</code> portion
-of semantic version (<a href="https://semver.org/">https://semver.org/</a>). <code>build</code></td>
+<td>If <code>is-pre-release</code> is <code>True</code>, value to use for a pre-release name in pre-release poriton of semantic version (<a href="https://semver.org/">https://semver.org/</a>).
+EX: <code>&lt;app-version&gt;-&lt;branch&gt;</code></td>
+</tr>
+<tr>
+<td><code>workflow-run-num</code></td>
+<td>No</td>
+<td></td>
+<td>If <code>is-pre-release</code> is <code>True</code>, value to use for a numeric identifier of the branch <code>pre-release</code> identifier if provided.
+Also always used in build identifier.
+Since this can be included in the pre-release section, it should be incremental as per the sem version spec.</td>
+</tr>
+<tr>
+<td>EX (pre-release): <code>&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;</code> <br/>
+EX (release): <code>&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>sha</code></td>
+<td>No</td>
+<td></td>
+<td>Value to use for sha build identifier in build portion of semantic version.
+EX: <code>&lt;app-version&gt;+&lt;sha&gt;</code></td>
+</tr>
+<tr>
+<td><code>sha-build-identifier-length</code></td>
+<td>No</td>
+<td>7</td>
+<td>Trim the given <code>sha</code> down to this length when including as build identifier in semantic version</td>
+</tr>
+<tr>
+<td><code>additional-pre-release-identifiers</code></td>
+<td>No</td>
+<td></td>
+<td>If <code>is-pre-release</code> is <code>True</code>, additional <code>pre-release</code> identifiers to add to semantic version (<a href="https://semver.org/">https://semver.org/</a>).
+Ignored if <code>is-pre-release</code> is <code>False.
+EX (pre-release):</code><app-version>-<branch>.<workflow-run-num>-<additional-pre-release-identifiers>+<sha>.<workflow-run-num>`</td>
+</tr>
+<tr>
+<td><code>additional-build-identifiers</code></td>
+<td>No</td>
+<td></td>
+<td>Additional <code>build</code> identifiers to add to semantic version (<a href="https://semver.org/">https://semver.org/</a>).
+EX (pre-release): <code>&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;</code> <br/>
+EX (release): <code>&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;</code></td>
 </tr>
 </tbody>
 </table>
@@ -101,18 +154,23 @@ of semantic version (<a href="https://semver.org/">https://semver.org/</a>). <co
 <tbody>
 <tr>
 <td><code>version</code></td>
-<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>).</td>
+<td>Full constructured semantic version</td>
 </tr>
 <tr>
 <td><code>container-image-tag</code></td>
-<td>Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build number
-since container tags don't support + symbol.</td>
+<td>Constructed semenatic version without build identifier since not compatible with container image tags</td>
 </tr>
 <tr>
-<td><code>container-image-version</code></td>
-<td>DEPRECIATED. See <code>container-image-tag</code>.
-Constructed semantic version (<a href="https://semver.org/">https://semver.org/</a>) without build number
-since container tags don't support + symbol.</td>
+<td><code>semantic-version-core</code></td>
+<td>Semantic version version core portion</td>
+</tr>
+<tr>
+<td><code>semantic-version-pre-release</code></td>
+<td>Semantic version version pre-release portion</td>
+</tr>
+<tr>
+<td><code>semantic-version-build</code></td>
+<td>Semantic version version build portion</td>
 </tr>
 </tbody>
 </table>
@@ -159,41 +217,57 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key | Required? | Default | Description
-------------------|-----------|---------|-----------
-`app-version`     | Yes       |         | Value to use for `version` portion of \
-                                          semantic version (https://semver.org/).
-`pre-release`     | No        |         | Value to use for `pre-release` portion \
-                                          of semantic version (https://semver.org/). \
-`build`           | Yes       |         | Value to use for `build` portion \
-                                          of semantic version (https://semver.org/).
+Configuration Key                     | Required? | Default | Description
+--------------------------------------|-----------|---------|-----------
+`app-version`                         | Yes       |         | Value to use for `version` portion of semantic version (https://semver.org/). \
+                                                              EX: `&lt;app-version&gt;`
+`is-pre-release`                      | Yes       | `False` | If `True` then will add any relevant `pre-release` identifiers to semantic version (https://semver.org/), \
+                                                              such as the branch name. \
+                                                              If `False` then assumed to be a release build and all `pre-release` identifiers will \
+                                                              be ignored from version as per the semantic version spec (https://semver.org/).
+`branch`                              | No        |         | If `is-pre-release` is `True`, value to use for a pre-release name in pre-release poriton of semantic version (https://semver.org/). \
+                                                              EX: `&lt;app-version&gt;-&lt;branch&gt;`
+`workflow-run-num`                    | No        |         | If `is-pre-release` is `True`, value to use for a numeric identifier of the branch `pre-release` identifier if provided. \
+                                                              Also always used in build identifier. \
+                                                              Since this can be included in the pre-release section, it should be incremental as per the sem version spec.
+                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;` &lt;br/&gt;\
+                                                              EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
+`sha`                                 | No        |         | Value to use for sha build identifier in build portion of semantic version. \
+                                                              EX: `&lt;app-version&gt;+&lt;sha&gt;`
+`sha-build-identifier-length`         | No        | 7       | Trim the given `sha` down to this length when including as build identifier in semantic version
+`additional-pre-release-identifiers`  | No        |         | If `is-pre-release` is `True`, additional `pre-release` identifiers to add to semantic version (https://semver.org/). \
+                                                              Ignored if `is-pre-release` is `False. \
+                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;-&lt;additional-pre-release-identifiers&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
+`additional-build-identifiers`        | No        |         | Additional `build` identifiers to add to semantic version (https://semver.org/). \
+                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;` &lt;br/&gt;\
+                                                              EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;`
 
 Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key       | Description
---------------------------|------------
-`version`                 | Constructed semantic version (https://semver.org/).
-`container-image-tag`     | Constructed semantic version (https://semver.org/) without build number\
-                            since container tags don&#39;t support + symbol.
-`container-image-version` | DEPRECIATED. See `container-image-tag`.\
-                            Constructed semantic version (https://semver.org/) without build number\
-                            since container tags don&#39;t support + symbol.
-&#34;&#34;&#34;
+Result Artifact Key            | Description
+-------------------------------|------------
+`version`                      | Full constructured semantic version
+`container-image-tag`          | Constructed semenatic version without build identifier since not compatible with container image tags
+`semantic-version-core`        | Semantic version version core portion
+`semantic-version-pre-release` | Semantic version version pre-release portion
+`semantic-version-build`       | Semantic version version build portion
 
-from ploigos_step_runner import StepImplementer
-from ploigos_step_runner import StepResult
+&#34;&#34;&#34;# pylint: disable=line-too-long
+
+import re
+
+from ploigos_step_runner import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
-    &#39;release-branch&#39;: &#39;master&#39;
+  &#39;is-pre-release&#39;: False,
+  &#39;sha-build-identifier-length&#39;: 7
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;app-version&#39;,
-    &#39;pre-release&#39;,
-    &#39;release-branch&#39;,
-    &#39;build&#39;
+    &#39;is-pre-release&#39;
 ]
 
 class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
@@ -244,42 +318,142 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        app_version = None
+        # construct version and image tag
+        version_core = self.get_value(&#39;app-version&#39;)
+        version = f&#39;{version_core}&#39;
+        image_tag = f&#39;{version_core}&#39;
         pre_release = None
-        build = None
-        release_branch = self.get_value(&#39;release-branch&#39;)
-        app_version = self.get_value(&#39;app-version&#39;)
-        pre_release = self.get_value(&#39;pre-release&#39;)
-        build = self.get_value(&#39;build&#39;)
-
-        if pre_release == release_branch:
-            version = f&#39;{app_version}+{build}&#39;
-            image_tag = f&#39;{app_version}&#39;
-        else:
-            version = f&#39;{app_version}-{pre_release}+{build}&#39;
-            image_tag = f&#39;{app_version}-{pre_release}&#39;
+        if self.get_value(&#39;is-pre-release&#39;):
+            pre_release = self.__get_semantic_version_pre_release()
+            if pre_release:
+                version += f&#39;-{pre_release}&#39;
+                image_tag += f&#39;-{pre_release}&#39;
+            else:
+                # NOTE: maybe at some point we should set some default pre-release value if
+                #       none calculated so that semver reflects that it is a pre-release?
+                pass
+        build = self.__get_semantic_version_build()
+        if build:
+            version += f&#39;+{build}&#39;
 
         # add artifacts
         step_result.add_artifact(
             name=&#39;version&#39;,
-            value=version
+            value=version,
+            description=&#39;Full constructured semantic version&#39;
         )
         step_result.add_artifact(
             name=&#39;container-image-tag&#39;,
-            value=image_tag
+            value=image_tag,
+            description=&#39;Constructed semenatic version without build identifier&#39; \
+              &#39; since not compatible with container image tags&#39;
         )
+        step_result.add_artifact(
+            name=&#39;semantic-version-core&#39;,
+            value=version_core,
+            description=&#39;Semantic version version core portion&#39;
+        )
+        if pre_release:
+            step_result.add_artifact(
+                name=&#39;semantic-version-pre-release&#39;,
+                value=pre_release,
+                description=&#39;Semantic version pre-release portion&#39;
+            )
+        if build:
+            step_result.add_artifact(
+                name=&#39;semantic-version-build&#39;,
+                value=build,
+                description=&#39;Semantic version build portion&#39;
+            )
 
         # add evidence
         step_result.add_evidence(
             name=&#39;version&#39;,
-            value=version
+            value=version,
+            description=&#39;Full constructured semantic version&#39;
         )
         step_result.add_evidence(
             name=&#39;container-image-tag&#39;,
-            value=image_tag
+            value=image_tag,
+            description=&#39;semenatic version without build identifier&#39; \
+                &#39; since not compatible with container image tags&#39;
         )
 
-        return step_result</code></pre>
+        return step_result
+
+    def __get_semantic_version_pre_release(self):
+        &#34;&#34;&#34;Get the pre-release portion of the semantic version
+
+        Returns
+        -------
+        Pre-release portion of the semantic version.
+        &#34;&#34;&#34;
+        pre_release = None
+        pre_release_identifiers = []
+
+        # if branch given add as a pre-release identifier
+        branch = self.get_value(&#39;branch&#39;)
+        if branch:
+            pre_release_regex = re.compile(r&#34;/&#34;, re.IGNORECASE)
+            branch_pre_release_identifier = re.sub(pre_release_regex, &#39;-&#39;, branch)
+            pre_release_identifiers.append(branch_pre_release_identifier)
+
+        # if workflow run num given ass as  apre-release identifier
+        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
+        if workflow_run_num:
+            pre_release_identifiers.append(workflow_run_num)
+
+        # if additional pre-release identifiers given, add as pre-release identifiers
+        additional_pre_release_identifiers = self.get_value(&#39;additional-pre-release-identifiers&#39;)
+        if additional_pre_release_identifiers:
+            if isinstance(additional_pre_release_identifiers, list):
+                pre_release_identifiers += additional_pre_release_identifiers
+            else:
+                pre_release_identifiers.append(additional_pre_release_identifiers)
+
+        if pre_release_identifiers:
+            pre_release = &#39;.&#39;.join(pre_release_identifiers)
+
+        return pre_release
+
+    def __get_semantic_version_build(self):
+        &#34;&#34;&#34;Get the build portion of the semantic version
+
+        Returns
+        -------
+        Build portion of the semantic version.
+        &#34;&#34;&#34;
+        build = None
+        build_identifiers = []
+
+        # if sha given add as a build identifier
+        sha = self.get_value(&#39;sha&#39;)
+        if sha:
+            sha_build_identifier = None
+            sha_build_identifier_length = self.get_value(&#39;sha-build-identifier-length&#39;)
+            if sha_build_identifier_length:
+                sha_build_identifier = str(sha)[:sha_build_identifier_length]
+            else:
+                sha_build_identifier = sha
+            build_identifiers.append(sha_build_identifier)
+
+        # if workflow run num given as a build identifier
+        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
+        if workflow_run_num:
+            build_identifiers.append(str(workflow_run_num))
+
+        # if additional pre-release identifiers given, add as pre-release identifiers
+        additional_build_identifiers = self.get_value(&#39;additional-build-identifiers&#39;)
+        if additional_build_identifiers:
+            if isinstance(additional_build_identifiers, list):
+                build_identifiers += additional_build_identifiers
+            else:
+                build_identifiers.append(additional_build_identifiers)
+
+        if build_identifiers:
+            build = &#39;.&#39;.join(build_identifiers)
+
+        return build</code></pre>
 </details>
 </section>
 <section>
@@ -350,42 +524,142 @@ semantic version from given input.</p></div>
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        app_version = None
+        # construct version and image tag
+        version_core = self.get_value(&#39;app-version&#39;)
+        version = f&#39;{version_core}&#39;
+        image_tag = f&#39;{version_core}&#39;
         pre_release = None
-        build = None
-        release_branch = self.get_value(&#39;release-branch&#39;)
-        app_version = self.get_value(&#39;app-version&#39;)
-        pre_release = self.get_value(&#39;pre-release&#39;)
-        build = self.get_value(&#39;build&#39;)
-
-        if pre_release == release_branch:
-            version = f&#39;{app_version}+{build}&#39;
-            image_tag = f&#39;{app_version}&#39;
-        else:
-            version = f&#39;{app_version}-{pre_release}+{build}&#39;
-            image_tag = f&#39;{app_version}-{pre_release}&#39;
+        if self.get_value(&#39;is-pre-release&#39;):
+            pre_release = self.__get_semantic_version_pre_release()
+            if pre_release:
+                version += f&#39;-{pre_release}&#39;
+                image_tag += f&#39;-{pre_release}&#39;
+            else:
+                # NOTE: maybe at some point we should set some default pre-release value if
+                #       none calculated so that semver reflects that it is a pre-release?
+                pass
+        build = self.__get_semantic_version_build()
+        if build:
+            version += f&#39;+{build}&#39;
 
         # add artifacts
         step_result.add_artifact(
             name=&#39;version&#39;,
-            value=version
+            value=version,
+            description=&#39;Full constructured semantic version&#39;
         )
         step_result.add_artifact(
             name=&#39;container-image-tag&#39;,
-            value=image_tag
+            value=image_tag,
+            description=&#39;Constructed semenatic version without build identifier&#39; \
+              &#39; since not compatible with container image tags&#39;
         )
+        step_result.add_artifact(
+            name=&#39;semantic-version-core&#39;,
+            value=version_core,
+            description=&#39;Semantic version version core portion&#39;
+        )
+        if pre_release:
+            step_result.add_artifact(
+                name=&#39;semantic-version-pre-release&#39;,
+                value=pre_release,
+                description=&#39;Semantic version pre-release portion&#39;
+            )
+        if build:
+            step_result.add_artifact(
+                name=&#39;semantic-version-build&#39;,
+                value=build,
+                description=&#39;Semantic version build portion&#39;
+            )
 
         # add evidence
         step_result.add_evidence(
             name=&#39;version&#39;,
-            value=version
+            value=version,
+            description=&#39;Full constructured semantic version&#39;
         )
         step_result.add_evidence(
             name=&#39;container-image-tag&#39;,
-            value=image_tag
+            value=image_tag,
+            description=&#39;semenatic version without build identifier&#39; \
+                &#39; since not compatible with container image tags&#39;
         )
 
-        return step_result</code></pre>
+        return step_result
+
+    def __get_semantic_version_pre_release(self):
+        &#34;&#34;&#34;Get the pre-release portion of the semantic version
+
+        Returns
+        -------
+        Pre-release portion of the semantic version.
+        &#34;&#34;&#34;
+        pre_release = None
+        pre_release_identifiers = []
+
+        # if branch given add as a pre-release identifier
+        branch = self.get_value(&#39;branch&#39;)
+        if branch:
+            pre_release_regex = re.compile(r&#34;/&#34;, re.IGNORECASE)
+            branch_pre_release_identifier = re.sub(pre_release_regex, &#39;-&#39;, branch)
+            pre_release_identifiers.append(branch_pre_release_identifier)
+
+        # if workflow run num given ass as  apre-release identifier
+        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
+        if workflow_run_num:
+            pre_release_identifiers.append(workflow_run_num)
+
+        # if additional pre-release identifiers given, add as pre-release identifiers
+        additional_pre_release_identifiers = self.get_value(&#39;additional-pre-release-identifiers&#39;)
+        if additional_pre_release_identifiers:
+            if isinstance(additional_pre_release_identifiers, list):
+                pre_release_identifiers += additional_pre_release_identifiers
+            else:
+                pre_release_identifiers.append(additional_pre_release_identifiers)
+
+        if pre_release_identifiers:
+            pre_release = &#39;.&#39;.join(pre_release_identifiers)
+
+        return pre_release
+
+    def __get_semantic_version_build(self):
+        &#34;&#34;&#34;Get the build portion of the semantic version
+
+        Returns
+        -------
+        Build portion of the semantic version.
+        &#34;&#34;&#34;
+        build = None
+        build_identifiers = []
+
+        # if sha given add as a build identifier
+        sha = self.get_value(&#39;sha&#39;)
+        if sha:
+            sha_build_identifier = None
+            sha_build_identifier_length = self.get_value(&#39;sha-build-identifier-length&#39;)
+            if sha_build_identifier_length:
+                sha_build_identifier = str(sha)[:sha_build_identifier_length]
+            else:
+                sha_build_identifier = sha
+            build_identifiers.append(sha_build_identifier)
+
+        # if workflow run num given as a build identifier
+        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
+        if workflow_run_num:
+            build_identifiers.append(str(workflow_run_num))
+
+        # if additional pre-release identifiers given, add as pre-release identifiers
+        additional_build_identifiers = self.get_value(&#39;additional-build-identifiers&#39;)
+        if additional_build_identifiers:
+            if isinstance(additional_build_identifiers, list):
+                build_identifiers += additional_build_identifiers
+            else:
+                build_identifiers.append(additional_build_identifiers)
+
+        if build_identifiers:
+            build = &#39;.&#39;.join(build_identifiers)
+
+        return build</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
