@@ -30,11 +30,15 @@
 <pre><code class="python">&#34;&#34;&#34;`StepImplementers` for the `generate-metadata` step.
 &#34;&#34;&#34;
 
-from ploigos_step_runner.step_implementers.generate_metadata.commitizen import Commitizen
+from ploigos_step_runner.step_implementers.generate_metadata.commitizen import \
+    Commitizen
 from ploigos_step_runner.step_implementers.generate_metadata.git import Git
+from ploigos_step_runner.step_implementers.generate_metadata.jenkins import \
+    Jenkins
 from ploigos_step_runner.step_implementers.generate_metadata.maven import Maven
 from ploigos_step_runner.step_implementers.generate_metadata.npm import Npm
-from ploigos_step_runner.step_implementers.generate_metadata.semantic_version import SemanticVersion</code></pre>
+from ploigos_step_runner.step_implementers.generate_metadata.semantic_version import \
+    SemanticVersion</code></pre>
 </details>
 </section>
 <section>
@@ -47,6 +51,10 @@ from ploigos_step_runner.step_implementers.generate_metadata.semantic_version im
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.generate_metadata.git" href="git.html">ploigos_step_runner.step_implementers.generate_metadata.git</a></code></dt>
 <dd>
 <div class="desc"><p><code>StepImplementer</code> for the <code>generate-metadata</code> step using Git …</p></div>
+</dd>
+<dt><code class="name"><a title="ploigos_step_runner.step_implementers.generate_metadata.jenkins" href="jenkins.html">ploigos_step_runner.step_implementers.generate_metadata.jenkins</a></code></dt>
+<dd>
+<div class="desc"><p><code>StepImplementer</code> for the <code>generate-metadata</code> step to get metadata from Jenkins …</p></div>
 </dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.generate_metadata.maven" href="maven.html">ploigos_step_runner.step_implementers.generate_metadata.maven</a></code></dt>
 <dd>
@@ -84,6 +92,7 @@ from ploigos_step_runner.step_implementers.generate_metadata.semantic_version im
 <ul>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.commitizen" href="commitizen.html">ploigos_step_runner.step_implementers.generate_metadata.commitizen</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.git" href="git.html">ploigos_step_runner.step_implementers.generate_metadata.git</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.jenkins" href="jenkins.html">ploigos_step_runner.step_implementers.generate_metadata.jenkins</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.maven" href="maven.html">ploigos_step_runner.step_implementers.generate_metadata.maven</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.npm" href="npm.html">ploigos_step_runner.step_implementers.generate_metadata.npm</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.semantic_version" href="semantic_version.html">ploigos_step_runner.step_implementers.generate_metadata.semantic_version</a></code></li>
