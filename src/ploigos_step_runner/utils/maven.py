@@ -1,8 +1,12 @@
 """Shared utils for maven operations.
 """
+
+
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
+from io import StringIO
 
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -502,7 +506,7 @@ def get_effective_pom(
 
     return effective_pom_path
 
-def run_maven( #pylint: disable=too-many-arguments
+def run_maven( #pylint: disable=too-many-arguments, too-many-locals
     mvn_output_file_path,
     settings_file,
     pom_file,
@@ -538,7 +542,7 @@ def run_maven( #pylint: disable=too-many-arguments
     Returns
     -------
     str
-        Standard Out and Standard Error from running Maven.
+        Standard Out from running Maven.
 
     Raises
     ------
@@ -550,7 +554,7 @@ def run_maven( #pylint: disable=too-many-arguments
         phases_and_goals = [phases_and_goals]
 
     # create profile argument
-    profiles_arguments = ""
+    profiles_arguments = []
     if profiles:
         profiles_arguments = ['-P', f"{','.join(profiles)}"]
 
@@ -572,11 +576,13 @@ def run_maven( #pylint: disable=too-many-arguments
         additional_arguments = []
 
     # run maven
+    maven_output_buff = StringIO()
     try:
         with open(mvn_output_file_path, 'w', encoding='utf-8') as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
-                mvn_output_file
+                mvn_output_file,
+                maven_output_buff
             ])
             err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stderr,
@@ -598,6 +604,12 @@ def run_maven( #pylint: disable=too-many-arguments
         raise StepRunnerException(
             f"Error running maven. {error}"
         ) from error
+
+    # remove ansi escape charaters from output before returning
+    maven_output = maven_output_buff.getvalue().rstrip()
+    maven_output_striped_ansi = re.compile(r'\x1b[^m]*m').sub('', maven_output)
+
+    return maven_output_striped_ansi
 
 def get_maven_plugin_xml_element_path(plugin_name):
     """Create XML element path for a given maven plugin.
