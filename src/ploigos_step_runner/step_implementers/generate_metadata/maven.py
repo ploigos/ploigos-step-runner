@@ -26,7 +26,7 @@ Result Artifact Key                     | Description
 `app-version`                           | Value to use for `version` portion of semantic version \
                                           (https://semver.org/). Uses the version read out of the given pom file.
 
-`maven-evaluate-project-version-output` | Standard out and standard error from running maven to auto increment version.
+`maven-auto-increment-version-output` | Standard out and standard error from running maven to auto increment version.
 """# pylint: disable=line-too-long
 
 from ploigos_step_runner import StepResult, StepRunnerException
@@ -134,7 +134,7 @@ class Maven(MavenGeneric):
     def __get_project_version(self, step_result):
         """Get the project version
 
-        Paramters
+        Parameters
         ---------
         step_result : StepResult
             Step result to add step results to.
@@ -167,7 +167,7 @@ class Maven(MavenGeneric):
     def __auto_increment_version(self, auto_increment_version_segment, step_result):
         """Automatically increments a given version segment.
 
-        Paramters
+        Parameters
         ---------
         auto_increment_version_segment : str
             The version segment to auto increment.
