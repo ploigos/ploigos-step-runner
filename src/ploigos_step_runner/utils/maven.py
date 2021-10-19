@@ -607,9 +607,9 @@ def run_maven( #pylint: disable=too-many-arguments, too-many-locals
 
     # remove ansi escape charaters from output before returning
     maven_output = maven_output_buff.getvalue().rstrip()
-    maven_output_striped_ansi = re.compile(r'\x1b[^m]*m').sub('', maven_output)
+    maven_output_stripped_ansi = re.compile(r'\x1b[^m]*m').sub('', maven_output)
 
-    return maven_output_striped_ansi
+    return maven_output_stripped_ansi
 
 def get_maven_plugin_xml_element_path(plugin_name):
     """Create XML element path for a given maven plugin.
