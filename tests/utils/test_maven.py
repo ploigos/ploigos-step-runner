@@ -4,7 +4,7 @@ Test for the utility for maven operations.
 """
 import re
 import xml.etree.ElementTree as ET
-from io import BytesIO, StringIO
+from io import BytesIO, StringIO, IOBase
 from pathlib import Path
 from unittest.mock import call, mock_open, patch
 
@@ -1191,7 +1191,8 @@ class TestMavenUtils_run_maven(BaseTestCase):
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
-                    mock_open.return_value
+                    mock_open.return_value,
+                    Any(IOBase)
                 ]),
                 call([
                     sys.stderr,
@@ -1230,7 +1231,8 @@ class TestMavenUtils_run_maven(BaseTestCase):
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
-                    mock_open.return_value
+                    mock_open.return_value,
+                    Any(IOBase)
                 ]),
                 call([
                     sys.stderr,
@@ -1270,7 +1272,8 @@ class TestMavenUtils_run_maven(BaseTestCase):
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
-                    mock_open.return_value
+                    mock_open.return_value,
+                    Any(IOBase)
                 ]),
                 call([
                     sys.stderr,
@@ -1310,7 +1313,8 @@ class TestMavenUtils_run_maven(BaseTestCase):
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
-                    mock_open.return_value
+                    mock_open.return_value,
+                    Any(IOBase)
                 ]),
                 call([
                     sys.stderr,
@@ -1352,7 +1356,8 @@ class TestMavenUtils_run_maven(BaseTestCase):
             redirect_mock.assert_has_calls([
                 call([
                     sys.stdout,
-                    mock_open.return_value
+                    mock_open.return_value,
+                    Any(IOBase)
                 ]),
                 call([
                     sys.stderr,
