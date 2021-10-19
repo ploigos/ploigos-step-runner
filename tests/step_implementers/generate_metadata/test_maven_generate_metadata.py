@@ -31,7 +31,13 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
     def test_step_implementer_config_defaults(self):
         defaults = Maven.step_implementer_config_defaults()
         expected_defaults = {
-            'pom-file': 'pom.xml'
+            'auto-increment-all-module-versions': True,
+            'auto-increment-version-segment': None,
+            'maven-additional-arguments': [],
+            'maven-no-transfer-progress': True,
+            'maven-profiles': [],
+            'pom-file': 'pom.xml',
+            'tls-verify': True
         }
         self.assertEqual(defaults, expected_defaults)
 
