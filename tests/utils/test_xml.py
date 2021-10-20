@@ -101,6 +101,33 @@ class TestXMLUtils_other(BaseTestCase):
 
         self.assertEqual(results, expected_results)
 
+    def test_parse_xml_element_for_attributes_multiple_files_float_and_int(self):
+        """Test to get an xml attribute from xml element
+
+        """
+
+        sample_file_paths = [
+            os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample2.xml'
+            ),
+            os.path.join(
+                os.path.dirname(__file__),
+                'files',
+                'sample3.xml'
+            )
+        ]
+
+        element = 'testsuite'
+        attribs = ['time']
+
+        results = aggregate_xml_element_attribute_values(sample_file_paths, element, attribs)
+
+        expected_results = {'time': 3.42}
+
+        self.assertEqual(results, expected_results)
+
     def test_parse_xml_element_for_attributes_multiple_files(self):
         """Test that element attributes are aggregated if multiple files with same element/attributes exist.
 
