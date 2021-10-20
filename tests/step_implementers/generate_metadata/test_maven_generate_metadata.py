@@ -3,6 +3,7 @@
 # pylint: disable=missing-function-docstring
 import os
 from unittest.mock import patch
+from re import escape
 
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
@@ -90,6 +91,38 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
             with self.assertRaisesRegex(
                 AssertionError,
                 rf"Given maven pom file \(pom-file\) does not exist: {pom_file_path}"
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+    def test__validate_required_config_or_previous_step_result_artifact_keys_bad_auto_increment_version_string(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            temp_dir.write('pom.xml', b'''<project>
+                <modelVersion>4.0.0</modelVersion>
+                <groupId>com.mycompany.app</groupId>
+                <artifactId>my-app</artifactId>
+                <version>42.1</version>
+            </project>''')
+
+            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            auto_increment_version_segment = 'build-number'
+
+            step_config = {
+                'pom-file': pom_file_path,
+                'auto-increment-version-segment': auto_increment_version_segment
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='generate-metadata',
+                implementer='Maven',
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            with self.assertRaisesMessage(
+                AssertionError,
+                rf'Given auto increment version segment (auto-increment-version-segment)'
+                rf' must be one of [major, minor, patch]: {auto_increment_version_segment}'
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
