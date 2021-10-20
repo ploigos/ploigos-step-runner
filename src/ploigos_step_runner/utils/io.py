@@ -41,6 +41,7 @@ def create_sh_redirect_to_multiple_streams_fn_callback(streams):
     def sh_redirect_to_multiple_streams(data):
         for stream in streams:
             stream.write(data)
+            stream.flush()
 
     return sh_redirect_to_multiple_streams
 
