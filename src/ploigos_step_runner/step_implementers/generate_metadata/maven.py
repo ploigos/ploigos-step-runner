@@ -109,25 +109,29 @@ class Maven(MavenGeneric):
         StepResult
             Object containing the dictionary results of this step.
         """
-        step_result = StepResult.from_step_implementer(self)
+        try:
+            step_result = StepResult.from_step_implementer(self)
 
-        # auto increment the version
-        auto_increment_version_segment = self.get_value('auto-increment-version-segment')
-        if auto_increment_version_segment:
-            print("Update maven package version")
-            self.__auto_increment_version(auto_increment_version_segment, step_result)
+            # auto increment the version
+            auto_increment_version_segment = self.get_value('auto-increment-version-segment')
+            if auto_increment_version_segment:
+                print("Update maven package version")
+                self.__auto_increment_version(auto_increment_version_segment, step_result)
 
-        # get the version
-        project_version = self.__get_project_version(step_result)
-        if project_version:
-            step_result.add_artifact(
-                name='app-version',
-                value=project_version
-            )
-        else:
+            # get the version
+            project_version = self.__get_project_version(step_result)
+            if project_version:
+                step_result.add_artifact(
+                    name='app-version',
+                    value=project_version
+                )
+            else:
+                step_result.success = False
+                step_result.message += 'Could not get project version from given pom file' \
+                    f' ({self.get_value("pom-file")})'
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message += 'Could not get project version from given pom file' \
-                f' ({self.get_value("pom-file")})'
+            step_result.message = str(error)
 
         return step_result
 
@@ -213,11 +217,10 @@ class Maven(MavenGeneric):
                 additional_arguments=additional_arguments
             )
         except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = f"Error running maven to auto increment version segment" \
-                f" ({auto_increment_version_segment})." \
-                f" More details maybe found in 'maven-auto-increment-version-output'" \
-                f" report artifact: {error}"
+            raise StepRunnerException(f"Error running maven to auto increment version segment"
+                f" ({auto_increment_version_segment})."
+                f" More details maybe found in 'maven-auto-increment-version-output'"
+                f" report artifact: {error}") from error
         finally:
             step_result.add_artifact(
                 description="Standard out and standard error from running maven" \
