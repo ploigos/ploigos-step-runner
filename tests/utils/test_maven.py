@@ -2,14 +2,10 @@
 
 Test for the utility for maven operations.
 """
-import re
-import xml.etree.ElementTree as ET
-from io import BytesIO, StringIO, IOBase
+from io import BytesIO, IOBase
 from pathlib import Path
 from unittest.mock import call, mock_open, patch
 
-import sh
-from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import *
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase

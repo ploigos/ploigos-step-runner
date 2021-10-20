@@ -88,7 +88,7 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
             with self.assertRaisesRegex(
                 AssertionError,
-                rf"Given pom file \(pom-file\) does not exist: {pom_file_path}"
+                rf"Given maven pom file \(pom-file\) does not exist: {pom_file_path}"
             ):
                 step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
