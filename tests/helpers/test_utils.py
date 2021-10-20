@@ -10,9 +10,9 @@ from ploigos_step_runner import StepRunner
 
 
 def create_sh_side_effect(
-        mock_stdout=None,
-        mock_stderr=None,
-        exception=None
+    mock_stdout=None,
+    mock_stderr=None,
+    exception=None
 ):
     def sh_side_effect(*args, **kwargs):
         if mock_stdout:
@@ -32,6 +32,30 @@ def create_sh_side_effect(
 
         if exception:
             raise exception
+
+    return sh_side_effect
+
+def create_sh_side_effects(sh_side_effects):
+    times_called = 0
+    def sh_side_effect(*args, **kwargs):
+
+        if 'mock_stdout' in sh_side_effects[times_called]:
+            if '_out' in kwargs:
+                if callable(kwargs['_out']):
+                    kwargs['_out'](sh_side_effects[times_called]['mock_stdout'])
+                elif isinstance(kwargs['_out'], IOBase):
+                    kwargs['_out'].write(sh_side_effects[times_called]['mock_stdout'])
+            else:
+                return sh_side_effects[times_called]['mock_stdout']
+
+        if 'mock_stderr' in sh_side_effects[times_called]:
+            if callable(kwargs['_err']):
+                kwargs['_err'](sh_side_effects[times_called]['mock_stderr'])
+            elif isinstance(kwargs['_err'], IOBase):
+                kwargs['_err'].write(sh_side_effects[times_called]['mock_stderr'])
+
+        if 'exception' in sh_side_effects[times_called]:
+            raise sh_side_effects[times_called]['exception']
 
     return sh_side_effect
 
