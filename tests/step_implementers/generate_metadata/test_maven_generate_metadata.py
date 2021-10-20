@@ -2,12 +2,13 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 import os
+from unittest.mock import patch
 
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from ploigos_step_runner.step_implementers.generate_metadata import Maven
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepResult, StepRunnerException
 
 
 class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
@@ -125,7 +126,13 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    def test_run_step_fail_missing_version_in_pom_file(self):
+    @patch('ploigos_step_runner.step_implementers.generate_metadata.maven.run_maven')
+    def test_run_step_fail_missing_version_in_pom_file(
+            self,
+            mock_run_maven
+    ):
+        mock_run_maven.side_effect = StepRunnerException("no version found")
+
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -154,7 +161,9 @@ class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):
                 sub_step_implementer_name='Maven'
             )
             expected_step_result.success = False
-            expected_step_result.message = f"Given pom file ({pom_file_path}) does not contain " + \
-                "a \"version\" key."
+            expected_step_result.message = f'Error running maven to get the project version: ' \
+                    f'no version found' \
+                    f'Could not get project version from given pom file' \
+                    f' ({pom_file_path})'
 
             self.assertEqual(result, expected_step_result)
