@@ -250,30 +250,26 @@ def aggregate_xml_element_attribute_values(xml_file_paths, xml_element, attribs)
     #Loop to check if all values aggregated are integers, floats, strings, or a mix
     #of all three.
     for attrib in attribs:
-        only_numerics = False
-        only_floats = False
+        only_ints = True
+        only_floats = True
 
         #Iteration to determine what pattern all values follow.
         if attrib in report_results:
             for value in report_results[attrib]:
-                #isnumeric() returns True if the value contains numbers
-                #but not a decimal point. If this returns
-                #true then continue because the value would be
-                #a valid float anyway
-                if value.isnumeric():
-                    only_numerics = True
-                    only_floats = True
-                else:
-                    only_numerics = False
-                    try:
-                        float(value)
-                        only_floats = True
-                    except ValueError:
-                        only_floats = False
-                        #Break since only_numerics and only_floats are both false
-                        break
+                # check if int
+                try:
+                    int(value)
+                except ValueError:
+                    only_ints = False
 
-            if only_numerics or only_floats:
+                # check if float
+                try:
+                    float(value)
+                except ValueError:
+                    only_floats = False
+
+
+            if only_ints or only_floats:
                 aggregated_value = 0
             else:
                 aggregated_value = []
@@ -281,7 +277,7 @@ def aggregate_xml_element_attribute_values(xml_file_paths, xml_element, attribs)
             #Iteration to aggregate values based on determined pattern.
             for value in report_results[attrib]:
                 #If a value is numeric and can be a float then it is an integer
-                if only_numerics:
+                if only_ints:
                     aggregated_value = int(aggregated_value) + int(value)
                 #If a value is not numeric but can be a float then it is a float
                 elif only_floats:
@@ -398,30 +394,26 @@ aggregated.</p>
     #Loop to check if all values aggregated are integers, floats, strings, or a mix
     #of all three.
     for attrib in attribs:
-        only_numerics = False
-        only_floats = False
+        only_ints = True
+        only_floats = True
 
         #Iteration to determine what pattern all values follow.
         if attrib in report_results:
             for value in report_results[attrib]:
-                #isnumeric() returns True if the value contains numbers
-                #but not a decimal point. If this returns
-                #true then continue because the value would be
-                #a valid float anyway
-                if value.isnumeric():
-                    only_numerics = True
-                    only_floats = True
-                else:
-                    only_numerics = False
-                    try:
-                        float(value)
-                        only_floats = True
-                    except ValueError:
-                        only_floats = False
-                        #Break since only_numerics and only_floats are both false
-                        break
+                # check if int
+                try:
+                    int(value)
+                except ValueError:
+                    only_ints = False
 
-            if only_numerics or only_floats:
+                # check if float
+                try:
+                    float(value)
+                except ValueError:
+                    only_floats = False
+
+
+            if only_ints or only_floats:
                 aggregated_value = 0
             else:
                 aggregated_value = []
@@ -429,7 +421,7 @@ aggregated.</p>
             #Iteration to aggregate values based on determined pattern.
             for value in report_results[attrib]:
                 #If a value is numeric and can be a float then it is an integer
-                if only_numerics:
+                if only_ints:
                     aggregated_value = int(aggregated_value) + int(value)
                 #If a value is not numeric but can be a float then it is a float
                 elif only_floats:
