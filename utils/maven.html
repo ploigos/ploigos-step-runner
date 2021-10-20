@@ -29,9 +29,13 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Shared utils for maven operations.
 &#34;&#34;&#34;
+
+
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
+from io import StringIO
 
 import sh
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -531,7 +535,7 @@ def get_effective_pom(
 
     return effective_pom_path
 
-def run_maven( #pylint: disable=too-many-arguments
+def run_maven( #pylint: disable=too-many-arguments, too-many-locals
     mvn_output_file_path,
     settings_file,
     pom_file,
@@ -567,7 +571,7 @@ def run_maven( #pylint: disable=too-many-arguments
     Returns
     -------
     str
-        Standard Out and Standard Error from running Maven.
+        Standard Out from running Maven.
 
     Raises
     ------
@@ -579,7 +583,7 @@ def run_maven( #pylint: disable=too-many-arguments
         phases_and_goals = [phases_and_goals]
 
     # create profile argument
-    profiles_arguments = &#34;&#34;
+    profiles_arguments = []
     if profiles:
         profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
 
@@ -601,11 +605,13 @@ def run_maven( #pylint: disable=too-many-arguments
         additional_arguments = []
 
     # run maven
+    maven_output_buff = StringIO()
     try:
         with open(mvn_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
-                mvn_output_file
+                mvn_output_file,
+                maven_output_buff
             ])
             err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stderr,
@@ -627,6 +633,12 @@ def run_maven( #pylint: disable=too-many-arguments
         raise StepRunnerException(
             f&#34;Error running maven. {error}&#34;
         ) from error
+
+    # remove ansi escape charaters from output before returning
+    maven_output = maven_output_buff.getvalue().rstrip()
+    maven_output_stripped_ansi = re.compile(r&#39;\x1b[^m]*m&#39;).sub(&#39;&#39;, maven_output)
+
+    return maven_output_stripped_ansi
 
 def get_maven_plugin_xml_element_path(plugin_name):
     &#34;&#34;&#34;Create XML element path for a given maven plugin.
@@ -1909,7 +1921,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>str</code></dt>
-<dd>Standard Out and Standard Error from running Maven.</dd>
+<dd>Standard Out from running Maven.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
 <dl>
@@ -1920,7 +1932,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_maven( #pylint: disable=too-many-arguments
+<pre><code class="python">def run_maven( #pylint: disable=too-many-arguments, too-many-locals
     mvn_output_file_path,
     settings_file,
     pom_file,
@@ -1956,7 +1968,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
     Returns
     -------
     str
-        Standard Out and Standard Error from running Maven.
+        Standard Out from running Maven.
 
     Raises
     ------
@@ -1968,7 +1980,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
         phases_and_goals = [phases_and_goals]
 
     # create profile argument
-    profiles_arguments = &#34;&#34;
+    profiles_arguments = []
     if profiles:
         profiles_arguments = [&#39;-P&#39;, f&#34;{&#39;,&#39;.join(profiles)}&#34;]
 
@@ -1990,11 +2002,13 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
         additional_arguments = []
 
     # run maven
+    maven_output_buff = StringIO()
     try:
         with open(mvn_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as mvn_output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
-                mvn_output_file
+                mvn_output_file,
+                maven_output_buff
             ])
             err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stderr,
@@ -2015,7 +2029,13 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
             f&#34;Error running maven. {error}&#34;
-        ) from error</code></pre>
+        ) from error
+
+    # remove ansi escape charaters from output before returning
+    maven_output = maven_output_buff.getvalue().rstrip()
+    maven_output_stripped_ansi = re.compile(r&#39;\x1b[^m]*m&#39;).sub(&#39;&#39;, maven_output)
+
+    return maven_output_stripped_ansi</code></pre>
 </details>
 </dd>
 <dt id="ploigos_step_runner.utils.maven.write_effective_pom"><code class="name flex">
