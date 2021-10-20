@@ -4,11 +4,14 @@
 
 import re
 import sys
+from io import StringIO
 
 import sh
 import yaml
 from ploigos_step_runner import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.io import \
+    create_sh_redirect_to_multiple_streams_fn_callback
 
 KUBE_LABEL_NOT_SAFE_CHARS_REGEX = r"[^a-zA-Z0-9\-_\.]"
 KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$"
@@ -20,6 +23,11 @@ class ArgoCDGeneric(StepImplementer):
     """
 
     GIT_REPO_REGEX = re.compile(r"(?P<protocol>^https:\/\/|^http:\/\/)?(?P<address>.*$)")
+    ARGOCD_OP_IN_PROGRESS_REGEX = re.compile(
+        r'.*FailedPrecondition.*another\s+operation\s+is\s+already\s+in\s+progress',
+        re.DOTALL
+    )
+    MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES = 2
 
     def _get_deployment_config_helm_chart_environment_values_file(self):
         """Get the deployment configuration Helm Chart environment specific value file.
@@ -644,55 +652,84 @@ users:
         if argocd_sync_prune:
             argocd_sync_additional_flags.append('--prune')
 
-        # wait for any existing operations before requesting new synchronization
-        #
-        # NOTE: attempted work around for 'FailedPrecondition desc = another operation is
-        #       already in progress' error
-        # SEE: https://github.com/argoproj/argo-cd/issues/4505
-        try:
-            print(
-                f"Wait for existing ArgoCD operations on app ({argocd_app_name})"
-                " before requesting synchronization."
-            )
-            sh.argocd.app.wait( # pylint: disable=no-member
-                argocd_app_name,
-                '--operation',
-                '--timeout', argocd_sync_timeout_seconds,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error waiting for ArgoCD Application ({argocd_app_name}) existing operation"
-                f" before requesting new synchronization: {error}"
-            ) from error
+        for wait_for_op_retry in range(ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES):
+            # wait for any existing operations before requesting new synchronization
+            #
+            # NOTE: attempted work around for 'FailedPrecondition desc = another operation is
+            #       already in progress' error
+            # SEE: https://github.com/argoproj/argo-cd/issues/4505
+            try:
+                print(
+                    f"Wait for existing ArgoCD operations on app ({argocd_app_name})"
+                    " before requesting synchronization."
+                )
+                sh.argocd.app.wait( # pylint: disable=no-member
+                    argocd_app_name,
+                    '--operation',
+                    '--timeout', argocd_sync_timeout_seconds,
+                    _out=sys.stdout,
+                    _err=sys.stderr
+                )
+            except sh.ErrorReturnCode as error:
+                raise StepRunnerException(
+                    f"Error waiting for ArgoCD Application ({argocd_app_name}) existing operation"
+                    f" before requesting new synchronization: {error}"
+                ) from error
 
-        # sync app
-        try:
-            print(f"Request synchronization of ArgoCD app ({argocd_app_name}).")
-            sh.argocd.app.sync(  # pylint: disable=no-member
-                *argocd_sync_additional_flags,
-                '--timeout', argocd_sync_timeout_seconds,
-                '--retry-limit', argocd_sync_retry_limit,
-                argocd_app_name,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            if not argocd_sync_prune:
-                prune_warning = ". Sync 'prune' option is disabled." \
-                    " If sync error (see logs) was due to resource(s) that need to be pruned," \
-                    " and the pruneable resources are intentionally there then see the ArgoCD" \
-                    " documentation for instructions for argo to ignore the resource(s)." \
-                    " See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources" \
-                    " and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous"
-            else:
-                prune_warning = ""
+            # sync app
+            argocd_output_buff = StringIO()
+            try:
+                print(f"Request synchronization of ArgoCD app ({argocd_app_name}).")
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    argocd_output_buff
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    argocd_output_buff
+                ])
 
-            raise StepRunnerException(
-                f"Error synchronization ArgoCD Application ({argocd_app_name})"
-                f"{prune_warning}: {error}"
-            ) from error
+                sh.argocd.app.sync(  # pylint: disable=no-member
+                    *argocd_sync_additional_flags,
+                    '--timeout', argocd_sync_timeout_seconds,
+                    '--retry-limit', argocd_sync_retry_limit,
+                    argocd_app_name,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+
+                break
+            except sh.ErrorReturnCode as error:
+                # if error syncing because of in progress op
+                # try again to wait for in progress op and do sync again
+                #
+                # NOTE: this can happen if we do the wait for op, and then an op starts and then
+                #       we try to do a sync
+                #
+                # SEE: https://github.com/argoproj/argo-cd/issues/4505
+                if re.match(ArgoCDGeneric.ARGOCD_OP_IN_PROGRESS_REGEX, argocd_output_buff.getvalue()):
+                    print(
+                        f"ArgoCD Application ({argocd_app_name}) has an existing operation"
+                        " that started after we already waited for existing operations but"
+                        f" before we tried to do a sync. Try ({wait_for_op_retry}) again"
+                        " to wait for the operation"
+                    )
+                    continue
+
+                if not argocd_sync_prune:
+                    prune_warning = ". Sync 'prune' option is disabled." \
+                        " If sync error (see logs) was due to resource(s) that need to be pruned," \
+                        " and the pruneable resources are intentionally there then see the ArgoCD" \
+                        " documentation for instructions for argo to ignore the resource(s)." \
+                        " See: https://argoproj.github.io/argo-cd/user-guide/sync-options/#no-prune-resources" \
+                        " and https://argoproj.github.io/argo-cd/user-guide/compare-options/#ignoring-resources-that-are-extraneous"
+                else:
+                    prune_warning = ""
+
+                raise StepRunnerException(
+                    f"Error synchronization ArgoCD Application ({argocd_app_name})"
+                    f"{prune_warning}: {error}"
+                ) from error
 
         # wait for sync to finish
         try:

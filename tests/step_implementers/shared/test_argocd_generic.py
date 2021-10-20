@@ -11,7 +11,7 @@ from ploigos_step_runner.step_implementers.shared.argocd_generic import \
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any, create_sh_side_effect
+from tests.helpers.test_utils import Any, create_sh_side_effect, create_sh_side_effects
 
 
 class MockArgoCDGenericImpl(ArgoCDGeneric):
@@ -2299,6 +2299,65 @@ class TestStepImplementerSharedArgoCDGenericargocd_app_sync(TestStepImplementerS
             _out=mock.ANY,
             _err=mock.ANY
         )
+
+    def test_fail_sync_due_to_existing_operation(self, argocd_mock):
+        argocd_mock.app.sync.side_effect = create_sh_side_effects([
+            {
+                'mock_stdout': 'time="2021-10-20T16:19:03Z" level=fatal msg="rpc error: code = FailedPrecondition desc = another operation is already in progress"',
+                'mock_stderr': '',
+                'exception': sh.ErrorReturnCode(
+                    'argocd',
+                    b'mock sync stdout',
+                    b'mock sync error'
+                )
+            },
+            {
+                'mock_stdout': 'mock success',
+                'mock_stderr': '',
+                'exception': None
+            }
+        ])
+
+        ArgoCDGeneric._argocd_app_sync(
+            argocd_app_name='test',
+            argocd_sync_timeout_seconds=120,
+            argocd_sync_retry_limit=3
+        )
+
+        argocd_mock.app.sync.assert_has_calls([
+            call(
+                '--prune',
+                '--timeout', 120,
+                '--retry-limit', 3,
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            ),
+            call(
+                '--prune',
+                '--timeout', 120,
+                '--retry-limit', 3,
+                'test',
+                _out=Any(IOBase),
+                _err=Any(IOBase)
+            )
+        ])
+        argocd_mock.app.wait.assert_has_calls([
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            ),
+            call(
+                'test',
+                '--operation',
+                '--timeout', 120,
+                _out=mock.ANY,
+                _err=mock.ANY
+            )
+        ])
 
     def test_fail_wait_after_sync(self, argocd_mock):
         # setup mocks
