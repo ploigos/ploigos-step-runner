@@ -14,7 +14,8 @@ from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
 KUBE_LABEL_NOT_SAFE_CHARS_REGEX = r"[^a-zA-Z0-9\-_\.]"
-KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$"
+KUBE_LABEL_NOT_SAFE_CHARS_REGEX = r"(^[^a-z]+)|([^-a-z0-9])+|([^a-z0-9]$)+"
+KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX = r"^[^a-z]*|[^a-z0-9]*$"
 KUBE_LABEL_MAX_LENGTH = 52
 KUBE_LABEL_REPLACEMENT_CHAR = '-'
 
@@ -134,7 +135,7 @@ class ArgoCDGeneric(StepImplementer):
             )
 
     def _get_app_name(self):
-        repo_branch = ArgoCDGeneric._get_repo_branch()
+        repo_branch = self._get_repo_branch()
         organization = self.get_value('organization')
         application = self.get_value('application-name')
         service = self.get_value('service-name')
@@ -155,7 +156,14 @@ class ArgoCDGeneric(StepImplementer):
         if len(app_name) > KUBE_LABEL_MAX_LENGTH:
             app_name = app_name[len(app_name) - KUBE_LABEL_MAX_LENGTH:]
 
-        # be sure app name doesn't start or end with not safe chars
+        # be sure app name is DNS-1035 compliant
+        # first replace all not safe characters with -
+        app_name = re.sub(
+            KUBE_LABEL_NOT_SAFE_CHARS_REGEX,
+            '-',
+            app_name
+        )
+        # second, replace any leading or trailing - with blanks
         app_name = re.sub(
             KUBE_LABEL_NOT_SAFE_BEGINING_END_CHARS_REGEX,
             '',
@@ -393,20 +401,8 @@ class ArgoCDGeneric(StepImplementer):
 
         return repo_dir
 
-    @staticmethod
-    def _get_repo_branch():
-        try:
-            return sh.git( # pylint: disable=no-member,too-many-function-args
-                'rev-parse',
-                '--abbrev-ref',
-                'HEAD'
-            ).rstrip()
-        except sh.ErrorReturnCode as error:
-            # NOTE: this should never happen
-            raise StepRunnerException(
-                "Unexpected error getting checkedout git repository branch"
-                f" of the working directory: {error}"
-            ) from error
+    def _get_repo_branch(self):
+        return self.get_value('branch')
 
     @staticmethod
     def _git_tag_and_push(repo_dir, tag, url=None, force_push_tags=False):

@@ -75,7 +75,11 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
                 'deployment-config-helm-chart-values-file-image-tag-yq-path'
             ],
             'git-email',
-            'git-name'
+            'git-name',
+            'organization',
+            'applciation-name',
+            'service-name',
+            'branch'
         ]
         self.assertEqual(required_keys, expected_required_keys)
         mock_container_deploy_mixin_required_config_or_result_keys.assert_called_once()
