@@ -96,7 +96,7 @@ class TestStepImplementerMavenIntegrationTest__required_config_or_result_keys(
 
 @patch.object(MavenIntegrationTest, '_run_maven_step')
 @patch.object(MavenIntegrationTest, 'write_working_file', return_value='/mock/mvn_output.txt')
-@patch.object(MavenIntegrationTest, '_MavenIntegrationTest__get_test_report_dir', return_value='/mock/test-results-dir')
+@patch.object(MavenIntegrationTest, '_MavenIntegrationTest__get_test_report_dirs', return_value='/mock/test-results-dir')
 @patch.object(MavenIntegrationTest, '_gather_evidence_from_test_report_directory_testsuite_elements')
 class TestStepImplementerMavenIntegrationTest__run_step(
     BaseTestStepImplementerMavenIntegrationTest
@@ -168,7 +168,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_with_report_dir_deployed_host_urls_list_multiple_entries(
@@ -227,7 +227,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_with_report_dir_deployed_host_urls_single(
@@ -280,7 +280,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_with_report_dir_target_host_url(
@@ -333,7 +333,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_no_report_dir_deployed_host_urls_list_one_entry(
@@ -445,7 +445,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_fail_no_report_dir(
@@ -520,7 +520,7 @@ class TestStepImplementerMavenIntegrationTest___get_test_report_dir(
             )
 
             # run test
-            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(actual_test_report_dir, '/mock/user-given/test-reports-dir')
@@ -541,7 +541,7 @@ class TestStepImplementerMavenIntegrationTest___get_test_report_dir(
                 '/mock/dynamically-determined/failsafe/test-reports-dir'
 
             # run test
-            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(
@@ -571,7 +571,7 @@ class TestStepImplementerMavenIntegrationTest___get_test_report_dir(
             ]
 
             # run test
-            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(
@@ -606,7 +606,7 @@ class TestStepImplementerMavenIntegrationTest___get_test_report_dir(
             mock_attempt_get_test_report_directory.side_effect = StepRunnerException('mock error')
 
             # run test
-            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenIntegrationTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(actual_test_report_dir, None)

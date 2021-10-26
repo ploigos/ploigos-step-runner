@@ -17,8 +17,8 @@ Configuration Key            | Required? | Default     | Description
 `maven-profiles`             | No        | `[]`        | List of maven profiles to use.
 """# pylint: disable=line-too-long
 
-import glob
 import os
+import glob
 
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import \
@@ -126,7 +126,7 @@ class MavenTestReportingMixin:
     @staticmethod
     def _gather_evidence_from_test_report_directory_testsuite_elements(
         step_result,
-        test_report_dir
+        test_report_dirs
     ):
         """Given a test report directory containing XML files with 'testsuite' xml elements
         collects evidence from those files and elements.
@@ -135,53 +135,61 @@ class MavenTestReportingMixin:
         ----------
         step_result : StepResult
             StepResult to add the evidence to.
-        test_report_dir : str
-            Directory to search for 'testsuite' xml elements in to collect evidence from.
+        test_report_dirs : str or [str]
+            Directory(s) to search for 'testsuite' xml elements in to collect evidence from.
         """
-        if os.path.exists(test_report_dir):
-            test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
-            test_report_evidence_element = 'testsuite'
 
-            report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(test_report_dir)
+        # standardize input
+        if not isinstance(test_report_dirs, list):
+            test_report_dirs = [test_report_dirs]
 
-            # Add the test results to the evidence
-            not_found_attribs = []
-            for attribute in test_report_evidence_attributes:
-                if attribute in report_results:
-                    step_result.add_evidence(
-                        name=attribute,
-                        value=report_results[attribute]
-                    )
-                else:
-                    not_found_attribs.append(attribute)
+         # gather evidence
+        test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
+        test_report_evidence_element = 'testsuite'
+        report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(
+            test_report_dirs=test_report_dirs
+        )
 
-            # Add a warning to the step_result for any attribute that was not found
-            if not_found_attribs:
-                step_result.message += "\nWARNING: could not find expected evidence" \
-                    f" attributes ({not_found_attribs}) on xml element" \
-                    f" ({test_report_evidence_element}) in test report" \
-                    f" directory ({test_report_dir})."
+        # Add the test results to the evidence
+        not_found_attribs = []
+        for attribute in test_report_evidence_attributes:
+            if attribute in report_results:
+                step_result.add_evidence(
+                    name=attribute,
+                    value=report_results[attribute]
+                )
+            else:
+                not_found_attribs.append(attribute)
 
-            # Add any warnings encountered during collecting the test results to the step_result
-            for warning in collection_warnings:
-                step_result.message += f"\n{warning}"
+        # Add a warning to the step_result for any attribute that was not found
+        if not_found_attribs:
+            step_result.message += "\nWARNING: could not find expected evidence" \
+                f" attributes ({not_found_attribs}) on xml element" \
+                f" ({test_report_evidence_element}) in test report" \
+                f" directory ({test_report_dirs})."
 
-        else:
-            step_result.message += f"\nWARNING: test report directory ({test_report_dir})" \
-                " does not exist to gather evidence from"
+        # Add any warnings encountered during collecting the test results to the step_result
+        for warning in collection_warnings:
+            step_result.message += f"\n{warning}"
 
     @staticmethod
     def _collect_report_results(
-            test_report_dir
+        test_report_dirs
     ):
         report_results = {}
         warnings = []
 
+        # collect all the xml file paths
+        xml_files = []
+        for xml_file_path in test_report_dirs:
+            if os.path.isdir(xml_file_path):
+                xml_files += glob.glob(xml_file_path + '/*.xml', recursive=False)
+            elif os.path.isfile(xml_file_path):
+                xml_files += [xml_file_path]
+
         # Iterate over each file that contains test results
-        xml_files = glob.glob(test_report_dir + '/*.xml', recursive=False)
         for file in xml_files:
             try:
-
                 # Iterate over the XML attributes that are evidence
                 element = get_xml_element(file, MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT)
                 for attrib in element.attrib:
@@ -192,10 +200,11 @@ class MavenTestReportingMixin:
                         try:
                             attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
                         except ValueError:
-                            print(
-                                f"WARNING: While parsing test results, expected the value of {attrib} " \
-                                f"in {file} to be a number. It was '{element.attrib[attrib]}'. Ignoring."
-                            )
+                            warnings += [
+                                "WARNING: While parsing test results, expected the value of"
+                                f" attribute ({attrib}) in file ({file}) to be a number."
+                                f" Value was '{element.attrib[attrib]}'. Ignoring."
+                            ]
 
                         # Add up the totals across all files
                         if attrib in report_results:

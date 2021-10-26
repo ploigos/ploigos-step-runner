@@ -95,7 +95,7 @@ class TestStepImplementerMavenTest__required_config_or_result_keys(
 
 @patch.object(MavenTest, '_run_maven_step')
 @patch.object(MavenTest, 'write_working_file', return_value='/mock/mvn_output.txt')
-@patch.object(MavenTest, '_MavenTest__get_test_report_dir', return_value='/mock/test-results-dir')
+@patch.object(MavenTest, '_MavenTest__get_test_report_dirs', return_value='/mock/test-results-dir')
 @patch.object(MavenTest, '_gather_evidence_from_test_report_directory_testsuite_elements')
 class TestStepImplementerMavenTest__run_step(
     BaseTestStepImplementerMavenTest
@@ -160,7 +160,7 @@ class TestStepImplementerMavenTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_no_report_dir(
@@ -258,7 +258,7 @@ class TestStepImplementerMavenTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_fail_no_report_dir(
@@ -326,7 +326,7 @@ class TestStepImplementerMavenTest___get_test_report_dir(
             )
 
             # run test
-            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(actual_test_report_dir, '/mock/user-given/test-reports-dir')
@@ -347,7 +347,7 @@ class TestStepImplementerMavenTest___get_test_report_dir(
                 '/mock/dynamically-determined/test-reports-dir'
 
             # run test
-            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(
@@ -374,7 +374,7 @@ class TestStepImplementerMavenTest___get_test_report_dir(
             mock_attempt_get_test_report_directory.side_effect = StepRunnerException('mock error')
 
             # run test
-            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dir()
+            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dirs()
 
             # verify results
             self.assertEqual(actual_test_report_dir, None)
@@ -383,3 +383,31 @@ class TestStepImplementerMavenTest___get_test_report_dir(
                 configuration_key='reportsDirectory',
                 default='target/surefire-reports'
             )
+
+    def test_user_given_test_reports_dirs(self, mock_attempt_get_test_report_directory):
+        with TempDirectory() as test_dir:
+            # setup test
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+            step_config = {
+                'test-reports-dirs': [
+                    '/mock/user-given/test-reports-dir1',
+                    '/mock/user-given/test-reports-dir2'
+                ]
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run test
+            actual_test_report_dir = step_implementer._MavenTest__get_test_report_dirs()
+
+            # verify results
+            self.assertEqual(
+                actual_test_report_dir,
+                [
+                    '/mock/user-given/test-reports-dir1',
+                    '/mock/user-given/test-reports-dir2'
+                ]
+            )
+            mock_attempt_get_test_report_directory.assert_not_called()

@@ -169,7 +169,7 @@ class TestStepImplementerNpmXunitIntegrationTest__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
             self.assertEqual(step_implementer.npm_args, ['run', 'test:uat'])

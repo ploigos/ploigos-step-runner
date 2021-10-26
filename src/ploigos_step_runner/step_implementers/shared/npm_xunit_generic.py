@@ -10,7 +10,8 @@ Could come from:
 
 Configuration Key            | Required? | Default    | Description
 -----------------------------|-----------|------------|------------
-`test-reports-dir`           | Yes       |            | Location of test result files
+`test-reports-dirs`          | Yes       |            | Location of test result files
+`test-reports-dir`           | Yes       |            | Alias for `test-reports-dirs`
 `npm-test-script`            | Yes       |            | NPM script to run the test
 `target-host-env-var-name`   | No        |            | It is assumed that integration tests need to know a URL
                                                          endpoint to run the tests against,
@@ -35,7 +36,7 @@ from ploigos_step_runner.step_implementers.shared import NpmGeneric
 from ploigos_step_runner.step_implementers.shared import MavenTestReportingMixin
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'test-reports-dir',
+    ['test-reports-dirs','test-reports-dir'],
     'target-host-env-var-name',
     'npm-test-script'
 ]
@@ -146,18 +147,18 @@ class NpmXunitGeneric(NpmGeneric, MavenTestReportingMixin):
                 value=npm_output_file_path
             )
 
-        test_report_dir = self.get_value('test-reports-dir')
-        if test_report_dir:
+        test_report_dirs = self.get_value(['test-reports-dir','test-reports-dirs'])
+        if test_report_dirs:
             step_result.add_artifact(
                 description="Test report generated when running tests.",
                 name='test-report',
-                value=test_report_dir
+                value=test_report_dirs
             )
 
             # gather test report evidence
             self._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=step_result,
-                test_report_dir=test_report_dir
+                test_report_dirs=test_report_dirs
             )
 
         # return result

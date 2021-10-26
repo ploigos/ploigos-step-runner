@@ -88,7 +88,7 @@ class TestStepImplementerNpmXunitGeneric__required_config_or_result_keys(
         self.assertEqual(
             NpmXunitGeneric._required_config_or_result_keys(),
             [
-                'test-reports-dir',
+                ['test-reports-dirs','test-reports-dir'],
                 'target-host-env-var-name',
                 'npm-test-script'
             ]
@@ -172,7 +172,7 @@ class TestStepImplementerNpmXunitGeneric__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
             self.assertEqual(step_implementer.npm_args, ['run', 'myscript'])
@@ -231,7 +231,7 @@ class TestStepImplementerNpmXunitGeneric__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
             self.assertEqual(step_implementer.npm_args, ['run', 'myscript'])
@@ -296,7 +296,7 @@ class TestStepImplementerNpmXunitGeneric__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_success_with_report_dir_target_host_url(
@@ -353,7 +353,7 @@ class TestStepImplementerNpmXunitGeneric__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
 
     def test_error_in_npm(
@@ -398,5 +398,5 @@ class TestStepImplementerNpmXunitGeneric__run_step(
             )
             mock_gather_evidence.assert_called_once_with(
                 step_result=Any(StepResult),
-                test_report_dir='/mock/test-results-dir'
+                test_report_dirs='/mock/test-results-dir'
             )
