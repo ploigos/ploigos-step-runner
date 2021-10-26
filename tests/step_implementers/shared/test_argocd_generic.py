@@ -344,6 +344,40 @@ class TestStepImplementerSharedArgoCDGenericget_app_name(TestStepImplementerShar
             app_name = step_implementer._get_app_name()
             self.assertEqual(app_name, 'test-org-test-app-test-service-feature-test-prod')
 
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/v0.1.2')
+    def test_get_app_name_branch_with_dots_chars(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'test-org-test-app-test-service-feature-v0-1-2')
+
+    @patch.object(ArgoCDGeneric, '_get_repo_branch', return_value='feature/v0.1.2...')
+    def test_get_app_name_branch_with_bad_chars_end(self, get_repo_branch_mock):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            app_name = step_implementer._get_app_name()
+            self.assertEqual(app_name, 'test-org-test-app-test-service-feature-v0-1-2')
+
 class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestStepImplementerSharedArgoCDBase):
     def test_get_deployment_config_repo_tag_use_tag(self):
         with TempDirectory() as temp_dir:
@@ -1286,43 +1320,26 @@ class TestStepImplementerSharedArgoCDGenericclone_repo(TestStepImplementerShared
             ])
 
 class TestStepImplementerSharedArgoCDGenericget_repo_branch(TestStepImplementerSharedArgoCDBase):
-    @patch.object(sh, 'git')
-    def test_get_repo_branch_success(self, git_mock):
-        git_mock.side_effect = create_sh_side_effect(mock_stdout="feature/test")
-
-        repo_branch = ArgoCDGeneric._get_repo_branch()
-        self.assertEqual(repo_branch, 'feature/test')
-        git_mock.assert_called_once_with(
-            'rev-parse',
-            '--abbrev-ref',
-            'HEAD'
-        )
-
-    @patch.object(sh, 'git')
-    def test_get_repo_branch_fail(self, git_mock):
-        git_mock.side_effect = create_sh_side_effect(
-            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git rev-parse error')
-        )
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                r"Unexpected error getting checkedout git repository branch"
-                r" of the working directory."
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git rev-parse error",
-                re.DOTALL
+    def test_get_repo_branch_success(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'organization': 'test-org',
+                'application-name': 'test-app',
+                'service-name': 'test-service',
+                'branch': 'feature/test'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
             )
-        ):
-            ArgoCDGeneric._get_repo_branch()
-            git_mock.assert_called_once_with(
-                'rev-parse',
-                '--abbrev-ref',
-                'HEAD'
-            )
+
+            # run test
+            repo_branch = step_implementer._get_repo_branch()
+
+            # validate
+            self.assertEqual(repo_branch, 'feature/test')
 
 class TestStepImplementerSharedArgoCDGenericgit_tag_and_push(TestStepImplementerSharedArgoCDBase):
     @patch.object(sh, 'git')

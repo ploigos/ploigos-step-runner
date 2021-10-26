@@ -99,6 +99,10 @@ Configuration Key                       | Required? | Default  | Description
                                                                  pulling container image for deployment.<br/>\
                                                                  If `False` then use container image tag in container image address when \
                                                                  pulling container image for deployment.
+`organization`                          | Yes       |          | Used to build ArgoCD application name.
+`applciation-name`                      | Yes       |          | Used to build ArgoCD application name.
+`service-name`                          | Yes       |          | Used to build ArgoCD application name.
+`branch`                                | Yes       |          | Used to build ArgoCD application name.
 
 Results
 -------
@@ -151,7 +155,11 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
         'deployment-config-helm-chart-values-file-image-tag-yq-path'
     ],
     'git-email',
-    'git-name'
+    'git-name',
+    'organization',
+    'applciation-name',
+    'service-name',
+    'branch'
 ]
 
 GIT_AUTHENTICATION_CONFIG = {
