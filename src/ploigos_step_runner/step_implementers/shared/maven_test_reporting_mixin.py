@@ -17,13 +17,13 @@ Configuration Key            | Required? | Default     | Description
 `maven-profiles`             | No        | `[]`        | List of maven profiles to use.
 """# pylint: disable=line-too-long
 
+import glob
 import os
 
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import \
     get_plugin_configuration_absolute_path_values
-from ploigos_step_runner.utils.xml import \
-    aggregate_xml_element_attribute_values
+from ploigos_step_runner.utils.xml import get_xml_element
 
 
 class MavenTestReportingMixin:
@@ -38,6 +38,7 @@ class MavenTestReportingMixin:
     SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/surefire-reports'
     FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/failsafe-reports'
     TESTSUITE_EVIDENCE_ATTRIBUTES = ["time", "tests", "errors", "skipped", "failures"]
+    TESTSUITE_EVIDENCE_ELEMENT = "testsuite"
 
     def _attempt_get_test_report_directory(
         self,
@@ -141,13 +142,10 @@ class MavenTestReportingMixin:
             test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
             test_report_evidence_element = 'testsuite'
 
-            not_found_attribs = []
-            report_results = aggregate_xml_element_attribute_values(
-                xml_file_paths=test_report_dir,
-                xml_element=test_report_evidence_element,
-                attribs=test_report_evidence_attributes
-            )
+            report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(test_report_dir)
 
+            # Add the test results to the evidence
+            not_found_attribs = []
             for attribute in test_report_evidence_attributes:
                 if attribute in report_results:
                     step_result.add_evidence(
@@ -156,11 +154,64 @@ class MavenTestReportingMixin:
                     )
                 else:
                     not_found_attribs.append(attribute)
+
+            # Add a warning to the step_result for any attribute that was not found
             if not_found_attribs:
                 step_result.message += "\nWARNING: could not find expected evidence" \
                     f" attributes ({not_found_attribs}) on xml element" \
                     f" ({test_report_evidence_element}) in test report" \
                     f" directory ({test_report_dir})."
+
+            # Add any warnings encountered during collecting the test results to the step_result
+            for warning in collection_warnings:
+                step_result.message += f"\n{warning}"
+
         else:
             step_result.message += f"\nWARNING: test report directory ({test_report_dir})" \
                 " does not exist to gather evidence from"
+
+    @staticmethod
+    def _collect_report_results(
+            test_report_dir
+    ):
+        report_results = {}
+        warnings = []
+
+        # Iterate over each file that contains test results
+        xml_files = glob.glob(test_report_dir + '/*.xml', recursive=False)
+        for file in xml_files:
+            try:
+
+                # Iterate over the XML attributes that are evidence
+                element = get_xml_element(file, MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT)
+                for attrib in element.attrib:
+                    if attrib in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES: # Is this attribute evidence?
+
+                        # Parse each attribute as a number
+                        attrib_value = 0
+                        try:
+                            attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
+                        except ValueError:
+                            print(
+                                f"WARNING: While parsing test results, expected the value of {attrib} " \
+                                f"in {file} to be a number. It was '{element.attrib[attrib]}'. Ignoring."
+                            )
+
+                        # Add up the totals across all files
+                        if attrib in report_results:
+                            report_results[attrib] += attrib_value
+                        else:
+                            report_results[attrib] = attrib_value
+
+            # If we cannot parse a file for some reason, warn but continue processing.
+            except ValueError:
+                warnings += [f"WARNING: could not parse test results in file ({file}). Ignoring."]
+                continue
+
+        return report_results, warnings
+
+    @staticmethod
+    def _to_number(string):
+        if string.isnumeric():
+            return int(string)
+        return float(string)

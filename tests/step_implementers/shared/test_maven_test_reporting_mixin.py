@@ -161,11 +161,10 @@ class TestMavenTestReportingMixin__attempt_get_test_report_directory(BaseStepImp
             require_phase_execution_config=False
         )
 
-@patch("ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.aggregate_xml_element_attribute_values")
 class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_testsuite_elements(
     BaseStepImplementerTestCase
 ):
-    def test_found_all_attributes(self, aggregate_xml_element_attribute_values_mock):
+    def test_found_all_attributes(self):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -173,25 +172,15 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 sub_step_name='mock-maven-test-sub-step',
                 sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
             )
-            test_report_dir = os.path.join(
-                test_dir.path,
-                'mock-test-results'
-            )
 
             # setup mocks
-            os.mkdir(test_report_dir)
-            aggregate_xml_element_attribute_values_mock.return_value = {
-                "time": 1.42,
-                "tests": 42,
-                "errors": 3,
-                "skipped": 2,
-                "failures": 1
-            }
+            test_result = b'<testsuite time="1.42" tests="42" errors="3" skipped="2" failures="1" />'
+            test_dir.write('test_result.xml', test_result)
 
             # run test
             MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=actual_step_result,
-                test_report_dir=test_report_dir
+                test_report_dir=test_dir.path
             )
 
             # verify results
@@ -207,7 +196,7 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
             expected_step_result.add_evidence(name='failures', value=1)
             self.assertEqual(actual_step_result, expected_step_result)
 
-    def test_found_dir_found_no_attributes(self, aggregate_xml_element_attribute_values_mock):
+    def test_found_dir_found_some_attributes(self):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -215,22 +204,15 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 sub_step_name='mock-maven-test-sub-step',
                 sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
             )
-            test_report_dir = os.path.join(
-                test_dir.path,
-                'mock-test-results'
-            )
 
             # setup mocks
-            os.mkdir(test_report_dir)
-            aggregate_xml_element_attribute_values_mock.return_value = {
-                "time": 1.42,
-                "tests": 42
-            }
+            test_result = b'<testsuite time="1.42" tests="42" />'
+            test_dir.write('test_result.xml', test_result)
 
             # run test
             MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=actual_step_result,
-                test_report_dir=test_report_dir
+                test_report_dir=test_dir.path
             )
 
             # verify results
@@ -246,10 +228,10 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
             expected_step_result.message += "\nWARNING: could not find expected evidence" \
                 f" attributes ({not_found_attribs}) on xml element" \
                 f" ({test_report_evidence_element}) in test report" \
-                f" directory ({test_report_dir})."
+                f" directory ({test_dir.path})."
             self.assertEqual(actual_step_result, expected_step_result)
 
-    def test_found_dir_found_some_attributes(self, aggregate_xml_element_attribute_values_mock):
+    def test_found_dir_found_no_attributes(self):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -257,19 +239,15 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 sub_step_name='mock-maven-test-sub-step',
                 sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
             )
-            test_report_dir = os.path.join(
-                test_dir.path,
-                'mock-test-results'
-            )
 
             # setup mocks
-            os.mkdir(test_report_dir)
-            aggregate_xml_element_attribute_values_mock.return_value = {}
+            test_result = b'<testsuite />'
+            test_dir.write('test_result.xml', test_result)
 
             # run test
             MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=actual_step_result,
-                test_report_dir=test_report_dir
+                test_report_dir=test_dir.path
             )
 
             # verify results
@@ -283,10 +261,10 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
             expected_step_result.message += "\nWARNING: could not find expected evidence" \
                 f" attributes ({not_found_attribs}) on xml element" \
                 f" ({test_report_evidence_element}) in test report" \
-                f" directory ({test_report_dir})."
+                f" directory ({test_dir.path})."
             self.assertEqual(actual_step_result, expected_step_result)
 
-    def test_test_report_dir_does_not_exist(self, aggregate_xml_element_attribute_values_mock):
+    def test_test_report_dir_does_not_exist(self):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -313,4 +291,100 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
             )
             expected_step_result.message += f"\nWARNING: test report directory ({test_report_dir})" \
                 " does not exist to gather evidence from"
+            self.assertEqual(actual_step_result, expected_step_result)
+
+    def test_xml_does_not_contain_correct_element(self):
+        with TempDirectory() as test_dir:
+            # setup test
+            actual_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+
+            # setup mocks
+            # test_result = b'<not-a-test-suite />'
+            test_result = b'<not-a-test-suite time="1.42" tests="42" errors="3" skipped="2" failures="1" />'
+            test_dir.write('test_result.xml', test_result)
+
+            # run test
+            MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=actual_step_result,
+                test_report_dir=test_dir.path
+            )
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+            expected_message = f"WARNING: could not parse test results in file \\(.+\\). Ignoring."
+
+            # Assert that the message *contains* the warning (and maybe some other stuff)
+            self.assertRegex(actual_step_result.message, expected_message)
+
+    def test_multiple_result_files(self):
+        with TempDirectory() as test_dir:
+            # setup test
+            actual_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+
+            # setup mocks
+            test_dir.write('test_result_1.xml', b'<testsuite time="1.11" tests="20" errors="5" skipped="3" failures="1" />')
+            test_dir.write('test_result_2.xml', b'<testsuite time="2.22" tests="30" errors="6" skipped="4" failures="2" />')
+
+            # run test
+            MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=actual_step_result,
+                test_report_dir=test_dir.path
+            )
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+            expected_step_result.add_evidence(name='time', value=3.33)
+            expected_step_result.add_evidence(name='tests', value=50)
+            expected_step_result.add_evidence(name='errors', value=11)
+            expected_step_result.add_evidence(name='skipped', value=7)
+            expected_step_result.add_evidence(name='failures', value=3)
+            self.assertEqual(actual_step_result, expected_step_result)
+
+
+    def test_nonnumeric_attribute_value(self):
+        with TempDirectory() as test_dir:
+            # setup test
+            actual_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+
+            # setup mocks
+            test_dir.write('result1.xml', b'<testsuite time="1.11" tests="20" errors="5" skipped="3" failures="1" />')
+            test_dir.write('result2.xml', b'<testsuite time="2.22" tests="30" errors="6" skipped="4" failures="bob" />')
+
+            # run test
+            MavenTestReportingMixin._gather_evidence_from_test_report_directory_testsuite_elements(
+                step_result=actual_step_result,
+                test_report_dir=test_dir.path
+            )
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='mock-maven-test-step',
+                sub_step_name='mock-maven-test-sub-step',
+                sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
+            )
+            expected_step_result.add_evidence(name='time', value=3.33)
+            expected_step_result.add_evidence(name='tests', value=50)
+            expected_step_result.add_evidence(name='errors', value=11)
+            expected_step_result.add_evidence(name='skipped', value=7)
+            expected_step_result.add_evidence(name='failures', value=1)
             self.assertEqual(actual_step_result, expected_step_result)
