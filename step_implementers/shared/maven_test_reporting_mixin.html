@@ -90,13 +90,13 @@ Configuration Key            | Required? | Default     | Description
 `maven-profiles`             | No        | `[]`        | List of maven profiles to use.
 &#34;&#34;&#34;# pylint: disable=line-too-long
 
+import glob
 import os
 
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import \
     get_plugin_configuration_absolute_path_values
-from ploigos_step_runner.utils.xml import \
-    aggregate_xml_element_attribute_values
+from ploigos_step_runner.utils.xml import get_xml_element
 
 
 class MavenTestReportingMixin:
@@ -111,6 +111,7 @@ class MavenTestReportingMixin:
     SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR = &#39;target/surefire-reports&#39;
     FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR = &#39;target/failsafe-reports&#39;
     TESTSUITE_EVIDENCE_ATTRIBUTES = [&#34;time&#34;, &#34;tests&#34;, &#34;errors&#34;, &#34;skipped&#34;, &#34;failures&#34;]
+    TESTSUITE_EVIDENCE_ELEMENT = &#34;testsuite&#34;
 
     def _attempt_get_test_report_directory(
         self,
@@ -214,13 +215,10 @@ class MavenTestReportingMixin:
             test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
             test_report_evidence_element = &#39;testsuite&#39;
 
-            not_found_attribs = []
-            report_results = aggregate_xml_element_attribute_values(
-                xml_file_paths=test_report_dir,
-                xml_element=test_report_evidence_element,
-                attribs=test_report_evidence_attributes
-            )
+            report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(test_report_dir)
 
+            # Add the test results to the evidence
+            not_found_attribs = []
             for attribute in test_report_evidence_attributes:
                 if attribute in report_results:
                     step_result.add_evidence(
@@ -229,14 +227,67 @@ class MavenTestReportingMixin:
                     )
                 else:
                     not_found_attribs.append(attribute)
+
+            # Add a warning to the step_result for any attribute that was not found
             if not_found_attribs:
                 step_result.message += &#34;\nWARNING: could not find expected evidence&#34; \
                     f&#34; attributes ({not_found_attribs}) on xml element&#34; \
                     f&#34; ({test_report_evidence_element}) in test report&#34; \
                     f&#34; directory ({test_report_dir}).&#34;
+
+            # Add any warnings encountered during collecting the test results to the step_result
+            for warning in collection_warnings:
+                step_result.message += f&#34;\n{warning}&#34;
+
         else:
             step_result.message += f&#34;\nWARNING: test report directory ({test_report_dir})&#34; \
-                &#34; does not exist to gather evidence from&#34;</code></pre>
+                &#34; does not exist to gather evidence from&#34;
+
+    @staticmethod
+    def _collect_report_results(
+            test_report_dir
+    ):
+        report_results = {}
+        warnings = []
+
+        # Iterate over each file that contains test results
+        xml_files = glob.glob(test_report_dir + &#39;/*.xml&#39;, recursive=False)
+        for file in xml_files:
+            try:
+
+                # Iterate over the XML attributes that are evidence
+                element = get_xml_element(file, MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT)
+                for attrib in element.attrib:
+                    if attrib in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES: # Is this attribute evidence?
+
+                        # Parse each attribute as a number
+                        attrib_value = 0
+                        try:
+                            attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
+                        except ValueError:
+                            print(
+                                f&#34;WARNING: While parsing test results, expected the value of {attrib} &#34; \
+                                f&#34;in {file} to be a number. It was &#39;{element.attrib[attrib]}&#39;. Ignoring.&#34;
+                            )
+
+                        # Add up the totals across all files
+                        if attrib in report_results:
+                            report_results[attrib] += attrib_value
+                        else:
+                            report_results[attrib] = attrib_value
+
+            # If we cannot parse a file for some reason, warn but continue processing.
+            except ValueError:
+                warnings += [f&#34;WARNING: could not parse test results in file ({file}). Ignoring.&#34;]
+                continue
+
+        return report_results, warnings
+
+    @staticmethod
+    def _to_number(string):
+        if string.isnumeric():
+            return int(string)
+        return float(string)</code></pre>
 </details>
 </section>
 <section>
@@ -270,6 +321,7 @@ MavenGeneric based StepImplementers.</p></div>
     SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR = &#39;target/surefire-reports&#39;
     FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR = &#39;target/failsafe-reports&#39;
     TESTSUITE_EVIDENCE_ATTRIBUTES = [&#34;time&#34;, &#34;tests&#34;, &#34;errors&#34;, &#34;skipped&#34;, &#34;failures&#34;]
+    TESTSUITE_EVIDENCE_ELEMENT = &#34;testsuite&#34;
 
     def _attempt_get_test_report_directory(
         self,
@@ -373,13 +425,10 @@ MavenGeneric based StepImplementers.</p></div>
             test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
             test_report_evidence_element = &#39;testsuite&#39;
 
-            not_found_attribs = []
-            report_results = aggregate_xml_element_attribute_values(
-                xml_file_paths=test_report_dir,
-                xml_element=test_report_evidence_element,
-                attribs=test_report_evidence_attributes
-            )
+            report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(test_report_dir)
 
+            # Add the test results to the evidence
+            not_found_attribs = []
             for attribute in test_report_evidence_attributes:
                 if attribute in report_results:
                     step_result.add_evidence(
@@ -388,14 +437,67 @@ MavenGeneric based StepImplementers.</p></div>
                     )
                 else:
                     not_found_attribs.append(attribute)
+
+            # Add a warning to the step_result for any attribute that was not found
             if not_found_attribs:
                 step_result.message += &#34;\nWARNING: could not find expected evidence&#34; \
                     f&#34; attributes ({not_found_attribs}) on xml element&#34; \
                     f&#34; ({test_report_evidence_element}) in test report&#34; \
                     f&#34; directory ({test_report_dir}).&#34;
+
+            # Add any warnings encountered during collecting the test results to the step_result
+            for warning in collection_warnings:
+                step_result.message += f&#34;\n{warning}&#34;
+
         else:
             step_result.message += f&#34;\nWARNING: test report directory ({test_report_dir})&#34; \
-                &#34; does not exist to gather evidence from&#34;</code></pre>
+                &#34; does not exist to gather evidence from&#34;
+
+    @staticmethod
+    def _collect_report_results(
+            test_report_dir
+    ):
+        report_results = {}
+        warnings = []
+
+        # Iterate over each file that contains test results
+        xml_files = glob.glob(test_report_dir + &#39;/*.xml&#39;, recursive=False)
+        for file in xml_files:
+            try:
+
+                # Iterate over the XML attributes that are evidence
+                element = get_xml_element(file, MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT)
+                for attrib in element.attrib:
+                    if attrib in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES: # Is this attribute evidence?
+
+                        # Parse each attribute as a number
+                        attrib_value = 0
+                        try:
+                            attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
+                        except ValueError:
+                            print(
+                                f&#34;WARNING: While parsing test results, expected the value of {attrib} &#34; \
+                                f&#34;in {file} to be a number. It was &#39;{element.attrib[attrib]}&#39;. Ignoring.&#34;
+                            )
+
+                        # Add up the totals across all files
+                        if attrib in report_results:
+                            report_results[attrib] += attrib_value
+                        else:
+                            report_results[attrib] = attrib_value
+
+            # If we cannot parse a file for some reason, warn but continue processing.
+            except ValueError:
+                warnings += [f&#34;WARNING: could not parse test results in file ({file}). Ignoring.&#34;]
+                continue
+
+        return report_results, warnings
+
+    @staticmethod
+    def _to_number(string):
+        if string.isnumeric():
+            return int(string)
+        return float(string)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -435,6 +537,10 @@ MavenGeneric based StepImplementers.</p></div>
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT"><code class="name">var <span class="ident">TESTSUITE_EVIDENCE_ELEMENT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -465,6 +571,7 @@ MavenGeneric based StepImplementers.</p></div>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME" href="#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME">SUREFIRE_PLUGIN_NAME</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME" href="#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME">SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES" href="#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES">TESTSUITE_EVIDENCE_ATTRIBUTES</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT" href="#ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin.MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT">TESTSUITE_EVIDENCE_ELEMENT</a></code></li>
 </ul>
 </li>
 </ul>

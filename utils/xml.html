@@ -31,7 +31,6 @@
 Shared utils for dealing with XML.
 &#34;&#34;&#34;
 
-import glob
 import re
 import os.path
 from xml.etree import ElementTree
@@ -182,117 +181,7 @@ def get_xml_element_text_by_path(
     else:
         result = xml_elements.text
 
-    return result
-
-def aggregate_xml_element_attribute_values(xml_file_paths, xml_element, attribs): # pylint: disable=too-many-branches
-    &#34;&#34;&#34;Function to parse a XML file looking for a specific element and obtaining its attributes.
-
-    If element is not found in file the file is ignored.
-
-    If attribute is not found in element then any other attributes that are in the file are still
-    aggregated.
-
-    Parameters
-    ----------
-    xml_file_paths : str, [str]
-        Path(s) to XML file(s) or directory(s) containing XML file(s)
-    xml_element: str
-        XML element being searched for
-    attribs: list
-        List of attributes being searched for in the XML element
-
-    Returns
-    --------
-    report_results: dict
-        A dictionary of attribute values.
-    &#34;&#34;&#34;
-    report_results = {}
-
-    if not isinstance(xml_file_paths, list):
-        xml_file_paths = [xml_file_paths]
-
-    # collect all the xml file paths
-    xml_files = []
-    for xml_file_path in xml_file_paths:
-        if os.path.isdir(xml_file_path):
-            xml_files += glob.glob(xml_file_path + &#39;/*.xml&#39;, recursive=False)
-        elif os.path.isfile(xml_file_path):
-            xml_files += [xml_file_path]
-
-    #Iterate over XML files
-    for file in xml_files:
-        try:
-            #Add attributes to dictionary
-            element = get_xml_element(file, xml_element)
-            for attrib in attribs:
-                if attrib in element.attrib:
-                    # aggregate attribute accross multiple files
-                    attribute_value = element.attrib[attrib]
-
-                    if not attrib in report_results:
-                        report_results[attrib] = []
-                    report_results[attrib].append(attribute_value)
-                else:
-                    # ignore if a file has the element but missing an attribute
-                    print(
-                        f&#34;WARNING: Did not find attribute ({attrib}) on element ({element})&#34; \
-                        f&#34; in file ({file}). Ignoring.&#34;
-                    )
-                    continue
-        except ValueError:
-            # ignore if a file has the element but missing an attribute
-            print(
-                f&#34;WARNING: Did not find element ({xml_element})&#34; \
-                f&#34; in file ({file}). Ignoring.&#34;
-            )
-            continue
-
-    #Loop to check if all values aggregated are integers, floats, strings, or a mix
-    #of all three.
-    for attrib in attribs:
-        only_ints = True
-        only_floats = True
-
-        #Iteration to determine what pattern all values follow.
-        if attrib in report_results:
-            for value in report_results[attrib]:
-                # check if int
-                try:
-                    int(value)
-                except ValueError:
-                    only_ints = False
-
-                # check if float
-                try:
-                    float(value)
-                except ValueError:
-                    only_floats = False
-
-
-            if only_ints or only_floats:
-                aggregated_value = 0
-            else:
-                aggregated_value = []
-
-            #Iteration to aggregate values based on determined pattern.
-            for value in report_results[attrib]:
-                #If a value is numeric and can be a float then it is an integer
-                if only_ints:
-                    aggregated_value = int(aggregated_value) + int(value)
-                #If a value is not numeric but can be a float then it is a float
-                elif only_floats:
-                    aggregated_value = float(aggregated_value) + float(value)
-                else:
-                    aggregated_value.append(value)
-        else:
-            aggregated_value = None
-
-        #Replace list of values with aggregated value that is either an int,
-        #float, or string
-        if aggregated_value is not None:
-            report_results[attrib] = aggregated_value
-
-    return report_results</code></pre>
+    return result</code></pre>
 </details>
 </section>
 <section>
@@ -302,143 +191,6 @@ def aggregate_xml_element_attribute_values(xml_file_paths, xml_element, attribs)
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="ploigos_step_runner.utils.xml.aggregate_xml_element_attribute_values"><code class="name flex">
-<span>def <span class="ident">aggregate_xml_element_attribute_values</span></span>(<span>xml_file_paths, xml_element, attribs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Function to parse a XML file looking for a specific element and obtaining its attributes.</p>
-<p>If element is not found in file the file is ignored.</p>
-<p>If attribute is not found in element then any other attributes that are in the file are still
-aggregated.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>xml_file_paths</code></strong> :&ensp;<code>str, [str]</code></dt>
-<dd>Path(s) to XML file(s) or directory(s) containing XML file(s)</dd>
-<dt><strong><code>xml_element</code></strong> :&ensp;<code>str</code></dt>
-<dd>XML element being searched for</dd>
-<dt><strong><code>attribs</code></strong> :&ensp;<code>list</code></dt>
-<dd>List of attributes being searched for in the XML element</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><strong><code>report_results</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A dictionary of attribute values.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def aggregate_xml_element_attribute_values(xml_file_paths, xml_element, attribs): # pylint: disable=too-many-branches
-    &#34;&#34;&#34;Function to parse a XML file looking for a specific element and obtaining its attributes.
-
-    If element is not found in file the file is ignored.
-
-    If attribute is not found in element then any other attributes that are in the file are still
-    aggregated.
-
-    Parameters
-    ----------
-    xml_file_paths : str, [str]
-        Path(s) to XML file(s) or directory(s) containing XML file(s)
-    xml_element: str
-        XML element being searched for
-    attribs: list
-        List of attributes being searched for in the XML element
-
-    Returns
-    --------
-    report_results: dict
-        A dictionary of attribute values.
-    &#34;&#34;&#34;
-    report_results = {}
-
-    if not isinstance(xml_file_paths, list):
-        xml_file_paths = [xml_file_paths]
-
-    # collect all the xml file paths
-    xml_files = []
-    for xml_file_path in xml_file_paths:
-        if os.path.isdir(xml_file_path):
-            xml_files += glob.glob(xml_file_path + &#39;/*.xml&#39;, recursive=False)
-        elif os.path.isfile(xml_file_path):
-            xml_files += [xml_file_path]
-
-    #Iterate over XML files
-    for file in xml_files:
-        try:
-            #Add attributes to dictionary
-            element = get_xml_element(file, xml_element)
-            for attrib in attribs:
-                if attrib in element.attrib:
-                    # aggregate attribute accross multiple files
-                    attribute_value = element.attrib[attrib]
-
-                    if not attrib in report_results:
-                        report_results[attrib] = []
-                    report_results[attrib].append(attribute_value)
-                else:
-                    # ignore if a file has the element but missing an attribute
-                    print(
-                        f&#34;WARNING: Did not find attribute ({attrib}) on element ({element})&#34; \
-                        f&#34; in file ({file}). Ignoring.&#34;
-                    )
-                    continue
-        except ValueError:
-            # ignore if a file has the element but missing an attribute
-            print(
-                f&#34;WARNING: Did not find element ({xml_element})&#34; \
-                f&#34; in file ({file}). Ignoring.&#34;
-            )
-            continue
-
-    #Loop to check if all values aggregated are integers, floats, strings, or a mix
-    #of all three.
-    for attrib in attribs:
-        only_ints = True
-        only_floats = True
-
-        #Iteration to determine what pattern all values follow.
-        if attrib in report_results:
-            for value in report_results[attrib]:
-                # check if int
-                try:
-                    int(value)
-                except ValueError:
-                    only_ints = False
-
-                # check if float
-                try:
-                    float(value)
-                except ValueError:
-                    only_floats = False
-
-
-            if only_ints or only_floats:
-                aggregated_value = 0
-            else:
-                aggregated_value = []
-
-            #Iteration to aggregate values based on determined pattern.
-            for value in report_results[attrib]:
-                #If a value is numeric and can be a float then it is an integer
-                if only_ints:
-                    aggregated_value = int(aggregated_value) + int(value)
-                #If a value is not numeric but can be a float then it is a float
-                elif only_floats:
-                    aggregated_value = float(aggregated_value) + float(value)
-                else:
-                    aggregated_value.append(value)
-        else:
-            aggregated_value = None
-
-        #Replace list of values with aggregated value that is either an int,
-        #float, or string
-        if aggregated_value is not None:
-            report_results[attrib] = aggregated_value
-
-    return report_results</code></pre>
-</details>
-</dd>
 <dt id="ploigos_step_runner.utils.xml.get_xml_element"><code class="name flex">
 <span>def <span class="ident">get_xml_element</span></span>(<span>xml_file, element_name)</span>
 </code></dt>
@@ -692,7 +444,6 @@ If True find all matching elements.</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="ploigos_step_runner.utils.xml.aggregate_xml_element_attribute_values" href="#ploigos_step_runner.utils.xml.aggregate_xml_element_attribute_values">aggregate_xml_element_attribute_values</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.xml.get_xml_element" href="#ploigos_step_runner.utils.xml.get_xml_element">get_xml_element</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.xml.get_xml_element_by_path" href="#ploigos_step_runner.utils.xml.get_xml_element_by_path">get_xml_element_by_path</a></code></li>
 <li><code><a title="ploigos_step_runner.utils.xml.get_xml_element_text_by_path" href="#ploigos_step_runner.utils.xml.get_xml_element_text_by_path">get_xml_element_text_by_path</a></code></li>
