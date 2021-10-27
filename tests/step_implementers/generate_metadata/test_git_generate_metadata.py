@@ -27,21 +27,28 @@ class TestStepImplementerGitGenerateMetadataBase(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path
         )
 
+
 class TestStepImplementerGitGenerateMetadata_misc(TestStepImplementerGitGenerateMetadataBase):
     def test_step_implementer_config_defaults(self):
         defaults = Git.step_implementer_config_defaults()
         expected_defaults = {
-            'repo-root': './',
-            'release-branch-regexes': ['^main$', '^master$']
+            'git-repo-root': './',
+            'release-branch-regexes': ['^main$', '^master$'],
+            'git-commit-and-push-changes': False,
+            'git-commit-message': 'Automated commit of changes during release engineering'
+                                  ' generate-metadata step',
+            'git-user-name': 'Ploigos Robot',
+            'git-user-email': 'ploigos-robot'
         }
         self.assertEqual(defaults, expected_defaults)
 
     def test__required_config_or_result_keys(self):
         required_keys = Git._required_config_or_result_keys()
         expected_required_keys = [
-            'repo-root'
+            ['git-repo-root', 'repo-root']
         ]
         self.assertEqual(required_keys, expected_required_keys)
+
 
 @patch('ploigos_step_runner.step_implementers.generate_metadata.git.Repo')
 class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGenerateMetadataBase):
@@ -374,7 +381,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 sub_step_implementer_name='Git'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Given repo-root ({temp_dir.path})' \
+            expected_step_result.message = f'Given git-repo-root ({temp_dir.path})' \
                 ' is not a Git repository'
 
             self.assertEqual(actual_step_result, expected_step_result)
@@ -405,7 +412,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 sub_step_implementer_name='Git'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Given repo-root ({temp_dir.path})' \
+            expected_step_result.message = f'Given git-repo-root ({temp_dir.path})' \
                 ' is not a Git repository'
 
             self.assertEqual(actual_step_result, expected_step_result)
@@ -477,7 +484,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=False
             )
             expected_step_result.success = False
-            expected_step_result.message =  f'Given repo-root ({temp_dir.path}) is a' \
+            expected_step_result.message = f'Given git-repo-root ({temp_dir.path}) is a' \
                 f' git branch (main) with no commit history'
 
             self.assertEqual(actual_step_result, expected_step_result)

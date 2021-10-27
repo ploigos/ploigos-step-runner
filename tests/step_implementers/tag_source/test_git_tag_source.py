@@ -35,12 +35,21 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
 # TESTS FOR configuration checks
     def test_step_implementer_config_defaults(self):
         defaults = Git.step_implementer_config_defaults()
-        expected_defaults = {}
+        expected_defaults = {
+            'version': 'latest',
+            'git-repo-root': './',
+            'git-commit-message': 'Automated commit of changes during release engineering' \
+                                  ' generate-metadata step',
+            'git-user-name': 'Ploigos Robot',
+            'git-user-email': 'ploigos-robot'
+        }
         self.assertEqual(defaults, expected_defaults)
 
     def test__required_config_or_result_keys(self):
         required_keys = Git._required_config_or_result_keys()
-        expected_required_keys = []
+        expected_required_keys = [
+            ['git-repo-root', 'repo-root'],
+        ]
         self.assertEqual(required_keys, expected_required_keys)
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_valid(self):
@@ -57,43 +66,6 @@ class TestStepImplementerTagSourceGit(BaseStepImplementerTestCase):
             )
 
             step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
-    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_username(self):
-         with TempDirectory() as test_dir:
-            parent_work_dir_path = os.path.join(test_dir.path, 'working')
-
-            step_config = {
-                'git-password': 'git-password'
-            }
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                parent_work_dir_path=parent_work_dir_path,
-            )
-
-            with self.assertRaisesRegex(
-                StepRunnerException,
-                r"Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
-    def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_missing_git_password(self):
-         with TempDirectory() as test_dir:
-            parent_work_dir_path = os.path.join(test_dir.path, 'working')
-
-            step_config = {
-                'git-username': 'git-username'
-            }
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                parent_work_dir_path=parent_work_dir_path,
-            )
-
-            with self.assertRaisesRegex(
-                StepRunnerException,
-                r"Either 'git-username' or 'git-password 'is not set. Neither or both must be set."
-            ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
-
 
 # TESTS FOR _run_step
 

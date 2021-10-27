@@ -10,9 +10,9 @@ Could come from:
 
 Configuration Key    | Required? | Default              | Description
 ---------------------|-----------|----------------------|-----------
-`git-repo-root`      | Yes       | `.`                  | Directory path to the Git repository to perform git operations on.
+`git-repo-root`      | Yes       | `./`                 | Directory path to the Git repository to perform git operations on.
 `repo-root`          | No        |                      | Alias for `git-repo-root`.
-`git-url`            | No        | Git repo root configured origion url \
+`git-url`            | No        | Git repo root configured origin url \
                                                         | URL to Git repository to perform Git operations on. \
                                                           If not given will use Git remote url set in given Git repository root.
 `url`                | No        |                      | Alias for `git-url`.
@@ -37,15 +37,14 @@ from git.exc import GitCommandError
 from ploigos_step_runner import StepRunnerException
 
 DEFAULT_CONFIG = {
-    'repo-root': './',
+    'git-repo-root': './',
     'git-commit-message': 'Automated commit of changes during release engineering' \
         ' generate-metadata step',
     'git-user-name': 'Ploigos Robot',
     'git-user-email': 'ploigos-robot'
 }
-
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'repo-root'
+    ['git-repo-root', 'repo-root']
 ]
 
 class GitMixin:
@@ -108,7 +107,7 @@ class GitMixin:
                 self.__git_repo = Repo(repo_root)
             except InvalidGitRepositoryError as error:
                 raise StepRunnerException(
-                    f'Given repo-root ({repo_root}) is not a Git repository'
+                    f'Given git-repo-root ({repo_root}) is not a Git repository'
                 ) from error
 
         return self.__git_repo
