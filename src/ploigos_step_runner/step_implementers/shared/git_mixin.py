@@ -10,9 +10,9 @@ Could come from:
 
 Configuration Key    | Required? | Default              | Description
 ---------------------|-----------|----------------------|-----------
-`git-repo-root`      | Yes       | `.`                  | Directory path to the Git repository to perform git operations on.
+`git-repo-root`      | Yes       | `./`                 | Directory path to the Git repository to perform git operations on.
 `repo-root`          | No        |                      | Alias for `git-repo-root`.
-`git-url`            | No        | Git repo root configured origion url \
+`git-url`            | No        | Git repo root configured origin url \
                                                         | URL to Git repository to perform Git operations on. \
                                                           If not given will use Git remote url set in given Git repository root.
 `url`                | No        |                      | Alias for `git-url`.
@@ -37,15 +37,14 @@ from git.exc import GitCommandError
 from ploigos_step_runner import StepRunnerException
 
 DEFAULT_CONFIG = {
-    'repo-root': './',
+    'git-repo-root': './',
     'git-commit-message': 'Automated commit of changes during release engineering' \
         ' generate-metadata step',
     'git-user-name': 'Ploigos Robot',
     'git-user-email': 'ploigos-robot'
 }
-
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'repo-root'
+    ['git-repo-root', 'repo-root']
 ]
 
 class GitMixin:
@@ -108,7 +107,7 @@ class GitMixin:
                 self.__git_repo = Repo(repo_root)
             except InvalidGitRepositoryError as error:
                 raise StepRunnerException(
-                    f'Given repo-root ({repo_root}) is not a Git repository'
+                    f'Given git-repo-root ({repo_root}) is not a Git repository'
                 ) from error
 
         return self.__git_repo
@@ -129,8 +128,9 @@ class GitMixin:
         if not self.__git_url:
             # get git url from config or current repo remote
             git_url = self.get_value(['git-url', 'url'])
+
             if not git_url:
-                git_url = self.git_repo.remote().url
+                git_url = self.git_repo.remote.url
 
             # get given git username and pass
             git_username = self.get_value('git-username')
@@ -140,15 +140,6 @@ class GitMixin:
             # if git url is http|https combine git username and password with git url
             split_git_url = urlsplit(git_url)
             if split_git_url.scheme in ['ssh']:
-                if git_username:
-                    raise StepRunnerException(
-                        f"Git username ({git_username}) given but git URL ({git_url}) uses SSH."
-                    )
-                if git_password:
-                    raise StepRunnerException(
-                        f"Git password ({git_password}) given but git URL ({git_url}) uses SSH."
-                    )
-
                 self.__git_url = git_url
             elif split_git_url.scheme in ['http', 'https']:
                 # determine git username
@@ -241,14 +232,16 @@ class GitMixin:
             If error pushing changes to remote.
         """
         repo = self.git_repo
+        url = self.git_url
+
         try:
             # NOTE:
             #   using repo.git.push rather then repo.remote().push() because need to be
             #   able to override the git url for the push
-            repo.git.push(self.git_url)
+            repo.git.push(url)
         except (GitCommandError, Exception) as error:
             raise StepRunnerException(
-                f"Error pushing changes to remote ({self.git_url})"
+                f"Error pushing changes to remote ({url})"
                 f" on current branch ({repo.active_branch.name}): {error}"
             ) from error
 
@@ -262,14 +255,16 @@ class GitMixin:
             If error pushing tags to remote.
         """
         repo = self.git_repo
+        url = self.git_url
+
         try:
             # NOTE:
             #   using repo.git.push rather then repo.remote().push() because need to be
             #   able to override the git url for the push
-            repo.git.push(self.git_url, '--tag')
+            repo.git.push(url, '--tag')
         except (GitCommandError, Exception) as error:
             raise StepRunnerException(
-                f"Error pushing tags to remote ({self.git_url})"
+                f"Error pushing tags to remote ({url})"
                 f" on current branch ({repo.active_branch.name}): {error}"
             ) from error
 

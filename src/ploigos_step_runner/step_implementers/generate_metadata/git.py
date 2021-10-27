@@ -21,9 +21,9 @@ Configuration Key             | Required? | Default                  | Descripti
                                                                        If False, will never commit and push any changes. \
                                                                        If 'release' will only commit and push changes when on a release branch. \
                                                                        If 'pre-release' will only commit and push changes on a pre-release branch.
-`git-repo-root`               | Yes       | `.`                      | Directory path to the Git repository to perform git operations on.
+`git-repo-root`               | Yes       | `./`                     | Directory path to the Git repository to perform git operations on.
 `repo-root`                   | No        |                          | Alias for `git-repo-root`.
-`git-url`                     | No        | Git repo root configured origion url \
+`git-url`                     | No        | Git repo root configured origin url \
                                                                      | URL to Git repository to perform Git operations on. \
                                                                        If not given will use Git remote url set in given Git repository root.
 `url`                         | No        |                          | Alias for `git-url`.
@@ -60,12 +60,17 @@ from ploigos_step_runner.step_implementers.shared import GitMixin
 
 
 DEFAULT_CONFIG = {
+    'git-repo-root': './',
     'release-branch-regexes': ['^main$', '^master$'],
     'git-commit-and-push-changes': False
 }
 
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-]
+"""
+Note
+---
+Some required fields inherited from GitMixin (see `_required_config_or_result_keys`)
+"""
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = []
 
 class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
     """
@@ -145,6 +150,11 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
+            return step_result
+
+        if repo.bare:
+            step_result.success = False
+            step_result.message = 'Given git-repo-root is not a Git repository'
             return step_result
 
         # Need to be able to determine the branch name to determine if is a pre-release build or not

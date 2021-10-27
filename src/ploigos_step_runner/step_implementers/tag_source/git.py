@@ -11,9 +11,9 @@ Could come from:
 Configuration Key | Required? | Default  | Description
 ------------------|-----------|----------|-----------
 `version`         | No        | `latest` | Semantic version to use as Git tag.
-`git-repo-root`   | Yes       | `.`      | Directory path to the Git repository to perform git operations on.
+`git-repo-root`   | Yes       | `./`     | Directory path to the Git repository to perform git operations on.
 `repo-root`       | No        |          | Alias for `git-repo-root`.
-`git-url`         | No        | Git repo root configured origion url \
+`git-url`         | No        | Git repo root configured origin url \
                                          | URL to Git repository to perform Git operations on. \
                                            If not given will use Git remote url set in given Git repository root.
 `url`             | No        |          | Alias for `git-url`.
@@ -39,7 +39,15 @@ from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import GitMixin
 
-DEFAULT_CONFIG = {}
+DEFAULT_CONFIG = {
+    'version': 'latest',
+    'git-repo-root': './',
+}
+"""
+Note
+---
+Some required fields inherited from GitMixin (see `_required_config_or_result_keys`)
+"""
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = []
 
 class Git(StepImplementer, GitMixin):

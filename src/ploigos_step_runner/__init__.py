@@ -282,7 +282,7 @@ From least precedence to highest precedence.
       - implementer: Git
         config: {
           # Optional.
-          #repo-root: './'
+          #git-repo-root: './'
 
           # Optional.
           #build-string-length: 7
@@ -668,7 +668,7 @@ From least precedence to highest precedence.
       - implementer: Git
         config: {
           # Optional.
-          #repo-root: './'
+          #git-repo-root: './'
 
           # Optional.
           #build-string-length: 7
