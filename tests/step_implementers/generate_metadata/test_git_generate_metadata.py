@@ -50,7 +50,7 @@ class TestStepImplementerGitGenerateMetadata_misc(TestStepImplementerGitGenerate
         self.assertEqual(required_keys, expected_required_keys)
 
 
-@patch('ploigos_step_runner.step_implementers.generate_metadata.git.Repo')
+@patch('ploigos_step_runner.step_implementers.generate_metadata.Git.git_repo')
 class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGenerateMetadataBase):
     def test_success_release_branch_default_release_branch_regexes(self, mock_repo):
         with TempDirectory() as temp_dir:
@@ -412,8 +412,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 sub_step_implementer_name='Git'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Given git-repo-root ({temp_dir.path})' \
-                ' is not a Git repository'
+            expected_step_result.message = f'Given git-repo-root is not a Git repository'
 
             self.assertEqual(actual_step_result, expected_step_result)
 
@@ -421,7 +420,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
-                'repo-root': temp_dir.path
+                'git-repo-root': temp_dir.path
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -443,8 +442,8 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 sub_step_implementer_name='Git'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Expected a Git branch in given repo_root' \
-                f' ({temp_dir.path}) but has a detached head'
+            expected_step_result.message = f'Expected a Git branch in given git repo root' \
+                f' but has a detached head'
 
             self.assertEqual(actual_step_result, expected_step_result)
 

@@ -152,6 +152,11 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
             step_result.message = str(error)
             return step_result
 
+        if repo.bare:
+            step_result.success = False
+            step_result.message = f'Given git-repo-root is not a Git repository'
+            return step_result
+
         # Need to be able to determine the branch name to determine if is a pre-release build or not
         if repo.head.is_detached:
             step_result.success = False
