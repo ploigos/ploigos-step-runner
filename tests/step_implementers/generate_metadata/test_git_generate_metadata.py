@@ -65,10 +65,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'main'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'main'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -110,10 +110,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'release/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'release/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -153,10 +153,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'release/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'release/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -195,10 +195,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'feature/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'feature/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -240,10 +240,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'feature/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'feature/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -283,10 +283,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'feature/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'feature/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -327,10 +327,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'feature/mock1'
-            mock_repo().head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.head.reference.name = 'feature/mock1'
+            mock_repo.head.reference.commit = 'a1b2c3d4e5f6g7h8i9'
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -400,7 +400,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = True
+            mock_repo.bare = True
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -429,8 +429,8 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = True
+            mock_repo.bare = False
+            mock_repo.head.is_detached = True
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -448,6 +448,9 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             self.assertEqual(actual_step_result, expected_step_result)
 
     def test_fail_no_commit_history(self, mock_repo):
+        # Data setup
+        git_branch = 'main'
+
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -460,10 +463,10 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo().bare = False
-            mock_repo().head.is_detached = False
-            mock_repo().head.reference.name = 'main'
-            type(mock_repo().head.reference).commit = PropertyMock(side_effect=ValueError)
+            mock_repo.bare = False
+            mock_repo.head.is_detached = False
+            mock_repo.active_branch.name = git_branch
+            type(mock_repo.head.reference).commit = PropertyMock(side_effect=ValueError)
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -476,14 +479,14 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
             expected_step_result.add_artifact(
                 name='branch',
-                value='main'
+                value=git_branch
             )
             expected_step_result.add_artifact(
                 name='is-pre-release',
                 value=False
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Given git-repo-root ({temp_dir.path}) is a' \
-                f' git branch (main) with no commit history'
+            expected_step_result.message = f'Given Git repository root is a' \
+                f' git branch ({git_branch}) with no commit history.'
 
             self.assertEqual(actual_step_result, expected_step_result)
