@@ -11,18 +11,32 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Key               | Required | Default                     | Description
-------------------|----------|-----------------------------|------------
-`properties`      | Yes      | `./sonar-project.proerties` | Existing properties file for SonarQube
-`url`             | Yes      |                             | SonarQube host url (sonar.host.url)
-`username`        | No       |                             | SonarQube username id (sonar.login)
-`password`        | No       |                             | SonarQube password
-`token`           | No       |                             | SonarQube token
-`version`         | Yes      |                             | Version to use for the SonarQube \
-                                                             project version (sonar.projectVersion)
-`java-truststore` | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
+Key                      | Required | Default                     | Description
+-------------------------|----------|-----------------------------|------------
+`properties`             | Yes      | `./sonar-project.proerties` | Existing properties file for SonarQube
+`url`                    | Yes      |                             | SonarQube host url (sonar.host.url)
+`username`               | No       |                             | SonarQube username id (sonar.login)
+`password`               | No       |                             | SonarQube password
+`token`                  | No       |                             | SonarQube token
+`version`                | Yes      |                             | Version to use for the SonarQube \
+                                                                    project version (sonar.projectVersion)
+`java-truststore`        | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
                                                              to System.
-`project-key`     | No       |                             | SonarQube project key
+`project-key`            | No       |                             | SonarQube project key
+`sonar-analyze-branches` | No       | `False`                     | `True` to pass the `sonar.branch.name` property to SonarQube, \
+                                                                    which can only be done if using SonarQube Developer Edition or above as per \
+                                                                    https://redirect.sonarsource.com/doc/branches.html. \
+                                                                    `False to not pass the `sonar.branch.name` property to SonarQube. \
+                                                                    Note, even if `False`, SonarQube will still be called even if on a branch, \
+                                                                    that branch name just wont be passed to SonarQube so all of the results will \
+                                                                    show up on the same `master` branch in the SonarQube UI.
+`branch`                 | Maybe    |                             | Value to use for `sonar.branch.name` property if `sonar-analyze-branches` is `True`. \
+                                                                    See https://sonarqube.corp.redhat.com/documentation/branches/overview/.
+`release-branch-regexes` | No       | `['^main$', '^master$']`    | SonarQube does not want the `sonar.branch.name` flag passed for the \
+                                                                    "main", "master", "release" branch. Therefor the StepImplementer needs to know \
+                                                                    which branch(s) are considered the "main" branch so we don't pass the flag \
+                                                                    for that branch. \
+                                                                    See https://community.sonarsource.com/t/how-to-change-the-main-branch-in-sonarqube/13669/8
 
 Result Artifacts
 ----------------
@@ -49,6 +63,7 @@ Example: Generated Sonar Scanner Call (uses both step configuration and previous
         -Dsonar.host.url=url
         -Dsonar.projectVersion=generate-metadata.version
         -Dsonar.projectKey=application-name.service-name
+        -Dsonar.branch.name=feature/foo42
 
 Example: Existing Sonar Properties File (minimal)
 
@@ -83,19 +98,21 @@ Example: Existing Sonar Properties File (minimal)
     #sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco
     #sonar.core.codeCoveragePlugin=jacoco
 
-"""
+"""# pylint: disable=line-too-long
 
 import os
+import re
 import sys
 
 import sh
-from ploigos_step_runner import StepImplementer
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner import StepResult
 
 DEFAULT_CONFIG = {
     'properties': './sonar-project.properties',
-    'java-truststore': '/etc/pki/java/cacerts'
+    'java-truststore': '/etc/pki/java/cacerts',
+    'sonar-analyze-branches': False,
+    'release-branch-regexes': ['^main$', '^master$']
 }
 
 AUTHENTICATION_CONFIG = {
@@ -206,10 +223,7 @@ class SonarQube(StepImplementer):
 
         application_name = self.get_value('application-name')
         service_name = self.get_value('service-name')
-        url = self.get_value('url')
-        version = self.get_value('version')
         properties_file = self.get_value('properties')
-        java_truststore = self.get_value('java-truststore')
 
         # Optional: project-key
         if self.get_value('project-key'):
@@ -228,43 +242,43 @@ class SonarQube(StepImplementer):
             # Hint:  Call sonar-scanner with sh.sonar_scanner
             #    https://amoffat.github.io/sh/sections/faq.html
             working_directory = self.work_dir_path
+
+            sonar_optional_flags = []
+            # determine auth flags
             if token:
-                sh.sonar_scanner(  # pylint: disable=no-member
-                    f'-Dproject.settings={properties_file}',
-                    f'-Dsonar.host.url={url}',
-                    f'-Dsonar.projectVersion={version}',
-                    f'-Dsonar.projectKey={project_key}',
-                    f'-Dsonar.login={token}',
-                    f'-Dsonar.working.directory={working_directory}',
-                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
+                sonar_optional_flags += [
+                    f'-Dsonar.login={token}'
+                ]
             elif username:
-                sh.sonar_scanner(  # pylint: disable=no-member
-                    f'-Dproject.settings={properties_file}',
-                    f'-Dsonar.host.url={url}',
-                    f'-Dsonar.projectVersion={version}',
-                    f'-Dsonar.projectKey={project_key}',
+                sonar_optional_flags += [
                     f'-Dsonar.login={username}',
                     f'-Dsonar.password={password}',
-                    f'-Dsonar.working.directory={working_directory}',
-                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
-            else:
-                sh.sonar_scanner(  # pylint: disable=no-member
-                    f'-Dproject.settings={properties_file}',
-                    f'-Dsonar.host.url={url}',
-                    f'-Dsonar.projectVersion={version}',
-                    f'-Dsonar.projectKey={project_key}',
-                    f'-Dsonar.working.directory={working_directory}',
-                    _env={"SONAR_SCANNER_OPTS": f'-Djavax.net.ssl.trustStore={java_truststore}'},
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
+                ]
 
+            # determine branch flag
+            # only provide sonar.branch.name flag if not the "main"/"master"/"release branch" and
+            # sonar-analyze-branches is true (since can only due with certain versions of SonarQube)
+            # see: https://community.sonarsource.com/t/how-to-change-the-main-branch-in-sonarqube/13669/8
+            if self.get_value('sonar-analyze-branches') and not self.__is_release_branch():
+                sonar_optional_flags += [
+                    f"-Dsonar.branch.name={self.get_value('branch')}",
+                ]
+
+            # run scan
+            sh.sonar_scanner(  # pylint: disable=no-member
+                f'-Dproject.settings={properties_file}',
+                f"-Dsonar.host.url={self.get_value('url')}",
+                f"-Dsonar.projectVersion={self.get_value('version')}",
+                f'-Dsonar.projectKey={project_key}',
+                f'-Dsonar.working.directory={working_directory}',
+                *sonar_optional_flags,
+                _env={
+                    "SONAR_SCANNER_OPTS": \
+                        f"-Djavax.net.ssl.trustStore={self.get_value('java-truststore')}"
+                },
+                _out=sys.stdout,
+                _err=sys.stderr
+            )
             sonarqube_success = True
         except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
             # Error Code 1: INTERNAL_ERROR
@@ -296,3 +310,27 @@ class SonarQube(StepImplementer):
         )
 
         return step_result
+
+    def __is_release_branch(self):
+        """Determins if current branch is a release branch or not.
+
+        Returns
+        -------
+        bool
+            True if current branch is a release branch.
+            False if not.
+        """
+        branch = self.get_value('branch')
+        release_branch_regexes = self.get_value('release-branch-regexes')
+
+        is_release_branch = False
+        if release_branch_regexes:
+            is_release_branch = False
+            if not isinstance(release_branch_regexes, list):
+                release_branch_regexes = [release_branch_regexes]
+            for release_branch_regex in release_branch_regexes:
+                if re.match(release_branch_regex, branch):
+                    is_release_branch = True
+                    break
+
+        return is_release_branch
