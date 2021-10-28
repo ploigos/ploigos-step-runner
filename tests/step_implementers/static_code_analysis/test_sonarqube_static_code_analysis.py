@@ -14,8 +14,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
-
-class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
+class TestStepImplementerStaticCodeAnalysisSonarQube_Base(BaseStepImplementerTestCase):
     def create_step_implementer(
             self,
             step_config={},
@@ -32,13 +31,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
-
-# TESTS FOR configuration checks
+class TestStepImplementerStaticCodeAnalysisSonarQube_other(TestStepImplementerStaticCodeAnalysisSonarQube_Base):
     def test_step_implementer_config_defaults(self):
         defaults = SonarQube.step_implementer_config_defaults()
         expected_defaults = {
             'properties': './sonar-project.properties',
-            'java-truststore': '/etc/pki/java/cacerts'
+            'java-truststore': '/etc/pki/java/cacerts',
+            'sonar-analyze-branches': False,
+            'release-branch-regexes': ['^main$', '^master$']
         }
         self.assertEqual(defaults, expected_defaults)
 
@@ -142,7 +142,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 StepRunnerException,
                 r"Either 'username' or 'password 'is set. Neither can be set with a token."
             ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()   
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_token_and_username(self):
         step_config = {
@@ -166,7 +166,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 StepRunnerException,
                 r"Either 'username' or 'password 'is set. Neither can be set with a token."
             ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()           
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
 
     def test__validate_required_config_or_previous_step_result_artifact_keys_invalid_token_and_username_and_password(self):
         step_config = {
@@ -191,10 +191,12 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 StepRunnerException,
                 r"Either 'username' or 'password 'is set. Neither can be set with a token."
             ):
-                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()               
-                
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_username_and_password(self, sonar_mock):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+@patch.object(SonarQube, '_SonarQube__is_release_branch')
+@patch('sh.sonar_scanner', create=True)
+class TestStepImplementerStaticCodeAnalysisSonarQube__run_step(TestStepImplementerStaticCodeAnalysisSonarQube_Base):
+    def test_pass_username_and_password(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
@@ -238,14 +240,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -253,8 +255,137 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_with_token(self, sonar_mock):
+    def test_pass_username_and_password_sonar_analyze_branches_true_and_release_branch(self, mock_sonar, mock_is_release_branch):
+        with TempDirectory() as temp_dir:
+            # setup
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('sonar-project.properties',b'''testing''')
+            properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+            step_config = {
+                'properties': properties_path,
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                'application-name': 'app-name',
+                'service-name': 'service-name',
+                'username': 'username',
+                'password': 'password',
+                'sonar-analyze-branches': True
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            # set up mocks
+            mock_is_release_branch.return_value = True
+
+            # run test
+            result = step_implementer._run_step()
+
+            # validate
+            expected_step_result = StepResult(
+                step_name='static-code-analysis',
+                sub_step_name='SonarQube',
+                sub_step_implementer_name='SonarQube'
+            )
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
+            )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=True
+            )
+
+            mock_is_release_branch.assert_called_once()
+            mock_sonar.assert_called_once_with(
+                    '-Dproject.settings=' + properties_path,
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                    '-Dsonar.projectVersion=1.0-123abc',
+                    '-Dsonar.projectKey=app-name:service-name',
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
+                    '-Dsonar.login=username',
+                    '-Dsonar.password=password',
+                    _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
+                    _out=sys.stdout,
+                    _err=sys.stderr
+            )
+
+            self.assertEqual(result, expected_step_result)
+
+    def test_pass_username_and_password_sonar_analyze_branches_true_and_pre_release_branch(self, mock_sonar, mock_is_release_branch):
+        with TempDirectory() as temp_dir:
+            # setup
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            temp_dir.write('sonar-project.properties',b'''testing''')
+            properties_path = os.path.join(temp_dir.path, 'sonar-project.properties')
+            artifact_config = {
+                'version': {'description': '', 'value': '1.0-123abc'},
+            }
+            workflow_result = self.setup_previous_result(parent_work_dir_path, artifact_config)
+            step_config = {
+                'properties': properties_path,
+                'url': 'https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                'application-name': 'app-name',
+                'service-name': 'service-name',
+                'username': 'username',
+                'password': 'password',
+                'sonar-analyze-branches': True,
+                'branch': 'feature/mock42'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            # set up mocks
+            mock_is_release_branch.return_value = False
+
+            # run test
+            result = step_implementer._run_step()
+
+            # validate
+            expected_step_result = StepResult(
+                step_name='static-code-analysis',
+                sub_step_name='SonarQube',
+                sub_step_implementer_name='SonarQube'
+            )
+            expected_step_result.add_artifact(
+                name='sonarqube-result-set',
+                value=f'{temp_dir.path}/working/static-code-analysis/report-task.txt'
+            )
+            expected_step_result.add_evidence(
+                name='sonarqube-quality-gate-pass',
+                value=True
+            )
+
+            mock_is_release_branch.assert_called_once()
+            mock_sonar.assert_called_once_with(
+                    '-Dproject.settings=' + properties_path,
+                    '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
+                    '-Dsonar.projectVersion=1.0-123abc',
+                    '-Dsonar.projectKey=app-name:service-name',
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
+                    '-Dsonar.login=username',
+                    '-Dsonar.password=password',
+                    '-Dsonar.branch.name=feature/mock42',
+                    _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
+                    _out=sys.stdout,
+                    _err=sys.stderr
+            )
+
+            self.assertEqual(result, expected_step_result)
+
+    def test_pass_with_token(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
@@ -297,13 +428,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
-                    '-Dsonar.login=token',
                     '-Dsonar.working.directory=' + step_implementer.work_dir_path,
+                    '-Dsonar.login=token',
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -311,8 +442,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_no_username_and_password(self, sonar_mock):
+    def test_pass_no_username_and_password(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
@@ -354,7 +484,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
@@ -367,8 +497,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_no_properties(self, sonar_mock):
+    def test_fail_no_properties(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -403,8 +532,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_with_token_and_project_key(self, sonar_mock):
+    def test_pass_with_token_and_project_key(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
@@ -448,13 +576,13 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=project-key',
-                    '-Dsonar.login=token',
                     '-Dsonar.working.directory=' + step_implementer.work_dir_path,
+                    '-Dsonar.login=token',
                     _env={'SONAR_SCANNER_OPTS': '-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -462,8 +590,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_no_username_and_password_and_project_key(self, sonar_mock):
+    def test_pass_no_username_and_password_and_project_key(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties',b'''testing''')
@@ -506,7 +633,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
@@ -519,8 +646,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_no_properties_and_project_key(self, sonar_mock):
+    def test_fail_no_properties_and_project_key(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
@@ -555,9 +681,8 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             expected_step_result.message = 'Properties file not found: ./sonar-project.properties'
 
             self.assertEqual(result, expected_step_result)
-    
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_pass_alternate_java_truststore(self, sonar_mock):
+
+    def test_pass_alternate_java_truststore(self, mock_sonar, mock_is_release_branch):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             temp_dir.write('sonar-project.properties', b'''testing''')
@@ -603,14 +728,14 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 value=True
             )
 
-            sonar_mock.assert_called_once_with(
+            mock_sonar.assert_called_once_with(
                     '-Dproject.settings=' + properties_path,
                     '-Dsonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com',
                     '-Dsonar.projectVersion=1.0-123abc',
                     '-Dsonar.projectKey=app-name:service-name',
+                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     '-Dsonar.login=username',
                     '-Dsonar.password=password',
-                    '-Dsonar.working.directory=' + step_implementer.work_dir_path,
                     _env={'SONAR_SCANNER_OPTS': f'-Djavax.net.ssl.trustStore={java_truststore}'},
                     _out=sys.stdout,
                     _err=sys.stderr
@@ -618,11 +743,11 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    def __run__run_step_fail_sonar_scanner_error_test(
+    def __run__fail_sonar_scanner_error_test(
         self,
         sonar_scanner_error,
         expected_result_message_regex,
-        sonar_mock
+        mock_sonar
     ):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -651,7 +776,7 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 parent_work_dir_path=parent_work_dir_path,
             )
 
-            sonar_mock.side_effect = sonar_scanner_error
+            mock_sonar.side_effect = sonar_scanner_error
 
             result = step_implementer._run_step()
 
@@ -674,9 +799,8 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
             self.assertEqual(result.artifacts, expected_step_result.artifacts)
             self.assertRegex(result.message, expected_result_message_regex)
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_sonar_scanner_internal_error(self, sonar_mock):
-        self.__run__run_step_fail_sonar_scanner_error_test(
+    def test_fail_sonar_scanner_internal_error(self, mock_sonar, mock_is_release_branch):
+        self.__run__fail_sonar_scanner_error_test(
             sonar_scanner_error=sh.ErrorReturnCode_1(
                 'sonar-scanner',
                 b'mock out',
@@ -691,12 +815,11 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 r".*mock internal error",
                 re.DOTALL
             ),
-            sonar_mock=sonar_mock
+            mock_sonar=mock_sonar
         )
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_sonar_scanner_tests_failed(self, sonar_mock):
-        self.__run__run_step_fail_sonar_scanner_error_test(
+    def test_fail_sonar_scanner_tests_failed(self, mock_sonar, mock_is_release_branch):
+        self.__run__fail_sonar_scanner_error_test(
            sonar_scanner_error=sh.ErrorReturnCode_2(
                 'sonar-scanner',
                 b'mock out',
@@ -707,12 +830,11 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 r" See 'sonarqube-result-set' result artifact for details.",
                 re.DOTALL
             ),
-            sonar_mock=sonar_mock
+            mock_sonar=mock_sonar
         )
 
-    @patch('sh.sonar_scanner', create=True)
-    def test_run_step_fail_sonar_scanner_unexpected_error(self, sonar_mock):
-        self.__run__run_step_fail_sonar_scanner_error_test(
+    def test_fail_sonar_scanner_unexpected_error(self, mock_sonar, mock_is_release_branch):
+        self.__run__fail_sonar_scanner_error_test(
            sonar_scanner_error=sh.ErrorReturnCode_42(
                 'sonar-scanner',
                 b'mock out',
@@ -727,5 +849,103 @@ class TestStepImplementerSonarQubePackageBase(BaseStepImplementerTestCase):
                 r".*mock unexpected error",
                 re.DOTALL
             ),
-            sonar_mock=sonar_mock
+            mock_sonar=mock_sonar
         )
+
+class TestStepImplementerStaticCodeAnalysisSonarQube___is_release_branch(TestStepImplementerStaticCodeAnalysisSonarQube_Base):
+    def test_is_release_branch_main_default_release_branch_regexes(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            step_config = {
+                'branch': 'main'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                parent_work_dir_path=temp_dir.path
+            )
+
+            # run test
+            result = step_implementer._SonarQube__is_release_branch()
+
+            # validate
+            self.assertEqual(result, True)
+
+    def test_is_release_branch_main_default_release_branch_regexes(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            step_config = {
+                'branch': 'master'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                parent_work_dir_path=temp_dir.path
+            )
+
+            # run test
+            result = step_implementer._SonarQube__is_release_branch()
+
+            # validate
+            self.assertEqual(result, True)
+
+    def test_is_release_branch_foo_custom_release_branch_regexes(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            step_config = {
+                'release-branch-regexes': '^release/.*$',
+                'branch': 'release/v0.42.0'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                parent_work_dir_path=temp_dir.path
+            )
+
+            # run test
+            result = step_implementer._SonarQube__is_release_branch()
+
+            # validate
+            self.assertEqual(result, True)
+
+    def test_is_pre_release_branch_default_release_branch_regexes(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            step_config = {
+                'branch': 'feature/mock42'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                parent_work_dir_path=temp_dir.path
+            )
+
+            # run test
+            result = step_implementer._SonarQube__is_release_branch()
+
+            # validate
+            self.assertEqual(result, False)
+
+    def test_is_pre_release_branch_custom_release_branch_regexes(self):
+        with TempDirectory() as temp_dir:
+            # setup
+            step_config = {
+                'release-branch-regexes': '^release/.*$',
+                'branch': 'feature/mock42'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='static-code-analysis',
+                implementer='SonarQube',
+                parent_work_dir_path=temp_dir.path
+            )
+
+            # run test
+            result = step_implementer._SonarQube__is_release_branch()
+
+            # validate
+            self.assertEqual(result, False)
