@@ -284,7 +284,23 @@ If <code>False</code> then use container image full address (including registry)
 | If <code>True</code> then use container image digest in container image address when
 pulling container image for deployment.<br/>
 If <code>False</code> then use container image tag in container image address when
-pulling container image for deployment.</p>
+pulling container image for deployment.
+<code>organization</code>
+| Yes
+|
+| Used to build ArgoCD application name.
+<code>applciation-name</code>
+| Yes
+|
+| Used to build ArgoCD application name.
+<code>service-name</code>
+| Yes
+|
+| Used to build ArgoCD application name.
+<code>branch</code>
+| Yes
+|
+| Used to build ArgoCD application name.</p>
 <h2 id="results">Results</h2>
 <p>Results output by this step.</p>
 <table>
@@ -422,6 +438,10 @@ Configuration Key                       | Required? | Default  | Description
                                                                  pulling container image for deployment.&lt;br/&gt;\
                                                                  If `False` then use container image tag in container image address when \
                                                                  pulling container image for deployment.
+`organization`                          | Yes       |          | Used to build ArgoCD application name.
+`applciation-name`                      | Yes       |          | Used to build ArgoCD application name.
+`service-name`                          | Yes       |          | Used to build ArgoCD application name.
+`branch`                                | Yes       |          | Used to build ArgoCD application name.
 
 Results
 -------
@@ -474,7 +494,11 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
         &#39;deployment-config-helm-chart-values-file-image-tag-yq-path&#39;
     ],
     &#39;git-email&#39;,
-    &#39;git-name&#39;
+    &#39;git-name&#39;,
+    &#39;organization&#39;,
+    &#39;applciation-name&#39;,
+    &#39;service-name&#39;,
+    &#39;branch&#39;
 ]
 
 GIT_AUTHENTICATION_CONFIG = {
