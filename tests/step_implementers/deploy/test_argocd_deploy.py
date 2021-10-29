@@ -77,7 +77,7 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
             'git-email',
             'git-name',
             'organization',
-            'applciation-name',
+            'application-name',
             'service-name',
             'branch'
         ]

@@ -100,7 +100,7 @@ Configuration Key                       | Required? | Default  | Description
                                                                  If `False` then use container image tag in container image address when \
                                                                  pulling container image for deployment.
 `organization`                          | Yes       |          | Used to build ArgoCD application name.
-`applciation-name`                      | Yes       |          | Used to build ArgoCD application name.
+`application-name`                      | Yes       |          | Used to build ArgoCD application name.
 `service-name`                          | Yes       |          | Used to build ArgoCD application name.
 `branch`                                | Yes       |          | Used to build ArgoCD application name.
 
@@ -157,7 +157,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     'git-email',
     'git-name',
     'organization',
-    'applciation-name',
+    'application-name',
     'service-name',
     'branch'
 ]
