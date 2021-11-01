@@ -47,6 +47,12 @@ class NpmTest(NpmGeneric):
 
         npm_output_file_path = self.write_working_file('npm_test_output.txt')
         try:
+            if self.get_value('install-first'):
+                self._run_npm_step(
+                    npm_output_file_path=npm_output_file_path,
+                    npm_args='install'
+                )
+
             self._run_npm_step(
                 npm_output_file_path=npm_output_file_path
             )

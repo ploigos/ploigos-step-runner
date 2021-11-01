@@ -150,7 +150,8 @@ class NpmGeneric(StepImplementer):
     def _run_npm_step(
         self,
         npm_output_file_path,
-        step_implementer_additional_envs=None
+        step_implementer_additional_envs=None,
+        npm_args=None,
     ):
         """Runs npm using the configuration given to this step runner.
 
@@ -160,6 +161,8 @@ class NpmGeneric(StepImplementer):
             Path to file containing the npm stdout and stderr output.
         step_implementer_additional_envs : {}
             Additional environment variables injected by the step implementer.
+        npm_args : str
+            Arguments to pass to npm. Defaults to self.npm_args.
 
         Raises
         ------
@@ -167,7 +170,9 @@ class NpmGeneric(StepImplementer):
             If npm returns a non 0 exit code.
         """
 
-        npm_args = self.npm_args
+        if not npm_args:
+            npm_args = self.npm_args
+
         npm_envs = None
 
         if step_implementer_additional_envs:
