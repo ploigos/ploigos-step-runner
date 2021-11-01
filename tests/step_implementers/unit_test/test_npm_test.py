@@ -77,3 +77,28 @@ class TestNpmTest__run_step(BaseStepImplementerTestCase):
                 value=output_file_path,
                 description="Standard out and standard error from 'npm test'."
             ))
+
+    @patch('sh.npm', create=True) # Given a shell command, 'npm'
+    @patch('os.path.exists', side_effect = lambda filename: filename == 'package.json') # Given that a file named package.json exists
+    def test_run_install_shell_command(self, os_path_exists_mock, npm_shell_command_mock):
+
+        # Given a working directory
+        with TempDirectory() as temp_dir:
+            working_dir_path = os.path.join(temp_dir.path, 'working')
+
+            # Given an NpmTest step implementer that is configured to run 'npm install' before running the unit tests
+            npm_test = self.create_given_step_implementer(
+                NpmTest,
+                step_config={'install-first': True},
+                parent_work_dir_path=working_dir_path
+            )
+
+            # When I run the step
+            npm_test.run_step()
+
+            # Then it should run a shell command, 'npm install'
+            npm_shell_command_mock.assert_any_call(
+                'install',
+                _out=Any(StringIO),
+                _err=Any(StringIO)
+            )
