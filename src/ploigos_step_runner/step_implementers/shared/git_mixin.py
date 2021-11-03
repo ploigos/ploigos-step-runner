@@ -107,7 +107,7 @@ class GitMixin:
                 self.__git_repo = Repo(repo_root)
             except InvalidGitRepositoryError as error:
                 raise StepRunnerException(
-                    f'Given git-repo-root ({repo_root}) is not a Git repository'
+                    f'Given git-repo-root ({repo_root}) is not a Git repository: {error}'
                 ) from error
 
         return self.__git_repo
@@ -128,13 +128,8 @@ class GitMixin:
         if not self.__git_url:
             # get git url from config or current repo remote
             git_url = self.get_value(['git-url', 'url'])
-
             if not git_url:
-                git_url = self.git_repo.remote.url
-
-            # get given git username and pass
-            git_username = self.get_value('git-username')
-            git_password = self.get_value('git-password')
+                git_url = self.git_repo.remote().url
 
             # if git url is ssh, throw error if git username or password given
             # if git url is http|https combine git username and password with git url
@@ -142,6 +137,10 @@ class GitMixin:
             if split_git_url.scheme in ['ssh']:
                 self.__git_url = git_url
             elif split_git_url.scheme in ['http', 'https']:
+                # get given git username and pass
+                git_username = self.get_value('git-username')
+                git_password = self.get_value('git-password')
+
                 # determine git username
                 if split_git_url.username and git_username:
                     print(
