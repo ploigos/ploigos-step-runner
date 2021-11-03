@@ -1,8 +1,7 @@
 
 from unittest.mock import PropertyMock, patch
 
-from git import InvalidGitRepositoryError
-from ploigos_step_runner import StepResult
+from ploigos_step_runner import StepResult, StepRunnerException
 from ploigos_step_runner.step_implementers.generate_metadata import Git
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
@@ -533,8 +532,8 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
 
             self.assertEqual(actual_step_result, expected_step_result)
 
-    @patch('git.Repo')
-    def test_fail_not_a_git_repo(self, mock_repo):
+    @patch.object(Git, 'git_repo', new_callable=PropertyMock)
+    def test_fail_getting_git_repo(self, mock_git_repo):
         with TempDirectory() as temp_dir:
             # setup
             step_config = {
@@ -547,7 +546,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
             )
 
             # setup mocks
-            mock_repo.side_effect = InvalidGitRepositoryError()
+            mock_git_repo.side_effect = StepRunnerException('mock error')
 
             # run test
             actual_step_result = step_implementer._run_step()
@@ -559,8 +558,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 sub_step_implementer_name='Git'
             )
             expected_step_result.success = False
-            expected_step_result.message = f'Given git-repo-root ({temp_dir.path})' \
-                ' is not a Git repository'
+            expected_step_result.message = f'mock error'
 
             self.assertEqual(actual_step_result, expected_step_result)
 
