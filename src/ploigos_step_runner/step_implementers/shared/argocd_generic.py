@@ -29,7 +29,7 @@ class ArgoCDGeneric(StepImplementer):
         re.DOTALL
     )
     ARGOCD_HEALTH_STATE_TRANSITIONED_FROM_HEALTHY_TO_DEGRADED = re.compile(
-        r".*level=fatal.*health\s+state\s+has\s+transitioned\s+from\s+Healthy\s+to\s+Degraded",
+        r".*level=fatal.*health\s+state\s+has\s+transitioned\s+from\s.+\s+to\s+Degraded",
         re.DOTALL
     )
     MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES = 2

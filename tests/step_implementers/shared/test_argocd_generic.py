@@ -2560,12 +2560,56 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
             _err=ANY
         )
 
-    def test_success_on_second_wait(self, mock_argocd):
+    def test_success_on_second_wait_after_transitioning_from_healthy_to_degraded(self, mock_argocd):
         # setup mocks
         mock_argocd.app.wait.side_effect = create_sh_side_effects([
             {
                 'mock_stdout': 'time="2021-11-04T22:57:38Z" level=fatal msg="application'
                     ' \'mock-app\' health state has transitioned from Healthy to Degraded"',
+                'mock_stderr': '',
+                'exception': sh.ErrorReturnCode(
+                    'argocd',
+                    b'mock wait stdout',
+                    b'mock wait error'
+                )
+            },
+            {
+                'mock_stdout': 'mock success',
+                'mock_stderr': '',
+                'exception': None
+            }
+        ])
+
+        # run test
+        ArgoCDGeneric._argocd_app_wait_for_health(
+            argocd_app_name='mock-app',
+            argocd_timeout_seconds=42
+        )
+
+        # validate
+        mock_argocd.app.wait.assert_has_calls([
+            call(
+                'mock-app',
+                '--health',
+                '--timeout', 42,
+                _out=ANY,
+                _err=ANY
+            ),
+            call(
+                'mock-app',
+                '--health',
+                '--timeout', 42,
+                _out=ANY,
+                _err=ANY
+            )
+        ])
+
+    def test_success_on_second_wait_after_transitioning_from_progressing_to_degraded(self, mock_argocd):
+        # setup mocks
+        mock_argocd.app.wait.side_effect = create_sh_side_effects([
+            {
+                'mock_stdout': 'time="2021-11-05T19:40:51Z" level=fatal msg="application'
+                    ' \'mock-app\' health state has transitioned from Progressing to Degraded"',
                 'mock_stderr': '',
                 'exception': sh.ErrorReturnCode(
                     'argocd',
