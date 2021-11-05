@@ -28,7 +28,12 @@ class ArgoCDGeneric(StepImplementer):
         r'.*FailedPrecondition.*another\s+operation\s+is\s+already\s+in\s+progress',
         re.DOTALL
     )
+    ARGOCD_HEALTH_STATE_TRANSITIONED_FROM_HEALTHY_TO_DEGRADED = re.compile(
+        r".*level=fatal.*health\s+state\s+has\s+transitioned\s+from\s+Healthy\s+to\s+Degraded",
+        re.DOTALL
+    )
     MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES = 2
+    MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_HEALTH_RETRIES = 2
 
     def _get_deployment_config_helm_chart_environment_values_file(self):
         """Get the deployment configuration Helm Chart environment specific value file.
@@ -654,23 +659,10 @@ users:
             # NOTE: attempted work around for 'FailedPrecondition desc = another operation is
             #       already in progress' error
             # SEE: https://github.com/argoproj/argo-cd/issues/4505
-            try:
-                print(
-                    f"Wait for existing ArgoCD operations on app ({argocd_app_name})"
-                    " before requesting synchronization."
-                )
-                sh.argocd.app.wait( # pylint: disable=no-member
-                    argocd_app_name,
-                    '--operation',
-                    '--timeout', argocd_sync_timeout_seconds,
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
-            except sh.ErrorReturnCode as error:
-                raise StepRunnerException(
-                    f"Error waiting for ArgoCD Application ({argocd_app_name}) existing operation"
-                    f" before requesting new synchronization: {error}"
-                ) from error
+            ArgoCDGeneric._argocd_app_wait_for_operation(
+                argocd_app_name=argocd_app_name,
+                argocd_timeout_seconds=argocd_sync_timeout_seconds
+            )
 
             # sync app
             argocd_output_buff = StringIO()
@@ -707,8 +699,10 @@ users:
                     print(
                         f"ArgoCD Application ({argocd_app_name}) has an existing operation"
                         " that started after we already waited for existing operations but"
-                        f" before we tried to do a sync. Try ({wait_for_op_retry}) again"
-                        " to wait for the operation"
+                        " before we tried to do a sync."
+                        f" Try ({wait_for_op_retry} out of"
+                        f" {ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES}) again to"
+                        " wait for the operation"
                     )
                     continue
 
@@ -728,19 +722,107 @@ users:
                 ) from error
 
         # wait for sync to finish
+        ArgoCDGeneric._argocd_app_wait_for_health(
+            argocd_app_name=argocd_app_name,
+            argocd_timeout_seconds=argocd_sync_timeout_seconds
+        )
+
+    @staticmethod
+    def _argocd_app_wait_for_operation(argocd_app_name, argocd_timeout_seconds):
+        """Waits for an existing operation on an ArgoCD Application to finish.
+
+        Parameters
+        ----------
+        argocd_app_name : str
+            Name of ArgoCD Application to wait for existing operations on.
+        argocd_timeout_seconds : int
+            Number of sections to wait before timing out waiting for existing operations to finish.
+
+        Raises
+        ------
+        StepRunnerException
+            If error (including timeout) waiting for existing ArgoCD Application operation to finish
+        """
         try:
-            print(f"Wait for synchronization of ArgoCD app ({argocd_app_name}) to finish.")
-            sh.argocd.app.wait(  # pylint: disable=no-member
-                '--timeout', argocd_sync_timeout_seconds,
-                '--health',
+            print(
+                f"Wait for existing ArgoCD operations on Application ({argocd_app_name})"
+            )
+            sh.argocd.app.wait( # pylint: disable=no-member
                 argocd_app_name,
+                '--operation',
+                '--timeout', argocd_timeout_seconds,
                 _out=sys.stdout,
                 _err=sys.stderr
             )
         except sh.ErrorReturnCode as error:
             raise StepRunnerException(
-                f"Error waiting for ArgoCD Application ({argocd_app_name}) synchronization: {error}"
+                f"Error waiting for existing ArgoCD operations on Application ({argocd_app_name})"
+                f": {error}"
             ) from error
+
+    @staticmethod
+    def _argocd_app_wait_for_health(argocd_app_name, argocd_timeout_seconds):
+        """Waits for ArgoCD Application to reach Healthy state.
+
+        Parameters
+        ----------
+        argocd_app_name : str
+            Name of ArgoCD Application to wait for Healthy state of.
+        argocd_timeout_seconds : int
+            Number of sections to wait before timing out waiting for Healthy state.
+
+        Raises
+        ------
+        StepRunnerException
+            If error (including timeout) waiting for existing ArgoCD Application Healthy state.
+            If ArgoCD Application transitions from Healthy to Degraded while waiting for Healthy
+            state.
+        """
+        for wait_for_health_retry in range(ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES):
+            argocd_output_buff = StringIO()
+            try:
+                print(f"Wait for Healthy ArgoCD Application ({argocd_app_name}")
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    argocd_output_buff
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    argocd_output_buff
+                ])
+                sh.argocd.app.wait(  # pylint: disable=no-member
+                    argocd_app_name,
+                    '--health',
+                    '--timeout', argocd_timeout_seconds,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+                break
+            except sh.ErrorReturnCode as error:
+                # if error waiting for Healthy state because entered Degraded state
+                # while waiting for Healthy state
+                # try again to wait for Healthy state assuming that on next attempt the
+                # new degradation of Health will resolve itself.
+                #
+                # NOTE: this can happen based on bad timing if for instance an
+                #       HorizontalPodAutoscaller doesn't enter Degraded state until after we are
+                #       already waiting for the ArgoCD Application to enter Healthy state,
+                #       but then the HorizontalPodAutoscaller will, after a time, become Healthy.
+                if re.match(
+                    ArgoCDGeneric.ARGOCD_HEALTH_STATE_TRANSITIONED_FROM_HEALTHY_TO_DEGRADED,
+                    argocd_output_buff.getvalue()
+                ):
+                    print(
+                        f"ArgoCD Application ({argocd_app_name}) entered Degraded state"
+                        " while waiting for it to enter Healthy state."
+                        f" Try ({wait_for_health_retry} out of"
+                        f" {ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES}) again to"
+                        " wait for Healthy state."
+                    )
+                else:
+                    raise StepRunnerException(
+                        f"Error waiting for Healthy ArgoCD Application ({argocd_app_name}): {error}"
+                    ) from error
 
     def _argocd_get_app_manifest(
         self,
