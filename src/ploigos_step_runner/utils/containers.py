@@ -565,35 +565,41 @@ def add_container_build_step_result_artifacts(
         The given StepResult which was modified in place.
         Returned for convenience / and clarity.
     """
-    step_result.add_artifact(
-        name='container-image-registry',
-        value=contaimer_image_registry,
-        description='Container image registry of the built container image address.'
-    )
-    step_result.add_artifact(
-        name='container-image-repository',
-        value=container_image_repository,
-        description='Container image repository of the built container image address.'
-    )
-    step_result.add_artifact(
-        name='container-image-tag',
-        value=container_image_tag,
-        description='Container image tag of the built container image address.'
-    )
-    step_result.add_artifact(
-        name='container-image-build-digest',
-        value=container_image_digest,
-        description='Container image digest of the built container image address.'
-    )
-    step_result.add_artifact(
-        name='container-image-build-address',
-        value=container_image_build_address,
-        description='Container image address of the built container image.'
-    )
-    step_result.add_artifact(
-        name='container-image-build-short-address',
-        value=container_image_build_short_address,
-        description='Container image short address (no registry) of the built container image.'
-    )
+    if contaimer_image_registry:
+        step_result.add_artifact(
+            name='container-image-registry',
+            value=contaimer_image_registry,
+            description='Container image registry of the built container image address.'
+        )
+    if container_image_repository:
+        step_result.add_artifact(
+            name='container-image-repository',
+            value=container_image_repository,
+            description='Container image repository of the built container image address.'
+        )
+    if container_image_tag:
+        step_result.add_artifact(
+            name='container-image-tag',
+            value=container_image_tag,
+            description='Container image tag of the built container image address.'
+        )
+    if container_image_digest:
+        step_result.add_artifact(
+            name='container-image-build-digest',
+            value=container_image_digest,
+            description='Container image digest of the built container image address.'
+        )
+    if container_image_build_address:
+        step_result.add_artifact(
+            name='container-image-build-address',
+            value=container_image_build_address,
+            description='Container image address of the built container image.'
+        )
+    if container_image_build_short_address:
+        step_result.add_artifact(
+            name='container-image-build-short-address',
+            value=container_image_build_short_address,
+            description='Container image short address (no registry) of the built container image.'
+        )
 
     return step_result
