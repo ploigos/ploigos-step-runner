@@ -95,7 +95,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <td>Dictionary of dictionaries of id, url, mirror_of</td>
 </tr>
 <tr>
-<td><code>test-reports-dir</code></td>
+<td><code>test-reports-dirs</code></td>
 <td>No</td>
 <td></td>
 <td>Default is to try and dynamically determine where the test reports directory is
@@ -103,6 +103,12 @@ based on configuration in the given <code>pom-file</code>, but it is impossible 
 in all cases.
 So, this parameter provides a way for the user to specify where the test results
 are if our attempts at dynamically figuring it out are failing your unique pom.</td>
+</tr>
+<tr>
+<td><code>test-reports-dir</code></td>
+<td>No</td>
+<td></td>
+<td>Alias for <code>test-reports-dirs</code></td>
 </tr>
 </tbody>
 </table>
@@ -152,11 +158,12 @@ Configuration Key            | Required? | Default | Description
 `maven-servers`              | No        |         | Dictionary of dictionaries of id, username, password
 `maven-repositories`         | No        |         | Dictionary of dictionaries of id, url, snapshots, releases
 `maven-mirrors`              | No        |         | Dictionary of dictionaries of id, url, mirror_of
-`test-reports-dir`           | No        |         | Default is to try and dynamically determine where the test reports directory is \
+`test-reports-dirs`          | No        |         | Default is to try and dynamically determine where the test reports directory is \
                                                      based on configuration in the given `pom-file`, but it is impossible task to do \
                                                      in all cases. \
                                                      So, this parameter provides a way for the user to specify where the test results \
                                                      are if our attempts at dynamically figuring it out are failing your unique pom.
+`test-reports-dir`           | No        |         | Alias for `test-reports-dirs`
 
 
 Result Artifacts
@@ -260,25 +267,25 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
             )
 
         # get test report dir
-        test_report_dir = self.__get_test_report_dir()
-        if test_report_dir:
+        test_report_dirs = self.__get_test_report_dirs()
+        if test_report_dirs:
             step_result.add_artifact(
                 description=&#34;Test report generated when running unit tests.&#34;,
                 name=&#39;test-report&#39;,
-                value=test_report_dir
+                value=test_report_dirs
             )
 
             # gather test report evidence
             self._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=step_result,
-                test_report_dir=test_report_dir
+                test_report_dirs=test_report_dirs
             )
 
         # return result
         return step_result
 
-    def __get_test_report_dir(self):
-        &#34;&#34;&#34;Gets the test report directory.
+    def __get_test_report_dirs(self):
+        &#34;&#34;&#34;Gets the test report directory(s)
 
         Search Priority:
         * values -&gt; &#39;test-reports-dir&#39;
@@ -286,18 +293,18 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
 
         Returns
         -------
-        str
-            Path to the directory containing the test reports.
+        [str] or str
+            Path(s) to the directory containing the test reports.
         &#34;&#34;&#34;
         # user supplied where the test reports go, just use that
-        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+        test_report_dirs = self.get_value([&#39;test-reports-dir&#39;,&#39;test-reports-dirs&#39;])
 
         # else do our best to find them
-        if not test_report_dir:
+        if not test_report_dirs:
             # attempt to get failsafe test report dir, if not, try for surefire
-            test_report_dir = None
+            test_report_dirs = None
             try:
-                test_report_dir = self._attempt_get_test_report_directory(
+                test_report_dirs = self._attempt_get_test_report_directory(
                     plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
                     configuration_key=\
                         MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
@@ -315,7 +322,7 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
                     &#39; step implementer config (test-reports-dir).&#39;
                 )
 
-        return test_report_dir</code></pre>
+        return test_report_dirs</code></pre>
 </details>
 </section>
 <section>
@@ -418,25 +425,25 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
             )
 
         # get test report dir
-        test_report_dir = self.__get_test_report_dir()
-        if test_report_dir:
+        test_report_dirs = self.__get_test_report_dirs()
+        if test_report_dirs:
             step_result.add_artifact(
                 description=&#34;Test report generated when running unit tests.&#34;,
                 name=&#39;test-report&#39;,
-                value=test_report_dir
+                value=test_report_dirs
             )
 
             # gather test report evidence
             self._gather_evidence_from_test_report_directory_testsuite_elements(
                 step_result=step_result,
-                test_report_dir=test_report_dir
+                test_report_dirs=test_report_dirs
             )
 
         # return result
         return step_result
 
-    def __get_test_report_dir(self):
-        &#34;&#34;&#34;Gets the test report directory.
+    def __get_test_report_dirs(self):
+        &#34;&#34;&#34;Gets the test report directory(s)
 
         Search Priority:
         * values -&gt; &#39;test-reports-dir&#39;
@@ -444,18 +451,18 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
 
         Returns
         -------
-        str
-            Path to the directory containing the test reports.
+        [str] or str
+            Path(s) to the directory containing the test reports.
         &#34;&#34;&#34;
         # user supplied where the test reports go, just use that
-        test_report_dir = self.get_value(&#39;test-reports-dir&#39;)
+        test_report_dirs = self.get_value([&#39;test-reports-dir&#39;,&#39;test-reports-dirs&#39;])
 
         # else do our best to find them
-        if not test_report_dir:
+        if not test_report_dirs:
             # attempt to get failsafe test report dir, if not, try for surefire
-            test_report_dir = None
+            test_report_dirs = None
             try:
-                test_report_dir = self._attempt_get_test_report_directory(
+                test_report_dirs = self._attempt_get_test_report_directory(
                     plugin_name=MavenTestReportingMixin.SUREFIRE_PLUGIN_NAME,
                     configuration_key=\
                         MavenTestReportingMixin.SUREFIRE_PLUGIN_REPORTS_DIR_CONFIG_NAME,
@@ -473,7 +480,7 @@ class MavenTest(MavenGeneric, MavenTestReportingMixin):
                     &#39; step implementer config (test-reports-dir).&#39;
                 )
 
-        return test_report_dir</code></pre>
+        return test_report_dirs</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
