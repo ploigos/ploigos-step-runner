@@ -40,43 +40,53 @@ Could come from:
 </thead>
 <tbody>
 <tr>
-<td><code>url</code></td>
-<td>Yes</td>
-<td>git url returned by
-<code>git config --get
-remote.origin.url</code>
-in container</td>
-<td>This is the url for the
-git server.</td>
-</tr>
-<tr>
-<td><code>git-username</code></td>
-<td>Yes (if url
-is http or https)</td>
-<td></td>
-<td>This is the username to use.
-Due to security concerns this
-should only be only provided by
-the runtime configuration</td>
-</tr>
-<tr>
-<td><code>git-password</code></td>
-<td>Yes (if url
-is http or https)</td>
-<td></td>
-<td>This is the password to use.
-Due to security concerns this
-should only be only provided by
-the runtime configuration</td>
-</tr>
-<tr>
 <td><code>version</code></td>
 <td>No</td>
 <td><code>latest</code></td>
-<td>Semantic version,
-if not found this step
-will use <code>latest</code> as the version
-to perform the git tag with</td>
+<td>Semantic version to use as Git tag.</td>
+</tr>
+<tr>
+<td><code>git-repo-root</code></td>
+<td>Yes</td>
+<td><code>./</code></td>
+<td>Directory path to the Git repository to perform git operations on.</td>
+</tr>
+<tr>
+<td><code>repo-root</code></td>
+<td>No</td>
+<td></td>
+<td>Alias for <code>git-repo-root</code>.</td>
+</tr>
+<tr>
+<td><code>git-url</code></td>
+<td>No</td>
+<td>Git repo root configured origin url</td>
+<td>URL to Git repository to perform Git operations on.
+If not given will use Git remote url set in given Git repository root.</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>No</td>
+<td></td>
+<td>Alias for <code>git-url</code>.</td>
+</tr>
+<tr>
+<td><code>git-username</code></td>
+<td>No</td>
+<td></td>
+<td>Git username to use when connecting with Git remote.
+Will override username in given git url.
+Will override username in Git url in Git repository root remote url.
+Will be ignored if Git repository url is using SSH.</td>
+</tr>
+<tr>
+<td><code>git-password</code></td>
+<td>No</td>
+<td></td>
+<td>Git password to use when connecting with Git remote.
+Will override password in given git url.
+Will override password in Git url in Git repository root remote url.
+Will be ignored if Git repository url is using SSH.</td>
 </tr>
 </tbody>
 </table>
@@ -110,27 +120,23 @@ Could come from:
 * runtime configuration
 * previous step results
 
-Configuration Key | Required?          | Default              | Description
-------------------|--------------------|----------------------|-----------
-`url`             | Yes                | git url returned by \
-                                         `git config --get \
-                                         remote.origin.url` \
-                                         in container         | This is the url for the \
-                                                                git server.
-`git-username`    | Yes (if url \
-                    is http or https)  |                      | This is the username to use. \
-                                                                Due to security concerns this \
-                                                                should only be only provided by \
-                                                                the runtime configuration
-`git-password`    | Yes (if url \
-                    is http or https)  |                      | This is the password to use. \
-                                                                Due to security concerns this \
-                                                                should only be only provided by \
-                                                                the runtime configuration
-`version`         | No                 | `latest`             | Semantic version, \
-                                                                if not found this step \
-                                                                will use `latest` as the version \
-                                                                to perform the git tag with
+Configuration Key | Required? | Default  | Description
+------------------|-----------|----------|-----------
+`version`         | No        | `latest` | Semantic version to use as Git tag.
+`git-repo-root`   | Yes       | `./`     | Directory path to the Git repository to perform git operations on.
+`repo-root`       | No        |          | Alias for `git-repo-root`.
+`git-url`         | No        | Git repo root configured origin url \
+                                         | URL to Git repository to perform Git operations on. \
+                                           If not given will use Git remote url set in given Git repository root.
+`url`             | No        |          | Alias for `git-url`.
+`git-username`    | No        |          | Git username to use when connecting with Git remote. \
+                                           Will override username in given git url. \
+                                           Will override username in Git url in Git repository root remote url. \
+                                           Will be ignored if Git repository url is using SSH.
+`git-password`    | No        |          | Git password to use when connecting with Git remote. \
+                                           Will override password in given git url. \
+                                           Will override password in Git url in Git repository root remote url. \
+                                           Will be ignored if Git repository url is using SSH.
 
 Result Artifacts
 ----------------
@@ -139,25 +145,24 @@ Results artifacts output by this step.
 Result Artifact Key | Description
 --------------------|------------
 `tag`               | This is the value that was used to tag the source.
-&#34;&#34;&#34;
-import re
-import sys
-from io import StringIO
+&#34;&#34;&#34;# pylint: disable=line-too-long
 
-import sh
-from ploigos_step_runner import StepImplementer
+from ploigos_step_runner import StepImplementer, StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.step_implementers.shared import GitMixin
 
-DEFAULT_CONFIG = {}
-
-AUTHENTICATION_CONFIG = {
-    &#39;git-username&#39;: None,
-    &#39;git-password&#39;: None
+DEFAULT_CONFIG = {
+    &#39;version&#39;: &#39;latest&#39;,
+    &#39;git-repo-root&#39;: &#39;./&#39;,
 }
+&#34;&#34;&#34;
+Note
+---
+Some required fields inherited from GitMixin (see `_required_config_or_result_keys`)
+&#34;&#34;&#34;
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = []
 
-
-class Git(StepImplementer):
+class Git(StepImplementer, GitMixin):
     &#34;&#34;&#34;StepImplementer for the tag-source step for Git.
 
     Note
@@ -181,7 +186,7 @@ class Git(StepImplementer):
         dict
             Default values to use for step configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**GitMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -198,36 +203,8 @@ class Git(StepImplementer):
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return []
-
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-        * either both git-username and git-password are set or neither.
-
-        Raises
-        ------
-        StepRunnerException
-            If step configuration or previous step result artifacts have invalid required values
-        &#34;&#34;&#34;
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        # ensure either both git-username and git-password are set or neither
-        runtime_auth_config = {}
-        for auth_config_key in AUTHENTICATION_CONFIG:
-            runtime_auth_config_value = self.get_value(auth_config_key)
-
-            if runtime_auth_config_value is not None:
-                runtime_auth_config[auth_config_key] = runtime_auth_config_value
-
-        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
-                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
-            raise StepRunnerException(
-                &#34;Either &#39;git-username&#39; or &#39;git-password &#39;is not set. Neither or both must be set.&#34;
-            )
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            GitMixin._required_config_or_result_keys()
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -239,137 +216,49 @@ class Git(StepImplementer):
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        username = None
-        password = None
-
-        if self.has_config_value(AUTHENTICATION_CONFIG):
-            username = self.get_value(&#39;git-username&#39;)
-            password = self.get_value(&#39;git-password&#39;)
-        else:
-            print(&#39;No username/password found, assuming ssh&#39;)
-
-        tag = self.__get_tag()
-
-        try:
-            self.__git_tag(tag)
-            git_url = self.__git_url()
-            if git_url.startswith(&#39;http://&#39;):
-                if username and password:
-                    self.__git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
-                else:
-                    step_result.success = False
-                    step_result.message = &#39;For a http:// git url, you need to also provide &#39; \
-                                        &#39;username/password pair&#39;
-                    return step_result
-            elif git_url.startswith(&#39;https://&#39;):
-                if username and password:
-                    self.__git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
-                else:
-                    step_result.success = False
-                    step_result.message = &#39;For a https:// git url, you need to also provide &#39; \
-                                        &#39;username/password pair&#39;
-                    return step_result
-            else:
-                self.__git_push(None)
-        except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = str(error)
-
+        # get the tag
+        tag = self.__get_tag_value()
         step_result.add_artifact(
             name=&#39;tag&#39;,
             value=tag
         )
 
+        # tag and push tags
+        try:
+            self.git_tag(tag)
+            self.git_push_tags()
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = f&#34;Error tagging and pushing tags: {error}&#34;
+
         return step_result
 
-    def __get_tag(self):
+    def __get_tag_value(self):
+        &#34;&#34;&#34;Get the tag value to tag the Git repository with.
+
+        Returns
+        -------
+        str
+            Value to use for the git tag.
+        &#34;&#34;&#34;
         tag = self.get_value(&#39;version&#39;)
         if tag is None:
             tag = &#39;latest&#39;
             print(&#39;No version found in metadata. Using latest&#39;)
-        return tag
-
-    def __git_url(self):
-        git_url = None
-        if self.get_value(&#39;url&#39;):
-            git_url = self.get_value(&#39;url&#39;)
-        else:
-            try:
-                out = StringIO()
-                sh.git.config(
-                    &#39;--get&#39;,
-                    &#39;remote.origin.url&#39;,
-                    _encoding=&#39;UTF-8&#39;,
-                    _decode_errors=&#39;ignore&#39;,
-                    _out=out,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-                git_url = out.getvalue().rstrip()
-
-                # remove ANYTHING@ from beginning of git_url since step will pass in its own
-                # username and password
-                #
-                # Regex:
-                #   ^[^@]+@ - match from beginning of line any character up until
-                #             an @ and then the @
-                #   (.*) - match any character and capture to capture group 1
-                #   \1 - capture group 1 which is the http or https if there was one
-                #   \2 - capture group 2 which is anything after the first @ if there was one
-                git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
-
-            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-                raise StepRunnerException(
-                    f&#34;Error invoking git config --get remote.origin.url: {error}&#34;
-                ) from error
-        return git_url
-
-    @staticmethod
-    def __git_tag(git_tag_value):
-        try:
-            # NOTE:
-            # this force is only needed locally in case of a re-run of the same pipeline
-            # without a fresh check out. You will notice there is no force on the push
-            # making this an acceptable work around to the issue since on the off chance
-            # actually overwriting a tag with a different comment, the push will fail
-            # because the tag will be attached to a different git hash.
-            sh.git.tag(  # pylint: disable=no-member
-                git_tag_value,
-                &#39;-f&#39;,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise StepRunnerException(
-                f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;
-            ) from error
-
-    @staticmethod
-    def __git_push(url=None):
-        try:
-            if url:
-                sh.git.push(
-                    url,
-                    &#39;--tag&#39;,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-            else:
-                sh.git.push(
-                    &#39;--tag&#39;,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise StepRunnerException(f&#34;Error invoking git push: {error}&#34;) from error</code></pre>
+        return tag</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.tag_source.git.DEFAULT_CONFIG"><code class="name">var <span class="ident">DEFAULT_CONFIG</span></code></dt>
+<dd>
+<div class="desc"><h2 id="note">Note</h2>
+<p>Some required fields inherited from GitMixin (see <code>_required_config_or_result_keys</code>)</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -390,7 +279,7 @@ for http and https git repos, and that is a desired use case.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Git(StepImplementer):
+<pre><code class="python">class Git(StepImplementer, GitMixin):
     &#34;&#34;&#34;StepImplementer for the tag-source step for Git.
 
     Note
@@ -414,7 +303,7 @@ for http and https git repos, and that is a desired use case.</p></div>
         dict
             Default values to use for step configuration values.
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**GitMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -431,36 +320,8 @@ for http and https git repos, and that is a desired use case.</p></div>
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return []
-
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-        * either both git-username and git-password are set or neither.
-
-        Raises
-        ------
-        StepRunnerException
-            If step configuration or previous step result artifacts have invalid required values
-        &#34;&#34;&#34;
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        # ensure either both git-username and git-password are set or neither
-        runtime_auth_config = {}
-        for auth_config_key in AUTHENTICATION_CONFIG:
-            runtime_auth_config_value = self.get_value(auth_config_key)
-
-            if runtime_auth_config_value is not None:
-                runtime_auth_config[auth_config_key] = runtime_auth_config_value
-
-        if (any(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)) and \
-                (not all(element in runtime_auth_config for element in AUTHENTICATION_CONFIG)):
-            raise StepRunnerException(
-                &#34;Either &#39;git-username&#39; or &#39;git-password &#39;is not set. Neither or both must be set.&#34;
-            )
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            GitMixin._required_config_or_result_keys()
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -472,137 +333,42 @@ for http and https git repos, and that is a desired use case.</p></div>
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        username = None
-        password = None
-
-        if self.has_config_value(AUTHENTICATION_CONFIG):
-            username = self.get_value(&#39;git-username&#39;)
-            password = self.get_value(&#39;git-password&#39;)
-        else:
-            print(&#39;No username/password found, assuming ssh&#39;)
-
-        tag = self.__get_tag()
-
-        try:
-            self.__git_tag(tag)
-            git_url = self.__git_url()
-            if git_url.startswith(&#39;http://&#39;):
-                if username and password:
-                    self.__git_push(&#39;http://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[7:])
-                else:
-                    step_result.success = False
-                    step_result.message = &#39;For a http:// git url, you need to also provide &#39; \
-                                        &#39;username/password pair&#39;
-                    return step_result
-            elif git_url.startswith(&#39;https://&#39;):
-                if username and password:
-                    self.__git_push(&#39;https://&#39; + username + &#39;:&#39; + password + &#39;@&#39; + git_url[8:])
-                else:
-                    step_result.success = False
-                    step_result.message = &#39;For a https:// git url, you need to also provide &#39; \
-                                        &#39;username/password pair&#39;
-                    return step_result
-            else:
-                self.__git_push(None)
-        except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = str(error)
-
+        # get the tag
+        tag = self.__get_tag_value()
         step_result.add_artifact(
             name=&#39;tag&#39;,
             value=tag
         )
 
+        # tag and push tags
+        try:
+            self.git_tag(tag)
+            self.git_push_tags()
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = f&#34;Error tagging and pushing tags: {error}&#34;
+
         return step_result
 
-    def __get_tag(self):
+    def __get_tag_value(self):
+        &#34;&#34;&#34;Get the tag value to tag the Git repository with.
+
+        Returns
+        -------
+        str
+            Value to use for the git tag.
+        &#34;&#34;&#34;
         tag = self.get_value(&#39;version&#39;)
         if tag is None:
             tag = &#39;latest&#39;
             print(&#39;No version found in metadata. Using latest&#39;)
-        return tag
-
-    def __git_url(self):
-        git_url = None
-        if self.get_value(&#39;url&#39;):
-            git_url = self.get_value(&#39;url&#39;)
-        else:
-            try:
-                out = StringIO()
-                sh.git.config(
-                    &#39;--get&#39;,
-                    &#39;remote.origin.url&#39;,
-                    _encoding=&#39;UTF-8&#39;,
-                    _decode_errors=&#39;ignore&#39;,
-                    _out=out,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-                git_url = out.getvalue().rstrip()
-
-                # remove ANYTHING@ from beginning of git_url since step will pass in its own
-                # username and password
-                #
-                # Regex:
-                #   ^[^@]+@ - match from beginning of line any character up until
-                #             an @ and then the @
-                #   (.*) - match any character and capture to capture group 1
-                #   \1 - capture group 1 which is the http or https if there was one
-                #   \2 - capture group 2 which is anything after the first @ if there was one
-                git_url = re.sub(r&#34;^(http://|https://)[^@]+@(.*)&#34;, r&#34;\1\2&#34;, git_url)
-
-            except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-                raise StepRunnerException(
-                    f&#34;Error invoking git config --get remote.origin.url: {error}&#34;
-                ) from error
-        return git_url
-
-    @staticmethod
-    def __git_tag(git_tag_value):
-        try:
-            # NOTE:
-            # this force is only needed locally in case of a re-run of the same pipeline
-            # without a fresh check out. You will notice there is no force on the push
-            # making this an acceptable work around to the issue since on the off chance
-            # actually overwriting a tag with a different comment, the push will fail
-            # because the tag will be attached to a different git hash.
-            sh.git.tag(  # pylint: disable=no-member
-                git_tag_value,
-                &#39;-f&#39;,
-                _out=sys.stdout,
-                _err=sys.stderr,
-                _tee=&#39;err&#39;
-            )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise StepRunnerException(
-                f&#34;Error pushing git tag ({git_tag_value}): {error}&#34;
-            ) from error
-
-    @staticmethod
-    def __git_push(url=None):
-        try:
-            if url:
-                sh.git.push(
-                    url,
-                    &#39;--tag&#39;,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-            else:
-                sh.git.push(
-                    &#39;--tag&#39;,
-                    _out=sys.stdout,
-                    _err=sys.stderr,
-                    _tee=&#39;err&#39;
-                )
-        except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
-            raise StepRunnerException(f&#34;Error invoking git push: {error}&#34;) from error</code></pre>
+        return tag</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
+<li><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin">GitMixin</a></li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -631,6 +397,18 @@ for http and https git repos, and that is a desired use case.</p></div>
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
+<li><code><b><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin">GitMixin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push">commit_changes_and_push</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user">configure_git_user</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes">git_commit_changes</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push">git_push</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags">git_push_tags</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo">git_repo</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_tag" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_tag">git_tag</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url">git_url</a></code></li>
+</ul>
+</li>
 </ul>
 </dd>
 </dl>
@@ -648,6 +426,11 @@ for http and https git repos, and that is a desired use case.</p></div>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="ploigos_step_runner.step_implementers.tag_source" href="index.html">ploigos_step_runner.step_implementers.tag_source</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="ploigos_step_runner.step_implementers.tag_source.git.DEFAULT_CONFIG" href="#ploigos_step_runner.step_implementers.tag_source.git.DEFAULT_CONFIG">DEFAULT_CONFIG</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

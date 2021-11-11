@@ -42,14 +42,6 @@ Could come from:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>repo-root</code></td>
-<td>Yes</td>
-<td><code>./</code></td>
-<td>Directory path to the Git repo to generate
-metadata from. Must not be in a detached head state
-so that <code>pre-release</code> value can be determined.</td>
-</tr>
-<tr>
 <td><code>release-branch-regexes</code></td>
 <td>No</td>
 <td><code>['^main$', '^master$']</code></td>
@@ -57,6 +49,78 @@ so that <code>pre-release</code> value can be determined.</td>
 then this will be considered a release else
 will be considered a pre-release.
 If no patterns given then will be considered a pre-release.</td>
+</tr>
+<tr>
+<td><code>git-commit-and-push-changes</code></td>
+<td>No</td>
+<td><code>False</code></td>
+<td>When, if ever, to commit and push any changes detected in the repository.
+One of [True, False, 'always', 'release', 'pre-release'].
+If True or 'always' then will always commit and push any changes.
+If False, will never commit and push any changes.
+If 'release' will only commit and push changes when on a release branch.
+If 'pre-release' will only commit and push changes on a pre-release branch.</td>
+</tr>
+<tr>
+<td><code>git-repo-root</code></td>
+<td>Yes</td>
+<td><code>./</code></td>
+<td>Directory path to the Git repository to perform git operations on.</td>
+</tr>
+<tr>
+<td><code>repo-root</code></td>
+<td>No</td>
+<td></td>
+<td>Alias for <code>git-repo-root</code>.</td>
+</tr>
+<tr>
+<td><code>git-url</code></td>
+<td>No</td>
+<td>Git repo root configured origin url</td>
+<td>URL to Git repository to perform Git operations on.
+If not given will use Git remote url set in given Git repository root.</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>No</td>
+<td></td>
+<td>Alias for <code>git-url</code>.</td>
+</tr>
+<tr>
+<td><code>git-username</code></td>
+<td>No</td>
+<td></td>
+<td>Git username to use when connecting with Git remote.
+Will override username in given git url.
+Will override username in Git url in Git repository root remote url.
+Will be ignored if Git repository url is using SSH.</td>
+</tr>
+<tr>
+<td><code>git-password</code></td>
+<td>No</td>
+<td></td>
+<td>Git password to use when connecting with Git remote.
+Will override password in given git url.
+Will override password in Git url in Git repository root remote url.
+Will be ignored if Git repository url is using SSH.</td>
+</tr>
+<tr>
+<td><code>git-user-name</code></td>
+<td>Maybe</td>
+<td><code>Ploigos Robot</code></td>
+<td>User name to use when creating Git commits.</td>
+</tr>
+<tr>
+<td><code>git-user-email</code></td>
+<td>Maybe</td>
+<td><code>ploigos-robot</code></td>
+<td>User email to use when creating Git commits.</td>
+</tr>
+<tr>
+<td><code>git-commit-message</code></td>
+<td>Maybe</td>
+<td><code>Automated commit of changes during release engineering generate-metadata step</code></td>
+<td>Git commit message to use when/if creating an automated git commit.</td>
 </tr>
 </tbody>
 </table>
@@ -100,15 +164,36 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key        | Required? | Default                  | Description
--------------------------|-----------|--------------------------|-----------
-`repo-root`              | Yes       | `./`                     | Directory path to the Git repo to generate \
-                                                                  metadata from. Must not be in a detached head state \
-                                                                  so that `pre-release` value can be determined.
-`release-branch-regexes` | No        | `[&#39;^main$&#39;, &#39;^master$&#39;]` | If current git branch matches any of the given regex patterns, \
-                                                                  then this will be considered a release else \
-                                                                  will be considered a pre-release. \
-                                                                  If no patterns given then will be considered a pre-release.
+Configuration Key             | Required? | Default                  | Description
+------------------------------|-----------|--------------------------|-----------
+`release-branch-regexes`      | No        | `[&#39;^main$&#39;, &#39;^master$&#39;]` | If current git branch matches any of the given regex patterns, \
+                                                                       then this will be considered a release else \
+                                                                       will be considered a pre-release. \
+                                                                       If no patterns given then will be considered a pre-release.
+`git-commit-and-push-changes` | No        | `False`                  | When, if ever, to commit and push any changes detected in the repository. \
+                                                                       One of [True, False, &#39;always&#39;, &#39;release&#39;, &#39;pre-release&#39;]. \
+                                                                       If True or &#39;always&#39; then will always commit and push any changes. \
+                                                                       If False, will never commit and push any changes. \
+                                                                       If &#39;release&#39; will only commit and push changes when on a release branch. \
+                                                                       If &#39;pre-release&#39; will only commit and push changes on a pre-release branch.
+`git-repo-root`               | Yes       | `./`                     | Directory path to the Git repository to perform git operations on.
+`repo-root`                   | No        |                          | Alias for `git-repo-root`.
+`git-url`                     | No        | Git repo root configured origin url \
+                                                                     | URL to Git repository to perform Git operations on. \
+                                                                       If not given will use Git remote url set in given Git repository root.
+`url`                         | No        |                          | Alias for `git-url`.
+`git-username`                | No        |                          | Git username to use when connecting with Git remote. \
+                                                                       Will override username in given git url. \
+                                                                       Will override username in Git url in Git repository root remote url. \
+                                                                       Will be ignored if Git repository url is using SSH.
+`git-password`                | No        |                          | Git password to use when connecting with Git remote. \
+                                                                       Will override password in given git url. \
+                                                                       Will override password in Git url in Git repository root remote url. \
+                                                                       Will be ignored if Git repository url is using SSH.
+`git-user-name`               | Maybe     | `Ploigos Robot`          | User name to use when creating Git commits.
+`git-user-email`              | Maybe     | `ploigos-robot`          | User email to use when creating Git commits.
+`git-commit-message`          | Maybe     | `Automated commit of changes during release engineering generate-metadata step` \
+                                                                     | Git commit message to use when/if creating an automated git commit.
 
 Result Artifacts
 ----------------
@@ -120,25 +205,29 @@ Result Artifact Key | Description
 `is-pre-release`    | `True` if this build should be considered a pre-release, \
                       `False` if should be considered a release.
 `sha`               | Current commit sha.
-
 &#34;&#34;&#34;# pylint: disable=line-too-long
 
 import re
 
-from git import InvalidGitRepositoryError, Repo
+from ploigos_step_runner import (StepImplementer, StepResult,
+                                 StepRunnerException)
+from ploigos_step_runner.step_implementers.shared import GitMixin
 
-from ploigos_step_runner import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
-    &#39;repo-root&#39;: &#39;./&#39;,
-    &#39;release-branch-regexes&#39;: [&#39;^main$&#39;, &#39;^master$&#39;]
+    &#39;git-repo-root&#39;: &#39;./&#39;,
+    &#39;release-branch-regexes&#39;: [&#39;^main$&#39;, &#39;^master$&#39;],
+    &#39;git-commit-and-push-changes&#39;: False
 }
 
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;repo-root&#39;
-]
+&#34;&#34;&#34;
+Note
+---
+Some required fields inherited from GitMixin (see `_required_config_or_result_keys`)
+&#34;&#34;&#34;
+REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = []
 
-class Git(StepImplementer):  # pylint: disable=too-few-public-methods
+class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
     StepImplementer for the generate-metadata step for Git.
     &#34;&#34;&#34;
@@ -157,7 +246,7 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         These are the lowest precedence configuration values.
 
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**GitMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -174,7 +263,30 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            GitMixin._required_config_or_result_keys()
+
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;pom-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # validate git-commit-and-push-changes is boolean or valid string option
+        git_commit_and_push_changes = self.get_value(&#39;git-commit-and-push-changes&#39;)
+        assert isinstance(git_commit_and_push_changes, bool) or \
+            (git_commit_and_push_changes in [&#39;always&#39;, &#39;release&#39;, &#39;pre-release&#39;, &#39;prerelease&#39;]), \
+            &#34;Given configuration option (git-commit-and-push-changes)&#34; \
+            &#34; must either be a boolean or one of [always, release, pre-release].&#34;
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -186,28 +298,29 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        repo_root = self.get_value(&#39;repo-root&#39;)
+        # get the git repo
+        repo = None
         try:
-            repo = Repo(repo_root)
-        except InvalidGitRepositoryError:
+            repo = self.git_repo
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is not a Git repository&#39;
+            step_result.message = str(error)
             return step_result
 
         if repo.bare:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is not a Git repository&#39;
+            step_result.message = &#39;Given git-repo-root is not a Git repository&#39;
             return step_result
 
         # Need to be able to determine the branch name to determine if is a pre-release build or not
         if repo.head.is_detached:
             step_result.success = False
-            step_result.message = f&#39;Expected a Git branch in given repo_root ({repo_root})&#39; \
+            step_result.message = &#39;Expected a Git branch in given git repo root&#39; \
                 &#39; but has a detached head&#39;
             return step_result
 
         # add branch artifact
-        git_branch = repo.head.reference.name
+        git_branch = repo.active_branch.name
         step_result.add_artifact(
             name=&#39;branch&#39;,
             value=git_branch
@@ -232,6 +345,15 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             value=is_pre_release
         )
 
+        # commit and push changes
+        if self.__should_commit_changes_and_push(is_pre_release):
+            try:
+                self.commit_changes_and_push()
+            except StepRunnerException as error:
+                step_result.success = False
+                step_result.message = f&#34;Error committing and pushing changes: {error}&#34;
+                return step_result
+
         # add commit sha artifact
         try:
             git_branch_last_commit_sha = str(repo.head.reference.commit)
@@ -241,16 +363,53 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             )
         except ValueError:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is a&#39; \
-                f&#39; git branch ({git_branch}) with no commit history&#39;
+            step_result.message = f&#39;Given Git repository root is a&#39; \
+                f&#39; git branch ({git_branch}) with no commit history.&#39;
             return step_result
 
-        return step_result</code></pre>
+        return step_result
+
+    def __should_commit_changes_and_push(self, is_pre_release):
+        &#34;&#34;&#34;Determine if should commit changes and push.
+
+        Parameters
+        ----------
+        is_pre_release : bool
+            True if is a pre-release, False if Release.
+
+        Returns
+        -------
+        bool
+            True if should commit changes and push, False if not.
+        &#34;&#34;&#34;
+        should_commit_changes_and_push = False
+        git_commit_and_push_changes = self.get_value(&#39;git-commit-and-push-changes&#39;)
+        if git_commit_and_push_changes:
+            if isinstance(git_commit_and_push_changes, bool) and git_commit_and_push_changes:
+                should_commit_changes_and_push = True
+            else:
+                git_commit_and_push_changes = git_commit_and_push_changes.lower()
+                if is_pre_release and (
+                    git_commit_and_push_changes in (&#39;always&#39;, &#39;pre-release&#39;, &#39;prerelease&#39;) \
+                ):
+                    should_commit_changes_and_push = True
+                elif not is_pre_release and git_commit_and_push_changes in (&#39;always&#39;, &#39;release&#39;):
+                    should_commit_changes_and_push = True
+
+        return should_commit_changes_and_push</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.generate_metadata.git.DEFAULT_CONFIG"><code class="name">var <span class="ident">DEFAULT_CONFIG</span></code></dt>
+<dd>
+<div class="desc"><h2 id="note">Note</h2>
+<p>Some required fields inherited from GitMixin (see <code>_required_config_or_result_keys</code>)</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -267,7 +426,7 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Git(StepImplementer):  # pylint: disable=too-few-public-methods
+<pre><code class="python">class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;
     StepImplementer for the generate-metadata step for Git.
     &#34;&#34;&#34;
@@ -286,7 +445,7 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         These are the lowest precedence configuration values.
 
         &#34;&#34;&#34;
-        return DEFAULT_CONFIG
+        return {**GitMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -303,7 +462,30 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             Array of configuration keys or previous step result artifacts
             that are required before running the step.
         &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
+        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS + \
+            GitMixin._required_config_or_result_keys()
+
+    def _validate_required_config_or_previous_step_result_artifact_keys(self):
+        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
+        are set and have valid values.
+
+        Validates that:
+        * required configuration is given
+        * given &#39;pom-file&#39; exists
+
+        Raises
+        ------
+        AssertionError
+            If step configuration or previous step result artifacts have invalid required values
+        &#34;&#34;&#34;
+        super()._validate_required_config_or_previous_step_result_artifact_keys()
+
+        # validate git-commit-and-push-changes is boolean or valid string option
+        git_commit_and_push_changes = self.get_value(&#39;git-commit-and-push-changes&#39;)
+        assert isinstance(git_commit_and_push_changes, bool) or \
+            (git_commit_and_push_changes in [&#39;always&#39;, &#39;release&#39;, &#39;pre-release&#39;, &#39;prerelease&#39;]), \
+            &#34;Given configuration option (git-commit-and-push-changes)&#34; \
+            &#34; must either be a boolean or one of [always, release, pre-release].&#34;
 
     def _run_step(self):
         &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
@@ -315,28 +497,29 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
         &#34;&#34;&#34;
         step_result = StepResult.from_step_implementer(self)
 
-        repo_root = self.get_value(&#39;repo-root&#39;)
+        # get the git repo
+        repo = None
         try:
-            repo = Repo(repo_root)
-        except InvalidGitRepositoryError:
+            repo = self.git_repo
+        except StepRunnerException as error:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is not a Git repository&#39;
+            step_result.message = str(error)
             return step_result
 
         if repo.bare:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is not a Git repository&#39;
+            step_result.message = &#39;Given git-repo-root is not a Git repository&#39;
             return step_result
 
         # Need to be able to determine the branch name to determine if is a pre-release build or not
         if repo.head.is_detached:
             step_result.success = False
-            step_result.message = f&#39;Expected a Git branch in given repo_root ({repo_root})&#39; \
+            step_result.message = &#39;Expected a Git branch in given git repo root&#39; \
                 &#39; but has a detached head&#39;
             return step_result
 
         # add branch artifact
-        git_branch = repo.head.reference.name
+        git_branch = repo.active_branch.name
         step_result.add_artifact(
             name=&#39;branch&#39;,
             value=git_branch
@@ -361,6 +544,15 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             value=is_pre_release
         )
 
+        # commit and push changes
+        if self.__should_commit_changes_and_push(is_pre_release):
+            try:
+                self.commit_changes_and_push()
+            except StepRunnerException as error:
+                step_result.success = False
+                step_result.message = f&#34;Error committing and pushing changes: {error}&#34;
+                return step_result
+
         # add commit sha artifact
         try:
             git_branch_last_commit_sha = str(repo.head.reference.commit)
@@ -370,16 +562,46 @@ class Git(StepImplementer):  # pylint: disable=too-few-public-methods
             )
         except ValueError:
             step_result.success = False
-            step_result.message = f&#39;Given repo-root ({repo_root}) is a&#39; \
-                f&#39; git branch ({git_branch}) with no commit history&#39;
+            step_result.message = f&#39;Given Git repository root is a&#39; \
+                f&#39; git branch ({git_branch}) with no commit history.&#39;
             return step_result
 
-        return step_result</code></pre>
+        return step_result
+
+    def __should_commit_changes_and_push(self, is_pre_release):
+        &#34;&#34;&#34;Determine if should commit changes and push.
+
+        Parameters
+        ----------
+        is_pre_release : bool
+            True if is a pre-release, False if Release.
+
+        Returns
+        -------
+        bool
+            True if should commit changes and push, False if not.
+        &#34;&#34;&#34;
+        should_commit_changes_and_push = False
+        git_commit_and_push_changes = self.get_value(&#39;git-commit-and-push-changes&#39;)
+        if git_commit_and_push_changes:
+            if isinstance(git_commit_and_push_changes, bool) and git_commit_and_push_changes:
+                should_commit_changes_and_push = True
+            else:
+                git_commit_and_push_changes = git_commit_and_push_changes.lower()
+                if is_pre_release and (
+                    git_commit_and_push_changes in (&#39;always&#39;, &#39;pre-release&#39;, &#39;prerelease&#39;) \
+                ):
+                    should_commit_changes_and_push = True
+                elif not is_pre_release and git_commit_and_push_changes in (&#39;always&#39;, &#39;release&#39;):
+                    should_commit_changes_and_push = True
+
+        return should_commit_changes_and_push</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementer.StepImplementer" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer">StepImplementer</a></li>
 <li>abc.ABC</li>
+<li><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin">GitMixin</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -413,7 +635,7 @@ def step_implementer_config_defaults():
     These are the lowest precedence configuration values.
 
     &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
+    return {**GitMixin.step_implementer_config_defaults(), **DEFAULT_CONFIG}</code></pre>
 </details>
 </dd>
 </dl>
@@ -443,6 +665,18 @@ def step_implementer_config_defaults():
 <li><code><a title="ploigos_step_runner.step_implementer.StepImplementer.write_working_file" href="../../step_implementer.html#ploigos_step_runner.step_implementer.StepImplementer.write_working_file">write_working_file</a></code></li>
 </ul>
 </li>
+<li><code><b><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin">GitMixin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push">commit_changes_and_push</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user">configure_git_user</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes">git_commit_changes</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push">git_push</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags">git_push_tags</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo">git_repo</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_tag" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_tag">git_tag</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url">git_url</a></code></li>
+</ul>
+</li>
 </ul>
 </dd>
 </dl>
@@ -460,6 +694,11 @@ def step_implementer_config_defaults():
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="ploigos_step_runner.step_implementers.generate_metadata" href="index.html">ploigos_step_runner.step_implementers.generate_metadata</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="ploigos_step_runner.step_implementers.generate_metadata.git.DEFAULT_CONFIG" href="#ploigos_step_runner.step_implementers.generate_metadata.git.DEFAULT_CONFIG">DEFAULT_CONFIG</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
