@@ -140,6 +140,16 @@ EX (pre-release):</code><app-version>-<branch>.<workflow-run-num>-<additional-pr
 EX (pre-release): <code>&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;</code> <br/>
 EX (release): <code>&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;</code></td>
 </tr>
+<tr>
+<td><code>container-image-tag-build-deliminator</code></td>
+<td>Yes</td>
+<td><code>_</code></td>
+<td>Unfortunately the container image tag spec does not allow for the <code>+</code> character which means can not follow
+strict semver syntax when including the <code>build</code> portion of the semver in the image tag.
+The value here is used instead of the <code>+</code> for the purposes of container image tags.
+NOTE: the default <code>_</code> is chosen because it is otherwise not a valid character in semver syntax so if doing parsing
+against the standard semver spec/regex it is simple enough to swap the <code>+</code> for a <code>_</code> and still get accurate results.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="result-artifacts">Result Artifacts</h2>
@@ -217,30 +227,35 @@ Could come from:
   * runtime configuration
   * previous step results
 
-Configuration Key                     | Required? | Default | Description
---------------------------------------|-----------|---------|-----------
-`app-version`                         | Yes       |         | Value to use for `version` portion of semantic version (https://semver.org/). \
-                                                              EX: `&lt;app-version&gt;`
-`is-pre-release`                      | Yes       | `False` | If `True` then will add any relevant `pre-release` identifiers to semantic version (https://semver.org/), \
-                                                              such as the branch name. \
-                                                              If `False` then assumed to be a release build and all `pre-release` identifiers will \
-                                                              be ignored from version as per the semantic version spec (https://semver.org/).
-`branch`                              | No        |         | If `is-pre-release` is `True`, value to use for a pre-release name in pre-release poriton of semantic version (https://semver.org/). \
-                                                              EX: `&lt;app-version&gt;-&lt;branch&gt;`
-`workflow-run-num`                    | No        |         | If `is-pre-release` is `True`, value to use for a numeric identifier of the branch `pre-release` identifier if provided. \
-                                                              Also always used in build identifier. \
-                                                              Since this can be included in the pre-release section, it should be incremental as per the sem version spec.
-                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;` &lt;br/&gt;\
-                                                              EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
-`sha`                                 | No        |         | Value to use for sha build identifier in build portion of semantic version. \
-                                                              EX: `&lt;app-version&gt;+&lt;sha&gt;`
-`sha-build-identifier-length`         | No        | 7       | Trim the given `sha` down to this length when including as build identifier in semantic version
-`additional-pre-release-identifiers`  | No        |         | If `is-pre-release` is `True`, additional `pre-release` identifiers to add to semantic version (https://semver.org/). \
-                                                              Ignored if `is-pre-release` is `False. \
-                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;-&lt;additional-pre-release-identifiers&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
-`additional-build-identifiers`        | No        |         | Additional `build` identifiers to add to semantic version (https://semver.org/). \
-                                                              EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;` &lt;br/&gt;\
-                                                              EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;`
+Configuration Key                       | Required? | Default | Description
+----------------------------------------|-----------|---------|-----------
+`app-version`                           | Yes       |         | Value to use for `version` portion of semantic version (https://semver.org/). \
+                                                                EX: `&lt;app-version&gt;`
+`is-pre-release`                        | Yes       | `False` | If `True` then will add any relevant `pre-release` identifiers to semantic version (https://semver.org/), \
+                                                                such as the branch name. \
+                                                                If `False` then assumed to be a release build and all `pre-release` identifiers will \
+                                                                be ignored from version as per the semantic version spec (https://semver.org/).
+`branch`                                | No        |         | If `is-pre-release` is `True`, value to use for a pre-release name in pre-release poriton of semantic version (https://semver.org/). \
+                                                                EX: `&lt;app-version&gt;-&lt;branch&gt;`
+`workflow-run-num`                      | No        |         | If `is-pre-release` is `True`, value to use for a numeric identifier of the branch `pre-release` identifier if provided. \
+                                                                Also always used in build identifier. \
+                                                                Since this can be included in the pre-release section, it should be incremental as per the sem version spec.
+                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;` &lt;br/&gt;\
+                                                                EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
+`sha`                                   | No        |         | Value to use for sha build identifier in build portion of semantic version. \
+                                                                EX: `&lt;app-version&gt;+&lt;sha&gt;`
+`sha-build-identifier-length`           | No        | 7       | Trim the given `sha` down to this length when including as build identifier in semantic version
+`additional-pre-release-identifiers`    | No        |         | If `is-pre-release` is `True`, additional `pre-release` identifiers to add to semantic version (https://semver.org/). \
+                                                                Ignored if `is-pre-release` is `False. \
+                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;-&lt;additional-pre-release-identifiers&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;`
+`additional-build-identifiers`          | No        |         | Additional `build` identifiers to add to semantic version (https://semver.org/). \
+                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;` &lt;br/&gt;\
+                                                                EX (release): `&lt;app-version&gt;+&lt;sha&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;`
+`container-image-tag-build-deliminator` | Yes       | `_`   | Unfortunately the container image tag spec does not allow for the `+` character which means can not follow \
+                                                              strict semver syntax when including the `build` portion of the semver in the image tag. \
+                                                              The value here is used instead of the `+` for the purposes of container image tags. \
+                                                              NOTE: the default `_` is chosen because it is otherwise not a valid character in semver syntax so if doing parsing \
+                                                              against the standard semver spec/regex it is simple enough to swap the `+` for a `_` and still get accurate results.
 
 Result Artifacts
 ----------------
@@ -262,12 +277,14 @@ from ploigos_step_runner import StepImplementer, StepResult
 
 DEFAULT_CONFIG = {
   &#39;is-pre-release&#39;: False,
-  &#39;sha-build-identifier-length&#39;: 7
+  &#39;sha-build-identifier-length&#39;: 7,
+  &#39;container-image-tag-build-deliminator&#39;: &#39;_&#39;
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     &#39;app-version&#39;,
-    &#39;is-pre-release&#39;
+    &#39;is-pre-release&#39;,
+    &#39;container-image-tag-build-deliminator&#39;
 ]
 
 class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
@@ -335,6 +352,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         build = self.__get_semantic_version_build()
         if build:
             version += f&#39;+{build}&#39;
+            image_tag += f&#34;{self.get_value(&#39;container-image-tag-build-deliminator&#39;)}{build}&#34;
 
         # add artifacts
         step_result.add_artifact(
@@ -541,6 +559,7 @@ semantic version from given input.</p></div>
         build = self.__get_semantic_version_build()
         if build:
             version += f&#39;+{build}&#39;
+            image_tag += f&#34;{self.get_value(&#39;container-image-tag-build-deliminator&#39;)}{build}&#34;
 
         # add artifacts
         step_result.add_artifact(
