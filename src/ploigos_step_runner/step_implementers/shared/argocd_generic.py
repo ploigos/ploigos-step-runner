@@ -610,6 +610,12 @@ users:
         StepRunnerException
             If error creating or updating ArgoCD app.
         """
+        # NOTE: this is really only needed due to https://github.com/argoproj/argo-cd/issues/7800
+        # which is actually fixed in newer ArgoCD versions, but the version (2.1.2) released with
+        # OpenShift 4.9 has the issue, so need this so that OCP 4.9 GitOps users can use PSR.
+        ArgoCDGeneric._argocd_repo_refresh(repo=repo)
+
+        # Create or update (--upsert) ArgoCD app
         try:
             if str(auto_sync).lower() == 'true':
                 sync_policy = 'automated'
@@ -850,7 +856,7 @@ users:
         """
         argocd_app_manifest_file = self.write_working_file('deploy_argocd_manifests.yml')
         try:
-            sh.argocd.app.manifests(  # pylint: disable=no-member
+            sh.argocd.app.manifests( # pylint: disable=no-member
                 f'--source={source}',
                 argocd_app_name,
                 _out=argocd_app_manifest_file,
@@ -862,3 +868,33 @@ users:
             ) from error
 
         return argocd_app_manifest_file
+
+    @staticmethod
+    def _argocd_repo_refresh(repo):
+        """Forces a refresh of an ArgoCD Repository.
+
+        NOTE: this is really only needed due to https://github.com/argoproj/argo-cd/issues/7800
+        which is actually fixed in newer ArgoCD versions, but the version (2.1.2) released with
+        OpenShift 4.9 has the issue, so need this so that OCP 4.9 GitOps users can use PSR.
+
+        Parameters
+        ----------
+        repo : str
+            Repo URL of an existing ArgoCD repo.
+
+        Raises
+        ------
+        StepRunnerException
+            If error refreshing ArgoCD Repository
+        """
+        try:
+            sh.argocd.repo.get( # pylint: disable=no-member
+               repo,
+               '--refresh', 'hard',
+               _out=sys.stdout,
+               _err=sys.stderr
+            )
+        except sh.ErrorReturnCode as error:
+            raise StepRunnerException(
+                f"Error refreshing ArgoCD Repository ({repo}): {error}"
+            ) from error

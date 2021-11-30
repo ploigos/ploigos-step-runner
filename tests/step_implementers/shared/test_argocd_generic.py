@@ -1948,13 +1948,17 @@ users:
                         expected_config_argocd_cluster_context_file_contents
                     )
 
-
+@patch.object(ArgoCDGeneric, '_argocd_repo_refresh')
+@patch('sh.argocd', create=True)
 class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStepImplementerSharedArgoCDBase):
-    @patch('sh.argocd', create=True)
-    def testargocd_app_create_or_update_success_sync_auto_no_extra_values_files(self, mock_argocd):
+    def testargocd_app_create_or_update_success_sync_auto_no_extra_values_files(
+        self,
+        mock_argocd,
+        mock_argocd_repo_refresh
+    ):
         argocd_app_name = 'test'
         project = 'myproject'
-        repo = 'https://git.test.xyz'
+        repo = 'https://git.test.xyz/mock.git'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
@@ -1989,12 +1993,16 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+        mock_argocd_repo_refresh.assert_called_once_with(repo=repo)
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_create_or_update_success_sync_none_no_extra_values_files(self, mock_argocd):
+    def testargocd_app_create_or_update_success_sync_none_no_extra_values_files(
+        self,
+        mock_argocd,
+        mock_argocd_repo_refresh
+    ):
         argocd_app_name = 'test'
         project = 'myproject'
-        repo = 'https://git.test.xyz'
+        repo = 'https://git.test.xyz/mock.git'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
@@ -2029,12 +2037,16 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+        mock_argocd_repo_refresh.assert_called_once_with(repo=repo)
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_create_or_update_success_sync_auto_1_values_files(self, mock_argocd):
+    def testargocd_app_create_or_update_success_sync_auto_1_values_files(
+        self,
+        mock_argocd,
+        mock_argocd_repo_refresh
+    ):
         argocd_app_name = 'test'
         project = 'myproject'
-        repo = 'https://git.test.xyz'
+        repo = 'https://git.test.xyz/mock.git'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
@@ -2069,12 +2081,16 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+        mock_argocd_repo_refresh.assert_called_once_with(repo=repo)
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_create_or_update_success_sync_auto_2_values_files(self, mock_argocd):
+    def testargocd_app_create_or_update_success_sync_auto_2_values_files(
+        self,
+        mock_argocd,
+        mock_argocd_repo_refresh
+    ):
         argocd_app_name = 'test'
         project = 'myproject'
-        repo = 'https://git.test.xyz'
+        repo = 'https://git.test.xyz/mock.git'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
@@ -2109,16 +2125,20 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+        mock_argocd_repo_refresh.assert_called_once_with(repo=repo)
 
-    @patch('sh.argocd', create=True)
-    def testargocd_app_create_or_update_fail_sync_auto_1_values_files(self, mock_argocd):
+    def testargocd_app_create_or_update_fail_sync_auto_1_values_files(
+        self,
+        mock_argocd,
+        mock_argocd_repo_refresh
+    ):
         mock_argocd.app.create.side_effect = create_sh_side_effect(
             exception=sh.ErrorReturnCode('argocd', b'mock out', b'mock create error')
         )
 
         argocd_app_name = 'test'
         project = 'myproject'
-        repo = 'https://git.test.xyz'
+        repo = 'https://git.test.xyz/mock.git'
         revision = 'feature/test'
         path = 'charts/awesome'
         dest_server = 'https://kubernetes.default.svc'
@@ -2166,6 +2186,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+        mock_argocd_repo_refresh.assert_called_once_with(repo=repo)
 
 @patch.object(ArgoCDGeneric, '_argocd_app_wait_for_health')
 @patch.object(ArgoCDGeneric, '_argocd_app_wait_for_operation')
@@ -2772,3 +2793,60 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_get_app_manifest(TestStepImpl
                     _out=ANY,
                     _err=ANY
                 )
+
+@patch('sh.argocd', create=True)
+class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_repo_refresh(
+    TestStepImplementerSharedArgoCDBase
+):
+    def test_success(self, mock_argocd):
+        # run test
+        ArgoCDGeneric._argocd_repo_refresh(
+            repo='https://mock.xyz/mock-app.git'
+        )
+
+        # validate
+        mock_argocd.repo.get.assert_called_once_with(
+            'https://mock.xyz/mock-app.git',
+            '--refresh', 'hard',
+            _out=ANY,
+            _err=ANY
+        )
+
+    def test_fail(self, mock_argocd):
+        # setup mocks
+        mock_argocd.repo.get.side_effect = create_sh_side_effects([
+            {
+                'mock_stdout': '',
+                'mock_stderr': 'unknown crazy scary mock error',
+                'exception': sh.ErrorReturnCode(
+                    'argocd',
+                    b'mock get out',
+                    b'mock get error'
+                )
+            }
+        ])
+
+        # run test
+        with self.assertRaisesRegex(
+            StepRunnerException,
+            re.compile(
+                r"Error refreshing ArgoCD Repository \(https://mock.xyz/mock-app.git\):"
+                r".*RAN: argocd"
+                r".*STDOUT:"
+                r".*mock get out"
+                r".*STDERR:"
+                r".*mock get error",
+                re.DOTALL
+            )
+        ):
+            ArgoCDGeneric._argocd_repo_refresh(
+                repo='https://mock.xyz/mock-app.git'
+            )
+
+        # validate
+        mock_argocd.repo.get.assert_called_once_with(
+            'https://mock.xyz/mock-app.git',
+            '--refresh', 'hard',
+            _out=ANY,
+            _err=ANY
+        )
