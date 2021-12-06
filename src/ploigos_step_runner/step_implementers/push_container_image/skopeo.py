@@ -231,7 +231,8 @@ class Skopeo(StepImplementer):
             try:
                 print("Get pushed container image digest")
                 container_image_digest = get_container_image_digest(
-                    container_image_address=container_image_push_address_by_tag
+                    container_image_address=container_image_push_address_by_tag,
+                    containers_config_auth_file=containers_config_auth_file
                 )
 
                 container_image_short_address_by_digest = \
