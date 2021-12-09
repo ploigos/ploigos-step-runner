@@ -425,7 +425,7 @@ class TestStepImplementerResultArtifactsArchive__create_archive(TestStepImplemen
             )
             step_result.add_artifact(
                 name='test-step-result-dir',
-                value=os.path.join(temp_dir.path, artifact_dir_name)
+                value=os.path.join(temp_dir.path, f'{artifact_dir_name}/')
             )
             workflow_result = WorkflowResult()
             workflow_result.add_step_result(step_result)

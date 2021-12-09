@@ -55,6 +55,7 @@ Result Artifact Key              | Description
 import json
 import os
 import pprint
+import re
 import shutil
 
 from ploigos_step_runner import StepImplementer, StepResult
@@ -217,9 +218,10 @@ class ResultArtifactsArchive(StepImplementer):
                         if os.path.isfile(artifact.value):
                             shutil.copy(artifact.value, results_archive_artifact_dir_path)
                         elif os.path.isdir(artifact.value):
+                            basename = self.__basename_of_dir(artifact.value)
                             dest_path = os.path.join(
                                 results_archive_artifact_dir_path,
-                                os.path.basename(artifact.value)
+                                basename
                             )
                             shutil.copytree(artifact.value, dest_path)
                     else:
@@ -276,3 +278,13 @@ class ResultArtifactsArchive(StepImplementer):
             results_artifacts_archive = None
 
         return results_artifacts_archive
+
+    @staticmethod
+    def __basename_of_dir(absolute_path):
+        """
+        Returns the name of the directory without any parent directories or slashes.
+        __basename_of_dir('/foo/bar/') returns 'bar'.
+        This is useful because os.path.basename('/foo/bar/') returns ''.
+        """
+        no_trailing_slash = re.sub(f'{os.path.sep}$', '', absolute_path)
+        return os.path.basename(no_trailing_slash)
