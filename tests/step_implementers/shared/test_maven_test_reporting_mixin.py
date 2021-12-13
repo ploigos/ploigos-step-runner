@@ -213,7 +213,7 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 test_report_dirs=[test_report_dir]
             )
 
-    def test_found_dir_found_no_attributes(self, mock_collect_report_results):
+    def test_found_dir_found_some_attributes(self, mock_collect_report_results):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -249,18 +249,17 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
             )
             expected_step_result.add_evidence(name='time', value=1.42)
             expected_step_result.add_evidence(name='tests', value=42)
-            test_report_evidence_element = 'testsuite'
-            not_found_attribs = ["errors", "skipped", "failures"]
+            not_found_attribs = ["failures"]
             expected_step_result.message += "\nWARNING: could not find expected evidence" \
-                f" attributes ({not_found_attribs}) on xml element" \
-                f" ({test_report_evidence_element}) in test report" \
+                f" attributes ({not_found_attribs}) on a recognized xml root element" \
+                f" (['testsuites', 'testsuite']) in test report" \
                 f" directory (['{test_report_dir}'])."
             self.assertEqual(actual_step_result, expected_step_result)
             mock_collect_report_results.assert_called_once_with(
                 test_report_dirs=[test_report_dir]
             )
 
-    def test_found_dir_found_some_attributes(self, mock_collect_report_results):
+    def test_found_dir_found_no_attributes(self, mock_collect_report_results):
         with TempDirectory() as test_dir:
             # setup test
             actual_step_result = StepResult(
@@ -291,11 +290,10 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 sub_step_name='mock-maven-test-sub-step',
                 sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
             )
-            test_report_evidence_element = 'testsuite'
-            not_found_attribs = ["time", "tests", "errors", "skipped", "failures"]
+            not_found_attribs = ["time", "tests", "failures"]
             expected_step_result.message += "\nWARNING: could not find expected evidence" \
-                f" attributes ({not_found_attribs}) on xml element" \
-                f" ({test_report_evidence_element}) in test report" \
+                f" attributes ({not_found_attribs}) on a recognized xml root element" \
+                f" (['testsuites', 'testsuite']) in test report" \
                 f" directory (['{test_report_dir}'])."
             self.assertEqual(actual_step_result, expected_step_result)
             mock_collect_report_results.assert_called_once_with(
@@ -334,8 +332,8 @@ class TestMavenTestReportingMixin__gather_evidence_from_test_report_directory_te
                 sub_step_implementer_name='MockMavenTestReportingMixinStepImplementer'
             )
             expected_step_result.message += "\nWARNING: could not find expected evidence" \
-                " attributes (['time', 'tests', 'errors', 'skipped', 'failures'])" \
-                f" on xml element (testsuite) in test report directory (['{test_report_dir}'])."
+                " attributes (['time', 'tests', 'failures'])" \
+                f" on a recognized xml root element (['testsuites', 'testsuite']) in test report directory (['{test_report_dir}'])."
             self.assertEqual(actual_step_result, expected_step_result)
             mock_collect_report_results.assert_called_once_with(
                 test_report_dirs=[test_report_dir]

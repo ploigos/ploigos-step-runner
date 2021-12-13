@@ -108,6 +108,20 @@ class TestXMLUtils_get_xml_element_if_present(BaseTestCase):
 
             self.assertEqual(None, actual_element)
 
+    def test_returns_first_of_two_elements(self):
+        """Test getting an xml element."""
+        with TempDirectory() as temp_dir:
+            file = b'''<baseelement>
+                            <child1>value1</child1>
+                            <child2>value2</child2>
+                        </baseelement>'''
+            temp_dir.write('file.xml', file)
+            file_path = path.join(temp_dir.path, 'file.xml')
+
+            actual_value = get_xml_element_if_present(file_path, 'child1').text
+
+            self.assertEqual('value1', actual_value)
+
 class TestXMLUtils_get_xml_element_by_path(BaseTestCase):
     def test_none_existent_file(self):
         """Test get xml element by xpath but file does not exist."""

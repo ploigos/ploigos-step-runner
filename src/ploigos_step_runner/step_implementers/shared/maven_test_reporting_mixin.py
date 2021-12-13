@@ -37,7 +37,8 @@ class MavenTestReportingMixin:
     FAILSAFE_PLUGIN_REPORTS_DIR_CONFIG_NAME = 'reportsDirectory'
     SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/surefire-reports'
     FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/failsafe-reports'
-    TESTSUITE_EVIDENCE_ATTRIBUTES = ["time", "tests", "errors", "skipped", "failures"]
+    TESTSUITE_EVIDENCE_ATTRIBUTES = ["time", "tests", "failures", "errors", "skipped"]
+    TESTSUITE_EVIDENCE_ATTRIBUTES_REQUIRED = ["time", "tests", "failures"]
     TESTSUITE_EVIDENCE_ELEMENTS = ["testsuites", "testsuite"]
 
     def _attempt_get_test_report_directory(
@@ -144,28 +145,26 @@ class MavenTestReportingMixin:
             test_report_dirs = [test_report_dirs]
 
          # gather evidence
-        test_report_evidence_attributes = MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES
-        test_report_evidence_element = 'testsuite'
         report_results, collection_warnings = MavenTestReportingMixin._collect_report_results(
             test_report_dirs=test_report_dirs
         )
 
         # Add the test results to the evidence
-        not_found_attribs = []
-        for attribute in test_report_evidence_attributes:
+        missing_attributes = []
+        for attribute in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES:
             if attribute in report_results:
                 step_result.add_evidence(
                     name=attribute,
                     value=report_results[attribute]
                 )
-            else:
-                not_found_attribs.append(attribute)
+            elif attribute in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES_REQUIRED:
+                missing_attributes.append(attribute)
 
-        # Add a warning to the step_result for any attribute that was not found
-        if not_found_attribs:
+        # Add a warning to the step_result for required attributes that were not found
+        if missing_attributes:
             step_result.message += "\nWARNING: could not find expected evidence" \
-                f" attributes ({not_found_attribs}) on xml element" \
-                f" ({test_report_evidence_element}) in test report" \
+                f" attributes ({missing_attributes}) on a recognized xml root element" \
+                f" ({MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENTS}) in test report" \
                 f" directory ({test_report_dirs})."
 
         # Add any warnings encountered during collecting the test results to the step_result
