@@ -21,6 +21,36 @@ def get_xml_element(xml_file, element_name):
         The Element matching the given element_name.
     """
 
+    xml_element = get_xml_element_if_present(xml_file, element_name)
+
+    # verify information from xml file
+    if xml_element is None:
+        raise ValueError('Given xml file (' + \
+             xml_file + \
+             ') does not have ./' + \
+             element_name + \
+             ' element' \
+        )
+
+    return xml_element
+
+
+def get_xml_element_if_present(xml_file, element_name):
+    """ Gets a given element from a given xml file, if the xml file has that element.
+        Otherwise returns None.
+
+    Raises
+    ------
+    ValueError
+        If the given xml_file does not exist.
+
+    Returns
+    -------
+    xml.etree.ElementTree.Element
+        The Element matching the given element_name.
+        Or None if the file does not contain an Element with element_name.
+    """
+
     # verify runtime config
     if not os.path.exists(xml_file):
         raise ValueError('Given xml file does not exist: ' + xml_file)
@@ -38,15 +68,6 @@ def get_xml_element(xml_file, element_name):
         xml_element = xml_root
     else:
         xml_element = xml_root.find('./' + xml_namespace + element_name)
-
-    # verify information from xml file
-    if xml_element is None:
-        raise ValueError('Given xml file (' + \
-             xml_file + \
-             ') does not have ./' + \
-             element_name + \
-             ' element' \
-        )
 
     return xml_element
 

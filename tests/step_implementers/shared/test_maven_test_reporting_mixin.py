@@ -563,3 +563,35 @@ class TestMavenTestReportingMixin__collect_report_results(unittest.TestCase):
                     f" Value was 'mock-bad'. Ignoring."
                 ]
             )
+
+    def test_multiple_test_suite_elements(self):
+        with TempDirectory() as test_dir:
+            # setup test
+            # Example taken from cypress uat test output with mocha-based junit reporter
+            # Expected behavior is to parse the top line and ignore the rest
+            input_xml = """
+            <testsuites name="Mocha Tests" time="1.1760" tests="1" failures="0">
+              <testsuite name="" timestamp="2021-12-13T15:07:56" tests="0" file="cypress/integration/greeting_spec.js" time="0.0000" failures="0">
+              </testsuite>
+              <testsuite name="Root Suite.Home Page" timestamp="2021-12-13T15:07:56" tests="1" time="1.1760" failures="0">
+                <testcase name="Says Hello" time="1.1760" classname="Home Page">
+                </testcase>
+              </testsuite>
+            </testsuites>
+            """
+            test_dir.write(
+                'test_result1.xml',
+                input_xml.encode()
+            )
+
+            # run test
+            actual_results, actual_warnings = MavenTestReportingMixin._collect_report_results(
+                test_report_dirs=[os.path.join(test_dir.path, 'test_result1.xml')]
+            )
+
+            # verify results
+            self.assertEqual(
+                actual_results,
+                {'time': 1.176, 'tests': 1, 'failures': 0}
+            )
+            self.assertEqual(actual_warnings, [])

@@ -81,6 +81,33 @@ class TestXMLUtils_other(BaseTestCase):
 
                 get_xml_element(pom_file_path, 'does-not-exist')
 
+class TestXMLUtils_get_xml_element_if_present(BaseTestCase):
+    def test_gets_element(self):
+        """Test getting an xml element."""
+        with TempDirectory() as temp_dir:
+            file = b'''<baseelement>
+                            <child>my-value</child>
+                        </baseelement>'''
+            temp_dir.write('file.xml', file)
+            file_path = path.join(temp_dir.path, 'file.xml')
+
+            actual_value = get_xml_element_if_present(file_path, 'child').text
+
+            self.assertEqual('my-value', actual_value)
+
+    def test_returns_none_for_nonexistent_element(self):
+        """Test getting an xml element."""
+        with TempDirectory() as temp_dir:
+            file = b'''<baseelement>
+                            <child>my-value</child>
+                        </baseelement>'''
+            temp_dir.write('file.xml', file)
+            file_path = path.join(temp_dir.path, 'file.xml')
+
+            actual_element = get_xml_element_if_present(file_path, 'not-present')
+
+            self.assertEqual(None, actual_element)
+
 class TestXMLUtils_get_xml_element_by_path(BaseTestCase):
     def test_none_existent_file(self):
         """Test get xml element by xpath but file does not exist."""
