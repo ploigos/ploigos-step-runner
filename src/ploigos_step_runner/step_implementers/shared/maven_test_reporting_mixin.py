@@ -23,7 +23,7 @@ import glob
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.utils.maven import \
     get_plugin_configuration_absolute_path_values
-from ploigos_step_runner.utils.xml import get_xml_element
+from ploigos_step_runner.utils.xml import get_xml_element_if_present
 
 
 class MavenTestReportingMixin:
@@ -38,7 +38,7 @@ class MavenTestReportingMixin:
     SUREFIRE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/surefire-reports'
     FAILSAFE_PLUGIN_DEFAULT_REPORTS_DIR = 'target/failsafe-reports'
     TESTSUITE_EVIDENCE_ATTRIBUTES = ["time", "tests", "errors", "skipped", "failures"]
-    TESTSUITE_EVIDENCE_ELEMENT = "testsuite"
+    TESTSUITE_EVIDENCE_ELEMENTS = ["testsuites", "testsuite"]
 
     def _attempt_get_test_report_directory(
         self,
@@ -189,35 +189,44 @@ class MavenTestReportingMixin:
 
         # Iterate over each file that contains test results
         for file in xml_files:
-            try:
-                # Iterate over the XML attributes that are evidence
-                element = get_xml_element(file, MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENT)
-                for attrib in element.attrib:
-                    if attrib in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES: # Is this attribute evidence?
+            element = MavenTestReportingMixin._read_evidence_element(file)
 
-                        # Parse each attribute as a number
-                        attrib_value = 0
-                        try:
-                            attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
-                        except ValueError:
-                            warnings += [
-                                "WARNING: While parsing test results, expected the value of"
-                                f" attribute ({attrib}) in file ({file}) to be a number."
-                                f" Value was '{element.attrib[attrib]}'. Ignoring."
-                            ]
-
-                        # Add up the totals across all files
-                        if attrib in report_results:
-                            report_results[attrib] += attrib_value
-                        else:
-                            report_results[attrib] = attrib_value
-
-            # If we cannot parse a file for some reason, warn but continue processing.
-            except ValueError:
+            # If this file does not have an element that contains evidence, warn but continue processing other files.
+            if element is None: # Elements that exist but have no child elements are falsy!
                 warnings += [f"WARNING: could not parse test results in file ({file}). Ignoring."]
                 continue
 
+            # Iterate over the XML attributes that are evidence
+            for attrib in element.attrib:
+                if attrib in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ATTRIBUTES: # Is this attribute evidence?
+
+                    # Parse each attribute as a number
+                    attrib_value = 0
+                    try:
+                        attrib_value = MavenTestReportingMixin._to_number(element.attrib[attrib])
+                    except ValueError:
+                        warnings += [
+                            "WARNING: While parsing test results, expected the value of"
+                            f" attribute ({attrib}) in file ({file}) to be a number."
+                            f" Value was '{element.attrib[attrib]}'. Ignoring."
+                        ]
+
+                    # Add up the totals across all files
+                    if attrib in report_results:
+                        report_results[attrib] += attrib_value
+                    else:
+                        report_results[attrib] = attrib_value
+
         return report_results, warnings
+
+    @staticmethod
+    def _read_evidence_element(file):
+        # Check if the base xml element of the file has one of the element names that is allowed
+        for candidate in MavenTestReportingMixin.TESTSUITE_EVIDENCE_ELEMENTS:
+            element = get_xml_element_if_present(file, candidate)
+            if element is not None: # Elements that exist but have no child elements are falsy!
+                return element
+        return None
 
     @staticmethod
     def _to_number(string):
