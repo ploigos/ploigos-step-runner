@@ -143,6 +143,35 @@ class TestStepImplementerSharedOpenSCAPGeneric__validate_required_config_or_prev
 
             mock_super_validate.assert_called_once_with()
 
+    def test_invalid_severity(self, mock_super_validate):
+        oscap_severity = 'bad'
+        step_config = {
+            'oscap-input-definitions-uri': 'https://www.redhat.com/security/data/oval/v2/RHEL8/rhel-8.oval.xml.bz2',
+            'image-tar-file': 'does-not-matter',
+            'oscap-severity': oscap_severity
+        }
+
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                step_name='test',
+                implementer='OpenSCAP',
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+            with self.assertRaisesRegex(
+                AssertionError,
+                re.compile(
+                    rf'Open SCAP severity \({oscap_severity}\)' \
+                    r' must be of know severity \(low\|moderate\|important\|critical\).'
+                )
+            ):
+                step_implementer._validate_required_config_or_previous_step_result_artifact_keys()
+
+            mock_super_validate.assert_called_once_with()
+
 class TestStepImplementerSharedOpenSCAPGeneric___get_oscap_document_type(
     BaseTestStepImplementerSharedOpenSCAPGeneric
 ):
@@ -334,7 +363,9 @@ class TestStepImplementerSharedOpenSCAPGeneric___run_oscap_scan(
             oscap_tailoring_file=None,
             oscap_eval_success_expected=True,
             exit_code=0,
-            oscap_eval_fails_expected=None
+            oscap_eval_fails_expected=None,
+            oscap_failure_met_threshold_expected=False,
+            oscap_severity=None
     ):
         with TempDirectory() as temp_dir:
             buildah_unshare_command = sh.buildah.bake('unshare')
@@ -370,8 +401,11 @@ class TestStepImplementerSharedOpenSCAPGeneric___run_oscap_scan(
             )
 
             stdout_buff = StringIO()
+
+            oscap_severity_index = OpenSCAPGeneric._OpenSCAPGeneric__parse_sev_to_int(oscap_severity=oscap_severity)
+
             with redirect_stdout(stdout_buff):
-                oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric._OpenSCAPGeneric__run_oscap_scan(
+                oscap_eval_success, oscap_eval_fails, oscap_failure_met_threshold = OpenSCAPGeneric._OpenSCAPGeneric__run_oscap_scan(
                     buildah_unshare_command=buildah_unshare_command,
                     oscap_eval_type=oscap_eval_type,
                     oscap_input_file=oscap_input_file,
@@ -381,9 +415,10 @@ class TestStepImplementerSharedOpenSCAPGeneric___run_oscap_scan(
                     container_mount_path=container_mount_path,
                     oscap_profile=oscap_profile,
                     oscap_tailoring_file=oscap_tailoring_file,
-                    oscap_fetch_remote_resources=oscap_fetch_remote_resources
+                    oscap_fetch_remote_resources=oscap_fetch_remote_resources,
+                    oscap_severity_index=oscap_severity_index
                 )
-
+            print(f"{stdout_buff.getvalue()}")
             if oscap_profile:
                 oscap_profile_flag = f"--profile={oscap_profile}"
             else:
@@ -419,6 +454,8 @@ class TestStepImplementerSharedOpenSCAPGeneric___run_oscap_scan(
 
             if oscap_eval_fails_expected:
                 self.assertEqual(oscap_eval_fails, oscap_eval_fails_expected)
+
+            self.assertEqual(oscap_failure_met_threshold, oscap_failure_met_threshold_expected)
 
             stdout = stdout_buff.getvalue()
             self.assertEqual(stdout, oscap_stdout_expected)
@@ -514,6 +551,156 @@ Result	pass
         )
 
     @patch('sh.buildah', create=True)
+    def test_xccdf_do_not_fetch_remote_with_profile_with_fail_above_threshold(self, buildah_mock):
+        self.__run_test_xccdf_do_not_fetch_remote_with_profile_all_pass(
+            buildah_mock=buildah_mock,
+            oscap_eval_type='xccdf',
+            oscap_profile='this.is.real.i.sware',
+            oscap_fetch_remote_resources=False,
+            oscap_eval_success_expected=False,
+            exit_code=2,
+            oscap_stdout="""
+Title\r	Enable Kernel Page-Table Isolation (KPTI)
+Rule\r	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident\r	CCE-82194-2
+Result\r	notapplicable
+
+Title\r	Install dnf-automatic Package (Moderate)
+Rule\r	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident\r	CCE-82985-3
+Result\r	fail
+
+Title\r	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule\r	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident\r	CCE-80792-5
+Result\r	pass""",
+            oscap_stdout_expected="""
+Title	Enable Kernel Page-Table Isolation (KPTI)
+Rule	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident	CCE-82194-2
+Result	notapplicable
+
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+
+Title	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident	CCE-80792-5
+Result	pass
+""",
+            oscap_eval_fails_expected="""
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+""",
+            oscap_failure_met_threshold_expected=True,
+            oscap_severity='Low'
+        )
+
+    @patch('sh.buildah', create=True)
+    def test_xccdf_do_not_fetch_remote_with_profile_with_fail_at_threshold(self, buildah_mock):
+        self.__run_test_xccdf_do_not_fetch_remote_with_profile_all_pass(
+            buildah_mock=buildah_mock,
+            oscap_eval_type='xccdf',
+            oscap_profile='this.is.real.i.sware',
+            oscap_fetch_remote_resources=False,
+            oscap_eval_success_expected=False,
+            exit_code=2,
+            oscap_stdout="""
+Title\r	Enable Kernel Page-Table Isolation (KPTI)
+Rule\r	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident\r	CCE-82194-2
+Result\r	notapplicable
+
+Title\r	Install dnf-automatic Package (Moderate)
+Rule\r	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident\r	CCE-82985-3
+Result\r	fail
+
+Title\r	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule\r	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident\r	CCE-80792-5
+Result\r	pass""",
+            oscap_stdout_expected="""
+Title	Enable Kernel Page-Table Isolation (KPTI)
+Rule	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident	CCE-82194-2
+Result	notapplicable
+
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+
+Title	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident	CCE-80792-5
+Result	pass
+""",
+            oscap_eval_fails_expected="""
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+""",
+            oscap_failure_met_threshold_expected=True,
+            oscap_severity='Moderate'
+        )
+
+    @patch('sh.buildah', create=True)
+    def test_xccdf_do_not_fetch_remote_with_profile_with_fail_below_threshold(self, buildah_mock):
+        self.__run_test_xccdf_do_not_fetch_remote_with_profile_all_pass(
+            buildah_mock=buildah_mock,
+            oscap_eval_type='xccdf',
+            oscap_profile='this.is.real.i.sware',
+            oscap_fetch_remote_resources=False,
+            oscap_eval_success_expected=False,
+            exit_code=2,
+            oscap_stdout="""
+Title\r	Enable Kernel Page-Table Isolation (KPTI)
+Rule\r	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident\r	CCE-82194-2
+Result\r	notapplicable
+
+Title\r	Install dnf-automatic Package (Moderate)
+Rule\r	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident\r	CCE-82985-3
+Result\r	fail
+
+Title\r	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule\r	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident\r	CCE-80792-5
+Result\r	pass""",
+            oscap_stdout_expected="""
+Title	Enable Kernel Page-Table Isolation (KPTI)
+Rule	xccdf_org.ssgproject.content_rule_grub2_pti_argument
+Ident	CCE-82194-2
+Result	notapplicable
+
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+
+Title	Ensure gpgcheck Enabled for All yum Package Repositories
+Rule	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
+Ident	CCE-80792-5
+Result	pass
+""",
+            oscap_eval_fails_expected="""
+Title	Install dnf-automatic Package (Moderate)
+Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
+Ident	CCE-82985-3
+Result	fail
+""",
+            oscap_failure_met_threshold_expected=False,
+            oscap_severity='Critical'
+        )
+
+    @patch('sh.buildah', create=True)
     def test_xccdf_do_yes_fetch_remote_with_profile_with_fail(self, buildah_mock):
         self.__run_test_xccdf_do_not_fetch_remote_with_profile_all_pass(
             buildah_mock=buildah_mock,
@@ -558,8 +745,10 @@ Title	Install dnf-automatic Package
 Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
 Ident	CCE-82985-3
 Result	fail
-"""
+""",
+            oscap_failure_met_threshold_expected=True
         )
+
 
     @patch('sh.buildah', create=True)
     def test_str_oscap_fetch_remote_resources_flag(self, buildah_mock):
@@ -630,7 +819,8 @@ Definition oval:com.redhat.rhsa:def:20203662: true
 """,
             oscap_eval_fails_expected="""Definition oval:com.redhat.rhsa:def:20203669: true
 Definition oval:com.redhat.rhsa:def:20203662: true
-"""
+""",
+            oscap_failure_met_threshold_expected=True
         )
 
     @patch('sh.buildah', create=True)
@@ -695,7 +885,8 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     Rule	xccdf_org.ssgproject.content_rule_ensure_gpgcheck_never_disabled
     Ident	CCE-80792-5
     Result	pass
-    """
+    """,
+                oscap_failure_met_threshold_expected=True
             )
 
     @patch('sh.buildah', create=True)
@@ -731,7 +922,8 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     Definition oval:com.redhat.rhsa:def:20203669: true
     Definition oval:com.redhat.rhsa:def:20203665: false
     Definition oval:com.redhat.rhsa:def:20203662: true
-    """
+    """,
+                oscap_failure_met_threshold_expected=True
             )
 
     @patch('sh.buildah', create=True)
@@ -767,7 +959,9 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     Definition oval:com.redhat.rhsa:def:20203669: true
     Definition oval:com.redhat.rhsa:def:20203665: false
     Definition oval:com.redhat.rhsa:def:20203662: true
-    """
+    """,
+                oscap_failure_met_threshold_expected=True
+
             )
 
     @patch('sh.buildah', create=True)
@@ -803,7 +997,8 @@ Definition oval:com.redhat.rhsa:def:20203662: true
     Definition oval:com.redhat.rhsa:def:20203669: true
     Definition oval:com.redhat.rhsa:def:20203665: false
     Definition oval:com.redhat.rhsa:def:20203662: true
-    """
+    """,
+                oscap_failure_met_threshold_expected=True
             )
 
     @patch('sh.buildah', create=True)
@@ -867,6 +1062,7 @@ class TestStepImplementerSharedOpenSCAPGeneric__run_step(
         }
         oscap_eval_success = True
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
 
         with TempDirectory() as temp_dir:
             # setup test
@@ -884,7 +1080,8 @@ class TestStepImplementerSharedOpenSCAPGeneric__run_step(
             mount_container_mock.return_value = mount_path
             run_oscap_scan_mock.return_value = [
                 oscap_eval_success,
-                oscap_eval_fails
+                oscap_eval_fails,
+                oscap_failure_met_threshold
             ]
 
             # run test
@@ -966,6 +1163,7 @@ Rule	xccdf_org.ssgproject.content_rule_package_dnf-automatic_installed
 Ident	CCE-82985-3
 Result	fail
 """
+        oscap_failure_met_threshold = True
 
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -982,7 +1180,8 @@ Result	fail
             mount_container_mock.return_value = mount_path
             run_oscap_scan_mock.return_value = [
                 oscap_eval_success,
-                oscap_eval_fails
+                oscap_eval_fails,
+                oscap_failure_met_threshold
             ]
 
             stdout_buff = StringIO()
@@ -1063,6 +1262,7 @@ Result	fail
         }
         oscap_eval_success = True
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
 
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -1079,7 +1279,8 @@ Result	fail
             mount_container_mock.return_value = mount_path
             run_oscap_scan_mock.return_value = [
                 oscap_eval_success,
-                oscap_eval_fails
+                oscap_eval_fails,
+                oscap_failure_met_threshold
             ]
 
             stdout_buff = StringIO()
@@ -1159,6 +1360,7 @@ Result	fail
         }
         oscap_eval_success = True
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
 
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -1175,7 +1377,8 @@ Result	fail
             mount_container_mock.return_value = mount_path
             run_oscap_scan_mock.return_value = [
                 oscap_eval_success,
-                oscap_eval_fails
+                oscap_eval_fails,
+                oscap_failure_met_threshold
             ]
 
             mock_error_msg = 'mock error downloading open scap file'
@@ -1244,6 +1447,7 @@ Result	fail
         }
         oscap_eval_success = True
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
 
         with TempDirectory() as temp_dir:
             # setup test
@@ -1261,7 +1465,8 @@ Result	fail
             mount_container_mock.return_value = mount_path
             run_oscap_scan_mock.return_value = [
                 oscap_eval_success,
-                oscap_eval_fails
+                oscap_eval_fails,
+                oscap_failure_met_threshold
             ]
 
             # run test with mock error
