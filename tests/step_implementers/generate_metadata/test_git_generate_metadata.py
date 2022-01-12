@@ -100,7 +100,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=False
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -153,7 +153,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -207,7 +207,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -260,7 +260,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=False
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -306,7 +306,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=False
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -350,7 +350,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=False
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -393,7 +393,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -439,7 +439,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -483,7 +483,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 
@@ -527,7 +527,7 @@ class TestStepImplementerGitGenerateMetadata_run_step(TestStepImplementerGitGene
                 value=True
             )
             expected_step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value='a1b2c3d4e5f6g7h8i9'
             )
 

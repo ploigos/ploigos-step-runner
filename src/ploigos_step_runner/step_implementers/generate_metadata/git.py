@@ -49,7 +49,7 @@ Result Artifact Key | Description
 `branch`            | Current branch name.
 `is-pre-release`    | `True` if this build should be considered a pre-release, \
                       `False` if should be considered a release.
-`sha`               | Current commit sha.
+`commit-hash`       | Current commit hash.
 """# pylint: disable=line-too-long
 
 import re
@@ -199,11 +199,11 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
                 step_result.message = f"Error committing and pushing changes: {error}"
                 return step_result
 
-        # add commit sha artifact
+        # add commit hash artifact
         try:
             git_branch_last_commit_sha = str(repo.head.reference.commit)
             step_result.add_artifact(
-                name='sha',
+                name='commit-hash',
                 value=git_branch_last_commit_sha
             )
         except ValueError:
