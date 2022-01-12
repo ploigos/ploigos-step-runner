@@ -4,7 +4,8 @@ import sh
 from io import StringIO
 from unittest.mock import patch
 
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResultArtifact
 from ploigos_step_runner.step_implementers.static_code_analysis import \
     ToxLint

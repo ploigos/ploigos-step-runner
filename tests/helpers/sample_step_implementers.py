@@ -1,4 +1,5 @@
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.config.config_value import ConfigValue
 
 

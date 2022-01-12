@@ -49,7 +49,8 @@ Result Artifact Key                   | Description
 `container-image-build-short-address` | Container image short address (no registry) of the built container image.
 """# pylint: disable=line-too-long
 
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 from ploigos_step_runner.utils.containers import (

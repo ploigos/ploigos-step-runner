@@ -5,13 +5,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 import sh
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.create_container_image import \
     Buildah
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-
 
 class BaseTestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTestCase):
     def create_step_implementer(
@@ -31,7 +30,7 @@ class BaseTestStepImplementerCreateContainerImageBuildah(BaseStepImplementerTest
             parent_work_dir_path=parent_work_dir_path
         )
 
-@patch("ploigos_step_runner.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
+@patch("ploigos_step_runner.step_implementer.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
 class TestStepImplementerCreateContainerImageBuildah__validate_required_config_or_previous_step_result_artifact_keys(
     BaseTestStepImplementerCreateContainerImageBuildah
 ):

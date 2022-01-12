@@ -16,7 +16,8 @@ Configuration Key            | Required? | Default          | Description
 
 
 import os
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.npm import run_npm
 

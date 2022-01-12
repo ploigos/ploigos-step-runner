@@ -13,7 +13,7 @@ from git import Repo
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.generate_metadata import Commitizen
 
 
@@ -54,9 +54,9 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
 
             temp_dir.write('.cz.json', b'''{
                 "commitizen": {
-                    "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]", 
-                    "name": "cz_conventional_commits", 
-                    "tag_format": "$version", 
+                    "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]",
+                    "name": "cz_conventional_commits",
+                    "tag_format": "$version",
                     "update_changelog_on_bump": true
                 }
             }''')
@@ -86,9 +86,9 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
 
                 temp_dir.write('.cz.json', b'''{
                     "commitizen": {
-                        "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]", 
-                        "name": "cz_conventional_commits", 
-                        "tag_format": "$version", 
+                        "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]",
+                        "name": "cz_conventional_commits",
+                        "tag_format": "$version",
                         "update_changelog_on_bump": true
                     }
                 }''')
@@ -106,7 +106,7 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
                 )
 
                 mock_sh.cz.bump.side_effect = functools.partial(
-                    self._mock_cz_bump, 
+                    self._mock_cz_bump,
                     path=os.path.join(temp_dir.path, '.cz.json'),
                     increment_type='minor'
                 )
@@ -137,9 +137,9 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
 
                 temp_dir.write('.cz.json', b'''{
                     "commitizen": {
-                        "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]", 
-                        "name": "cz_conventional_commits", 
-                        "tag_format": "$version", 
+                        "bump_message": "build: bump $current_version \\u2192 $new_version [skip-ci]",
+                        "name": "cz_conventional_commits",
+                        "tag_format": "$version",
                         "update_changelog_on_bump": true
                     }
                 }''')
@@ -157,7 +157,7 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
                 )
 
                 mock_sh.cz.bump.side_effect = functools.partial(
-                    self._mock_cz_bump, 
+                    self._mock_cz_bump,
                     path=os.path.join(temp_dir.path, '.cz.json'),
                     increment_type='minor'
                 )
@@ -188,7 +188,7 @@ class TestStepImplementerCommitizenGenerateMetadata(BaseStepImplementerTestCase)
         with open(path, 'r') as cz_json:
             version = json.loads(cz_json.read())['commitizen']['version']
             version = re.match(r'(?P<major>\d+).(?P<minor>\d+).(?P<patch>\d+)', version).groupdict()
-            
+
             if increment_type == 'major':
                 version['major'] = str(int(version['major']) + 1)
                 version['minor'] = '0'

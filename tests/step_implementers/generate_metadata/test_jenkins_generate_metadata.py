@@ -1,7 +1,7 @@
 
 
 from mock import patch
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.generate_metadata import Jenkins
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \

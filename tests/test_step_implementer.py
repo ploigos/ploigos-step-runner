@@ -3,7 +3,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from unittest.mock import patch
 
-from ploigos_step_runner import StepResult, WorkflowResult
+from ploigos_step_runner.results import StepResult, WorkflowResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer

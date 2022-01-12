@@ -1,11 +1,8 @@
-import unittest
-from testfixtures import TempDirectory
-
-import os.path
-
+from ploigos_step_runner.config import Config
+from ploigos_step_runner.config.config_value import ConfigValue
+from ploigos_step_runner.config.sub_step_config import SubStepConfig
 from tests.helpers.base_test_case import BaseTestCase
 
-from ploigos_step_runner.config import Config, StepConfig, SubStepConfig, ConfigValue
 
 class TestSubStepConfig(BaseTestCase):
     def test_constructor_no_sub_step_config_or_step_env_config(self):

@@ -83,7 +83,8 @@ Result Artifact Key            | Description
 
 import re
 
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 
 DEFAULT_CONFIG = {
   'is-pre-release': False,

@@ -37,7 +37,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from ploigos_step_runner.config.config_value import ConfigValue
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.utils.io import TextIOIndenter
 
 

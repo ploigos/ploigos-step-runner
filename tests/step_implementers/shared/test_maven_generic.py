@@ -3,8 +3,10 @@ from pathlib import Path
 from shutil import copyfile
 from unittest.mock import PropertyMock, patch
 
-from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
-from ploigos_step_runner.config.config import Config
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import WorkflowResult
+from ploigos_step_runner.config import Config
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 from ploigos_step_runner.utils.file import create_parent_dir
@@ -13,7 +15,7 @@ from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
 
-@patch("ploigos_step_runner.StepImplementer.__init__")
+@patch("ploigos_step_runner.step_implementer.StepImplementer.__init__")
 class TestStepImplementerSharedMavenGeneric___init__(BaseStepImplementerTestCase):
 
     def test_no_environment_no_maven_phases_and_goals(self, mock_super_init):
@@ -124,7 +126,7 @@ class BaseTestStepImplementerSharedMavenGeneric(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path
         )
 
-@patch("ploigos_step_runner.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
+@patch("ploigos_step_runner.step_implementer.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
 class TestStepImplementerSharedMavenGeneric__validate_required_config_or_previous_step_result_artifact_keys(
     BaseTestStepImplementerSharedMavenGeneric
 ):

@@ -1,14 +1,14 @@
-from io import StringIO
 import os.path
-
+from io import StringIO
 from unittest.mock import patch
 
+from ploigos_step_runner.config import Config
+from ploigos_step_runner.config.config_value import ConfigValue
+from ploigos_step_runner.config.decryptors.sops import SOPS
+from ploigos_step_runner.decryption_utils import DecryptionUtils
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import Any, create_sops_side_effect
 
-from ploigos_step_runner.config import Config, ConfigValue
-from ploigos_step_runner.decryption_utils import DecryptionUtils
-from ploigos_step_runner.config.decryptors.sops import SOPS
 
 class TestConfigValue(BaseTestCase):
     def test__eq__is_equal_basic(self):

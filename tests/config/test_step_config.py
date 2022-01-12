@@ -1,10 +1,9 @@
 import os.path
 
-from testfixtures import TempDirectory
-
+from ploigos_step_runner.config import Config
+from ploigos_step_runner.config.config_value import ConfigValue
 from tests.helpers.base_test_case import BaseTestCase
 
-from ploigos_step_runner.config import Config, ConfigValue
 
 class TestStepConfig(BaseTestCase):
     def test_parent_config(self):

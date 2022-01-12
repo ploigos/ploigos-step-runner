@@ -36,7 +36,7 @@ Configuration Key                      | Required? | Default  | Description
                                                                 pulling container image for deployment.
 """# pylint: disable=line-too-long
 
-from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
 
 DEFAULT_CONFIG = {
     'use-container-image-short-addres': False,

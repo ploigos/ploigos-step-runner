@@ -1,7 +1,8 @@
 import os
 from unittest.mock import patch
 
-from ploigos_step_runner import StepImplementer, StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.step_implementers.shared import ContainerDeployMixin
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \

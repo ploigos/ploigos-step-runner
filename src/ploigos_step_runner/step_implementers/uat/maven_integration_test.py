@@ -46,7 +46,7 @@ Result Artifact Key | Description
 `test-report`       | Directory containing the test reports generated from running this step.
 """  # pylint: disable=line-too-long
 
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import (
     MavenGeneric, MavenTestReportingMixin)

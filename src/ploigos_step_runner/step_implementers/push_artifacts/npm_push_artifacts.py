@@ -29,7 +29,8 @@ Result Artifact Key | Description
 """
 
 from base64 import b64encode
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
 
 DEFAULT_CONFIG = {}

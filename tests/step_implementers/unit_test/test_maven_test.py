@@ -1,7 +1,9 @@
 import os
 from unittest.mock import patch
 
-from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import WorkflowResult
 from ploigos_step_runner.step_implementers.unit_test import MavenTest
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \

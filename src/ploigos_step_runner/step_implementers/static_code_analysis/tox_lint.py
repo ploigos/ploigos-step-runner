@@ -23,7 +23,7 @@ Result Artifact Key | Description
 """
 
 
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.shared.tox_generic import ToxGeneric
 from ploigos_step_runner.exceptions import StepRunnerException
 

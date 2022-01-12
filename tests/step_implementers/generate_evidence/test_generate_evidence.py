@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import mock
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.results.workflow_result import WorkflowResult
 from ploigos_step_runner.step_implementers.generate_evidence import GenerateEvidence
 from testfixtures import TempDirectory

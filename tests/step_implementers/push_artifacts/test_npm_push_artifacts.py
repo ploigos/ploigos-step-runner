@@ -1,17 +1,17 @@
 
 import os
-
 from base64 import b64decode
-from io import StringIO
-from unittest.mock import PropertyMock, patch
-from ploigos_step_runner import WorkflowResult, StepRunnerException
-from ploigos_step_runner.step_implementers.push_artifacts import NpmPushArtifacts
-from tests.helpers.test_utils import Any
+from unittest.mock import patch
+
+from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.results import WorkflowResult
+from ploigos_step_runner.step_implementers.push_artifacts import \
+    NpmPushArtifacts
+from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from testfixtures import TempDirectory
 
-# @patch("ploigos_step_runner.step_implementers.shared.NpmGeneric.__init__")
+
 class TestStepImplementerNpmPushArtifacts___init__(BaseStepImplementerTestCase):
     def test_defaults(self):
 
@@ -133,21 +133,21 @@ class TestStepImplementerNpmPushArtifacts___init__(BaseStepImplementerTestCase):
 
             # Then the NPM_CONFIG__AUTH env variable should be the concatenated, base 64 encoded username & password.
             # NOTE: .encode() does not base 64 encode. It just gets the bytes so they can be bassed to b64decode().
-            self.assertEqual(b64decode(actual_env_args['NPM_CONFIG__AUTH'].encode()), b'npm-user-name:npm-password') 
+            self.assertEqual(b64decode(actual_env_args['NPM_CONFIG__AUTH'].encode()), b'npm-user-name:npm-password')
 
 """
 Test Cases
 
-1) DONE - NpmPushArtifacts class can instantiate 
+1) DONE - NpmPushArtifacts class can instantiate
 2) DONE - NpmPushArtifacts is configured properly
  - contains a valid config value for: NPM REGISTRY
- - contains a valid config value for: NPM USER NAME 
- - contains a valid config value for: NPM USER PASSWORD 
+ - contains a valid config value for: NPM USER NAME
+ - contains a valid config value for: NPM USER PASSWORD
  2.a)  NpmPushArtifacts is configured improperly - No registry provided
  2.b)  NpmPushArtifacts is configured improperly - No user name
  2.c)  NpmPushArtifacts is configured improperly - No user password
 3) DONE - NpmPushArtifacts calls 'npm publish' successfully
-    CRITERIA - 
+    CRITERIA -
     3.a) test that there is an npm_publish_outputs.txt file
 4) NpmPushArtifacts calls 'npm publish' and there is a failure
     4.a) an execption message if provided and the step result success is false

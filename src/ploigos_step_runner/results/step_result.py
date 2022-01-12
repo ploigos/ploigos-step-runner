@@ -2,7 +2,7 @@
 of a StepImplementer#run.
 """
 
-from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
 from ploigos_step_runner.results.step_result_evidence import StepResultEvidence
 

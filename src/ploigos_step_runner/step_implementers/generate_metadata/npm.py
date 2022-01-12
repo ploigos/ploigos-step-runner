@@ -27,8 +27,8 @@ Result Artifact Key | Description
 import json
 import os.path
 
-from ploigos_step_runner import StepImplementer
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
