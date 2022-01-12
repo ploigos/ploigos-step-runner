@@ -4,7 +4,7 @@ from unittest.mock import ANY, call, patch
 
 import sh
 from ploigos_step_runner.results import StepResult
-from ploigos_step_runner.config import ConfigValue
+from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.utils.containers import *
 from tests.helpers.base_test_case import BaseTestCase
 from tests.helpers.test_utils import *

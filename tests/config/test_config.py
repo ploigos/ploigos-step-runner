@@ -1,6 +1,7 @@
 import os.path
 
-from ploigos_step_runner.config import Config, ConfigValue
+from ploigos_step_runner.config import Config
+from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.config.decryptors.sops import SOPS
 from ploigos_step_runner.decryption_utils import DecryptionUtils
 from testfixtures import TempDirectory

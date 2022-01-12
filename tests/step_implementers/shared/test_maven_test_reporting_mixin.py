@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.shared import \
     MavenTestReportingMixin

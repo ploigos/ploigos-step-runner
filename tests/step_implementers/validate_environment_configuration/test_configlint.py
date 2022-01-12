@@ -10,7 +10,7 @@ from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from ploigos_step_runner.step_implementers.validate_environment_configuration import \
     Configlint
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 
 
 class TestStepImplementerConfiglint(BaseStepImplementerTestCase):

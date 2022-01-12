@@ -1,12 +1,9 @@
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
 import os
 import re
 from io import IOBase
 
 import yaml
-from ploigos_step_runner import StepRunner
+from ploigos_step_runner.step_runner import StepRunner
 
 
 def create_sh_side_effect(

@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import sh
 from shutil import copy
-from ploigos_step_runner import StepResult, WorkflowResult
-from ploigos_step_runner.config.config import Config
+from ploigos_step_runner.results import StepResult, WorkflowResult
+from ploigos_step_runner.config import Config
 from ploigos_step_runner.step_implementers.shared import RekorSignGeneric
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \

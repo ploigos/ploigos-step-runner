@@ -1,16 +1,13 @@
 import os
 import sh
-from unittest.mock import Mock, patch
-from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult, step_implementer
-from ploigos_step_runner.config import Config
+from unittest.mock import patch
 from ploigos_step_runner.results import StepResultArtifact
 from ploigos_step_runner.step_implementers.unit_test import NpmTest
-from pytest import raises
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any
 from testfixtures import TempDirectory
-from io import BytesIO, StringIO, TextIOWrapper
+from io import StringIO
 
 class TestNpmTest__run_step(BaseStepImplementerTestCase):
 

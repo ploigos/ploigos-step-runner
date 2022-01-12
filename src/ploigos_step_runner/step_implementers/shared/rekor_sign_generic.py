@@ -29,7 +29,8 @@ import json
 import sys
 from io import StringIO
 import sh
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.utils.file import base64_encode, get_file_hash,\
     download_source_to_destination
 from ploigos_step_runner.utils.io import \

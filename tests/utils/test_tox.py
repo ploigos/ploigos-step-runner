@@ -5,7 +5,7 @@ Test for the utility for tox operations.
 from unittest.mock import patch, call, mock_open
 from io import StringIO
 
-from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
 from tests.helpers.base_test_case import BaseTestCase
 from ploigos_step_runner.utils.tox import run_tox
 from tests.helpers.test_utils import Any

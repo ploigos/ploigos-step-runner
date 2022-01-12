@@ -6,7 +6,7 @@ from unittest.mock import patch
 import mock
 import re
 import sh
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.results.workflow_result import WorkflowResult
 from ploigos_step_runner.step_implementers.audit_attestation import OpenPolicyAgent
 from testfixtures import TempDirectory

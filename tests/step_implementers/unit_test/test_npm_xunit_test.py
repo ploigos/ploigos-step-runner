@@ -1,12 +1,10 @@
 import os
-from unittest.mock import patch, call
+from unittest.mock import patch
 
-from ploigos_step_runner import StepResult, StepRunnerException, WorkflowResult
+from ploigos_step_runner.results import WorkflowResult
 from ploigos_step_runner.step_implementers.unit_test import NpmXunitTest
-from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
 
 
 class BaseTestStepImplementerNpmXunitTest(

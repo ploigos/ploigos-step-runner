@@ -3,7 +3,8 @@ import re
 from io import IOBase
 from unittest.mock import call, patch
 
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.deploy import ArgoCDDeploy
 from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,

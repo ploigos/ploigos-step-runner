@@ -34,7 +34,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 from git import InvalidGitRepositoryError, Repo
 from git.exc import GitCommandError
-from ploigos_step_runner import StepRunnerException
+from ploigos_step_runner.exceptions import StepRunnerException
 
 DEFAULT_CONFIG = {
     'git-repo-root': './',

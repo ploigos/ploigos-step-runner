@@ -7,7 +7,8 @@ import sys
 from unittest.mock import patch
 
 import sh
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.static_code_analysis import \
     SonarQube
 from testfixtures import TempDirectory

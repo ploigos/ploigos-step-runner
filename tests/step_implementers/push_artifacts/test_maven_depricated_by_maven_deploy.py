@@ -1,7 +1,7 @@
 
 from unittest.mock import patch
 
-from ploigos_step_runner import WorkflowResult
+from ploigos_step_runner.results import WorkflowResult
 from ploigos_step_runner.step_implementers.push_artifacts import Maven
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase

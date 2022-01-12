@@ -50,7 +50,8 @@ Result Artifact Key              | Description
 import json
 import os
 
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.utils.file import upload_file
 
 DEFAULT_CONFIG = {

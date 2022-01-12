@@ -1,7 +1,9 @@
 import re
 from unittest.mock import patch
 
-from ploigos_step_runner import StepResult, StepRunner, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.step_runner import StepRunner
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.config import Config
 from testfixtures import TempDirectory
 

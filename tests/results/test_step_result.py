@@ -1,6 +1,6 @@
 """Test ResultStep
 """
-from ploigos_step_runner import StepResult, WorkflowResult
+from ploigos_step_runner.results import StepResult, WorkflowResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import (StepResultArtifact,

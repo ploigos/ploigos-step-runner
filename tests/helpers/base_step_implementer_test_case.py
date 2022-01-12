@@ -1,7 +1,7 @@
 import os
 
-from ploigos_step_runner import StepResult, WorkflowResult
-from ploigos_step_runner.config.config import Config
+from ploigos_step_runner.results import StepResult, WorkflowResult
+from ploigos_step_runner.config import Config
 from ploigos_step_runner.exceptions import StepRunnerException
 
 from .base_test_case import BaseTestCase

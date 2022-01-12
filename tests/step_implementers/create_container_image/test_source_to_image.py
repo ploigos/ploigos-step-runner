@@ -1,7 +1,7 @@
 from unittest.mock import ANY, patch
 
 import sh
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.create_container_image import \
     SourceToImage
 from tests.helpers.base_step_implementer_test_case import \

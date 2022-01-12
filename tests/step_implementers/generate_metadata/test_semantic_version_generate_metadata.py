@@ -1,7 +1,7 @@
 import os
 
 from mock import patch
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.generate_metadata import \
     SemanticVersion
 from testfixtures import TempDirectory

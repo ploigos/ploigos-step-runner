@@ -8,7 +8,8 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from ploigos_step_runner.step_implementers.generate_metadata import Maven
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 
 
 class TestStepImplementerMavenGenerateMetadata(BaseStepImplementerTestCase):

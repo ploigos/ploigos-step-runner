@@ -3,7 +3,8 @@ import unittest
 from unittest.mock import MagicMock, patch, PropertyMock, call
 
 from git import InvalidGitRepositoryError, GitCommandError
-from ploigos_step_runner import StepImplementer, StepRunnerException
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import GitMixin
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase

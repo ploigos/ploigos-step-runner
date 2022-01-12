@@ -9,7 +9,7 @@ from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 from tests.helpers.test_utils import Any, create_sh_side_effect
-from ploigos_step_runner import StepResult
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.openscap_generic import OpenSCAPGeneric
 
@@ -63,7 +63,7 @@ class TestStepImplementerSharedOpenSCAPGeneric__required_config_or_result_keys(
         ]
         self.assertEqual(required_keys, expected_required_keys)
 
-@patch("ploigos_step_runner.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
+@patch("ploigos_step_runner.step_implementer.StepImplementer._validate_required_config_or_previous_step_result_artifact_keys")
 class TestStepImplementerSharedOpenSCAPGeneric__validate_required_config_or_previous_step_result_artifact_keys(
     BaseTestStepImplementerSharedOpenSCAPGeneric
 ):

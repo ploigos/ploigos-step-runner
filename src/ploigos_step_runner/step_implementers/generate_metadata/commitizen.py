@@ -33,7 +33,8 @@ import sys
 import sh
 
 from git import Repo
-from ploigos_step_runner import StepImplementer, StepResult
+from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.results import StepResult
 
 DEFAULT_CONFIG = {
     'cz-json': '.cz.json',

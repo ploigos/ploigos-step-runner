@@ -30,10 +30,11 @@ Result Artifact Key | Description
 `test-report`       | Directory containing the test reports generated from running this step.
 """  # pylint: disable=line-too-long
 
-from ploigos_step_runner import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.shared import NpmGeneric
-from ploigos_step_runner.step_implementers.shared import MavenTestReportingMixin
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.step_implementers.shared.maven_test_reporting_mixin import \
+    MavenTestReportingMixin
+from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
     ['test-reports-dirs','test-reports-dir'],
