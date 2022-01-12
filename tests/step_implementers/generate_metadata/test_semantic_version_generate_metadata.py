@@ -35,7 +35,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata_misc(
         defaults = SemanticVersion.step_implementer_config_defaults()
         expected_defaults = {
             'is-pre-release': False,
-            'sha-build-identifier-length': 7,
+            'commit-hash-build-identifier-length': 7,
             'container-image-tag-build-deliminator': '_'
         }
         self.assertEqual(defaults, expected_defaults)
@@ -555,7 +555,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata___get_semantic_version_
     def test_only_sha_default_length(self):
         # setup
         step_config = {
-            'sha': 'a1b2c3d4e5f6g7h8i9'
+            'commit-hash': 'a1b2c3d4e5f6g7h8i9'
         }
         step_implementer = self.create_step_implementer(
             step_config=step_config,
@@ -572,8 +572,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata___get_semantic_version_
     def test_only_sha_custom_length(self):
         # setup
         step_config = {
-            'sha': 'a1b2c3d4e5f6g7h8i9',
-            'sha-build-identifier-length': 10
+            'commit-hash': 'a1b2c3d4e5f6g7h8i9',
+            'commit-hash-build-identifier-length': 10
         }
         step_implementer = self.create_step_implementer(
             step_config=step_config,
@@ -590,8 +590,8 @@ class TestStepImplementerSemanticVersionGenerateMetadata___get_semantic_version_
     def test_only_sha_no_length(self):
         # setup
         step_config = {
-            'sha': 'a1b2c3d4e5f6g7h8i9',
-            'sha-build-identifier-length': None
+            'commit-hash': 'a1b2c3d4e5f6g7h8i9',
+            'commit-hash-build-identifier-length': None
         }
         step_implementer = self.create_step_implementer(
             step_config=step_config,
@@ -662,7 +662,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata___get_semantic_version_
     def test_sha_workflow_run_num_additional_build_identifiers_list(self):
         # setup
         step_config = {
-            'sha': 'a1b2c3d4e5f6g7h8i9',
+            'commit-hash': 'a1b2c3d4e5f6g7h8i9',
             'workflow-run-num': 42,
             'additional-build-identifiers': [
                 'mock3',

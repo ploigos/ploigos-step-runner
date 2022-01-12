@@ -50,22 +50,22 @@ Configuration Key                       | Required? | Default | Description
 `workflow-run-num`                      | No        |         | If `is-pre-release` is `True`, value to use for a numeric identifier of the branch `pre-release` identifier if provided. \
                                                                 Also always used in build identifier. \
                                                                 Since this can be included in the pre-release section, it should be incremental as per the sem version spec.
-                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>+<sha>.<workflow-run-num>` <br/>\
-                                                                EX (release): `<app-version>+<sha>.<workflow-run-num>`
-`sha`                                   | No        |         | Value to use for sha build identifier in build portion of semantic version. \
-                                                                EX: `<app-version>+<sha>`
-`sha-build-identifier-length`           | No        | 7       | Trim the given `sha` down to this length when including as build identifier in semantic version
+                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>+<commit-hash>.<workflow-run-num>` <br/>\
+                                                                EX (release): `<app-version>+<commit-hash>.<workflow-run-num>`
+`commit-hash`                           | No        |         | Value to use for commit hash build identifier in build portion of semantic version. \
+                                                                EX: `<app-version>+<commit-hash>`
+`commit-hash-build-identifier-length`   | No        | 7       | Trim the given `commit-hash` down to this length when including as build identifier in semantic version
 `additional-pre-release-identifiers`    | No        |         | If `is-pre-release` is `True`, additional `pre-release` identifiers to add to semantic version (https://semver.org/). \
                                                                 Ignored if `is-pre-release` is `False. \
-                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>-<additional-pre-release-identifiers>+<sha>.<workflow-run-num>`
+                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>-<additional-pre-release-identifiers>+<commit-hash>.<workflow-run-num>`
 `additional-build-identifiers`          | No        |         | Additional `build` identifiers to add to semantic version (https://semver.org/). \
-                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>+<sha>.<workflow-run-num>.<additional-build-identifiers>` <br/>\
-                                                                EX (release): `<app-version>+<sha>.<workflow-run-num>.<additional-build-identifiers>`
-`container-image-tag-build-deliminator` | Yes       | `_`   | Unfortunately the container image tag spec does not allow for the `+` character which means can not follow \
-                                                              strict semver syntax when including the `build` portion of the semver in the image tag. \
-                                                              The value here is used instead of the `+` for the purposes of container image tags. \
-                                                              NOTE: the default `_` is chosen because it is otherwise not a valid character in semver syntax so if doing parsing \
-                                                              against the standard semver spec/regex it is simple enough to swap the `+` for a `_` and still get accurate results.
+                                                                EX (pre-release): `<app-version>-<branch>.<workflow-run-num>+<commit-hash>.<workflow-run-num>.<additional-build-identifiers>` <br/>\
+                                                                EX (release): `<app-version>+<commit-hash>.<workflow-run-num>.<additional-build-identifiers>`
+`container-image-tag-build-deliminator` | Yes       | `_`     | Unfortunately the container image tag spec does not allow for the `+` character which means can not follow \
+                                                                strict semver syntax when including the `build` portion of the semver in the image tag. \
+                                                                The value here is used instead of the `+` for the purposes of container image tags. \
+                                                                NOTE: the default `_` is chosen because it is otherwise not a valid character in semver syntax so if doing parsing \
+                                                                against the standard semver spec/regex it is simple enough to swap the `+` for a `_` and still get accurate results.
 
 Result Artifacts
 ----------------
@@ -88,7 +88,7 @@ from ploigos_step_runner.results import StepResult
 
 DEFAULT_CONFIG = {
   'is-pre-release': False,
-  'sha-build-identifier-length': 7,
+  'commit-hash-build-identifier-length': 7,
   'container-image-tag-build-deliminator': '_'
 }
 
@@ -255,16 +255,16 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         build = None
         build_identifiers = []
 
-        # if sha given add as a build identifier
-        sha = self.get_value('sha')
-        if sha:
-            sha_build_identifier = None
-            sha_build_identifier_length = self.get_value('sha-build-identifier-length')
-            if sha_build_identifier_length:
-                sha_build_identifier = str(sha)[:sha_build_identifier_length]
+        # if commit-hash given add as a build identifier
+        commit_hash = self.get_value('commit-hash')
+        if commit_hash:
+            commit_hash_build_identifier = None
+            commit_hash_build_identifier_length = self.get_value('commit-hash-build-identifier-length')
+            if commit_hash_build_identifier_length:
+                commit_hash_build_identifier = str(commit_hash)[:commit_hash_build_identifier_length]
             else:
-                sha_build_identifier = sha
-            build_identifiers.append(sha_build_identifier)
+                commit_hash_build_identifier = commit_hash
+            build_identifiers.append(commit_hash_build_identifier)
 
         # if workflow run num given as a build identifier
         workflow_run_num = self.get_value('workflow-run-num')
