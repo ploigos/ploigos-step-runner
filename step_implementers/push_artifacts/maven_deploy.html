@@ -200,7 +200,8 @@ Result Artifact Key | Description
 `push-artifacts`    | An array of dictionaries with information on the pushed artifacts
 &#34;&#34;&#34;
 
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 from ploigos_step_runner.utils.maven import run_maven

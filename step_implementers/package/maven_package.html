@@ -226,7 +226,8 @@ Keys in the dictionary elements in the `package-artifacts` array in the step res
 &#34;&#34;&#34;
 import os
 
-from ploigos_step_runner import StepResult, StepRunnerException
+from ploigos_step_runner.results import StepResult
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
 
