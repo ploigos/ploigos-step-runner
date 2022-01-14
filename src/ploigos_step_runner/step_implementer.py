@@ -61,6 +61,7 @@ class DefaultSteps:  # pylint: disable=too-few-public-methods
     UAT = 'uat'
     RUNTIME_VULNERABILITY_SCAN = 'runtime-vulnerability-scan'
     CANARY_TEST = 'canary-test'
+    UNDEPLOY = 'undeploy'
     PUBLISH_WORKFLOW_RESULTS = 'publish-workflow-results'
 
 
