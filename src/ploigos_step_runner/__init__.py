@@ -43,6 +43,7 @@ Step Configuration
 * uat
 * runtime-vulnerability-scan
 * canary-test
+* undeploy
 * report
 * publish-workflow-results
 * automated-governance
