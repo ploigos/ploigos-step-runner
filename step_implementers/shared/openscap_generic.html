@@ -80,12 +80,15 @@ For disconnected environments the remote
 internal mirror.</td>
 </tr>
 <tr>
-<td><code>[container-image-pull-registry-type, container-image-registry-type]</code></td>
-<td>Yes</td>
-<td>'containers-storage:'</td>
-<td>Container repository type for the pull image source.
-See <a href="https://github.com/containers/skopeo">https://github.com/containers/skopeo</a> for valid
-options.</td>
+<td>'oscap-severity'</td>
+<td>No</td>
+<td></td>
+<td>Severity threshold for failing a step.
+Will fail step on any vulnerability at
+that severity or higher. Will fail on
+any severity if unset.
+Valid severity:
+low</td>
 </tr>
 </tbody>
 </table>
@@ -147,6 +150,12 @@ from runtime configuration.
                                                        remote resources and this is not True. \
                                                        For disconnected environments the remote \
                                                        internal mirror.
+&#39;oscap-severity&#39;               | No        |         | Severity threshold for failing a step. \
+                                                       Will fail step on any vulnerability at \
+                                                       that severity or higher. Will fail on \
+                                                       any severity if unset. \
+                                                       Valid severity: \
+                                                       low|moderate|important|critical \
 `[container-image-pull-registry-type, container-image-registry-type]` \
                                | Yes       | &#39;containers-storage:&#39; \
                                                      | \
@@ -226,13 +235,13 @@ class OpenSCAPGeneric(StepImplementer):
     #    Result fail
     #
     # Matches:
-    #    (Title RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    (Title RHSA-2020:4186: spice and spice-gtk security update ((Important))
     #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
     #    Ident  RHSA-2020:4186
     #    Ident  CVE-2020-14355
     #    Result (pass))
     #
-    #    (Title RHSA-2020:3658: librepo security update (Important)
+    #    (Title RHSA-2020:3658: librepo security update ((Important))
     #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
     #    Ident  RHSA-2020:3658
     #    Ident  CVE-2020-14352
@@ -240,7 +249,7 @@ class OpenSCAPGeneric(StepImplementer):
     #
     # Named Groups:
     #    [0]ruleblock
-    #        Title      RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #        Title      RHSA-2020:4186: spice and spice-gtk security update ([0]severityImportant)
     #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
     #        Ident      RHSA-2020:4186
     #        Ident      CVE-2020-14355
@@ -249,7 +258,7 @@ class OpenSCAPGeneric(StepImplementer):
     #        pass
     #
     #    [1]ruleblock
-    #        Title      RHSA-2020:3658: librepo security update (Important)
+    #        Title      RHSA-2020:3658: librepo security update ([1]severityImportant)
     #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
     #        Ident      RHSA-2020:3658
     #        Ident      CVE-2020-14352
@@ -257,7 +266,7 @@ class OpenSCAPGeneric(StepImplementer):
     #    [1]ruleresult
     #        fail
     OSCAP_XCCDF_STDOUT_PATTERN = re.compile(
-        r&#39;(?P&lt;ruleblock&gt;Title.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;,
+        r&#39;(?P&lt;ruleblock&gt;Title.+?(\((?P&lt;severity&gt;.*?)\).+?)?Rule.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;, # pylint: disable=line-too-long
         re.DOTALL
     )
     OSCAP_XCCDF_STDOUT_FAIL_PATTERN = re.compile(r&#39;fail&#39;)
@@ -353,6 +362,16 @@ class OpenSCAPGeneric(StepImplementer):
             f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
             f&#34; must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}&#34;
 
+        # validate that the give &#39;oscap-severity&#39; is valid
+        oscap_severity = self.get_value(&#39;oscap-severity&#39;)
+        if oscap_severity is not None:
+            oscap_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+                oscap_severity = oscap_severity
+            )
+            assert (oscap_severity_index is not None), \
+                    f&#34;Open SCAP severity ({oscap_severity})&#34; \
+                    f&#34; must be of know severity (low|moderate|important|critical).&#34;
+
     def _run_step(self):  # pylint: disable=too-many-locals,too-many-statements
         &#34;&#34;&#34;Runs the OpenSCAP eval for a given input file against a given container.
         &#34;&#34;&#34;
@@ -368,6 +387,11 @@ class OpenSCAPGeneric(StepImplementer):
         ])
         oscap_profile = self.get_value(&#39;oscap-profile&#39;)
         oscap_fetch_remote_resources = self.get_value(&#39;oscap-fetch-remote-resources&#39;)
+
+        oscap_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+            oscap_severity = self.get_value(&#39;oscap-severity&#39;)
+        )
+
         pull_repository_type = self.get_value([
             &#39;container-image-pull-registry-type&#39;,
             &#39;container-image-registry-type&#39;
@@ -459,7 +483,9 @@ class OpenSCAPGeneric(StepImplementer):
             )
             oscap_html_report_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-report.html&#39;)
             print(&#34;\nRun oscap scan&#34;)
-            oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
+            oscap_eval_success, \
+            oscap_eval_fails, \
+            oscap_failure_met_threshold = OpenSCAPGeneric.__run_oscap_scan(
                 buildah_unshare_command=buildah_unshare_command,
                 oscap_eval_type=oscap_eval_type,
                 oscap_input_file=oscap_input_file,
@@ -469,12 +495,16 @@ class OpenSCAPGeneric(StepImplementer):
                 container_mount_path=container_mount_path,
                 oscap_profile=oscap_profile,
                 oscap_tailoring_file=oscap_tailoring_file,
-                oscap_fetch_remote_resources=oscap_fetch_remote_resources
+                oscap_fetch_remote_resources=oscap_fetch_remote_resources,
+                oscap_severity_index=oscap_severity_index
             )
             print(f&#34;OpenSCAP scan completed with eval success: {oscap_eval_success}&#34;)
 
             # save scan results
-            step_result.success = oscap_eval_success
+            # if there were no failure or threshold was met then pass
+            step_result.success = oscap_eval_success or not oscap_failure_met_threshold
+
+            # report all issues even if they did not meet threshold
             if not oscap_eval_success:
                 step_result.message = f&#34;OSCAP eval found issues:\n{oscap_eval_fails}&#34;
 
@@ -575,7 +605,8 @@ class OpenSCAPGeneric(StepImplementer):
         container_mount_path,
         oscap_profile=None,
         oscap_tailoring_file=None,
-        oscap_fetch_remote_resources=True
+        oscap_fetch_remote_resources=True,
+        oscap_severity_index=-1
     ):
         &#34;&#34;&#34;Run an oscap scan in the context of a buildah unshare to run &#34;rootless&#34;.
 
@@ -606,6 +637,13 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_profile : str
             OpenSCAP profile to evaluate. Must be a valid profile in the given oscap_input_file.
             EX: if you perform an `oscap info oscap_input_file` the profile must be listed.
+        oscap_severity_index : int
+            Index of the severity level.
+            -1 : undefined
+            0 : low
+            1 : moderate
+            2 : important
+            3 : critical
 
         Returns
         -------
@@ -615,6 +653,9 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_fails : str
             If oscap_eval_success is True then indeterminate.
             If oscap_eval_success is False then string of all of the failed rules.
+        oscap_failure_met_threshold : bool
+            True if oval type or if there were failures that were greater than or equal to the oscap_severity_index
+            False if xccdf and there were not failures or if there were failures and they were las than oscap_severity_index
 
         Raises
         ------
@@ -640,6 +681,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_out_buff = StringIO()
         oscap_eval_out = &#34;&#34;
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
         try:
             oscap_chroot_command = buildah_unshare_command.bake(&#34;oscap-chroot&#34;)
             with open(oscap_out_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as oscap_out_file:
@@ -701,6 +743,8 @@ class OpenSCAPGeneric(StepImplementer):
         #       need to search output to determine if there were any rule failures
         if oscap_eval_type == &#39;oval&#39; and oscap_eval_success:
             oscap_eval_fails = &#34;&#34;
+            #oval does not contain serverity in output so it always meets threshold
+            oscap_failure_met_threshold=True
             for match in OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN.finditer(oscap_eval_out):
                 # NOTE: need to do regex and not == because may contain xterm color chars
                 if OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN.search(
@@ -710,7 +754,8 @@ class OpenSCAPGeneric(StepImplementer):
                     oscap_eval_fails += &#34;\n&#34;
                     oscap_eval_success = False
 
-        # if failed xccdf eval then parse out the fails
+        # if failed xccdf eval then parse out the fails check if any are above severity
+        # threshold
         if oscap_eval_type == &#39;xccdf&#39; and not oscap_eval_success:
             oscap_eval_fails = &#34;&#34;
             for match in OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN.finditer(oscap_eval_out):
@@ -720,7 +765,40 @@ class OpenSCAPGeneric(StepImplementer):
                     oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
                     oscap_eval_fails += &#34;\n&#34;
 
-        return oscap_eval_success, oscap_eval_fails</code></pre>
+                    #No need to run severity check if value is not set
+                    #or severity is not found for rule
+                    if (oscap_severity_index is not None
+                        and match.groupdict()[&#39;severity&#39;]):
+                        match_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+                            oscap_severity=match.groupdict()[&#39;severity&#39;]
+                        )
+
+                        #If severity is not found or
+                        #the set severity is the same or higher
+                        #then threshold is met
+                        if (match_severity_index is None
+                            or match_severity_index &gt;= oscap_severity_index):
+                            oscap_failure_met_threshold=True
+                    else:
+                        oscap_failure_met_threshold=True
+
+        return oscap_eval_success, oscap_eval_fails, oscap_failure_met_threshold
+
+    @staticmethod
+    def __parse_sev_to_int(oscap_severity):
+        if oscap_severity is None:
+            return None
+
+        oscap_severity_index = None
+        severity_dict = {
+            &#39;low&#39;: 0,
+            &#39;moderate&#39; : 1,
+            &#39;important&#39; : 2,
+            &#39;critical&#39;: 3
+        }
+        oscap_severity_index = severity_dict.get(oscap_severity.strip().lower())
+
+        return oscap_severity_index</code></pre>
 </details>
 </section>
 <section>
@@ -767,13 +845,13 @@ class OpenSCAPGeneric(StepImplementer):
     #    Result fail
     #
     # Matches:
-    #    (Title RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #    (Title RHSA-2020:4186: spice and spice-gtk security update ((Important))
     #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
     #    Ident  RHSA-2020:4186
     #    Ident  CVE-2020-14355
     #    Result (pass))
     #
-    #    (Title RHSA-2020:3658: librepo security update (Important)
+    #    (Title RHSA-2020:3658: librepo security update ((Important))
     #    Rule   xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
     #    Ident  RHSA-2020:3658
     #    Ident  CVE-2020-14352
@@ -781,7 +859,7 @@ class OpenSCAPGeneric(StepImplementer):
     #
     # Named Groups:
     #    [0]ruleblock
-    #        Title      RHSA-2020:4186: spice and spice-gtk security update (Important)
+    #        Title      RHSA-2020:4186: spice and spice-gtk security update ([0]severityImportant)
     #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20204186
     #        Ident      RHSA-2020:4186
     #        Ident      CVE-2020-14355
@@ -790,7 +868,7 @@ class OpenSCAPGeneric(StepImplementer):
     #        pass
     #
     #    [1]ruleblock
-    #        Title      RHSA-2020:3658: librepo security update (Important)
+    #        Title      RHSA-2020:3658: librepo security update ([1]severityImportant)
     #        Rule       xccdf_com.redhat.rhsa_rule_oval-com.redhat.rhsa-def-20203658
     #        Ident      RHSA-2020:3658
     #        Ident      CVE-2020-14352
@@ -798,7 +876,7 @@ class OpenSCAPGeneric(StepImplementer):
     #    [1]ruleresult
     #        fail
     OSCAP_XCCDF_STDOUT_PATTERN = re.compile(
-        r&#39;(?P&lt;ruleblock&gt;Title.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;,
+        r&#39;(?P&lt;ruleblock&gt;Title.+?(\((?P&lt;severity&gt;.*?)\).+?)?Rule.+?Result\s+(?P&lt;ruleresult&gt;[^\n]+))\n&#39;, # pylint: disable=line-too-long
         re.DOTALL
     )
     OSCAP_XCCDF_STDOUT_FAIL_PATTERN = re.compile(r&#39;fail&#39;)
@@ -894,6 +972,16 @@ class OpenSCAPGeneric(StepImplementer):
             f&#34;Open SCAP input definitions source ({oscap_input_definitions_uri})&#34; \
             f&#34; must be of known type (xml|bz2), got: {oscap_input_definitions_uri_extension}&#34;
 
+        # validate that the give &#39;oscap-severity&#39; is valid
+        oscap_severity = self.get_value(&#39;oscap-severity&#39;)
+        if oscap_severity is not None:
+            oscap_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+                oscap_severity = oscap_severity
+            )
+            assert (oscap_severity_index is not None), \
+                    f&#34;Open SCAP severity ({oscap_severity})&#34; \
+                    f&#34; must be of know severity (low|moderate|important|critical).&#34;
+
     def _run_step(self):  # pylint: disable=too-many-locals,too-many-statements
         &#34;&#34;&#34;Runs the OpenSCAP eval for a given input file against a given container.
         &#34;&#34;&#34;
@@ -909,6 +997,11 @@ class OpenSCAPGeneric(StepImplementer):
         ])
         oscap_profile = self.get_value(&#39;oscap-profile&#39;)
         oscap_fetch_remote_resources = self.get_value(&#39;oscap-fetch-remote-resources&#39;)
+
+        oscap_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+            oscap_severity = self.get_value(&#39;oscap-severity&#39;)
+        )
+
         pull_repository_type = self.get_value([
             &#39;container-image-pull-registry-type&#39;,
             &#39;container-image-registry-type&#39;
@@ -1000,7 +1093,9 @@ class OpenSCAPGeneric(StepImplementer):
             )
             oscap_html_report_path = self.write_working_file(f&#39;oscap-{oscap_eval_type}-report.html&#39;)
             print(&#34;\nRun oscap scan&#34;)
-            oscap_eval_success, oscap_eval_fails = OpenSCAPGeneric.__run_oscap_scan(
+            oscap_eval_success, \
+            oscap_eval_fails, \
+            oscap_failure_met_threshold = OpenSCAPGeneric.__run_oscap_scan(
                 buildah_unshare_command=buildah_unshare_command,
                 oscap_eval_type=oscap_eval_type,
                 oscap_input_file=oscap_input_file,
@@ -1010,12 +1105,16 @@ class OpenSCAPGeneric(StepImplementer):
                 container_mount_path=container_mount_path,
                 oscap_profile=oscap_profile,
                 oscap_tailoring_file=oscap_tailoring_file,
-                oscap_fetch_remote_resources=oscap_fetch_remote_resources
+                oscap_fetch_remote_resources=oscap_fetch_remote_resources,
+                oscap_severity_index=oscap_severity_index
             )
             print(f&#34;OpenSCAP scan completed with eval success: {oscap_eval_success}&#34;)
 
             # save scan results
-            step_result.success = oscap_eval_success
+            # if there were no failure or threshold was met then pass
+            step_result.success = oscap_eval_success or not oscap_failure_met_threshold
+
+            # report all issues even if they did not meet threshold
             if not oscap_eval_success:
                 step_result.message = f&#34;OSCAP eval found issues:\n{oscap_eval_fails}&#34;
 
@@ -1116,7 +1215,8 @@ class OpenSCAPGeneric(StepImplementer):
         container_mount_path,
         oscap_profile=None,
         oscap_tailoring_file=None,
-        oscap_fetch_remote_resources=True
+        oscap_fetch_remote_resources=True,
+        oscap_severity_index=-1
     ):
         &#34;&#34;&#34;Run an oscap scan in the context of a buildah unshare to run &#34;rootless&#34;.
 
@@ -1147,6 +1247,13 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_profile : str
             OpenSCAP profile to evaluate. Must be a valid profile in the given oscap_input_file.
             EX: if you perform an `oscap info oscap_input_file` the profile must be listed.
+        oscap_severity_index : int
+            Index of the severity level.
+            -1 : undefined
+            0 : low
+            1 : moderate
+            2 : important
+            3 : critical
 
         Returns
         -------
@@ -1156,6 +1263,9 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_fails : str
             If oscap_eval_success is True then indeterminate.
             If oscap_eval_success is False then string of all of the failed rules.
+        oscap_failure_met_threshold : bool
+            True if oval type or if there were failures that were greater than or equal to the oscap_severity_index
+            False if xccdf and there were not failures or if there were failures and they were las than oscap_severity_index
 
         Raises
         ------
@@ -1181,6 +1291,7 @@ class OpenSCAPGeneric(StepImplementer):
         oscap_eval_out_buff = StringIO()
         oscap_eval_out = &#34;&#34;
         oscap_eval_fails = None
+        oscap_failure_met_threshold = False
         try:
             oscap_chroot_command = buildah_unshare_command.bake(&#34;oscap-chroot&#34;)
             with open(oscap_out_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as oscap_out_file:
@@ -1242,6 +1353,8 @@ class OpenSCAPGeneric(StepImplementer):
         #       need to search output to determine if there were any rule failures
         if oscap_eval_type == &#39;oval&#39; and oscap_eval_success:
             oscap_eval_fails = &#34;&#34;
+            #oval does not contain serverity in output so it always meets threshold
+            oscap_failure_met_threshold=True
             for match in OpenSCAPGeneric.OSCAP_OVAL_STDOUT_PATTERN.finditer(oscap_eval_out):
                 # NOTE: need to do regex and not == because may contain xterm color chars
                 if OpenSCAPGeneric.OSCAP_OVAL_STDOUT_FAIL_PATTERN.search(
@@ -1251,7 +1364,8 @@ class OpenSCAPGeneric(StepImplementer):
                     oscap_eval_fails += &#34;\n&#34;
                     oscap_eval_success = False
 
-        # if failed xccdf eval then parse out the fails
+        # if failed xccdf eval then parse out the fails check if any are above severity
+        # threshold
         if oscap_eval_type == &#39;xccdf&#39; and not oscap_eval_success:
             oscap_eval_fails = &#34;&#34;
             for match in OpenSCAPGeneric.OSCAP_XCCDF_STDOUT_PATTERN.finditer(oscap_eval_out):
@@ -1261,7 +1375,40 @@ class OpenSCAPGeneric(StepImplementer):
                     oscap_eval_fails += match.groupdict()[&#39;ruleblock&#39;]
                     oscap_eval_fails += &#34;\n&#34;
 
-        return oscap_eval_success, oscap_eval_fails</code></pre>
+                    #No need to run severity check if value is not set
+                    #or severity is not found for rule
+                    if (oscap_severity_index is not None
+                        and match.groupdict()[&#39;severity&#39;]):
+                        match_severity_index = OpenSCAPGeneric.__parse_sev_to_int(
+                            oscap_severity=match.groupdict()[&#39;severity&#39;]
+                        )
+
+                        #If severity is not found or
+                        #the set severity is the same or higher
+                        #then threshold is met
+                        if (match_severity_index is None
+                            or match_severity_index &gt;= oscap_severity_index):
+                            oscap_failure_met_threshold=True
+                    else:
+                        oscap_failure_met_threshold=True
+
+        return oscap_eval_success, oscap_eval_fails, oscap_failure_met_threshold
+
+    @staticmethod
+    def __parse_sev_to_int(oscap_severity):
+        if oscap_severity is None:
+            return None
+
+        oscap_severity_index = None
+        severity_dict = {
+            &#39;low&#39;: 0,
+            &#39;moderate&#39; : 1,
+            &#39;important&#39; : 2,
+            &#39;critical&#39;: 3
+        }
+        oscap_severity_index = severity_dict.get(oscap_severity.strip().lower())
+
+        return oscap_severity_index</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
