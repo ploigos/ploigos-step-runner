@@ -133,27 +133,27 @@ class ArgoCDDelete(ArgoCDGeneric):
 
             print("Sign into ArgoCD")
             self._argocd_sign_in(
-                argocd_api = self._get_argocd_api(),
-                username = self._get_argocd_username(),
-                password = self._get_argocd_password(),
-                insecure = self._get_argocd_skip_tls()
+                argocd_api = self.argocd_api,
+                username = self.argocd_username,
+                password = self.argocd_password,
+                insecure = self.argocd_skip_tls
             )
 
             add_or_update_target_cluster = self.get_value('argocd-add-or-update-target-cluster')
             if add_or_update_target_cluster:
                 print("Add target cluster to ArgoCD")
                 self._argocd_add_target_cluster(
-                    kube_api = self._get_kube_api_uri(),
-                    kube_api_token = self._get_kube_api_token(),
-                    kube_api_skip_tls = self._get_kube_api_skip_tls()
+                    kube_api = self.kube_api_uri,
+                    kube_api_token = self.kube_api_uri,
+                    kube_api_skip_tls = self.kube_api_skip_tls
                 )
 
             print(f"Delete ArgoCD Application ({argocd_app_name})")
 
             self._argocd_app_delete(
                 argocd_app_name,
-                argocd_cascade = self._get_argocd_cascade(),
-                argocd_propagation_policy = self._get_argocd_propagation_policy()
+                argocd_cascade = self.argocd_cascade,
+                argocd_propagation_policy = self.argocd_propagation_policy
             )
 
         except StepRunnerException as error:
@@ -191,13 +191,15 @@ class ArgoCDDelete(ArgoCDGeneric):
                 f"Error deleting ArgoCD app ({argocd_app_name}): {error}"
             ) from error
 
-    def _get_argocd_cascade(self):
+    @property
+    def argocd_cascade(self):
         """
         :return: true if cascaded deletion of all application resources
         """
         return self.get_value('argocd-cascade')
 
-    def _get_argocd_propagation_policy(self):
+    @property
+    def argocd_propagation_policy(self):
         """
         :return: true if cascaded deletion of all application resources
         """
