@@ -34,7 +34,6 @@ class TestStepImplementerArgoCDDelete_Other(TestStepImplementerDeployArgoCDBase)
     ):
         defaults = ArgoCDDelete.step_implementer_config_defaults()
         expected_defaults = {
-            'argocd-add-or-update-target-cluster': True,
             'argocd-cascade': True,
             'argocd-propagation-policy': 'foreground',
             'argocd-skip-tls': False,
@@ -66,14 +65,12 @@ class TestStepImplementerArgoCDDelete_Other(TestStepImplementerDeployArgoCDBase)
 
 class TestStepImplementerArgoCDDelete_run_step(TestStepImplementerDeployArgoCDBase):
     @patch.object(ArgoCDDelete, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDelete, '_argocd_add_target_cluster')
     @patch.object(ArgoCDDelete, '_argocd_sign_in')
     @patch('sh.argocd', create=True)
     def test_run_step_success(
             self,
             mock_argocd,
             argocd_sign_in_mock,
-            argocd_add_target_cluster_mock,
             get_app_name_mock
     ):
         with TempDirectory() as temp_dir:
@@ -84,7 +81,6 @@ class TestStepImplementerArgoCDDelete_run_step(TestStepImplementerDeployArgoCDBa
             argocd_propagation_policy = 'background'
 
             step_config = {
-                'argocd-add-or-update-target-cluster': True,
                 'argocd-username': 'argo-username',
                 'argocd-password': 'argo-password',
                 'argocd-api': 'https://argo.ploigos.xyz',
@@ -125,11 +121,6 @@ class TestStepImplementerArgoCDDelete_run_step(TestStepImplementerDeployArgoCDBa
                 password=step_config['argocd-password'],
                 insecure=step_config['argocd-skip-tls']
             )
-            argocd_add_target_cluster_mock.assert_called_once_with(
-                kube_api='https://kubernetes.default.svc',
-                kube_api_token=None,
-                kube_api_skip_tls=False
-            )
             mock_argocd.app.delete.assert_called_once_with(
                 'test-app-name',
                 f'--cascade={argocd_cascade}',
@@ -140,14 +131,12 @@ class TestStepImplementerArgoCDDelete_run_step(TestStepImplementerDeployArgoCDBa
             )
 
     @patch.object(ArgoCDDelete, '_get_app_name', return_value='test-app-name')
-    @patch.object(ArgoCDDelete, '_argocd_add_target_cluster')
     @patch.object(ArgoCDDelete, '_argocd_sign_in')
     @patch('sh.argocd', create=True)
     def test_run_step_failure(
             self,
             mock_argocd,
             argocd_sign_in_mock,
-            argocd_add_target_cluster_mock,
             get_app_name_mock
     ):
         with TempDirectory() as temp_dir:
@@ -209,9 +198,4 @@ class TestStepImplementerArgoCDDelete_run_step(TestStepImplementerDeployArgoCDBa
                 username=step_config['argocd-username'],
                 password=step_config['argocd-password'],
                 insecure=step_config['argocd-skip-tls']
-            )
-            argocd_add_target_cluster_mock.assert_called_once_with(
-                kube_api='https://kubernetes.default.svc',
-                kube_api_token=None,
-                kube_api_skip_tls=False
             )

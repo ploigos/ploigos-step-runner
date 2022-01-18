@@ -13,11 +13,6 @@ Could come from:
 Configuration Key           | Required? | Default    | Description
 ----------------------------|-----------|------------|---------------------------
 `application-name`          | Yes       |            | Used to build ArgoCD application name.
-`argocd-add-or-update-target-cluster` \
-                            | No        | True       | `True` to automatically add or update \
-                                                       target cluster information. \
-                                                       `False` to assume target cluster already in \
-                                                       place.
 `argocd-api`                | Yes       |            | The ArgoCD API endpoint
 `argocd-cascade`            | Yes       | True       | Perform a cascaded deletion of all \
                                                        application resources
@@ -53,7 +48,6 @@ from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementers.shared import ArgoCDGeneric
 
 DEFAULT_CONFIG = {
-    'argocd-add-or-update-target-cluster': True,
     'argocd-cascade': True,
     'argocd-propagation-policy': 'foreground',
     'argocd-skip-tls': False,
@@ -138,15 +132,6 @@ class ArgoCDDelete(ArgoCDGeneric):
                 password = self.argocd_password,
                 insecure = self.argocd_skip_tls
             )
-
-            add_or_update_target_cluster = self.get_value('argocd-add-or-update-target-cluster')
-            if add_or_update_target_cluster:
-                print("Add target cluster to ArgoCD")
-                self._argocd_add_target_cluster(
-                    kube_api = self.kube_api_uri,
-                    kube_api_token = self.kube_api_uri,
-                    kube_api_skip_tls = self.kube_api_skip_tls
-                )
 
             print(f"Delete ArgoCD Application ({argocd_app_name})")
 
