@@ -864,36 +864,6 @@ users:
         return argocd_app_manifest_file
 
     @property
-    def kube_api_uri(self):
-        """
-        Returns
-        -------
-        str
-            The k8s API endpoint
-        """
-        return self.get_value('kube-api-uri')
-
-    @property
-    def kube_api_token(self):
-        """
-        Returns
-        -------
-        str
-            The k8s API token (required to add an external k8s cluster into ArgoCD)
-        """
-        return self.get_value('kube-api-token')
-
-    @property
-    def kube_api_skip_tls(self):
-        """
-        Returns
-        -------
-        bool
-            True to skip tls verification; False to enforce
-        """
-        return self.get_value('kube-api-skip-tls')
-
-    @property
     def argocd_api(self):
         """
         Returns
