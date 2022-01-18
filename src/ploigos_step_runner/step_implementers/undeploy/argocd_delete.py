@@ -179,14 +179,20 @@ class ArgoCDDelete(ArgoCDGeneric):
     @property
     def argocd_cascade(self):
         """
-        :return: true if cascaded deletion of all application resources
+        Returns
+        -------
+        bool
+            True for cascaded deletion; False otherwise
         """
         return self.get_value('argocd-cascade')
 
     @property
     def argocd_propagation_policy(self):
         """
-        :return: controls whether propagated delete should be parent-first (background), \
-                 parent-last (foreground), or no-op (orphan)
+        Returns
+        -------
+        str
+            Value for the k8s delete propagation policy: parent-first (background), parent-last \
+            (foreground), or no-op (orphan)
         """
         return self.get_value('argocd-propagation-policy')
