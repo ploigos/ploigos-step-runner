@@ -866,48 +866,69 @@ users:
     @property
     def kube_api_uri(self):
         """
-        :return: the k8s API endpoint
+        Returns
+        -------
+        str
+            The k8s API endpoint
         """
         return self.get_value('kube-api-uri')
 
     @property
     def kube_api_token(self):
         """
-        :return: true if the kube api token should be persistent
+        Returns
+        -------
+        str
+            The k8s API token (required to add an external k8s cluster into ArgoCD)
         """
         return self.get_value('kube-api-token')
 
     @property
     def kube_api_skip_tls(self):
         """
-        :return: true if skipping tls verification
+        Returns
+        -------
+        bool
+            True to skip tls verification; False to enforce
         """
         return self.get_value('kube-api-skip-tls')
 
     @property
     def argocd_api(self):
         """
-        :return: the ArgoCD API endpoint
+        Returns
+        -------
+        str
+            The ArgoCD API endpoint
         """
         return self.get_value('argocd-api')
 
     @property
     def argocd_username(self):
         """
-        :return: the username for accessing the ArgoCD API
+        Returns
+        -------
+        str
+            The username for accessing the ArgoCD API
         """
         return self.get_value('argocd-username')
 
     @property
     def argocd_password(self):
         """
-        :return: the password for accessing the ArgoCD API
+        Returns
+        -------
+        str
+            The password for accessing the ArgoCD API
         """
         return self.get_value('argocd-password')
 
     @property
     def argocd_skip_tls(self):
         """
-        :return: should TLS issues be ignored when authenticating with ArgoCD
+        Returns
+        -------
+        bool
+            True to ignore TLS issues when authenticating with ArgoCD
         """
         return self.get_value('argocd-skip-tls')
