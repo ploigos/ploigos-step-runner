@@ -890,7 +890,47 @@ users:
                 f&#34;Error reading ArgoCD Application ({argocd_app_name}) manifest: {error}&#34;
             ) from error
 
-        return argocd_app_manifest_file</code></pre>
+        return argocd_app_manifest_file
+
+    @property
+    def argocd_api(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The ArgoCD API endpoint
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-api&#39;)
+
+    @property
+    def argocd_username(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The username for accessing the ArgoCD API
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-username&#39;)
+
+    @property
+    def argocd_password(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The password for accessing the ArgoCD API
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-password&#39;)
+
+    @property
+    def argocd_skip_tls(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        bool
+            True to ignore TLS issues when authenticating with ArgoCD
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-skip-tls&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -1754,7 +1794,47 @@ users:
                 f&#34;Error reading ArgoCD Application ({argocd_app_name}) manifest: {error}&#34;
             ) from error
 
-        return argocd_app_manifest_file</code></pre>
+        return argocd_app_manifest_file
+
+    @property
+    def argocd_api(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The ArgoCD API endpoint
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-api&#39;)
+
+    @property
+    def argocd_username(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The username for accessing the ArgoCD API
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-username&#39;)
+
+    @property
+    def argocd_password(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str
+            The password for accessing the ArgoCD API
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-password&#39;)
+
+    @property
+    def argocd_skip_tls(self):
+        &#34;&#34;&#34;
+        Returns
+        -------
+        bool
+            True to ignore TLS issues when authenticating with ArgoCD
+        &#34;&#34;&#34;
+        return self.get_value(&#39;argocd-skip-tls&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1764,6 +1844,7 @@ users:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy" href="../deploy/argocd_deploy.html#ploigos_step_runner.step_implementers.deploy.argocd_deploy.ArgoCDDeploy">ArgoCDDeploy</a></li>
+<li><a title="ploigos_step_runner.step_implementers.undeploy.argocd_delete.ArgoCDDelete" href="../undeploy/argocd_delete.html#ploigos_step_runner.step_implementers.undeploy.argocd_delete.ArgoCDDelete">ArgoCDDelete</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -1786,6 +1867,97 @@ users:
 <dt id="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES"><code class="name">var <span class="ident">MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES</span></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_api"><code class="name">var <span class="ident">argocd_api</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The ArgoCD API endpoint</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def argocd_api(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str
+        The ArgoCD API endpoint
+    &#34;&#34;&#34;
+    return self.get_value(&#39;argocd-api&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_password"><code class="name">var <span class="ident">argocd_password</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The password for accessing the ArgoCD API</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def argocd_password(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str
+        The password for accessing the ArgoCD API
+    &#34;&#34;&#34;
+    return self.get_value(&#39;argocd-password&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_skip_tls"><code class="name">var <span class="ident">argocd_skip_tls</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True to ignore TLS issues when authenticating with ArgoCD</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def argocd_skip_tls(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    bool
+        True to ignore TLS issues when authenticating with ArgoCD
+    &#34;&#34;&#34;
+    return self.get_value(&#39;argocd-skip-tls&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_username"><code class="name">var <span class="ident">argocd_username</span></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The username for accessing the ArgoCD API</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def argocd_username(self):
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str
+        The username for accessing the ArgoCD API
+    &#34;&#34;&#34;
+    return self.get_value(&#39;argocd-username&#39;)</code></pre>
+</details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -1841,6 +2013,10 @@ users:
 <li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.GIT_REPO_REGEX" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.GIT_REPO_REGEX">GIT_REPO_REGEX</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_HEALTH_RETRIES" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_HEALTH_RETRIES">MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_HEALTH_RETRIES</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES">MAX_ATTEMPT_TO_WAIT_FOR_ARGOCD_OP_RETRIES</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_api" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_api">argocd_api</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_password" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_password">argocd_password</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_skip_tls" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_skip_tls">argocd_skip_tls</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_username" href="#ploigos_step_runner.step_implementers.shared.argocd_generic.ArgoCDGeneric.argocd_username">argocd_username</a></code></li>
 </ul>
 </li>
 </ul>
