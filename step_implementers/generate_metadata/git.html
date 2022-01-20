@@ -144,8 +144,8 @@ Will be ignored if Git repository url is using SSH.</td>
 <code>False</code> if should be considered a release.</td>
 </tr>
 <tr>
-<td><code>sha</code></td>
-<td>Current commit sha.</td>
+<td><code>commit-hash</code></td>
+<td>Current commit hash.</td>
 </tr>
 </tbody>
 </table>
@@ -204,7 +204,7 @@ Result Artifact Key | Description
 `branch`            | Current branch name.
 `is-pre-release`    | `True` if this build should be considered a pre-release, \
                       `False` if should be considered a release.
-`sha`               | Current commit sha.
+`commit-hash`       | Current commit hash.
 &#34;&#34;&#34;# pylint: disable=line-too-long
 
 import re
@@ -354,11 +354,11 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
                 step_result.message = f&#34;Error committing and pushing changes: {error}&#34;
                 return step_result
 
-        # add commit sha artifact
+        # add commit hash artifact
         try:
             git_branch_last_commit_sha = str(repo.head.reference.commit)
             step_result.add_artifact(
-                name=&#39;sha&#39;,
+                name=&#39;commit-hash&#39;,
                 value=git_branch_last_commit_sha
             )
         except ValueError:
@@ -553,11 +553,11 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
                 step_result.message = f&#34;Error committing and pushing changes: {error}&#34;
                 return step_result
 
-        # add commit sha artifact
+        # add commit hash artifact
         try:
             git_branch_last_commit_sha = str(repo.head.reference.commit)
             step_result.add_artifact(
-                name=&#39;sha&#39;,
+                name=&#39;commit-hash&#39;,
                 value=git_branch_last_commit_sha
             )
         except ValueError:
