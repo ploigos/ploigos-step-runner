@@ -74,7 +74,7 @@ Results artifacts output by this step.
 Result Artifact Key            | Description
 -------------------------------|------------
 `version`                      | Full constructured semantic version
-`container-image-tag`          | Constructed semenatic version without build identifier since not compatible with container image tags
+`container-image-tag`          | Constructed semantic version without build identifier since not compatible with container image tags
 `semantic-version-core`        | Semantic version version core portion
 `semantic-version-pre-release` | Semantic version version pre-release portion
 `semantic-version-build`       | Semantic version version build portion
@@ -174,7 +174,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         step_result.add_artifact(
             name='container-image-tag',
             value=image_tag,
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         step_result.add_artifact(
@@ -204,7 +204,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         step_result.add_evidence(
             name='container-image-tag',
             value=image_tag,
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 

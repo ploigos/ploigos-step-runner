@@ -86,7 +86,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -102,7 +102,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
@@ -142,7 +142,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1_mock1',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -163,7 +163,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1_mock1',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
@@ -204,7 +204,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1_-_mock1',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -225,7 +225,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1_-_mock1',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
@@ -266,7 +266,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1-feature-mock1',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -287,7 +287,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1-feature-mock1',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
@@ -330,7 +330,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -346,7 +346,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
@@ -387,7 +387,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_artifact(
             name='container-image-tag',
             value='0.42.1-feature-mock1_mock3',
-            description='Constructed semenatic version without build identifier' \
+            description='Constructed semantic version without build identifier' \
               ' since not compatible with container image tags'
         )
         expected_step_result.add_artifact(
@@ -413,7 +413,7 @@ class TestStepImplementerSemanticVersionGenerateMetadata__run_step(
         expected_step_result.add_evidence(
             name='container-image-tag',
             value='0.42.1-feature-mock1_mock3',
-            description='semenatic version without build identifier' \
+            description='semantic version without build identifier' \
                 ' since not compatible with container image tags'
         )
 
