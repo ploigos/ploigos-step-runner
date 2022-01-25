@@ -28,14 +28,22 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;`StepImplementers` for the `push-container-image` step.
-&#34;&#34;&#34;
+&#34;&#34;&#34;# pylint: disable=line-too-long
 
-from ploigos_step_runner.step_implementers.push_container_image.skopeo import Skopeo</code></pre>
+from ploigos_step_runner.step_implementers.push_container_image.pelorus_commit_timestamp_metric import \
+    PelorusCommitTimestampMetric
+from ploigos_step_runner.step_implementers.push_container_image.skopeo import \
+    Skopeo</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="ploigos_step_runner.step_implementers.push_container_image.pelorus_commit_timestamp_metric" href="pelorus_commit_timestamp_metric.html">ploigos_step_runner.step_implementers.push_container_image.pelorus_commit_timestamp_metric</a></code></dt>
+<dd>
+<div class="desc"><p><code>StepImplementer</code> to extend the <code>push-container-image</code> step to push the
+Pelorus Commit Timestamp metric to a Prometheus Pushgateway inlieuof the …</p></div>
+</dd>
 <dt><code class="name"><a title="ploigos_step_runner.step_implementers.push_container_image.skopeo" href="skopeo.html">ploigos_step_runner.step_implementers.push_container_image.skopeo</a></code></dt>
 <dd>
 <div class="desc"><p><code>StepImplementer</code> for the <code>push-container-image</code> step using Skopeo …</p></div>
@@ -62,6 +70,7 @@ from ploigos_step_runner.step_implementers.push_container_image.skopeo import Sk
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="ploigos_step_runner.step_implementers.push_container_image.pelorus_commit_timestamp_metric" href="pelorus_commit_timestamp_metric.html">ploigos_step_runner.step_implementers.push_container_image.pelorus_commit_timestamp_metric</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.push_container_image.skopeo" href="skopeo.html">ploigos_step_runner.step_implementers.push_container_image.skopeo</a></code></li>
 </ul>
 </li>

@@ -138,6 +138,7 @@ Configuration Key    | Required? | Default              | Description
                                                         | Git commit message to use when/if creating an automated git commit.
 &#34;&#34;&#34;# pylint: disable=line-too-long
 
+from datetime import timezone
 from urllib.parse import urlsplit, urlunsplit
 
 from git import InvalidGitRepositoryError, Repo
@@ -436,7 +437,20 @@ class GitMixin:
         except (GitCommandError, Exception) as error:
             raise StepRunnerException(
                 f&#34;Error creating git tag ({git_tag_value}): {error}&#34;
-            ) from error</code></pre>
+            ) from error
+
+    def git_commit_utc_timestamp(self):
+        &#34;&#34;&#34;Get the Git commit UTC timestamp.
+
+        Returns
+        -------
+        str
+            Git commit POSIX timestamp in UTC timezone.
+        &#34;&#34;&#34;
+        commit_datetime = self.git_repo.commit().committed_datetime
+        commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
+
+        return commit_utc_timestamp</code></pre>
 </details>
 </section>
 <section>
@@ -739,7 +753,20 @@ to StepImplementers that interact with Git.</p></div>
         except (GitCommandError, Exception) as error:
             raise StepRunnerException(
                 f&#34;Error creating git tag ({git_tag_value}): {error}&#34;
-            ) from error</code></pre>
+            ) from error
+
+    def git_commit_utc_timestamp(self):
+        &#34;&#34;&#34;Get the Git commit UTC timestamp.
+
+        Returns
+        -------
+        str
+            Git commit POSIX timestamp in UTC timezone.
+        &#34;&#34;&#34;
+        commit_datetime = self.git_repo.commit().committed_datetime
+        commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
+
+        return commit_utc_timestamp</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1043,6 +1070,34 @@ If error commiting changes to current branch.</dd>
         ) from error</code></pre>
 </details>
 </dd>
+<dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp"><code class="name flex">
+<span>def <span class="ident">git_commit_utc_timestamp</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the Git commit UTC timestamp.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Git commit POSIX timestamp in UTC timezone.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def git_commit_utc_timestamp(self):
+    &#34;&#34;&#34;Get the Git commit UTC timestamp.
+
+    Returns
+    -------
+    str
+        Git commit POSIX timestamp in UTC timezone.
+    &#34;&#34;&#34;
+    commit_datetime = self.git_repo.commit().committed_datetime
+    commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
+
+    return commit_utc_timestamp</code></pre>
+</details>
+</dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push"><code class="name flex">
 <span>def <span class="ident">git_push</span></span>(<span>self)</span>
 </code></dt>
@@ -1195,6 +1250,7 @@ If error creating Git tag.</dd>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push">commit_changes_and_push</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user">configure_git_user</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes">git_commit_changes</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp">git_commit_utc_timestamp</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push">git_push</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags">git_push_tags</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo" href="#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo">git_repo</a></code></li>

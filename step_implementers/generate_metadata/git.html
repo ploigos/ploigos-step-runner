@@ -147,6 +147,10 @@ Will be ignored if Git repository url is using SSH.</td>
 <td><code>commit-hash</code></td>
 <td>Current commit hash.</td>
 </tr>
+<tr>
+<td><code>commit-utc-timestamp</code></td>
+<td>Current commit UTC POSIX timestamp.</td>
+</tr>
 </tbody>
 </table>
 <details class="source">
@@ -199,12 +203,13 @@ Result Artifacts
 ----------------
 Results artifacts output by this step.
 
-Result Artifact Key | Description
---------------------|------------
-`branch`            | Current branch name.
-`is-pre-release`    | `True` if this build should be considered a pre-release, \
-                      `False` if should be considered a release.
-`commit-hash`       | Current commit hash.
+Result Artifact Key    | Description
+-----------------------|------------
+`branch`               | Current branch name.
+`is-pre-release`       | `True` if this build should be considered a pre-release, \
+                         `False` if should be considered a release.
+`commit-hash`          | Current commit hash.
+`commit-utc-timestamp` | Current commit UTC POSIX timestamp.
 &#34;&#34;&#34;# pylint: disable=line-too-long
 
 import re
@@ -366,6 +371,12 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
             step_result.message = f&#39;Given Git repository root is a&#39; \
                 f&#39; git branch ({git_branch}) with no commit history.&#39;
             return step_result
+
+        # add commit timestamp
+        step_result.add_artifact(
+            name=&#39;commit-utc-timestamp&#39;,
+            value=self.git_commit_utc_timestamp()
+        )
 
         return step_result
 
@@ -566,6 +577,12 @@ class Git(StepImplementer, GitMixin):  # pylint: disable=too-few-public-methods
                 f&#39; git branch ({git_branch}) with no commit history.&#39;
             return step_result
 
+        # add commit timestamp
+        step_result.add_artifact(
+            name=&#39;commit-utc-timestamp&#39;,
+            value=self.git_commit_utc_timestamp()
+        )
+
         return step_result
 
     def __should_commit_changes_and_push(self, is_pre_release):
@@ -670,6 +687,7 @@ def step_implementer_config_defaults():
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.commit_changes_and_push">commit_changes_and_push</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user">configure_git_user</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes">git_commit_changes</a></code></li>
+<li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp">git_commit_utc_timestamp</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push">git_push</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags">git_push_tags</a></code></li>
 <li><code><a title="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo" href="../shared/git_mixin.html#ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo">git_repo</a></code></li>
