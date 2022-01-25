@@ -168,7 +168,7 @@ against the standard semver spec/regex it is simple enough to swap the <code>+</
 </tr>
 <tr>
 <td><code>container-image-tag</code></td>
-<td>Constructed semenatic version without build identifier since not compatible with container image tags</td>
+<td>Constructed semantic version without build identifier since not compatible with container image tags</td>
 </tr>
 <tr>
 <td><code>semantic-version-core</code></td>
@@ -264,7 +264,7 @@ Results artifacts output by this step.
 Result Artifact Key            | Description
 -------------------------------|------------
 `version`                      | Full constructured semantic version
-`container-image-tag`          | Constructed semenatic version without build identifier since not compatible with container image tags
+`container-image-tag`          | Constructed semantic version without build identifier since not compatible with container image tags
 `semantic-version-core`        | Semantic version version core portion
 `semantic-version-pre-release` | Semantic version version pre-release portion
 `semantic-version-build`       | Semantic version version build portion
@@ -364,7 +364,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         step_result.add_artifact(
             name=&#39;container-image-tag&#39;,
             value=image_tag,
-            description=&#39;Constructed semenatic version without build identifier&#39; \
+            description=&#39;Constructed semantic version without build identifier&#39; \
               &#39; since not compatible with container image tags&#39;
         )
         step_result.add_artifact(
@@ -394,7 +394,7 @@ class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-method
         step_result.add_evidence(
             name=&#39;container-image-tag&#39;,
             value=image_tag,
-            description=&#39;semenatic version without build identifier&#39; \
+            description=&#39;semantic version without build identifier&#39; \
                 &#39; since not compatible with container image tags&#39;
         )
 
@@ -571,7 +571,7 @@ semantic version from given input.</p></div>
         step_result.add_artifact(
             name=&#39;container-image-tag&#39;,
             value=image_tag,
-            description=&#39;Constructed semenatic version without build identifier&#39; \
+            description=&#39;Constructed semantic version without build identifier&#39; \
               &#39; since not compatible with container image tags&#39;
         )
         step_result.add_artifact(
@@ -601,7 +601,7 @@ semantic version from given input.</p></div>
         step_result.add_evidence(
             name=&#39;container-image-tag&#39;,
             value=image_tag,
-            description=&#39;semenatic version without build identifier&#39; \
+            description=&#39;semantic version without build identifier&#39; \
                 &#39; since not compatible with container image tags&#39;
         )
 
