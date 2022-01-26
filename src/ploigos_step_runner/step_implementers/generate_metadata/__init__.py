@@ -4,6 +4,8 @@
 from ploigos_step_runner.step_implementers.generate_metadata.commitizen import \
     Commitizen
 from ploigos_step_runner.step_implementers.generate_metadata.git import Git
+from ploigos_step_runner.step_implementers.generate_metadata.gitlab import \
+    GitLab
 from ploigos_step_runner.step_implementers.generate_metadata.jenkins import \
     Jenkins
 from ploigos_step_runner.step_implementers.generate_metadata.maven import Maven
