@@ -76,7 +76,7 @@ See <a href="https://maven.apache.org/ref/current/maven-embedder/cli.html">https
 <td><code>maven-additional-arguments</code></td>
 <td>No</td>
 <td><code>['-Dmaven.install.skip=true',
-'-Dmaven.test.skip=true'
+'-Dmaven.test.skip=true',
 '-DskipTests',
 '-DskipITs']</code></td>
 <td>List of additional arguments to use.
@@ -170,7 +170,7 @@ Configuration Key            | Required? | Default | Description
                             `False` to have the transfer progress printed.\
                             See https://maven.apache.org/ref/current/maven-embedder/cli.html
 `maven-additional-arguments` | No        | `[&#39;-Dmaven.install.skip=true&#39;, \
-                                             &#39;-Dmaven.test.skip=true&#39; \
+                                             &#39;-Dmaven.test.skip=true&#39;, \
                                              &#39;-DskipTests&#39;, \
                                              &#39;-DskipITs&#39;]` \
                                                    | List of additional arguments to use. \
@@ -209,7 +209,7 @@ from ploigos_step_runner.utils.maven import run_maven
 DEFAULT_CONFIG = {
     &#39;maven-additional-arguments&#39;: [
         &#39;-Dmaven.install.skip=true&#39;,
-        &#39;-Dmaven.test.skip=true&#39;
+        &#39;-Dmaven.test.skip=true&#39;,
         &#39;-DskipTests&#39;,
         &#39;-DskipITs&#39;
     ]
