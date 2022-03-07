@@ -452,8 +452,10 @@ class TestStepImplementerDeployArgoCD_validate_required_config_or_previous_step_
 @patch.object(ArgoCDDeploy, '_get_deployment_config_repo_tag', return_value='v0.42.0')
 @patch.object(ArgoCDDeploy, '_git_tag_and_push_deployment_config_repo')
 @patch.object(ArgoCDDeploy, '_argocd_add_target_cluster')
-@patch.object(ArgoCDGeneric, '_clone_repo', return_value='/does/not/matter')
-@patch.object(ArgoCDGeneric, '_git_commit_file')
+@patch('ploigos_step_runner.step_implementers.deploy.argocd_deploy.clone_repo')
+@patch('ploigos_step_runner.step_implementers.deploy.argocd_deploy.git_config')
+@patch('ploigos_step_runner.step_implementers.deploy.argocd_deploy.git_commit_file')
+@patch('ploigos_step_runner.step_implementers.deploy.argocd_deploy.git_checkout')
 @patch.object(ArgoCDGeneric, '_argocd_sign_in')
 @patch.object(ArgoCDGeneric, '_argocd_app_create_or_update')
 @patch.object(ArgoCDGeneric, '_argocd_app_sync')
@@ -477,7 +479,9 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock,
             argocd_app_create_or_update_mock,
             argocd_sign_in_mock,
+            git_checkout_mock,
             git_commit_file_mock,
+            git_config_mock,
             clone_repo_mock,
             argocd_add_target_cluster_mock,
             git_tag_and_push_deployment_config_repo_mock,
@@ -546,29 +550,43 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
+
             clone_repo_mock.assert_called_once_with(
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
-                repo_branch='feature/test',
-                git_email=step_config['git-email'],
-                git_name=step_config['git-name'],
                 username=None,
                 password=None
             )
+            git_config_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name']
+            )
+            git_checkout_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch='feature/test'
+            )
+
+            deployment_config_helm_chart_environment_values_file_path = os.path.join(
+                deployment_config_repo_dir,
+                'charts/foo/values-PROD.yaml'
+            )
+
             update_yaml_file_value_mock.assert_called_once_with(
-                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                file=deployment_config_helm_chart_environment_values_file_path,
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
                 value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
                 file_path='charts/foo/values-PROD.yaml',
-                repo_dir='/does/not/matter'
+                repo_dir=deployment_config_repo_dir
             )
+
             get_deployment_config_repo_tag_mock.assert_called_once_with()
             git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
                 deployment_config_repo=step_config['deployment-config-repo'],
-                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_dir=deployment_config_repo_dir,
                 deployment_config_repo_tag='v0.42.0',
                 force_push_tags=False
             )
@@ -616,7 +634,9 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock,
             argocd_app_create_or_update_mock,
             argocd_sign_in_mock,
+            git_checkout_mock,
             git_commit_file_mock,
+            git_config_mock,
             clone_repo_mock,
             argocd_add_target_cluster_mock,
             git_tag_and_push_deployment_config_repo_mock,
@@ -686,29 +706,43 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
+
             clone_repo_mock.assert_called_once_with(
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
-                repo_branch='feature/test',
-                git_email=step_config['git-email'],
-                git_name=step_config['git-name'],
                 username=None,
                 password=None
             )
+            git_config_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name']
+            )
+            git_checkout_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch='feature/test'
+            )
+
+            deployment_config_helm_chart_environment_values_file_path = os.path.join(
+                deployment_config_repo_dir,
+                'charts/foo/values-PROD.yaml'
+            )
+
             update_yaml_file_value_mock.assert_called_once_with(
-                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                file=deployment_config_helm_chart_environment_values_file_path,
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
                 value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
                 file_path='charts/foo/values-PROD.yaml',
-                repo_dir='/does/not/matter'
+                repo_dir=deployment_config_repo_dir
             )
+
             get_deployment_config_repo_tag_mock.assert_called_once_with()
             git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
                 deployment_config_repo=step_config['deployment-config-repo'],
-                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_dir=deployment_config_repo_dir,
                 deployment_config_repo_tag='v0.42.0',
                 force_push_tags=False
             )
@@ -752,7 +786,9 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock,
             argocd_app_create_or_update_mock,
             argocd_sign_in_mock,
+            git_checkout_mock,
             git_commit_file_mock,
+            git_config_mock,
             clone_repo_mock,
             argocd_add_target_cluster_mock,
             git_tag_and_push_deployment_config_repo_mock,
@@ -821,29 +857,43 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
+
             clone_repo_mock.assert_called_once_with(
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
-                repo_branch='feature/test',
-                git_email=step_config['git-email'],
-                git_name=step_config['git-name'],
                 username=None,
                 password=None
             )
+            git_config_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name']
+            )
+            git_checkout_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch='feature/test'
+            )
+
+            deployment_config_helm_chart_environment_values_file_path = os.path.join(
+                deployment_config_repo_dir,
+                'charts/foo/values-PROD.yaml'
+            )
+
             update_yaml_file_value_mock.assert_called_once_with(
-                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                file=deployment_config_helm_chart_environment_values_file_path,
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
                 value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
                 file_path='charts/foo/values-PROD.yaml',
-                repo_dir='/does/not/matter'
+                repo_dir=deployment_config_repo_dir
             )
+
             get_deployment_config_repo_tag_mock.assert_called_once_with()
             git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
                 deployment_config_repo=step_config['deployment-config-repo'],
-                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_dir=deployment_config_repo_dir,
                 deployment_config_repo_tag='v0.42.0',
                 force_push_tags=False
             )
@@ -891,7 +941,9 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock,
             argocd_app_create_or_update_mock,
             argocd_sign_in_mock,
+            git_checkout_mock,
             git_commit_file_mock,
+            git_config_mock,
             clone_repo_mock,
             argocd_add_target_cluster_mock,
             git_tag_and_push_deployment_config_repo_mock,
@@ -959,29 +1011,43 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
+
             clone_repo_mock.assert_called_once_with(
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
-                repo_branch='feature/test',
-                git_email=step_config['git-email'],
-                git_name=step_config['git-name'],
                 username=None,
                 password=None
             )
+            git_config_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                git_email=step_config['git-email'],
+                git_name=step_config['git-name']
+            )
+            git_checkout_mock.assert_called_once_with(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch='feature/test'
+            )
+
+            deployment_config_helm_chart_environment_values_file_path = os.path.join(
+                deployment_config_repo_dir,
+                'charts/foo/values-PROD.yaml'
+            )
+
             update_yaml_file_value_mock.assert_called_once_with(
-                file='/does/not/matter/charts/foo/values-PROD.yaml',
+                file=deployment_config_helm_chart_environment_values_file_path,
                 yq_path=step_config['deployment-config-helm-chart-values-file-image-tag-yq-path'],
                 value='mock-deploy-time-container-image-address'
             )
             git_commit_file_mock.assert_called_once_with(
                 git_commit_message='Updating values for deployment to PROD',
                 file_path='charts/foo/values-PROD.yaml',
-                repo_dir='/does/not/matter'
+                repo_dir=deployment_config_repo_dir
             )
+
             get_deployment_config_repo_tag_mock.assert_called_once_with()
             git_tag_and_push_deployment_config_repo_mock.assert_called_once_with(
                 deployment_config_repo=step_config['deployment-config-repo'],
-                deployment_config_repo_dir='/does/not/matter',
+                deployment_config_repo_dir=deployment_config_repo_dir,
                 deployment_config_repo_tag='v0.42.0',
                 force_push_tags=False
             )
@@ -1029,7 +1095,9 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
             argocd_app_sync_mock,
             argocd_app_create_or_update_mock,
             argocd_sign_in_mock,
+            git_checkout_mock,
             git_commit_file_mock,
+            git_config_mock,
             clone_repo_mock,
             argocd_add_target_cluster_mock,
             git_tag_and_push_deployment_config_repo_mock,
@@ -1085,17 +1153,18 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 step_implementer.work_dir_path,
                 'deployment-config-repo'
             )
+
             clone_repo_mock.assert_called_once_with(
                 repo_dir=deployment_config_repo_dir,
                 repo_url=step_config['deployment-config-repo'],
-                repo_branch='feature/test',
-                git_email=step_config['git-email'],
-                git_name=step_config['git-name'],
                 username=None,
                 password=None
             )
+
             update_yaml_file_value_mock.assert_not_called()
+            git_checkout_mock.assert_not_called()
             git_commit_file_mock.assert_not_called()
+            git_config_mock.assert_not_called()
             get_deployment_config_repo_tag_mock.assert_not_called()
             git_tag_and_push_deployment_config_repo_mock.assert_not_called()
             argocd_sign_in_mock.assert_not_called()
