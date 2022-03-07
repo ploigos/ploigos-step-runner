@@ -1,9 +1,9 @@
 import os
 import re
-from io import IOBase
 from unittest.mock import ANY, call, patch
 
 import sh
+
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.argocd_generic import \
     ArgoCDGeneric
@@ -29,6 +29,7 @@ class MockArgoCDGenericImpl(ArgoCDGeneric):
     def _run_step(self):
         pass
 
+
 class TestStepImplementerSharedArgoCDBase(BaseStepImplementerTestCase):
     def create_step_implementer(
         self,
@@ -44,6 +45,7 @@ class TestStepImplementerSharedArgoCDBase(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path,
             environment=environment
         )
+
 
 class TestStepImplementerSharedArgoCDGenericget_deployment_config_helm_chart_environment_values_file(
     TestStepImplementerSharedArgoCDBase
@@ -100,6 +102,7 @@ class TestStepImplementerSharedArgoCDGenericget_deployment_config_helm_chart_env
                 deployment_config_helm_chart_env_value_file,
                 'values-PROD.yaml'
             )
+
 
 class TestStepImplementerSharedArgoCDGenericupdate_yaml_file_value(TestStepImplementerSharedArgoCDBase):
     @patch('sh.yq', create=True)
@@ -195,8 +198,9 @@ class TestStepImplementerSharedArgoCDGenericupdate_yaml_file_value(TestStepImple
                         f"    v0.42.0-abc123 # written by ploigos-step-runner\n",
                     )
 
+
 class TestStepImplementerSharedArgoCDGenericgit_tag_and_push_deployment_config_repo(TestStepImplementerSharedArgoCDBase):
-    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    @patch('ploigos_step_runner.step_implementers.shared.argocd_generic.git_tag_and_push')
     def test_git_tag_and_push_deployment_config_repo_http(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -222,7 +226,7 @@ class TestStepImplementerSharedArgoCDGenericgit_tag_and_push_deployment_config_r
                 force_push_tags=False
             )
 
-    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    @patch('ploigos_step_runner.step_implementers.shared.argocd_generic.git_tag_and_push')
     def test_git_tag_and_push_deployment_config_repo_https(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -248,7 +252,7 @@ class TestStepImplementerSharedArgoCDGenericgit_tag_and_push_deployment_config_r
                 force_push_tags=False
             )
 
-    @patch.object(ArgoCDGeneric, '_git_tag_and_push')
+    @patch('ploigos_step_runner.step_implementers.shared.argocd_generic.git_tag_and_push')
     def test_git_tag_and_push_deployment_config_repo_ssh(self, git_tag_and_push_mock):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -378,6 +382,7 @@ class TestStepImplementerSharedArgoCDGenericget_app_name(TestStepImplementerShar
             app_name = step_implementer._get_app_name()
             self.assertEqual(app_name, 'test-org-test-app-test-service-feature-v0-1-2')
 
+
 class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestStepImplementerSharedArgoCDBase):
     def test_get_deployment_config_repo_tag_use_tag(self):
         with TempDirectory() as temp_dir:
@@ -437,6 +442,7 @@ class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestS
 
             deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
             self.assertEqual(deployment_config_repo_tag, 'v0.42.0-main+abc123.PROD')
+
 
 class TestStepImplementerSharedArgoCDGenericget_deployed_host_urls(TestStepImplementerSharedArgoCDBase):
     def __run__get_deployed_host_urls_test(
@@ -906,418 +912,6 @@ status:
             ]
         )
 
-class TestStepImplementerSharedArgoCDGenericclone_repo(TestStepImplementerSharedArgoCDBase):
-    @patch.object(sh, 'git')
-    def test_clone_repo_success_new_branch(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'Password'
-        ArgoCDGeneric._clone_repo(
-            repo_dir=repo_dir,
-            repo_url=repo_url,
-            repo_branch=repo_branch,
-            git_email=git_email,
-            git_name=git_name,
-            username=username,
-            password=password
-        )
-
-        git_mock.clone.assert_called_once_with(
-            repo_url,
-            repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-        git_mock.checkout.assert_called_once_with(
-            repo_branch,
-            _cwd=repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-        git_mock.config.assert_has_calls([
-            call(
-                'user.email',
-                git_email,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            ),
-            call(
-                'user.name',
-                git_name,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-        ])
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_success_new_branch_https(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'https://Test:Password@git.ploigos.xyz'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'Password'
-        repo_url_with_auth = 'https://git.ploigos.xyz'
-        ArgoCDGeneric._clone_repo(
-            repo_dir=repo_dir,
-            repo_url=repo_url_with_auth,
-            repo_branch=repo_branch,
-            git_email=git_email,
-            git_name=git_name,
-            username=username,
-            password=password
-        )
-
-        git_mock.clone.assert_called_once_with(
-            repo_url,
-            repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-        git_mock.checkout.assert_called_once_with(
-            repo_branch,
-            _cwd=repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-        git_mock.config.assert_has_calls([
-            call(
-                'user.email',
-                git_email,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            ),
-            call(
-                'user.name',
-                git_name,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-        ])
-
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_success_existing_branch(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'password'
-
-        git_mock.checkout.side_effect = [
-            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
-            None
-        ]
-
-        ArgoCDGeneric._clone_repo(
-            repo_dir=repo_dir,
-            repo_url=repo_url,
-            repo_branch=repo_branch,
-            git_email=git_email,
-            git_name=git_name,
-            username=username,
-            password=password
-        )
-
-        git_mock.clone.assert_called_once_with(
-            repo_url,
-            repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-        git_mock.checkout.assert_has_calls([
-            call(
-                repo_branch,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            ),
-            call(
-                '-b',
-                repo_branch,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-        ])
-        git_mock.config.assert_has_calls([
-            call(
-                'user.email',
-                git_email,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            ),
-            call(
-                'user.name',
-                git_name,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-        ])
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_fail_clone(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'password'
-
-        git_mock.clone.side_effect = create_sh_side_effect(
-            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git clone error')
-        )
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Error cloning repository \({repo_url}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git clone error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._clone_repo(
-                repo_dir=repo_dir,
-                repo_url=repo_url,
-                repo_branch=repo_branch,
-                git_email=git_email,
-                git_name=git_name,
-                username=username,
-                password=password
-            )
-
-            git_mock.clone.assert_called_once_with(
-                repo_url,
-                repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-            git_mock.checkout.assert_not_called()
-            git_mock.config.assert_not_called()
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_fail_existing_branch(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'password'
-
-        git_mock.checkout.side_effect = [
-            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout branch does not exist'),
-            sh.ErrorReturnCode('git', b'mock out', b'mock git checkout new branch error'),
-        ]
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Unexpected error checking out new or existing branch \({repo_branch}\)"
-                rf" from repository \({repo_url}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git checkout new branch error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._clone_repo(
-                repo_dir=repo_dir,
-                repo_url=repo_url,
-                repo_branch=repo_branch,
-                git_email=git_email,
-                git_name=git_name,
-                username=username,
-                password=password
-            )
-
-            git_mock.clone.assert_called_once_with(
-                repo_url,
-                repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-            git_mock.checkout.assert_has_calls([
-                call(
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                ),
-                call(
-                    '-b',
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                )
-            ])
-            git_mock.config.assert_not_called()
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_fail_config_email(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'password'
-
-        git_mock.config.side_effect = [
-            sh.ErrorReturnCode('git', b'mock out', b'mock git config email error'),
-            None
-        ]
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Unexpected error configuring git user.email \({git_email}\)"
-                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
-                rf" in directory \({repo_dir}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git config email error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._clone_repo(
-                repo_dir=repo_dir,
-                repo_url=repo_url,
-                repo_branch=repo_branch,
-                git_email=git_email,
-                git_name=git_name,
-                username=username,
-                password=password
-            )
-
-            git_mock.clone.assert_called_once_with(
-                repo_url,
-                repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-            git_mock.checkout.assert_has_calls([
-                call(
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                ),
-                call(
-                    '-b',
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                )
-            ])
-            git_mock.config.assert_called_once_with(
-                'user.email',
-                git_email,
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-
-    @patch.object(sh, 'git')
-    def test_clone_repo_fail_config_name(self, git_mock):
-        repo_dir = '/does/not/matter'
-        repo_url = 'git@git.ploigos.xyz:/foo/test.git'
-        repo_branch = 'feature/test'
-        git_email = 'test@ploigos.xyz'
-        git_name = 'Test Robot'
-        username = 'Test'
-        password = 'password'
-
-        git_mock.config.side_effect = [
-            None,
-            sh.ErrorReturnCode('git', b'mock out', b'mock git config name error')
-        ]
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Unexpected error configuring git user.email \({git_email}\)"
-                rf" and user.name \({git_name}\) for repository \({repo_url}\)"
-                rf" in directory \({repo_dir}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git config name error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._clone_repo(
-                repo_dir=repo_dir,
-                repo_url=repo_url,
-                repo_branch=repo_branch,
-                git_email=git_email,
-                git_name=git_name,
-                username=username,
-                password=password
-            )
-
-            git_mock.clone.assert_called_once_with(
-                repo_url,
-                repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-            git_mock.checkout.assert_has_calls([
-                call(
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                ),
-                call(
-                    '-b',
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                )
-            ])
-            git_mock.config.assert_has_calls([
-                call(
-                    'user.email',
-                    git_email,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                ),
-                call(
-                    'user.name',
-                    git_name,
-                    _cwd=repo_dir,
-                    _out=ANY,
-                    _err=ANY
-                )
-            ])
 
 class TestStepImplementerSharedArgoCDGenericget_repo_branch(TestStepImplementerSharedArgoCDBase):
     def test_get_repo_branch_success(self):
@@ -1341,327 +935,6 @@ class TestStepImplementerSharedArgoCDGenericget_repo_branch(TestStepImplementerS
             # validate
             self.assertEqual(repo_branch, 'feature/test')
 
-class TestStepImplementerSharedArgoCDGenericgit_tag_and_push(TestStepImplementerSharedArgoCDBase):
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_success_ssh(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = None
-        ArgoCDGeneric._git_tag_and_push(
-            repo_dir=repo_dir,
-            tag=tag,
-            url=url
-        )
-
-        git_mock.push.assert_has_calls([
-            call(
-                _cwd=repo_dir,
-                _out=ANY
-            ),
-            call(
-                '--tag',
-                _cwd=repo_dir,
-                _out=ANY
-            )
-        ])
-        git_mock.tag.assert_called_once_with(
-            tag,
-            '-f',
-            _cwd=repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_success_https_url(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = 'https://user:pass@git.ploigos.xyz'
-        ArgoCDGeneric._git_tag_and_push(
-            repo_dir=repo_dir,
-            tag=tag,
-            url=url
-        )
-
-        git_mock.push.bake().assert_has_calls([
-            call(
-                _cwd=repo_dir,
-                _out=ANY
-            ),
-            call(
-                '--tag',
-                _cwd=repo_dir,
-                _out=ANY
-            )
-        ])
-        git_mock.tag.assert_called_once_with(
-            tag,
-            '-f',
-            _cwd=repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_fail_commit(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = None
-
-        git_mock.push.side_effect = [
-            sh.ErrorReturnCode('git', b'mock out', b'mock git push error'),
-            create_sh_side_effect()
-        ]
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Error pushing commits from repository directory \({repo_dir}\) to"
-                rf" repository \({url}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git push error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._git_tag_and_push(
-                repo_dir=repo_dir,
-                tag=tag,
-                url=url
-            )
-
-            git_mock.push.assert_has_calls([
-                call(
-                    _cwd=repo_dir,
-                    _out=ANY
-                )
-            ])
-
-            git_mock.tag.assert_not_called()
-
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_fail_tag(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = None
-
-        git_mock.tag.side_effect = sh.ErrorReturnCode('git', b'mock out', b'mock git tag error')
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Error tagging repository \({repo_dir}\) with tag \({tag}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git tag error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._git_tag_and_push(
-                repo_dir=repo_dir,
-                tag=tag,
-                url=url
-            )
-
-            git_mock.push.assert_called_once_with(
-                _cwd=repo_dir,
-                _out=ANY
-            )
-
-            git_mock.tag.assert_called_once_with(
-                tag,
-                '-f',
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_fail_push_tag(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = None
-
-        git_mock.push.side_effect = [
-            create_sh_side_effect(),
-            sh.ErrorReturnCode('git', b'mock out', b'mock git push tag error')
-        ]
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                rf"Error pushing tags from repository directory \({repo_dir}\) to"
-                rf" repository \({url}\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git push tag error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._git_tag_and_push(
-                repo_dir=repo_dir,
-                tag=tag,
-                url=url
-            )
-
-            git_mock.push.bake().assert_has_calls([
-                call(
-                    _cwd=repo_dir,
-                    _out=ANY
-                ),
-                call(
-                    '--tag',
-                    _cwd=repo_dir,
-                    _out=ANY
-                )
-            ])
-
-            git_mock.tag.assert_called_once_with(
-                tag,
-                '-f',
-                _cwd=repo_dir,
-                _out=ANY,
-                _err=ANY
-            )
-
-    @patch.object(sh, 'git')
-    def test_git_tag_and_push_override_tls(self, git_mock):
-        repo_dir = '/does/not/matter'
-        tag = 'v0.42.0'
-        url = None
-        ArgoCDGeneric._git_tag_and_push(
-            repo_dir=repo_dir,
-            tag=tag,
-            url=url,
-            force_push_tags=True
-        )
-
-        git_mock.push.assert_has_calls([
-            call(
-                _cwd=repo_dir,
-                _out=ANY
-            ),
-            call(
-                '--tag',
-                '--force',
-                _cwd=repo_dir,
-                _out=ANY
-            )
-        ])
-        git_mock.tag.assert_called_once_with(
-            tag,
-            '-f',
-            _cwd=repo_dir,
-            _out=ANY,
-            _err=ANY
-        )
-
-
-class TestStepImplementerSharedArgoCDGenericgit_commit_file(TestStepImplementerSharedArgoCDBase):
-    @patch.object(sh, 'git')
-    def test_git_commit_file_success(self, git_mock):
-        ArgoCDGeneric._git_commit_file(
-            git_commit_message='hello world',
-            file_path='charts/foo/values-DEV.yaml',
-            repo_dir='/does/not/matter'
-        )
-
-        git_mock.add.assert_called_once_with(
-            'charts/foo/values-DEV.yaml',
-            _cwd='/does/not/matter',
-            _out=ANY,
-            _err=ANY
-        )
-
-        git_mock.commit.assert_called_once_with(
-            '--allow-empty',
-            '--all',
-            '--message', 'hello world',
-            _cwd='/does/not/matter',
-            _out=ANY,
-            _err=ANY
-        )
-
-    @patch.object(sh, 'git')
-    def test_git_commit_file_fail_add(self, git_mock):
-        git_mock.add.side_effect = create_sh_side_effect(
-            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git add error')
-        )
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                r"Unexpected error adding file \(charts/foo/values-DEV.yaml\) to commit"
-                r" in git repository \(/does/not/matter\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git add error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._git_commit_file(
-                git_commit_message='hello world',
-                file_path='charts/foo/values-DEV.yaml',
-                repo_dir='/does/not/matter'
-            )
-
-            git_mock.add.assert_called_once_with(
-                'charts/foo/values-DEV.yaml',
-                _cwd='/does/not/matter',
-                _out=ANY,
-                _err=ANY
-            )
-
-            git_mock.commit.assert_not_called()
-
-    @patch.object(sh, 'git')
-    def test_git_commit_file_fail_commit(self, git_mock):
-        git_mock.commit.side_effect = create_sh_side_effect(
-            exception=sh.ErrorReturnCode('git', b'mock out', b'mock git commit error')
-        )
-
-        with self.assertRaisesRegex(
-            StepRunnerException,
-            re.compile(
-                r"Unexpected error commiting file \(charts/foo/values-DEV.yaml\)"
-                r" in git repository \(/does/not/matter\):"
-                r".*RAN: git"
-                r".*STDOUT:"
-                r".*mock out"
-                r".*STDERR:"
-                r".*mock git commit error",
-                re.DOTALL
-            )
-        ):
-            ArgoCDGeneric._git_commit_file(
-                git_commit_message='hello world',
-                file_path='charts/foo/values-DEV.yaml',
-                repo_dir='/does/not/matter'
-            )
-
-            git_mock.add.assert_called_once_with(
-                'charts/foo/values-DEV.yaml',
-                _cwd='/does/not/matter',
-                _out=ANY,
-                _err=ANY
-            )
-
-            git_mock.commit.assert_called_once_with(
-                '--allow-empty',
-                '--all',
-                '--message', 'hello world',
-                _cwd='/does/not/matter',
-                _out=ANY,
-                _err=ANY
-            )
 
 class TestStepImplementerSharedArgoCDGenericArgoCD_sign_in(TestStepImplementerSharedArgoCDBase):
     @patch('sh.argocd', create=True)
@@ -1743,6 +1016,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_sign_in(TestStepImplementerSh
                 _out=ANY,
                 _err=ANY
             )
+
 
 class TestStepImplementerSharedArgoCDGenericArgoCD_add_target_cluster(TestStepImplementerSharedArgoCDBase):
     @patch('sh.argocd', create=True)
@@ -2166,6 +1440,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             _out=ANY,
             _err=ANY
         )
+
 
 @patch.object(ArgoCDGeneric, '_argocd_app_wait_for_health')
 @patch.object(ArgoCDGeneric, '_argocd_app_wait_for_operation')

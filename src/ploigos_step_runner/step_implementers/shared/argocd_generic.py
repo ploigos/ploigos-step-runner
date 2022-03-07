@@ -10,6 +10,7 @@ import sh
 import yaml
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
+from ploigos_step_runner.utils.git import (clone_repo, git_tag_and_push, get_git_repo_regex)
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
@@ -23,7 +24,6 @@ class ArgoCDGeneric(StepImplementer):
     """Abstract parent class for StepImplementers that use ArgoCD.
     """
 
-    GIT_REPO_REGEX = re.compile(r"(?P<protocol>^https:\/\/|^http:\/\/)?(?P<address>.*$)")
     ARGOCD_OP_IN_PROGRESS_REGEX = re.compile(
         r'.*FailedPrecondition.*another\s+operation\s+is\s+already\s+in\s+progress',
         re.DOTALL
@@ -110,7 +110,7 @@ class ArgoCDGeneric(StepImplementer):
         deployment_config_repo_tag,
         force_push_tags
     ):
-        deployment_config_repo_match = ArgoCDGeneric.GIT_REPO_REGEX.match(deployment_config_repo)
+        deployment_config_repo_match = get_git_repo_regex().match(deployment_config_repo)
         deployment_config_repo_protocol = deployment_config_repo_match.groupdict()['protocol']
         deployment_config_repo_address = deployment_config_repo_match.groupdict()['address']
 
@@ -126,14 +126,14 @@ class ArgoCDGeneric(StepImplementer):
             deployment_config_repo_with_user_pass = \
                 f"{deployment_config_repo_protocol}{username}:{password}" \
                 f"@{deployment_config_repo_address}"
-            ArgoCDGeneric._git_tag_and_push(
+            git_tag_and_push(
                 repo_dir=deployment_config_repo_dir,
                 tag=deployment_config_repo_tag,
                 url=deployment_config_repo_with_user_pass,
                 force_push_tags=force_push_tags
             )
         else:
-            ArgoCDGeneric._git_tag_and_push(
+            git_tag_and_push(
                 repo_dir=deployment_config_repo_dir,
                 tag=deployment_config_repo_tag,
                 force_push_tags=force_push_tags
@@ -294,215 +294,8 @@ class ArgoCDGeneric(StepImplementer):
 
         return host_urls
 
-    @staticmethod
-    def _clone_repo( # pylint: disable=too-many-arguments
-        repo_dir,
-        repo_url,
-        repo_branch,
-        git_email,
-        git_name,
-	  username=None,
-	  password=None
-    ):
-        """Clones and checks out the deployment configuration repository.
-
-        Parameters
-        ----------
-        repo_dir : str
-            Path to where to clone the repository
-        repo_uri : str
-            URI of the repository to clone.
-        git_email : str
-            email to use when performing git operations in the cloned repository
-        git_name : str
-            name to use when performing git operations in the cloned repository
-
-        Returns
-        -------
-        str
-            Path to the directory where the deployment configuration repository was cloned
-            and checked out.
-
-        Raises
-        ------
-        StepRunnerException
-        * if error cloning repository
-        * if error checking out branch of repository
-        * if error configuring repo user
-        """
-        repo_match = ArgoCDGeneric.GIT_REPO_REGEX.match(repo_url)
-        repo_protocol = repo_match.groupdict()['protocol']
-        repo_address = repo_match.groupdict()['address']
-        # if deployment config repo uses http/https push using user/pass
-        # else push using ssh
-        if username and password and repo_protocol and re.match(
-            r'^http://|^https://',
-            repo_protocol
-        ):
-            repo_url_with_auth = \
-                f"{repo_protocol}{username}:{password}" \
-                f"@{repo_address}"
-        else:
-            repo_url_with_auth = repo_url
-        try:
-            sh.git.clone( # pylint: disable=no-member
-                repo_url_with_auth,
-                repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error cloning repository ({repo_url}): {error}"
-            ) from error
-
-        try:
-            # no atomic way in git to checkout out new or existing branch,
-            # so first try to check out existing, if that doesn't work try new
-            try:
-                sh.git.checkout(  # pylint: disable=no-member
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
-            except sh.ErrorReturnCode:
-                sh.git.checkout(
-                    '-b',
-                    repo_branch,
-                    _cwd=repo_dir,
-                    _out=sys.stdout,
-                    _err=sys.stderr
-                )
-        except sh.ErrorReturnCode as error:
-            # NOTE: this should never happen
-            raise StepRunnerException(
-                f"Unexpected error checking out new or existing branch ({repo_branch})"
-                f" from repository ({repo_url}): {error}"
-            ) from error
-
-        try:
-            sh.git.config( # pylint: disable=no-member
-                'user.email',
-                git_email,
-                _cwd=repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-            sh.git.config( # pylint: disable=no-member
-                'user.name',
-                git_name,
-                _cwd=repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            # NOTE: this should never happen
-            raise StepRunnerException(
-                f"Unexpected error configuring git user.email ({git_email})"
-                f" and user.name ({git_name}) for repository ({repo_url})"
-                f" in directory ({repo_dir}): {error}"
-            ) from error
-
-        return repo_dir
-
     def _get_repo_branch(self):
         return self.get_value('branch')
-
-    @staticmethod
-    def _git_tag_and_push(repo_dir, tag, url=None, force_push_tags=False):
-        """
-        Raises
-        ------
-        StepRunnerException
-        * if error pushing commits
-        * if error tagging repository
-        * if error pushing tags
-        """
-
-        git_push = sh.git.push.bake(url) if url else sh.git.push
-
-        # push commits
-        try:
-            git_push(
-                _cwd=repo_dir,
-                _out=sys.stdout
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error pushing commits from repository directory ({repo_dir}) to"
-                f" repository ({url}): {error}"
-            ) from error
-
-        # tag
-        try:
-            # NOTE:
-            # this force is only needed locally in case of a re-run of the same pipeline
-            # without a fresh check out. You will notice there is no force on the push
-            # making this an acceptable work around to the issue since on the off chance
-            # actually overwriting a tag with a different comment, the push will fail
-            # because the tag will be attached to a different git hash.
-            sh.git.tag(  # pylint: disable=no-member
-                tag,
-                '-f',
-                _cwd=repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error tagging repository ({repo_dir}) with tag ({tag}): {error}"
-            ) from error
-
-        git_push_additional_arguments = []
-        if force_push_tags:
-            git_push_additional_arguments += ["--force"]
-
-        # push tag
-        try:
-            git_push(
-                '--tag',
-                *git_push_additional_arguments,
-                _cwd=repo_dir,
-                _out=sys.stdout
-            )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error pushing tags from repository directory ({repo_dir}) to"
-                f" repository ({url}): {error}"
-            ) from error
-
-    @staticmethod
-    def _git_commit_file(git_commit_message, file_path, repo_dir):
-        try:
-            sh.git.add( # pylint: disable=no-member
-                file_path,
-                _cwd=repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            # NOTE: this should never happen
-            raise StepRunnerException(
-                f"Unexpected error adding file ({file_path}) to commit"
-                f" in git repository ({repo_dir}): {error}"
-            ) from error
-
-        try:
-            sh.git.commit( # pylint: disable=no-member
-                '--allow-empty',
-                '--all',
-                '--message', git_commit_message,
-                _cwd=repo_dir,
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-        except sh.ErrorReturnCode as error:
-            # NOTE: this should never happen
-            raise StepRunnerException(
-                f"Unexpected error commiting file ({file_path})"
-                f" in git repository ({repo_dir}): {error}"
-            ) from error
 
     @staticmethod
     def _argocd_sign_in(
