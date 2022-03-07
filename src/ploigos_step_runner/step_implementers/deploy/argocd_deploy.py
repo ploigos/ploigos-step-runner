@@ -123,6 +123,7 @@ from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,
                                                           ContainerDeployMixin)
+from ploigos_step_runner.utils.git import *
 
 DEFAULT_CONFIG = {
     'argocd-sync-timeout-seconds': 60,
@@ -277,15 +278,22 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
 
             # clone the configuration repository
             print("Clone the configuration repository")
-            clone_repo_dir_name = 'deployment-config-repo'
-            deployment_config_repo_dir = self._clone_repo(
-                repo_dir=self.create_working_dir_sub_dir(clone_repo_dir_name),
+            deployment_config_repo_dir = self.create_working_dir_sub_dir('deployment-config-repo');
+
+            clone_repo(
+                repo_dir=deployment_config_repo_dir,
                 repo_url=deployment_config_repo,
-                repo_branch=deployment_config_repo_branch,
-                git_email=self.get_value('git-email'),
-                git_name=self.get_value('git-name'),
                 username = self.get_value('git-username'),
                 password = self.get_value('git-password')
+            )
+            git_config(
+                repo_dir=deployment_config_repo_dir,
+                git_email=self.get_value('git-email'),
+                git_name=self.get_value('git-name'),
+            )
+            git_checkout(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch=deployment_config_repo_branch,
             )
 
             # update values file, commit it, push it, and tag it
@@ -308,7 +316,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
             )
 
             print("Commit the updated environment values file")
-            self._git_commit_file(
+            git_commit_file(
                 git_commit_message=f'Updating values for deployment to {self.environment}',
                 file_path=os.path.join(
                     deployment_config_helm_chart_path,
@@ -316,6 +324,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 ),
                 repo_dir=deployment_config_repo_dir
             )
+
             print("Tag and push the updated environment values file")
             deployment_config_repo_tag = self._get_deployment_config_repo_tag()
             self._git_tag_and_push_deployment_config_repo(
