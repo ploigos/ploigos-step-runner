@@ -10,7 +10,7 @@ import sh
 import yaml
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.utils.git import (clone_repo, git_tag_and_push, get_git_repo_regex)
+from ploigos_step_runner.utils.git import (git_tag_and_push, get_git_repo_regex)
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 

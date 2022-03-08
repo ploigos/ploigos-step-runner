@@ -1,5 +1,9 @@
 """A mixin class designed to add shared functionality to StepImplementers that interact with Git.
 
+NOTE: There is heavy overlap between this class and the git utils. An architectural decision needs
+      to be made on composition vs. multiple inheritance for gaining consistency between unrelated
+      step implementers that require the same configuration parameters / behaviors.
+
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
