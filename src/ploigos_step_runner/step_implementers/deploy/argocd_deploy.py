@@ -123,7 +123,7 @@ from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,
                                                           ContainerDeployMixin)
-from ploigos_step_runner.utils.git import *
+from ploigos_step_runner.utils.git import clone_repo, git_config, git_checkout, git_commit_file
 
 DEFAULT_CONFIG = {
     'argocd-sync-timeout-seconds': 60,
@@ -278,7 +278,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
 
             # clone the configuration repository
             print("Clone the configuration repository")
-            deployment_config_repo_dir = self.create_working_dir_sub_dir('deployment-config-repo');
+            deployment_config_repo_dir = self.create_working_dir_sub_dir('deployment-config-repo')
 
             clone_repo(
                 repo_dir=deployment_config_repo_dir,

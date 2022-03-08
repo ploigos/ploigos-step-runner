@@ -1,4 +1,8 @@
 """Shared utils for git operations.
+
+NOTE: There is heavy overlap between this class and `GitMixin`. An architectural decision needs
+      to be made on composition vs. multiple inheritance for gaining consistency between unrelated
+      step implementers that require the same configuration parameters / behaviors.
 """
 
 import re
@@ -14,27 +18,23 @@ def clone_repo(  # pylint: disable=too-many-arguments
     username=None,
     password=None
 ):
-    """Clones and checks out the deployment configuration repository.
+    """Clones the repository specified in repo_url.
 
     Parameters
     ----------
     repo_dir : str
         Path to where to clone the repository
-    repo_uri : str
+    repo_url : str
         URI of the repository to clone.
-
-    Returns
-    -------
-    str
-        Path to the directory where the deployment configuration repository was cloned
-        and checked out.
+    username : str
+        Username for the remote git repo (if required)
+    password : str
+        Password for the remote git repo (if required)
 
     Raises
     ------
     StepRunnerException
     * if error cloning repository
-    * if error checking out branch of repository
-    * if error configuring repo user
     """
     repo_match = get_git_repo_regex().match(repo_url)
     repo_protocol = repo_match.groupdict()['protocol']
@@ -113,6 +113,20 @@ def git_checkout(
     repo_dir,
     repo_branch
 ):
+    """Checks out a specifc branch in the given git repository.
+
+    Parameters
+    ----------
+    repo_dir : str
+        Path to an existing git repository
+    repo_branch : str
+        The branch to checkout.
+
+    Raises
+    ------
+    StepRunnerException
+    * if error checking out branch of repository
+    """
     try:
         # no atomic way in git to checkout out new or existing branch,
         # so first try to check out existing, if that doesn't work try new
@@ -143,6 +157,24 @@ def git_commit_file(
     file_path,
     repo_dir
 ):
+    """Adds and commits a file.
+    NOTE: In the future, this should be split between two methods, to allow adding multiple files
+          before committing.
+
+    Parameters
+    ----------
+    git_commit_message : str
+        The message to apply on commit.
+    file_path : str
+        The file to commit.
+    repo_dir : str
+        Path to an existing git repository.
+
+    Raises
+    ------
+    StepRunnerException
+    * if error adding or committing the file
+    """
     try:
         sh.git.add( # pylint: disable=no-member
             file_path,
@@ -179,7 +211,21 @@ def git_tag_and_push(
     url=None,
     force_push_tags=False
 ):
-    """
+    """Tags a commit and pushes it.
+    NOTE: In the future, this should be split between two methods, to allow additional actions
+          after tagging without requiring multiple pushes.
+
+    Parameters
+    ----------
+    repo_dir : str
+        Path to an existing git repository.
+    tag : str
+        Tag (label) to apply.
+    url : str
+        URI of git repo, if different than the default as configured under repo_dir.
+    force_push_tags : bool
+        Whether to force push when history between the local and remote branch differs.
+
     Raises
     ------
     StepRunnerException
@@ -241,4 +287,11 @@ def git_tag_and_push(
         ) from error
 
 def get_git_repo_regex():
+    """Getter for the StepImplementer's configuration defaults.
+
+    Returns
+    -------
+    str
+        The regex representing a valid git repo URI.
+    """
     return GIT_REPO_REGEX
