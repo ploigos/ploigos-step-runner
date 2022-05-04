@@ -1,5 +1,3 @@
-
-import http
 import os
 import urllib
 from unittest.mock import Mock, patch
@@ -8,7 +6,8 @@ from ploigos_step_runner.utils.file import (
     base64_encode, create_parent_dir,
     download_source_to_destination,
     download_and_decompress_source_to_destination, get_file_hash,
-    parse_yaml_or_json_file, upload_file)
+    parse_yaml_or_json_file, upload_file, is_compressed,
+    get_file_extension)
 from testfixtures import TempDirectory
 from tests.helpers.base_test_case import BaseTestCase
 
@@ -52,6 +51,7 @@ class TestParseYAMLOrJASONFile(BaseTestCase):
             r"Error parsing file \(.+\) as YAML or JSON:"
         ):
             parse_yaml_or_json_file(sample_file_path)
+
 
 class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
     def test_https_bz2(self):
@@ -144,6 +144,7 @@ class TestDownloadAndDecompressSourceToDestination(BaseTestCase):
                     destination_dir=test_dir.path
                 )
 
+
 class TestDownloadSourceToDestination(BaseTestCase):
     def test_https_xml(self):
         with TempDirectory() as test_dir:
@@ -220,6 +221,8 @@ class TestDownloadSourceToDestination(BaseTestCase):
                     source_uri="https://www.redhat.com/security/data/metrics/ds/v2/RHEL8/does-not-exist.ds.xml.bz2",
                     destination_dir=test_dir.path
                 )
+
+
 class TestUploadFile(BaseTestCase):
     def __create_http_response_side_effect(self, read_return):
         def http_response_side_effect(request):
@@ -401,6 +404,8 @@ class TestUploadFile(BaseTestCase):
                 file_path=sample_file_path,
                 destination_uri="https://ploigos.com/test/foo42"
             )
+
+
 class TestFileMisc(BaseTestCase):
     def test_create_parent_dir(self):
         with TempDirectory() as test_dir:
@@ -436,3 +441,44 @@ class TestFileMisc(BaseTestCase):
 
             result = get_file_hash(sample_file_path)
             self.assertEqual(result, '09daa01246aa5ee9c29f64f644627a0ea83247857dfea2665689e26b166eef47')
+
+    def test_get_file_extension(self):
+        """This test verifies that the extension of a file is correctly retrieved.
+        """
+
+        # Set up test / mock data
+        file_path = '/path/to/my/file.xml'
+
+        # Run the test
+        file_extension = get_file_extension(file_path)
+
+        # Verification of results
+        self.assertEqual(file_extension, '.xml')
+
+    def test_is_compressed_true(self):
+        """This test verifies that a file with an extension listed in the file
+        module's SUPPORTED_COMPRESSION_EXTENSIONS is recognized as compressed.
+        """
+
+        # Set up test / mock data
+        file_path = '/path/to/test-compressed-file.bz2'
+
+        # Run the test
+        compressed = is_compressed(file_path)
+
+        # Verification of results
+        self.assertTrue(compressed)
+
+    def test_is_compressed_false_unsupported(self):
+        """This test verifies that a file with an extension not listed in the file
+        module's SUPPORTED_COMPRESSION_EXTENSIONS is not recognized as compressed.
+        """
+
+        # Set up test / mock data
+        file_path = '/path/to/test-unsupported-but-compressed.iso'
+
+        # Run the test
+        compressed = is_compressed(file_path)
+
+        # Verification of results
+        self.assertFalse(compressed)
