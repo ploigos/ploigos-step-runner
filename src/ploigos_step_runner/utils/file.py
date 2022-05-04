@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 
 import yaml
 
+SUPPORTED_COMPRESSION_EXTENSIONS = ['.bz2']
 
 def parse_yaml_or_json_file(yaml_or_json_file):
     """
@@ -28,7 +29,7 @@ def parse_yaml_or_json_file(yaml_or_json_file):
     Returns
     -------
     dict
-        Dictionary parsed from given YAML or JSON file
+        Dictionary parsed from given YAML or JSON file.
 
     Raises
     ------
@@ -95,16 +96,10 @@ def download_source_to_destination(
         If source_uri does not start with file://|http://|https://
     """
 
-    # depending on the protocol type get the source_file into the working dir
-    if re.match(r'^file://|/', source_uri):
+    # depending on the protocol type, get the source_file into the working dir
+    if is_local_file_path(source_uri):
         # get the destination dir path
-        if re.match(r'^file://', source_uri):
-            # remove file:// and turn into an absolute path
-            source_uri_abs_path = os.path.abspath(
-                re.sub('^file://', '', source_uri)
-            )
-        else:
-            source_uri_abs_path = source_uri
+        source_uri_abs_path = normalize_file_path(source_uri)
 
         # copy the file to the working dir
         source_file_name = os.path.basename(source_uri_abs_path)
@@ -113,7 +108,7 @@ def download_source_to_destination(
             src=source_uri_abs_path,
             dst=destination_path
         )
-    elif re.match(r'^http://|^https://', source_uri):
+    elif is_remote_http_path(source_uri):
         # download the file to the working dir
         source_file_name = os.path.basename(source_uri)
         destination_path = os.path.join(destination_dir, source_file_name)
@@ -127,21 +122,23 @@ def download_source_to_destination(
             raise RuntimeError(f"Error downloading file ({source_uri}): {error}") from error
     else:
         # NOTE:
-        #   this should NEVER happen because of the logic in
-        #   _validate_required_config_or_previous_step_result_artifact_keys
-        #   but rather then failing silently need to do something.
+        #   Defensive coding; this case should NEVER happen, given the logic in
+        #   _validate_required_config_or_previous_step_result_artifact_keys; should this
+        #   case somehow be reached, raise an error instead of failing silently.
         raise ValueError(
             "Unexpected error, should have been caught by step validation."
             f" Source ({source_uri}) must start with known protocol (/|file://|http://|https://)."
         )
+
     return destination_path
 
 def download_and_decompress_source_to_destination(
     source_uri,
     destination_dir
 ):
-    """Given a source url using a known protocol downloads the file to a given destination
-    and decompresses it if known compression method.
+    """Given a source url using a known protocol, downloads the file to a given destination.
+    The file is also decompressed if the compression method is known; see `is_compressed` and
+    `decompress_file` methods for additional information.
 
     Notes
     -----
@@ -176,19 +173,8 @@ def download_and_decompress_source_to_destination(
 
     destination_path = download_source_to_destination(source_uri, destination_dir)
 
-    # if extension is .bz2, decompress, else assume file is fine as as is
-    file_path, file_extension = os.path.splitext(destination_path)
-    if file_extension == '.bz2':
-        # NOTE: file_path is whats left after removeing .bz2 from the end
-        with \
-                bz2.BZ2File(destination_path) as decompressed_source, \
-                open(file_path,"wb") as decompressed_destination:
-
-            shutil.copyfileobj(decompressed_source, decompressed_destination)
-
-            # NOTE: the compressed file was decompressed to file_path
-            #       therefor that is now the actual file we want
-            destination_path = file_path
+    if is_compressed(destination_path):
+        destination_path = decompress_file(destination_path)
 
     return destination_path
 
@@ -232,7 +218,12 @@ def get_file_hash(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def upload_file(file_path, destination_uri, username=None, password=None): # pylint: disable=too-many-locals
+def upload_file(
+    file_path,
+    destination_uri,
+    username=None,
+    password=None
+): # pylint: disable=too-many-locals
     """Uploads a given file to a given destination.
 
     Notes
@@ -274,62 +265,20 @@ def upload_file(file_path, destination_uri, username=None, password=None): # pyl
 
     upload_result = None
 
-    if re.match(r'^file://|/', destination_uri):
-        # get the destination dir path
-        if re.match(r'^file://', destination_uri):
-            # remove file:// and turn into an absolute path
-            destination_dir_path = os.path.abspath(
-                re.sub('^file://', '', destination_uri)
-            )
-        else:
-            destination_dir_path = destination_uri
-
-        # create the destination dir
-        os.makedirs(destination_dir_path, exist_ok=True)
-
-        # copy the file to the destination dir
-        destination_file_name = os.path.basename(file_path)
-        destination_path = os.path.join(destination_dir_path, destination_file_name)
-        shutil.copyfile(
-            src=file_path,
-            dst=destination_path
+    if is_local_file_path(destination_uri):
+        upload_result = copy_file(file_path, destination_uri)
+    elif is_remote_http_path(destination_uri):
+        upload_result = upload_file_to_http_target(
+            file_path,
+            destination_uri,
+            username,
+            password
         )
-
-        upload_result = destination_path
-    elif re.match(r'^http://|^https://', destination_uri):
-        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-
-        if username:
-            top_level_uri = urlparse(destination_uri).netloc
-            password_mgr.add_password(None, top_level_uri, username, password)
-            handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-            opener = urllib.request.build_opener(handler)
-        else:
-            opener = urllib.request.build_opener()
-
-        with open(file_path, 'rb') as file:
-            request = urllib.request.Request(url=destination_uri, data=file.read(), method='PUT',
-                                             headers={'Content-Type': 'application/octet-stream'})
-
-            try:
-                result = opener.open(request)
-                response_reason = result.reason
-                response_body = str(result.read(), encoding='utf8')
-                response_code = result.status
-                upload_result = f"status={response_code}, " \
-                                f"reason={response_reason}, " \
-                                f"body={response_body}"
-            except urllib.error.HTTPError as error:
-                raise RuntimeError(
-                    f"Error uploading file ({file_path}) to destination ({destination_uri})"
-                    f" with user name ({username}) and password ({password}): {error}"
-                ) from error
-
     else:
         # NOTE:
-        #   this should NEVER happen because of the logic in
-        #   _validate_required_config_or_previous_step_result_artifact_keys
-        #   but rather then failing silently need to do something.
+        #   Defensive coding; this case should NEVER happen, given the logic in
+        #   _validate_required_config_or_previous_step_result_artifact_keys; should this
+        #   case somehow be reached, raise an error instead of failing silently.
         raise ValueError(
             "Unexpected error, should have been caught by step validation."
             f" Destination ({destination_uri}) must start with known protocol"
@@ -337,3 +286,258 @@ def upload_file(file_path, destination_uri, username=None, password=None): # pyl
         )
 
     return upload_result
+
+def copy_file(
+    file_path,
+    destination_uri
+):
+    """Copies a given file to a destination on the local filesystem.
+
+    Notes
+    -----
+    Known source protocols
+    * /        - local file path
+    * file://  - local file path
+
+    Parameters
+    ----------
+    file_path : str
+        Path to file to upload.
+    destination_uri : str
+        URI to copy file to.
+
+    Returns
+    -------
+    str
+        The full path of the destination file.
+
+    Raises
+    ------
+    ValueError
+        If file_path does not exist.
+    """
+
+    # get the destination dir path
+    destination_dir_path = normalize_file_path(destination_uri)
+
+    # create the destination dir
+    os.makedirs(destination_dir_path, exist_ok=True)
+
+    # copy the file to the destination dir
+    destination_file_name = os.path.basename(file_path)
+    destination_path = os.path.join(destination_dir_path, destination_file_name)
+    shutil.copyfile(
+        src=file_path,
+        dst=destination_path
+    )
+
+    return destination_path
+
+def upload_file_to_http_target(
+    file_path,
+    destination_uri,
+    username=None,
+    password=None
+): # pylint: disable=too-many-locals
+    """Uploads a given file to a remote destination, using http.
+
+    Notes
+    -----
+    Known source protocols
+    * http://  - remote upload
+    * https:// - remote upload
+
+    Parameters
+    ----------
+    file_path : str
+        Path to file to upload.
+    destination_uri : str
+        URI to upload file to using http.
+    username : str, optional
+        Optional user name for http destination.
+    password : str, optional
+        Optional password for http destination.
+
+    Returns
+    -------
+    str
+        The response body.
+
+    Raises
+    ------
+    ValueError
+        If file_path does not exist.
+        If destination_uri does not start with /|file://|http://|https://
+    RuntimeError
+        If error uploading file.
+    """
+    upload_result = None
+
+    password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+
+    if username:
+        # create opener http basic authentication
+        top_level_uri = urlparse(destination_uri).netloc
+        password_mgr.add_password(None, top_level_uri, username, password)
+        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+        opener = urllib.request.build_opener(handler)
+    else:
+        # create a default opener
+        opener = urllib.request.build_opener()
+
+    with open(file_path, 'rb') as file:
+        request = urllib.request.Request(
+            url=destination_uri,
+            data=file.read(),
+            method='PUT',
+            headers={'Content-Type': 'application/octet-stream'})
+
+        try:
+            result = opener.open(request)
+
+            response_reason = result.reason
+            response_body = str(result.read(), encoding='utf8')
+            response_code = result.status
+
+            upload_result = f"status={response_code}, " \
+                            f"reason={response_reason}, " \
+                            f"body={response_body}"
+        except urllib.error.HTTPError as error:
+            raise RuntimeError(
+                f"Error uploading file ({file_path}) to destination ({destination_uri})"
+                f" with user name ({username}) and password ({password}): {error}"
+            ) from error
+
+    return upload_result
+
+def get_file_extension(file_uri):
+    """Given a file path, return only the extension of the file
+
+    Parameters
+    ----------
+    file_uri : string
+        File name (including full path) to a file
+
+    Returns
+    -------
+    str
+        The file extension (e.g., '.bz2' for '/tmp/data.xml.bz2').
+    """
+    _, file_extension = os.path.splitext(file_uri)
+
+    return file_extension
+
+def is_compressed(file_uri):
+    """Given a file path, determine if it the file is compressed using an algorithm that this class
+    recognizes and can handle; see `decompress_file` method for additional information.
+
+    Notes
+    -----
+    Known compression types
+    * bz2
+
+    Parameters
+    ----------
+    file_uri : string
+        File to check whether or not is in a supported compression format
+
+    Returns
+    -------
+    bool
+        True, if the file extension matches a support compression algorithm.
+    """
+    compressed = False
+
+    if get_file_extension(file_uri) in SUPPORTED_COMPRESSION_EXTENSIONS:
+        compressed = True
+
+    return compressed
+
+def decompress_file(file_uri):
+    """Decompresses a file; see `is_compressed` for additional information. This method
+    assumes that only a single file will reside inside the compressed archive (currently
+    a moot point, since the only supported algorithm at the moment, bz2, only allows
+    single files to be compressed).
+
+    Notes
+    -----
+    Known compression types
+    * bz2
+
+    Parameters
+    ----------
+    file_uri : path
+        Path to the file to decompress.
+
+    Returns
+    -------
+    str
+        Path to the decompressed file.
+    """
+
+    # file_path is the filename without the extension
+    file_path, file_extension = os.path.splitext(file_uri)
+
+    if file_extension == '.bz2':
+        with \
+                bz2.BZ2File(file_uri) as decompressed_source, \
+                open(file_path, "wb") as decompressed_destination:
+            shutil.copyfileobj(decompressed_source, decompressed_destination)
+
+            # NOTE: the compressed file was decompressed to file_path,
+            #       therefore that is now the actual file we want
+            file_uri = file_path
+
+    return file_uri
+
+def normalize_file_path(uri):
+    """Normalizes the file path, if necessary.
+
+    Parameters
+    ----------
+    uri : string
+        File path that may need to be normalized (e.g., removal of 'file://')
+
+    Returns
+    -------
+    str
+        The source_uri, normalized
+    """
+    if re.match(r'^file://', uri):
+        # remove file:// and turn into an absolute path
+        uri = os.path.abspath(
+            re.sub('^file://', '', uri)
+        )
+
+    return uri
+
+def is_local_file_path(uri):
+    """Determines whether or a not a given uri refers to a file on the local file system
+
+    Parameters
+    ----------
+    uri : string
+        File path to inspect
+
+    Returns
+    -------
+    bool
+        True, if source-uri is a local file (e.g., file:///path/to/file.xml)
+    """
+    return re.match(r'^file://|/', uri)
+
+def is_remote_http_path(uri):
+    """Determines whether or a not a given uri refers to a file location accessible via
+    the Hypertext Transfer Protocol
+
+    Parameters
+    ----------
+    uri : string
+        File path to inspect
+
+    Returns
+    -------
+    bool
+        True, if this is an http file (e.g., https://example.org/example.zip)
+    """
+    return re.match(r'^http://|^https://', uri)
