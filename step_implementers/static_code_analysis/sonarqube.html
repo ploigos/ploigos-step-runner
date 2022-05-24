@@ -46,7 +46,7 @@ Could come from:</p>
 <tr>
 <td><code>properties</code></td>
 <td>Yes</td>
-<td><code>./sonar-project.proerties</code></td>
+<td><code>./sonar-project.properties</code></td>
 <td>Existing properties file for SonarQube</td>
 </tr>
 <tr>
@@ -206,7 +206,8 @@ Could come from:
 
 Key                      | Required | Default                     | Description
 -------------------------|----------|-----------------------------|------------
-`properties`             | Yes      | `./sonar-project.proerties` | Existing properties file for SonarQube
+`properties`             | Yes      | `./sonar-project.properties` \
+                                                                  | Existing properties file for SonarQube
 `url`                    | Yes      |                             | SonarQube host url (sonar.host.url)
 `username`               | No       |                             | SonarQube username id (sonar.login)
 `password`               | No       |                             | SonarQube password
@@ -214,7 +215,7 @@ Key                      | Required | Default                     | Description
 `version`                | Yes      |                             | Version to use for the SonarQube \
                                                                     project version (sonar.projectVersion)
 `java-truststore`        | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
-                                                             to System.
+                                                                    to System.
 `project-key`            | No       |                             | SonarQube project key
 `sonar-analyze-branches` | No       | `False`                     | `True` to pass the `sonar.branch.name` property to SonarQube, \
                                                                     which can only be done if using SonarQube Developer Edition or above as per \

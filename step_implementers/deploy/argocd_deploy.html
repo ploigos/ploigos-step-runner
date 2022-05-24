@@ -462,6 +462,7 @@ from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import (ArgoCDGeneric,
                                                           ContainerDeployMixin)
+from ploigos_step_runner.utils.git import clone_repo, git_config, git_checkout, git_commit_file
 
 DEFAULT_CONFIG = {
     &#39;argocd-sync-timeout-seconds&#39;: 60,
@@ -616,15 +617,22 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
 
             # clone the configuration repository
             print(&#34;Clone the configuration repository&#34;)
-            clone_repo_dir_name = &#39;deployment-config-repo&#39;
-            deployment_config_repo_dir = self._clone_repo(
-                repo_dir=self.create_working_dir_sub_dir(clone_repo_dir_name),
+            deployment_config_repo_dir = self.create_working_dir_sub_dir(&#39;deployment-config-repo&#39;)
+
+            clone_repo(
+                repo_dir=deployment_config_repo_dir,
                 repo_url=deployment_config_repo,
-                repo_branch=deployment_config_repo_branch,
-                git_email=self.get_value(&#39;git-email&#39;),
-                git_name=self.get_value(&#39;git-name&#39;),
                 username = self.get_value(&#39;git-username&#39;),
                 password = self.get_value(&#39;git-password&#39;)
+            )
+            git_config(
+                repo_dir=deployment_config_repo_dir,
+                git_email=self.get_value(&#39;git-email&#39;),
+                git_name=self.get_value(&#39;git-name&#39;),
+            )
+            git_checkout(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch=deployment_config_repo_branch,
             )
 
             # update values file, commit it, push it, and tag it
@@ -647,7 +655,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
             )
 
             print(&#34;Commit the updated environment values file&#34;)
-            self._git_commit_file(
+            git_commit_file(
                 git_commit_message=f&#39;Updating values for deployment to {self.environment}&#39;,
                 file_path=os.path.join(
                     deployment_config_helm_chart_path,
@@ -655,6 +663,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 ),
                 repo_dir=deployment_config_repo_dir
             )
+
             print(&#34;Tag and push the updated environment values file&#34;)
             deployment_config_repo_tag = self._get_deployment_config_repo_tag()
             self._git_tag_and_push_deployment_config_repo(
@@ -879,15 +888,22 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
 
             # clone the configuration repository
             print(&#34;Clone the configuration repository&#34;)
-            clone_repo_dir_name = &#39;deployment-config-repo&#39;
-            deployment_config_repo_dir = self._clone_repo(
-                repo_dir=self.create_working_dir_sub_dir(clone_repo_dir_name),
+            deployment_config_repo_dir = self.create_working_dir_sub_dir(&#39;deployment-config-repo&#39;)
+
+            clone_repo(
+                repo_dir=deployment_config_repo_dir,
                 repo_url=deployment_config_repo,
-                repo_branch=deployment_config_repo_branch,
-                git_email=self.get_value(&#39;git-email&#39;),
-                git_name=self.get_value(&#39;git-name&#39;),
                 username = self.get_value(&#39;git-username&#39;),
                 password = self.get_value(&#39;git-password&#39;)
+            )
+            git_config(
+                repo_dir=deployment_config_repo_dir,
+                git_email=self.get_value(&#39;git-email&#39;),
+                git_name=self.get_value(&#39;git-name&#39;),
+            )
+            git_checkout(
+                repo_dir=deployment_config_repo_dir,
+                repo_branch=deployment_config_repo_branch,
             )
 
             # update values file, commit it, push it, and tag it
@@ -910,7 +926,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
             )
 
             print(&#34;Commit the updated environment values file&#34;)
-            self._git_commit_file(
+            git_commit_file(
                 git_commit_message=f&#39;Updating values for deployment to {self.environment}&#39;,
                 file_path=os.path.join(
                     deployment_config_helm_chart_path,
@@ -918,6 +934,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 ),
                 repo_dir=deployment_config_repo_dir
             )
+
             print(&#34;Tag and push the updated environment values file&#34;)
             deployment_config_repo_tag = self._get_deployment_config_repo_tag()
             self._git_tag_and_push_deployment_config_repo(

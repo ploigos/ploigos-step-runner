@@ -23,6 +23,9 @@
 </header>
 <section id="section-intro">
 <p>A mixin class designed to add shared functionality to StepImplementers that interact with Git.</p>
+<p>NOTE: There is heavy overlap between this class and the git utils. An architectural decision needs
+to be made on composition vs. multiple inheritance for gaining consistency between unrelated
+step implementers that require the same configuration parameters / behaviors.</p>
 <h2 id="step-configuration">Step Configuration</h2>
 <p>Step configuration expected as input to this step.
 Could come from:
@@ -107,6 +110,10 @@ Will be ignored if Git repository url is using SSH.</td>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;A mixin class designed to add shared functionality to StepImplementers that interact with Git.
+
+NOTE: There is heavy overlap between this class and the git utils. An architectural decision needs
+      to be made on composition vs. multiple inheritance for gaining consistency between unrelated
+      step implementers that require the same configuration parameters / behaviors.
 
 Step Configuration
 ------------------
