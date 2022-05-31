@@ -293,6 +293,66 @@ class TestStepImplementerMavenIntegrationTest__run_step(
                 test_report_dirs='/mock/test-results-dir'
             )
 
+    def test_success_with_report_dir_deployed_host_urls_list_multiple_entries_bad_target(
+        self,
+        mock_gather_evidence,
+        mock_get_test_report_dir,
+        mock_write_working_file,
+        mock_run_maven_step
+    ):
+        with TempDirectory() as test_dir:
+            # setup test
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            step_config = {
+                'pom-file': pom_file,
+                'target-host-url-maven-argument-name': 'mock.target-host-url-param',
+                'target-url-substring':'mock-app-3',
+                'deployed-host-urls': [
+                    'https://mock.ploigos.org/mock-app-1',
+                    'https://mock.ploigos.org/mock-app-2'
+                ]
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            # run test
+            actual_step_result = step_implementer._run_step()
+
+            # verify results
+            expected_step_result = StepResult(
+                step_name='unit-test',
+                sub_step_name='MavenIntegrationTest',
+                sub_step_implementer_name='MavenIntegrationTest'
+            )
+            expected_step_result.message = \
+                f"Given more then one deployed host URL ({step_config['deployed-host-urls']}) but no target substring" \
+                f" found, targeting first one (https://mock.ploigos.org/mock-app-1) for user acceptance test (UAT)."
+            expected_step_result.add_artifact(
+                description="Standard out and standard error from maven.",
+                name='maven-output',
+                value='/mock/mvn_output.txt'
+            )
+            expected_step_result.add_artifact(
+                description="Test report generated when running unit tests.",
+                name='test-report',
+                value='/mock/test-results-dir'
+            )
+            self.assertEqual(actual_step_result, expected_step_result)
+
+            mock_run_maven_step.assert_called_once_with(
+                mvn_output_file_path='/mock/mvn_output.txt',
+                step_implementer_additional_arguments=[
+                    '-Dmock.target-host-url-param=https://mock.ploigos.org/mock-app-1'
+                ]
+            )
+            mock_gather_evidence.assert_called_once_with(
+                step_result=Any(StepResult),
+                test_report_dirs='/mock/test-results-dir'
+            )
+
     def test_success_with_report_dir_deployed_host_urls_single(
         self,
         mock_gather_evidence,
