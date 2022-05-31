@@ -1466,6 +1466,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
         )
         mock_argocd.app.sync.assert_called_once_with(
             '--prune',
+            '--async',
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -1497,6 +1498,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
         )
         mock_argocd.app.sync.assert_called_once_with(
             '--prune',
+            '--async',
             '--timeout', 120,
             '--retry-limit', 4,
             'test',
@@ -1545,6 +1547,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
         )
         mock_argocd.app.sync.assert_called_once_with(
             '--prune',
+            '--async',
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -1596,6 +1599,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
             argocd_timeout_seconds=120
         )
         mock_argocd.app.sync.assert_called_once_with(
+            '--async',
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -1649,6 +1653,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
         mock_argocd.app.sync.assert_has_calls([
             call(
                 '--prune',
+                '--async',
                 '--timeout', 120,
                 '--retry-limit', 3,
                 'test',
@@ -1657,6 +1662,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
             ),
             call(
                 '--prune',
+                '--async',
                 '--timeout', 120,
                 '--retry-limit', 3,
                 'test',
@@ -1693,6 +1699,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
         )
         mock_argocd.app.sync.assert_called_once_with(
             '--prune',
+            '--async',
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -1749,6 +1756,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_sync(TestStepImplementerS
             argocd_timeout_seconds=120
         )
         mock_argocd.app.sync.assert_called_once_with(
+            '--async',
             '--timeout', 120,
             '--retry-limit', 3,
             'test',
@@ -1829,6 +1837,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
         # validate
         mock_argocd.app.wait.assert_called_once_with(
             'mock-app',
+            '--sync',
             '--health',
             '--timeout', 42,
             _out=ANY,
@@ -1865,6 +1874,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
         mock_argocd.app.wait.assert_has_calls([
             call(
                 'mock-app',
+                '--sync',
                 '--health',
                 '--timeout', 42,
                 _out=ANY,
@@ -1872,6 +1882,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
             ),
             call(
                 'mock-app',
+                '--sync',
                 '--health',
                 '--timeout', 42,
                 _out=ANY,
@@ -1909,6 +1920,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
         mock_argocd.app.wait.assert_has_calls([
             call(
                 'mock-app',
+                '--sync',
                 '--health',
                 '--timeout', 42,
                 _out=ANY,
@@ -1916,6 +1928,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
             ),
             call(
                 'mock-app',
+                '--sync',
                 '--health',
                 '--timeout', 42,
                 _out=ANY,
@@ -1958,6 +1971,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_argocd_app_wait_for_health(
         # validate
         mock_argocd.app.wait.assert_called_once_with(
             'mock-app',
+            '--sync',
             '--health',
             '--timeout', 42,
             _out=ANY,
