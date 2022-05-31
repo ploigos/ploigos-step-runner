@@ -35,6 +35,7 @@ Configuration Key            | Required? | Default | Description
                                                      but there is not standardized way for integration tests to receive that information. \
                                                      Therefor this parameter takes the name of a maven -D flag that should be set with the \
                                                      target host url to then be read by the integration tests.
+`target-url-substring`       | No        |         | If more than one url is deployed, define the substring of the one that should be targeted
 
 Result Artifacts
 ----------------
@@ -125,15 +126,27 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
 
         # NOTE:
         #   at some point may need to do smarter logic if a deployable has more then one deployed
-        #   host URL to do UAT against all of them, but for now, use first one as target of UAT
+        #   host URL to do UAT against all of them, but for now, search based on a string and use
+        #   that one, else default the first
         deployed_host_urls = self.get_value('deployed-host-urls')
         if isinstance(deployed_host_urls, list):
             target_host_url = deployed_host_urls[0]
+            target_substring = self.get_value('target-url-substring')
             if len(deployed_host_urls) > 1:
-                step_result.message = \
-                    f"Given more then one deployed host URL ({deployed_host_urls})," \
-                    f" targeting first one ({target_host_url}) for user acceptance test (UAT)."
-                print(step_result.message)
+                if target_substring:
+                    for deployed_host_url in deployed_host_urls:
+                        if deployed_host_url.find(target_substring) != -1:
+                            target_host_url = deployed_host_url
+                            step_result.message = \
+                            f"Given more then one deployed host URL ({deployed_host_urls}) and target" \
+                            f" substring ({target_substring}), selecting ({target_host_url}) for user" \
+                            f" acceptance test (UAT)."
+                            print(step_result.message)
+                else:
+                    step_result.message = \
+                    f"Given more then one deployed host URL ({deployed_host_urls}) but no target" \
+                    f" substring, targeting first one ({target_host_url}) for user acceptance test (UAT)."
+                    print(step_result.message)
         elif deployed_host_urls:
             target_host_url = deployed_host_urls
         else:
