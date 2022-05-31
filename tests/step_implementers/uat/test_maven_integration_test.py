@@ -173,7 +173,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
                 test_report_dirs='/mock/test-results-dir'
             )
 
-    def test_success_with_report_dir_deployed_host_urls_list_multiple_entries(
+    def test_success_with_report_dir_deployed_host_urls_list_multiple_entries_no_target(
         self,
         mock_gather_evidence,
         mock_get_test_report_dir,
@@ -207,7 +207,7 @@ class TestStepImplementerMavenIntegrationTest__run_step(
                 sub_step_implementer_name='MavenIntegrationTest'
             )
             expected_step_result.message = \
-                f"Given more then one deployed host URL ({step_config['deployed-host-urls']})," \
+                f"Given more then one deployed host URL ({step_config['deployed-host-urls']}) but no target substring," \
                 f" targeting first one (https://mock.ploigos.org/mock-app-1) for user acceptance test (UAT)."
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
