@@ -470,8 +470,14 @@ users:
                     argocd_output_buff
                 ])
 
+                # run app sync asynchronously and then wait for sync to finish
+                #
+                # NOTE: attempted work around for 'level=fatal msg=Operation
+                #       has completed with phase: Running' error
+                # SEE: https://github.com/argoproj/argo-cd/issues/5592
                 sh.argocd.app.sync(  # pylint: disable=no-member
                     *argocd_sync_additional_flags,
+                    '--async', #don't wait for sync to finish
                     '--timeout', argocd_sync_timeout_seconds,
                     '--retry-limit', argocd_sync_retry_limit,
                     argocd_app_name,
@@ -585,6 +591,7 @@ users:
                 ])
                 sh.argocd.app.wait(  # pylint: disable=no-member
                     argocd_app_name,
+                    '--sync',
                     '--health',
                     '--timeout', argocd_timeout_seconds,
                     _out=out_callback,
