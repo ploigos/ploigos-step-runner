@@ -124,12 +124,8 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
         """
         step_result = StepResult.from_step_implementer(self)
 
-        target_url_and_message = self.__get_target_host_url()
-        target_host_url = target_url_and_message[0]
-        message = target_url_and_message[1]
-        if message:
-            step_result.message = message
-            print(step_result.message)
+        # determine target url
+        target_host_url = self.__get_target_host_url(step_result)
 
         # run the tests
         print("Run user acceptance tests (UAT)")
@@ -171,14 +167,12 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
         # return result
         return step_result
 
-    def __get_target_host_url(self):
+    def __get_target_host_url(self, step_result):
         """Gets the URL to target for the UAT
 
         Returns
         -------
-        list
-            [0]str - host url to target
-            [1]str - message to print from step runner
+        str - host url to target
             """
         # NOTE:
         #   at some point may need to do smarter logic if a deployable has more then one deployed
@@ -196,19 +190,22 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
                     if deployed_host_url.find(target_substring) != -1:
                         target_host_url = deployed_host_url
                         found_target_url = True
-                        step_result_message = \
+                        step_result.message = \
                         f"Given more then one deployed host URL ({deployed_host_urls}) and target" \
                         f" substring ({target_substring}), selecting ({target_host_url}) for user" \
                         f" acceptance test (UAT)."
+                        print(step_result.message)
                 if not found_target_url:
-                    step_result_message = \
+                    step_result.message = \
                     f"Given more then one deployed host URL ({deployed_host_urls}) but no target" \
                     f" substring found, targeting first one ({target_host_url}) for user acceptance test (UAT)."
+                    print(step_result.message)
             elif len(deployed_host_urls) > 1:
                 target_host_url = deployed_host_urls[0]
-                step_result_message = \
+                step_result.message = \
                 f"Given more then one deployed host URL ({deployed_host_urls}) but no target" \
                 f" substring, targeting first one ({target_host_url}) for user acceptance test (UAT)."
+                print(step_result.message)
             else:
                 target_host_url = deployed_host_urls[0]
         elif deployed_host_urls:
@@ -216,7 +213,7 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
         else:
             target_host_url = self.get_value('target-host-url')
 
-        return (target_host_url, step_result_message)
+        return target_host_url
 
     def __get_test_report_dirs(self):
         """Gets the test report directory.
