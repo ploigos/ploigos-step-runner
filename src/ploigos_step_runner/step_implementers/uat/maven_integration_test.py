@@ -134,17 +134,17 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
             target_substring = self.get_value('target-url-substring')
             if len(deployed_host_urls) > 1:
                 if target_substring:
-                    found_host_url = False
+                    found_target_url = False
                     for deployed_host_url in deployed_host_urls:
                         if deployed_host_url.find(target_substring) != -1:
                             target_host_url = deployed_host_url
-                            found_host_url = True
+                            found_target_url = True
                             step_result.message = \
                             f"Given more then one deployed host URL ({deployed_host_urls}) and target" \
                             f" substring ({target_substring}), selecting ({target_host_url}) for user" \
                             f" acceptance test (UAT)."
                             print(step_result.message)
-                    if not found_host_url:
+                    if not found_target_url:
                         step_result.message = \
                         f"Given more then one deployed host URL ({deployed_host_urls}) but no target" \
                         f" substring found, targeting first one ({target_host_url}) for user acceptance test (UAT)."
