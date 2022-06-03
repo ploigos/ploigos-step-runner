@@ -94,7 +94,7 @@ class OpenPolicyAgent(StepImplementer):  # pylint: disable=too-few-public-method
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def __audit_attestation(self, # pylint: disable=no-self-use
+    def __audit_attestation(self, # pylint: disable=bad-option-value,no-self-use
         workflow_attestation_file_path,
         workflow_policy_file_path,
         workflow_policy_query):

@@ -111,7 +111,7 @@ class RekorSignGeneric(StepImplementer):  # pylint: disable=too-few-public-metho
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _create_rekor_entry( # pylint: disable=no-self-use
+    def _create_rekor_entry( # pylint: disable=bad-option-value,no-self-use
         self,
         signer_pgp_public_key,
         signer_pgp_private_key_fingerprint,
