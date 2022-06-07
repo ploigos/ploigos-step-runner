@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: psr-it-everything-
+  labels:
+    app.kubernetes.io/component: ploigos-workflow
+    app.kubernetes.io/instance: everything-pipeline
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: service2
+    app.kubernetes.io/part-of: app1
+    helm.sh/chart: ploigos-workflow-tekton-resources-0.22.1-edge.0
+spec:
+  params:
+    - name: verbose
+      value: "true"
+    - name: appRepoUrl
+      value: http://gitea.devsecops.svc.cluster.local:3000/platform/reference-quarkus-mvn
+    - name: appRepoRef
+      value: main
+    - name: stepRunnerConfigDir
+      value: /opt/platform-config/ /opt/platform-config-secrets/ cicd/ploigos-software-factory-operator/ploigos-step-runner-config/
+    - name: pgpKeysSecretName
+      value: ploigos-gpg-key
+    - name: stepRunnerPackageName
+      value: ploigos-step-runner
+    - name: stepRunnerUpdateLibrary
+      value: "true"
+    - name: stepRunnerLibIndexUrl
+      value: https://pypi.org/simple/
+    - name: stepRunnerLibExtraIndexUrl
+      value: https://pypi.org/simple/
+    - name: stepRunnerLibSourceUrl
+      value: STEP_RUNNER_LIB_SOURCE_URL
+    - name: envNameDev
+      value: DEV
+    - name: envNameTest
+      value: TEST
+    - name: envNameProd
+      value: PROD
+    - name: ciOnlyGitRefPatterns
+      value: ^$
+    - name: devGitRefPatterns
+      value: ^feature/.+$|^PR-.+$
+    - name: releaseGitRefPatterns
+      value: ^main$
+    - name: workflowWorkerImageDefault
+      value: quay.io/ploigos/ploigos-tool-maven:latest
+    - name: workflowWorkerImageSourceClone
+      value: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.12.1
+    - name: workflowWorkerImageUnitTest
+      value: quay.io/ploigos/ploigos-tool-maven:latest
+    - name: workflowWorkerImagePackage
+      value: quay.io/ploigos/ploigos-tool-maven:latest
+    - name: workflowWorkerImageStaticCodeAnalysis
+      value: quay.io/ploigos/ploigos-tool-sonar:latest
+    - name: workflowWorkerImagePushArtifacts
+      value: quay.io/ploigos/ploigos-tool-maven:latest
+    - name: workflowWorkerImageContainerOperations
+      value: ploigos/ploigos-tool-containers:latest
+    - name: workflowWorkerImageContainerImageStaticComplianceScan
+      value: ploigos/ploigos-tool-openscap:latest
+    - name: workflowWorkerImageContainerImageStaticVulnerabilityScan
+      value: ploigos/ploigos-tool-openscap:latest
+    - name: workflowWorkerImageDeploy
+      value: ploigos/ploigos-tool-argocd:latest
+    - name: workflowWorkerImageValidateEnvironmentConfiguration
+      value: ploigos/ploigos-tool-config-lint:latest
+    - name: workflowWorkerImageUAT
+      value: quay.io/ploigos/ploigos-tool-maven:latest
+    - name: workflowWorkerImageAutoGov
+      value: ploigos/ploigos-tool-autogov:latest
+  pipelineRef:
+    name: app1-service1
+  resources: []
+  serviceAccountName: pipeline
+  workspaces:
+    - name: home
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+    - name: app
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - configMap:
+        name: ploigos-platform-config-demo
+      name: ploigos-platform-config
+    - name: ploigos-platform-config-secrets
+      secret:
+        secretName: ploigos-platform-config-secrets-demo
