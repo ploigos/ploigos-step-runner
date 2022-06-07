@@ -18,7 +18,7 @@ sed -i "s,STEP_RUNNER_LIB_SOURCE_URL,${STEP_RUNNER_LIB_SOURCE_URL}," everything-
 
 # Create the PipelineRun
 oc login --server=${OPENSHIFT_URL} -u ${OPENSHIFT_USER} -p ${OPENSHIFT_PASSWORD}
-CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml -n "${PIPELINE_NAMESPACE} | cut -d ' ' -f 1)
+CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml -n ${PIPELINE_NAMESPACE}" | cut -d ' ' -f 1)
 
 # Wait for the pipeline to finish
 STATUS=Unknown
