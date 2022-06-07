@@ -5,10 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/component: ploigos-workflow
     app.kubernetes.io/instance: everything-pipeline
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: service2
-    app.kubernetes.io/part-of: app1
-    helm.sh/chart: ploigos-workflow-tekton-resources-0.22.1-edge.0
 spec:
   params:
     - name: verbose
