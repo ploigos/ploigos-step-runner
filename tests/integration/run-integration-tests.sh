@@ -12,7 +12,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 STEP_RUNNER_LIB_SOURCE_URL="git+https://github.com/ploigos/ploigos-step-runner.git@${PSR_BRANCH}"
 
 # Generate the Tekton PipelineRun
-cp ${SCRIPT_DIR}=everything-pipelinerun-template.yml everything-pipelinerun.yml
+cp ${SCRIPT_DIR}/everything-pipelinerun-template.yml everything-pipelinerun.yml
 sed -i "s,STEP_RUNNER_LIB_SOURCE_URL,${STEP_RUNNER_LIB_SOURCE_URL}," everything-pipelinerun.yml
 
 # Create the PipelineRun
