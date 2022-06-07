@@ -65,9 +65,7 @@ jobs:
           OPENSHIFT_URL: ${{ secrets.OPENSHIFT_URL }}
           OPENSHIFT_USER: ${{ secrets.OPENSHIFT_USER }}
           OPENSHIFT_PASSWORD: ${{ secrets.OPENSHIFT_PASSWORD }}
+          PSR_BRANCH: ${{ github.ref }}
         run: |
-          echo "${{ github.ref }}"
-          export PSR_BRANCH=$(echo "${{ github.ref }}" | awk -F '/' '{$1=$2=""; if($4) print($3 "/" $4); else print($3)}') # Hack to get the branch name. Doesn't work with branch names like feature/something/anotherthing.
-          echo ${PSR_BRANCH}
           ./tests/integration/run-integration-tests.sh
 
