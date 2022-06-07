@@ -25,7 +25,7 @@ CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml -n ${PIPELINE_NAME
 STATUS=Unknown
 while [ "${STATUS}" == "Unknown" ]; do
     sleep ${STATUS_CHECK_WAIT_SEC}
-    CONDITIONS=$(oc get ${CREATED_PIPELINERUN} -o yaml | yq .status.conditions)
+    CONDITIONS=$(oc get ${CREATED_PIPELINERUN} -n ${PIPELINE_NAMESPACE} -o yaml | yq .status.conditions)
     STATUS=$(echo "${CONDITIONS}" | yq .[0].status)
     if [ "${STATUS}" == "Unknown" ]; then
         sleep ${STATUS_CHECK_WAIT_SEC}
