@@ -11,6 +11,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 STEP_RUNNER_LIB_SOURCE_URL="git+https://github.com/ploigos/ploigos-step-runner.git@${PSR_BRANCH}"
 PIPELINE_NAMESPACE=devsecops
+STATUS_CHECK_WAIT_SEC=60
 
 # Generate the Tekton PipelineRun
 cp ${SCRIPT_DIR}/everything-pipelinerun-template.yml everything-pipelinerun.yml
@@ -23,11 +24,11 @@ CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml -n ${PIPELINE_NAME
 # Wait for the pipeline to finish
 STATUS=Unknown
 while [ "${STATUS}" == "Unknown" ]; do
-    sleep 5
+    sleep ${STATUS_CHECK_WAIT_SEC}
     CONDITIONS=$(oc get ${CREATED_PIPELINERUN} -o yaml | yq .status.conditions)
     STATUS=$(echo "${CONDITIONS}" | yq .[0].status)
     if [ "${STATUS}" == "Unknown" ]; then
-        sleep 60
+        sleep ${STATUS_CHECK_WAIT_SEC}
     fi
 done
 
