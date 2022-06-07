@@ -10,6 +10,7 @@ set -eux -o pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 STEP_RUNNER_LIB_SOURCE_URL="git+https://github.com/ploigos/ploigos-step-runner.git@${PSR_BRANCH}"
+PIPELINE_NAMESPACE=devsecops
 
 # Generate the Tekton PipelineRun
 cp ${SCRIPT_DIR}/everything-pipelinerun-template.yml everything-pipelinerun.yml
@@ -17,7 +18,7 @@ sed -i "s,STEP_RUNNER_LIB_SOURCE_URL,${STEP_RUNNER_LIB_SOURCE_URL}," everything-
 
 # Create the PipelineRun
 oc login --server=${OPENSHIFT_URL} -u ${OPENSHIFT_USER} -p ${OPENSHIFT_PASSWORD}
-CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml | cut -d ' ' -f 1)
+CREATED_PIPELINERUN=$(oc create -f everything-pipelinerun.yml -n "${PIPELINE_NAMESPACE} | cut -d ' ' -f 1)
 
 # Wait for the pipeline to finish
 STATUS=Unknown
