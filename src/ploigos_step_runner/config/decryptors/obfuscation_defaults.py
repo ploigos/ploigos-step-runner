@@ -4,7 +4,8 @@ from ploigos_step_runner.config.config_value_decryptor import ConfigValueDecrypt
 import re
 
 # ConfigValueDecryptor that does not really decrypt anything. It just flags ConfigValues that have potentially sensitive
-# names (for example they contain "password" and "username"), so that they are obfuscated in the PSR output ... just in case.
+# names (for example they contain "password" and "username"), so that they are obfuscated
+# in the PSR output ... just in case.
 class ObfuscationDefaults(ConfigValueDecryptor):
 
     def __init__(self, additional_sops_args=None):

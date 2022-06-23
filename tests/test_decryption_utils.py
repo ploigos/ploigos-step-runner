@@ -186,9 +186,9 @@ class TestDecryptionUtils(BaseTestCase):
     def test_create_and_register_config_value_decryptor_required_constructor_args_missing_arg(self):
         with self.assertRaisesRegex(
             ValueError,
-            r"Loaded decryptor class \(<class 'tests.test_decryption_utils." +
-            r"RequiredConstructorParamsConfigValueDecryptor'>\) failed to construct with " +
-            r"given constructor arguments \({}\): __init__\(\) missing 1 " +
+            r"Loaded decryptor class (<class 'tests.test_decryption_utils." +
+            r"RequiredConstructorParamsConfigValueDecryptor'>) failed to construct with " +
+            r"given constructor arguments ({}): __init__() missing 1 " +
             r"required positional argument: 'required_arg'"
         ):
             DecryptionUtils.create_and_register_config_value_decryptor(
