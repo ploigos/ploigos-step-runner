@@ -3,9 +3,10 @@ It just flags ConfigValues that have potentially sensitivenames
 (for example they contain "password" and "username"), so that they are obfuscated
 in the PSR output ... just in case
 """
+import re
 from ploigos_step_runner.config.config_value_decryptor import ConfigValueDecryptor
 
-import re
+
 
 
 class ObfuscationDefaults(ConfigValueDecryptor):
