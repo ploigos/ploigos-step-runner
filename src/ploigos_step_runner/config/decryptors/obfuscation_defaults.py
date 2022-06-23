@@ -19,10 +19,6 @@ in the PSR output ... just in case.
     ----------
 
     """
-
-    def __init__(self):
-        super().__init__()
-
     def can_decrypt(self, config_value):
         for path_part in config_value.path_parts:
             if re.search(".*(password|username).*", str(path_part)):
