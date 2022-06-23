@@ -12,7 +12,7 @@ class ObfuscationDefaults(ConfigValueDecryptor):
     """ConfigValueDecryptor that does not really decrypt anything.
 It just flags ConfigValues that have potentially sensitivenames
 (for example they contain "password" and "username"), so that they are obfuscated
-in the PSR output ... just in case
+in the PSR output ... just in case.
 
     Parameters
     ----------
