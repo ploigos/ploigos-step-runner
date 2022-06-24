@@ -20,7 +20,7 @@ class ObfuscationDefaults(ConfigValueDecryptor):
 
     def can_decrypt(self, config_value):
         for path_part in config_value.path_parts:
-            if re.search(".*(password|username).*", str(path_part)):
+            if re.search(".*(password|username).*", str(path_part), re.IGNORECASE):
                 return True
         return False
 
