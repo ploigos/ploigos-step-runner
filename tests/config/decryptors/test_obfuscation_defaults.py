@@ -32,6 +32,19 @@ class TestObfuscationDefaults(TestCase):
         # THEN it should be obfuscated
         self.assertTrue(actual_result)
 
+    def test_can_decrypt_non_sensitive(self):
+        # GIVEN an ObfuscationDefaults
+        obfuscation_defaults = ObfuscationDefaults()
+
+        # GIVEN a ConfigValue that is not a sensitive value
+        config_value = self.config_value_like("not-a-secret", "my-value")
+
+        # WHEN I test if a username should be obfuscated
+        actual_result = obfuscation_defaults.can_decrypt(config_value)
+
+        # THEN it should be obfuscated
+        self.assertFalse(actual_result)
+
     def test_decrypt(self):
         # GIVEN ObfuscationDefaults
         obfuscation_defaults = ObfuscationDefaults()
