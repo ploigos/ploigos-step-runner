@@ -45,6 +45,20 @@ class TestObfuscationDefaults(TestCase):
         # THEN it should be obfuscated
         self.assertFalse(actual_result)
 
+
+    def test_can_decrypt_mixed_case(self):
+        # GIVEN an ObfuscationDefaults
+        obfuscation_defaults = ObfuscationDefaults()
+
+        # GIVEN a ConfigValue that is a password
+        config_value = self.config_value_like("admin-PASSword-for-tool", "abc123")
+
+        # WHEN I test if a password should be obfuscated
+        actual_result = obfuscation_defaults.can_decrypt(config_value)
+
+        # THEN it should be obfuscated
+        self.assertTrue(actual_result)
+
     def test_decrypt(self):
         # GIVEN ObfuscationDefaults
         obfuscation_defaults = ObfuscationDefaults()
