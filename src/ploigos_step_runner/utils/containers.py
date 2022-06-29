@@ -424,7 +424,8 @@ def determine_container_image_address_info(
 
 def inspect_container_image(
     container_image_address,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    tls_verify=False
 ):
     """Inspects a given container image for all its details. Useful for getting image labels
     and such.
@@ -458,7 +459,8 @@ def inspect_container_image(
     try:
         sh.buildah.pull( # pylint: disable=no-member
             *buildah_authfile_flags,
-            container_image_address
+            container_image_address,
+            f'--tls-verify {tls_verify}'
         )
     except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
         raise RuntimeError(
@@ -484,7 +486,8 @@ def inspect_container_image(
 
 def get_container_image_digest(
     container_image_address,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    tls_verify=False
 ):
     """Get the container image digest for a given container image.
 
@@ -511,7 +514,8 @@ def get_container_image_digest(
     try:
         container_image_details = inspect_container_image(
             container_image_address=container_image_address,
-            containers_config_auth_file=containers_config_auth_file
+            containers_config_auth_file=containers_config_auth_file,
+            tls_verify=tls_verify
         )
 
         return container_image_details['FromImageDigest']
