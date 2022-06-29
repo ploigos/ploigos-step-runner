@@ -423,9 +423,9 @@ def determine_container_image_address_info(
         contaimer_image_registry, container_image_repository, container_image_tag
 
 def inspect_container_image(
-    tls_verify=None,
     container_image_address,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    tls_verify=None
 ):
     """Inspects a given container image for all its details. Useful for getting image labels
     and such.
@@ -485,9 +485,9 @@ def inspect_container_image(
     return buildah_inspect
 
 def get_container_image_digest(
-    tls_verify=None,
     container_image_address,
-    containers_config_auth_file=None
+    containers_config_auth_file=None,
+    tls_verify=None
 ):
     """Get the container image digest for a given container image.
 
