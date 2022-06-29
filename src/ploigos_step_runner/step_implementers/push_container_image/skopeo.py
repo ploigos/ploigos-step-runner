@@ -232,9 +232,9 @@ class Skopeo(StepImplementer):
             try:
                 print("Get pushed container image digest")
                 container_image_digest = get_container_image_digest(
+                    tls_verify=self.get_value('dest-tls-verify'),
                     container_image_address=container_image_push_address_by_tag,
-                    containers_config_auth_file=containers_config_auth_file,
-                    tls_verify=self.get_value('dest-tls-verify')
+                    containers_config_auth_file=containers_config_auth_file
                 )
 
                 container_image_short_address_by_digest = \

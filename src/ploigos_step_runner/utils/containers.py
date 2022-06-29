@@ -423,9 +423,9 @@ def determine_container_image_address_info(
         contaimer_image_registry, container_image_repository, container_image_tag
 
 def inspect_container_image(
+    tls_verify=None,
     container_image_address,
-    containers_config_auth_file=None,
-    tls_verify=False
+    containers_config_auth_file=None
 ):
     """Inspects a given container image for all its details. Useful for getting image labels
     and such.
@@ -458,9 +458,9 @@ def inspect_container_image(
     # pull container image (can't inspect remote image)
     try:
         sh.buildah.pull( # pylint: disable=no-member
+            '--tls-verify=' + str(tls_verify).lower(),
             *buildah_authfile_flags,
             container_image_address,
-            f'--tls-verify {tls_verify}'
         )
     except sh.ErrorReturnCode as error:  # pylint: disable=undefined-variable
         raise RuntimeError(
