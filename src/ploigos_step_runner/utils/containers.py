@@ -425,7 +425,7 @@ def determine_container_image_address_info(
 def inspect_container_image(
     container_image_address,
     containers_config_auth_file=None,
-    tls_verify=None
+    tls_verify=False
 ):
     """Inspects a given container image for all its details. Useful for getting image labels
     and such.
@@ -487,7 +487,7 @@ def inspect_container_image(
 def get_container_image_digest(
     container_image_address,
     containers_config_auth_file=None,
-    tls_verify=None
+    tls_verify=False
 ):
     """Get the container image digest for a given container image.
 
