@@ -609,6 +609,7 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 dest_server='https://kubernetes.default.svc',
                 dest_namespace='test-app-name',
                 auto_sync=True,
+                fail_on_shared_resource=False,
                 values_files=['values-PROD.yaml'],
                 project='default'
             )
@@ -761,6 +762,7 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 dest_server='https://kubernetes.default.svc',
                 dest_namespace='test-app-name',
                 auto_sync=True,
+                fail_on_shared_resource=False,
                 values_files=['values-PROD.yaml'],
                 project='default'
             )
@@ -916,6 +918,7 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 dest_server='https://kubernetes.default.svc',
                 dest_namespace='best-namespace',
                 auto_sync=True,
+                fail_on_shared_resource=False,
                 values_files=['values-PROD.yaml'],
                 project='default'
             )
@@ -1070,6 +1073,7 @@ class TestStepImplementerArgoCDDeploy_run_step(TestStepImplementerDeployArgoCDBa
                 dest_server='https://kubernetes.default.svc',
                 dest_namespace='test-app-name',
                 auto_sync=True,
+                fail_on_shared_resource=False,
                 values_files=['values-PROD.yaml', 'secrets.yaml', 'extra-secrets.yaml'],
                 project='default'
             )
