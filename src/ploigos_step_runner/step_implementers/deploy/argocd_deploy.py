@@ -17,6 +17,13 @@ Configuration Key                       | Required? | Default  | Description
 `argocd-auto-sync`                      | Yes       | True     | If set to false, argo cd will sync only if \
                                                                  explicitly told to do so via the UI or CLI. \
                                                                  Otherwise it will sync if the repo contents have changed.
+`argocd-fail-on-shared-resource`        | Yes       | False    | If set to false, argo cd will apply all manifests \
+                                                                 found in the git path configured in the Application \
+                                                                 regardless if the resources defined in the yamls are \
+                                                                 already applied by another Application. \
+                                                                 Otherwise it will fail the sync whenever it finds a \
+                                                                 resource in the current Application that is already \
+                                                                 applied in the cluster by another Application.
 `argocd-skip-tls`                       | Yes       | False    | `False` to not ignore TLS issues when \
                                                                   authenticating with ArgoCD. True` to ignore TLS \
                                                                   issues when authenticating with ArgoCD.
@@ -129,6 +136,7 @@ DEFAULT_CONFIG = {
     'argocd-sync-timeout-seconds': 60,
     'argocd-sync-retry-limit': 3,
     'argocd-auto-sync': True,
+    'argocd-fail-on-shared-resource': False,
     'argocd-skip-tls' : False,
     'argocd-sync-prune': True,
     'argocd-project': 'default',
@@ -377,6 +385,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 dest_server=deployment_config_destination_cluster_uri,
                 dest_namespace=deployment_namespace,
                 auto_sync=self.get_value('argocd-auto-sync'),
+                fail_on_shared_resource=self.get_value('argocd-fail-on-shared-resource'),
                 values_files=argocd_values_files,
                 project=self.get_value('argocd-project')
             )

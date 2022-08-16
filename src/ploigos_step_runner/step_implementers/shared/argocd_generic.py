@@ -394,6 +394,7 @@ users:
         dest_server,
         dest_namespace,
         auto_sync,
+        fail_on_shared_resource,
         values_files
     ):
         """Creates or updates an ArgoCD App.
@@ -408,6 +409,11 @@ users:
                 sync_policy = 'automated'
             else:
                 sync_policy = 'none'
+            
+            if str(fail_on_shared_resource).lower() == 'true':
+                sync_option = 'FailOnSharedResource=true'
+            else:
+                sync_option = 'FailOnSharedResource=false'
 
             values_params = None
             if values_files:
@@ -423,6 +429,7 @@ users:
                 f'--dest-server={dest_server}',
                 f'--dest-namespace={dest_namespace}',
                 f'--sync-policy={sync_policy}',
+                f'--sync-option={sync_option}',
                 f'--project={project}',
                 values_params,
                 '--upsert',

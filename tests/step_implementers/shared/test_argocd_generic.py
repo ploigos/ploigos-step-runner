@@ -1234,6 +1234,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
         dest_server = 'https://kubernetes.default.svc'
         dest_namespace = 'my-namespace'
         auto_sync = True
+        fail_on_shared_resource = False
         values_files = []
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
@@ -1244,10 +1245,12 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             dest_server=dest_server,
             dest_namespace=dest_namespace,
             auto_sync=auto_sync,
+            fail_on_shared_resource=fail_on_shared_resource,
             values_files=values_files
         )
 
         sync_policy = 'automated'
+        sync_option = 'FailOnSharedResource=false'
         values_params = None
         mock_argocd.app.create.assert_called_once_with(
             argocd_app_name,
@@ -1257,6 +1260,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             f'--dest-server={dest_server}',
             f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
             f'--project={project}',
             values_params,
             '--upsert',
@@ -1274,6 +1278,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
         dest_server = 'https://kubernetes.default.svc'
         dest_namespace = 'my-namespace'
         auto_sync = False
+        fail_on_shared_resource = False
         values_files = []
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
@@ -1284,10 +1289,12 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             dest_server=dest_server,
             dest_namespace=dest_namespace,
             auto_sync=auto_sync,
+            fail_on_shared_resource=fail_on_shared_resource,
             values_files=values_files
         )
 
         sync_policy = 'none'
+        sync_option = 'FailOnSharedResource=false'
         values_params = None
         mock_argocd.app.create.assert_called_once_with(
             argocd_app_name,
@@ -1297,6 +1304,51 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             f'--dest-server={dest_server}',
             f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
+            f'--project={project}',
+            values_params,
+            '--upsert',
+            _out=ANY,
+            _err=ANY
+        )
+    
+    @patch('sh.argocd', create=True)
+    def testargocd_app_create_or_update_success_sync_none_fail_on_shared_true_no_extra_values_files(self, mock_argocd):
+        argocd_app_name = 'test'
+        project = 'myproject'
+        repo = 'https://git.test.xyz'
+        revision = 'feature/test'
+        path = 'charts/awesome'
+        dest_server = 'https://kubernetes.default.svc'
+        dest_namespace = 'my-namespace'
+        auto_sync = False
+        fail_on_shared_resource = True
+        values_files = []
+        ArgoCDGeneric._argocd_app_create_or_update(
+            argocd_app_name=argocd_app_name,
+            project=project,
+            repo=repo,
+            revision=revision,
+            path=path,
+            dest_server=dest_server,
+            dest_namespace=dest_namespace,
+            auto_sync=auto_sync,
+            fail_on_shared_resource=fail_on_shared_resource,
+            values_files=values_files
+        )
+
+        sync_policy = 'none'
+        sync_option = 'FailOnSharedResource=true'
+        values_params = None
+        mock_argocd.app.create.assert_called_once_with(
+            argocd_app_name,
+            f'--repo={repo}',
+            f'--revision={revision}',
+            f'--path={path}',
+            f'--dest-server={dest_server}',
+            f'--dest-namespace={dest_namespace}',
+            f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
             f'--project={project}',
             values_params,
             '--upsert',
@@ -1314,6 +1366,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
         dest_server = 'https://kubernetes.default.svc'
         dest_namespace = 'my-namespace'
         auto_sync = True
+        fail_on_shared_resource = False
         values_files = ['values-foo.yaml']
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
@@ -1324,10 +1377,12 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             dest_server=dest_server,
             dest_namespace=dest_namespace,
             auto_sync=auto_sync,
+            fail_on_shared_resource=fail_on_shared_resource,
             values_files=values_files
         )
 
         sync_policy = 'automated'
+        sync_option = 'FailOnSharedResource=false'
         values_params = ['--values=values-foo.yaml']
         mock_argocd.app.create.assert_called_once_with(
             argocd_app_name,
@@ -1337,6 +1392,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             f'--dest-server={dest_server}',
             f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
             f'--project={project}',
             values_params,
             '--upsert',
@@ -1354,6 +1410,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
         dest_server = 'https://kubernetes.default.svc'
         dest_namespace = 'my-namespace'
         auto_sync = True
+        fail_on_shared_resource = False
         values_files = ['values-foo.yaml', 'values-DEV.yaml']
         ArgoCDGeneric._argocd_app_create_or_update(
             argocd_app_name=argocd_app_name,
@@ -1364,10 +1421,12 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             dest_server=dest_server,
             dest_namespace=dest_namespace,
             auto_sync=auto_sync,
+            fail_on_shared_resource=fail_on_shared_resource,
             values_files=values_files
         )
 
         sync_policy = 'automated'
+        sync_option = 'FailOnSharedResource=false'
         values_params = ['--values=values-foo.yaml', '--values=values-DEV.yaml']
         mock_argocd.app.create.assert_called_once_with(
             argocd_app_name,
@@ -1377,6 +1436,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             f'--dest-server={dest_server}',
             f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
             f'--project={project}',
             values_params,
             '--upsert',
@@ -1398,6 +1458,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
         dest_server = 'https://kubernetes.default.svc'
         dest_namespace = 'my-namespace'
         auto_sync = True
+        fail_on_shared_resource = False
         values_files = ['values-foo.yaml']
 
         with self.assertRaisesRegex(
@@ -1421,10 +1482,12 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
                 dest_server=dest_server,
                 dest_namespace=dest_namespace,
                 auto_sync=auto_sync,
+                fail_on_shared_resource=fail_on_shared_resource,
                 values_files=values_files
             )
 
         sync_policy = 'automated'
+        sync_option = 'FailOnSharedResource=false'
         values_params = ['--values=values-foo.yaml']
         mock_argocd.app.create.assert_called_once_with(
             argocd_app_name,
@@ -1434,6 +1497,7 @@ class TestStepImplementerSharedArgoCDGenericArgoCD_app_create_or_update(TestStep
             f'--dest-server={dest_server}',
             f'--dest-namespace={dest_namespace}',
             f'--sync-policy={sync_policy}',
+            f'--sync-option={sync_option}',
             f'--project={project}',
             values_params,
             '--upsert',
