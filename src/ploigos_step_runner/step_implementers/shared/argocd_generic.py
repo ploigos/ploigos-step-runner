@@ -409,7 +409,7 @@ users:
                 sync_policy = 'automated'
             else:
                 sync_policy = 'none'
-            
+
             if str(fail_on_shared_resource).lower() == 'true':
                 sync_option = 'FailOnSharedResource=true'
             else:
