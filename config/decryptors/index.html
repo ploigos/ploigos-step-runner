@@ -30,12 +30,18 @@
 <pre><code class="python">&#34;&#34;&#34;Decryptors for configuration values.
 &#34;&#34;&#34;
 
-from ploigos_step_runner.config.decryptors.sops import SOPS</code></pre>
+from ploigos_step_runner.config.decryptors.sops import SOPS
+from ploigos_step_runner.config.decryptors.obfuscation_defaults import ObfuscationDefaults</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="ploigos_step_runner.config.decryptors.obfuscation_defaults" href="obfuscation_defaults.html">ploigos_step_runner.config.decryptors.obfuscation_defaults</a></code></dt>
+<dd>
+<div class="desc"><p>ConfigValueDecryptor that does not really decrypt anything, but flags values that should be
+obfuscated (like "password" and "username") …</p></div>
+</dd>
 <dt><code class="name"><a title="ploigos_step_runner.config.decryptors.sops" href="sops.html">ploigos_step_runner.config.decryptors.sops</a></code></dt>
 <dd>
 <div class="desc"><p>ConfigValueDecryptor that uses SOPS to decyrpt ConfigValues …</p></div>
@@ -62,6 +68,7 @@ from ploigos_step_runner.config.decryptors.sops import SOPS</code></pre>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="ploigos_step_runner.config.decryptors.obfuscation_defaults" href="obfuscation_defaults.html">ploigos_step_runner.config.decryptors.obfuscation_defaults</a></code></li>
 <li><code><a title="ploigos_step_runner.config.decryptors.sops" href="sops.html">ploigos_step_runner.config.decryptors.sops</a></code></li>
 </ul>
 </li>

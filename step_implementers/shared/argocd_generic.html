@@ -499,8 +499,14 @@ users:
                     argocd_output_buff
                 ])
 
+                # run app sync asynchronously and then wait for sync to finish
+                #
+                # NOTE: attempted work around for &#39;level=fatal msg=Operation
+                #       has completed with phase: Running&#39; error
+                # SEE: https://github.com/argoproj/argo-cd/issues/5592
                 sh.argocd.app.sync(  # pylint: disable=no-member
                     *argocd_sync_additional_flags,
+                    &#39;--async&#39;, #don&#39;t wait for sync to finish
                     &#39;--timeout&#39;, argocd_sync_timeout_seconds,
                     &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                     argocd_app_name,
@@ -614,6 +620,7 @@ users:
                 ])
                 sh.argocd.app.wait(  # pylint: disable=no-member
                     argocd_app_name,
+                    &#39;--sync&#39;,
                     &#39;--health&#39;,
                     &#39;--timeout&#39;, argocd_timeout_seconds,
                     _out=out_callback,
@@ -1195,8 +1202,14 @@ users:
                     argocd_output_buff
                 ])
 
+                # run app sync asynchronously and then wait for sync to finish
+                #
+                # NOTE: attempted work around for &#39;level=fatal msg=Operation
+                #       has completed with phase: Running&#39; error
+                # SEE: https://github.com/argoproj/argo-cd/issues/5592
                 sh.argocd.app.sync(  # pylint: disable=no-member
                     *argocd_sync_additional_flags,
+                    &#39;--async&#39;, #don&#39;t wait for sync to finish
                     &#39;--timeout&#39;, argocd_sync_timeout_seconds,
                     &#39;--retry-limit&#39;, argocd_sync_retry_limit,
                     argocd_app_name,
@@ -1310,6 +1323,7 @@ users:
                 ])
                 sh.argocd.app.wait(  # pylint: disable=no-member
                     argocd_app_name,
+                    &#39;--sync&#39;,
                     &#39;--health&#39;,
                     &#39;--timeout&#39;, argocd_timeout_seconds,
                     _out=out_callback,

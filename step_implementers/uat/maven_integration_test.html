@@ -333,7 +333,6 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
         #   host URL to do UAT against all of them, but for now, search based on a string and use
         #   that one, else default the first
         deployed_host_urls = self.get_value(&#39;deployed-host-urls&#39;)
-        step_result_message = &#34;&#34;
         if isinstance(deployed_host_urls, list):
             target_host_url = deployed_host_urls[0]
             target_substring = self.get_value(&#39;target-url-substring&#39;)
@@ -561,7 +560,6 @@ class MavenIntegrationTest(MavenGeneric, MavenTestReportingMixin):
         #   host URL to do UAT against all of them, but for now, search based on a string and use
         #   that one, else default the first
         deployed_host_urls = self.get_value(&#39;deployed-host-urls&#39;)
-        step_result_message = &#34;&#34;
         if isinstance(deployed_host_urls, list):
             target_host_url = deployed_host_urls[0]
             target_substring = self.get_value(&#39;target-url-substring&#39;)
