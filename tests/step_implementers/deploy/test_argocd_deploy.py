@@ -43,6 +43,7 @@ class TestStepImplementerSharedArgoCDDeploy_Other(TestStepImplementerDeployArgoC
             'argocd-auto-sync': True,
             'argocd-skip-tls' : False,
             'argocd-sync-prune': True,
+            'argocd-fail-on-shared-resource': False,
             'argocd-project': 'default',
             'deployment-config-helm-chart-path': './',
             'deployment-config-helm-chart-additional-values-files': [],
