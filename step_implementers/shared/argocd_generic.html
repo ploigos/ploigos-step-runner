@@ -423,6 +423,7 @@ users:
         dest_server,
         dest_namespace,
         auto_sync,
+        fail_on_shared_resource,
         values_files
     ):
         &#34;&#34;&#34;Creates or updates an ArgoCD App.
@@ -438,6 +439,11 @@ users:
             else:
                 sync_policy = &#39;none&#39;
 
+            if str(fail_on_shared_resource).lower() == &#39;true&#39;:
+                sync_option = &#39;FailOnSharedResource=true&#39;
+            else:
+                sync_option = &#39;FailOnSharedResource=false&#39;
+
             values_params = None
             if values_files:
                 values_params = []
@@ -452,6 +458,7 @@ users:
                 f&#39;--dest-server={dest_server}&#39;,
                 f&#39;--dest-namespace={dest_namespace}&#39;,
                 f&#39;--sync-policy={sync_policy}&#39;,
+                f&#39;--sync-option={sync_option}&#39;,
                 f&#39;--project={project}&#39;,
                 values_params,
                 &#39;--upsert&#39;,
@@ -1126,6 +1133,7 @@ users:
         dest_server,
         dest_namespace,
         auto_sync,
+        fail_on_shared_resource,
         values_files
     ):
         &#34;&#34;&#34;Creates or updates an ArgoCD App.
@@ -1141,6 +1149,11 @@ users:
             else:
                 sync_policy = &#39;none&#39;
 
+            if str(fail_on_shared_resource).lower() == &#39;true&#39;:
+                sync_option = &#39;FailOnSharedResource=true&#39;
+            else:
+                sync_option = &#39;FailOnSharedResource=false&#39;
+
             values_params = None
             if values_files:
                 values_params = []
@@ -1155,6 +1168,7 @@ users:
                 f&#39;--dest-server={dest_server}&#39;,
                 f&#39;--dest-namespace={dest_namespace}&#39;,
                 f&#39;--sync-policy={sync_policy}&#39;,
+                f&#39;--sync-option={sync_option}&#39;,
                 f&#39;--project={project}&#39;,
                 values_params,
                 &#39;--upsert&#39;,

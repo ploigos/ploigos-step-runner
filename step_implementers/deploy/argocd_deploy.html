@@ -68,6 +68,18 @@ explicitly told to do so via the UI or CLI.
 Otherwise it will sync if the repo contents have changed.</td>
 </tr>
 <tr>
+<td><code>argocd-fail-on-shared-resource</code></td>
+<td>Yes</td>
+<td>False</td>
+<td>If set to false, argo cd will apply all manifests
+found in the git path configured in the Application
+regardless if the resources defined in the yamls are
+already applied by another Application.
+Otherwise it will fail the sync whenever it finds a
+resource in the current Application that is already
+applied in the cluster by another Application.</td>
+</tr>
+<tr>
 <td><code>argocd-skip-tls</code></td>
 <td>Yes</td>
 <td>False</td>
@@ -356,6 +368,13 @@ Configuration Key                       | Required? | Default  | Description
 `argocd-auto-sync`                      | Yes       | True     | If set to false, argo cd will sync only if \
                                                                  explicitly told to do so via the UI or CLI. \
                                                                  Otherwise it will sync if the repo contents have changed.
+`argocd-fail-on-shared-resource`        | Yes       | False    | If set to false, argo cd will apply all manifests \
+                                                                 found in the git path configured in the Application \
+                                                                 regardless if the resources defined in the yamls are \
+                                                                 already applied by another Application. \
+                                                                 Otherwise it will fail the sync whenever it finds a \
+                                                                 resource in the current Application that is already \
+                                                                 applied in the cluster by another Application.
 `argocd-skip-tls`                       | Yes       | False    | `False` to not ignore TLS issues when \
                                                                   authenticating with ArgoCD. True` to ignore TLS \
                                                                   issues when authenticating with ArgoCD.
@@ -468,6 +487,7 @@ DEFAULT_CONFIG = {
     &#39;argocd-sync-timeout-seconds&#39;: 60,
     &#39;argocd-sync-retry-limit&#39;: 3,
     &#39;argocd-auto-sync&#39;: True,
+    &#39;argocd-fail-on-shared-resource&#39;: False,
     &#39;argocd-skip-tls&#39; : False,
     &#39;argocd-sync-prune&#39;: True,
     &#39;argocd-project&#39;: &#39;default&#39;,
@@ -716,6 +736,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 dest_server=deployment_config_destination_cluster_uri,
                 dest_namespace=deployment_namespace,
                 auto_sync=self.get_value(&#39;argocd-auto-sync&#39;),
+                fail_on_shared_resource=self.get_value(&#39;argocd-fail-on-shared-resource&#39;),
                 values_files=argocd_values_files,
                 project=self.get_value(&#39;argocd-project&#39;)
             )
@@ -987,6 +1008,7 @@ class ArgoCDDeploy(ContainerDeployMixin, ArgoCDGeneric):
                 dest_server=deployment_config_destination_cluster_uri,
                 dest_namespace=deployment_namespace,
                 auto_sync=self.get_value(&#39;argocd-auto-sync&#39;),
+                fail_on_shared_resource=self.get_value(&#39;argocd-fail-on-shared-resource&#39;),
                 values_files=argocd_values_files,
                 project=self.get_value(&#39;argocd-project&#39;)
             )
