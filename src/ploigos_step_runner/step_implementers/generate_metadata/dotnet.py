@@ -26,13 +26,14 @@ Result Artifact Key                     | Description
 `app-version`                           | Value to use for `version` portion of semantic version \
                                           (https://semver.org/). Uses the version read out of the given pom file.
 
-`maven-auto-increment-version-output` | Standard out and standard error from running maven to auto increment version.
+`dotnet-auto-increment-version-output` | Standard out and standard error from running maven to auto increment version.
 """# pylint: disable=line-too-long
 
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared import MavenGeneric
 from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.utils import xml
 
 DEFAULT_CONFIG = {
     'csproj-file': 'dotnet-app.csproj',
@@ -88,7 +89,7 @@ class Dotnet(StepImplementer):
 
         Validates that:
         * required configuration is given
-        * given 'pom-file' exists
+        * given 'csproj-file' exists
 
         Raises
         ------
@@ -117,7 +118,7 @@ class Dotnet(StepImplementer):
             # auto increment the version
             auto_increment_version_segment = self.get_value('auto-increment-version-segment')
             if auto_increment_version_segment:
-                print("Update maven package version")
+                print("Update dotnet package version")
                 self.__auto_increment_version(auto_increment_version_segment, step_result)
 
 
@@ -147,27 +148,15 @@ class Dotnet(StepImplementer):
             Step result to add step results to.
         """
         project_version = None
-        mvn_evaluate_project_version_file_path = self.write_working_file(
-            'mvn_evaluate_project_version.txt'
+        dotnet_evaluate_project_version_file_path = self.write_working_file(
+            'dotnet_evaluate_project_version.txt'
         )
         try:
-            project_version = run_maven(
-                mvn_output_file_path=mvn_evaluate_project_version_file_path,
-                settings_file=self.maven_settings_file,
-                pom_file=self.get_value('pom-file'),
-                phases_and_goals=[
-                    'help:evaluate'
-                ],
-                additional_arguments=[
-                    '-Dexpression=project.version',
-                    '--batch-mode',
-                    '-q',
-                    '-DforceStdout'
-                ]
-            )
+            project_version = xml.get_xml_element(self.get_value('csproj-file'), 'Version')
+
         except StepRunnerException as error:
             step_result.success = False
-            step_result.message = f"Error running maven to get the project version: {error}"
+            step_result.message = f"Error retrieving project version from csproj file: {error}"
 
         return project_version
 
@@ -182,8 +171,8 @@ class Dotnet(StepImplementer):
         step_result : StepResult
             Step result to add step results to.
         """
-        mvn_auto_increment_version_output_file_path = self.write_working_file(
-            'mvn_versions_set_output.txt'
+        dotnet_auto_increment_version_output_file_path = self.write_working_file(
+            'dotnet_versions_set_output.txt'
         )
         try:
             # SEE: https://www.mojohaus.org/build-helper-maven-plugin/parse-version-mojo.html
@@ -208,17 +197,10 @@ class Dotnet(StepImplementer):
             if auto_increment_all_module_versions:
                 additional_arguments.append('-DprocessAllModules')
 
-            run_maven(
-                mvn_output_file_path=mvn_auto_increment_version_output_file_path,
-                settings_file=self.maven_settings_file,
-                pom_file=self.get_value('pom-file'),
-                phases_and_goals=[
-                    'build-helper:parse-version',
-                    'versions:set',
-                    'versions:commit'
-                ],
-                additional_arguments=additional_arguments
-            )
+            #Add code to update csproj file
+            #
+            #
+
         except StepRunnerException as error:
             raise StepRunnerException(f"Error running maven to auto increment version segment"
                 f" ({auto_increment_version_segment})."
@@ -229,5 +211,5 @@ class Dotnet(StepImplementer):
                 description="Standard out and standard error from running maven" \
                     " to auto increment version.",
                 name='maven-auto-increment-version-output',
-                value=mvn_auto_increment_version_output_file_path
+                value=dotnet_auto_increment_version_output_file_path
             )

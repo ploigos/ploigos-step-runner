@@ -98,27 +98,28 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml', b'''<Project Sdk="Microsoft.NET.Sdk">
+            temp_dir.write('dotnet-app.csproj', b'''<Project Sdk="Microsoft.NET.Sdk">
                 <PropertyGroup>
                 <OutputType>Exe</OutputType>
                 <TargetFramework>net6.0</TargetFramework>
                 <RootNamespace>dotnet-app</RootNamespace>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
+                <Version>1.2.0</Version>
                 </PropertyGroup>
             </Project>''')
 
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            csproj_file_path = os.path.join(temp_dir.path, 'dotnet-app.csproj')
             auto_increment_version_segment = 'build-number'
 
             step_config = {
-                'pom-file': pom_file_path,
+                'csproj-file': csproj_file_path,
                 'auto-increment-version-segment': auto_increment_version_segment
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
-                implementer='Maven',
+                implementer='Dotnet',
                 parent_work_dir_path=parent_work_dir_path,
             )
 
@@ -133,21 +134,24 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml', b'''<project>
-                <modelVersion>4.0.0</modelVersion>
-                <groupId>com.mycompany.app</groupId>
-                <artifactId>my-app</artifactId>
-                <version>42.1</version>
-            </project>''')
-            pom_file_path = os.path.join(temp_dir.path, 'pom.xml')
+            temp_dir.write('dotnet-app.csproj', b'''<Project Sdk="Microsoft.NET.Sdk">
+                <PropertyGroup>
+                <OutputType>Exe</OutputType>
+                <TargetFramework>net6.0</TargetFramework>
+                <RootNamespace>dotnet-app</RootNamespace>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+                </PropertyGroup>
+            </Project>''')
+            csproj_file_path = os.path.join(temp_dir.path, 'dotnet-app.csproj')
 
             step_config = {
-                'pom-file': pom_file_path
+                'csproj-file': csproj_file_path
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
-                implementer='Maven',
+                implementer='Dotnet',
                 parent_work_dir_path=parent_work_dir_path,
             )
 
@@ -155,19 +159,14 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
 
             expected_step_result = StepResult(
                 step_name='generate-metadata',
-                sub_step_name='Maven',
-                sub_step_implementer_name='Maven'
+                sub_step_name='Dotnet',
+                sub_step_implementer_name='Dotnet'
             )
-            expected_step_result.add_artifact(name='app-version', value='42.1')
+            expected_step_result.add_artifact(name='framework-version', value='net6.0')
 
             self.assertEqual(result, expected_step_result)
 
-    @patch.object(
-        Maven,
-        'maven_settings_file',
-        new_callable=PropertyMock,
-        return_value='/fake/settings.xml'
-    )
+
     @patch('ploigos_step_runner.step_implementers.generate_metadata.maven.run_maven')
     def test_run_step_pass_increment_major_version(
             self,
@@ -336,13 +335,7 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
 
             self.assertEqual(result, expected_step_result)
 
-    @patch.object(
-        Maven,
-        'maven_settings_file',
-        new_callable=PropertyMock,
-        return_value='/fake/settings.xml'
-    )
-    @patch('ploigos_step_runner.step_implementers.generate_metadata.maven.run_maven')
+
     def test_run_step_pass_increment_patch_version(
             self,
             mock_run_maven,
@@ -352,7 +345,7 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
             # Test setup
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
 
-            temp_dir.write('pom.xml', b'''<project>
+            temp_dir.write('dotnet-app.csproj', b'''<project>
                 <modelVersion>4.0.0</modelVersion>
                 <groupId>com.mycompany.app</groupId>
                 <artifactId>my-app</artifactId>
@@ -367,7 +360,7 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
                 step_name='generate-metadata',
-                implementer='Maven',
+                implementer='Dotnet',
                 parent_work_dir_path=parent_work_dir_path,
             )
 
@@ -592,7 +585,7 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
             self.assertEqual(result, expected_step_result)
 
     @patch('ploigos_step_runner.step_implementers.generate_metadata.maven.run_maven')
-    def test_run_step_fail_missing_version_in_pom_file(
+    def test_run_step_fail_missing_version_in_csproj_file(
             self,
             mock_run_maven
     ):
