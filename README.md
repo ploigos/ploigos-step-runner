@@ -40,9 +40,9 @@ python -m pip install --upgrade pip
 python -m pip install -e '.[tests]'
 ```
 
-### Run Tests
-
 > :notebook: Some tests require `mvn` command in your PATH. Install with brew/yum/dnf prior to running tests.
+
+### Run Tests
 
 ```bash
 tox -e test
