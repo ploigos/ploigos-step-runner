@@ -41,6 +41,9 @@ python -m pip install -e '.[tests]'
 ```
 
 ### Run Tests
+
+> :note: Some tests require `mvn` command in your PATH. Install with brew/yum/dnf prior to running tests.
+
 ```bash
 tox -e test
 ```

@@ -16,6 +16,7 @@ step-runner-results
 step-runner-working
 results.yml/
 .venvs
+.venv
 
 # Eclipse
 .project
