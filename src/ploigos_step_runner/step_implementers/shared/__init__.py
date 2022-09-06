@@ -5,6 +5,8 @@ from ploigos_step_runner.step_implementers.shared.argocd_generic import \
     ArgoCDGeneric
 from ploigos_step_runner.step_implementers.shared.container_deploy_mixin import \
     ContainerDeployMixin
+from ploigos_step_runner.step_implementers.shared.dotnet_generic import \
+    DotnetGeneric
 from ploigos_step_runner.step_implementers.shared.git_mixin import GitMixin
 from ploigos_step_runner.step_implementers.shared.maven_generic import \
     MavenGeneric
