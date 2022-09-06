@@ -11,8 +11,8 @@ from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
 
 
-@patch("ploigos_step_runner.step_implementers.shared.MavenGeneric.__init__")
-class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
+@patch("ploigos_step_runner.step_implementers.shared.DotnetGeneric.__init__")
+class TestStepImplementerDotnetPackage___init__(BaseStepImplementerTestCase):
     def test_defaults(self, mock_super_init):
         workflow_result = WorkflowResult()
         parent_work_dir_path = '/fake/path'
@@ -29,7 +29,7 @@ class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path,
             config=config,
             environment=None,
-            maven_phases_and_goals=['package']
+            dotnet_phases_and_goals=['package']
         )
 
     def test_given_environment(self, mock_super_init):
@@ -37,7 +37,7 @@ class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
         parent_work_dir_path = '/fake/path'
         config = {}
 
-        MavenPackage(
+        DotnetPackage(
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
@@ -49,43 +49,43 @@ class TestStepImplementerMavenPackage___init__(BaseStepImplementerTestCase):
             parent_work_dir_path=parent_work_dir_path,
             config=config,
             environment='mock-env',
-            maven_phases_and_goals=['package']
+            dotnet_phases_and_goals=['package']
         )
 
-class TestStepImplementerMavenPackage_step_implementer_config_defaults(
+class TestStepImplementerDotnetPackage_step_implementer_config_defaults(
     BaseStepImplementerTestCase
 ):
     def test_result(self):
         self.assertEqual(
-            MavenPackage.step_implementer_config_defaults(),
+            DotnetPackage.step_implementer_config_defaults(),
             {
-                'pom-file': 'pom.xml',
+                'csproj-file': 'app.csproj',
                 'tls-verify': True,
-                'maven-profiles': [],
-                'maven-additional-arguments': [],
-                'maven-no-transfer-progress': True,
-                'maven-additional-arguments': [
-                    '-Dmaven.test.skip=true'
-                ],
-                'artifact-extensions': ["jar", "war", "ear"],
-                'artifact-parent-dir': 'target'
+                #'maven-profiles': [],
+                #'maven-additional-arguments': [],
+                #'maven-no-transfer-progress': True,
+                #'maven-additional-arguments': [
+                #    '-Dmaven.test.skip=true'
+                #],
+                #'artifact-extensions': ["jar", "war", "ear"],
+                #'artifact-parent-dir': 'target'
             }
         )
 
-class TestStepImplementerMavenPackage__required_config_or_result_keys(
+class TestStepImplementerDotnetPackage__required_config_or_result_keys(
     BaseStepImplementerTestCase
 ):
     def test_result(self):
         self.assertEqual(
-            MavenPackage._required_config_or_result_keys(),
+            DotnetPackage._required_config_or_result_keys(),
             [
-                'pom-file'
+                'csproj-file'
             ]
         )
 
-@patch.object(MavenPackage, '_run_maven_step')
-@patch.object(MavenPackage, 'write_working_file', return_value='/mock/mvn_output.txt')
-class TestStepImplementerMavenPackage__run_step(
+@patch.object(DotnetPackage, '_run_maven_step')
+@patch.object(DotnetPackage, 'write_working_file', return_value='/mock/dotnet_output.txt')
+class TestStepImplementerDotnetPackage__run_step(
     BaseStepImplementerTestCase
 ):
     def create_step_implementer(
@@ -95,10 +95,10 @@ class TestStepImplementerMavenPackage__run_step(
             parent_work_dir_path=''
     ):
         return self.create_given_step_implementer(
-            step_implementer=MavenPackage,
+            step_implementer=DotnetPackage,
             step_config=step_config,
             step_name='package',
-            implementer='MavenPackage',
+            implementer='DotnetPackage',
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path
         )
@@ -111,9 +111,9 @@ class TestStepImplementerMavenPackage__run_step(
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
             step_config = {
-                'pom-file': pom_file
+                'csproj-file': csproj_file
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -142,8 +142,8 @@ class TestStepImplementerMavenPackage__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='MavenPackage',
-                sub_step_implementer_name='MavenPackage'
+                sub_step_name='DotnetPackage',
+                sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -176,9 +176,9 @@ class TestStepImplementerMavenPackage__run_step(
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
             step_config = {
-                'pom-file': pom_file
+                'csproj-file': csproj_file
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -208,8 +208,8 @@ class TestStepImplementerMavenPackage__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='MavenPackage',
-                sub_step_implementer_name='MavenPackage'
+                sub_step_name='DotnetPackage',
+                sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.add_artifact(
                 description="Standard out and standard error from maven.",
@@ -247,9 +247,9 @@ class TestStepImplementerMavenPackage__run_step(
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
             step_config = {
-                'pom-file': pom_file
+                'csproj-file': csproj_file
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -264,8 +264,8 @@ class TestStepImplementerMavenPackage__run_step(
             surefire_reports_dir = os.path.join(test_dir.path, 'target/surefire-reports')
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='MavenPackage',
-                sub_step_implementer_name='MavenPackage'
+                sub_step_name='DotnetPackage',
+                sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.success = False
             expected_step_result.message = "Error running 'maven package' to package artifacts. " \
@@ -296,9 +296,9 @@ class TestStepImplementerMavenPackage__run_step(
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            pom_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
             step_config = {
-                'pom-file': pom_file,
+                'csproj-file': csproj_file,
                 'artifact-parent-dir': 'mock/does-not-exist'
             }
             step_implementer = self.create_step_implementer(
@@ -312,8 +312,8 @@ class TestStepImplementerMavenPackage__run_step(
             # create expected step result
             expected_step_result = StepResult(
                 step_name='package',
-                sub_step_name='MavenPackage',
-                sub_step_implementer_name='MavenPackage'
+                sub_step_name='DotnetPackage',
+                sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.success = False
             expected_step_result.message = \
