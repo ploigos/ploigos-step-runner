@@ -45,3 +45,15 @@ If you are updating the python documentation and want to generate locally this i
 ```bash
 tox -e docs
 ```
+
+## Troubleshooting
+
+> Fatal error calling step (generate-metadata): Can not add duplicate StepResult for step (generate-metadata), sub step (Maven), and environment (None)
+
+This error (and similar duplicate step errors) occurs when a step that was previously run is re-run. PSR expects a given step and sub-step to run only once. In an actual pipeline, this indicates an error. When developing step implementers, it is common to trigger this error when re-running steps to test changes.
+
+To fix this, remove the ./step-runner-working directory:
+
+```bash
+rm -r ./step-runner-working
+```
