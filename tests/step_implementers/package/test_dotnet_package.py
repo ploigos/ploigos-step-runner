@@ -33,3 +33,33 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
         dotnet_shell_command_mock.assert_any_call(
             'build'
         )
+
+    @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
+    def test_package_with_csproj_command(self, dotnet_shell_command_mock):
+
+        # GIVEN a config that specifies a csproj file named app.csproj
+        step_config = {
+            'csproj-file': 'app.csproj'
+        }
+
+        # GIVEN a DotNetStepImplementer
+        with TempDirectory() as test_dir:
+            parent_work_dir_path = os.path.join(test_dir.path, 'working')
+            workflow_result = WorkflowResult()
+            step_implementer = self.create_given_step_implementer(
+                step_implementer=DotnetPackage,
+                step_config=step_config,
+                step_name='package',
+                implementer='DotnetPackage',
+                workflow_result=workflow_result,
+                parent_work_dir_path=parent_work_dir_path
+            )
+
+        # WHEN I run the step
+        actual_step_result = step_implementer._run_step()
+
+        # THEN it should run a shell command like 'dotnet build app.csproj'
+        dotnet_shell_command_mock.assert_any_call(
+            'build',
+            'app.csproj'
+        )

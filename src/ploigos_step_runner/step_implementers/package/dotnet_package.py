@@ -88,4 +88,8 @@ class DotnetPackage(DotnetGeneric):
         StepResult
             Object containing the dictionary results of this step.
         """
-        sh.dotnet("build") # pylint: disable=no-member
+        csproj_file = self.get_value('csproj-file')
+        if csproj_file is None:
+            sh.dotnet("build") # pylint: disable=no-member
+        else:
+            sh.dotnet("build", csproj_file) # pylint: disable=no-member
