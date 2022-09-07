@@ -10,24 +10,12 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
 
     @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
     def test_package(self, dotnet_shell_command_mock):
-
-        # GIVEN a config like:
-        step_config = {
-            'csproj-file': 'app.csproj'
-        }
-
-        # GIVEN a DotnetPackage StepImplementer
         with TempDirectory() as test_dir:
-            parent_work_dir_path = os.path.join(test_dir.path, 'working')
-            workflow_result = WorkflowResult()
-            step_implementer = self.create_given_step_implementer(
-                step_implementer=DotnetPackage,
-                step_config=step_config,
-                step_name='package',
-                implementer='DotnetPackage',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
-            )
+
+            # GIVEN a step implementer configured like:
+            step_implementer = self.create_step_implementer(test_dir, {
+                'csproj-file': 'app.csproj'
+            })
 
             # WHEN I run the step
             actual_step_result = step_implementer._run_step()
@@ -38,49 +26,30 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
                 'app.csproj'
             )
 
+
     @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
     def test_package_command_missing_csproj(self, dotnet_shell_command_mock):
-        # GIVEN a DotnetPackage StepImplementer
-        step_config = {
-            # Empty
-        }
         with TempDirectory() as test_dir:
-            parent_work_dir_path = os.path.join(test_dir.path, 'working')
-            workflow_result = WorkflowResult()
-            step_implementer = self.create_given_step_implementer(
-                step_implementer=DotnetPackage,
-                step_config=step_config,
-                step_name='package',
-                implementer='DotnetPackage',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
-            )
 
-            # THEN the required configuration properties should be:
+            # GIVEN a step implementer
+            step_implementer = self.create_step_implementer(test_dir, {})
+
+            # WHEN I check the required configuration properties
             required_keys = step_implementer._required_config_or_result_keys()
+
+            # THEN they should look like:
             self.assertCountEqual(required_keys, ['csproj-file']) # "assertCountEqual" is really unordered list comparison
+
 
     @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
     def test_package_with_configuration_flag(self, dotnet_shell_command_mock):
-
-        # GIVEN a config that specifies a configuration flag value named 'Release'
-        step_config = {
-            'csproj-file': 'app.csproj',
-            'configuration': 'Release'
-        }
-
-        # GIVEN a DotnetPackage StepImplementer
         with TempDirectory() as test_dir:
-            parent_work_dir_path = os.path.join(test_dir.path, 'working')
-            workflow_result = WorkflowResult()
-            step_implementer = self.create_given_step_implementer(
-                step_implementer=DotnetPackage,
-                step_config=step_config,
-                step_name='package',
-                implementer='DotnetPackage',
-                workflow_result=workflow_result,
-                parent_work_dir_path=parent_work_dir_path
-            )
+
+            # GIVEN a step implementer configured to use a dotnet configuration called 'Release'
+            step_implementer = self.create_step_implementer(test_dir, {
+                'csproj-file': 'app.csproj',
+                'configuration': 'Release'
+            })
 
             # WHEN I run the step
             actual_step_result = step_implementer._run_step()
@@ -91,3 +60,15 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
                 'app.csproj',
                 '-c', 'Release'
             )
+
+
+    def create_step_implementer(self, test_dir, step_config):
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
+        return self.create_given_step_implementer(
+            step_implementer=DotnetPackage,
+            step_config=step_config,
+            step_name='package',
+            implementer='DotnetPackage',
+            workflow_result=WorkflowResult(),
+            parent_work_dir_path=parent_work_dir_path
+        )
