@@ -3,10 +3,6 @@
 Notes
 -----
 
-.. Important::
-
-    If package not specified in pom will default to jar in result.
-
 Step Configuration
 ------------------
 Step configuration expected as input to this step.
@@ -18,29 +14,6 @@ Could come from:
 
 Configuration Key            | Required? | Default | Description
 -----------------------------|-----------|---------|-----------
-`pom-file`                   | Yes       | `'pom.xml'` | pom used when executing maven.
-`tls-verify`                 | No        | `True`  | Disables TLS Verification if set to False
-`maven-profiles`             | No        | `[]`    | List of maven profiles to use.
-`maven-no-transfer-progress` | No        | `True`  | \
-                            `True` to suppress the transfer progress of packages maven downloads.
-                            `False` to have the transfer progress printed.\
-                            See https://maven.apache.org/ref/current/maven-embedder/cli.html
-`maven-additional-arguments` | No        | `['-Dmaven.test.skip=true']` \
-                                                   | List of additional arguments to use. \
-                                                     Skipping tests by default because assuming \
-                                                     a previous step already ran them.
-`maven-servers`              | No        |         | Dictionary of dictionaries of \
-                                                     id, username, password
-`maven-repositories`         | No        |         | Dictionary of dictionaries of \
-                                                     id, url, snapshots, releases
-`maven-mirrors`              | No        |         | Dictionary of dictionaries of \
-                                                     id, url, mirror_of
-`artifact-extensions`        | Yes       | `["jar", "war", "ear"]` \
-                                            | Extensions to look for in the `artifact-parent-dir` \
-                                              for built artifacts.
-`artifact-parent-dir`        | Yes       | `'target'` \
-                                            | Parent directory to look for built artifacts in \
-                                              ending in `artifact-extensions`.
 
 Result Artifacts
 ----------------
@@ -48,35 +21,17 @@ Results artifacts output by this step.
 
 Result Artifact Key | Description
 --------------------|------------
-`maven-output`      | Path to Stdout and Stderr from invoking Maven.
-`packages`          | An array of dictionaries with information on the built artifacts.
-
-
-## package-artifacts
-Keys in the dictionary elements in the `package-artifacts` array in the step results.
-
-| Key             | Description
-|-----------------|------------
-| `path`          | Absolute path to the built artifact.
 
 """
-import os
+import sh
 
-from ploigos_step_runner.results import StepResult
-from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementers.shared.dotnet_generic import \
     DotnetGeneric
 
 DEFAULT_CONFIG = {
-    'maven-additional-arguments': [
-        '-Dmaven.test.skip=true'
-    ],
-    'artifact-extensions': ["jar", "war", "ear"],
-    'artifact-parent-dir': 'target'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    'pom-file'
 ]
 
 class DotnetPackage(DotnetGeneric):
@@ -110,16 +65,12 @@ class DotnetPackage(DotnetGeneric):
         -----
         These are the lowest precedence configuration values.
         """
-        return {**MavenGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
+        # return {**MavenGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
 
     @staticmethod
     def _required_config_or_result_keys():
         """Getter for step configuration or previous step result artifacts that are required before
         running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
 
         Returns
         -------
@@ -137,52 +88,4 @@ class DotnetPackage(DotnetGeneric):
         StepResult
             Object containing the dictionary results of this step.
         """
-        step_result = StepResult.from_step_implementer(self)
-
-        pom_file = self.get_value('pom-file')
-        artifact_extensions = self.get_value('artifact-extensions')
-        artifact_parent_dir = self.get_value('artifact-parent-dir')
-
-        # package the artifacts
-        mvn_output_file_path = self.write_working_file('mvn_output.txt')
-        try:
-            # execute maven step (params come from config)
-            self._run_maven_step(
-                mvn_output_file_path=mvn_output_file_path
-            )
-
-             # find the artifacts
-            packages = []
-            pom_file_dir_name = os.path.dirname(os.path.abspath(pom_file))
-            files_in_artifact_parent_dir = sorted(os.listdir(os.path.join(
-                pom_file_dir_name,
-                artifact_parent_dir)))
-            for filename in files_in_artifact_parent_dir:
-                if any(filename.endswith(ext) for ext in artifact_extensions):
-                    packages += [{
-                        'path': os.path.join(
-                            pom_file_dir_name,
-                            artifact_parent_dir,
-                            filename
-                        )
-                    }]
-
-            step_result.add_artifact(
-                name='packages',
-                value=packages
-            )
-        except FileNotFoundError as error:
-            step_result.success = False
-            step_result.message = f"Error finding artifacts after running maven package: {error}"
-        except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = "Error running 'maven package' to package artifacts. " \
-                f"More details maybe found in 'maven-output' report artifact: {error}"
-        finally:
-            step_result.add_artifact(
-                description="Standard out and standard error from maven.",
-                name='maven-output',
-                value=mvn_output_file_path
-            )
-
-        return step_result
+        sh.dotnet("build") # pylint: disable=no-member
