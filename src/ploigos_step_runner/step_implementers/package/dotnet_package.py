@@ -89,7 +89,17 @@ class DotnetPackage(DotnetGeneric):
             Object containing the dictionary results of this step.
         """
         csproj_file = self.get_value('csproj-file')
+
+        # The 'dotnet' command has a -c flag which stands for 'configuration'.
+        # Use it if psr is configured for it.
+        config_setting = self.get_value('configuration')
+        config_args = []
+        if config_setting is not None:
+            config_args = ['-c', config_setting]
+
         if csproj_file is None:
             sh.dotnet("build") # pylint: disable=no-member
         else:
-            sh.dotnet("build", csproj_file) # pylint: disable=no-member
+            sh.dotnet("build", # pylint: disable=no-member
+                      csproj_file,
+                      *config_args)
