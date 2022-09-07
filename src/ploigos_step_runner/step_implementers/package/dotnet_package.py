@@ -31,6 +31,7 @@ DEFAULT_CONFIG = {
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
+    "csproj-file"
 ]
 
 class DotnetPackage(StepImplementer):
@@ -95,9 +96,6 @@ class DotnetPackage(StepImplementer):
         if config_setting is not None:
             config_args = ['-c', config_setting]
 
-        if csproj_file is None:
-            sh.dotnet("build") # pylint: disable=no-member
-        else:
-            sh.dotnet("build", # pylint: disable=no-member
-                      csproj_file,
-                      *config_args)
+        sh.dotnet("build", # pylint: disable=no-member
+                  csproj_file,
+                  *config_args)
