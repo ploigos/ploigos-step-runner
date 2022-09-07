@@ -63,11 +63,11 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 A workflow runner is a Continuous Integration (CI) tool that execute pipelines. Common workflow runners are Jenkins, Tekton, GitHub Actions, and GitLab CI.
 
-> What do I do if I want to use a tool that PSR doesn't have an implementer for?
+> What if I want to use a tool that PSR doesn't have an step implementer for?
 
 Each PSR step has a corresponding *step_implementer* Python module under
 [src/ploigos_step_runner/step_implementers](src/ploigos_step_runner/step_implementers).
-If you need to use a tool that PSR does not have a step implementer for you
+If you need to use a tool that PSR does not have a step implementer for, you
 will need to create one. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 instructions on creating step implementers.
 
