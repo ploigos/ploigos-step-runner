@@ -1,5 +1,14 @@
 # Contributing
 
+## Fork and Clone Repo
+
+Fork this repo under your GitHub account. After forking, clone the fork to your
+local machine: (replace *your-username*)
+
+```bash
+git clone https://github.com/your-username/ploigos-step-runner.git
+```
+
 ## Set Up Development Environment
 
 > :warning: **If you are running RHEL7 or older versions of Python**: This project will need Python 3.3 or better to run. If you are running on RHEL7, you can invoke `python3` in place of `python` in the following commands.
@@ -76,9 +85,30 @@ EOF
 psr -s hello-world -c psr.yml
 ```
 
-> :warning: If you want to rerun hello-world (or any step that has been run),
-> you must remove the directory `./step-runner-working`. See
-> [Troubleshooting](#troubleshooting).
+3. Validate the output, both stdout and artifacts sections.
+
+4. Delete the PSR working directory:
+
+```bash
+rm -r ./step-runner-working
+```
+
+> :warning: This step is important. If you need to rerun hello-world (or any
+> step that has been run), you must remove the directory
+> `./step-runner-working`. See [Troubleshooting](#troubleshooting).
+
+To execute a different implementer for the hello-world step, replace *psr.yaml*:
+
+```bash
+cat > psr.yml << EOF
+hello-world:
+  - implementer: LongGreeting
+    name: Ryan
+EOF
+```
+
+This will use the LongGreeting implementer instead of ShortGreeting. Re-run PSR
+and validate the output.
 
 It is useful to prototype against a real code base when developing an
 implementer. [spring-petclinic](https://github.com/ploigos/spring-petclinic) is
@@ -87,6 +117,12 @@ framework, use an application written for that language.
 
 > :notepad: If you're testing using a different repo, make sure to create a
 psr.yml file in that root of that repo for PSR configurations.
+
+**Make sure to add tests for any new step implementers!**
+
+Once the new step implementer is ready, [create a Pull
+Request](https://github.com/ploigos/ploigos-step-runner/compare) to merge your
+branch to the upstream project!
 
 ## Troubleshooting
 
