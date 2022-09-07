@@ -9,7 +9,34 @@
 
 # ploigos-step-runner
 
-Ploigos Step Runner (PSR) implemented as a Python library.
+Ploigos Step Runner (PSR) is a middleware tool to execute pipeline steps,
+independent of your application and pipeline tech stack. PSR runs on workflow
+runners like Jenkins, Tekton, GitHub Actions, GitLab CI, or any other workflow
+runner that can execute commands.
+
+**PSR is not a pipeline!** It is a CLI tool called in your pipeline by a
+workflow runner as a command: `psr -s hello-world -c psr.yml`.
+
+PSR abstracts the implementation of a *step* from a specific product or
+solution. A few common steps most pipelines implement are *packaging*, *unit
+testing*, and *deploying*. The implementation of these steps differs between a
+Java and JavaScript application. With PSR, the same pipeline can be used on
+both Java and JS applications. Available PSR steps can be found
+[here](https://ploigos.github.io/ploigos-step-runner/#step-configuration).
+
+Each PSR step has one or more *Step Implementers*. A step implementer does two
+things:
+
+1. Integrates with a given product or solution
+2. Produces output in a standard format that can be used or validated by other
+pipeline steps
+
+PSR uses a common file, *psr.yml*, for configuration of all steps in a
+pipeline. This file exists in an application source code repo alongside a
+pipeline definition file (Jenkinsfile, .gitlab-ci.yml, etc.). PSR abstracts
+implementation from the pipeline definition, allowing the same pipeline
+definition to be reused for all applications, regardless of the application
+language and framework.
 
 ## Documentation
 
