@@ -60,7 +60,7 @@ class TestStepImplementerDotnetPackage_step_implementer_config_defaults(
             DotnetPackage.step_implementer_config_defaults(),
             {
                 'csproj-file': 'app.csproj',
-                'tls-verify': True,
+                'tls-verify': True
                 #'maven-profiles': [],
                 #'maven-additional-arguments': [],
                 #'maven-no-transfer-progress': True,
@@ -83,7 +83,7 @@ class TestStepImplementerDotnetPackage__required_config_or_result_keys(
             ]
         )
 
-@patch.object(DotnetPackage, '_run_maven_step')
+@patch.object(DotnetPackage, '_run_dotnet_step')
 @patch.object(DotnetPackage, 'write_working_file', return_value='/mock/dotnet_output.txt')
 class TestStepImplementerDotnetPackage__run_step(
     BaseStepImplementerTestCase
@@ -106,12 +106,12 @@ class TestStepImplementerDotnetPackage__run_step(
     def test_success_single_packaged_artifact(
         self,
         mock_write_working_file,
-        mock_run_maven_step
+        mock_run_dotnet_step
     ):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock.csproj')
             step_config = {
                 'csproj-file': csproj_file
             }
@@ -122,10 +122,10 @@ class TestStepImplementerDotnetPackage__run_step(
 
             # setup sideeffects
             artifact_parent_dir = os.path.join(test_dir.path, 'target')
-            package_artifact_names = [
-                f'my-app.jar'
-            ]
-            def run_maven_side_effect(mvn_output_file_path):
+            #package_artifact_names = [
+            #    f'my-app.jar'
+            #]
+            def run_dotnet_side_effect(dotnet_output_file_path):
                 os.makedirs(artifact_parent_dir, exist_ok=True)
                 for artifact_name in package_artifact_names:
                     artifact_path = os.path.join(
@@ -134,7 +134,7 @@ class TestStepImplementerDotnetPackage__run_step(
                     )
                     Path(artifact_path).touch()
 
-            mock_run_maven_step.side_effect = run_maven_side_effect
+            mock_run_dotnet_step.side_effect = run_dotnet_side_effect
 
             # run step
             actual_step_result = step_implementer._run_step()
@@ -146,14 +146,14 @@ class TestStepImplementerDotnetPackage__run_step(
                 sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.add_artifact(
-                description="Standard out and standard error from maven.",
-                name='maven-output',
-                value='/mock/mvn_output.txt'
+                description="Standard out and standard error from dotnet.",
+                name='dotnet-output',
+                value='/mock/dotnet_output.txt'
             )
             expected_step_result.add_artifact(
                 name='packages',
                 value=[{
-                    'path': os.path.join(artifact_parent_dir, 'my-app.jar')
+                    #'path': os.path.join(artifact_parent_dir, 'my-app.jar')
                 }]
             )
 
@@ -164,19 +164,19 @@ class TestStepImplementerDotnetPackage__run_step(
             )
 
             mock_write_working_file.assert_called_once()
-            mock_run_maven_step.assert_called_with(
-                mvn_output_file_path='/mock/mvn_output.txt'
+            mock_run_dotnet_step.assert_called_with(
+                dotnet_output_file_path='/mock/dotnet_output.txt'
             )
 
     def test_success_multiple_packaged_artifact(
         self,
         mock_write_working_file,
-        mock_run_maven_step
+        mock_run_dotnet_step
     ):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock.csproj')
             step_config = {
                 'csproj-file': csproj_file
             }
@@ -188,10 +188,10 @@ class TestStepImplementerDotnetPackage__run_step(
             # setup sideeffects
             artifact_parent_dir = os.path.join(test_dir.path, 'target')
             package_artifact_names = [
-                f'my-app.jar',
-                f'my-app.war'
+                #f'my-app.jar',
+                #f'my-app.war'
             ]
-            def run_maven_side_effect(mvn_output_file_path):
+            def run_dotnet_side_effect(dotnet_output_file_path):
                 os.makedirs(artifact_parent_dir, exist_ok=True)
                 for artifact_name in package_artifact_names:
                     artifact_path = os.path.join(
@@ -200,7 +200,7 @@ class TestStepImplementerDotnetPackage__run_step(
                     )
                     Path(artifact_path).touch()
 
-            mock_run_maven_step.side_effect = run_maven_side_effect
+            mock_run_dotnet_step.side_effect = run_dotnet_side_effect
 
             # run step
             actual_step_result = step_implementer._run_step()
@@ -212,18 +212,18 @@ class TestStepImplementerDotnetPackage__run_step(
                 sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.add_artifact(
-                description="Standard out and standard error from maven.",
-                name='maven-output',
-                value='/mock/mvn_output.txt'
+                description="Standard out and standard error from dotnet.",
+                name='dotnet-output',
+                value='/mock/dotnet_output.txt'
             )
             expected_step_result.add_artifact(
                 name='packages',
                 value=[
                     {
-                        'path': os.path.join(artifact_parent_dir, 'my-app.jar')
+                        #'path': os.path.join(artifact_parent_dir, 'my-app.jar')
                     },
                     {
-                        'path': os.path.join(artifact_parent_dir, 'my-app.war')
+                        #'path': os.path.join(artifact_parent_dir, 'my-app.war')
                     }
                 ]
             )
@@ -235,19 +235,19 @@ class TestStepImplementerDotnetPackage__run_step(
             )
 
             mock_write_working_file.assert_called_once()
-            mock_run_maven_step.assert_called_with(
-                mvn_output_file_path='/mock/mvn_output.txt'
+            mock_run_dotnet_step.assert_called_with(
+                dotnet_output_file_path='/mock/dotnet_output.txt'
             )
 
-    def test_fail_maven_run(
+    def test_fail_dotnet_run(
         self,
         mock_write_working_file,
-        mock_run_maven_step
+        mock_run_dotnet_step
     ):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock.csproj')
             step_config = {
                 'csproj-file': csproj_file
             }
@@ -257,7 +257,7 @@ class TestStepImplementerDotnetPackage__run_step(
             )
 
             # run step with mock failure
-            mock_run_maven_step.side_effect = StepRunnerException('Mock error running maven')
+            mock_run_dotnet_step.side_effect = StepRunnerException('Mock error running dotnet')
             actual_step_result = step_implementer._run_step()
 
             # create expected step result
@@ -268,13 +268,13 @@ class TestStepImplementerDotnetPackage__run_step(
                 sub_step_implementer_name='DotnetPackage'
             )
             expected_step_result.success = False
-            expected_step_result.message = "Error running 'maven package' to package artifacts. " \
-                "More details maybe found in 'maven-output' report artifact: " \
-                "Mock error running maven"
+            expected_step_result.message = "Error running 'dotnet package' to package artifacts. " \
+                "More details maybe found in 'dotnet-output' report artifact: " \
+                "Mock error running dotnet"
             expected_step_result.add_artifact(
-                description="Standard out and standard error from maven.",
-                name='maven-output',
-                value='/mock/mvn_output.txt'
+                description="Standard out and standard error from dotnet.",
+                name='dotnet-output',
+                value='/mock/dotnet_output.txt'
             )
 
             # verify step result
@@ -284,19 +284,19 @@ class TestStepImplementerDotnetPackage__run_step(
             )
 
             mock_write_working_file.assert_called_once()
-            mock_run_maven_step.assert_called_with(
-                mvn_output_file_path='/mock/mvn_output.txt'
+            mock_run_dotnet_step.assert_called_with(
+                dotnet_output_file_path='/mock/dotnet_output.txt'
             )
 
     def test_fail_no_find_artifacts(
         self,
         mock_write_working_file,
-        mock_run_maven_step
+        mock_run_dotnet_step
     ):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
-            csproj_file = os.path.join(test_dir.path, 'mock-pom.xml')
+            csproj_file = os.path.join(test_dir.path, 'mock.csproj')
             step_config = {
                 'csproj-file': csproj_file,
                 'artifact-parent-dir': 'mock/does-not-exist'
@@ -317,18 +317,18 @@ class TestStepImplementerDotnetPackage__run_step(
             )
             expected_step_result.success = False
             expected_step_result.message = \
-                "Error finding artifacts after running maven package:" \
+                "Error finding artifacts after running dotnet package:" \
                 f" [Errno 2] No such file or directory: '{test_dir.path}/mock/does-not-exist'"
             expected_step_result.add_artifact(
-                description="Standard out and standard error from maven.",
-                name='maven-output',
-                value='/mock/mvn_output.txt'
+                description="Standard out and standard error from dotnet.",
+                name='dotnet-output',
+                value='/mock/dotnet_output.txt'
             )
 
             # verify step result
             self.assertEqual(actual_step_result,expected_step_result)
 
             mock_write_working_file.assert_called_once()
-            mock_run_maven_step.assert_called_with(
-                mvn_output_file_path='/mock/mvn_output.txt'
+            mock_run_dotnet_step.assert_called_with(
+                dotnet_output_file_path='/mock/dotnet_output.txt'
             )
