@@ -25,8 +25,7 @@ Result Artifact Key | Description
 """
 import sh
 
-from ploigos_step_runner.step_implementers.shared.dotnet_generic import \
-    DotnetGeneric
+from ploigos_step_runner.step_implementer import StepImplementer
 
 DEFAULT_CONFIG = {
 }
@@ -34,7 +33,7 @@ DEFAULT_CONFIG = {
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
-class DotnetPackage(DotnetGeneric):
+class DotnetPackage(StepImplementer):
     """`StepImplementer` for the `package` step using Maven.
     """
     def __init__(  # pylint: disable=too-many-arguments
@@ -48,8 +47,7 @@ class DotnetPackage(DotnetGeneric):
             workflow_result=workflow_result,
             parent_work_dir_path=parent_work_dir_path,
             config=config,
-            environment=environment,
-            maven_phases_and_goals=['package']
+            environment=environment
         )
 
     @staticmethod
