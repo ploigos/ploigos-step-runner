@@ -106,6 +106,8 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
             self.assertEqual(result, expected_step_result)
 
     def test_run_step_fail_missing_version_in_csproj_file(self):
+
+        # Given an XML file missing the version tag
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             csproj_file_name = 'dotnet-app.csproj'
@@ -129,6 +131,7 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
                 parent_work_dir_path=parent_work_dir_path,
             )
 
+            # WHEN I run the step
             result = step_implementer._run_step()
 
             print(result)
@@ -141,4 +144,5 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
             expected_step_result.success = False
             expected_step_result.message = f"Could not get project version from given csproj file: ({csproj_file_path})"
 
+            # THEN the step should fail
             self.assertEqual(result, expected_step_result)
