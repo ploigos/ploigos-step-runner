@@ -132,6 +132,12 @@ sequenceDiagram
     participant psr as PSR
     participant tool as External Tool
 
+    Note over wr,tool: Generate Metadata Step
+    wr->>psr: `psr -s generate-metadata -c psr.yml`
+    psr->>tool: Gathers Git and Maven Metadata
+    tool->>psr: Metadata
+    psr->>wr: Artifacts Object
+
     Note over wr,tool: Unit Test Step
     wr->>psr: `psr -s unit-test -c psr.yml`
     psr->>tool: Tests with JUnit
@@ -147,13 +153,13 @@ sequenceDiagram
     Note over wr,tool: Create Container Image Step
     wr->>psr: `psr -s create-container-image -c psr.yml`
     psr->>tool: Creates Container Image with Buildah
-    tool->>psr: Container Image
+    tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Push Container Image Step
     wr->>psr: `psr -s push-container-image -c psr.yml`
     psr->>tool: Pushes Container Image with Skopeo
-    tool->>psr: Container Image
+    tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 ```
 
@@ -186,12 +192,12 @@ sequenceDiagram
     Note over wr,tool: Create Container Image Step
     wr->>psr: `psr -s create-container-image -c psr.yml`
     psr->>tool: Creates Container Image with Buildah
-    tool->>psr: Container Image
+    tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Push Container Image Step
     wr->>psr: `psr -s push-container-image -c psr.yml`
     psr->>tool: Pushes Container Image with Skopeo
-    tool->>psr: Container Image
+    tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 ```
