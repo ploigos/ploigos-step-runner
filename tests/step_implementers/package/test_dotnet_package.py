@@ -9,7 +9,7 @@ from tests.helpers.base_step_implementer_test_case import \
 class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
 
     @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
-    def test_package(self, dotnet_shell_command_mock):
+    def test_run_step_executes_dotnet(self, dotnet_shell_command_mock):
         with TempDirectory() as test_dir:
 
             # GIVEN a step implementer configured like:
@@ -26,6 +26,20 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
                 'app.csproj'
             )
 
+    @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
+    def test_run_step_returns_result(self, dotnet_shell_command_mock):
+        with TempDirectory() as test_dir:
+
+            # GIVEN a step implementer configured like:
+            step_implementer = self.create_step_implementer(test_dir, {
+                'csproj-file': 'app.csproj'
+            })
+
+            # WHEN I run the step
+            actual_step_result = step_implementer._run_step()
+
+            # THEN it should return a StepResult
+            self.assertIsNotNone(actual_step_result)
 
     @patch('sh.dotnet', create=True) # GIVEN a shell command, 'dotnet'
     def test_package_command_missing_csproj(self, dotnet_shell_command_mock):

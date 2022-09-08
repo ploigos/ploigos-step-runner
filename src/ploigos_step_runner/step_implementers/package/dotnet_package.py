@@ -26,6 +26,7 @@ Result Artifact Key | Description
 """
 import sh
 
+from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
 
 DEFAULT_CONFIG = {
@@ -100,3 +101,5 @@ class DotnetPackage(StepImplementer):
         sh.dotnet("publish", # pylint: disable=no-member
                   csproj_file,
                   *config_args)
+
+        return StepResult.from_step_implementer(self)
