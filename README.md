@@ -24,8 +24,8 @@ a Java and JavaScript application. PSR abstracts implementation from the
 pipeline definition, allowing the same pipeline definition to be reused for all
 applications, regardless of the application language and framework.
 
-Each PSR step has one or more *Step Implementers* that are executed are
-executed by PSR from a pipeline. A step implementer does two things:
+Each PSR step has one or more *Step Implementers* that are executed by PSR from
+a pipeline. A step implementer does two things:
 
 1. Integrates with a given product or solution
 2. Produces output in a standard format that can be used or validated by other
