@@ -18,27 +18,23 @@ GitHub Actions, GitLab CI, or any other workflow runner that can execute
 commands.
 
 PSR abstracts the implementation of a *step* from a specific product or
-solution. A few common steps most pipelines implement are *packaging*, *unit
-testing*, and *deploying*. The implementation of these steps differs between a
-Java and JavaScript application. With PSR, the same pipeline can be used on
-both Java and JS applications. Available PSR steps can be found
-[here](https://ploigos.github.io/ploigos-step-runner/#step-configuration).
+solution. A few common steps most pipelines implement are *unit testing*,
+*packaging* and *deploying*. The implementation of these steps differs between
+a Java and JavaScript application. PSR abstracts implementation from the
+pipeline definition, allowing the same pipeline definition to be reused for all
+applications, regardless of the application language and framework.
 
-Each PSR step has one or more *Step Implementers*. A step implementer does two
-things:
+Each PSR step has one or more *Step Implementers* that are executed are
+executed by PSR from a pipeline. A step implementer does two things:
 
 1. Integrates with a given product or solution
 2. Produces output in a standard format that can be used or validated by other
 pipeline steps
 
-PSR uses a common file, *psr.yml*, for configuration of all steps in a
-pipeline. This file exists in an application source code repo alongside a
-pipeline definition file (Jenkinsfile, .gitlab-ci.yml, etc.). PSR abstracts
-implementation from the pipeline definition, allowing the same pipeline
-definition to be reused for all applications, regardless of the application
-language and framework.
+Available PSR steps can be found
+[here](https://ploigos.github.io/ploigos-step-runner/#step-configuration).
 
-A end-to-end example pipeline that uses PSR is documented
+An end-to-end example pipeline that uses PSR is documented
 [here](docs/end-to-end.md).
 
 ## Documentation
