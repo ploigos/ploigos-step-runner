@@ -11,7 +11,7 @@
 
 Ploigos Step Runner (PSR) is a middleware tool to execute Continuous
 Integration (CI) pipeline steps.  **PSR is not a pipeline!** It is a CLI tool
-called in each stage of a pipeline as a command: `psr -s package -c psr.yml`.
+called in each stage of a pipeline as a command: `psr -s package -c psr.yaml`.
 
 PSR is tech stack agnostic and runs on workflow runners like Jenkins, Tekton,
 GitHub Actions, GitLab CI, or any other workflow runner that can execute
@@ -71,7 +71,7 @@ will need to create one. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 instructions on creating step implementers.
 
 An AdHoc step implementer is proposed in #131 that would allow for a command or
-script to be specified in `psr.yml`.
+script to be specified in `psr.yaml`.
 
 ## Contributing
 

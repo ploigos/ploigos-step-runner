@@ -69,11 +69,11 @@ contains implementers for a given step. In the case of hello-world,
 
 To run hello-world (or your step),
 
-1. Create a *psr.yml* file:
+1. Create a *psr.yaml* file:
 
 ```bash
 # Replace step/implementer if testing outside of hello-world
-cat > psr.yml << EOF
+cat > psr.yaml << EOF
 hello-world:
   - implementer: ShortGreeting
 EOF
@@ -82,7 +82,7 @@ EOF
 2. Run PSR:
 
 ```bash
-psr -s hello-world -c psr.yml
+psr -s hello-world -c psr.yaml
 ```
 
 3. Validate the output, both stdout and artifacts sections.
@@ -100,7 +100,7 @@ rm -r ./step-runner-working
 To execute a different implementer for the hello-world step, replace *psr.yaml*:
 
 ```bash
-cat > psr.yml << EOF
+cat > psr.yaml << EOF
 hello-world:
   - implementer: LongGreeting
     name: Ryan
@@ -116,7 +116,7 @@ a Java/Maven repo to test with. If you're testing another language or
 framework, use an application written for that language.
 
 > :notepad: If you're testing using a different repo, make sure to create a
-psr.yml file in that root of that repo for PSR configurations.
+psr.yaml file in that root of that repo for PSR configurations.
 
 **Make sure to add tests for any new step implementers!**
 
