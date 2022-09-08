@@ -29,17 +29,16 @@ Result Artifact Key                     | Description
 `dotnet-auto-increment-version-output` | Standard out and standard error from running maven to auto increment version.
 """# pylint: disable=line-too-long
 
+import os.path
+import xml.etree.ElementTree as ET
 from ploigos_step_runner.results import StepResult
-from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.step_implementers.shared import MavenGeneric
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils import xml
+
+
+
 
 DEFAULT_CONFIG = {
-    'csproj-file': 'dotnet-app.csproj',
-    'auto-increment-version-segment': None,
-    'auto-increment-all-module-versions': True,
-    'tls-verify': True
+    'csproj-file': 'dotnet-app.csproj'
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -64,7 +63,7 @@ class Dotnet(StepImplementer):
         -----
         These are the lowest precedence configuration values.
         """
-        return {**MavenGeneric.step_implementer_config_defaults(), **DEFAULT_CONFIG}
+        return DEFAULT_CONFIG
 
     @staticmethod
     def _required_config_or_result_keys():
@@ -98,11 +97,8 @@ class Dotnet(StepImplementer):
         """
         super()._validate_required_config_or_previous_step_result_artifact_keys()
 
-        auto_increment_version_segment = self.get_value('auto-increment-version-segment')
-        if auto_increment_version_segment:
-            assert (auto_increment_version_segment in ('major', 'minor', 'patch')), \
-                f'Given auto increment version segment (auto-increment-version-segment)' \
-                f' must be one of [major, minor, patch]: {auto_increment_version_segment}'
+        csproj_file = self.get_value('csproj-file')
+        assert os.path.exists(csproj_file), f'Given csproj file (csproj-file) does not exist: {csproj_file}'
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
@@ -112,104 +108,38 @@ class Dotnet(StepImplementer):
         StepResult
             Object containing the dictionary results of this step.
         """
-        try:
-            step_result = StepResult.from_step_implementer(self)
 
-            # auto increment the version
-            auto_increment_version_segment = self.get_value('auto-increment-version-segment')
-            if auto_increment_version_segment:
-                print("Update dotnet package version")
-                self.__auto_increment_version(auto_increment_version_segment, step_result)
+        step_result = StepResult.from_step_implementer(self)
 
+        # get the version
+        project_version = self.__get_project_version()
 
-            # get the version
-            project_version = self.__get_project_version(step_result)
-            if project_version:
-                step_result.add_artifact(
-                    name='app-version',
-                    value=project_version
-                )
-            else:
-                step_result.success = False
-                step_result.message += 'Could not get project version from given pom file' \
-                    f' ({self.get_value("pom-file")})'
-        except StepRunnerException as error:
+        if project_version is not None:
+            step_result.add_artifact(
+                name='app-version',
+                value=project_version
+            )
+            step_result.success = True
+        else:
             step_result.success = False
-            step_result.message = str(error)
+            step_result.message += 'Could not get project version from given csproj file:' \
+                f' ({self.get_value("csproj-file")})'
 
         return step_result
 
-    def __get_project_version(self, step_result):
-        """Get the project version
-
-        Parameters
-        ---------
-        step_result : StepResult
-            Step result to add step results to.
+    def __get_project_version(self):
+        """Get the project version from a csproj xml file
         """
         project_version = None
-        dotnet_evaluate_project_version_file_path = self.write_working_file(
-            'dotnet_evaluate_project_version.txt'
-        )
-        try:
-            project_version = xml.get_xml_element(self.get_value('csproj-file'), 'Version')
 
-        except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = f"Error retrieving project version from csproj file: {error}"
+        csproj_file = self.get_value('csproj-file')
+
+        # Parse csproj file for a Version tag
+        tree = ET.parse(csproj_file)
+        root = tree.getroot()
+        for child in root.iter():
+            if child.tag == 'Version':
+                project_version = child.text
+                break
 
         return project_version
-
-    def __auto_increment_version(self, auto_increment_version_segment, step_result):
-        """Automatically increments a given version segment.
-
-        Parameters
-        ---------
-        auto_increment_version_segment : str
-            The version segment to auto increment.
-            One of: major, minor, or patch
-        step_result : StepResult
-            Step result to add step results to.
-        """
-        dotnet_auto_increment_version_output_file_path = self.write_working_file(
-            'dotnet_versions_set_output.txt'
-        )
-        try:
-            # SEE: https://www.mojohaus.org/build-helper-maven-plugin/parse-version-mojo.html
-            new_version = None
-            if auto_increment_version_segment == 'major':
-                new_version = r'${parsedVersion.nextMajorVersion}.0.0'
-            elif auto_increment_version_segment == 'minor':
-                new_version = r'${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0'
-            elif auto_increment_version_segment == 'patch':
-                new_version = r'${parsedVersion.majorVersion}' \
-                    r'.${parsedVersion.minorVersion}' \
-                    r'.${parsedVersion.nextIncrementalVersion}'
-
-            additional_arguments = [
-                f'-DnewVersion={new_version}'
-            ]
-
-            # determine if should auto increment all modules
-            auto_increment_all_module_versions = self.get_value(
-                'auto-increment-all-module-versions'
-            )
-            if auto_increment_all_module_versions:
-                additional_arguments.append('-DprocessAllModules')
-
-            #Add code to update csproj file
-            #
-            #
-
-        except StepRunnerException as error:
-            raise StepRunnerException(f"Error running maven to auto increment version segment"
-                f" ({auto_increment_version_segment})."
-                f" More details maybe found in 'maven-auto-increment-version-output'"
-                f" report artifact: {error}") from error
-        finally:
-            step_result.add_artifact(
-                description="Standard out and standard error from running maven" \
-                    " to auto increment version.",
-                name='maven-auto-increment-version-output',
-                value=dotnet_auto_increment_version_output_file_path
-            )
