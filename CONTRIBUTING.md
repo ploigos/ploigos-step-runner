@@ -115,7 +115,7 @@ implementer. [spring-petclinic](https://github.com/ploigos/spring-petclinic) is
 a Java/Maven repo to test with. If you're testing another language or
 framework, use an application written for that language.
 
-> :notepad: If you're testing using a different repo, make sure to create a
+> :notebook: If you're testing using a different repo, make sure to create a
 psr.yaml file in that root of that repo for PSR configurations.
 
 **Make sure to add tests for any new step implementers!**
