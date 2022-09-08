@@ -20,9 +20,9 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
             # WHEN I run the step
             actual_step_result = step_implementer._run_step()
 
-            # THEN it should run a shell command like 'dotnet build app.csproj'
+            # THEN it should run a shell command like 'dotnet publish app.csproj'
             dotnet_shell_command_mock.assert_any_call(
-                'build',
+                'publish',
                 'app.csproj'
             )
 
@@ -54,9 +54,9 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
             # WHEN I run the step
             actual_step_result = step_implementer._run_step()
 
-            # THEN it should run a shell command like 'dotnet build app.csproj -c Release'
+            # THEN it should run a shell command like 'dotnet publish app.csproj -c Release'
             dotnet_shell_command_mock.assert_any_call(
-                'build',
+                'publish',
                 'app.csproj',
                 '-c', 'Release'
             )

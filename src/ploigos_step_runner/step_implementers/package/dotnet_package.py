@@ -14,7 +14,7 @@ Could come from:
 
 Configuration Key            | Required? | Default | Description
 -----------------------------|-----------|---------|-----------
-`csproj-file`                | Yes       |         | .csproj or .sln file to pass to the dotnet command
+`csproj-file`                | Yes       |         | .csproj or .sln file to pass to dotnet command
 
 Result Artifacts
 ----------------
@@ -97,6 +97,6 @@ class DotnetPackage(StepImplementer):
         if config_setting is not None:
             config_args = ['-c', config_setting]
 
-        sh.dotnet("build", # pylint: disable=no-member
+        sh.dotnet("publish", # pylint: disable=no-member
                   csproj_file,
                   *config_args)
