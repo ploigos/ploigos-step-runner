@@ -38,6 +38,9 @@ implementation from the pipeline definition, allowing the same pipeline
 definition to be reused for all applications, regardless of the application
 language and framework.
 
+A end-to-end example pipeline that uses PSR is documented
+[here](docs/end-to-end.md).
+
 ## Documentation
 
 - [Python Package Documentation](https://ploigos.github.io/ploigos-step-runner/)
