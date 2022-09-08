@@ -22,7 +22,7 @@ import traceback
 from contextlib import redirect_stderr, redirect_stdout
 
 from ploigos_step_runner.config import Config
-from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config.decryption_utils import DecryptionUtils
 from ploigos_step_runner.step_runner import StepRunner
 from ploigos_step_runner.utils.io import TextIOSelectiveObfuscator
 

@@ -8,7 +8,7 @@ from distutils import util
 
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.config.step_config import StepConfig
-from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config.decryption_utils import DecryptionUtils
 from ploigos_step_runner.utils.dict import deep_merge
 from ploigos_step_runner.utils.file import parse_yaml_or_json_file
 

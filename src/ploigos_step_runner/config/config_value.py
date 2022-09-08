@@ -2,7 +2,7 @@
 """
 
 import copy
-from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config.decryption_utils import DecryptionUtils
 
 class ConfigValue:
     """Representation of a configuration value.

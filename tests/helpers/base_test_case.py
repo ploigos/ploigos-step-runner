@@ -2,7 +2,7 @@ import unittest
 import shutil
 from re import escape
 
-from ploigos_step_runner.decryption_utils import DecryptionUtils
+from ploigos_step_runner.config.decryption_utils import DecryptionUtils
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
