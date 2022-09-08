@@ -21,6 +21,9 @@ python -m pip install --upgrade pip
 python -m pip install -e '.[tests]'
 ```
 
+You will need to run `source .venvs/psr-dev/bin/activate` to activate the
+development environment each time you start working in a new terminal session.
+
 ## Run Tests
 
 > :notebook: Some tests require `mvn` command in your PATH. Install with brew/yum/dnf prior to running tests.
