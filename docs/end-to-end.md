@@ -76,7 +76,7 @@ unit-test:
 Jenkins needs to call the PSR command with two options:
 
 - `-s <step>` is the name of the step that will be executed
-- `-c psr.yml` is the path to the PSR configuration file for the application
+- `-c psr.yaml` is the path to the PSR configuration file for the application
 
 Create a Jenkinsfile in both source code repos that contains the same pipeline
 definition:
@@ -133,31 +133,31 @@ sequenceDiagram
     participant tool as External Tool
 
     Note over wr,tool: Generate Metadata Step
-    wr->>psr: `psr -s generate-metadata -c psr.yml`
+    wr->>psr: `psr -s generate-metadata -c psr.yaml`
     psr->>tool: Gathers Git and Maven Metadata
     tool->>psr: Metadata
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Unit Test Step
-    wr->>psr: `psr -s unit-test -c psr.yml`
+    wr->>psr: `psr -s unit-test -c psr.yaml`
     psr->>tool: Tests with JUnit
     tool->>psr: Test Results + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Package Step
-    wr->>psr: `psr -s package -c psr.yml`
+    wr->>psr: `psr -s package -c psr.yaml`
     psr->>tool: Builds with Maven
     tool->>psr: JAR File + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Create Container Image Step
-    wr->>psr: `psr -s create-container-image -c psr.yml`
+    wr->>psr: `psr -s create-container-image -c psr.yaml`
     psr->>tool: Creates Container Image with Buildah
     tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Push Container Image Step
-    wr->>psr: `psr -s push-container-image -c psr.yml`
+    wr->>psr: `psr -s push-container-image -c psr.yaml`
     psr->>tool: Pushes Container Image with Skopeo
     tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
@@ -172,31 +172,31 @@ sequenceDiagram
     participant tool as External Tool
 
     Note over wr,tool: Generate Metadata Step
-    wr->>psr: `psr -s generate-metadata -c psr.yml`
+    wr->>psr: `psr -s generate-metadata -c psr.yaml`
     psr->>tool: Gathers Git and NPM Metadata
     tool->>psr: Metadata
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Unit Test Step
-    wr->>psr: `psr -s unit-test -c psr.yml`
+    wr->>psr: `psr -s unit-test -c psr.yaml`
     psr->>tool: Tests with NpmXunitTest
     tool->>psr: Test Results + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Package Step
-    wr->>psr: `psr -s package -c psr.yml`
+    wr->>psr: `psr -s package -c psr.yaml`
     psr->>tool: Builds with NPM
     tool->>psr: JAR File + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Create Container Image Step
-    wr->>psr: `psr -s create-container-image -c psr.yml`
+    wr->>psr: `psr -s create-container-image -c psr.yaml`
     psr->>tool: Creates Container Image with Buildah
     tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Push Container Image Step
-    wr->>psr: `psr -s push-container-image -c psr.yml`
+    wr->>psr: `psr -s push-container-image -c psr.yaml`
     psr->>tool: Pushes Container Image with Skopeo
     tool->>psr: Container Image + Logs
     psr->>wr: Artifacts Object
