@@ -4,20 +4,20 @@ Below is an end-to-end example pipeline that leverages PSR.
 
 ## Example Scenario
 
-- Two applications
+- We have two applications
     - First is a Java Spring backend API built with Maven
     - Second is a JavaScript React frontend built with NPM
-- Want to build a pipeline that has 5 stages
+- We want to build a pipeline that has 5 stages
     - Generate Metadata
     - Unit test
     - Package
     - Create Container Image
     - Push Container Image
-- Workflow runner is Jenkins
+- We want to use Jenkins as the workflow runner
 
 ## Step 1: Configure *psr.yaml* for Maven
 
-Create a *psr.yaml* file for the Spring application:
+Create a *psr.yaml* file in the source code repo for the Spring application:
 
 ```yaml
 create-container-image:
@@ -46,7 +46,7 @@ unit-test:
 
 ## Step 2: Configure *psr.yaml* for NPM
 
-Create a *psr.yaml* file for the Spring application:
+Create a *psr.yaml* file in the source code repo for the NPM application:
 
 ```yaml
 create-container-image:
@@ -78,7 +78,8 @@ Jenkins needs to call the PSR command with two options:
 - `-s <step>` is the name of the step that will be executed
 - `-c psr.yml` is the path to the PSR configuration file for the application
 
-Create a Jenkinsfile containing the pipeline definition:
+Create a Jenkinsfile in both source code repos that contains the same pipeline
+definition:
 
 ```Jenkinsfile
 pipeline {
