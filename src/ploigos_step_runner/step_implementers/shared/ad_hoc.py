@@ -44,6 +44,20 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
     StepImplementer for the ad-hoc step for AdHoc.
     """
 
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        workflow_result,
+        parent_work_dir_path,
+        config,
+        environment=None
+    ):
+        super().__init__(
+            workflow_result=workflow_result,
+            parent_work_dir_path=parent_work_dir_path,
+            config=config,
+            environment=environment
+        )
+
     @staticmethod
     def step_implementer_config_defaults():
         """Getter for the StepImplementer's configuration defaults.
