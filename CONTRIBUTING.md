@@ -106,7 +106,8 @@ To execute a different implementer for the hello-world step, replace *psr.yaml*:
 cat > psr.yaml << EOF
 hello-world:
   - implementer: LongGreeting
-    name: Ryan
+    config:
+      name: Ryan
 EOF
 ```
 
