@@ -33,6 +33,7 @@ from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
+import ploigos_step_runner.utils.bash as bash
 
 DEFAULT_CONFIG = {}
 
@@ -103,32 +104,13 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         command = self.get_value('command')
         step_result = StepResult.from_step_implementer(self)
         output_file_path = self.write_working_file('ad_hoc_output.txt')
-        result = None
-        try:
-            with open('./output', 'w', encoding='utf-8') as output_file:
-                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stdout,
-                    output_file
-                ])
-                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                    sys.stderr,
-                    output_file
-                ])
 
-                result = sh.bash(  # pylint: disable=no-member
-                    '-c',
-                    command,
-                    _out=out_callback,
-                    _err=err_callback
-                )
-        except sh.ErrorReturnCode as error:
-            raise StepRunnerException(
-                f"Error running command. {error}"
-            ) from error
-        # except StepRunnerException as error:
-        #     step_result.success = False
-        #     step_result.message = str(error)
-        #     return step_result
+        try:
+            exit_code = bash.run_bash(output_file_path, command)
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+            return step_result
 
         # import pdb ; pdb.set_trace()
         # TODO: Add artifact stdout, stderr, and return code
@@ -141,7 +123,7 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
 
         step_result.add_artifact(
             name='exit_code',
-            value=result.exit_code
+            value=exit_code
         )
 
         return step_result
