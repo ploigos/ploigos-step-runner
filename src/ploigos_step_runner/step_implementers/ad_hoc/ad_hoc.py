@@ -102,7 +102,8 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         """
         command = self.get_value('command')
         step_result = StepResult.from_step_implementer(self)
-        # import pdb ; pdb.set_trace()
+        output_file_path = self.write_working_file('ad_hoc_output.txt')
+        result = None
         try:
             with open('./output', 'w', encoding='utf-8') as output_file:
                 out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
@@ -114,8 +115,7 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
                     output_file
                 ])
 
-
-                sh.bash(  # pylint: disable=no-member
+                result = sh.bash(  # pylint: disable=no-member
                     '-c',
                     command,
                     _out=out_callback,
@@ -130,10 +130,18 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         #     step_result.message = str(error)
         #     return step_result
 
+        # import pdb ; pdb.set_trace()
         # TODO: Add artifact stdout, stderr, and return code
+
         step_result.add_artifact(
-            name='test',
-            value='test'
+            description="Standard out and standard error from ad-hoc command run.",
+            name='command-output',
+            value=output_file_path
+        )
+
+        step_result.add_artifact(
+            name='exit_code',
+            value=result.exit_code
         )
 
         return step_result
