@@ -22,16 +22,10 @@ Result Artifact Key    | Description
 `command-output`       | stdout and stderr from the command run
 """# pylint: disable=line-too-long
 
-import re
-import sys
-
-import sh
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils.io import \
-    create_sh_redirect_to_multiple_streams_fn_callback
-import ploigos_step_runner.utils.bash as bash
+from ploigos_step_runner.utils import bash
 
 DEFAULT_CONFIG = {}
 
@@ -90,20 +84,6 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
             that are required before running the step.
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        """Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-
-        Raises
-        ------
-        AssertionError
-            If step configuration or previous step result artifacts have invalid required values
-        """
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
 
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.

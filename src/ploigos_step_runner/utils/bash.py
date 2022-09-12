@@ -2,7 +2,6 @@
 Shared utils for bash operations.
 """
 
-import os
 import sys
 
 import sh

@@ -19,13 +19,12 @@ class TestAdHocPackage__run_step(BaseStepImplementerTestCase):
 
         # Given a working directory
         with TempDirectory() as temp_dir:
-            working_dir_path = os.path.join(temp_dir.path, 'working')
 
+            # Given an AdHoc step implementer
+            working_dir_path = os.path.join(temp_dir.path, 'working')
             config = {
                 'command': 'echo "Hello World!"'
             }
-
-            # Given an AdHoc step implementer
             ad_hoc_test = self.create_given_step_implementer(
                 AdHoc,
                 step_config=config,
@@ -49,13 +48,12 @@ class TestAdHocPackage__run_step(BaseStepImplementerTestCase):
 
         # Given a working directory
         with TempDirectory() as temp_dir:
-            working_dir_path = os.path.join(temp_dir.path, 'working')
 
+            # Given an AdHoc step implementer
+            working_dir_path = os.path.join(temp_dir.path, 'working')
             config = {
                 'command': 'echooo "Hello World!"'
             }
-
-            # Given an NpmPackage step implementer
             ad_hoc_test = self.create_given_step_implementer(
                 AdHoc,
                 parent_work_dir_path=working_dir_path,
@@ -92,7 +90,7 @@ class TestAdHocPackage__run_step(BaseStepImplementerTestCase):
             # When I run the step
             step_result = ad_hoc_test.run_step()
 
-            # Then the StepResult should have an artifact with the npm output:
+            # Then the StepResult should have an artifact with the command output:
             artifact = step_result.get_artifact('command-output')
             output_file_path = os.path.join(working_dir_path, 'ad_hoc_output.txt')
             self.assertEqual(artifact, StepResultArtifact(
