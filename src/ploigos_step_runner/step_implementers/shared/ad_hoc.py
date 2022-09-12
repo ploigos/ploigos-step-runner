@@ -1,4 +1,4 @@
-"""`StepImplementer` for the `ad-hoc` step using AdHoc.
+"""`StepImplementer` to run an `ad-hoc` bash script/command.
 
 Step Configuration
 ------------------
@@ -19,15 +19,13 @@ Results artifacts output by this step.
 
 Result Artifact Key    | Description
 -----------------------|------------
-`stdout`               | stdout from the command run
-`stderr`               | stderr from the command run
+`command-output`       | stdout and stderr from the command run
 """# pylint: disable=line-too-long
 
 import re
 import sys
 
 import sh
-
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
