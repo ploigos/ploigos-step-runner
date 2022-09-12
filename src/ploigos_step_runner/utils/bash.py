@@ -13,7 +13,6 @@ from ploigos_step_runner.utils.io import \
 def run_bash(output_file_path, command):
     """Run a bash command.
     """
-    result = None
     try:
         with open(output_file_path, 'w', encoding='utf-8') as output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
@@ -25,7 +24,7 @@ def run_bash(output_file_path, command):
                 output_file
             ])
 
-            result = sh.bash(  # pylint: disable=no-member
+            sh.bash(  # pylint: disable=no-member
                 '-c',
                 command,
                 _out=out_callback,
@@ -35,4 +34,3 @@ def run_bash(output_file_path, command):
         raise StepRunnerException(
             f"Error running command. {error}"
         ) from error
-    return result.exit_code

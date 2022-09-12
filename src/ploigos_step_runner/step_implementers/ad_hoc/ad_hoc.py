@@ -101,19 +101,8 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         StepResult
             Object containing the dictionary results of this step.
         """
-        command = self.get_value('command')
         step_result = StepResult.from_step_implementer(self)
         output_file_path = self.write_working_file('ad_hoc_output.txt')
-
-        try:
-            exit_code = bash.run_bash(output_file_path, command)
-        except StepRunnerException as error:
-            step_result.success = False
-            step_result.message = str(error)
-            return step_result
-
-        # import pdb ; pdb.set_trace()
-        # TODO: Add artifact stdout, stderr, and return code
 
         step_result.add_artifact(
             description="Standard out and standard error from ad-hoc command run.",
@@ -121,9 +110,12 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
             value=output_file_path
         )
 
-        step_result.add_artifact(
-            name='exit_code',
-            value=exit_code
-        )
+        command = self.get_value('command')
+
+        try:
+            bash.run_bash(output_file_path, command)
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
 
         return step_result
