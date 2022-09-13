@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.utils.npm API documentation</title>
-<meta name="description" content="Shared utils for npm operations." />
+<title>ploigos_step_runner.utils.shell API documentation</title>
+<meta name="description" content="Use this module to run shell commands with a simplified interface that is
+easier to user test than the &#39;sh&#39; module." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,16 +20,18 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.utils.npm</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.utils.shell</code></h1>
 </header>
 <section id="section-intro">
-<p>Shared utils for npm operations.</p>
+<p>Use this module to run shell commands with a simplified interface that is
+easier to user test than the 'sh' module.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-Shared utils for npm operations.
+Use this module to run shell commands with a simplified interface that is
+easier to user test than the &#39;sh&#39; module.
 &#34;&#34;&#34;
 import os
 import sys
@@ -38,50 +41,56 @@ from ploigos_step_runner.utils.io import \
     create_sh_redirect_to_multiple_streams_fn_callback
 
 
-def run_npm(npm_output_file_path, npm_args, npm_envs=None):
+class Shell:
     &#34;&#34;&#34;
-    Run an npm command
-
-    Parameters
-    ----------
-    npm_output_file_path:
-        String
-    npm_args:
-        Commandline arguments to npm
-    npm_envs:
-        Dictionary representing additional environment variables
+    Provides access to a command-line shell. Use run() to run commands.
     &#34;&#34;&#34;
-    try:
-        with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
-            out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                sys.stdout,
-                npm_output_file
-            ])
-            err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-                sys.stderr,
-                npm_output_file
-            ])
 
-            if npm_envs:
-                new_env = os.environ.copy()
-                new_env.update(npm_envs)
+    def run(self, command, output_file_path=None, args=None, envs=None):
+        &#34;&#34;&#34;
+        Run a shell command
 
-                sh.npm(  # pylint: disable=no-member
-                    npm_args,
+        Parameters
+        ----------
+        command:
+            String
+        output_file_path:
+            String
+        args:
+            Commandline arguments
+        envs:
+            Dictionary representing additional environment variables
+        &#34;&#34;&#34;
+        try:
+            with open(output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as output_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    output_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    output_file
+                ])
+
+                new_env = None
+                if envs:
+                    new_env = os.environ.copy()
+                    new_env.update(envs)
+
+                # Run the command
+                shell_command = sh.Command(  # pylint: disable=unexpected-keyword-arg
+                    command
+                )
+                shell_command(
+                    args,
                     _env=new_env,
                     _out=out_callback,
                     _err=err_callback
                 )
-            else:
-                sh.npm(  # pylint: disable=no-member
-                    npm_args,
-                    _out=out_callback,
-                    _err=err_callback
-                )
-    except sh.ErrorReturnCode as error:
-        raise StepRunnerException(
-            f&#34;Error running npm. {error}&#34;
-        ) from error</code></pre>
+        except sh.ErrorReturnCode as error:
+            raise StepRunnerException(
+                f&#34;Error running shell command. {error}&#34;
+            ) from error</code></pre>
 </details>
 </section>
 <section>
@@ -89,73 +98,140 @@ def run_npm(npm_output_file_path, npm_args, npm_envs=None):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="ploigos_step_runner.utils.npm.run_npm"><code class="name flex">
-<span>def <span class="ident">run_npm</span></span>(<span>npm_output_file_path, npm_args, npm_envs=None)</span>
+<dt id="ploigos_step_runner.utils.shell.Shell"><code class="flex name class">
+<span>class <span class="ident">Shell</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Run an npm command</p>
+<div class="desc"><p>Provides access to a command-line shell. Use run() to run commands.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Shell:
+    &#34;&#34;&#34;
+    Provides access to a command-line shell. Use run() to run commands.
+    &#34;&#34;&#34;
+
+    def run(self, command, output_file_path=None, args=None, envs=None):
+        &#34;&#34;&#34;
+        Run a shell command
+
+        Parameters
+        ----------
+        command:
+            String
+        output_file_path:
+            String
+        args:
+            Commandline arguments
+        envs:
+            Dictionary representing additional environment variables
+        &#34;&#34;&#34;
+        try:
+            with open(output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as output_file:
+                out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stdout,
+                    output_file
+                ])
+                err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
+                    sys.stderr,
+                    output_file
+                ])
+
+                new_env = None
+                if envs:
+                    new_env = os.environ.copy()
+                    new_env.update(envs)
+
+                # Run the command
+                shell_command = sh.Command(  # pylint: disable=unexpected-keyword-arg
+                    command
+                )
+                shell_command(
+                    args,
+                    _env=new_env,
+                    _out=out_callback,
+                    _err=err_callback
+                )
+        except sh.ErrorReturnCode as error:
+            raise StepRunnerException(
+                f&#34;Error running shell command. {error}&#34;
+            ) from error</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ploigos_step_runner.utils.shell.Shell.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self, command, output_file_path=None, args=None, envs=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Run a shell command</p>
 <h2 id="parameters">Parameters</h2>
-<p>npm_output_file_path:
+<p>command:
 String
-npm_args:
-Commandline arguments to npm
-npm_envs:
+output_file_path:
+String
+args:
+Commandline arguments
+envs:
 Dictionary representing additional environment variables</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_npm(npm_output_file_path, npm_args, npm_envs=None):
+<pre><code class="python">def run(self, command, output_file_path=None, args=None, envs=None):
     &#34;&#34;&#34;
-    Run an npm command
+    Run a shell command
 
     Parameters
     ----------
-    npm_output_file_path:
+    command:
         String
-    npm_args:
-        Commandline arguments to npm
-    npm_envs:
+    output_file_path:
+        String
+    args:
+        Commandline arguments
+    envs:
         Dictionary representing additional environment variables
     &#34;&#34;&#34;
     try:
-        with open(npm_output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as npm_output_file:
+        with open(output_file_path, &#39;w&#39;, encoding=&#39;utf-8&#39;) as output_file:
             out_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stdout,
-                npm_output_file
+                output_file
             ])
             err_callback = create_sh_redirect_to_multiple_streams_fn_callback([
                 sys.stderr,
-                npm_output_file
+                output_file
             ])
 
-            if npm_envs:
+            new_env = None
+            if envs:
                 new_env = os.environ.copy()
-                new_env.update(npm_envs)
+                new_env.update(envs)
 
-                sh.npm(  # pylint: disable=no-member
-                    npm_args,
-                    _env=new_env,
-                    _out=out_callback,
-                    _err=err_callback
-                )
-            else:
-                sh.npm(  # pylint: disable=no-member
-                    npm_args,
-                    _out=out_callback,
-                    _err=err_callback
-                )
+            # Run the command
+            shell_command = sh.Command(  # pylint: disable=unexpected-keyword-arg
+                command
+            )
+            shell_command(
+                args,
+                _env=new_env,
+                _out=out_callback,
+                _err=err_callback
+            )
     except sh.ErrorReturnCode as error:
         raise StepRunnerException(
-            f&#34;Error running npm. {error}&#34;
+            f&#34;Error running shell command. {error}&#34;
         ) from error</code></pre>
 </details>
 </dd>
 </dl>
-</section>
-<section>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -169,9 +245,14 @@ Dictionary representing additional environment variables</p></div>
 <li><code><a title="ploigos_step_runner.utils" href="index.html">ploigos_step_runner.utils</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ploigos_step_runner.utils.shell.Shell" href="#ploigos_step_runner.utils.shell.Shell">Shell</a></code></h4>
 <ul class="">
-<li><code><a title="ploigos_step_runner.utils.npm.run_npm" href="#ploigos_step_runner.utils.npm.run_npm">run_npm</a></code></li>
+<li><code><a title="ploigos_step_runner.utils.shell.Shell.run" href="#ploigos_step_runner.utils.shell.Shell.run">run</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
