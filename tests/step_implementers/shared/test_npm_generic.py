@@ -1,14 +1,12 @@
 
 import os
 from pathlib import Path
-# from shutil import copyfile
 from unittest.mock import PropertyMock, patch
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import WorkflowResult
 from ploigos_step_runner.config import Config
 from ploigos_step_runner.step_implementers.shared.npm_generic import NpmGeneric
-# from ploigos_step_runner.utils.file import create_parent_dir
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
@@ -266,7 +264,7 @@ class TestStepImplementerSharedNpmGeneric_config(
         )
 
 
-@patch('ploigos_step_runner.step_implementers.shared.npm_generic.run_npm')
+@patch('ploigos_step_runner.step_implementers.shared.npm_generic.Shell.run')
 @patch.object(
     NpmGeneric,
     'npm_args',
@@ -274,7 +272,7 @@ class TestStepImplementerSharedNpmGeneric_config(
     return_value=['fake-arg']
 )
 class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerSharedNpmGeneric):
-    def test_defaults(self, mock_args, mock_run_npm):
+    def test_defaults(self, mock_args, mock_shell_run):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -294,13 +292,14 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
                 npm_output_file_path=npm_output_file_path
             )
 
-            mock_run_npm.assert_called_with(
-                npm_output_file_path=npm_output_file_path,
-                npm_args=['fake-arg'],
-                npm_envs=None
+            mock_shell_run.assert_called_with(
+                'npm',
+                output_file_path=npm_output_file_path,
+                args=['fake-arg'],
+                envs=None
             )
 
-    def test_npm_env_vars_from_config(self, mock_args, mock_run_npm):
+    def test_npm_env_vars_from_config(self, mock_args, mock_shell_run):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -334,13 +333,14 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
                 expected_step_result
             )
 
-            mock_run_npm.assert_called_with(
-                npm_output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
-                npm_args=['fake-arg'],
-                npm_envs={"WEB_DRIVER_URL": "selenium-grid-route-config-key",
+            mock_shell_run.assert_called_with(
+                'npm',
+                output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
+                args=['fake-arg'],
+                envs={"WEB_DRIVER_URL": "selenium-grid-route-config-key",
                           "BROWSER": "chrome"})
 
-    def test_npm_env_vars_injected(self, mock_args, mock_run_npm):
+    def test_npm_env_vars_injected(self, mock_args, mock_shell_run):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -354,12 +354,13 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
             step_implementer._run_npm_step(npm_output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
                                            step_implementer_additional_envs={"ENV1": "VAL1"})
 
-            mock_run_npm.assert_called_with(
-                npm_output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
-                npm_args=['fake-arg'],
-                npm_envs={"ENV1": "VAL1"})
+            mock_shell_run.assert_called_with(
+                'npm',
+                output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
+                args=['fake-arg'],
+                envs={"ENV1": "VAL1"})
 
-    def test_npm_env_vars_from_config_and_injected_vars(self, mock_args, mock_run_npm):
+    def test_npm_env_vars_from_config_and_injected_vars(self, mock_args, mock_shell_run):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -376,10 +377,11 @@ class TestStepImplementerSharedNpmGeneric__run_npm_step(BaseTestStepImplementerS
             step_implementer._run_npm_step(npm_output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
                                            step_implementer_additional_envs={"ENV1": "VAL1"})
 
-            mock_run_npm.assert_called_with(
-                npm_output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
-                npm_args=['fake-arg'],
-                npm_envs={"WEB_DRIVER_URL": "selenium-grid-route-config-key",
+            mock_shell_run.assert_called_with(
+                'npm',
+                output_file_path=f'{parent_work_dir_path}/foo/npm_output.txt',
+                args=['fake-arg'],
+                envs={"WEB_DRIVER_URL": "selenium-grid-route-config-key",
                           "BROWSER": "chrome", "ENV1": "VAL1"})
 
 
@@ -422,7 +424,7 @@ class TestStepImplementerSharedNpmGeneric__run_step(
                 npm_output_file_path='/mock/npm_output.txt'
             )
 
-    def test_fail(self, mock_write_working_file, mock_run_npm_step):
+    def test_fail(self, mock_write_working_file, mock_shell_run):
         with TempDirectory() as test_dir:
             parent_work_dir_path = os.path.join(test_dir.path, 'working')
 
@@ -433,7 +435,7 @@ class TestStepImplementerSharedNpmGeneric__run_step(
             )
 
             # run step with mock failure
-            mock_run_npm_step.side_effect = StepRunnerException(
+            mock_shell_run.side_effect = StepRunnerException(
                 'Mock error running npm')
             actual_step_result = step_implementer._run_step()
 
@@ -460,6 +462,6 @@ class TestStepImplementerSharedNpmGeneric__run_step(
             )
 
             mock_write_working_file.assert_called_once()
-            mock_run_npm_step.assert_called_with(
+            mock_shell_run.assert_called_with(
                 npm_output_file_path='/mock/npm_output.txt'
             )
