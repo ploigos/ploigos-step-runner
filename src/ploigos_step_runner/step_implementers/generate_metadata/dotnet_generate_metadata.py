@@ -31,7 +31,6 @@ from ploigos_step_runner.step_implementer import StepImplementer
 
 DEFAULT_CONFIG = {
     'csproj-version-tag': 'Version'
-
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -114,6 +113,9 @@ class DotnetGenerateMetadata(StepImplementer):
         """Get the project version from a csproj xml file
         """
         project_version = None
+
+        csproj_file = self.get_value('csproj-file')
+        assert os.path.exists(csproj_file), f'Given csproj file (csproj-file) does not exist: {csproj_file}'
 
         # Parse csproj file for a Version tag
         tree = ET.parse(xml_file)
