@@ -114,9 +114,6 @@ class DotnetGenerateMetadata(StepImplementer):
         """
         project_version = None
 
-        csproj_file = self.get_value('csproj-file')
-        assert os.path.exists(csproj_file), f'Given csproj file (csproj-file) does not exist: {csproj_file}'
-
         # Parse csproj file for a Version tag
         tree = ET.parse(xml_file)
         root = tree.getroot()

@@ -42,27 +42,6 @@ class TestStepImplementerDotnetGenerateMetadata(BaseStepImplementerTestCase):
         expected_required_keys = ['csproj-file']
         self.assertEqual(required_keys, expected_required_keys)
 
-    def test__run_step_package_file_does_not_exist(self):
-        with TempDirectory() as temp_dir:
-            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
-            csproj_file_path = os.path.join(temp_dir.path, 'dotnet-app.csproj')
-            step_config = {
-                'csproj-file': csproj_file_path
-            }
-
-            step_implementer = self.create_step_implementer(
-                step_config=step_config,
-                step_name='test',
-                implementer='DotnetGenerateMetadata',
-                parent_work_dir_path=parent_work_dir_path
-            )
-
-            with self.assertRaisesRegex(
-                    AssertionError,
-                    rf"Given csproj file \(csproj-file\) does not exist: {csproj_file_path}"
-            ):
-                step_implementer._run_step()
-
     def test_run_step_pass(self):
 
         # GIVEN an XML file with a Version element
