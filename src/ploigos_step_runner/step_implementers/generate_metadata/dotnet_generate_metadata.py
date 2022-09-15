@@ -1,4 +1,4 @@
-"""`StepImplementer` for the `generate-metadata` step using Maven.
+"""`StepImplementer` for the `generate-metadata` step using Dotnet.
 
 Step Configuration
 ------------------
