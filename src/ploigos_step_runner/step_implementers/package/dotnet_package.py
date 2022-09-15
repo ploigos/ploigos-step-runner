@@ -49,8 +49,8 @@ class DotnetPackage(StepImplementer):
         # Command usage: `dotnet [options] publish [<PROJECT | SOLUTION>]`
         # Build the arguments
         args = []
-        args += self._build_options()                # [options]
         args += ["publish"]                          # publish
+        args += self._build_options()                # [options]
         csproj_file = self.get_value('csproj-file')
         args += [csproj_file]                        # [<PROJECT | SOLUTION>]
 

@@ -71,7 +71,7 @@ class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
             expected_output_file_path = os.path.join(test_dir.path, 'working', 'package', 'dotnet_publish_output.txt')
             mock_shell.assert_any_call(
                 'dotnet',
-                args=['-c', 'Release', 'publish', 'app.csproj'],
+                args=['publish', '-c', 'Release', 'app.csproj'],
                 output_file_path=expected_output_file_path
             )
 
