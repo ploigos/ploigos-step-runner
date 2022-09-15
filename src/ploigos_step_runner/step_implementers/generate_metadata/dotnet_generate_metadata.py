@@ -11,11 +11,8 @@ Could come from:
 
 Configuration Key                    | Required? | Default      | Description
 -------------------------------------|-----------|--------------|-----------
-`csproj-file`                        | Yes       | `'dotnet-app.csproj'` | csproj file to read the app version out of
-`auto-increment-version-segment`     | No        |              | Segment of the app version to auto increment. \
-                                                                  One of major, minor, or patch. \
-                                                                  If None / empty string will not auto increment version.
-`auto-increment-all-module-versions` | No        | True         | If auto incrementing version, auto increment version in all sub modules if True.
+`csproj-file`                        | Yes       |              | csproj file to read the app version out of
+`csproj-version-tag`                 | No        | 'Version'    | XML tag to get version from csproj file
 
 Result Artifacts
 ----------------
@@ -25,8 +22,6 @@ Result Artifact Key                     | Description
 ----------------------------------------|------------
 `app-version`                           | Value to use for `version` portion of semantic version \
                                           (https://semver.org/). Uses the version read out of the given pom file.
-
-`dotnet-auto-increment-version-output` | Standard out and standard error from running maven to auto increment version.
 """# pylint: disable=line-too-long
 
 import os.path
@@ -34,11 +29,9 @@ import xml.etree.ElementTree as ET
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
 
-
-
-
 DEFAULT_CONFIG = {
-    'csproj-file': 'dotnet-app.csproj'
+    'csproj-version-tag': 'Version'
+
 }
 
 REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
@@ -46,7 +39,7 @@ REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
 ]
 
 
-class Dotnet(StepImplementer):
+class DotnetGenerateMetadata(StepImplementer):
     """`StepImplementer` for the `generate-metadata` step using Dotnet.
     """
 
@@ -82,24 +75,6 @@ class Dotnet(StepImplementer):
         """
         return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
 
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        """Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-
-        Validates that:
-        * required configuration is given
-        * given 'csproj-file' exists
-
-        Raises
-        ------
-        AssertionError
-            If step configuration or previous step result artifacts have invalid required values
-        """
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        csproj_file = self.get_value('csproj-file')
-        assert os.path.exists(csproj_file), f'Given csproj file (csproj-file) does not exist: {csproj_file}'
-
     def _run_step(self):
         """Runs the step implemented by this StepImplementer.
 
@@ -112,7 +87,15 @@ class Dotnet(StepImplementer):
         step_result = StepResult.from_step_implementer(self)
 
         # get the version
-        project_version = self.__get_project_version()
+        csproj_file = self.get_value('csproj-file')
+        csproj_version_tag = self.get_value('csproj-version-tag')
+
+        if not os.path.exists(csproj_file):
+            step_result.message += f'Given csproj file (csproj-file) does not exist: {csproj_file}'
+            step_result.success = False
+            return step_result
+
+        project_version = self.__get_project_version(csproj_file, csproj_version_tag)
 
         if project_version is not None:
             step_result.add_artifact(
@@ -127,18 +110,16 @@ class Dotnet(StepImplementer):
 
         return step_result
 
-    def __get_project_version(self):
+    def __get_project_version(self, xml_file, xml_tag):
         """Get the project version from a csproj xml file
         """
         project_version = None
 
-        csproj_file = self.get_value('csproj-file')
-
         # Parse csproj file for a Version tag
-        tree = ET.parse(csproj_file)
+        tree = ET.parse(xml_file)
         root = tree.getroot()
         for child in root.iter():
-            if child.tag == 'Version':
+            if child.tag == xml_tag:
                 project_version = child.text
                 break
 
