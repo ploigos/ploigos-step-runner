@@ -186,7 +186,7 @@ sequenceDiagram
     Note over wr,tool: Package Step
     wr->>psr: `psr -s package -c psr.yaml`
     psr->>tool: Builds with NPM
-    tool->>psr: JAR File + Logs
+    tool->>psr: Build Outputs + Logs
     psr->>wr: Artifacts Object
 
     Note over wr,tool: Create Container Image Step
