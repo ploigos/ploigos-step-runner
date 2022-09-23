@@ -96,7 +96,7 @@ psr -s hello-world -c psr.yaml
 rm -r ./step-runner-working
 ```
 
-> :warning: This step is important. If you need to rerun hello-world (or any
+> :warning: This step is important. If you need to re-run hello-world (or any
 > step that has been run), you must remove the directory
 > `./step-runner-working`. See [Troubleshooting](#troubleshooting).
 

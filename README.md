@@ -19,7 +19,7 @@ commands.
 
 PSR abstracts the implementation of a *step* from a specific product or
 solution. A few common steps most pipelines implement are *unit testing*,
-*packaging* and *deploying*. The implementation of these steps differs between
+*packaging*, and *deploying*. The implementation of these steps differs between
 a Java and JavaScript application. PSR abstracts implementation from the
 pipeline definition, allowing the same pipeline definition to be reused for all
 applications, regardless of the application language and framework.
@@ -60,14 +60,14 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 > What is a Workflow Runner?
 
-A workflow runner is a Continuous Integration (CI) tool that execute pipelines. Common workflow runners are Jenkins, Tekton, GitHub Actions, and GitLab CI.
+A workflow runner is a Continuous Integration (CI) tool that executes pipelines. Common workflow runners are Jenkins, Tekton, GitHub Actions, and GitLab CI.
 
 > What if I want to use a tool that PSR doesn't have an step implementer for?
 
 Each PSR step has a corresponding *step_implementer* Python module under
 [src/ploigos_step_runner/step_implementers](src/ploigos_step_runner/step_implementers).
 If you need to use a tool that PSR does not have a step implementer for, you
-will need to create one. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+can create one or open a GitHub Issue to request an enhancement. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 instructions on creating step implementers.
 
 An AdHoc step implementer is proposed in #131 that would allow for a command or
