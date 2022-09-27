@@ -20,22 +20,34 @@ Below is an end-to-end example pipeline that leverages PSR.
 Create a *psr.yaml* file in the source code repo for the Spring application:
 
 ```yaml
-create-container-image:
-  - implementer: Buildah
+step-runner-config:
 
-generate-metadata:
+  global-defaults:
+    organization: ploigos
+    service-name: java-app
+    application-name: java-app
+
+  generate-metadata:
   - implementer: Maven
+  - implementer: Git
+  - implementer: SemanticVersion
 
-package:
+  unit-test:
+    - implementer: MavenTest
+
+  package:
   - implementer: MavenPackage
 
-push-container-image:
+  create-container-image:
+  - implementer: Buildah
+    config:
+      containers-config-auth-file: /var/jenkins_home/container-auth.json
+
+  push-container-image:
   - implementer: Skopeo
     config:
-      destination: 'quay.io/my-org/backend'
-
-unit-test:
-    - implementer: MavenTest
+      destination-url: docker-nexus.apps.mycluster.io
+      container-image-push-repository: ploigos/java-app
 ```
 
 > :notebook: The order in psr.yaml does not matter. Additionally, even if a
@@ -49,26 +61,35 @@ unit-test:
 Create a *psr.yaml* file in the source code repo for the NPM application:
 
 ```yaml
-create-container-image:
+step-runner-config:
+
+  global-defaults:
+    organization: ploigos
+    service-name: javascript-app
+    application-name: javascript-app
+
+  generate-metadata:
+  - implementer: Npm
+  - implementer: Git
+  - implementer: SemanticVersion
+
+  unit-test:
+    - implementer: NpmTest
+
+  package:
+  - implementer: NpmPackage
+
+  create-container-image:
   - implementer: Buildah
+    config:
+      containers-config-auth-file: /var/jenkins_home/container-auth.json
 
-generate-metadata:
-  - implementer: NPM
-
-package:
-  # WARNING: not yet implemented
-  - implementer: NPM
-    config: {}
-
-push-container-image:
+  push-container-image:
   - implementer: Skopeo
     config:
-      destination: 'quay.io/my-org/frontend'
+      destination-url: docker-nexus.apps.mycluster.io
+      container-image-push-repository: ploigos/javascript-app
 
-unit-test:
-- implementer: NpmXunitTest
-  config:
-    test-reports-dir: test_results
 ```
 
 ## Step 3: Create a Pipeline using any CI/CD Workflow Runner
@@ -96,36 +117,37 @@ definition:
 
 ```Jenkinsfile
 pipeline {
-    agent {
-        docker {
-            image 'TODO: Add image? Maybe...'
+   agent {
+        kubernetes {
+            cloud 'openshift'
+            defaultContainer 'default'
+            yamlFile 'kubernetes-pod.yaml'
         }
     }
-
     stages {
         stage('Generate Metadata') {
             steps {
-                psr -s unit-test -c psr.yaml
+                sh "psr -s generate-metadata -c psr.yaml"
             }
         }
         stage('Unit Test') {
             steps {
-                psr -s unit-test -c psr.yaml
+                sh "psr -s unit-test -c psr.yaml"
             }
         }
         stage('Package') {
             steps {
-                psr -s package -c psr.yaml
+                sh "psr -s package -c psr.yaml"
             }
         }
         stage('Create Container Image') {
             steps {
-                psr -s create-container-image -c psr.yaml
+                sh "psr -s create-container-image -c psr.yaml"
             }
         }
         stage('Push Container Image') {
             steps {
-                psr -s create-container-image -c psr.yaml
+                sh "psr -s push-container-image -c psr.yaml"
             }
         }
     }
