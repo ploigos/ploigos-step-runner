@@ -71,9 +71,22 @@ unit-test:
     test-reports-dir: test_results
 ```
 
-## Step 3: Create a Jenkinsfile
+## Step 3: Create a Pipeline using any CI/CD Workflow Runner
 
-Jenkins needs to call the PSR command with two options:
+PSR runs inside of a CI/CD pipeline, but it does not orchestrate the pipeline.
+You need another tool for that, and PSR does not care which one you choose.
+Portability between CI/CD workflow runners is one benefit of the PSR. For this
+example we will create a simple Jenkins pipeline.
+
+> :notebook: This is a simple example. Real-world pipelines are usually a bit more
+> complex. For examples of production-quality pipelines that you can copy, see our
+> tool-specific libraries:
+> * [GitHub Actions](https://github.com/ploigos/ploigos-github-workflows/)
+> * [GitLab](https://github.com/ploigos/ploigos-gitlab-library/)
+> * [Jenkins](https://github.com/ploigos/ploigos-jenkins-library/)
+> * [Tekton](https://github.com/ploigos/ploigos-charts/)
+
+Jenkins will call the PSR command with two options:
 
 - `-s <step>` is the name of the step that will be executed
 - `-c psr.yaml` is the path to the PSR configuration file for the application
