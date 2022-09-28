@@ -39,8 +39,10 @@ An end-to-end example pipeline that uses PSR is documented
 
 ## Documentation
 
-- [Python Package Documentation](https://ploigos.github.io/ploigos-step-runner/)
+- [End-to-End Example Pipeline](docs/end-to-end.md)
+- [Contributing](CONTRIBUTING.md)
 - [Ploigos Overview](https://ploigos.github.io/ploigos-docs/)
+- [Python Package Documentation](https://ploigos.github.io/ploigos-step-runner/)
 
 ## Install
 
