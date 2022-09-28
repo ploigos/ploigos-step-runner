@@ -61,31 +61,44 @@ tox -e docs
 ## Adding a New Step Implementer
 
 The easiest way to add a new step implementer is to copy an existing step
-implementer. The hello-world step and it's implementers were created bare bones
+implementer. The "example" step and it's implementers were created as examples
 for developers to copy and create their own implementers.
 
 The source code for step implementers is under
-*./src/ploigos_step_runner/step_implementers*. Each module under this directory
-contains implementers for a given step. In the case of hello-world,
-"hello-world" is the module for the step itself, while "short_greeting" and
-"long_greeting" are the modules for the implementers.
+`./src/ploigos_step_runner/step_implementers/`. Each sub-directory under that directory
+contains implementers for a given step. For example, the "unit_test" sub-directory contains
+all of the step implementers for the unit-test step. The different python files in that
+directory each implement a different step implementer that can be used for the unit-test
+step, each of which knows how to run unit tests using a different tool. For example,
+npm_test.py has python code that tells PSR how to execute the npm command to run unit tests.
 
-To run hello-world (or your step),
+Step implementers under the `./src/ploigos_step_runner/step_implementers/examples/` directory
+are associated with the special "examples" step, which is not part of any workflow but is used
+to organize and run example code. You can copy these examples as the basis for your own
+step implementers. hello_shell.py is a good starting point if your step implementer
+works by running a shell command.
+
+To run the HelloWorld example step implementer:
 
 1. Create a *psr.yaml* file:
 
 ```bash
-# Replace step/implementer if testing outside of hello-world
 cat > psr.yaml << EOF
-hello-world:
-  - implementer: ShortGreeting
+---
+step-runner-config:
+
+  examples:
+    - implementer: HelloWorld
+      config:
+        greeting-name: Folks
 EOF
 ```
 
 2. Run PSR:
-
+The "examples" step is a special step used to execute example StepImplementers. Real steps
+are things like "unit-test" and "create-container-image".
 ```bash
-psr -s hello-world -c psr.yaml
+psr -s examples -c psr.yaml
 ```
 
 3. Validate the output, both stdout and artifacts sections.
@@ -105,7 +118,7 @@ To execute a different implementer for the hello-world step, replace *psr.yaml*:
 ```bash
 cat > psr.yaml << EOF
 hello-world:
-  - implementer: LongGreeting
+  - implementer: HelloShell
     config:
       name: Ryan
 EOF
