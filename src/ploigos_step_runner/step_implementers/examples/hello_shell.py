@@ -1,5 +1,5 @@
-"""A simple StepImplementer that prints out a greeting. See the HelloShell example for an upgraded version
-that runs a shell command to print the greeting.
+"""Example StepImplementer that executes a shell command. This is a good starting point if you are writing
+a step implementer that is meant to run an external command line tool.
 
 You can run this example from the command line by creating a file named psr.yaml with these contents:
 
@@ -7,7 +7,7 @@ You can run this example from the command line by creating a file named psr.yaml
 step-runner-config:
 
   examples:
-    - implementer: HelloWorld
+    - implementer: HelloShell
       config:
         greeting-name: Folks
 ```
@@ -33,16 +33,18 @@ Results artifacts output by this step.
 
 Result Artifact Key    | Description
 -----------------------|------------
-`greeting`             | Message that was printed
+`echo-output`              | Message that was printed
 """  # pylint: disable=line-too-long
 
+from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
+from ploigos_step_runner.utils.shell import Shell
 
 
-class HelloWorld(StepImplementer):
+class HelloShell(StepImplementer):
     """
-    Example StepImplementer that prints a message and does nothing else.
+    Example StepImplementer that uses the echo shell command to print a message.
     """
 
     # Overridden to specify default values for this StepImplementer's configuration.
@@ -67,19 +69,30 @@ class HelloWorld(StepImplementer):
         StepResult
             Object containing the dictionary results of this step.
         """
-
-        # Read the configuration, usually from `psr.yaml`.
         step_result = StepResult.from_step_implementer(self)
+
         greeting = self.get_value('greeting-name')  # Read from configuration
-
-        # Do the actual work of the step.
         message = f"Hello {greeting}!"
-        print(message)
 
-        # Save the result. Future steps like the report step can access artifacts.
-        step_result.add_artifact(
-            name='greeting-output',
-            value=message
-        )
+        try:
+            # Log STDOUT and STDERR to this file
+            output_file_path = self.write_working_file('greeting-output.txt')
 
+            # Run the command
+            Shell().run(
+                'echo',
+                args=[message],
+                output_file_path=output_file_path
+            )
+
+        except StepRunnerException as error:
+            step_result.success = False
+            step_result.message = str(error)
+            return step_result
+        finally:
+            step_result.add_artifact(
+                description="Standard out and standard error from the echo command",
+                name='greeting-output',
+                value=output_file_path
+            )
         return step_result

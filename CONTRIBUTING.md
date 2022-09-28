@@ -84,7 +84,6 @@ To run the HelloWorld example step implementer:
 
 ```bash
 cat > psr.yaml << EOF
----
 step-runner-config:
 
   examples:
@@ -117,14 +116,16 @@ To execute a different implementer for the hello-world step, replace *psr.yaml*:
 
 ```bash
 cat > psr.yaml << EOF
-hello-world:
-  - implementer: HelloShell
-    config:
-      name: Ryan
+step-runner-config:
+
+  examples:
+    - implementer: HelloShell
+      config:
+        greeting-name: Folks
 EOF
 ```
 
-This will use the LongGreeting implementer instead of ShortGreeting. Re-run PSR
+This will use the HelloShell implementer instead of HelloWorld. Re-run PSR
 and validate the output.
 
 It is useful to prototype against a real code base when developing an
@@ -152,3 +153,4 @@ To fix this, remove the ./step-runner-working directory:
 ```bash
 rm -r ./step-runner-working
 ```
+
