@@ -41,6 +41,10 @@ class TestHelloWorld(BaseStepImplementerTestCase):
             # AND the StepResult should have an artifact with the configured message
             self.assertEqual(step_result.get_artifact('greeting-output').value, 'Hello Everyone!')
 
+    def test__required_config_or_result_keys(self):
+        required_keys = HelloWorld._required_config_or_result_keys()
+        self.assertEqual(required_keys, [])
+
     def create_step_implementer(self, test_dir, step_config):
         parent_work_dir_path = os.path.join(test_dir.path, 'working')
         return self.create_given_step_implementer(
