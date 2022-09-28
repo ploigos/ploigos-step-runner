@@ -1,76 +1,89 @@
 import os
-from io import StringIO
 from unittest.mock import patch
-
-import sh
-from ploigos_step_runner.results import StepResultArtifact
+from ploigos_step_runner.results import WorkflowResult
 from ploigos_step_runner.step_implementers.examples import HelloWorld
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
+from ploigos_step_runner.exceptions import StepRunnerException
 
 
-class TestHelloWorld(BaseStepImplementerTestCase):
+@patch('ploigos_step_runner.step_implementers.shared.npm_generic.Shell.run')  # Given a shell
+class TestStepImplementerDotnetPackage(BaseStepImplementerTestCase):
 
-    def test_run_step(self, os_path_exists_mock, npm_shell_command_mock):
+    def test_run_step_executes_echo_command(self, mock_shell):
+        with TempDirectory() as test_dir:
 
-        # Given a working directory
-        with TempDirectory() as temp_dir:
-            working_dir_path = os.path.join(temp_dir.path, 'working')
+            # GIVEN a step implementer configured like:
+            step_implementer = self.create_step_implementer(test_dir, {})
 
-            # Given a HelloWorld step implementer
-            npm_test = self.create_given_step_implementer(HelloWorld, parent_work_dir_path=working_dir_path)
+            # WHEN I run the step
+            actual_step_result = step_implementer._run_step()
 
-            # When I run the step
-            npm_test.run_step()
-
-            # Then it should run a shell command, 'npm test'
-            npm_shell_command_mock.assert_any_call(
-                'install',
-                _out=Any(StringIO),
-                _err=Any(StringIO)
+            # THEN it should run a shell command like `echo "Hello World!"`
+            expected_output_file_path = os.path.join(test_dir.path, 'working', 'examples', 'greeting-output.txt')
+            mock_shell.assert_any_call(
+                'echo',
+                args=['Hello World!'],
+                output_file_path=expected_output_file_path
             )
 
-    @patch('sh.npm', create=True) # Given a shell command, 'npm'
-    @patch('os.path.exists', side_effect = lambda filename: filename == 'package.json') # Given that a file named package.json exists
-    def test_success_false_when_shell_command_fails(self, os_path_exists_mock, npm_shell_command_mock):
+    def test_run_step_configure_greeting(self, mock_shell):
+        with TempDirectory() as test_dir:
 
-        # Given a working directory
-        with TempDirectory() as temp_dir:
-            working_dir_path = os.path.join(temp_dir.path, 'working')
+            # GIVEN a step implementer configured with a non-default message
+            step_implementer = self.create_step_implementer(test_dir, {
+                'greeting-name': 'Everyone'
+            })
 
-            # Given the 'npm' shell command exits with an error code
-            npm_shell_command_mock.side_effect = sh.ErrorReturnCode('npm', b'mock stdout', b'mock error')
+            # WHEN I run the step
+            actual_step_result = step_implementer._run_step()
 
-            # Given an NpmPackage step implementer
-            npm_test = self.create_given_step_implementer(NpmPackage, parent_work_dir_path=working_dir_path)
+            # THEN it should run a shell command like 'echo "Hello Everyone!"'
+            expected_output_file_path = os.path.join(test_dir.path, 'working', 'examples', 'greeting-output.txt')
+            mock_shell.assert_any_call(
+                'echo',
+                args=['Hello Everyone!'],
+                output_file_path=expected_output_file_path
+            )
+
+    def test_run_step_result(self, mock_shell):
+        with TempDirectory() as test_dir:
+
+            # GIVEN a step implementer configured like:
+            step_implementer = self.create_step_implementer(test_dir, {})
+
+            # WHEN I run the step
+            step_result = step_implementer._run_step()
+
+            # THEN it should return a StepResult
+            self.assertIsNotNone(step_result)
+
+            # AND the StepResult should say that the step was successful
+            self.assertEqual(step_result.success, True)
+
+    def test_run_step_success_false_when_shell_command_fails(self, mock_shell):
+        with TempDirectory() as test_dir:
+
+            # GIVEN a step implementer
+            step_implementer = self.create_step_implementer(test_dir, {})
+
+            # Given that every shell command exits with an error code
+            mock_shell.side_effect = StepRunnerException()
 
             # When I run the step
-            step_result = npm_test.run_step()
+            step_result = step_implementer.run_step()
 
-            # Then the StepResult should have success = False
+            # AND the StepResult should say that the step was not successful
             self.assertEqual(step_result.success, False)
 
-    @patch('sh.npm', create=True) # Given a shell command, 'npm'
-    @patch('os.path.exists', side_effect = lambda filename: filename == 'package.json') # Given that a file named package.json exists
-    def test_add_artifact_with_npm_output(self, os_path_exists_mock, npm_shell_command_mock):
-
-        # Given a working directory
-        with TempDirectory() as temp_dir:
-            working_dir_path = os.path.join(temp_dir.path, 'working')
-
-            # Given an NpmPackage step implementer
-            npm_test = self.create_given_step_implementer(NpmPackage, parent_work_dir_path=working_dir_path)
-
-            # When I run the step
-            step_result = npm_test.run_step()
-
-            # Then the StepResult should have an artifact with the npm output:
-            artifact = step_result.get_artifact('npm-output')
-            output_file_path = os.path.join(working_dir_path, 'npm_package_output.txt')
-            self.assertEqual(artifact, StepResultArtifact(
-                name='npm-output',
-                value=output_file_path,
-                description="Standard out and standard error from 'npm install'."
-            ))
+    def create_step_implementer(self, test_dir, step_config):
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
+        return self.create_given_step_implementer(
+            step_implementer=HelloWorld,
+            step_config=step_config,
+            step_name='examples',
+            implementer='HelloWorld',
+            workflow_result=WorkflowResult(),
+            parent_work_dir_path=parent_work_dir_path
+        )

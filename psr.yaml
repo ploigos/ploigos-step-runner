@@ -1,0 +1,8 @@
+---
+step-runner-config:
+
+  examples:
+    - implementer: HelloWorld
+      config:
+        greeting-name: Folks
+
