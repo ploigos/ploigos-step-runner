@@ -19,7 +19,7 @@ import os
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils.npm import run_npm
+from ploigos_step_runner.utils.shell import Shell
 
 DEFAULT_CONFIG = {
     'package-file': 'package.json'
@@ -44,7 +44,6 @@ class NpmGeneric(StepImplementer):
         npm_args=None,
         npm_envs=None
     ):
-        #self.__npm_args = npm_args
         self.__npm_args = npm_args
         self.__npm_envs = npm_envs
 
@@ -185,10 +184,11 @@ class NpmGeneric(StepImplementer):
             else:
                 npm_envs = self.npm_envs
 
-        run_npm(
-            npm_output_file_path=npm_output_file_path,
-            npm_args=npm_args,
-            npm_envs=npm_envs
+        Shell().run(
+            'npm',
+            output_file_path=npm_output_file_path,
+            args=npm_args,
+            envs=npm_envs
         )
 
     def _run_step(self):
