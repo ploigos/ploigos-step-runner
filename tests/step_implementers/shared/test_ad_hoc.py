@@ -1,100 +1,59 @@
 import os
-from io import StringIO
-from unittest.mock import patch
-from ploigos_step_runner import config
 
-import sh
-from ploigos_step_runner.results import StepResultArtifact
-from ploigos_step_runner.step_implementers.shared import AdHoc, ad_hoc
+from ploigos_step_runner.results import WorkflowResult
+from ploigos_step_runner.step_implementers.shared import AdHoc
 from testfixtures import TempDirectory
 from tests.helpers.base_step_implementer_test_case import \
     BaseStepImplementerTestCase
-from tests.helpers.test_utils import Any
 
 
-class TestAdHocPackage__run_step(BaseStepImplementerTestCase):
-    # Given a shell command, 'bash'
-    @patch('sh.bash', create=True)
-    def test_run_shell_command(self, bash_shell_command_mock):
+class TestAdHoc(BaseStepImplementerTestCase):
 
-        # Given a working directory
-        with TempDirectory() as temp_dir:
+    def test_run_step_fails_if_command_not_provided(self):
+        with TempDirectory() as test_dir:
 
-            # Given an AdHoc step implementer
-            working_dir_path = os.path.join(temp_dir.path, 'working')
-            config = {
-                'command': 'echo "Hello World!"'
-            }
-            ad_hoc_test = self.create_given_step_implementer(
-                AdHoc,
-                step_config=config,
-                parent_work_dir_path=working_dir_path
-            )
+            # GIVEN a step implementer configured like:
+            step_implementer = self.create_step_implementer(test_dir, {})
 
-            # When I run the step
-            ad_hoc_test.run_step()
+            # WHEN I run the step
+            step_result = step_implementer._run_step()
 
-            # Then it should run a shell command, 'echo "Hello World!"'
-            bash_shell_command_mock.assert_any_call(
-                '-c',
-                'echo "Hello World!"',
-                _out=Any(StringIO),
-                _err=Any(StringIO)
-            )
+            # THEN it should return a StepResult
+            self.assertIsNotNone(step_result)
 
-    # Given a shell command, 'bash'
-    @patch('sh.bash', create=True)
-    def test_success_false_when_shell_command_fails(self, bash_shell_command_mock):
-
-        # Given a working directory
-        with TempDirectory() as temp_dir:
-
-            # Given an AdHoc step implementer
-            working_dir_path = os.path.join(temp_dir.path, 'working')
-            config = {
-                'command': 'echooo "Hello World!"'
-            }
-            ad_hoc_test = self.create_given_step_implementer(
-                AdHoc,
-                parent_work_dir_path=working_dir_path,
-                step_config=config
-            )
-
-            # Given the 'echooo Hello World!' shell command exits with an error code
-            bash_shell_command_mock.side_effect = sh.ErrorReturnCode('bash', b'mock stdout', b'mock error')
-
-            # When I run the step
-            step_result = ad_hoc_test.run_step()
-
-            # Then the StepResult should have success = False
+            # AND the StepResult should have an artifact with the default message
             self.assertEqual(step_result.success, False)
 
-    # Given a shell command, 'bash'
-    @patch('sh.bash', create=True)
-    def test_add_artifact_with_command_output(self, bash_shell_command_mock):
+    def test_run_step_with_command(self):
+        with TempDirectory() as test_dir:
 
-        # Given a working directory
-        with TempDirectory() as temp_dir:
-
-            # Given an AdHoc step implementer
-            working_dir_path = os.path.join(temp_dir.path, 'working')
+            # GIVEN a step implementer configured like:
             config = {
                 'command': 'echo "Hello World!"'
             }
-            ad_hoc_test = self.create_given_step_implementer(
-                AdHoc,
-                parent_work_dir_path=working_dir_path,
-                step_config=config
-            )
+            step_implementer = self.create_step_implementer(test_dir, config)
 
-            # When I run the step
-            step_result = ad_hoc_test.run_step()
+            # WHEN I run the step
+            step_result = step_implementer._run_step()
 
-            # Then the StepResult should have an artifact with the command output:
-            artifact = step_result.get_artifact('command-output')
-            output_file_path = os.path.join(working_dir_path, 'ad_hoc_output.txt')
-            self.assertEqual(artifact, StepResultArtifact(
-                name='command-output',
-                value=output_file_path,
-                description="Standard out and standard error from ad-hoc command run."
-            ))
+            # THEN it should return a StepResult
+            self.assertIsNotNone(step_result)
+
+            # AND the StepResult should have an artifact with the default message
+            self.assertIsNotNone(step_result.get_artifact('command-output').value)
+
+
+    def test__required_config_or_result_keys(self):
+        required_keys = AdHoc._required_config_or_result_keys()
+        self.assertEqual(required_keys, ['command'])
+
+    def create_step_implementer(self, test_dir, step_config):
+        parent_work_dir_path = os.path.join(test_dir.path, 'working')
+        return self.create_given_step_implementer(
+            step_implementer=AdHoc,
+            step_config=step_config,
+            step_name='adhoc',
+            implementer='AdHoc',
+            workflow_result=WorkflowResult(),
+            parent_work_dir_path=parent_work_dir_path
+        )
