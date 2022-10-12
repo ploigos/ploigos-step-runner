@@ -25,7 +25,7 @@ Result Artifact Key    | Description
 from ploigos_step_runner.exceptions import StepRunnerException
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.utils import bash
+from ploigos_step_runner.utils.shell import Shell
 
 DEFAULT_CONFIG = {}
 
@@ -105,7 +105,15 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         command = self.get_value('command')
 
         try:
-            bash.run_bash(output_file_path, command)
+            # The 'sh' module does not handle command evaluation the same way
+            # bash does. By explicitly passing the given command to bash with
+            # the '-c' flag, the step runner should provide an equvilent
+            # experience to someone running the command in a bash prompt.
+            Shell().run(
+                'bash',
+                args=['-c', command],
+                output_file_path=output_file_path
+            )
         except StepRunnerException as error:
             step_result.success = False
             step_result.message = str(error)
