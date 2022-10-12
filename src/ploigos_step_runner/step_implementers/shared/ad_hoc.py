@@ -103,6 +103,10 @@ class AdHoc(StepImplementer):  # pylint: disable=too-few-public-methods
         )
 
         command = self.get_value('command')
+        if command is None:
+            step_result.success = False
+            step_result.message = str('"command" is not set!')
+            return step_result
 
         try:
             # The 'sh' module does not handle command evaluation the same way
