@@ -73,35 +73,48 @@ class TestMain(BaseTestCase):
                     assert mock_exit.call_args[0][0] == 42
 
     def test_no_arguments(self):
-        self._run_main_test(None, 2)
+        self._run_main_test(None, expected_exit_code=2)
 
     def test_help(self):
-        self._run_main_test(['--help'], 0)
+        self._run_main_test(['--help'], expected_exit_code=0)
 
     def test_bad_arg(self):
-        self._run_main_test(['--bad-arg'], 2)
+        self._run_main_test(['--bad-arg'], expected_exit_code=2)
 
     def test_config_file_does_not_exist(self):
-        self._run_main_test(['--step', 'generate-metadata', '--config', 'does-not-exist.yml'], 101)
+        self._run_main_test(
+            ['--step', 'generate-metadata', '--config', 'does-not-exist.yml'],
+            expected_exit_code=101
+        )
 
     def test_config_file_not_json_or_yaml(self):
-        self._run_main_test(['--step', 'generate-metadata'], 102, [
+        config_files = [
             {
                 'name': 'step-runner-config.yaml',
                 'contents': ": blarg this: is {} bad syntax"
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'generate-metadata'],
+            expected_exit_code=102,
+            config_files=config_files
+        )
 
     def test_config_file_no_root_config_key(self):
-        self._run_main_test(['--step', 'generate-metadata'], 102, [
-            {
-                'name': 'step-runner-config.yaml',
-                'contents': '{}'
-            }]
-                            )
+        config_files = [
+                {
+                    'name': 'step-runner-config.yaml',
+                    'contents': '{}'
+                }
+            ]
+        self._run_main_test(
+            ['--step', 'generate-metadata'],
+            expected_exit_code=102,
+            config_files=config_files
+        )
 
     def test_config_file_valid_yaml(self):
-        self._run_main_test(['--step', 'foo'], None, [
+        config_files = [
             {
                 'name': 'step-runner-config.yaml',
                 'contents': '''---
@@ -109,11 +122,15 @@ class TestMain(BaseTestCase):
                     foo:
                         implementer: 'tests.helpers.sample_step_implementers.FooStepImplementer'
                 '''
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'foo'],
+            config_files=config_files
+        )
 
     def test_config_file_valid_json(self):
-        self._run_main_test(['--step', 'foo'], None, [
+        config_files = [
             {
                 'name': 'step-runner-config.json',
                 'contents': '''
@@ -125,21 +142,30 @@ class TestMain(BaseTestCase):
                     }
                 }
                 '''
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'foo'],
+            config_files=config_files
+        )
 
     def test_required_step_config_missing(self):
-        self._run_main_test(['--step', 'required-step-config-test'], 300, [
+        config_files = [
             {
                 'name': 'step-runner-config.yaml',
                 'contents': '''---
                 step-runner-config: {}
                 '''
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'required-step-config-test'],
+            expected_exit_code=300,
+            config_files=config_files
+        )
 
     def test_required_step_config_pass_via_config_file(self):
-        self._run_main_test(['--step', 'required-step-config-test'], None, [
+        config_files = [
             {
                 'name': 'step-runner-config.yaml',
                 'contents': '''---
@@ -149,153 +175,159 @@ class TestMain(BaseTestCase):
                             config:
                                 required-config-key: "hello world"
                 '''
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'required-step-config-test'],
+            config_files=config_files
+        )
 
     def test_required_step_config_pass_via_runtime_arg_missing(self):
+        args = [
+            '--step', 'required-runtime-step-config-test',
+            '--step-config', 'wrong-config="hello world"'
+        ]
+        config_files = [
+            {
+                'name': 'step-runner-config.yaml',
+                'contents': '''---
+                step-runner-config:
+                    'required-runtime-step-config-test':
+                         implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                         config: {}
+                '''
+            }
+        ]
         self._run_main_test(
-            [
-                '--step', 'required-runtime-step-config-test',
-                '--step-config', 'wrong-config="hello world"'
-            ],
-            200,
-            [
-                {
-                    'name': 'step-runner-config.yaml',
-                    'contents': '''---
-                    step-runner-config:
-                        'required-runtime-step-config-test':
-                             implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                             config: {}
-                    '''
-                }
-            ]
+            args,
+            expected_exit_code=200,
+            config_files=config_files
         )
 
     def test_required_step_config_pass_via_runtime_arg_valid(self):
-        self._run_main_test(
-            [
-                '--step', 'required-step-config-test',
-                '--step-config', 'required-config-key="hello world"'
-            ],
-            None,
-            [
-                {
-                    'name': 'step-runner-config.yaml',
-                    'contents': '''---
-                    step-runner-config:
-                        'required-step-config-test':
-                             implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                             config: {}
-                    '''
-                }
-            ]
-        )
+        args = [
+            '--step', 'required-step-config-test',
+            '--step-config', 'required-config-key="hello world"'
+        ]
+        config_files = [
+            {
+                'name': 'step-runner-config.yaml',
+                'contents': '''---
+                step-runner-config:
+                    'required-step-config-test':
+                         implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                         config: {}
+                '''
+            }
+        ]
+        self._run_main_test(args, config_files=config_files)
 
     def test_multiple_config_files_verify_required_key_not_overwritten(self):
+        config_files = [
+            {
+                'name': 'step-runner-config1.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        required-step-config-test:
+                            implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                            config:
+                                required-config-key: "hello world"
+                                bar: 'test'
+                '''
+            },
+            {
+                'name': 'step-runner-config2.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        required-step-config-test:
+                            implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                            config:
+                                key2: "goodbye world"
+                '''
+            }
+        ]
         self._run_main_test(
             ['--step', 'required-step-config-test'],
-            None,
-            [
-                {
-                    'name': 'step-runner-config1.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            required-step-config-test:
-                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                                config:
-                                    required-config-key: "hello world"
-                                    bar: 'test'
-                    '''
-                },
-                {
-                    'name': 'step-runner-config2.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            required-step-config-test:
-                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                                config:
-                                    key2: "goodbye world"
-                    '''
-                }
-            ]
+            config_files=config_files
         )
 
     def test_multiple_config_files_verify_expected_merge(self):
-        self._run_main_test(
-            ['--step', 'write-config-as-results'],
-            None,
-            [
-                {
-                    'name': 'step-runner-config1.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            write-config-as-results:
-                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
-                                config:
-                                    key1: "value1"
-                                    key2: "value1"
-                    '''
-                },
-                {
-                    'name': 'step-runner-config2.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            write-config-as-results:
-                                implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
-                                config:
-                                    key3: "value2"
-                                    required-config-key: 'value'
-                    '''
-                }
-            ],
+        config_files = [
             {
-                'step-runner-results': {
-                    'write-config-as-results': {
-                        'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
-                            'artifacts': [
-                                {'name': 'key1', 'description': '', 'value': 'value1'},
-                                {'name': 'key2', 'description': '', 'value': 'value1'},
-                                {'name': 'key3', 'description': '', 'value': 'value2'},
-                                {'name': 'required-config-key', 'description': '', 'value': 'value'}
-                            ],
-                            'message': '',
-                            'sub-step-implementer-name':
-                                'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
-                            'success': True
-                        }
+                'name': 'step-runner-config1.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        write-config-as-results:
+                            implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
+                            config:
+                                key1: "value1"
+                                key2: "value1"
+                '''
+            },
+            {
+                'name': 'step-runner-config2.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        write-config-as-results:
+                            implementer: 'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer'
+                            config:
+                                key3: "value2"
+                                required-config-key: 'value'
+                '''
+            }
+        ]
+        expected_results = {
+            'step-runner-results': {
+                'write-config-as-results': {
+                    'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
+                        'artifacts': [
+                            {'name': 'key1', 'description': '', 'value': 'value1'},
+                            {'name': 'key2', 'description': '', 'value': 'value1'},
+                            {'name': 'key3', 'description': '', 'value': 'value2'},
+                            {'name': 'required-config-key', 'description': '', 'value': 'value'}
+                        ],
+                        'message': '',
+                        'sub-step-implementer-name':
+                            'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                        'success': True
                     }
                 }
             }
+        }
+        self._run_main_test(
+            ['--step', 'write-config-as-results'],
+            config_files=config_files,
+            expected_results=expected_results
         )
 
     def test_multiple_config_files_dup_keys_error(self):
+        config_files = [
+            {
+                'name': 'step-runner-config1.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        required-step-config-test:
+                            implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                            config:
+                                required-config-key: "hello world"
+                                bar: 'test'
+                '''
+            },
+            {
+                'name': 'step-runner-config2.yaml',
+                'contents': '''---
+                    step-runner-config:
+                        required-step-config-test:
+                            implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
+                            config:
+                                bar: "goodbye world"
+                '''
+            }
+        ]
         self._run_main_test(
             ['--step', 'required-step-config-test'],
-            102,
-            [
-                {
-                    'name': 'step-runner-config1.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            required-step-config-test:
-                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                                config:
-                                    required-config-key: "hello world"
-                                    bar: 'test'
-                    '''
-                },
-                {
-                    'name': 'step-runner-config2.yaml',
-                    'contents': '''---
-                        step-runner-config:
-                            required-step-config-test:
-                                implementer: 'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer'
-                                config:
-                                    bar: "goodbye world"
-                    '''
-                }
-            ]
+            expected_exit_code=102,
+            config_files=config_files
         )
 
     def test_multiple_config_files_from_dir(self):
@@ -374,94 +406,97 @@ class TestMain(BaseTestCase):
             args.append('--config')
             args.append(os.path.join(temp_dir.path, 'foo'))
             args.append(os.path.join(temp_dir.path, 'step-runner-config1.yaml'))
-            self._run_main_test(
-                args,
-                None,
-                None,
-                {
-                    'step-runner-results': {
-                        'write-config-as-results': {
-                            'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
-                                'artifacts': [
-                                    {'name': 'keyc2', 'description': '', 'value': 'c2'},
-                                    {'name': 'keya', 'description': '', 'value': 'a'},
-                                    {'name': 'keyd', 'description': '', 'value': 'd'},
-                                    {'name': 'keyc', 'description': '', 'value': 'c'},
-                                    {'name': 'keyb', 'description': '', 'value': 'b'},
-                                    {'name': 'required-config-key', 'description': '', 'value': 'value'}
-                                ],
-                                'message': '',
-                                'sub-step-implementer-name':
-                                    'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
-                                'success': True
-                            }
-                        }
-                    }
-                }
-            )
 
-    def test_encrypted_value_no_decryptor(self):
-        encrypted_config_file_path = os.path.join(
-            os.path.dirname(__file__),
-            'files',
-            'step-runner-config-secret-stuff.yml'
-        )
-
-        config_file_path = os.path.join(
-            os.path.dirname(__file__),
-            'files',
-            'step-runner-config.yml'
-        )
-
-        self._run_main_test(
-            argv=[
-                '--step', 'required-step-config-test',
-                '--environment', 'DEV'
-            ],
-            config_files=[encrypted_config_file_path, config_file_path],
-            expected_results={
+            expected_results = {
                 'step-runner-results': {
-                    'DEV': {
-                        'required-step-config-test': {
-                            'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                                'artifacts':[
-                                    {'name': 'environment-name', 'description': '', 'value': 'DEV'},
-                                    {
-                                        'name': 'kube-api-token',
-                                        'description': '',
-                                        'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'
-                                    },
-                                    {
-                                        'name': 'required-config-key',
-                                        'description': '',
-                                        'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
-                                    }
-                                ],
-                                'message': '',
-                                'sub-step-implementer-name':
-                                    'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
-                                'success': True
-                            }
+                    'write-config-as-results': {
+                        'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer': {
+                            'artifacts': [
+                                {'name': 'keyc2', 'description': '', 'value': 'c2'},
+                                {'name': 'keya', 'description': '', 'value': 'a'},
+                                {'name': 'keyd', 'description': '', 'value': 'd'},
+                                {'name': 'keyc', 'description': '', 'value': 'c'},
+                                {'name': 'keyb', 'description': '', 'value': 'b'},
+                                {'name': 'required-config-key', 'description': '', 'value': 'value'}
+                            ],
+                            'message': '',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.WriteConfigAsResultsStepImplementer',
+                            'success': True
                         }
                     }
                 }
             }
-        )
 
-    @patch('sh.sops', create=True)
-    def test_encrypted_value_with_sops_decryptor(self, sops_mock):
+            self._run_main_test(
+                args,
+                expected_results=expected_results
+            )
+
+    def test_encrypted_value_no_decryptor(self):
+        args = [
+            '--step', 'required-step-config-test',
+            '--environment', 'DEV'
+        ]
         encrypted_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
             'step-runner-config-secret-stuff.yml'
         )
-
         config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
             'step-runner-config.yml'
         )
+        expected_results = {
+            'step-runner-results': {
+                'DEV': {
+                    'required-step-config-test': {
+                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                            'artifacts':[
+                                {'name': 'environment-name', 'description': '', 'value': 'DEV'},
+                                {
+                                    'name': 'kube-api-token',
+                                    'description': '',
+                                    'value': 'ENC[AES256_GCM,data:UGKfnzsSrciR7GXZJhOCMmFrz3Y6V3pZsd3P,iv:yuReqA+n+rRXVHMc+2US5t7yPx54sooZSXWV4KLjDIs=,tag:jueP7/ZWLfYrEuhh+4eS8g==,type:str]'
+                                },
+                                {
+                                    'name': 'required-config-key',
+                                    'description': '',
+                                    'value': 'ENC[AES256_GCM,data:McsZ87srP8gCRNDOysExE/XJ6OaCGyAT3lmNcPXnNvwrucMrBQ==,iv:0cmnMa3tRDaHHdRekzUR57KgGj9fdCLGnWpD+1TUAyM=,tag:svFAjgdBI+mmqopwgKlRFg==,type:str]'
+                                }
+                            ],
+                            'message': '',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'success': True
+                        }
+                    }
+                }
+            }
+        }
+        self._run_main_test(
+            args,
+            config_files=[encrypted_config_file_path, config_file_path],
+            expected_results=expected_results
+        )
 
+    @patch('sh.sops', create=True)
+    def test_encrypted_value_with_sops_decryptor(self, sops_mock):
+        args = [
+            '--step', 'required-step-config-test',
+            '--environment', 'DEV'
+        ]
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'step-runner-config-secret-stuff.yml'
+        )
+        config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'step-runner-config.yml'
+        )
         decryptors_config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
@@ -470,34 +505,34 @@ class TestMain(BaseTestCase):
 
         mock_decrypted_value = 'mock decrypted value'
         sops_mock.side_effect = create_sops_side_effect(mock_decrypted_value)
-        self._run_main_test(
-            argv=[
-                '--step', 'required-step-config-test',
-                '--environment', 'DEV'
-            ],
-            config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
-            expected_results={
-                'step-runner-results': {
-                    'DEV': {
-                        'required-step-config-test': {
-                            'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
-                                'artifacts': [
-                                    {'name': 'environment-name', 'description': '', 'value': 'DEV'},
-                                    {'name': 'kube-api-token', 'description': '', 'value': 'mock decrypted value'},
-                                    {'name': 'required-config-key', 'description': '', 'value': 'mock decrypted value'}
-                                ],
-                                'message': '',
-                                'sub-step-implementer-name':
-                                    'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
-                                'success': True}
-                        }
+
+        expected_results = {
+            'step-runner-results': {
+                'DEV': {
+                    'required-step-config-test': {
+                        'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer': {
+                            'artifacts': [
+                                {'name': 'environment-name', 'description': '', 'value': 'DEV'},
+                                {'name': 'kube-api-token', 'description': '', 'value': 'mock decrypted value'},
+                                {'name': 'required-config-key', 'description': '', 'value': 'mock decrypted value'}
+                            ],
+                            'message': '',
+                            'sub-step-implementer-name':
+                                'tests.helpers.sample_step_implementers.RequiredStepConfigStepImplementer',
+                            'success': True}
                     }
                 }
             }
+        }
+
+        self._run_main_test(
+            args,
+            config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
+            expected_results=expected_results
         )
 
     def test_fail(self):
-        self._run_main_test(['--step', 'foo'], 200, [
+        config_files = [
             {
                 'name': 'step-runner-config.yaml',
                 'contents': '''---
@@ -505,5 +540,10 @@ class TestMain(BaseTestCase):
                     foo:
                         implementer: 'tests.helpers.sample_step_implementers.FailStepImplementer'
                 '''
-            }]
-                            )
+            }
+        ]
+        self._run_main_test(
+            ['--step', 'foo'],
+            expected_exit_code=200,
+            config_files=config_files
+        )
