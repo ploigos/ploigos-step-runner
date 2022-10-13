@@ -33,7 +33,6 @@ class TestMain(BaseTestCase):
                 os.chdir(temp_dir.path)
 
                 if config_files:
-                    argv.append('--config')
                     for config_file in config_files:
                         if isinstance(config_file, dict):
                             config_file_name = config_file['name']
@@ -41,9 +40,6 @@ class TestMain(BaseTestCase):
 
                             temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
                             config_file_path = os.path.join(temp_dir.path, config_file_name)
-                            argv.append(config_file_path)
-                        else:
-                            argv.append(config_file)
 
                 if expected_exit_code is not None:
                     with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
@@ -90,7 +86,7 @@ class TestMain(BaseTestCase):
     def test_config_file_not_json_or_yaml(self):
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': ": blarg this: is {} bad syntax"
             }
         ]
@@ -103,7 +99,7 @@ class TestMain(BaseTestCase):
     def test_config_file_no_root_config_key(self):
         config_files = [
                 {
-                    'name': 'step-runner-config.yaml',
+                    'name': 'psr.yaml',
                     'contents': '{}'
                 }
             ]
@@ -116,7 +112,7 @@ class TestMain(BaseTestCase):
     def test_config_file_valid_yaml(self):
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                 step-runner-config:
                     foo:
@@ -132,7 +128,7 @@ class TestMain(BaseTestCase):
     def test_config_file_valid_json(self):
         config_files = [
             {
-                'name': 'step-runner-config.json',
+                'name': 'psr.json',
                 'contents': '''
                 {
                     "step-runner-config": {
@@ -145,14 +141,14 @@ class TestMain(BaseTestCase):
             }
         ]
         self._run_main_test(
-            ['--step', 'foo'],
+            ['--step', 'foo', '--config', 'psr.json'],
             config_files=config_files
         )
 
     def test_required_step_config_missing(self):
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                 step-runner-config: {}
                 '''
@@ -167,7 +163,7 @@ class TestMain(BaseTestCase):
     def test_required_step_config_pass_via_config_file(self):
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                     step-runner-config:
                         required-step-config-test:
@@ -189,7 +185,7 @@ class TestMain(BaseTestCase):
         ]
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                 step-runner-config:
                     'required-runtime-step-config-test':
@@ -211,7 +207,7 @@ class TestMain(BaseTestCase):
         ]
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                 step-runner-config:
                     'required-step-config-test':
@@ -247,7 +243,8 @@ class TestMain(BaseTestCase):
             }
         ]
         self._run_main_test(
-            ['--step', 'required-step-config-test'],
+            ['--step', 'required-step-config-test',
+             '--config', 'step-runner-config1.yaml', 'step-runner-config2.yaml'],
             config_files=config_files
         )
 
@@ -295,7 +292,8 @@ class TestMain(BaseTestCase):
             }
         }
         self._run_main_test(
-            ['--step', 'write-config-as-results'],
+            ['--step', 'write-config-as-results',
+             '--config', 'step-runner-config1.yaml', 'step-runner-config2.yaml'],
             config_files=config_files,
             expected_results=expected_results
         )
@@ -325,7 +323,8 @@ class TestMain(BaseTestCase):
             }
         ]
         self._run_main_test(
-            ['--step', 'required-step-config-test'],
+            ['--step', 'required-step-config-test',
+             '--config', 'step-runner-config1.yaml', 'step-runner-config2.yaml'],
             expected_exit_code=102,
             config_files=config_files
         )
@@ -434,20 +433,21 @@ class TestMain(BaseTestCase):
             )
 
     def test_encrypted_value_no_decryptor(self):
-        args = [
-            '--step', 'required-step-config-test',
-            '--environment', 'DEV'
-        ]
-        encrypted_config_file_path = os.path.join(
-            os.path.dirname(__file__),
-            'files',
-            'step-runner-config-secret-stuff.yml'
-        )
         config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
             'step-runner-config.yml'
         )
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'step-runner-config-secret-stuff.yml'
+        )
+        args = [
+            '--step', 'required-step-config-test',
+            '--config', config_file_path, encrypted_config_file_path,
+            '--environment', 'DEV'
+        ]
         expected_results = {
             'step-runner-results': {
                 'DEV': {
@@ -483,15 +483,6 @@ class TestMain(BaseTestCase):
 
     @patch('sh.sops', create=True)
     def test_encrypted_value_with_sops_decryptor(self, sops_mock):
-        args = [
-            '--step', 'required-step-config-test',
-            '--environment', 'DEV'
-        ]
-        encrypted_config_file_path = os.path.join(
-            os.path.dirname(__file__),
-            'files',
-            'step-runner-config-secret-stuff.yml'
-        )
         config_file_path = os.path.join(
             os.path.dirname(__file__),
             'files',
@@ -502,10 +493,18 @@ class TestMain(BaseTestCase):
             'files',
             'step-runner-config-decryptors.yml'
         )
-
-        mock_decrypted_value = 'mock decrypted value'
-        sops_mock.side_effect = create_sops_side_effect(mock_decrypted_value)
-
+        encrypted_config_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'files',
+            'step-runner-config-secret-stuff.yml'
+        )
+        args = [
+            '--step', 'required-step-config-test',
+            '--config', config_file_path,
+                        decryptors_config_file_path,
+                        encrypted_config_file_path,
+            '--environment', 'DEV'
+        ]
         expected_results = {
             'step-runner-results': {
                 'DEV': {
@@ -525,6 +524,9 @@ class TestMain(BaseTestCase):
             }
         }
 
+        mock_decrypted_value = 'mock decrypted value'
+        sops_mock.side_effect = create_sops_side_effect(mock_decrypted_value)
+
         self._run_main_test(
             args,
             config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
@@ -534,7 +536,7 @@ class TestMain(BaseTestCase):
     def test_fail(self):
         config_files = [
             {
-                'name': 'step-runner-config.yaml',
+                'name': 'psr.yaml',
                 'contents': '''---
                 step-runner-config:
                     foo:
