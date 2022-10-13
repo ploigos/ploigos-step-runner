@@ -34,12 +34,11 @@ class TestMain(BaseTestCase):
 
                 if config_files:
                     for config_file in config_files:
-                        if isinstance(config_file, dict):
-                            config_file_name = config_file['name']
-                            config_file_contents = config_file['contents']
+                        config_file_name = config_file['name']
+                        config_file_contents = config_file['contents']
 
-                            temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
-                            config_file_path = os.path.join(temp_dir.path, config_file_name)
+                        temp_dir.write(config_file_name, bytes(config_file_contents, 'utf-8'))
+                        config_file_path = os.path.join(temp_dir.path, config_file_name)
 
                 if expected_exit_code is not None:
                     with self.assertRaisesRegex(SystemExit, f"{expected_exit_code}") as cm:
@@ -477,7 +476,6 @@ class TestMain(BaseTestCase):
         }
         self._run_main_test(
             args,
-            config_files=[encrypted_config_file_path, config_file_path],
             expected_results=expected_results
         )
 
@@ -529,7 +527,6 @@ class TestMain(BaseTestCase):
 
         self._run_main_test(
             args,
-            config_files=[encrypted_config_file_path, config_file_path, decryptors_config_file_path],
             expected_results=expected_results
         )
 
