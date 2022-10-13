@@ -79,7 +79,8 @@ def main(argv=None):
     parser.add_argument(
         '-c',
         '--config',
-        required=True,
+        required=False,
+        default=["psr.yaml"],
         nargs='+',
         help='Workflow configuration files, or directories containing files, in yml or json'
     )
