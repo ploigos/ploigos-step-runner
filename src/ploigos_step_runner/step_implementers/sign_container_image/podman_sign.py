@@ -75,9 +75,9 @@ Result Artifact Key                        | Description
 import glob
 import os
 import sys
-from distutils import util
 
 import sh
+from ploigos_step_runner.utils.strutils import strtobool
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.exceptions import StepRunnerException
@@ -174,7 +174,7 @@ class PodmanSign(ContainerDeployMixin, StepImplementer):
             #         from within the python virtual environment if the login happened with podman.
             container_registries_login(
                 registries=self.get_value('container-registries'),
-                containers_config_tls_verify=util.strtobool(self.get_value('src-tls-verify')),
+                containers_config_tls_verify=strtobool(self.get_value('src-tls-verify')),
                 container_command_short_name='podman'
             )
 

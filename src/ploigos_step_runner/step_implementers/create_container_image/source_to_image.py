@@ -53,9 +53,9 @@ Result Artifact Key                     | Description
 
 import os
 import sys
-from distutils import util
 
 import sh
+from ploigos_step_runner.utils.strutils import strtobool
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.utils.containers import (container_registries_login,
@@ -132,7 +132,7 @@ class SourceToImage(StepImplementer):
         # determine tls flag
         tls_verify = self.get_value('tls-verify')
         if isinstance(tls_verify, str):
-            tls_verify = bool(util.strtobool(tls_verify))
+            tls_verify = bool(strtobool(tls_verify))
         if tls_verify:
             s2i_tls_flags = ['--tlsverify']
         else:
