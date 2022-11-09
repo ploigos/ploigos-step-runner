@@ -4,8 +4,8 @@
 import copy
 import glob
 import os.path
-from distutils import util
 
+from ploigos_step_runner.utils.strutils import strtobool
 from ploigos_step_runner.config.config_value import ConfigValue
 from ploigos_step_runner.config.step_config import StepConfig
 from ploigos_step_runner.decryption_utils import DecryptionUtils
@@ -402,7 +402,7 @@ class Config:
                                 sub_step_contine_sub_steps_on_failure.value
                         else:
                             sub_step_contine_sub_steps_on_failure = bool(
-                                util.strtobool(sub_step_contine_sub_steps_on_failure.value)
+                                strtobool(sub_step_contine_sub_steps_on_failure.value)
                             )
 
                     self.add_or_update_step_config(

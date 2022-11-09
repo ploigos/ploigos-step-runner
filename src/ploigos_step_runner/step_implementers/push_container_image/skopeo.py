@@ -54,9 +54,9 @@ Result Artifact Key                       | Description
 
 import os
 import sys
-from distutils import util
 
 import sh
+from ploigos_step_runner.utils.strutils import strtobool
 from ploigos_step_runner.step_implementer import StepImplementer
 from ploigos_step_runner.results import StepResult
 from ploigos_step_runner.utils.containers import (container_registries_login,
@@ -138,7 +138,7 @@ class Skopeo(StepImplementer):
         ])
         source_tls_verify = self.get_value(['source-tls-verify', 'src-tls-verify'])
         if isinstance(source_tls_verify, str):
-            source_tls_verify = bool(util.strtobool(source_tls_verify))
+            source_tls_verify = bool(strtobool(source_tls_verify))
 
         # create destination config
         push_registry_type = self.get_value([
@@ -160,7 +160,7 @@ class Skopeo(StepImplementer):
         ])
         dest_tls_verify = self.get_value('dest-tls-verify')
         if isinstance(dest_tls_verify, str):
-            dest_tls_verify = bool(util.strtobool(dest_tls_verify))
+            dest_tls_verify = bool(strtobool(dest_tls_verify))
         container_image_push_short_address = \
             f"{container_image_push_repository}:{container_image_push_tag}"
         container_image_push_address_by_tag = f"{container_image_push_registry}" \
