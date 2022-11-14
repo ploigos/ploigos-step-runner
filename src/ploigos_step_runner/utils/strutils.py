@@ -13,7 +13,8 @@ def strtobool (val):
     lower_val = val.lower()
     if lower_val in ('y', 'yes', 't', 'true', 'on', '1'):
         return 1
-    elif lower_val in ('n', 'no', 'f', 'false', 'off', '0'):
+
+    if lower_val in ('n', 'no', 'f', 'false', 'off', '0'):
         return 0
-    else:
-        raise ValueError(f"invalid truth value {val}")
+
+    raise ValueError(f"invalid truth value {val}")
