@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>ploigos_step_runner.utils API documentation</title>
-<meta name="description" content="Useful utilities." />
+<title>ploigos_step_runner.utils.strutils API documentation</title>
+<meta name="description" content="Shared utilities for dealing with Strings" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,75 +19,77 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>ploigos_step_runner.utils</code></h1>
+<h1 class="title">Module <code>ploigos_step_runner.utils.strutils</code></h1>
 </header>
 <section id="section-intro">
-<p>Useful utilities.</p>
+<p>Shared utilities for dealing with Strings</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Useful utilities.
-&#34;&#34;&#34;</code></pre>
+<pre><code class="python">&#34;&#34;&#34;Shared utilities for dealing with Strings
+&#34;&#34;&#34;
+
+def strtobool (val):
+    &#34;&#34;&#34;Convert a string representation of truth to true (1) or false (0).
+
+    True values are &#39;y&#39;, &#39;yes&#39;, &#39;t&#39;, &#39;true&#39;, &#39;on&#39;, and &#39;1&#39;; false values
+    are &#39;n&#39;, &#39;no&#39;, &#39;f&#39;, &#39;false&#39;, &#39;off&#39;, and &#39;0&#39;.  Raises ValueError if
+    &#39;val&#39; is anything else.
+
+    NOTE: This is a modified version of strtobool from Python 3.9 distutils.
+    &#34;&#34;&#34;
+    lower_val = val.lower()
+    if lower_val in (&#39;y&#39;, &#39;yes&#39;, &#39;t&#39;, &#39;true&#39;, &#39;on&#39;, &#39;1&#39;):
+        return 1
+
+    if lower_val in (&#39;n&#39;, &#39;no&#39;, &#39;f&#39;, &#39;false&#39;, &#39;off&#39;, &#39;0&#39;):
+        return 0
+
+    raise ValueError(f&#34;invalid truth value {val}&#34;)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="ploigos_step_runner.utils.containers" href="containers.html">ploigos_step_runner.utils.containers</a></code></dt>
+<dt id="ploigos_step_runner.utils.strutils.strtobool"><code class="name flex">
+<span>def <span class="ident">strtobool</span></span>(<span>val)</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Shared utils for dealing with containers.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.dict" href="dict.html">ploigos_step_runner.utils.dict</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with dictionaries.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.file" href="file.html">ploigos_step_runner.utils.file</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with files.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.git" href="git.html">ploigos_step_runner.utils.git</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for git operations …</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.io" href="io.html">ploigos_step_runner.utils.io</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utilities for dealing with IO</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.maven" href="maven.html">ploigos_step_runner.utils.maven</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for maven operations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.pgp" href="pgp.html">ploigos_step_runner.utils.pgp</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with PGP keys …</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.reflection" href="reflection.html">ploigos_step_runner.utils.reflection</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utilities for dealing with Python reflection.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.shell" href="shell.html">ploigos_step_runner.utils.shell</a></code></dt>
-<dd>
-<div class="desc"><p>Use this module to run shell commands with a simplified interface that is
-easier to user test than the 'sh' module.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.strutils" href="strutils.html">ploigos_step_runner.utils.strutils</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utilities for dealing with Strings</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.tox" href="tox.html">ploigos_step_runner.utils.tox</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for tox operations.</p></div>
-</dd>
-<dt><code class="name"><a title="ploigos_step_runner.utils.xml" href="xml.html">ploigos_step_runner.utils.xml</a></code></dt>
-<dd>
-<div class="desc"><p>Shared utils for dealing with XML.</p></div>
+<div class="desc"><p>Convert a string representation of truth to true (1) or false (0).</p>
+<p>True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+are 'n', 'no', 'f', 'false', 'off', and '0'.
+Raises ValueError if
+'val' is anything else.</p>
+<p>NOTE: This is a modified version of strtobool from Python 3.9 distutils.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def strtobool (val):
+    &#34;&#34;&#34;Convert a string representation of truth to true (1) or false (0).
+
+    True values are &#39;y&#39;, &#39;yes&#39;, &#39;t&#39;, &#39;true&#39;, &#39;on&#39;, and &#39;1&#39;; false values
+    are &#39;n&#39;, &#39;no&#39;, &#39;f&#39;, &#39;false&#39;, &#39;off&#39;, and &#39;0&#39;.  Raises ValueError if
+    &#39;val&#39; is anything else.
+
+    NOTE: This is a modified version of strtobool from Python 3.9 distutils.
+    &#34;&#34;&#34;
+    lower_val = val.lower()
+    if lower_val in (&#39;y&#39;, &#39;yes&#39;, &#39;t&#39;, &#39;true&#39;, &#39;on&#39;, &#39;1&#39;):
+        return 1
+
+    if lower_val in (&#39;n&#39;, &#39;no&#39;, &#39;f&#39;, &#39;false&#39;, &#39;off&#39;, &#39;0&#39;):
+        return 0
+
+    raise ValueError(f&#34;invalid truth value {val}&#34;)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -100,23 +102,12 @@ easier to user test than the 'sh' module.</p></div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="ploigos_step_runner" href="../index.html">ploigos_step_runner</a></code></li>
+<li><code><a title="ploigos_step_runner.utils" href="index.html">ploigos_step_runner.utils</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="ploigos_step_runner.utils.containers" href="containers.html">ploigos_step_runner.utils.containers</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.dict" href="dict.html">ploigos_step_runner.utils.dict</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.file" href="file.html">ploigos_step_runner.utils.file</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.git" href="git.html">ploigos_step_runner.utils.git</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.io" href="io.html">ploigos_step_runner.utils.io</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.maven" href="maven.html">ploigos_step_runner.utils.maven</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.pgp" href="pgp.html">ploigos_step_runner.utils.pgp</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.reflection" href="reflection.html">ploigos_step_runner.utils.reflection</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.shell" href="shell.html">ploigos_step_runner.utils.shell</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.strutils" href="strutils.html">ploigos_step_runner.utils.strutils</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.tox" href="tox.html">ploigos_step_runner.utils.tox</a></code></li>
-<li><code><a title="ploigos_step_runner.utils.xml" href="xml.html">ploigos_step_runner.utils.xml</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ploigos_step_runner.utils.strutils.strtobool" href="#ploigos_step_runner.utils.strutils.strtobool">strtobool</a></code></li>
 </ul>
 </li>
 </ul>
