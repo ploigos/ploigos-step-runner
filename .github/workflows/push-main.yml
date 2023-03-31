@@ -84,7 +84,7 @@ jobs:
       run: tox -e build
 
     - name: Upload Distribution Artifacts 🔺
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist/
@@ -96,9 +96,10 @@ jobs:
     steps:
     - name: Download Distribution 🔻
       if: github.event_name == 'push'
-      uses: actions/download-artifact@v3.0.2
+      uses: actions/download-artifact@v3
       with:
         name: dist
+        path: dist/
 
     - name: Publish Distribution to Test PyPI 📦
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
