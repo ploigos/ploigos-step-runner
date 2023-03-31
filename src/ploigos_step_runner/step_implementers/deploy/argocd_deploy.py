@@ -81,6 +81,10 @@ Configuration Key                       | Required? | Default  | Description
 `version`                               | No        | latest   | Ignored if `tag` is provided. \
                                                                  The git tag to apply to the config repo if `tag` is not supplied. \
                                                                  If `tag` and `version` not supplied `latest` will be used.
+`tag-suffix`                            | No        |          | Append to the end of git tag to apply to the repo. \
+                                                                 If `tag` is supplied git tag will be `tag`-`tag-suffix`. \
+                                                                 If `tag` is not supplied `version`-`tag-suffix` will be used. \
+                                                                 If `tag` and `version` not supplied `latest` will be used and `tag-suffix` will be ignored.
 `force-push-tags`                       | No        | False    | Force push Git Tags
 `additional-helm-values-files`          | No        | []       | Array of value files to add to argocd app for helm use
 `[container-image-pull-registry, \
