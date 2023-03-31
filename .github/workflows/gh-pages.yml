@@ -46,7 +46,7 @@ jobs:
         name: pdoc3-html
 
     - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@releases/v4.4.1
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
