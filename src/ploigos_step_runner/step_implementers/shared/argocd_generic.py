@@ -190,9 +190,13 @@ class ArgoCDGeneric(StepImplementer):
             If i
         """
         tag = self.get_value('tag')
+        tag_suffix = self.get_value('tag-suffix')
 
         if tag is None:
             tag = self.get_value('version')
+
+        if tag and tag_suffix:
+            tag += f"-{tag_suffix}"
 
         if tag is None:
             tag = 'latest'

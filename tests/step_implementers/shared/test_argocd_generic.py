@@ -399,6 +399,22 @@ class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestS
             deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
             self.assertEqual(deployment_config_repo_tag, 'v0.42.0-abc123')
 
+    def test_get_deployment_config_repo_tag_use_tag_with_suffix(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'tag': 'v0.42.0-abc123',
+                'version': 'v0.42.0',
+                'tag-suffix': 'doremi'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0-abc123-doremi')
+
     def test_get_deployment_config_repo_tag_use_version(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
@@ -413,11 +429,40 @@ class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestS
             deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
             self.assertEqual(deployment_config_repo_tag, 'v0.42.0')
 
+    def test_get_deployment_config_repo_tag_use_version_with_suffix(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'version': 'v0.42.0',
+                'tag-suffix': 'doremi'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0-doremi')
+
 
     def test_get_deployment_config_repo_tag_use_latest(self):
         with TempDirectory() as temp_dir:
             parent_work_dir_path = os.path.join(temp_dir.path, 'working')
             step_config = {
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'latest')
+
+    def test_get_deployment_config_repo_tag_use_latest_with_suffix(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'tag-suffix': 'doremi'
             }
             step_implementer = self.create_step_implementer(
                 step_config=step_config,
@@ -443,6 +488,22 @@ class TestStepImplementerSharedArgoCDGenericget_deployment_config_repo_tag(TestS
             deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
             self.assertEqual(deployment_config_repo_tag, 'v0.42.0-main+abc123.PROD')
 
+    def test_get_deployment_config_repo_tag_use_tag_with_env_with_tag(self):
+        with TempDirectory() as temp_dir:
+            parent_work_dir_path = os.path.join(temp_dir.path, 'working')
+            step_config = {
+                'tag': 'v0.42.0-main+abc123',
+                'version': 'v0.42.0',
+                'tag-suffix': 'doremi'
+            }
+            step_implementer = self.create_step_implementer(
+                step_config=step_config,
+                parent_work_dir_path=parent_work_dir_path,
+                environment='PROD'
+            )
+
+            deployment_config_repo_tag = step_implementer._get_deployment_config_repo_tag()
+            self.assertEqual(deployment_config_repo_tag, 'v0.42.0-main+abc123-doremi.PROD')
 
 class TestStepImplementerSharedArgoCDGenericget_deployed_host_urls(TestStepImplementerSharedArgoCDBase):
     def __run__get_deployed_host_urls_test(
