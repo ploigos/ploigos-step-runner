@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9' ]
+        python-version: [ '3.9', '3.10', '3.11' ]
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.5.0
 
     - name: Set up Python 🐍
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v1.10
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -31,13 +31,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9' ]
+        python-version: [ '3.9', '3.10', '3.11' ]
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.5.0
 
     - name: Set up Python 🐍
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v1.10
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -50,7 +50,7 @@ jobs:
       run: tox -e test
 
     - name: Upload Coverage Report 🔺📊
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3.1.1
       with:
         flags: pytests
         name: Python ${{ matrix.python-version }}
@@ -64,15 +64,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.5.0
       with:
         fetch-depth: 0
         persist-credentials: false
 
     - name: Set up Python 🐍
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v1.10
       with:
-        python-version: '3.7'
+        python-version: '3.9'
 
     - name: Install tox 🧰
       run: |
@@ -83,7 +83,7 @@ jobs:
       run: tox -e build
 
     - name: Upload Distribution Artifacts 🔺
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: dist
         path: dist/
@@ -95,13 +95,13 @@ jobs:
     steps:
     - name: Download Distribution 🔻
       if: github.event_name == 'push'
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v3.0.2
       with:
         name: dist
 
     - name: Publish Distribution to PyPI 📦
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@v1.1.0
+      uses: pypa/gh-action-pypi-publish@v1.8.3
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
