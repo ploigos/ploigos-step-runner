@@ -243,6 +243,15 @@ The git tag to apply to the config repo if <code>tag</code> is not supplied.
 If <code>tag</code> and <code>version</code> not supplied <code>latest</code> will be used.</td>
 </tr>
 <tr>
+<td><code>tag-suffix</code></td>
+<td>No</td>
+<td></td>
+<td>Append to the end of git tag to apply to the repo.
+If <code>tag</code> is supplied git tag will be <code>tag</code>-<code>tag-suffix</code>.
+If <code>tag</code> is not supplied <code>version</code>-<code>tag-suffix</code> will be used.
+If <code>tag</code> and <code>version</code> not supplied <code>latest</code> will be used and <code>tag-suffix</code> will be ignored.</td>
+</tr>
+<tr>
 <td><code>force-push-tags</code></td>
 <td>No</td>
 <td>False</td>
@@ -432,6 +441,10 @@ Configuration Key                       | Required? | Default  | Description
 `version`                               | No        | latest   | Ignored if `tag` is provided. \
                                                                  The git tag to apply to the config repo if `tag` is not supplied. \
                                                                  If `tag` and `version` not supplied `latest` will be used.
+`tag-suffix`                            | No        |          | Append to the end of git tag to apply to the repo. \
+                                                                 If `tag` is supplied git tag will be `tag`-`tag-suffix`. \
+                                                                 If `tag` is not supplied `version`-`tag-suffix` will be used. \
+                                                                 If `tag` and `version` not supplied `latest` will be used and `tag-suffix` will be ignored.
 `force-push-tags`                       | No        | False    | Force push Git Tags
 `additional-helm-values-files`          | No        | []       | Array of value files to add to argocd app for helm use
 `[container-image-pull-registry, \

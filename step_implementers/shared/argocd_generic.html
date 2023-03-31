@@ -219,9 +219,13 @@ class ArgoCDGeneric(StepImplementer):
             If i
         &#34;&#34;&#34;
         tag = self.get_value(&#39;tag&#39;)
+        tag_suffix = self.get_value(&#39;tag-suffix&#39;)
 
         if tag is None:
             tag = self.get_value(&#39;version&#39;)
+
+        if tag and tag_suffix:
+            tag += f&#34;-{tag_suffix}&#34;
 
         if tag is None:
             tag = &#39;latest&#39;
@@ -929,9 +933,13 @@ users:
             If i
         &#34;&#34;&#34;
         tag = self.get_value(&#39;tag&#39;)
+        tag_suffix = self.get_value(&#39;tag-suffix&#39;)
 
         if tag is None:
             tag = self.get_value(&#39;version&#39;)
+
+        if tag and tag_suffix:
+            tag += f&#34;-{tag_suffix}&#34;
 
         if tag is None:
             tag = &#39;latest&#39;
