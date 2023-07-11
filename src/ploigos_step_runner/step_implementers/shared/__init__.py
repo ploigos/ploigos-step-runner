@@ -1,6 +1,7 @@
 """StepImplementer parent classes that are shared accross multiple steps.
 """
 
+from ploigos_step_runner.step_implementers.shared.ad_hoc import AdHoc
 from ploigos_step_runner.step_implementers.shared.argocd_generic import \
     ArgoCDGeneric
 from ploigos_step_runner.step_implementers.shared.container_deploy_mixin import \
