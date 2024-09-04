@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.results.step_result API documentation</title>
 <meta name="description" content="Defines a StepResult object which represents the results of a invocation
-of a StepImplementer#run." />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+of a StepImplementer#run.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -25,452 +28,6 @@ of a StepImplementer#run." />
 <section id="section-intro">
 <p>Defines a StepResult object which represents the results of a invocation
 of a StepImplementer#run.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Defines a StepResult object which represents the results of a invocation
-of a StepImplementer#run.
-&#34;&#34;&#34;
-
-from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.results.step_result_artifact import StepResultArtifact
-from ploigos_step_runner.results.step_result_evidence import StepResultEvidence
-
-
-class StepResult: # pylint: disable=too-many-instance-attributes
-    &#34;&#34;&#34;Defines a StepResult object which represents the results of a invocation
-    of a StepImplementer#run.
-
-    Parameters
-    ----------
-    step_name : str
-        Name of the step
-    sub_step_name : str
-        Name of the sub step
-    sub_step_implementer_name : str
-        Name of the sub step implementer
-    environment : str
-        Optional. Environment that this step result is for
-        if step was run against a specific environment.
-    &#34;&#34;&#34;
-    def __init__(self, step_name, sub_step_name, sub_step_implementer_name, environment=None):
-        self.__step_name = step_name
-        self.__sub_step_name = sub_step_name
-        self.__sub_step_implementer_name = sub_step_implementer_name
-        self.__environment = environment
-        self.__success = True
-        self.__message = &#39;&#39;
-        self.__artifacts = {}
-        self.__evidence = {}
-
-    @classmethod
-    def from_step_implementer(cls, step_implementer):
-        &#34;&#34;&#34;
-        Returns
-        ------
-        ResultStep
-        &#34;&#34;&#34;
-        return cls(
-            step_name=step_implementer.step_name,
-            sub_step_name=step_implementer.sub_step_name,
-            sub_step_implementer_name=step_implementer.sub_step_implementer_name,
-            environment=step_implementer.environment
-        )
-
-    @property
-    def step_name(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            Step name
-        &#34;&#34;&#34;
-        return self.__step_name
-
-    @property
-    def sub_step_name(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            Sub step name
-        &#34;&#34;&#34;
-        return self.__sub_step_name
-
-    @property
-    def sub_step_implementer_name(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            Sub step implementer name
-        &#34;&#34;&#34;
-        return self.__sub_step_implementer_name
-
-    @property
-    def environment(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            Environment name if this StepResult is specific to an environment,
-            else None.
-        &#34;&#34;&#34;
-        return self.__environment
-
-    @property
-    def artifacts(self):
-        &#34;&#34;&#34;Get the artifacts associated with this step result.
-
-        Returns
-        -------
-        dict of str: StepResultArtifacts
-            Key is artifact name, value is StepResultArtifact.
-        &#34;&#34;&#34;
-        return self.__artifacts
-
-    @property
-    def evidence(self):
-        &#34;&#34;&#34;Get the evidence associated with this step result.
-
-        Returns
-        -------
-        dict of str: StepResultEvidence
-            Key is evidence name, value is StepResultEvidence.
-        &#34;&#34;&#34;
-        return self.__evidence
-
-    @property
-    def artifacts_dicts(self):
-        &#34;&#34;&#34;Get the artifacts associated with this step result as dictionaries.
-
-        Returns
-        -------
-        list of dict
-            Each item in list a dict representation of the StepResultArtifact.
-        &#34;&#34;&#34;
-        artifact_dicts = []
-        for artifact in self.artifacts.values():
-            artifact_dicts.append(artifact.as_dict())
-
-        return artifact_dicts
-
-    @property
-    def evidence_dicts(self):
-        &#34;&#34;&#34;Get the evidence associated with this step result as dictionaries.
-
-        Returns
-        -------
-        list of dict
-            Each item in list a dict representation of the StepResultEvidence.
-        &#34;&#34;&#34;
-        evidence_dicts = []
-        for evidence in self.evidence.values():
-            evidence_dicts.append(evidence.as_dict())
-
-        return evidence_dicts
-
-    def get_artifact(self, name):
-        &#34;&#34;&#34;Get artifact with given name for this StepResult.
-
-        Parameters
-        ----------
-        name : str
-            The name of the artifact to return.
-
-        Returns
-        -------
-        StepResultArtifact
-            The step result artifact with the given name for this StepResult.
-        &#34;&#34;&#34;
-        return self.__artifacts.get(name)
-
-    def get_evidence(self, name):
-        &#34;&#34;&#34;Get evidence with given name for this StepResult.
-
-        Parameters
-        ----------
-        name : str
-            The name of the evidence to return.
-
-        Returns
-        -------
-        StepResultEvidence
-            The step result evidence with the given name for this StepResult.
-        &#34;&#34;&#34;
-        return self.__evidence.get(name)
-
-    def get_artifact_value(self, name):
-        &#34;&#34;&#34;Get the value for a specified artifact.
-
-        Parameters
-        ----------
-        name : str
-            The name of the artifact.
-
-        Returns
-        -------
-        str
-            The value of the artifact.
-        &#34;&#34;&#34;
-        value = None
-        if self.__artifacts.get(name):
-            value = self.__artifacts.get(name).value
-
-        return value
-
-    def get_evidence_value(self, name):
-        &#34;&#34;&#34;Get the value for a specified evidence.
-
-        Parameters
-        ----------
-        name : str
-            The name of the evidence.
-
-        Returns
-        -------
-        str
-            The value of the evidence.
-        &#34;&#34;&#34;
-        value = None
-        if self.evidence.get(name):
-            value = self.__evidence.get(name).value
-
-        return value
-
-    def add_artifact(self, name, value, description=&#39;&#39;):
-        &#34;&#34;&#34;Add an artifact to this StepResult.
-
-        Parameters
-        ----------
-        name : str
-            Name of the result artifact.
-        value : str
-            Arbitrary value of the artifact.
-        description : str, optional
-            Human readable description of the result artifact (defaults to empty).
-        &#34;&#34;&#34;
-        if not name:
-            raise StepRunnerException(&#39;Name is required to add artifact&#39;)
-
-        # False can be the value
-        if value == &#39;&#39; or value is None:
-            raise StepRunnerException(&#39;Value is required to add artifact&#39;)
-
-        self.__artifacts[name] = StepResultArtifact(
-            name=name,
-            value=value,
-            description=description
-        )
-
-    def add_evidence(self, name, value, description=&#39;&#39;):
-        &#34;&#34;&#34;Add evidence to this StepResult.
-
-        Parameters
-        ----------
-        name : str
-            Name of the result evidence.
-        value : str
-            Arbitrary value of the evidence.
-        description : str, optional
-            Human readable description of the result evidence (defaults to empty).
-        &#34;&#34;&#34;
-        if not name:
-            raise StepRunnerException(&#39;Name is required to add evidence&#39;)
-
-        # False can be the value
-        if value == &#39;&#39; or value is None:
-            raise StepRunnerException(&#39;Value is required to add evidence&#39;)
-
-        self.__evidence[name] = StepResultEvidence(
-            name=name,
-            value=value,
-            description=description
-        )
-
-    @property
-    def success(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        bool
-            Success
-        &#34;&#34;&#34;
-        return self.__success
-
-    @success.setter
-    def success(self, success=True):
-        &#34;&#34;&#34;Setter for success
-        &#34;&#34;&#34;
-        self.__success = success
-
-    @property
-    def message(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str
-            Message/ error message
-        &#34;&#34;&#34;
-        return self.__message
-
-    @message.setter
-    def message(self, message):
-        &#34;&#34;&#34;Setter for message
-        &#34;&#34;&#34;
-        self.__message = message
-
-    def get_sub_step_result_dict(self):
-        &#34;&#34;&#34;
-        Returns
-        -------
-        dict
-            Dictionary with the details for the sub-step.
-            For example:
-            {
-                &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
-                &#39;success&#39;: Boolean,
-                &#39;message&#39;: &#39;value&#39;,
-                &#39;artifacts&#39;: [],
-                &#39;evidence&#39;: []
-            }
-        &#34;&#34;&#34;
-        result = {
-            &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
-            &#39;success&#39;: self.success,
-            &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts,
-            &#39;evidence&#39;: self.evidence_dicts
-        }
-
-        return result
-
-    def get_step_result_dict(self):
-        &#34;&#34;&#34;Get the step result dictionary
-
-        Returns
-        -------
-        dict
-            Results with all step result components.
-            For example:
-            &#34;step-name: {
-                &#34;sub-step-name&#34;: {
-                    &#34;sub-step-implementer-name&#34;: &#34;sub_step_implementer_name&#34;,
-                    &#34;success&#34;: True,
-                    &#34;message&#34;: &#34;&#34;,
-                    &#34;artifacts&#34;: {
-                        &#34;name&#34;: {
-                            &#34;description&#34;: &#34;file description&#34;,
-                            &#34;value&#34;: &#34;step-result.txt&#34;
-                        },
-                    &#34;evidence&#34;: {
-                        &#34;name&#34;: {
-                            &#34;description&#34;: &#34;piece of evidence&#34;,
-                            &#34;value&#34;: &#34;evidence&#34;
-                        }
-                    }
-                    }
-                }
-            }
-        &#34;&#34;&#34;
-        if self.environment:
-            result = {
-                self.environment: {
-                    self.step_name: {
-                        self.sub_step_name: self.get_sub_step_result_dict()
-                    }
-                }
-            }
-        else:
-            result = {
-                self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result_dict()
-                }
-            }
-        return result
-
-    def merge(self, other):
-        &#34;&#34;&#34;Merge the artifacts and evidence from another StepResult into
-        this StepResult. The other StepResult must have the same step name,
-        sub step name and environment.
-
-        Parameters
-        ----------
-        step_result : StepResult
-            The second StepResult instance to merge into this one
-
-        Raises
-        ------
-        StepRunnerException if the StepResult to merge does not have a
-        matching step name, sub-step name, or environment.
-        &#34;&#34;&#34;
-
-        if not isinstance(other, StepResult):
-            raise StepRunnerException(&#39;expect StepResult instance type&#39;)
-
-        if other.step_name != self.step_name or \
-            other.sub_step_name != self.sub_step_name or \
-            other.environment != self.environment:
-            raise StepRunnerException(
-                    &#39;Other StepResult does not have matching &#39; \
-                    &#39;step name, sub step name, or environment.&#39;
-                  )
-
-        for artifact in other.artifacts.values():
-            self.add_artifact(artifact.name, artifact.value, artifact.description)
-
-        for evidence in other.evidence.values():
-            self.add_evidence(evidence.name, evidence.value, evidence.description)
-
-    def __str__(self):
-        &#34;&#34;&#34;Get string representation of the step result.
-        &#34;&#34;&#34;
-        return str({
-            &#39;step-name&#39;: self.step_name,
-            &#39;sub-step-name&#39;: self.sub_step_name,
-            &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
-            &#39;environment&#39;: self.environment,
-            &#39;success&#39;: self.success,
-            &#39;message&#39;: self.message,
-            &#39;artifacts&#39;: self.artifacts_dicts,
-            &#39;evidence&#39;: self.evidence_dicts
-        })
-
-    def __repr__(self):
-        &#34;&#34;&#34;Get representation of the step result.
-        &#34;&#34;&#34;
-        return &#34;StepResult(&#34; \
-            f&#34;step_name={self.step_name},&#34; \
-            f&#34;sub_step_name={self.sub_step_name},&#34; \
-            f&#34;sub_step_implementer_name={self.sub_step_implementer_name},&#34; \
-            f&#34;environment={self.environment},&#34; \
-            f&#34;success={self.success},&#34; \
-            f&#34;message={self.message},&#34; \
-            f&#34;artifacts={self.artifacts_dicts}&#34; \
-            f&#34;evidence={self.evidence_dicts}&#34; \
-            &#34;)&#34;
-
-    def __eq__(self, other):
-        &#34;&#34;&#34;StepResult is equal if all properties are equal.
-        &#34;&#34;&#34;
-        return (
-            isinstance(other, StepResult) and
-            self.step_name == other.step_name and
-            self.sub_step_name == other.sub_step_name and
-            self.sub_step_implementer_name == other.sub_step_implementer_name and
-            self.environment == other.environment and
-            self.success == other.success and
-            self.message == other.message and
-            self.artifacts == other.artifacts and
-            self.evidence == other.evidence
-        )
-
-    def __ne__(self, other):
-        &#34;&#34;&#34;StepResult is not equal if any properties are not equal.
-        &#34;&#34;&#34;
-        return not self.__eq__(other)</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -948,29 +505,11 @@ if step was run against a specific environment.</dd>
 <dt><code>ResultStep</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_step_implementer(cls, step_implementer):
-    &#34;&#34;&#34;
-    Returns
-    ------
-    ResultStep
-    &#34;&#34;&#34;
-    return cls(
-        step_name=step_implementer.step_name,
-        sub_step_name=step_implementer.sub_step_name,
-        sub_step_implementer_name=step_implementer.sub_step_implementer_name,
-        environment=step_implementer.environment
-    )</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts"><code class="name">var <span class="ident">artifacts</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts"><code class="name">prop <span class="ident">artifacts</span></code></dt>
 <dd>
 <div class="desc"><p>Get the artifacts associated with this step result.</p>
 <h2 id="returns">Returns</h2>
@@ -994,7 +533,7 @@ def artifacts(self):
     return self.__artifacts</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts_dicts"><code class="name">var <span class="ident">artifacts_dicts</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.artifacts_dicts"><code class="name">prop <span class="ident">artifacts_dicts</span></code></dt>
 <dd>
 <div class="desc"><p>Get the artifacts associated with this step result as dictionaries.</p>
 <h2 id="returns">Returns</h2>
@@ -1022,7 +561,7 @@ def artifacts_dicts(self):
     return artifact_dicts</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.environment"><code class="name">var <span class="ident">environment</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.environment"><code class="name">prop <span class="ident">environment</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1046,7 +585,7 @@ def environment(self):
     return self.__environment</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.evidence"><code class="name">var <span class="ident">evidence</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.evidence"><code class="name">prop <span class="ident">evidence</span></code></dt>
 <dd>
 <div class="desc"><p>Get the evidence associated with this step result.</p>
 <h2 id="returns">Returns</h2>
@@ -1070,7 +609,7 @@ def evidence(self):
     return self.__evidence</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.evidence_dicts"><code class="name">var <span class="ident">evidence_dicts</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.evidence_dicts"><code class="name">prop <span class="ident">evidence_dicts</span></code></dt>
 <dd>
 <div class="desc"><p>Get the evidence associated with this step result as dictionaries.</p>
 <h2 id="returns">Returns</h2>
@@ -1098,7 +637,7 @@ def evidence_dicts(self):
     return evidence_dicts</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.message"><code class="name">var <span class="ident">message</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.message"><code class="name">prop <span class="ident">message</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1120,7 +659,7 @@ def message(self):
     return self.__message</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.step_name"><code class="name">var <span class="ident">step_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.step_name"><code class="name">prop <span class="ident">step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1142,7 +681,7 @@ def step_name(self):
     return self.__step_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name"><code class="name">var <span class="ident">sub_step_implementer_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_implementer_name"><code class="name">prop <span class="ident">sub_step_implementer_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1164,7 +703,7 @@ def sub_step_implementer_name(self):
     return self.__sub_step_implementer_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_name"><code class="name">var <span class="ident">sub_step_name</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.sub_step_name"><code class="name">prop <span class="ident">sub_step_name</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1186,7 +725,7 @@ def sub_step_name(self):
     return self.__sub_step_name</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.results.step_result.StepResult.success"><code class="name">var <span class="ident">success</span></code></dt>
+<dt id="ploigos_step_runner.results.step_result.StepResult.success"><code class="name">prop <span class="ident">success</span></code></dt>
 <dd>
 <div class="desc"><h2 id="returns">Returns</h2>
 <dl>
@@ -1225,35 +764,6 @@ def success(self):
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>Human readable description of the result artifact (defaults to empty).</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_artifact(self, name, value, description=&#39;&#39;):
-    &#34;&#34;&#34;Add an artifact to this StepResult.
-
-    Parameters
-    ----------
-    name : str
-        Name of the result artifact.
-    value : str
-        Arbitrary value of the artifact.
-    description : str, optional
-        Human readable description of the result artifact (defaults to empty).
-    &#34;&#34;&#34;
-    if not name:
-        raise StepRunnerException(&#39;Name is required to add artifact&#39;)
-
-    # False can be the value
-    if value == &#39;&#39; or value is None:
-        raise StepRunnerException(&#39;Value is required to add artifact&#39;)
-
-    self.__artifacts[name] = StepResultArtifact(
-        name=name,
-        value=value,
-        description=description
-    )</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.add_evidence"><code class="name flex">
 <span>def <span class="ident">add_evidence</span></span>(<span>self, name, value, description='')</span>
@@ -1269,35 +779,6 @@ def success(self):
 <dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>Human readable description of the result evidence (defaults to empty).</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_evidence(self, name, value, description=&#39;&#39;):
-    &#34;&#34;&#34;Add evidence to this StepResult.
-
-    Parameters
-    ----------
-    name : str
-        Name of the result evidence.
-    value : str
-        Arbitrary value of the evidence.
-    description : str, optional
-        Human readable description of the result evidence (defaults to empty).
-    &#34;&#34;&#34;
-    if not name:
-        raise StepRunnerException(&#39;Name is required to add evidence&#39;)
-
-    # False can be the value
-    if value == &#39;&#39; or value is None:
-        raise StepRunnerException(&#39;Value is required to add evidence&#39;)
-
-    self.__evidence[name] = StepResultEvidence(
-        name=name,
-        value=value,
-        description=description
-    )</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_artifact"><code class="name flex">
 <span>def <span class="ident">get_artifact</span></span>(<span>self, name)</span>
@@ -1314,25 +795,6 @@ def success(self):
 <dt><code>StepResultArtifact</code></dt>
 <dd>The step result artifact with the given name for this StepResult.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_artifact(self, name):
-    &#34;&#34;&#34;Get artifact with given name for this StepResult.
-
-    Parameters
-    ----------
-    name : str
-        The name of the artifact to return.
-
-    Returns
-    -------
-    StepResultArtifact
-        The step result artifact with the given name for this StepResult.
-    &#34;&#34;&#34;
-    return self.__artifacts.get(name)</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_artifact_value"><code class="name flex">
 <span>def <span class="ident">get_artifact_value</span></span>(<span>self, name)</span>
@@ -1349,29 +811,6 @@ def success(self):
 <dt><code>str</code></dt>
 <dd>The value of the artifact.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_artifact_value(self, name):
-    &#34;&#34;&#34;Get the value for a specified artifact.
-
-    Parameters
-    ----------
-    name : str
-        The name of the artifact.
-
-    Returns
-    -------
-    str
-        The value of the artifact.
-    &#34;&#34;&#34;
-    value = None
-    if self.__artifacts.get(name):
-        value = self.__artifacts.get(name).value
-
-    return value</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_evidence"><code class="name flex">
 <span>def <span class="ident">get_evidence</span></span>(<span>self, name)</span>
@@ -1388,25 +827,6 @@ def success(self):
 <dt><code>StepResultEvidence</code></dt>
 <dd>The step result evidence with the given name for this StepResult.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_evidence(self, name):
-    &#34;&#34;&#34;Get evidence with given name for this StepResult.
-
-    Parameters
-    ----------
-    name : str
-        The name of the evidence to return.
-
-    Returns
-    -------
-    StepResultEvidence
-        The step result evidence with the given name for this StepResult.
-    &#34;&#34;&#34;
-    return self.__evidence.get(name)</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_evidence_value"><code class="name flex">
 <span>def <span class="ident">get_evidence_value</span></span>(<span>self, name)</span>
@@ -1423,29 +843,6 @@ def success(self):
 <dt><code>str</code></dt>
 <dd>The value of the evidence.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_evidence_value(self, name):
-    &#34;&#34;&#34;Get the value for a specified evidence.
-
-    Parameters
-    ----------
-    name : str
-        The name of the evidence.
-
-    Returns
-    -------
-    str
-        The value of the evidence.
-    &#34;&#34;&#34;
-    value = None
-    if self.evidence.get(name):
-        value = self.__evidence.get(name).value
-
-    return value</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_step_result_dict"><code class="name flex">
 <span>def <span class="ident">get_step_result_dict</span></span>(<span>self)</span>
@@ -1477,54 +874,6 @@ For example:
 }
 }</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_step_result_dict(self):
-    &#34;&#34;&#34;Get the step result dictionary
-
-    Returns
-    -------
-    dict
-        Results with all step result components.
-        For example:
-        &#34;step-name: {
-            &#34;sub-step-name&#34;: {
-                &#34;sub-step-implementer-name&#34;: &#34;sub_step_implementer_name&#34;,
-                &#34;success&#34;: True,
-                &#34;message&#34;: &#34;&#34;,
-                &#34;artifacts&#34;: {
-                    &#34;name&#34;: {
-                        &#34;description&#34;: &#34;file description&#34;,
-                        &#34;value&#34;: &#34;step-result.txt&#34;
-                    },
-                &#34;evidence&#34;: {
-                    &#34;name&#34;: {
-                        &#34;description&#34;: &#34;piece of evidence&#34;,
-                        &#34;value&#34;: &#34;evidence&#34;
-                    }
-                }
-                }
-            }
-        }
-    &#34;&#34;&#34;
-    if self.environment:
-        result = {
-            self.environment: {
-                self.step_name: {
-                    self.sub_step_name: self.get_sub_step_result_dict()
-                }
-            }
-        }
-    else:
-        result = {
-            self.step_name: {
-                self.sub_step_name: self.get_sub_step_result_dict()
-            }
-        }
-    return result</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.get_sub_step_result_dict"><code class="name flex">
 <span>def <span class="ident">get_sub_step_result_dict</span></span>(<span>self)</span>
@@ -1543,35 +892,6 @@ For example:
 'evidence': []
 }</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_sub_step_result_dict(self):
-    &#34;&#34;&#34;
-    Returns
-    -------
-    dict
-        Dictionary with the details for the sub-step.
-        For example:
-        {
-            &#39;sub-step-implementer-name&#39;: &#39;value&#39;,
-            &#39;success&#39;: Boolean,
-            &#39;message&#39;: &#39;value&#39;,
-            &#39;artifacts&#39;: [],
-            &#39;evidence&#39;: []
-        }
-    &#34;&#34;&#34;
-    result = {
-        &#39;sub-step-implementer-name&#39;: self.sub_step_implementer_name,
-        &#39;success&#39;: self.success,
-        &#39;message&#39;: self.message,
-        &#39;artifacts&#39;: self.artifacts_dicts,
-        &#39;evidence&#39;: self.evidence_dicts
-    }
-
-    return result</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.step_result.StepResult.merge"><code class="name flex">
 <span>def <span class="ident">merge</span></span>(<span>self, other)</span>
@@ -1591,43 +911,6 @@ sub step name and environment.</p>
 <dd>&nbsp;</dd>
 </dl>
 <p>matching step name, sub-step name, or environment.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def merge(self, other):
-    &#34;&#34;&#34;Merge the artifacts and evidence from another StepResult into
-    this StepResult. The other StepResult must have the same step name,
-    sub step name and environment.
-
-    Parameters
-    ----------
-    step_result : StepResult
-        The second StepResult instance to merge into this one
-
-    Raises
-    ------
-    StepRunnerException if the StepResult to merge does not have a
-    matching step name, sub-step name, or environment.
-    &#34;&#34;&#34;
-
-    if not isinstance(other, StepResult):
-        raise StepRunnerException(&#39;expect StepResult instance type&#39;)
-
-    if other.step_name != self.step_name or \
-        other.sub_step_name != self.sub_step_name or \
-        other.environment != self.environment:
-        raise StepRunnerException(
-                &#39;Other StepResult does not have matching &#39; \
-                &#39;step name, sub step name, or environment.&#39;
-              )
-
-    for artifact in other.artifacts.values():
-        self.add_artifact(artifact.name, artifact.value, artifact.description)
-
-    for evidence in other.evidence.values():
-        self.add_evidence(evidence.name, evidence.value, evidence.description)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1635,7 +918,6 @@ sub step name and environment.</p>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -1678,7 +960,7 @@ sub step name and environment.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>

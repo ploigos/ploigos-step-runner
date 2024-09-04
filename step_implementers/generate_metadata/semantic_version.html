@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.step_implementers.generate_metadata.semantic_version API documentation</title>
-<meta name="description" content="`StepImplementer` for the `generate-metadata` to generate a semantic version from given input …" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="`StepImplementer` for the `generate-metadata` to generate a semantic version from given input …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -184,296 +187,6 @@ against the standard semver spec/regex it is simple enough to swap the <code>+</
 </tr>
 </tbody>
 </table>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `generate-metadata` to generate a semantic version from given input.
-
-Supports the following semantic versions (https://semver.org/) :
-
-  - major.minor.patch+build
-  - major.minor.patch-pre_rleease+build
-
-Notes
------
-When tagging container images we will regex + to - due
-to https://github.com/docker/distribution/issues/1201.
-
-Source for version sections:
-
-  - major.minor.patch
-    * will come from previous sub step of generate_metadata step,
-      with step results including &#39;app_version&#39;
-    * known implementers:
-      -  maven
-  - pre-release
-    * will come from previous sub step of generate_metadata step,
-      with step results including &#39;pre_release&#39;
-    * known implementers:
-      - git
-  - build
-    * will come from previous sub step of generate_metadata step,
-      with step results including &#39;build&#39;
-    * known implementers:
-      - git
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-
-  * static configuration
-  * runtime configuration
-  * previous step results
-
-Configuration Key                       | Required? | Default | Description
-----------------------------------------|-----------|---------|-----------
-`app-version`                           | Yes       |         | Value to use for `version` portion of semantic version (https://semver.org/). \
-                                                                EX: `&lt;app-version&gt;`
-`is-pre-release`                        | Yes       | `False` | If `True` then will add any relevant `pre-release` identifiers to semantic version (https://semver.org/), \
-                                                                such as the branch name. \
-                                                                If `False` then assumed to be a release build and all `pre-release` identifiers will \
-                                                                be ignored from version as per the semantic version spec (https://semver.org/).
-`branch`                                | No        |         | If `is-pre-release` is `True`, value to use for a pre-release name in pre-release poriton of semantic version (https://semver.org/). \
-                                                                EX: `&lt;app-version&gt;-&lt;branch&gt;`
-`workflow-run-num`                      | No        |         | If `is-pre-release` is `True`, value to use for a numeric identifier of the branch `pre-release` identifier if provided. \
-                                                                Also always used in build identifier. \
-                                                                Since this can be included in the pre-release section, it should be incremental as per the sem version spec.
-                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;commit-hash&gt;.&lt;workflow-run-num&gt;` &lt;br/&gt;\
-                                                                EX (release): `&lt;app-version&gt;+&lt;commit-hash&gt;.&lt;workflow-run-num&gt;`
-`commit-hash`                           | No        |         | Value to use for commit hash build identifier in build portion of semantic version. \
-                                                                EX: `&lt;app-version&gt;+&lt;commit-hash&gt;`
-`commit-hash-build-identifier-length`   | No        | 7       | Trim the given `commit-hash` down to this length when including as build identifier in semantic version
-`additional-pre-release-identifiers`    | No        |         | If `is-pre-release` is `True`, additional `pre-release` identifiers to add to semantic version (https://semver.org/). \
-                                                                Ignored if `is-pre-release` is `False. \
-                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;-&lt;additional-pre-release-identifiers&gt;+&lt;commit-hash&gt;.&lt;workflow-run-num&gt;`
-`additional-build-identifiers`          | No        |         | Additional `build` identifiers to add to semantic version (https://semver.org/). \
-                                                                EX (pre-release): `&lt;app-version&gt;-&lt;branch&gt;.&lt;workflow-run-num&gt;+&lt;commit-hash&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;` &lt;br/&gt;\
-                                                                EX (release): `&lt;app-version&gt;+&lt;commit-hash&gt;.&lt;workflow-run-num&gt;.&lt;additional-build-identifiers&gt;`
-`container-image-tag-build-deliminator` | Yes       | `_`     | Unfortunately the container image tag spec does not allow for the `+` character which means can not follow \
-                                                                strict semver syntax when including the `build` portion of the semver in the image tag. \
-                                                                The value here is used instead of the `+` for the purposes of container image tags. \
-                                                                NOTE: the default `_` is chosen because it is otherwise not a valid character in semver syntax so if doing parsing \
-                                                                against the standard semver spec/regex it is simple enough to swap the `+` for a `_` and still get accurate results.
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key            | Description
--------------------------------|------------
-`version`                      | Full constructured semantic version
-`container-image-tag`          | Constructed semantic version without build identifier since not compatible with container image tags
-`semantic-version-core`        | Semantic version version core portion
-`semantic-version-pre-release` | Semantic version version pre-release portion
-`semantic-version-build`       | Semantic version version build portion
-
-&#34;&#34;&#34;# pylint: disable=line-too-long
-
-import re
-
-from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.results import StepResult
-
-DEFAULT_CONFIG = {
-  &#39;is-pre-release&#39;: False,
-  &#39;commit-hash-build-identifier-length&#39;: 7,
-  &#39;container-image-tag-build-deliminator&#39;: &#39;_&#39;
-}
-
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;app-version&#39;,
-    &#39;is-pre-release&#39;,
-    &#39;container-image-tag-build-deliminator&#39;
-]
-
-class SemanticVersion(StepImplementer):  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;`StepImplementer` for the `generate-metadata` to generate a
-    semantic version from given input.
-    &#34;&#34;&#34;
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        # construct version and image tag
-        version_core = self.get_value(&#39;app-version&#39;)
-        version = f&#39;{version_core}&#39;
-        image_tag = f&#39;{version_core}&#39;
-        pre_release = None
-        if self.get_value(&#39;is-pre-release&#39;):
-            pre_release = self.__get_semantic_version_pre_release()
-            if pre_release:
-                version += f&#39;-{pre_release}&#39;
-                image_tag += f&#39;-{pre_release}&#39;
-            else:
-                # NOTE: maybe at some point we should set some default pre-release value if
-                #       none calculated so that semver reflects that it is a pre-release?
-                pass
-        build = self.__get_semantic_version_build()
-        if build:
-            version += f&#39;+{build}&#39;
-            image_tag += f&#34;{self.get_value(&#39;container-image-tag-build-deliminator&#39;)}{build}&#34;
-
-        # add artifacts
-        step_result.add_artifact(
-            name=&#39;version&#39;,
-            value=version,
-            description=&#39;Full constructured semantic version&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;container-image-tag&#39;,
-            value=image_tag,
-            description=&#39;Constructed semantic version without build identifier&#39; \
-              &#39; since not compatible with container image tags&#39;
-        )
-        step_result.add_artifact(
-            name=&#39;semantic-version-core&#39;,
-            value=version_core,
-            description=&#39;Semantic version version core portion&#39;
-        )
-        if pre_release:
-            step_result.add_artifact(
-                name=&#39;semantic-version-pre-release&#39;,
-                value=pre_release,
-                description=&#39;Semantic version pre-release portion&#39;
-            )
-        if build:
-            step_result.add_artifact(
-                name=&#39;semantic-version-build&#39;,
-                value=build,
-                description=&#39;Semantic version build portion&#39;
-            )
-
-        # add evidence
-        step_result.add_evidence(
-            name=&#39;version&#39;,
-            value=version,
-            description=&#39;Full constructured semantic version&#39;
-        )
-        step_result.add_evidence(
-            name=&#39;container-image-tag&#39;,
-            value=image_tag,
-            description=&#39;semantic version without build identifier&#39; \
-                &#39; since not compatible with container image tags&#39;
-        )
-
-        return step_result
-
-    def __get_semantic_version_pre_release(self):
-        &#34;&#34;&#34;Get the pre-release portion of the semantic version
-
-        Returns
-        -------
-        Pre-release portion of the semantic version.
-        &#34;&#34;&#34;
-        pre_release = None
-        pre_release_identifiers = []
-
-        # if branch given add as a pre-release identifier
-        branch = self.get_value(&#39;branch&#39;)
-        if branch:
-            pre_release_regex = re.compile(r&#34;/&#34;, re.IGNORECASE)
-            branch_pre_release_identifier = re.sub(pre_release_regex, &#39;-&#39;, branch)
-            pre_release_identifiers.append(branch_pre_release_identifier)
-
-        # if workflow run num given ass as  apre-release identifier
-        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
-        if workflow_run_num:
-            pre_release_identifiers.append(workflow_run_num)
-
-        # if additional pre-release identifiers given, add as pre-release identifiers
-        additional_pre_release_identifiers = self.get_value(&#39;additional-pre-release-identifiers&#39;)
-        if additional_pre_release_identifiers:
-            if isinstance(additional_pre_release_identifiers, list):
-                pre_release_identifiers += additional_pre_release_identifiers
-            else:
-                pre_release_identifiers.append(additional_pre_release_identifiers)
-
-        if pre_release_identifiers:
-            pre_release = &#39;.&#39;.join(pre_release_identifiers)
-
-        return pre_release
-
-    def __get_semantic_version_build(self):
-        &#34;&#34;&#34;Get the build portion of the semantic version
-
-        Returns
-        -------
-        Build portion of the semantic version.
-        &#34;&#34;&#34;
-        build = None
-        build_identifiers = []
-
-        # if commit-hash given add as a build identifier
-        commit_hash = self.get_value(&#39;commit-hash&#39;)
-        if commit_hash:
-            commit_hash_build_identifier = None
-            commit_hash_build_identifier_length = self.get_value(&#39;commit-hash-build-identifier-length&#39;)
-            if commit_hash_build_identifier_length:
-                commit_hash_build_identifier = str(commit_hash)[:commit_hash_build_identifier_length]
-            else:
-                commit_hash_build_identifier = commit_hash
-            build_identifiers.append(commit_hash_build_identifier)
-
-        # if workflow run num given as a build identifier
-        workflow_run_num = self.get_value(&#39;workflow-run-num&#39;)
-        if workflow_run_num:
-            build_identifiers.append(str(workflow_run_num))
-
-        # if additional pre-release identifiers given, add as pre-release identifiers
-        additional_build_identifiers = self.get_value(&#39;additional-build-identifiers&#39;)
-        if additional_build_identifiers:
-            if isinstance(additional_build_identifiers, list):
-                build_identifiers += additional_build_identifiers
-            else:
-                build_identifiers.append(additional_build_identifiers)
-
-        if build_identifiers:
-            build = &#39;.&#39;.join(build_identifiers)
-
-        return build</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -700,26 +413,6 @@ semantic version from given input.</p></div>
 </dl>
 <h2 id="notes">Notes</h2>
 <p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -754,7 +447,6 @@ def step_implementer_config_defaults():
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul>
 <li><a href="#notes">Notes</a></li>
@@ -782,7 +474,7 @@ def step_implementer_config_defaults():
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>

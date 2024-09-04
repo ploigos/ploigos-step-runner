@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.step_implementers.static_code_analysis.sonarqube API documentation</title>
-<meta name="description" content="`StepImplementer` for the `static-code-analysis` step using SonarQube …" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="`StepImplementer` for the `static-code-analysis` step using SonarQube …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -187,349 +190,6 @@ sonar.java.test.binaries=target/test-classes/org/acme/rest/json
 #sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco
 #sonar.core.codeCoveragePlugin=jacoco
 </code></pre>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `static-code-analysis` step using SonarQube.
-
-Reference:  https://docs.sonarqube.org/latest/analysis/analysis-parameters
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-
-  * static configuration
-  * runtime configuration
-  * previous step results
-
-Key                      | Required | Default                     | Description
--------------------------|----------|-----------------------------|------------
-`properties`             | Yes      | `./sonar-project.properties` \
-                                                                  | Existing properties file for SonarQube
-`url`                    | Yes      |                             | SonarQube host url (sonar.host.url)
-`username`               | No       |                             | SonarQube username id (sonar.login)
-`password`               | No       |                             | SonarQube password
-`token`                  | No       |                             | SonarQube token
-`version`                | Yes      |                             | Version to use for the SonarQube \
-                                                                    project version (sonar.projectVersion)
-`java-truststore`        | No       | `/etc/pki/java/cacerts`     | Location of Java TrustStore. Defaults \
-                                                                    to System.
-`project-key`            | No       |                             | SonarQube project key
-`sonar-analyze-branches` | No       | `False`                     | `True` to pass the `sonar.branch.name` property to SonarQube, \
-                                                                    which can only be done if using SonarQube Developer Edition or above as per \
-                                                                    https://redirect.sonarsource.com/doc/branches.html. \
-                                                                    `False to not pass the `sonar.branch.name` property to SonarQube. \
-                                                                    Note, even if `False`, SonarQube will still be called even if on a branch, \
-                                                                    that branch name just wont be passed to SonarQube so all of the results will \
-                                                                    show up on the same `master` branch in the SonarQube UI.
-`branch`                 | Maybe    |                             | Value to use for `sonar.branch.name` property if `sonar-analyze-branches` is `True`. \
-                                                                    See https://sonarqube.corp.redhat.com/documentation/branches/overview/.
-`release-branch-regexes` | No       | `[&#39;^main$&#39;, &#39;^master$&#39;]`    | SonarQube does not want the `sonar.branch.name` flag passed for the \
-                                                                    &#34;main&#34;, &#34;master&#34;, &#34;release&#34; branch. Therefor the StepImplementer needs to know \
-                                                                    which branch(s) are considered the &#34;main&#34; branch so we don&#39;t pass the flag \
-                                                                    for that branch. \
-                                                                    See https://community.sonarsource.com/t/how-to-change-the-main-branch-in-sonarqube/13669/8
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key    | Description
------------------------|------------
-`sonarqube-result-set` | Path to the sonarqube results
-
-Examples
---------
-
-Example: Step Configuration (minimal)
-
-    static-code-analysis:
-    - implementer: SonarQube
-      config:
-        url: https://sonarqube.yourcompany.com/
-
-Example: Generated Sonar Scanner Call (uses both step configuration and previous results)
-
-    sonar-scanner
-        -Dproject.settings=properties
-        -Dsonar.host.url=url
-        -Dsonar.projectVersion=generate-metadata.version
-        -Dsonar.projectKey=application-name.service-name
-        -Dsonar.branch.name=feature/foo42
-
-Example: Existing Sonar Properties File (minimal)
-
-    #----- Default SonarQube server
-    # Config requires the url; this will NOT be used
-    #   sonar.host.url=https://sonarqube-sonarqube.apps.ploigos_step_runner.rht-set.com/
-    # Will override:
-    #   sonar.projectKey
-    #   sonar.projectVersion
-    #   sonar.working.directory
-    # Recommendation:
-    #   Set qualitygate wait to true to stop the pipeline
-    #   when the threshold of errors is reached.
-    #   Regardless, see the SonarQube dashboard for details.
-    sonar.qualitygate.wait=true
-
-    # --- optional ---
-    # Optional defaults to project key,
-    sonar.projectName=Quarkus Reference App
-
-    # --- optional ---
-    # Encoding of the source code. Default is default system encoding
-    sonar.sourceEncoding=UTF-8
-
-    # --- java basic properties ---
-    sonar.sources=src/main/java/
-    sonar.java.libraries=target/*.jar
-    sonar.java.binaries=target/classes/org/acme/rest/json
-    sonar.java.test.binaries=target/test-classes/org/acme/rest/json
-
-    # --- java reporting properties ---
-    #sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco
-    #sonar.core.codeCoveragePlugin=jacoco
-
-&#34;&#34;&#34;# pylint: disable=line-too-long
-
-import os
-import re
-import sys
-
-import sh
-from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.results import StepResult
-from ploigos_step_runner.exceptions import StepRunnerException
-
-DEFAULT_CONFIG = {
-    &#39;properties&#39;: &#39;./sonar-project.properties&#39;,
-    &#39;java-truststore&#39;: &#39;/etc/pki/java/cacerts&#39;,
-    &#39;sonar-analyze-branches&#39;: False,
-    &#39;release-branch-regexes&#39;: [&#39;^main$&#39;, &#39;^master$&#39;]
-}
-
-AUTHENTICATION_CONFIG = {
-    &#39;username&#39;: None,
-    &#39;password&#39;: None,
-    &#39;token&#39;: None
-}
-
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;url&#39;,
-    &#39;application-name&#39;,
-    &#39;service-name&#39;,
-    &#39;version&#39;
-]
-
-
-class SonarQube(StepImplementer):
-    &#34;&#34;&#34;
-    StepImplementer for the tag-source step for SonarQube.
-    &#34;&#34;&#34;
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;
-        Getter for the StepImplementer&#39;s configuration defaults.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _validate_required_config_or_previous_step_result_artifact_keys(self):
-        &#34;&#34;&#34;Validates that the required configuration keys or previous step result artifacts
-        are set and have valid values.
-        Validates that:
-        * required configuration is given
-        * either username and password are set but not token, token is set but not username
-        and password, or none are set.
-        Raises
-        ------
-        StepRunnerException
-            If step configuration or previous step result artifacts have invalid required values
-        &#34;&#34;&#34;
-        super()._validate_required_config_or_previous_step_result_artifact_keys()
-
-        # if token ensure no username and password
-        if self.get_value(&#39;token&#39;):
-            if (self.get_value(&#39;username&#39;)
-                    or self.get_value(&#39;password&#39;)):
-                raise StepRunnerException(
-                    &#34;Either &#39;username&#39; or &#39;password &#39;is set. Neither can be set with a token.&#34;
-                )
-        # if no token present, ensure either both git-username and git-password are set or neither
-        else:
-            if (self.get_value(&#39;username&#39;) and self.get_value(&#39;password&#39;) is None
-                        or self.get_value(&#39;username&#39;) is None and self.get_value(&#39;password&#39;)):
-                raise StepRunnerException(
-                    &#34;Either &#39;username&#39; or &#39;password &#39;is not set. Neither or both must be set.&#34;
-                )
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-
-        username = None
-        password = None
-        token = None
-
-        if self.has_config_value(AUTHENTICATION_CONFIG, True):
-            # Optional: token
-            if self.get_value(&#39;token&#39;):
-                token = self.get_value(&#39;token&#39;)
-            # Optional: username and password
-            else:
-                if (self.get_value(&#39;username&#39;)
-                        and self.get_value(&#39;password&#39;)):
-                    username = self.get_value(&#39;username&#39;)
-                    password = self.get_value(&#39;password&#39;)
-
-        application_name = self.get_value(&#39;application-name&#39;)
-        service_name = self.get_value(&#39;service-name&#39;)
-        properties_file = self.get_value(&#39;properties&#39;)
-
-        # Optional: project-key
-        if self.get_value(&#39;project-key&#39;):
-            project_key = self.get_value(&#39;project-key&#39;)
-        # Default
-        else:
-            project_key = f&#39;{application_name}:{service_name}&#39;
-
-        if not os.path.exists(properties_file):
-            step_result.success = False
-            step_result.message = f&#39;Properties file not found: {properties_file}&#39;
-            return step_result
-
-        sonarqube_success = False
-        try:
-            # Hint:  Call sonar-scanner with sh.sonar_scanner
-            #    https://amoffat.github.io/sh/sections/faq.html
-            working_directory = self.work_dir_path
-
-            sonar_optional_flags = []
-            # determine auth flags
-            if token:
-                sonar_optional_flags += [
-                    f&#39;-Dsonar.login={token}&#39;
-                ]
-            elif username:
-                sonar_optional_flags += [
-                    f&#39;-Dsonar.login={username}&#39;,
-                    f&#39;-Dsonar.password={password}&#39;,
-                ]
-
-            # determine branch flag
-            # only provide sonar.branch.name flag if not the &#34;main&#34;/&#34;master&#34;/&#34;release branch&#34; and
-            # sonar-analyze-branches is true (since can only due with certain versions of SonarQube)
-            # see: https://community.sonarsource.com/t/how-to-change-the-main-branch-in-sonarqube/13669/8
-            if self.get_value(&#39;sonar-analyze-branches&#39;) and not self.__is_release_branch():
-                sonar_optional_flags += [
-                    f&#34;-Dsonar.branch.name={self.get_value(&#39;branch&#39;)}&#34;,
-                ]
-
-            # run scan
-            sh.sonar_scanner(  # pylint: disable=no-member
-                f&#39;-Dproject.settings={properties_file}&#39;,
-                f&#34;-Dsonar.host.url={self.get_value(&#39;url&#39;)}&#34;,
-                f&#34;-Dsonar.projectVersion={self.get_value(&#39;version&#39;)}&#34;,
-                f&#39;-Dsonar.projectKey={project_key}&#39;,
-                f&#39;-Dsonar.working.directory={working_directory}&#39;,
-                *sonar_optional_flags,
-                _env={
-                    &#34;SONAR_SCANNER_OPTS&#34;: \
-                        f&#34;-Djavax.net.ssl.trustStore={self.get_value(&#39;java-truststore&#39;)}&#34;
-                },
-                _out=sys.stdout,
-                _err=sys.stderr
-            )
-            sonarqube_success = True
-        except sh.ErrorReturnCode_1 as error: # pylint: disable=no-member
-            # Error Code 1: INTERNAL_ERROR
-            # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
-            step_result.success = False
-            step_result.message = &#34;Error running static code analysis&#34; \
-                f&#34; using sonar-scanner: {error}&#34;
-        except sh.ErrorReturnCode_2: # pylint: disable=no-member
-            # Error Code 2: USER_ERROR
-            # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
-            step_result.success = False
-            step_result.message = &#34;Static code analysis failed.&#34; \
-                &#34; See &#39;sonarqube-result-set&#39; result artifact for details.&#34;
-        except sh.ErrorReturnCode as error: # pylint: disable=no-member
-            # Error Code Other: unexpected
-            # See error codes: https://github.com/SonarSource/sonar-scanner-cli/blob/master/src/main/java/org/sonarsource/scanner/cli/Exit.java # pylint: disable=line-too-long
-            step_result.success = False
-            step_result.message = &#34;Unexpected error running static code analysis&#34; \
-                f&#34; using sonar-scanner: {error}&#34;
-
-        step_result.add_artifact(
-            name=&#39;sonarqube-result-set&#39;,
-            value=f&#39;{working_directory}/report-task.txt&#39;
-        )
-
-        step_result.add_evidence(
-            name=&#39;sonarqube-quality-gate-pass&#39;,
-            value=sonarqube_success
-        )
-
-        return step_result
-
-    def __is_release_branch(self):
-        &#34;&#34;&#34;Determins if current branch is a release branch or not.
-
-        Returns
-        -------
-        bool
-            True if current branch is a release branch.
-            False if not.
-        &#34;&#34;&#34;
-        branch = self.get_value(&#39;branch&#39;)
-        release_branch_regexes = self.get_value(&#39;release-branch-regexes&#39;)
-
-        is_release_branch = False
-        if release_branch_regexes:
-            is_release_branch = False
-            if not isinstance(release_branch_regexes, list):
-                release_branch_regexes = [release_branch_regexes]
-            for release_branch_regex in release_branch_regexes:
-                if re.match(release_branch_regex, branch):
-                    is_release_branch = True
-                    break
-
-        return is_release_branch</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -794,7 +454,6 @@ class SonarQube(StepImplementer):
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
@@ -819,7 +478,7 @@ class SonarQube(StepImplementer):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>

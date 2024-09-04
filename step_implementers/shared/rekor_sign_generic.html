@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.step_implementers.shared.rekor_sign_generic API documentation</title>
-<meta name="description" content="`StepImplementer` for the `automated-governance` step using Rekor …" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="`StepImplementer` for the `automated-governance` step using Rekor …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -75,297 +78,6 @@ Could come from:</p>
 </tr>
 </tbody>
 </table>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;`StepImplementer` for the `automated-governance` step using Rekor.
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-
-  * static configuration
-  * runtime configuration
-  * previous step results
-
-Configuration Key       | Required? | Default | Description
--------------------     |-----------|---------|-----------
-`rekor-server-url`      | Yes       |         | URL for Rekor server to upload artifact(s) to.
-`signer-pgp-private-key`| Yes       |         | PGP Private Key used to sign the image
-
-Result Artifacts
-----------------
-Results artifacts output by this step.
-
-Result Artifact Key | Description
---------------------|------------
-`rekor-uuid`        | UUID of Rekor entry created by artifact upload.
-`rekor-entry`       | DEPRECIATED. Will likely be removed in next release.
-&#34;&#34;&#34;
-
-from base64 import b64encode
-import json
-import sys
-from io import StringIO
-import sh
-from ploigos_step_runner.step_implementer import StepImplementer
-from ploigos_step_runner.results import StepResult
-from ploigos_step_runner.utils.file import base64_encode, get_file_hash,\
-    download_source_to_destination
-from ploigos_step_runner.utils.io import \
-    create_sh_redirect_to_multiple_streams_fn_callback
-from ploigos_step_runner.utils.pgp import detach_sign_with_pgp_key
-from ploigos_step_runner.utils.pgp import import_pgp_key
-from ploigos_step_runner.utils.pgp import export_pgp_public_key
-
-
-DEFAULT_CONFIG = {}
-
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    &#39;rekor-server-url&#39;,
-    &#39;signer-pgp-private-key&#39;
-]
-class RekorSignGeneric(StepImplementer):  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;`StepImplementer` for the generic Rekor class.
-    &#34;&#34;&#34;
-
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        workflow_result,
-        parent_work_dir_path,
-        config,
-        artifact_to_sign_uri_config_key,
-        environment=None
-    ):
-        self.__artifact_to_sign_uri_config_key = artifact_to_sign_uri_config_key
-        super().__init__(
-            workflow_result=workflow_result,
-            parent_work_dir_path=parent_work_dir_path,
-            config=config,
-            environment=environment
-        )
-
-    @property
-    def artifact_to_sign_uri_config_key(self):
-        &#34;&#34;&#34;Getter for the artifact to sign config key.
-
-        Returns
-        -------
-        str
-            Config key that is used to obtain the artifact
-            that needs to be signed
-        &#34;&#34;&#34;
-        return self.__artifact_to_sign_uri_config_key
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    def _create_rekor_entry( # pylint: disable=bad-option-value,no-self-use
-        self,
-        signer_pgp_public_key,
-        signer_pgp_private_key_fingerprint,
-        path_to_file,
-        artifact_to_sign_uri
-    ):
-        &#34;&#34;&#34;Method to generate a rekor entry
-
-        Parameters
-        ----------
-        signer_pgp_public_key: str
-            Public key obtained from the private key fingerprint
-        signer_pgp_private_key_fingerprint: str
-            PGP fingerprint obtained from importing the private key
-        path_to_file: str
-            Path to file to be signed
-        artifact_to_sign_uri: str
-            URI where artifact was pulled from
-
-        Returns
-        -------
-        dict
-            Dictionary containing the rekor generated entry.
-
-
-        &#34;&#34;&#34;
-
-        file_hash = get_file_hash(path_to_file)
-        sig_file = path_to_file + &#39;.asc&#39;
-
-        base64_public_key = b64encode(signer_pgp_public_key.encode(&#39;utf-8&#39;)).decode(&#39;utf-8&#39;)
-
-        detach_sign_with_pgp_key(
-            output_signature_path=sig_file,
-            file_to_sign_path=path_to_file,
-            pgp_private_key_fingerprint=signer_pgp_private_key_fingerprint
-        )
-
-        #Base 64 encode the file
-
-        with open(path_to_file, &#39;rb&#39;) as file_bytes:
-            base64_encoded_data = b64encode(file_bytes.read()).decode(&#39;utf-8&#39;)
-
-        rekor_entry = {
-            &#34;kind&#34;: &#34;rekord&#34;,
-            &#34;apiVersion&#34;: &#34;0.0.1&#34;,
-            &#34;spec&#34;: {
-                &#34;signature&#34;: {
-                    &#34;format&#34;: &#34;pgp&#34;,
-                    &#34;content&#34;: base64_encode(sig_file),
-                    &#34;publicKey&#34;: {
-                        &#34;content&#34;: base64_public_key
-                    }
-                },
-                &#34;data&#34;: {
-                    &#34;content&#34;: base64_encoded_data,
-                    &#34;hash&#34;: {
-                        &#34;algorithm&#34;: &#34;sha256&#34;,
-                        &#34;value&#34;: file_hash
-                    }
-                },
-                &#34;extraData&#34;: {
-                    &#34;signed-artifact-uri&#34;: artifact_to_sign_uri
-
-                }
-            }
-        }
-        return rekor_entry
-
-    def _upload_to_rekor(
-        self,
-        rekor_server,
-        rekor_entry
-    ):
-        &#34;&#34;&#34;Method to upload a rekor entry to provided rekor server
-
-        Parameters
-        ----------
-        rekor_server: str
-            URL to rekor server
-        signer_pgp_private_key_fingerprint: str
-            PGP fingerprint obtained from importing the private key
-        path_to_file: str
-            Path to file to be signed
-        artifact_to_sign_uri: str
-            URI where artifact was pulled from
-
-        Returns
-        -------
-        str:
-            Returns rekor uuid returned from upload command
-
-        &#34;&#34;&#34;
-
-        rekor_entry_path = self.write_working_file(
-            filename=&#39;entry.json&#39;,
-            contents=bytes(json.dumps(rekor_entry), &#39;utf-8&#39;)
-        )
-        rekor_upload_stdout_result = StringIO()
-        rekor_upload_stdout_callback = create_sh_redirect_to_multiple_streams_fn_callback([
-            sys.stdout,
-            rekor_upload_stdout_result
-        ])
-        rekor = sh.rekor( # pylint: disable=no-member
-            &#39;upload&#39;,
-            &#39;--rekor_server&#39;,
-            rekor_server,
-            &#39;--entry&#39;,
-            rekor_entry_path,
-            _out=rekor_upload_stdout_callback,
-            _err_to_out=True,
-            _tee=&#39;out&#39;
-        )
-        rekor_uuid = str(rekor).rsplit(&#39;/&#39;, maxsplit=1)[-1].strip(&#39; \n&#39;)
-        return rekor_uuid
-
-    def _run_step(self):
-        &#34;&#34;&#34;Runs the step implemented by this StepImplementer.
-
-        Returns
-        -------
-        StepResult
-            Object containing the dictionary results of this step.
-        &#34;&#34;&#34;
-        step_result = StepResult.from_step_implementer(self)
-        rekor_server = self.get_value(&#39;rekor-server-url&#39;)
-
-        work_dir = self.work_dir_path
-        artifact_to_sign_uri = self.get_value(self.artifact_to_sign_uri_config_key)
-        #Download artifact that needs to be signed and place at work_dir.
-        #Path to file is returned as string
-        path_to_file = download_source_to_destination(
-            artifact_to_sign_uri,
-            work_dir)
-
-        # get the pgp private key to sign the image with
-        signer_pgp_private_key = self.get_value(
-            &#39;signer-pgp-private-key&#39;
-        )
-
-        # import the PGP key and get the finger print
-        signer_pgp_private_key_fingerprint = import_pgp_key(
-            pgp_private_key=signer_pgp_private_key
-        )
-
-        signer_pgp_public_key = export_pgp_public_key(signer_pgp_private_key_fingerprint)
-
-        rekor_entry = self._create_rekor_entry(
-            signer_pgp_public_key,
-            signer_pgp_private_key_fingerprint,
-            path_to_file,
-            artifact_to_sign_uri
-        )
-
-        rekor_uuid = self._upload_to_rekor(
-            rekor_server,
-            rekor_entry
-        )
-        step_result.add_artifact(
-                name=&#39;rekor-entry&#39;,
-                value=rekor_entry
-        )
-        step_result.add_artifact(
-                name=&#39;rekor-uuid&#39;,
-                value=rekor_uuid
-        )
-        rekor_uri = rekor_server + &#39;/api/v1/log/entries/&#39; + rekor_uuid
-        step_result.add_artifact(
-                name=&#39;rekor-entry-uri&#39;,
-                value=rekor_uri
-        )
-        return step_result</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -649,31 +361,11 @@ class RekorSignGeneric(StepImplementer):  # pylint: disable=too-few-public-metho
 </dl>
 <h2 id="notes">Notes</h2>
 <p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.shared.rekor_sign_generic.RekorSignGeneric.artifact_to_sign_uri_config_key"><code class="name">var <span class="ident">artifact_to_sign_uri_config_key</span></code></dt>
+<dt id="ploigos_step_runner.step_implementers.shared.rekor_sign_generic.RekorSignGeneric.artifact_to_sign_uri_config_key"><code class="name">prop <span class="ident">artifact_to_sign_uri_config_key</span></code></dt>
 <dd>
 <div class="desc"><p>Getter for the artifact to sign config key.</p>
 <h2 id="returns">Returns</h2>
@@ -732,7 +424,6 @@ def artifact_to_sign_uri_config_key(self):
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
@@ -760,7 +451,7 @@ def artifact_to_sign_uri_config_key(self):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>

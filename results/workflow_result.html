@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.results.workflow_result API documentation</title>
-<meta name="description" content="Abstract class and helper constants for WorkflowResult" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="Abstract class and helper constants for WorkflowResult">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -23,380 +26,6 @@
 </header>
 <section id="section-intro">
 <p>Abstract class and helper constants for WorkflowResult</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Abstract class and helper constants for WorkflowResult
-&#34;&#34;&#34;
-import json
-import os
-import pickle
-
-import yaml
-from ploigos_step_runner.exceptions import StepRunnerException
-from ploigos_step_runner.results.step_result import StepResult
-from ploigos_step_runner.utils.dict import deep_merge
-from ploigos_step_runner.utils.file import create_parent_dir
-
-
-class WorkflowResult:
-    &#34;&#34;&#34;
-    Class to manage a list of StepResults.
-    The WorkflowResult represents ALL previous results.
-    &#34;&#34;&#34;
-
-    def __init__(self):
-        self.__workflow_list = []
-
-    @property
-    def workflow_list(self):
-        &#34;&#34;&#34;Return workflow_list
-        &#34;&#34;&#34;
-        return self.__workflow_list
-
-    def get_artifact_value(
-        self,
-        artifact,
-        step_name=None,
-        sub_step_name=None,
-        environment=None
-    ): # pylint: disable=too-many-boolean-expressions
-        &#34;&#34;&#34;Search for an artifact.
-
-        If step_name, sub_step_name, or environment are not provided ensure the artifact comes
-        from the last step that returned that artifact.
-
-        1.  if step_name is provided, look for the artifact in the step
-        2.  elif step_name and sub_step_name is provided, look for the artifact in the step/sub_step
-        3.  else, search ALL steps for the FIRST match of the artifact.
-
-        Parameters
-        ----------
-        artifact: str
-           The artifact name to search for
-        step_name: str optional
-           Optionally search only in one step
-        sub_step_name: str optional
-            Optionally search only in one step
-        environment : str
-            Optional. Environment to get the step result for.
-
-        Returns
-        -------
-        Str
-           &#39;v1.0.2&#39;
-        &#34;&#34;&#34;
-
-        value = None
-        for step_result in reversed(self.workflow_list):
-            if ( \
-                (not step_name or step_result.step_name == step_name) and \
-                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-                (not environment or step_result.environment == environment)
-            ):
-                value = step_result.get_artifact_value(name=artifact)
-                if value is not None:
-                    break
-
-        return value
-
-    def get_evidence_value(
-        self,
-        evidence,
-        step_name=None,
-        sub_step_name=None,
-        environment=None
-    ): # pylint: disable=too-many-boolean-expressions
-        &#34;&#34;&#34;Search for an evidence.
-
-        If step_name, sub_step_name, or environment are provided ensure the evidence comes
-        from the first
-
-        1.  if step_name is provided, look for the evidence in the step
-        2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
-        3.  else, search ALL steps for the FIRST match of the evidence.
-
-        Parameters
-        ----------
-        evidence: str
-           The artifact name to search for
-        step_name: str optional
-           Optionally search only in one step
-        sub_step_name: str optional
-            Optionally search only in one step
-        environment : str
-            Optional. Environment to get the step result for.
-
-        Returns
-        -------
-        Str
-           &#39;v1.0.2&#39;
-        &#34;&#34;&#34;
-
-        value = None
-        for step_result in self.workflow_list:
-            if ( \
-                (not step_name or step_result.step_name == step_name) and \
-                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-                (not environment or step_result.environment == environment)
-            ):
-                value = step_result.get_evidence_value(name=evidence)
-                if value is not None:
-                    break
-
-        return value
-
-    def add_step_result(self, step_result):
-        &#34;&#34;&#34;Add a single step_result to the workflow list.
-
-        If the new result step is not already in the list
-           - simply append, done
-        Else
-           - find the old step result
-           - merge the old artifacts into the new artifacts
-           - delete the old step result
-           - append the new step result
-           - note: the delete/append is needed because it is a list
-
-        Parameters
-        ----------
-        step_result : StepResult
-           An StepResult object to add to the list
-
-        Raises
-        ------
-        Raises a StepRunnerException if an instance other than
-        StepResult is passed as a parameter
-        &#34;&#34;&#34;
-
-        if isinstance(step_result, StepResult):
-            if self.__step_result_exists(step_result):
-                raise StepRunnerException(
-                    f&#39;Can not add duplicate StepResult for step ({step_result.step_name}),&#39;
-                    f&#39; sub step ({step_result.sub_step_name}),&#39;
-                    f&#39; and environment ({step_result.environment}).&#39;
-                )
-
-            self.workflow_list.append(step_result)
-
-        else:
-            raise StepRunnerException(&#39;expect StepResult instance type&#39;)
-
-    # ARTIFACT helpers:
-    def write_results_to_yml_file(self, yml_filename):
-        &#34;&#34;&#34;Write the workflow list in a yaml format to file
-
-        Parameters
-        ----------
-        yml_filename : str
-             Name of file to write (eg: step-runner-results/step-runner-results.yml)
-
-        Raises
-        ------
-        Raises a RuntimeError if the file cannot be dumped
-        &#34;&#34;&#34;
-        try:
-            create_parent_dir(yml_filename)
-            with open(yml_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
-                results = self.__get_all_step_results_dict()
-                yaml.dump(results, file, indent=4)
-        except Exception as error:
-            raise RuntimeError(f&#39;error dumping {yml_filename}: {error}&#39;) from error
-
-    def write_results_to_json_file(self, json_filename):
-        &#34;&#34;&#34;Write the workflow list in a json format to file.
-
-        Parameters
-        ----------
-        json_filename : str
-             Name of file to write (eg: step-runner-results.json)
-
-        Raises
-        ------
-        Raises a RuntimeError if the file cannot be dumped
-        &#34;&#34;&#34;
-        try:
-            create_parent_dir(json_filename)
-            with open(json_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
-                results = self.__get_all_step_results_dict()
-                json.dump(results, file, indent=4)
-        except Exception as error:
-            raise RuntimeError(f&#39;error dumping {json_filename}: {error}&#39;) from error
-
-    # File handlers
-
-    @staticmethod
-    def load_from_pickle_file(pickle_filename):
-        &#34;&#34;&#34;Return the contents of a pickled file.
-
-        The file is expected to contain WorkflowResult instances
-
-        Parameters
-        ----------
-        pickle_filename: str
-           Name of the file to load
-
-        Raises
-        ------
-        Raises a StepRunnerException if the file cannot be loaded
-        Raises a StepRunnerException if the file contains non WorkflowResult instances
-        &#34;&#34;&#34;
-        try:
-            create_parent_dir(pickle_filename)
-
-            # if the file does not exist return empty object
-            if not os.path.isfile(pickle_filename):
-                return WorkflowResult()
-
-            # if the file is empty return empty object
-            if os.path.getsize(pickle_filename) == 0:
-                return WorkflowResult()
-
-            # check that the file has Workflow object
-            with open(pickle_filename, &#39;rb&#39;) as file:
-                workflow_result = pickle.load(file)
-                if not isinstance(workflow_result, WorkflowResult):
-                    raise StepRunnerException(f&#39;error {pickle_filename} has invalid data&#39;)
-                return workflow_result
-
-        except Exception as error:
-            raise StepRunnerException(f&#39;error loading {pickle_filename}: {error}&#39;) from error
-
-    def merge_with_pickle_file(self, pickle_filename):
-        &#34;&#34;&#34;Merge our workflow list with that stored on disk.
-        When we find overlaps, our in-memory values win.
-
-        Note: any locking of the pickle file is the responsibility
-        of the caller.
-
-        Parameters
-        ----------
-        pickle_filename : the on-disk path to the pickle file to merge with.
-
-        &#34;&#34;&#34;
-        on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
-        on_disk_results = on_disk_wfr.workflow_list
-        merged_workflow_list = []
-
-        for in_mem_step_result in self.__workflow_list:
-            on_disk_step_result = on_disk_wfr.get_step_result(
-                step_name=in_mem_step_result.step_name,
-                sub_step_name=in_mem_step_result.sub_step_name,
-                environment=in_mem_step_result.environment
-            )
-
-            if on_disk_step_result:
-                on_disk_results.remove(on_disk_step_result)
-
-                # in-memory values win if the two results are unequal
-                if on_disk_step_result != in_mem_step_result:
-                    on_disk_step_result.merge(in_mem_step_result)
-
-                merged_workflow_list.append(on_disk_step_result)
-
-            else:
-                merged_workflow_list.append(in_mem_step_result)
-
-        # on_disk_results at this point will only have the step results
-        # that were on disk, but not in memory.
-        merged_workflow_list += on_disk_results
-
-        self.__workflow_list = merged_workflow_list
-
-    def write_to_pickle_file(self, pickle_filename):
-        &#34;&#34;&#34;Write the workflow list in a pickle format to file.
-
-        Note: any locking of the pickle file is the responsibility
-        of the caller.
-
-        Parameters
-        ----------
-        pickle_filename : str
-             Name of file to write (eg: step-runner-results.pkl)
-
-        Raises
-        ------
-        Raises a RuntimeError if the file cannot be dumped
-        &#34;&#34;&#34;
-        try:
-            create_parent_dir(pickle_filename)
-            with open(pickle_filename, &#39;wb&#39;) as file:
-                pickle.dump(self, file)
-        except Exception as error:
-            raise RuntimeError(f&#39;error dumping {pickle_filename}: {error}&#39;) from error
-
-    def __step_result_exists(self, step_result):
-        &#34;&#34;&#34;Return True if the provided StepResult exists in our
-        workflow list, False otherwise.
-
-        Parameters
-        ----------
-        step_result - a StepResult object to search for
-
-        Return value
-        ------------
-            True if StepResult exists, False otherwise
-        &#34;&#34;&#34;
-        existing_step_result = self.get_step_result(
-            step_name=step_result.step_name,
-            sub_step_name=step_result.sub_step_name,
-            environment=step_result.environment
-        )
-        return existing_step_result
-
-    def __get_all_step_results_dict(self):
-        &#34;&#34;&#34;Get a dictionary of all of the recorded StepResults.
-
-        Returns
-        -------
-        results: dict
-            results of all steps from list
-        &#34;&#34;&#34;
-        all_results = {}
-        for step_result in self.workflow_list:
-            all_results = deep_merge(
-                dest=all_results,
-                source=step_result.get_step_result_dict(),
-                overwrite_duplicate_keys=True
-            )
-        step_runner_results = {
-            &#39;step-runner-results&#39;: all_results
-        }
-        return step_runner_results
-
-    def get_step_result(
-        self,
-        step_name,
-        sub_step_name=None,
-        environment=None
-    ): # pylint: disable=too-many-boolean-expressions
-        &#34;&#34;&#34;Helper method to return a step result.
-
-        Parameters
-        ----------
-        step_name: str
-            Name of step to search for
-        sub_step_name: str
-            Name of sub step to search for
-        environment : str
-            Optional. Environment to get the step result for.
-
-        Returns
-        -------
-        StepResult
-        &#34;&#34;&#34;
-
-        for step_result in self.workflow_list:
-            if ( \
-                (not step_name or step_result.step_name == step_name) and \
-                (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-                (not environment or step_result.environment == environment)
-            ):
-                return step_result
-
-        return None</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -795,52 +424,11 @@ The WorkflowResult represents ALL previous results.</p></div>
 <dt><code>Raises a StepRunnerException if the file contains non <a title="ploigos_step_runner.results.workflow_result.WorkflowResult" href="#ploigos_step_runner.results.workflow_result.WorkflowResult">WorkflowResult</a> instances</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def load_from_pickle_file(pickle_filename):
-    &#34;&#34;&#34;Return the contents of a pickled file.
-
-    The file is expected to contain WorkflowResult instances
-
-    Parameters
-    ----------
-    pickle_filename: str
-       Name of the file to load
-
-    Raises
-    ------
-    Raises a StepRunnerException if the file cannot be loaded
-    Raises a StepRunnerException if the file contains non WorkflowResult instances
-    &#34;&#34;&#34;
-    try:
-        create_parent_dir(pickle_filename)
-
-        # if the file does not exist return empty object
-        if not os.path.isfile(pickle_filename):
-            return WorkflowResult()
-
-        # if the file is empty return empty object
-        if os.path.getsize(pickle_filename) == 0:
-            return WorkflowResult()
-
-        # check that the file has Workflow object
-        with open(pickle_filename, &#39;rb&#39;) as file:
-            workflow_result = pickle.load(file)
-            if not isinstance(workflow_result, WorkflowResult):
-                raise StepRunnerException(f&#39;error {pickle_filename} has invalid data&#39;)
-            return workflow_result
-
-    except Exception as error:
-        raise StepRunnerException(f&#39;error loading {pickle_filename}: {error}&#39;) from error</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list"><code class="name">var <span class="ident">workflow_list</span></code></dt>
+<dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.workflow_list"><code class="name">prop <span class="ident">workflow_list</span></code></dt>
 <dd>
 <div class="desc"><p>Return workflow_list</p></div>
 <details class="source">
@@ -883,46 +471,6 @@ Else
 <dt><code>StepResult is passed as a parameter</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_step_result(self, step_result):
-    &#34;&#34;&#34;Add a single step_result to the workflow list.
-
-    If the new result step is not already in the list
-       - simply append, done
-    Else
-       - find the old step result
-       - merge the old artifacts into the new artifacts
-       - delete the old step result
-       - append the new step result
-       - note: the delete/append is needed because it is a list
-
-    Parameters
-    ----------
-    step_result : StepResult
-       An StepResult object to add to the list
-
-    Raises
-    ------
-    Raises a StepRunnerException if an instance other than
-    StepResult is passed as a parameter
-    &#34;&#34;&#34;
-
-    if isinstance(step_result, StepResult):
-        if self.__step_result_exists(step_result):
-            raise StepRunnerException(
-                f&#39;Can not add duplicate StepResult for step ({step_result.step_name}),&#39;
-                f&#39; sub step ({step_result.sub_step_name}),&#39;
-                f&#39; and environment ({step_result.environment}).&#39;
-            )
-
-        self.workflow_list.append(step_result)
-
-    else:
-        raise StepRunnerException(&#39;expect StepResult instance type&#39;)</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.get_artifact_value"><code class="name flex">
 <span>def <span class="ident">get_artifact_value</span></span>(<span>self, artifact, step_name=None, sub_step_name=None, environment=None)</span>
@@ -955,56 +503,6 @@ from the last step that returned that artifact.</p>
 <dd>&nbsp;</dd>
 </dl>
 <p>'v1.0.2'</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_artifact_value(
-    self,
-    artifact,
-    step_name=None,
-    sub_step_name=None,
-    environment=None
-): # pylint: disable=too-many-boolean-expressions
-    &#34;&#34;&#34;Search for an artifact.
-
-    If step_name, sub_step_name, or environment are not provided ensure the artifact comes
-    from the last step that returned that artifact.
-
-    1.  if step_name is provided, look for the artifact in the step
-    2.  elif step_name and sub_step_name is provided, look for the artifact in the step/sub_step
-    3.  else, search ALL steps for the FIRST match of the artifact.
-
-    Parameters
-    ----------
-    artifact: str
-       The artifact name to search for
-    step_name: str optional
-       Optionally search only in one step
-    sub_step_name: str optional
-        Optionally search only in one step
-    environment : str
-        Optional. Environment to get the step result for.
-
-    Returns
-    -------
-    Str
-       &#39;v1.0.2&#39;
-    &#34;&#34;&#34;
-
-    value = None
-    for step_result in reversed(self.workflow_list):
-        if ( \
-            (not step_name or step_result.step_name == step_name) and \
-            (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-            (not environment or step_result.environment == environment)
-        ):
-            value = step_result.get_artifact_value(name=artifact)
-            if value is not None:
-                break
-
-    return value</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.get_evidence_value"><code class="name flex">
 <span>def <span class="ident">get_evidence_value</span></span>(<span>self, evidence, step_name=None, sub_step_name=None, environment=None)</span>
@@ -1037,56 +535,6 @@ from the first</p>
 <dd>&nbsp;</dd>
 </dl>
 <p>'v1.0.2'</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_evidence_value(
-    self,
-    evidence,
-    step_name=None,
-    sub_step_name=None,
-    environment=None
-): # pylint: disable=too-many-boolean-expressions
-    &#34;&#34;&#34;Search for an evidence.
-
-    If step_name, sub_step_name, or environment are provided ensure the evidence comes
-    from the first
-
-    1.  if step_name is provided, look for the evidence in the step
-    2.  elif step_name and sub_step_name is provided, look for the evidence in the step/sub_step
-    3.  else, search ALL steps for the FIRST match of the evidence.
-
-    Parameters
-    ----------
-    evidence: str
-       The artifact name to search for
-    step_name: str optional
-       Optionally search only in one step
-    sub_step_name: str optional
-        Optionally search only in one step
-    environment : str
-        Optional. Environment to get the step result for.
-
-    Returns
-    -------
-    Str
-       &#39;v1.0.2&#39;
-    &#34;&#34;&#34;
-
-    value = None
-    for step_result in self.workflow_list:
-        if ( \
-            (not step_name or step_result.step_name == step_name) and \
-            (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-            (not environment or step_result.environment == environment)
-        ):
-            value = step_result.get_evidence_value(name=evidence)
-            if value is not None:
-                break
-
-    return value</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.get_step_result"><code class="name flex">
 <span>def <span class="ident">get_step_result</span></span>(<span>self, step_name, sub_step_name=None, environment=None)</span>
@@ -1107,42 +555,6 @@ from the first</p>
 <dt><code>StepResult</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_step_result(
-    self,
-    step_name,
-    sub_step_name=None,
-    environment=None
-): # pylint: disable=too-many-boolean-expressions
-    &#34;&#34;&#34;Helper method to return a step result.
-
-    Parameters
-    ----------
-    step_name: str
-        Name of step to search for
-    sub_step_name: str
-        Name of sub step to search for
-    environment : str
-        Optional. Environment to get the step result for.
-
-    Returns
-    -------
-    StepResult
-    &#34;&#34;&#34;
-
-    for step_result in self.workflow_list:
-        if ( \
-            (not step_name or step_result.step_name == step_name) and \
-            (not sub_step_name or step_result.sub_step_name == sub_step_name) and \
-            (not environment or step_result.environment == environment)
-        ):
-            return step_result
-
-    return None</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.merge_with_pickle_file"><code class="name flex">
 <span>def <span class="ident">merge_with_pickle_file</span></span>(<span>self, pickle_filename)</span>
@@ -1154,51 +566,6 @@ When we find overlaps, our in-memory values win.</p>
 of the caller.</p>
 <h2 id="parameters">Parameters</h2>
 <p>pickle_filename : the on-disk path to the pickle file to merge with.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def merge_with_pickle_file(self, pickle_filename):
-    &#34;&#34;&#34;Merge our workflow list with that stored on disk.
-    When we find overlaps, our in-memory values win.
-
-    Note: any locking of the pickle file is the responsibility
-    of the caller.
-
-    Parameters
-    ----------
-    pickle_filename : the on-disk path to the pickle file to merge with.
-
-    &#34;&#34;&#34;
-    on_disk_wfr = WorkflowResult.load_from_pickle_file(pickle_filename)
-    on_disk_results = on_disk_wfr.workflow_list
-    merged_workflow_list = []
-
-    for in_mem_step_result in self.__workflow_list:
-        on_disk_step_result = on_disk_wfr.get_step_result(
-            step_name=in_mem_step_result.step_name,
-            sub_step_name=in_mem_step_result.sub_step_name,
-            environment=in_mem_step_result.environment
-        )
-
-        if on_disk_step_result:
-            on_disk_results.remove(on_disk_step_result)
-
-            # in-memory values win if the two results are unequal
-            if on_disk_step_result != in_mem_step_result:
-                on_disk_step_result.merge(in_mem_step_result)
-
-            merged_workflow_list.append(on_disk_step_result)
-
-        else:
-            merged_workflow_list.append(in_mem_step_result)
-
-    # on_disk_results at this point will only have the step results
-    # that were on disk, but not in memory.
-    merged_workflow_list += on_disk_results
-
-    self.__workflow_list = merged_workflow_list</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_json_file"><code class="name flex">
 <span>def <span class="ident">write_results_to_json_file</span></span>(<span>self, json_filename)</span>
@@ -1215,30 +582,6 @@ of the caller.</p>
 <dt><code>Raises a RuntimeError if the file cannot be dumped</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write_results_to_json_file(self, json_filename):
-    &#34;&#34;&#34;Write the workflow list in a json format to file.
-
-    Parameters
-    ----------
-    json_filename : str
-         Name of file to write (eg: step-runner-results.json)
-
-    Raises
-    ------
-    Raises a RuntimeError if the file cannot be dumped
-    &#34;&#34;&#34;
-    try:
-        create_parent_dir(json_filename)
-        with open(json_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
-            results = self.__get_all_step_results_dict()
-            json.dump(results, file, indent=4)
-    except Exception as error:
-        raise RuntimeError(f&#39;error dumping {json_filename}: {error}&#39;) from error</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.write_results_to_yml_file"><code class="name flex">
 <span>def <span class="ident">write_results_to_yml_file</span></span>(<span>self, yml_filename)</span>
@@ -1255,30 +598,6 @@ of the caller.</p>
 <dt><code>Raises a RuntimeError if the file cannot be dumped</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write_results_to_yml_file(self, yml_filename):
-    &#34;&#34;&#34;Write the workflow list in a yaml format to file
-
-    Parameters
-    ----------
-    yml_filename : str
-         Name of file to write (eg: step-runner-results/step-runner-results.yml)
-
-    Raises
-    ------
-    Raises a RuntimeError if the file cannot be dumped
-    &#34;&#34;&#34;
-    try:
-        create_parent_dir(yml_filename)
-        with open(yml_filename, &#39;w&#39;, encoding=&#39;utf-8&#39;) as file:
-            results = self.__get_all_step_results_dict()
-            yaml.dump(results, file, indent=4)
-    except Exception as error:
-        raise RuntimeError(f&#39;error dumping {yml_filename}: {error}&#39;) from error</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.results.workflow_result.WorkflowResult.write_to_pickle_file"><code class="name flex">
 <span>def <span class="ident">write_to_pickle_file</span></span>(<span>self, pickle_filename)</span>
@@ -1297,32 +616,6 @@ of the caller.</p>
 <dt><code>Raises a RuntimeError if the file cannot be dumped</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write_to_pickle_file(self, pickle_filename):
-    &#34;&#34;&#34;Write the workflow list in a pickle format to file.
-
-    Note: any locking of the pickle file is the responsibility
-    of the caller.
-
-    Parameters
-    ----------
-    pickle_filename : str
-         Name of file to write (eg: step-runner-results.pkl)
-
-    Raises
-    ------
-    Raises a RuntimeError if the file cannot be dumped
-    &#34;&#34;&#34;
-    try:
-        create_parent_dir(pickle_filename)
-        with open(pickle_filename, &#39;wb&#39;) as file:
-            pickle.dump(self, file)
-    except Exception as error:
-        raise RuntimeError(f&#39;error dumping {pickle_filename}: {error}&#39;) from error</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1330,7 +623,6 @@ of the caller.</p>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -1363,7 +655,7 @@ of the caller.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>

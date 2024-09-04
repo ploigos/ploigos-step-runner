@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
 <title>ploigos_step_runner.step_implementers.shared.git_mixin API documentation</title>
-<meta name="description" content="A mixin class designed to add shared functionality to StepImplementers that interact with Git …" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="A mixin class designed to add shared functionality to StepImplementers that interact with Git …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -105,360 +108,6 @@ Will be ignored if Git repository url is using SSH.</td>
 </tr>
 </tbody>
 </table>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;A mixin class designed to add shared functionality to StepImplementers that interact with Git.
-
-NOTE: There is heavy overlap between this class and the git utils. An architectural decision needs
-      to be made on composition vs. multiple inheritance for gaining consistency between unrelated
-      step implementers that require the same configuration parameters / behaviors.
-
-Step Configuration
-------------------
-Step configuration expected as input to this step.
-Could come from:
-* static configuration
-* runtime configuration
-* previous step results
-
-Configuration Key    | Required? | Default              | Description
----------------------|-----------|----------------------|-----------
-`git-repo-root`      | Yes       | `./`                 | Directory path to the Git repository to perform git operations on.
-`repo-root`          | No        |                      | Alias for `git-repo-root`.
-`git-url`            | No        | Git repo root configured origin url \
-                                                        | URL to Git repository to perform Git operations on. \
-                                                          If not given will use Git remote url set in given Git repository root.
-`url`                | No        |                      | Alias for `git-url`.
-`git-username`       | No        |                      | Git username to use when connecting with Git remote. \
-                                                          Will override username in given git url. \
-                                                          Will override username in Git url in Git repository root remote url. \
-                                                          Will be ignored if Git repository url is using SSH.
-`git-password`       | No        |                      | Git password to use when connecting with Git remote. \
-                                                          Will override password in given git url. \
-                                                          Will override password in Git url in Git repository root remote url. \
-                                                          Will be ignored if Git repository url is using SSH.
-`git-user-name`      | Maybe     | `Ploigos Robot`      | User name to use when creating Git commits.
-`git-user-email`     | Maybe     | `ploigos-robot`      | User email to use when creating Git commits.
-`git-commit-message` | Maybe     | `Automated commit of changes during release engineering generate-metadata step` \
-                                                        | Git commit message to use when/if creating an automated git commit.
-&#34;&#34;&#34;# pylint: disable=line-too-long
-
-from datetime import timezone
-from urllib.parse import urlsplit, urlunsplit
-
-from git import InvalidGitRepositoryError, Repo
-from git.exc import GitCommandError
-from ploigos_step_runner.exceptions import StepRunnerException
-
-DEFAULT_CONFIG = {
-    &#39;git-repo-root&#39;: &#39;./&#39;,
-    &#39;git-commit-message&#39;: &#39;Automated commit of changes during release engineering&#39; \
-        &#39; generate-metadata step&#39;,
-    &#39;git-user-name&#39;: &#39;Ploigos Robot&#39;,
-    &#39;git-user-email&#39;: &#39;ploigos-robot&#39;
-}
-REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS = [
-    [&#39;git-repo-root&#39;, &#39;repo-root&#39;]
-]
-
-class GitMixin:
-    &#34;&#34;&#34;A mixin class designed to add shared functionality
-    to StepImplementers that interact with Git.
-    &#34;&#34;&#34;
-    def __init__(self):
-        self.__git_repo = None
-        self.__git_url = None
-
-    @staticmethod
-    def step_implementer_config_defaults():
-        &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-        Returns
-        -------
-        dict
-            Default values to use for step configuration values.
-
-        Notes
-        -----
-        These are the lowest precedence configuration values.
-        &#34;&#34;&#34;
-        return DEFAULT_CONFIG
-
-    @staticmethod
-    def _required_config_or_result_keys():
-        &#34;&#34;&#34;Getter for step configuration or previous step result artifacts that are required before
-        running this step.
-
-        See Also
-        --------
-        _validate_required_config_or_previous_step_result_artifact_keys
-
-        Returns
-        -------
-        array_list
-            Array of configuration keys or previous step result artifacts
-            that are required before running the step.
-        &#34;&#34;&#34;
-        return REQUIRED_CONFIG_OR_PREVIOUS_STEP_RESULT_ARTIFACT_KEYS
-
-    @property
-    def git_repo(self):
-        &#34;&#34;&#34;Get the Git repository.
-
-        Returns
-        -------
-        Repo
-            Git repository object for the given git repository root.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-        &#34;&#34;&#34;
-        if not self.__git_repo:
-            repo_root = self.get_value([&#39;git-repo-root&#39;, &#39;repo-root&#39;])
-            try:
-                self.__git_repo = Repo(repo_root)
-            except InvalidGitRepositoryError as error:
-                raise StepRunnerException(
-                    f&#39;Given git-repo-root ({repo_root}) is not a Git repository: {error}&#39;
-                ) from error
-
-        return self.__git_repo
-
-    @property
-    def git_url(self): # pylint: disable=too-many-branches
-        &#34;&#34;&#34;Get the Git url including auth if given.
-
-        This function tries to be smart and combine given username/password into given URL
-        and/or with username/password/url determined from Git repository remote configuration.
-
-        Raises
-        ------
-        StepRunnerException
-            If Git username given but Git url uses SSH
-            If Git password given but Git url uses SSH
-        &#34;&#34;&#34;
-        if not self.__git_url:
-            # get git url from config or current repo remote
-            git_url = self.get_value([&#39;git-url&#39;, &#39;url&#39;])
-            if not git_url:
-                git_url = self.git_repo.remote().url
-
-            # if git url is ssh, throw error if git username or password given
-            # if git url is http|https combine git username and password with git url
-            split_git_url = urlsplit(git_url)
-            if split_git_url.scheme in [&#39;ssh&#39;]:
-                self.__git_url = git_url
-            elif split_git_url.scheme in [&#39;http&#39;, &#39;https&#39;]:
-                # get given git username and pass
-                git_username = self.get_value(&#39;git-username&#39;)
-                git_password = self.get_value(&#39;git-password&#39;)
-
-                # determine git username
-                if split_git_url.username and git_username:
-                    print(
-                        f&#34;WARNING: Git url ({git_url}) includes username ({split_git_url.username})&#34;
-                        f&#34; but was given Git username ({git_username}).&#34;
-                        f&#34; Will use given Git username ({git_username}).&#34;
-                    )
-                elif split_git_url.username:
-                    git_username = split_git_url.username
-
-                # determine git password
-                if split_git_url.password and git_password:
-                    print(
-                        f&#34;WARNING: Git url ({git_url}) includes password ({split_git_url.password})&#34;
-                        f&#34; but was given Git password ({git_password}).&#34;
-                        f&#34; Will use given Git password ({git_password}).&#34;
-                    )
-                elif split_git_url.password:
-                    git_password = split_git_url.password
-
-                # construct new git url with auth
-                git_netloc = None
-                if git_username and git_password:
-                    git_netloc = f&#34;{git_username}:{git_password}@{split_git_url.hostname}&#34;
-                elif git_username:
-                    git_netloc = f&#34;{git_username}@{split_git_url.hostname}&#34;
-                else:
-                    git_netloc = split_git_url.hostname
-
-                if split_git_url.port:
-                    git_netloc += f&#34;:{split_git_url.port}&#34;
-
-                self.__git_url = urlunsplit((
-                    split_git_url.scheme,
-                    git_netloc,
-                    split_git_url.path,
-                    split_git_url.query,
-                    split_git_url.fragment
-                ))
-
-        return self.__git_url
-
-    def configure_git_user(self):
-        &#34;&#34;&#34;Configures the git user.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-        &#34;&#34;&#34;
-        repo = self.git_repo
-        repo.config_writer().set_value(
-            &#34;user&#34;,
-            &#34;name&#34;,
-            self.get_value(&#39;git-user-name&#39;)
-        ).release()
-        repo.config_writer().set_value(
-            &#34;user&#34;,
-            &#34;email&#34;,
-            self.get_value(&#39;git-user-email&#39;)
-        ).release()
-
-    def git_commit_changes(self):
-        &#34;&#34;&#34;Stages and commits any and all unstaged changes in the Git repository.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-            If error commiting changes to current branch.
-        &#34;&#34;&#34;
-        repo = self.git_repo
-        try:
-            repo.git.commit(&#39;-am&#39;, self.get_value(&#39;git-commit-message&#39;))
-        except (GitCommandError, Exception) as error:
-            raise StepRunnerException(
-                f&#34;Error committing changes to current branch ({repo.active_branch.name})&#34;
-                f&#34;: {error}&#34;
-            ) from error
-
-    def git_push(self):
-        &#34;&#34;&#34;Push all committed Git changes.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-            If error pushing changes to remote.
-        &#34;&#34;&#34;
-        repo = self.git_repo
-        url = self.git_url
-
-        try:
-            # NOTE:
-            #   using repo.git.push rather then repo.remote().push() because need to be
-            #   able to override the git url for the push
-            repo.git.push(url)
-        except (GitCommandError, Exception) as error:
-            raise StepRunnerException(
-                f&#34;Error pushing changes to remote ({url})&#34;
-                f&#34; on current branch ({repo.active_branch.name}): {error}&#34;
-            ) from error
-
-    def git_push_tags(self):
-        &#34;&#34;&#34;Push Git tags.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-            If error pushing tags to remote.
-        &#34;&#34;&#34;
-        repo = self.git_repo
-        url = self.git_url
-
-        try:
-            # NOTE:
-            #   using repo.git.push rather then repo.remote().push() because need to be
-            #   able to override the git url for the push
-            repo.git.push(url, &#39;--tag&#39;)
-        except (GitCommandError, Exception) as error:
-            raise StepRunnerException(
-                f&#34;Error pushing tags to remote ({url})&#34;
-                f&#34; on current branch ({repo.active_branch.name}): {error}&#34;
-            ) from error
-
-    def commit_changes_and_push(self):
-        &#34;&#34;&#34;Commits all changes in the given repo and pushes them to the current remote on the
-        current branch. If no changes to commit this is a no-op.
-
-        Parameters
-        ----------
-        repo : git.Repo
-            Repo to commit and push changes to.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-            If error commiting changes to current branch.
-            If error pushing changes to remote.
-
-        &#34;&#34;&#34;
-        repo = self.git_repo
-        print(
-            f&#34;Commit all changes and push to current remote ({repo.remote().url})&#34; \
-            f&#34; on current branch ({repo.active_branch.name})&#34;
-        )
-
-        if repo.is_dirty():
-            # configure git user
-            self.configure_git_user()
-
-            # commit changes
-            self.git_commit_changes()
-
-            # push changes
-            self.git_push()
-        else:
-            print(&#34;No changes to commit and push&#34;)
-
-
-    def git_tag(self, git_tag_value):
-        &#34;&#34;&#34;Create a git tag.
-
-        Parameters
-        ----------
-        git_tag_value : str
-            Value to tag Git repository with.
-
-        Raises
-        ------
-        StepRunnerException
-            If given git repo root is not a Git repository.
-            If error creating Git tag.
-        &#34;&#34;&#34;
-        try:
-            # NOTE:
-            #   this force is only needed locally in case of a re-run of the same pipeline
-            #   without a fresh check out. You will notice there is no force on the push
-            #   making this an acceptable work around to the issue since on the off chance
-            #   actually overwriting a tag with a different comment, the push will fail
-            #   because the tag will be attached to a different git hash.
-            self.git_repo.create_tag(git_tag_value, force=True)
-        except (GitCommandError, Exception) as error:
-            raise StepRunnerException(
-                f&#34;Error creating git tag ({git_tag_value}): {error}&#34;
-            ) from error
-
-    def git_commit_utc_timestamp(self):
-        &#34;&#34;&#34;Get the Git commit UTC timestamp.
-
-        Returns
-        -------
-        str
-            Git commit POSIX timestamp in UTC timezone.
-        &#34;&#34;&#34;
-        commit_datetime = self.git_repo.commit().committed_datetime
-        commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
-
-        return commit_utc_timestamp</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -794,30 +443,11 @@ to StepImplementers that interact with Git.</p></div>
 </dl>
 <h2 id="notes">Notes</h2>
 <p>These are the lowest precedence configuration values.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def step_implementer_config_defaults():
-    &#34;&#34;&#34;Getter for the StepImplementer&#39;s configuration defaults.
-
-    Returns
-    -------
-    dict
-        Default values to use for step configuration values.
-
-    Notes
-    -----
-    These are the lowest precedence configuration values.
-    &#34;&#34;&#34;
-    return DEFAULT_CONFIG</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
-<dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo"><code class="name">var <span class="ident">git_repo</span></code></dt>
+<dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_repo"><code class="name">prop <span class="ident">git_repo</span></code></dt>
 <dd>
 <div class="desc"><p>Get the Git repository.</p>
 <h2 id="returns">Returns</h2>
@@ -860,7 +490,7 @@ def git_repo(self):
     return self.__git_repo</code></pre>
 </details>
 </dd>
-<dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url"><code class="name">var <span class="ident">git_url</span></code></dt>
+<dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_url"><code class="name">prop <span class="ident">git_url</span></code></dt>
 <dd>
 <div class="desc"><p>Get the Git url including auth if given.</p>
 <p>This function tries to be smart and combine given username/password into given URL
@@ -968,45 +598,6 @@ current branch. If no changes to commit this is a no-op.</p>
 If error commiting changes to current branch.
 If error pushing changes to remote.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def commit_changes_and_push(self):
-    &#34;&#34;&#34;Commits all changes in the given repo and pushes them to the current remote on the
-    current branch. If no changes to commit this is a no-op.
-
-    Parameters
-    ----------
-    repo : git.Repo
-        Repo to commit and push changes to.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-        If error commiting changes to current branch.
-        If error pushing changes to remote.
-
-    &#34;&#34;&#34;
-    repo = self.git_repo
-    print(
-        f&#34;Commit all changes and push to current remote ({repo.remote().url})&#34; \
-        f&#34; on current branch ({repo.active_branch.name})&#34;
-    )
-
-    if repo.is_dirty():
-        # configure git user
-        self.configure_git_user()
-
-        # commit changes
-        self.git_commit_changes()
-
-        # push changes
-        self.git_push()
-    else:
-        print(&#34;No changes to commit and push&#34;)</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.configure_git_user"><code class="name flex">
 <span>def <span class="ident">configure_git_user</span></span>(<span>self)</span>
@@ -1018,30 +609,6 @@ If error pushing changes to remote.</dd>
 <dt><code>StepRunnerException</code></dt>
 <dd>If given git repo root is not a Git repository.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def configure_git_user(self):
-    &#34;&#34;&#34;Configures the git user.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-    &#34;&#34;&#34;
-    repo = self.git_repo
-    repo.config_writer().set_value(
-        &#34;user&#34;,
-        &#34;name&#34;,
-        self.get_value(&#39;git-user-name&#39;)
-    ).release()
-    repo.config_writer().set_value(
-        &#34;user&#34;,
-        &#34;email&#34;,
-        self.get_value(&#39;git-user-email&#39;)
-    ).release()</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_changes"><code class="name flex">
 <span>def <span class="ident">git_commit_changes</span></span>(<span>self)</span>
@@ -1054,28 +621,6 @@ If error pushing changes to remote.</dd>
 <dd>If given git repo root is not a Git repository.
 If error commiting changes to current branch.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def git_commit_changes(self):
-    &#34;&#34;&#34;Stages and commits any and all unstaged changes in the Git repository.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-        If error commiting changes to current branch.
-    &#34;&#34;&#34;
-    repo = self.git_repo
-    try:
-        repo.git.commit(&#39;-am&#39;, self.get_value(&#39;git-commit-message&#39;))
-    except (GitCommandError, Exception) as error:
-        raise StepRunnerException(
-            f&#34;Error committing changes to current branch ({repo.active_branch.name})&#34;
-            f&#34;: {error}&#34;
-        ) from error</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_commit_utc_timestamp"><code class="name flex">
 <span>def <span class="ident">git_commit_utc_timestamp</span></span>(<span>self)</span>
@@ -1087,23 +632,6 @@ If error commiting changes to current branch.</dd>
 <dt><code>str</code></dt>
 <dd>Git commit POSIX timestamp in UTC timezone.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def git_commit_utc_timestamp(self):
-    &#34;&#34;&#34;Get the Git commit UTC timestamp.
-
-    Returns
-    -------
-    str
-        Git commit POSIX timestamp in UTC timezone.
-    &#34;&#34;&#34;
-    commit_datetime = self.git_repo.commit().committed_datetime
-    commit_utc_timestamp = commit_datetime.astimezone(tz=timezone.utc).timestamp()
-
-    return commit_utc_timestamp</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push"><code class="name flex">
 <span>def <span class="ident">git_push</span></span>(<span>self)</span>
@@ -1116,33 +644,6 @@ If error commiting changes to current branch.</dd>
 <dd>If given git repo root is not a Git repository.
 If error pushing changes to remote.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def git_push(self):
-    &#34;&#34;&#34;Push all committed Git changes.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-        If error pushing changes to remote.
-    &#34;&#34;&#34;
-    repo = self.git_repo
-    url = self.git_url
-
-    try:
-        # NOTE:
-        #   using repo.git.push rather then repo.remote().push() because need to be
-        #   able to override the git url for the push
-        repo.git.push(url)
-    except (GitCommandError, Exception) as error:
-        raise StepRunnerException(
-            f&#34;Error pushing changes to remote ({url})&#34;
-            f&#34; on current branch ({repo.active_branch.name}): {error}&#34;
-        ) from error</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_push_tags"><code class="name flex">
 <span>def <span class="ident">git_push_tags</span></span>(<span>self)</span>
@@ -1155,33 +656,6 @@ If error pushing changes to remote.</dd>
 <dd>If given git repo root is not a Git repository.
 If error pushing tags to remote.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def git_push_tags(self):
-    &#34;&#34;&#34;Push Git tags.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-        If error pushing tags to remote.
-    &#34;&#34;&#34;
-    repo = self.git_repo
-    url = self.git_url
-
-    try:
-        # NOTE:
-        #   using repo.git.push rather then repo.remote().push() because need to be
-        #   able to override the git url for the push
-        repo.git.push(url, &#39;--tag&#39;)
-    except (GitCommandError, Exception) as error:
-        raise StepRunnerException(
-            f&#34;Error pushing tags to remote ({url})&#34;
-            f&#34; on current branch ({repo.active_branch.name}): {error}&#34;
-        ) from error</code></pre>
-</details>
 </dd>
 <dt id="ploigos_step_runner.step_implementers.shared.git_mixin.GitMixin.git_tag"><code class="name flex">
 <span>def <span class="ident">git_tag</span></span>(<span>self, git_tag_value)</span>
@@ -1199,37 +673,6 @@ If error pushing tags to remote.</dd>
 <dd>If given git repo root is not a Git repository.
 If error creating Git tag.</dd>
 </dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def git_tag(self, git_tag_value):
-    &#34;&#34;&#34;Create a git tag.
-
-    Parameters
-    ----------
-    git_tag_value : str
-        Value to tag Git repository with.
-
-    Raises
-    ------
-    StepRunnerException
-        If given git repo root is not a Git repository.
-        If error creating Git tag.
-    &#34;&#34;&#34;
-    try:
-        # NOTE:
-        #   this force is only needed locally in case of a re-run of the same pipeline
-        #   without a fresh check out. You will notice there is no force on the push
-        #   making this an acceptable work around to the issue since on the off chance
-        #   actually overwriting a tag with a different comment, the push will fail
-        #   because the tag will be attached to a different git hash.
-        self.git_repo.create_tag(git_tag_value, force=True)
-    except (GitCommandError, Exception) as error:
-        raise StepRunnerException(
-            f&#34;Error creating git tag ({git_tag_value}): {error}&#34;
-        ) from error</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1237,7 +680,6 @@ If error creating Git tag.</dd>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul>
 <li><a href="#step-configuration">Step Configuration</a></li>
@@ -1272,7 +714,7 @@ If error creating Git tag.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
 </footer>
 </body>
 </html>
